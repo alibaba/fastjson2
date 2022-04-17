@@ -16,9 +16,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        - with:
-            - timezoneLinux: "Asia/Shanghai"
-            - timezoneMacos: "Asia/Shanghai"
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
