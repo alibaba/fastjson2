@@ -7,14 +7,14 @@
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
     <name>fastjson1-compatible</name>
-    <version>2.0.1_preview01</version>
+    <version>2.0.1</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <junit.version>4.13.1</junit.version>
-        <gpg.skip>true</gpg.skip>
-        <javadoc.skip>true</javadoc.skip>
+        <gpg.skip>false</gpg.skip>
+        <javadoc.skip>false</javadoc.skip>
     </properties>
 
     <packaging>jar</packaging>
@@ -124,7 +124,7 @@
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
             <artifactId>fastjson2-extension</artifactId>
-            <version>2.0.1_preview01</version>
+            <version>2.0.1</version>
         </dependency>
 
         <dependency>
