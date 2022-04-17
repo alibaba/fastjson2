@@ -1390,7 +1390,8 @@ public abstract class JSONWriter implements Closeable {
         WriteEnumUsingToString                  (1 << 12),
         IgnoreErrorGetter                       (1 << 13),
         PrettyFormat                            (1 << 14),
-        ReferenceDetection                      (1 << 15)
+        ReferenceDetection                      (1 << 15),
+        WriteNameAsSymbol                       (1 << 16)
         ;
 
         public final long mask;

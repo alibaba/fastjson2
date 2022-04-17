@@ -1407,12 +1407,33 @@ final class JSONWriterJSONB extends JSONWriter {
             this.bytes[off++] = BC_SYMBOL;
             writeInt32(symbol);
             return;
-        } else {
-            if (symbols == null) {
-                symbols = new TLongIntHashMap();
-            }
-            symbols.put(nameHash, symbol = symbolIndex++);
         }
+
+        if ((context.features & Feature.WriteNameAsSymbol.mask) == 0) {
+            int minCapacity = this.off + name.length;
+            if (minCapacity - this.bytes.length > 0) {
+                int oldCapacity = this.bytes.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
+                }
+                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    throw new OutOfMemoryError();
+                }
+
+                // minCapacity is usually close to size, so this is a win:
+                this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+            }
+
+            System.arraycopy(name, 0, this.bytes, off, name.length);
+            off += name.length;
+            return;
+        }
+
+        if (symbols == null) {
+            symbols = new TLongIntHashMap();
+        }
+        symbols.put(nameHash, symbol = symbolIndex++);
 
         int minCapacity = this.off + 1 + name.length;
         if (minCapacity - this.bytes.length > 0) {
