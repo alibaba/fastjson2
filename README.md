@@ -20,7 +20,7 @@ FASTJSON 2.0是FASTJSON项目的重要升级，目标是为下一个十年提供
 <dependency>
 	<groupId>com.alibaba.fastjson2</groupId>
 	<artifactId>fastjson2</artifactId>
-	<version>2.0.0</version>
+	<version>2.0.1</version>
 </dependency>
 ```
 https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/
@@ -32,7 +32,7 @@ https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/
 <dependency>
 	<groupId>com.alibaba</groupId>
 	<artifactId>fastjson</artifactId>
-	<version>2.0.0</version>
+	<version>2.0.1</version>
 </dependency>
 ```
 
