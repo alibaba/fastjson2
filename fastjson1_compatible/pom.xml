@@ -6,13 +6,47 @@
 
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.0-preview_88</version>
+    <name>fastjson1-compatible</name>
+    <version>2.0.0</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <junit.version>4.13.1</junit.version>
     </properties>
+
+    <packaging>jar</packaging>
+    <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
+
+    <url>https://github.com/alibaba/fastjson2</url>
+    <inceptionYear>2022</inceptionYear>
+
+    <scm>
+        <url>https://github.com/alibaba/fastjson2</url>
+        <connection>scm:git:https://git@github.com/alibaba/fastjson2.git</connection>
+    </scm>
+
+    <organization>
+        <name>Alibaba Group</name>
+        <url>https://github.com/alibaba</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>wenshao</id>
+            <name>wenshao</name>
+            <email>shaojin.wensj@alibaba-inc.com</email>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
 
     <build>
         <plugins>
@@ -29,6 +63,29 @@
                 </executions>
                 <configuration>
                     <attach>true</attach>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.3.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <show>public</show>
+                    <charset>UTF-8</charset>
+                    <encoding>UTF-8</encoding>
+                    <docencoding>UTF-8</docencoding>
+                    <links>
+                        <link>http://docs.oracle.com/javase/8/docs/api</link>
+                    </links>
                 </configuration>
             </plugin>
 
@@ -51,8 +108,8 @@
     <dependencies>
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
-            <artifactId>fastjson-extension</artifactId>
-            <version>2.0.0-preview_88</version>
+            <artifactId>fastjson2-extension</artifactId>
+            <version>2.0.0</version>
         </dependency>
 
         <dependency>
