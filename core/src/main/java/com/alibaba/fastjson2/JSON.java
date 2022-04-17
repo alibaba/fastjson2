@@ -14,7 +14,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 
 public interface JSON {
-    String VERSION = "2.0.0";
+    String VERSION = "2.0.1";
 
     static Object parse(String str) {
         JSONReader reader = JSONReader.of(str);
