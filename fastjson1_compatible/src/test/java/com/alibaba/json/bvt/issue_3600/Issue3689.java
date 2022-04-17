@@ -4,80 +4,107 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class Issue3689 {
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_without_type_0_meaningles_char() {
-        JSONArray.parseArray("dfdfdf");
+        assertThrows(com.alibaba.fastjson2.JSONException.class, () -> {
+            JSONArray.parseArray("dfdfdf");
+        });
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_without_type_1_meaningles_char() {
-        JSONArray.parseArray("/dfdfdf");
+        assertThrows(com.alibaba.fastjson2.JSONException.class, () -> {
+            JSONArray.parseArray("/dfdfdf");
+        });
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_without_type_2_meaningles_char() {
-        JSONArray.parseArray("//dfdfdf");
+        assertThrows(com.alibaba.fastjson2.JSONException.class, () -> {
+            JSONArray.parseArray("//dfdfdf");
+        });
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_without_type_3_meaningles_char() {
-        JSONArray.parseArray("///dfdfdf");
+        assertThrows(com.alibaba.fastjson2.JSONException.class, () -> {
+            JSONArray.parseArray("///dfdfdf");
+        });
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_without_type_4_meaningles_char() {
-        JSONArray.parseArray("////dfdfdf");
+        assertThrows(com.alibaba.fastjson2.JSONException.class, () -> {
+            JSONArray.parseArray("////dfdfdf");
+        });
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_without_type_5_meaningles_char() {
-        JSONArray.parseArray("/////dfdfdf");
+        assertThrows(com.alibaba.fastjson2.JSONException.class, () -> {
+            JSONArray.parseArray("/////dfdfdf");
+        });
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_without_type_6_meaningles_char() {
-        JSONArray.parseArray("//////dfdfdf");
+        assertThrows(com.alibaba.fastjson2.JSONException.class, () -> {
+            JSONArray.parseArray("//////dfdfdf");
+        });
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_with_type_0_meaningles_char() {
-        JSONArray.parseArray("dfdfdf", String.class);
+        assertThrows(com.alibaba.fastjson.JSONException.class, () -> {
+            JSONArray.parseArray("dfdfdf", String.class);
+        });
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_with_type_1_meaningles_char() {
-        JSONArray.parseArray("/dfdfdf", String.class);
+        assertThrows(com.alibaba.fastjson.JSONException.class, () -> {
+            JSONArray.parseArray("/dfdfdf", String.class);
+        });
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_with_type_2_meaningles_char() {
-        JSONArray.parseArray("//dfdfdf", String.class);
+        assertThrows(com.alibaba.fastjson.JSONException.class, () -> {
+            JSONArray.parseArray("//dfdfdf", String.class);
+        });
 
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_with_type_3_meaningles_char() {
-        JSONArray.parseArray("///dfdfdf", String.class);
-
+        assertThrows(com.alibaba.fastjson.JSONException.class, () -> {
+            JSONArray.parseArray("///dfdfdf", String.class);
+        });
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_with_type_4_meaningles_char() {
-        JSONArray.parseArray("////dfdfdf", String.class);
-
+        assertThrows(com.alibaba.fastjson.JSONException.class, () -> {
+            JSONArray.parseArray("////dfdfdf", String.class);
+        });
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_with_type_5_meaningles_char() {
-        JSONArray.parseArray("/////dfdfdf", String.class);
-
+        assertThrows(com.alibaba.fastjson.JSONException.class, () -> {
+            JSONArray.parseArray("/////dfdfdf", String.class);
+        });
     }
 
-    @Test(expected = JSONException.class)
+    @Test
     public void test_with_type_6_meaningles_char() {
-        JSONArray.parseArray("//////dfdfdf", String.class);
+        assertThrows(JSONException.class, () -> {
+            JSONArray.parseArray("//////dfdfdf", String.class);
+        });
     }
 
     @Test
