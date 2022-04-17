@@ -13,19 +13,6 @@ import java.util.TimeZone;
 import static junit.framework.TestCase.assertEquals;
 
 public class JSONFieldTest {
-    private TimeZone defaultTimeZone;
-
-    @BeforeEach
-    public void before() {
-        defaultTimeZone  = TimeZone.getDefault();
-        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
-    }
-
-    @AfterEach
-    public void after() {
-        TimeZone.setDefault(defaultTimeZone);
-    }
-
     @Test
     public void test_format_iso8601() {
         ObjectWriterCreator[] creators = new ObjectWriterCreator[]{
@@ -44,7 +31,12 @@ public class JSONFieldTest {
             JSONWriter jsonWriter = JSONWriter.ofUTF8();
             objectWriter.write(jsonWriter, vo, null, null, 0);
 
-            assertEquals("{\"date\":\"1970-01-01T08:00:00+08:00\"}", jsonWriter.toString());
+            int rawOffset = TimeZone.getDefault().getRawOffset();
+            if (rawOffset == 0) {
+                assertEquals("{\"date\":\"1970-01-01T00:00:00Z\"}", jsonWriter.toString());
+            } else {
+                assertEquals("{\"date\":\"1970-01-01T08:00:00+08:00\"}", jsonWriter.toString());
+            }
         }
     }
 
@@ -66,7 +58,12 @@ public class JSONFieldTest {
             JSONWriter jsonWriter = JSONWriter.ofUTF8();
             objectWriter.write(jsonWriter, vo, null, null, 0);
 
-            assertEquals("{\"date\":\"1970-01-01T08:00:00+08:00\"}", jsonWriter.toString());
+            int rawOffset = TimeZone.getDefault().getRawOffset();
+            if (rawOffset == 0) {
+                assertEquals("{\"date\":\"1970-01-01T00:00:00Z\"}", jsonWriter.toString());
+            } else {
+                assertEquals("{\"date\":\"1970-01-01T08:00:00+08:00\"}", jsonWriter.toString());
+            }
         }
     }
 
