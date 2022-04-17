@@ -8,13 +8,29 @@ import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
 import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import com.alibaba.fastjson2.writer.*;
 import com.alibaba.fastjson2_vo.DateField1;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
+import java.util.TimeZone;
 
 import static junit.framework.TestCase.assertEquals;
 
 public class DateField1Test {
+    private TimeZone defaultTimeZone;
+
+    @BeforeEach
+    public void before() {
+        defaultTimeZone  = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+    }
+
+    @AfterEach
+    public void after() {
+        TimeZone.setDefault(defaultTimeZone);
+    }
+
     @Test
     public void test_arrayMapping() {
         ObjectWriterCreator[] creators = new ObjectWriterCreator[] {

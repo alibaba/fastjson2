@@ -6,11 +6,25 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+
+import java.util.TimeZone;
 
 import static junit.framework.TestCase.assertEquals;
 
 public class JSONFieldTest {
+    private TimeZone defaultTimeZone;
+
+    @BeforeEach
+    public void before() {
+        defaultTimeZone  = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+    }
+
+    @AfterEach
+    public void after() {
+        TimeZone.setDefault(defaultTimeZone);
+    }
 
     @Test
     public void test_format_iso8601() {
