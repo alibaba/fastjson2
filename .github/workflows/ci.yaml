@@ -31,4 +31,11 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}
       - name: Test with Maven
-        run: mvn test -B --file pom.xml
+        run: mvn test -B
+      - name: Generate code coverage
+        run: mvn -Pgen-code-cov clean test jacoco:report
+      # https://github.com/marketplace/actions/codecov
+      - uses: codecov/codecov-action@v2
+        with:
+          name: codecov-umbrella
+          token: ${{ secrets.CODECOV_TOKEN }}
