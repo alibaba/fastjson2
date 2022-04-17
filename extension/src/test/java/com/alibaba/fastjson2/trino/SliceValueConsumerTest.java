@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.support;
+package com.alibaba.fastjson2.trino;
 
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class SliceValueConsumerTest {
     @Test
