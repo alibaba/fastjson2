@@ -1,0 +1,16 @@
+language: java
+jdk:
+  - openjdk8
+  - openjdk11
+  - openjdk17
+before_install:
+  - pip install --user codecov
+after_success:
+  - codecov
+branches:
+  except:
+    - appveyor
+
+cache:
+  directories:
+  - $HOME/.m2
