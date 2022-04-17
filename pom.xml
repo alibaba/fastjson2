@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson-parent</artifactId>
-    <version>2.0.0_preview01</version>
+    <version>2.0.1_preview01</version>
     <packaging>pom</packaging>
 
     <properties>
