@@ -1,8 +1,8 @@
 # 1. FASTJSON 2.0介绍
 FASTJSON 2.0是FASTJSON项目的重要升级，目标是为下一个十年提供一个高性能的JSON库，同一套API支持JSON/JSONB两种协议，JSONPath是一等公民，支持全量解析和部分解析，支持Java服务端、客户端Android、大数据场景。
 
-● JSONB格式文档 https://github.com/alibaba/fastjson2/wiki/jsonb_format_cn
-● FASTJSON 2性能有了很大提升，具体性能数据看这里 https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark
+* JSONB格式文档 https://github.com/alibaba/fastjson2/wiki/jsonb_format_cn
+* FASTJSON 2性能有了很大提升，具体性能数据看这里 https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark
 
 # 2. 使用前准备
 ## 2.1 Maven依赖
