@@ -1,3 +1,12 @@
+
+[![Java CI](https://github.com/alibaba/fastjson2/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/alibaba/fastjson2/actions/workflows/ci.yaml)
+[![Codecov](https://codecov.io/gh/alibaba/fastjson2/branch/master/graph/badge.svg)](https://codecov.io/gh/alibaba/fastjson2/branch/master)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.alibaba.fastjson2/fastjson2/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alibaba.fastjson2/fastjson2/)
+[![GitHub release](https://img.shields.io/github/release/alibaba/fastjson2.svg)](https://github.com/alibaba/fastjson2/releases)
+[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/alibaba/fastjson2)
+
+
 # 1. FASTJSON 2.0介绍
 FASTJSON 2.0是FASTJSON项目的重要升级，目标是为下一个十年提供一个高性能的JSON库，同一套API支持JSON/JSONB两种协议，JSONPath是一等公民，支持全量解析和部分解析，支持Java服务端、客户端Android、大数据场景。
 
