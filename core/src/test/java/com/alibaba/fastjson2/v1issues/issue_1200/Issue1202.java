@@ -1,0 +1,118 @@
+package com.alibaba.fastjson2.v1issues.issue_1200;
+
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
+import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
+import junit.framework.TestCase;
+
+import java.util.Date;
+
+/**
+ * Created by wenshao on 16/05/2017.
+ */
+public class Issue1202 extends TestCase {
+    public void test_for_issue_0() throws Exception {
+        String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
+        Model1 model = JSON.parseObject(text, Model1.class);
+        assertNotNull(model.date);
+    }
+
+    public void test_for_issue_0_creators() throws Exception {
+        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
+                ObjectReaderCreator.INSTANCE,
+                ObjectReaderCreatorLambda.INSTANCE,
+                ObjectReaderCreatorASM.INSTANCE,
+//                ObjectReaderCreatorDynamicCompile.INSTANCE // TODO: ObjectReaderCreatorDynamicCompile
+        };
+
+        String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
+
+        for (ObjectReaderCreator creator : creators) {
+            ObjectReader<Model1> objectReader = creator.createObjectReader(Model1.class);
+            Model1 model = objectReader.readObject(JSONReader.of(text));
+            assertNotNull(model.date);
+        }
+    }
+
+    public void test_for_issue_2() throws Exception {
+        String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
+        Model2 model = JSON.parseObject(text, Model2.class);
+        assertNotNull(model.date);
+    }
+
+    public void test_for_issue_2_creators() throws Exception {
+        String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
+
+        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
+                ObjectReaderCreator.INSTANCE,
+                ObjectReaderCreatorLambda.INSTANCE,
+                ObjectReaderCreatorASM.INSTANCE,
+//                ObjectReaderCreatorDynamicCompile.INSTANCE // TODO: ObjectReaderCreatorDynamicCompile
+        };
+
+        for (ObjectReaderCreator creator : creators) {
+            ObjectReader<Model2> objectReader = creator.createObjectReader(Model2.class);
+            Model2 model = objectReader.readObject(JSONReader.of(text));
+            assertNotNull(model.date);
+        }
+    }
+
+    public void test_for_issue_3() throws Exception {
+        String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
+        Model3 model = JSON.parseObject(text, Model3.class);
+        assertNotNull(model.date);
+    }
+
+
+    public void test_for_issue_3_creators() throws Exception {
+        String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
+
+        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
+                ObjectReaderCreator.INSTANCE,
+                ObjectReaderCreatorLambda.INSTANCE,
+                ObjectReaderCreatorASM.INSTANCE,
+//                ObjectReaderCreatorDynamicCompile.INSTANCE // TODO: ObjectReaderCreatorDynamicCompile
+        };
+
+        for (ObjectReaderCreator creator : creators) {
+            ObjectReader<Model3> objectReader = creator.createObjectReader(Model3.class);
+            Model3 model = objectReader.readObject(JSONReader.of(text));
+            assertNotNull(model.date);
+        }
+    }
+
+    public static class Model1 {
+        @JSONField(format = "MMM dd, yyyy h:mm:ss aa")
+        private Date date;
+
+        public Date getDate() {
+            return date;
+        }
+
+        public void setDate(Date date) {
+            this.date = date;
+        }
+    }
+
+    public static class Model2 {
+        @JSONField(format = "MMM dd, yyyy h:mm:ss aa")
+        public Date date;
+    }
+
+    private static class Model3 {
+        @JSONField(format = "MMM dd, yyyy h:mm:ss aa")
+        private Date date;
+
+        public Date getDate() {
+            return date;
+        }
+
+        public void setDate(Date date) {
+            this.date = date;
+        }
+    }
+}

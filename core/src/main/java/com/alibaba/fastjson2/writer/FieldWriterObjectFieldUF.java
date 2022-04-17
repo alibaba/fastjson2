@@ -1,0 +1,30 @@
+package com.alibaba.fastjson2.writer;
+
+import com.alibaba.fastjson2.util.UnsafeUtils;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+
+import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
+
+final class FieldWriterObjectFieldUF extends FieldWriterObjectField {
+    final long fieldOffset;
+
+    protected FieldWriterObjectFieldUF(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            Type fieldType,
+            Class fieldClass,
+            Field field
+    ) {
+        super(name, ordinal, features, format, fieldType, fieldClass, field);
+
+        fieldOffset = UnsafeUtils.objectFieldOffset(field);
+    }
+
+    public Object getFieldValue(Object object) {
+        return UNSAFE.getObject(object, fieldOffset);
+    }
+}
