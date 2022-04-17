@@ -23,6 +23,7 @@ public class AutoTypeTest46_Pair {
                 , JSONWriter.Feature.WriteNulls
                 , JSONWriter.Feature.NotWriteDefaultValue
                 , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                , JSONWriter.Feature.WriteNameAsSymbol
         );
 
         JSONBDump.dump(bytes);

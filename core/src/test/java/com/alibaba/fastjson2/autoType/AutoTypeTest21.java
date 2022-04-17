@@ -80,7 +80,7 @@ public class AutoTypeTest21 {
         bean.values2 = new HashMap<>();
         bean.values2.put(item, null);
 
-        byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteNulls);
+        byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.WriteNameAsSymbol);
 
         JSONBDump.dump(bytes);
 

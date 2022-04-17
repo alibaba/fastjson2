@@ -107,7 +107,7 @@ public class ParserTest {
         MediaContent o = jr.read(MediaContent.class);
 
         JSONWriter jw = JSONWriter.ofJSONB();
-        jw.config(JSONWriter.Feature.FieldBased, JSONWriter.Feature.NotWriteDefaultValue);
+        jw.config(JSONWriter.Feature.FieldBased, JSONWriter.Feature.NotWriteDefaultValue, JSONWriter.Feature.WriteNameAsSymbol);
         jw.writeAny(o);
 //        System.out.println(jw);
 
@@ -144,7 +144,8 @@ public class ParserTest {
                         JSONWriter.Feature.WriteNulls,
                         JSONWriter.Feature.NotWriteDefaultValue,
                         JSONWriter.Feature.FieldBased,
-                        JSONWriter.Feature.IgnoreErrorGetter
+                        JSONWriter.Feature.IgnoreErrorGetter,
+                        JSONWriter.Feature.WriteNameAsSymbol
                 );
 //        System.out.println(jw);
 

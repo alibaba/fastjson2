@@ -32,6 +32,7 @@ public class AutoTypeTest41_dupRef {
                 , JSONWriter.Feature.WriteNulls
                 , JSONWriter.Feature.NotWriteDefaultValue
                 , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                , JSONWriter.Feature.WriteNameAsSymbol
         );
 
 //        JSONBDump.dump(bytes);
