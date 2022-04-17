@@ -5,16 +5,21 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.*;
 import com.alibaba.fastjson2_vo.Calendar1;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
 
 public class Calendar1Test {
+    private TimeZone defaultTimeZone;
+
     Calendar[] dates = new Calendar[] {
             null,
             calendar(0),
@@ -54,6 +59,17 @@ public class Calendar1Test {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(millis);
         return calendar;
+    }
+
+    @BeforeEach
+    public void before() {
+        defaultTimeZone  = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+    }
+
+    @AfterEach
+    public void after() {
+        TimeZone.setDefault(defaultTimeZone);
     }
 
     @Test

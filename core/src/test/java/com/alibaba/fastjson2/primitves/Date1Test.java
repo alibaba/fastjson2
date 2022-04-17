@@ -8,16 +8,21 @@ import com.alibaba.fastjson2.writer.*;
 import com.alibaba.fastjson2_vo.Date1;
 import com.alibaba.fastjson2_vo.LongValue1;
 import com.alibaba.fastjson2_vo.LongValueField1;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.TimeZone;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
 
 public class Date1Test {
+    private TimeZone defaultTimeZone;
+
     Date[] dates = new Date[] {
             null,
             new Date(0),
@@ -52,6 +57,17 @@ public class Date1Test {
             new Date(-10000000000000L),
             new Date(1637467712394L)
     };
+
+    @BeforeEach
+    public void before() {
+        defaultTimeZone  = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+    }
+
+    @AfterEach
+    public void after() {
+        TimeZone.setDefault(defaultTimeZone);
+    }
 
     @Test
     public void test_arrayMapping() {
