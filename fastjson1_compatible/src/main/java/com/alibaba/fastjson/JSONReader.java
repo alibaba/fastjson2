@@ -1,0 +1,58 @@
+package com.alibaba.fastjson;
+
+import com.alibaba.fastjson.parser.Feature;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.Locale;
+import java.util.TimeZone;
+
+public class JSONReader implements Closeable {
+    private final Reader input;
+    private com.alibaba.fastjson2.JSONReader raw;
+
+    public JSONReader(Reader reader){
+        this(reader, new Feature[0]);
+    }
+
+    public JSONReader(Reader input, Feature... features){
+        this.raw = com.alibaba.fastjson2.JSONReader.of(input);
+        this.input = input;
+        com.alibaba.fastjson2.JSONReader.Context context = raw.getContext();
+        for (Feature feature : features) {
+            if (feature == Feature.SupportArrayToBean) {
+                context.config(com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean);
+            }
+        }
+    }
+
+    public void setLocale(Locale locale) {
+        raw.getContext().setLocale(locale);
+    }
+
+    public void setTimzeZone(TimeZone timezone) {
+        raw.getContext().setTimeZone(timezone);
+    }
+
+    public <T> T readObject(Class<T> type) {
+        try {
+            return raw.read(type);
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            throw new JSONException(ex.getMessage(), ex.getCause());
+        }
+    }
+
+    public Locale getLocal() {
+        return raw.getContext().getLocale();
+    }
+
+    public TimeZone getTimeZone() {
+        return raw.getContext().getTimeZone();
+    }
+
+    @Override
+    public void close() throws IOException {
+        input.close();
+    }
+}
