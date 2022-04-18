@@ -16,6 +16,10 @@
     <url>https://github.com/alibaba/fastjson2</url>
     <inceptionYear>2022</inceptionYear>
 
+    <properties>
+        <maven.test.skip>true</maven.test.skip>
+    </properties>
+
     <scm>
         <url>https://github.com/alibaba/fastjson2</url>
         <connection>scm:git:https://git@github.com/alibaba/fastjson2.git</connection>
@@ -192,13 +196,6 @@
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java-util</artifactId>
             <version>3.11.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.7.6.201602180812</version>
             <scope>provided</scope>
         </dependency>
 
