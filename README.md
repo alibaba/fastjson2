@@ -68,7 +68,7 @@ class JSON {
     // 将Java对象输出成字符串
     static String toJSONString(Object object);
 
-    // 将Java对象输出成UT8编码的byte[]
+    // 将Java对象输出成UTF8编码的byte[]
     static byte[] toJSONBytes(Object object);
 }
 
@@ -116,7 +116,7 @@ class JSONReader {
     // 构造基于String输入的JSONReader
     static JSONReader of(String str);
 
-    // 构造基于ut8编码byte数组输入的JSONReader
+    // 构造基于utf8编码byte数组输入的JSONReader
     static JSONReader of(byte[] utf8Bytes);
 
     // 构造基于char[]输入的JSONReader
