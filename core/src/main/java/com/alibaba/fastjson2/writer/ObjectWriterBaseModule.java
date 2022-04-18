@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
@@ -44,7 +45,24 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 getBeanInfo(beanInfo, superclass);
             }
 
-            JSONType jsonType = (JSONType) objectClass.getAnnotation(JSONType.class);
+            Annotation jsonType1x = null;
+            JSONType jsonType = null;
+            Annotation[] annotations = objectClass.getAnnotations();
+            for (Annotation annotation : annotations) {
+                Class annotationType = annotation.annotationType();
+                if (annotationType == JSONType.class) {
+                    jsonType = (JSONType) annotation;
+                    continue;
+                }
+
+                switch (annotationType.getName()) {
+                    case "com.alibaba.fastjson.annotation.JSONType":
+                        jsonType1x = annotation;
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             if (jsonType == null) {
                 Class mixInSource = provider.mixInCache.get(objectClass);
@@ -91,6 +109,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         jsonType
                                 .naming()
                                 .name();
+            } else if (jsonType1x != null) {
+                final Annotation annotation = jsonType1x;
+                BeanUtils.annatationMethods(jsonType1x.annotationType(), method -> processJSONType1x(beanInfo, annotation, method));
             }
 
             if (beanInfo.seeAlso != null && beanInfo.seeAlso.length != 0) {
@@ -146,6 +167,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         fieldInfo.ignore = true;
                         break;
+                    case "com.alibaba.fastjson.annotation.JSONField":
+                        processJSONField1x(fieldInfo, annotation);
+                        break;
                     default:
                         break;
                 }
@@ -192,6 +216,103 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     && ObjectWriter.class.isAssignableFrom(writeUsing)
             ) {
                 fieldInfo.writeUsing = writeUsing;
+            }
+        }
+
+        private void processJSONField1x(FieldInfo fieldInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annatationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "name": {
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                fieldInfo.fieldName = value;
+                            }
+                            break;
+                        }
+                        case "format": {
+                            String format = (String) result;
+                            if (!format.isEmpty()) {
+                                if (format.indexOf('T') != -1 && !format.contains("'T'")) {
+                                    format = format.replaceAll("T", "'T'");
+                                }
+
+                                fieldInfo.format = format;
+                            }
+                            break;
+                        }
+                        case "ordinal": {
+                            Integer ordinal = (Integer) result;
+                            if (ordinal.intValue() != 0) {
+                                fieldInfo.ordinal = ordinal;
+                            }
+                            break;
+                        }
+                        case "serialize": {
+                            Boolean serialize = (Boolean) result;
+                            if (!serialize.booleanValue()) {
+                                fieldInfo.ignore = true;
+                            }
+                            break;
+                        }
+                        case "unwrapped": {
+                            Boolean unwrapped = (Boolean) result;
+                            if (!unwrapped.booleanValue()) {
+                                fieldInfo.format = "unwrapped";
+                            }
+                            break;
+                        }
+                        case "serialzeFeatures": {
+                            Enum[] features = (Enum[]) result;
+                            applyFeatures(fieldInfo, features);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {
+
+                }
+            });
+        }
+
+        private void applyFeatures(FieldInfo fieldInfo, Enum[] features) {
+            for (Enum feature : features) {
+                switch (feature.name()) {
+                    case "UseISO8601DateFormat":
+                        fieldInfo.format = "iso8601";
+                        break;
+                    case "WriteMapNullValue":
+                        fieldInfo.features |= JSONWriter.Feature.WriteNulls.mask;
+                        break;
+                    case "WriteNullListAsEmpty":
+                    case "WriteNullStringAsEmpty":
+                        fieldInfo.features |= JSONWriter.Feature.NullAsDefaultValue.mask;
+                        break;
+                    case "BrowserCompatible":
+                        fieldInfo.features |= JSONWriter.Feature.BrowserCompatible.mask;
+                        break;
+                    case "WriteClassName":
+                        fieldInfo.features |= JSONWriter.Feature.WriteClassName.mask;
+                        break;
+                    case "WriteNonStringValueAsString":
+                        fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
+                        break;
+                    case "WriteEnumUsingToString":
+                        fieldInfo.features |= JSONWriter.Feature.WriteEnumUsingToString.mask;
+                        break;
+                    case "NotWriteRootClassName":
+                        fieldInfo.features |= JSONWriter.Feature.NotWriteRootClassName.mask;
+                        break;
+                    case "IgnoreErrorGetter":
+                        fieldInfo.features |= JSONWriter.Feature.IgnoreErrorGetter.mask;
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -280,6 +401,80 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     getFieldInfo(fieldInfo, objectClass, declaredField);
                 }
             }
+        }
+    }
+
+    private void processJSONType1x(BeanInfo beanInfo, Annotation jsonType1x, Method method) {
+        try {
+            Object result = method.invoke(jsonType1x);
+            switch (method.getName()) {
+                case "seeAlso": {
+                    Class<?>[] classes = (Class[]) result;
+                    if (classes.length != 0) {
+                        beanInfo.seeAlso = classes;
+                    }
+                    break;
+                }
+                case "typeKey": {
+                    String typeKey = (String) result;
+                    if (!typeKey.isEmpty()) {
+                        beanInfo.typeKey = typeKey;
+                    }
+                    break;
+                }
+                case "serializeFeatures":
+                case "serialzeFeatures": {
+                    Enum[] serializeFeatures = (Enum[]) result;
+                    for (Enum feature : serializeFeatures) {
+                        switch (feature.name()) {
+                            case "WriteMapNullValue":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
+                                break;
+                            case "WriteNullListAsEmpty":
+                            case "WriteNullStringAsEmpty":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.NullAsDefaultValue.mask;
+                                break;
+                            case "BrowserCompatible":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.BrowserCompatible.mask;
+                                break;
+                            case "WriteClassName":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteClassName.mask;
+                                break;
+                            case "WriteNonStringValueAsString":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
+                                break;
+                            case "WriteEnumUsingToString":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteEnumUsingToString.mask;
+                                break;
+                            case "NotWriteRootClassName":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteRootClassName.mask;
+                                break;
+                            case "IgnoreErrorGetter":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.IgnoreErrorGetter.mask;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                }
+                case "serializeEnumAsJavaBean": {
+                    boolean serializeEnumAsJavaBean = (Boolean) result;
+                    if (serializeEnumAsJavaBean) {
+                        beanInfo.writeEnumAsJavaBean = true;
+                    }
+                    break;
+                }
+                case "naming": {
+                    Enum naming = (Enum) result;
+                    beanInfo.namingStrategy = naming.name();
+                    break;
+                }
+                default:
+                    break;
+            }
+        } catch (Throwable ignored) {
+
         }
     }
 
