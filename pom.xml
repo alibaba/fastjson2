@@ -20,6 +20,7 @@
     <modules>
         <module>core</module>
         <module>extension</module>
+        <module>fastjson1_compatible</module>
     </modules>
 
     <build>
