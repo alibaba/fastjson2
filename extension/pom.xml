@@ -43,27 +43,11 @@
         </license>
     </licenses>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <includes>
-                        <include>com/alibaba/fastjson2/**/*.java</include>
-                    </includes>
-                    <systemPropertyVariables>
-                        <user.timezone>Asia/Shanghai</user.timezone>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
             <artifactId>fastjson2</artifactId>
-            <version>2.0.2_preview01</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -112,4 +96,20 @@
             </exclusions>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>com/alibaba/fastjson2/**/*.java</include>
+                    </includes>
+                    <systemPropertyVariables>
+                        <user.timezone>Asia/Shanghai</user.timezone>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
