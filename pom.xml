@@ -305,9 +305,11 @@
             <build>
                 <plugins>
                     <plugin>
-                        <!-- for codecov.io -->
-                        <!-- config example: https://github.com/codecov/example-java -->
-                        <!-- plugin docs: https://eclemma.org/jacoco/trunk/doc/ -->
+                        <!--
+                            Code Coverage
+                            config example: https://github.com/codecov/example-java
+                            plugin docs: https://eclemma.org/jacoco/trunk/doc/
+                        -->
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>0.8.8</version>
