@@ -17,6 +17,7 @@
     <inceptionYear>2022</inceptionYear>
 
     <properties>
+        <!-- FIXME should enable test later -->
         <maven.test.skip>true</maven.test.skip>
     </properties>
 
@@ -497,18 +498,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <!-- FIXME should enable test later -->
-                    <skipTests>true</skipTests>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>
