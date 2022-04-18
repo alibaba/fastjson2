@@ -277,6 +277,36 @@ public abstract class BeanUtils {
         }
     }
 
+    public static void annatationMethods(Class objectClass, Consumer<Method> methodConsumer) {
+        Method[] methods = methodCache.get(objectClass);
+        if (methods == null) {
+            methods = objectClass.getMethods();
+            methodCache.putIfAbsent(objectClass, methods);
+        }
+
+        for_:
+        for (Method method : methods) {
+            if (method.getParameterCount() != 0) {
+                continue;
+            }
+
+            switch (method.getName()) {
+                case "toString":
+                case "hashCode":
+                case "annotationType":
+                case "wait":
+                case "notify":
+                case "notifyAll":
+                case "getClass":
+                    continue for_;
+                default:
+                    break;
+            }
+
+            methodConsumer.accept(method);
+        }
+    }
+
     public static void getters(Method[] methods, Consumer<Method> methodConsumer) {
         for (Method method : methods) {
             int paramType = method.getParameterCount();
