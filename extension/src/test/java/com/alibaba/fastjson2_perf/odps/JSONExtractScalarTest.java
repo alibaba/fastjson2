@@ -1,6 +1,6 @@
-package com.alibaba.fastjson2.perf.odps;
+package com.alibaba.fastjson2_perf.odps;
 
-import com.alibaba.fastjson2.support.odps.JSONExtract;
+import com.alibaba.fastjson2.support.odps.JSONExtractScalar;
 import com.aliyun.odps.io.Text;
 import com.aliyun.odps.io.Writable;
 import org.apache.commons.io.IOUtils;
@@ -11,23 +11,23 @@ import java.nio.charset.StandardCharsets;
 
 import static junit.framework.TestCase.assertEquals;
 
-public class JSONExtractTest {
+public class JSONExtractScalarTest {
     private String str;
     private byte[] utf8Bytes;
 
-    public JSONExtractTest() throws Exception {
-        InputStream is = JSONExtractTest.class.getClassLoader().getResourceAsStream("data/path_01.json");
+    public JSONExtractScalarTest() throws Exception {
+        InputStream is = JSONExtractScalarTest.class.getClassLoader().getResourceAsStream("data/path_01.json");
         str = IOUtils.toString(is, "UTF-8");
         utf8Bytes = str.getBytes(StandardCharsets.UTF_8);
     }
 
     @Test
     public void test_extract_id() {
-        JSONExtract udf = new JSONExtract("$.id");
+        JSONExtractScalar udf = new JSONExtractScalar("$.id");
         {
             Text intput = new Text(utf8Bytes);
             Writable result = udf.eval(intput);
-            assertEquals("\"1\""
+            assertEquals("1"
                     , result.toString());
         }
 
@@ -41,17 +41,18 @@ public class JSONExtractTest {
             }
 
             long millis = System.currentTimeMillis() - start;
-            System.out.println("extract : " + millis); // 410 387 346 317
+            System.out.println("extract : " + millis); // 500 449 414 395
         }
     }
 
+
     @Test
     public void test_extract_Duration() {
-        JSONExtract udf = new JSONExtract("$.Duration");
+        JSONExtractScalar udf = new JSONExtractScalar("$.Duration");
         {
             Text intput = new Text(utf8Bytes);
             Writable result = udf.eval(intput);
-            assertEquals("\"450\""
+            assertEquals("450"
                     , result.toString());
         }
 
@@ -65,17 +66,17 @@ public class JSONExtractTest {
             }
 
             long millis = System.currentTimeMillis() - start;
-            System.out.println("extract : " + millis); // 1272 1234 1077 1018
+            System.out.println("extract : " + millis); // 965
         }
     }
 
     @Test
     public void test_extract_StartTime() {
-        JSONExtract udf = new JSONExtract("$.StartTime");
+        JSONExtractScalar udf = new JSONExtractScalar("$.StartTime");
         {
             Text intput = new Text(utf8Bytes);
             Writable result = udf.eval(intput);
-            assertEquals("\"2020-01-06 17:00:00\""
+            assertEquals("2020-01-06 17:00:00"
                     , result.toString());
         }
 
@@ -89,7 +90,8 @@ public class JSONExtractTest {
             }
 
             long millis = System.currentTimeMillis() - start;
-            System.out.println("extract : " + millis); // 817 700
+            System.out.println("extract : " + millis); // 805 723 710
         }
     }
+
 }
