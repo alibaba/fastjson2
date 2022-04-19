@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.support.spring;
+package com.alibaba.fastjson2.support.spring.web.view;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
