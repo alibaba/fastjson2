@@ -224,9 +224,25 @@ public class ObjectWriterCreator {
             return new ObjectWriterException(objectClass, writerFeatures, fieldWriters);
         }
 
+        handleIgnores(beanInfo, fieldWriters);
+
         Collections.sort(fieldWriters);
 
         return new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+    }
+
+    protected void handleIgnores(BeanInfo beanInfo, List<FieldWriter> fieldWriters) {
+        if (beanInfo.ignores != null && beanInfo.ignores.length > 0) {
+            for (int i = fieldWriters.size() - 1; i >= 0; i--) {
+                FieldWriter fieldWriter = fieldWriters.get(i);
+                for (String ignore : beanInfo.ignores) {
+                    if (ignore.equals(fieldWriter.getFieldName())) {
+                        fieldWriters.remove(i);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     public <T> FieldWriter<T> createFieldWriter(String fieldName, String format, Field field) {

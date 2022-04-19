@@ -24,4 +24,6 @@ public @interface JSONType {
     NamingStrategy naming() default NamingStrategy.CamelCase;
 
     boolean writeEnumAsJavaBean() default false;
+
+    String[] ignores() default {};
 }

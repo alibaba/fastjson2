@@ -21,4 +21,5 @@ public class BeanInfo {
     public boolean writeEnumAsJavaBean;
 
     public String namingStrategy;
+    public String[] ignores;
 }

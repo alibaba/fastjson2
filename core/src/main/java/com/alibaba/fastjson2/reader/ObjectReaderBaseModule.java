@@ -241,6 +241,10 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                             beanInfo.namingStrategy = naming.name();
                             break;
                         }
+                        case "ignores": {
+                            beanInfo.ignores = (String[]) result;
+                            break;
+                        }
                         case "parseFeatures": {
                             Enum[] features = (Enum[]) result;
                             for (Enum feature : features) {
@@ -373,6 +377,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                         beanInfo.builderWithPrefix = withPrefix;
                     }
                 }
+            }
+
+            String[] ignores = jsonType.ignores();
+            if (ignores.length > 0) {
+                beanInfo.ignores = ignores;
             }
         }
 
