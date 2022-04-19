@@ -1616,7 +1616,7 @@ public abstract class JSONReader implements Closeable {
         if (scale > 0) {
             numDigits--;
         }
-        if (numDigits > 38) {
+        if (numDigits > 128) {
             throw new JSONException("number too large : " + new String(chars, off, numDigits));
         }
 
@@ -1754,7 +1754,7 @@ public abstract class JSONReader implements Closeable {
         if (scale > 0) {
             numDigits--;
         }
-        if (numDigits > 38) {
+        if (numDigits > 128) {
             throw new JSONException("number too large : " + new String(chars, off, numDigits));
         }
 

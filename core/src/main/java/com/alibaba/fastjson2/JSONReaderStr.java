@@ -3955,7 +3955,7 @@ final class JSONReaderStr extends JSONReader {
         if (scale > 0) {
             numDigits--;
         }
-        if (numDigits > 38) {
+        if (numDigits > 128) {
             throw new JSONException("number too large : " + str.substring(off, off + numDigits));
         }
 
