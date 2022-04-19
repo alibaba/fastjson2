@@ -8,17 +8,17 @@
 
 # 1. FASTJSON v2
 
-`FASTJSON v2`是`FASTJSON`项目的重要升级，目标是为下一个十年提供一个高性能的`JSON`库：
+`FASTJSON v2`是`FASTJSON`项目的重要升级，目标是为下一个十年提供一个高性能的`JSON`库。通过同一套`API`，
 
-- 同一套`API`支持`JSON/JSONB`两种协议，`JSONPath`是一等公民；
+- 支持`JSON/JSONB`两种协议，`JSONPath`是一等公民；
 - 支持全量解析和部分解析；
 - 支持`Java`服务端、客户端`Android`、大数据场景。
 
-![fastjson](logo.jpg "fastjson")
+![fastjson](docs/logo.jpg "fastjson")
 
 相关文档：
 
-- `JSONB`格式文档：
+- `JSONB`格式文档：  
   https://github.com/alibaba/fastjson2/wiki/jsonb_format_cn
 - `FASTJSON v2`性能有了很大提升，具体性能数据看这里：  
   https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark
