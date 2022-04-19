@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.spring;
 
-import com.alibaba.fastjson2.support.spring.FastJsonHttpMessageConverter;
-import com.alibaba.fastjson2.support.spring.FastJsonJsonView;
+import com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter;
+import com.alibaba.fastjson2.support.spring.web.view.FastJsonJsonView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

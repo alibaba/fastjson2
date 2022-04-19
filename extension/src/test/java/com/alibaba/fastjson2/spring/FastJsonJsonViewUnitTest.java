@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.spring;
 
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
-import com.alibaba.fastjson2.support.spring.FastJsonJsonView;
+import com.alibaba.fastjson2.support.spring.web.view.FastJsonJsonView;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
