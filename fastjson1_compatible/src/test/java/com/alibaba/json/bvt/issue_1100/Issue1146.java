@@ -19,10 +19,10 @@ public class Issue1146 extends TestCase {
         public boolean isXxx() {
             return true;
         }
-        public boolean getYyy() {
+        public Boolean getYyy() {
             return true;
         }
-        public boolean getZzz() {
+        public Boolean getZzz() {
             return true;
         }
     }

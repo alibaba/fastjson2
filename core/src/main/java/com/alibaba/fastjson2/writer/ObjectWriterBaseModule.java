@@ -109,6 +109,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         jsonType
                                 .naming()
                                 .name();
+
+                String[] ignores = jsonType.ignores();
+                if (ignores.length > 0) {
+                    beanInfo.ignores = ignores;
+                }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
                 BeanUtils.annatationMethods(jsonType1x.annotationType(), method -> processJSONType1x(beanInfo, annotation, method));
@@ -468,6 +473,10 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 case "naming": {
                     Enum naming = (Enum) result;
                     beanInfo.namingStrategy = naming.name();
+                    break;
+                }
+                case "ignores": {
+                    beanInfo.ignores = (String[]) result;
                     break;
                 }
                 default:

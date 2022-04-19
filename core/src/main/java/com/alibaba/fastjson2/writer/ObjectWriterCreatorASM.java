@@ -229,6 +229,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             fieldWriters = new ArrayList<>(fieldWriterMap.values());
         }
 
+        handleIgnores(beanInfo, fieldWriters);
         Collections.sort(fieldWriters);
 
         boolean match = true;

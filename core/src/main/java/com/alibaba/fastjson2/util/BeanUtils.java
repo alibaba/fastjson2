@@ -421,6 +421,7 @@ public abstract class BeanUtils {
         int prefixLength = is ? 2 : 3;
 
         switch (namingStrategy) {
+            case "NeverUseThisValueExceptDefaultValue":
             case "CamelCase": {
                 char[] chars = new char[methodNameLength - prefixLength];
                 methodName.getChars(is ? 2 : 3, methodNameLength, chars, 0);
