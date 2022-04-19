@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ObjectReaderProvider {
+    static final boolean SAFE_MODE;
     static final String[] DENYS;
     static final String[] AUTO_TYPE_ACCEPT_LIST;
 
@@ -98,6 +99,19 @@ public class ObjectReaderProvider {
                     }
                 }
             }
+        }
+
+        {
+            String property = System.getProperty("fastjson.parser.safeMode");
+            if (property == null || property.isEmpty()) {
+                property = JSONFactory.getProperty("fastjson.parser.safeMode");
+            }
+
+            if (property != null) {
+                property = property.trim();
+            }
+
+            SAFE_MODE = property != null && property.equals("true");
         }
     }
 
@@ -294,7 +308,7 @@ public class ObjectReaderProvider {
     }
 
     public Class checkAutoType(String typeName, Class<?> expectClass, long features) {
-        if (typeName == null) {
+        if (typeName == null || typeName.isEmpty()) {
             return null;
         }
 
@@ -305,9 +319,18 @@ public class ObjectReaderProvider {
             }
         }
 
+        if (SAFE_MODE) {
+            throw new JSONException("autoType is not support. " + typeName);
+        }
+
         int typeNameLength = typeName.length();
         if (typeNameLength >= 192) {
             throw new JSONException("autoType is not support. " + typeName);
+        }
+
+        if (typeName.charAt(0) == '[') {
+            String componentTypeName = typeName.substring(1);
+            checkAutoType(componentTypeName, null, features);
         }
 
         if (expectClass != null && expectClass.getName().equals(typeName)) {
