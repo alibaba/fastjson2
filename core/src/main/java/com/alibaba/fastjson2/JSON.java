@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.filter.*;
+import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
-import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -313,6 +313,35 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
+
+                Class<?> valueClass = object.getClass();
+                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+
+            int len = writer.flushTo(out);
+            return len;
+        } catch (IOException e) {
+            throw new JSONException("writeJSONString error", e);
+        }
+    }
+
+    static int writeTo(
+            OutputStream out
+            , Object object
+            , Filter[] filters
+            , JSONWriter.Feature... features) {
+
+        try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.setRootObject(object);
+
+                if (filters != null && filters.length != 0) {
+                    JSONWriter.Context context = writer.getContext();
+                    context.configFilter(filters);
+                }
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
