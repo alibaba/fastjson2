@@ -1010,7 +1010,8 @@ final class JSONReaderUTF16 extends JSONReader {
         _for:
         for (; ; ) {
             if (ch == '\\') {
-                ch = chars[++offset];
+                ch = chars[offset++];
+                ch = char1(ch);
                 continue;
             }
             if (ch == quote) {
