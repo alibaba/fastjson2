@@ -169,7 +169,7 @@ JSON.toJSONString(product);
 
 JSON.toJSONString(product, JSONWriter.Feature.BeanToArray);
 // 生成如下的结果
-[123, "DataWorks"]
+[1001, "DataWorks"]
 ```
 
 ## 4.2 将`JavaBean`对象生成`UTF8`编码的`byte[]`
