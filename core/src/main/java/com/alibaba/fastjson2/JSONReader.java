@@ -106,8 +106,7 @@ public abstract class JSONReader implements Closeable {
         }
 
         Object previous = null;
-        for (int i = 0; i < resolveTasks.size(); i++) {
-            ResolveTask resolveTask = resolveTasks.get(i);
+        for (ResolveTask resolveTask : resolveTasks) {
             JSONPath path = resolveTask.reference;
             FieldReader fieldReader = resolveTask.fieldReader;
 
@@ -130,29 +129,39 @@ public abstract class JSONReader implements Closeable {
             }
 
             Object resolvedObject = resolveTask.object;
-            if (resolvedObject instanceof Map && resolveTask.name != null) {
-                Map map = (Map) resolvedObject;
-                if (map instanceof LinkedHashMap) {
+
+            if (resolveTask.name != null) {
+                if (resolvedObject instanceof Map) {
+                    Map map = (Map) resolvedObject;
                     if (resolveTask.name instanceof ReferenceKey) {
-                        Object[] keys = new Object[map.size()];
-                        Object[] values = new Object[map.size()];
-
-                        int index = 0;
-                        for (Object o : map.entrySet()) {
-                            Map.Entry entry = (Map.Entry) o;
-                            Object entryKey = entry.getKey();
-                            if (resolveTask.name == entryKey) {
-                                keys[index] = fieldValue;
-                            } else {
-                                keys[index] = entryKey;
+                        if (map instanceof LinkedHashMap) {
+                            int size = map.size();
+                            if (size == 0) {
+                                continue;
                             }
-                            values[index++] = entry.getValue();
-                        }
 
-                        map.clear();;
+                            Object[] keys = new Object[size];
+                            Object[] values = new Object[size];
 
-                        for (int j = 0; j < keys.length; j++) {
-                            map.put(keys[j], values[j]);
+                            int index = 0;
+                            for (Object o : map.entrySet()) {
+                                Map.Entry entry = (Map.Entry) o;
+                                Object entryKey = entry.getKey();
+                                if (resolveTask.name == entryKey) {
+                                    keys[index] = fieldValue;
+                                } else {
+                                    keys[index] = entryKey;
+                                }
+                                values[index++] = entry.getValue();
+                            }
+                            map.clear();
+
+                            for (int j = 0; j < keys.length; j++) {
+                                map.put(keys[j], values[j]);
+                            }
+                        } else {
+                            Object value = map.remove(resolveTask.name);
+                            map.put(fieldValue, value);
                         }
                     } else {
                         map.put(resolveTask.name, fieldValue);
@@ -160,33 +169,27 @@ public abstract class JSONReader implements Closeable {
                     continue;
                 }
 
-                if (resolveTask.name instanceof ReferenceKey) {
-                    Object value = map.remove(resolveTask.name);
-                    map.put(fieldValue, value);
-                } else {
-                    map.put(resolveTask.name, fieldValue);
+                if (resolveTask.name instanceof Integer) {
+                    if (resolvedObject instanceof List) {
+                        int index = (Integer) resolveTask.name;
+                        List list = (List) resolveTask.object;
+                        list.set(index, fieldValue);
+                        continue;
+                    }
+
+                    if (resolvedObject instanceof Object[]) {
+                        int index = (Integer) resolveTask.name;
+                        Object[] array = (Object[]) resolveTask.object;
+                        array[index] = fieldValue;
+                        continue;
+                    }
+
+                    if (resolvedObject instanceof Collection) {
+                        Collection collection = (Collection) resolveTask.object;
+                        collection.add(fieldValue);
+                        continue;
+                    }
                 }
-                continue;
-            }
-
-            if (resolvedObject instanceof List && resolveTask.name instanceof Integer) {
-                int index = (Integer) resolveTask.name;
-                List list = (List) resolveTask.object;
-                list.set(index, fieldValue);
-                continue;
-            }
-
-            if (resolvedObject instanceof Object[] && resolveTask.name instanceof Integer) {
-                int index = (Integer) resolveTask.name;
-                Object[] array = (Object[]) resolveTask.object;
-                array[index] = fieldValue;
-                continue;
-            }
-
-            if (resolvedObject instanceof Collection && resolveTask.name instanceof Integer) {
-                Collection collection = (Collection) resolveTask.object;
-                collection.add(fieldValue);
-                continue;
             }
 
             fieldReader.accept(resolvedObject, fieldValue);
