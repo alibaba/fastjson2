@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
 import com.alibaba.fastjson2.reader.ObjectReaderImplList;
 import com.alibaba.fastjson2.reader.ObjectReaderImplListStr;
 import com.alibaba.fastjson2.util.Fnv;
@@ -78,13 +79,10 @@ public class JSONTest {
 
     @Test
     public void test_toJSONBytes_1() {
-
-        assertEquals("null",
-                new String(JSON.toJSONBytes(null, new Filter[0], JSONWriter.Feature.WriteNulls)));
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        JSON.writeTo(out, null, JSONWriter.Feature.WriteNulls);
-        assertEquals("null", new String(out.toByteArray()));
+        assertEquals("\"test\"",
+                new String(JSON.toJSONBytes("test", new Filter[0], JSONWriter.Feature.WriteNulls)));
+        assertEquals("\"test\"",
+                new String(JSON.toJSONBytes("test", Arrays.asList(new SimplePropertyPreFilter()).toArray(new Filter[0]), JSONWriter.Feature.WriteNulls)));
     }
 
     @Test
@@ -431,7 +429,25 @@ public class JSONTest {
     public void test_writeTo_1() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         JSON.writeTo(out,
+                null, new Filter[0], JSONWriter.Feature.WriteNulls);
+        assertEquals("null"
+                , new String(out.toByteArray()));
+    }
+
+    @Test
+    public void test_writeTo_2() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        JSON.writeTo(out,
                 Collections.singleton(1), new Filter[0], JSONWriter.Feature.WriteNulls);
+        assertEquals("[1]"
+                , new String(out.toByteArray()));
+    }
+
+    @Test
+    public void test_writeTo_3() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        JSON.writeTo(out,
+                Collections.singleton(1), Arrays.asList(new SimplePropertyPreFilter()).toArray(new Filter[0]), JSONWriter.Feature.WriteNulls);
         assertEquals("[1]"
                 , new String(out.toByteArray()));
     }
