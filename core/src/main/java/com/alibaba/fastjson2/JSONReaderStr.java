@@ -960,6 +960,7 @@ final class JSONReaderStr extends JSONReader {
         for (; ; ) {
             if (ch == '\\') {
                 ch = str.charAt(++offset);
+                char1(ch);
                 continue;
             }
             if (ch == quote) {

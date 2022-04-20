@@ -1943,7 +1943,8 @@ class JSONReaderUTF8 extends JSONReader {
         byte ch = bytes[offset++];
         for (; ; ) {
             if (ch == '\\') {
-                offset++;
+                ch = bytes[offset++];
+                char1(ch);
                 ch = bytes[offset++];
                 continue;
             }
