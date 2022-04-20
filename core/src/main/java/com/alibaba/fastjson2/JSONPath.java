@@ -43,27 +43,21 @@ public abstract class JSONPath {
     }
 
     public static Object extract(String json, String path) {
-        return JSONPath
-                .of(path)
-                .extract(
-                        JSONReader.of(json)
-                );
+        return JSONPath.of(path)
+                .extract(JSONReader.of(json));
     }
 
     public static Object eval(Object rootObject, String path) {
-        return JSONPath
-                .of(path)
-                .eval(rootObject);
+        return JSONPath.of(path).eval(rootObject);
     }
 
     public static void set(Object rootObject, String path, Object value) {
-        JSONPath.of(path)
-                .set(rootObject, value);
+        JSONPath.of(path).set(rootObject, value);
     }
 
     public static Map<String, Object> paths(Object javaObject) {
-        Map<Object, String> values = new IdentityHashMap<Object, String>();
-        Map<String, Object> paths = new HashMap<String, Object>();
+        Map<Object, String> values = new IdentityHashMap<>();
+        Map<String, Object> paths = new HashMap<>();
 
         JSONPath.of("").paths(values, paths, "/", javaObject);
         return paths;
@@ -149,7 +143,7 @@ public abstract class JSONPath {
                 for (Map.Entry<String, Object> entry : fieldValues.entrySet()) {
                     String key = entry.getKey();
 
-                    if (key instanceof String) {
+                    if (key != null) {
                         String path = parent.equals("/") ?  "/" + key : parent + "/" + key;
                         paths(values, paths, path, entry.getValue());
                     }
@@ -157,10 +151,7 @@ public abstract class JSONPath {
             } catch (Exception e) {
                 throw new JSONException("toJSON error", e);
             }
-            return;
         }
-
-        return;
     }
 
     public abstract boolean isRef();
@@ -172,7 +163,6 @@ public abstract class JSONPath {
             for (Object value : values) {
                 collection.add(value);
             }
-            return;
         }
     }
 
@@ -318,10 +308,9 @@ public abstract class JSONPath {
         }
 
         JSONReader jsonReader = JSONReader.of(path);
+        List<Segment> segments = new ArrayList<>();
 
-        List<Segment> segments = new ArrayList();
-
-        for (;jsonReader.current() != JSONReader.EOI;) {
+        while (jsonReader.current() != JSONReader.EOI) {
             if (jsonReader.current() == '$') {
                 jsonReader.next();
                 if (jsonReader.current() == '.') {
@@ -458,7 +447,7 @@ public abstract class JSONPath {
             if (jsonReader.ch == '[') {
                 jsonReader.next();
 
-                for (;;) {
+                do {
                     switch (jsonReader.ch) {
                         case '-':
                         case '0':
@@ -505,9 +494,7 @@ public abstract class JSONPath {
                             break;
                         case ':': {
                             jsonReader.next();
-                            int end = jsonReader.ch == ']'
-                                    ? 0
-                                    : jsonReader.readInt32Value();
+                            int end = jsonReader.ch == ']' ? 0 : jsonReader.readInt32Value();
                             RangeIndexSegment segment;
                             if (end > 0) {
                                 segment = new RangeIndexSegment(0, end);
@@ -521,8 +508,7 @@ public abstract class JSONPath {
                         case '\'':
                             String name = jsonReader.readString();
                             if (jsonReader.current() == ']') {
-                                segments.add(
-                                        new NameSegment(name, Fnv.hashCode64(name)));
+                                segments.add(new NameSegment(name, Fnv.hashCode64(name)));
                             } else if (jsonReader.isString()) {
                                 List<String> names = new ArrayList<>();
                                 names.add(name);
@@ -531,25 +517,20 @@ public abstract class JSONPath {
                                 } while (jsonReader.isString());
                                 String[] nameArray = new String[names.size()];
                                 names.toArray(nameArray);
-                                segments.add(
-                                        new MultiNameSegment(nameArray));
+                                segments.add(new MultiNameSegment(nameArray));
                             } else {
                                 throw new JSONException("TODO : " + jsonReader.current());
                             }
                             break;
                         case '?':
                             jsonReader.next();
-                            segments.add(
-                                    parseFilter(jsonReader));
+                            segments.add(parseFilter(jsonReader));
                             break;
                         default:
                             throw new JSONException("TODO : " + jsonReader.current());
                     }
 
-                    if (jsonReader.ch == ']' || jsonReader.ch == JSONReader.EOI) {
-                        break;
-                    }
-                }
+                } while (jsonReader.ch != ']' && jsonReader.ch != JSONReader.EOI);
 
                 if (jsonReader.ch == ']') {
                     jsonReader.next();
@@ -751,8 +732,6 @@ public abstract class JSONPath {
                             throw new JSONException("syntax error, " + and);
                         }
                         Number end = jsonReader.readNumber();
-                        boolean beginInt = begin instanceof Byte || begin instanceof Short || begin instanceof Integer || begin instanceof Long;
-                        boolean endInt = end instanceof Byte || end instanceof Short || end instanceof Integer || end instanceof Long;
                         segment = new NameIntBetweenSegment(fieldName, hashCode, begin.longValue(), end.longValue(), operator == Operator.NOT_BETWEEN);
                     } else {
                         throw new JSONException("syntax error, " + jsonReader.ch);
@@ -1118,7 +1097,7 @@ public abstract class JSONPath {
             if (objInt) {
                 long fieldValueInt;
                 if (fieldValue instanceof Boolean) {
-                    fieldValueInt = ((Boolean) fieldValue).booleanValue() ? 1 : 0;
+                    fieldValueInt = (Boolean) fieldValue ? 1 : 0;
                 } else {
                     fieldValueInt = ((Number) fieldValue).longValue();
                 }
@@ -1199,7 +1178,7 @@ public abstract class JSONPath {
             BigDecimal fieldValueDecimal;
 
             if (fieldValue instanceof Boolean) {
-                fieldValueDecimal = ((Boolean) fieldValue).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
+                fieldValueDecimal = (Boolean) fieldValue ? BigDecimal.ONE : BigDecimal.ZERO;
             } else if (fieldValue instanceof Byte
                     || fieldValue instanceof Short
                     || fieldValue instanceof Integer
@@ -1285,13 +1264,12 @@ public abstract class JSONPath {
             if (object instanceof List) {
                 List list = (List) object;
                 JSONArray array = new JSONArray(list.size());
-                for (int i = 0; i < list.size(); i++) {
+                for (int i = 0, l = list.size(); i < l ; i++) {
                     Object item = list.get(i);
-
                     boolean match = and;
                     for (FilterSegment filter : filters) {
                         boolean result = filter.apply(ctx, item);
-                        if(and) {
+                        if (and) {
                             if (!result) {
                                 match = false;
                                 break;
@@ -1331,7 +1309,6 @@ public abstract class JSONPath {
                 ctx.value = object;
             }
             ctx.eval = true;
-            return;
         }
     }
 
@@ -1456,9 +1433,9 @@ public abstract class JSONPath {
             }
 
             if (fieldValue instanceof BigInteger) {
-                BigInteger bigiInt = (BigInteger) fieldValue;
-                int cmpBegin = bigiInt.compareTo(BigInteger.valueOf(begin));
-                int cmpEnd = bigiInt.compareTo(BigInteger.valueOf(end));
+                BigInteger bigInt = (BigInteger) fieldValue;
+                int cmpBegin = bigInt.compareTo(BigInteger.valueOf(begin));
+                int cmpEnd = bigInt.compareTo(BigInteger.valueOf(end));
 
                 if (cmpBegin >= 0 && cmpEnd <= 0) {
                     return !not;
@@ -1508,18 +1485,18 @@ public abstract class JSONPath {
     static abstract class NameFilter extends FilterSegment {
         final String fieldName;
         final long fieldNameNameHash;
-        final Function funtion;
+        final Function function;
 
         public NameFilter(String fieldName, long fieldNameNameHash) {
             this.fieldName = fieldName;
             this.fieldNameNameHash = fieldNameNameHash;
-            this.funtion = null;
+            this.function = null;
         }
 
-        public NameFilter(String fieldName, long fieldNameNameHash, Function funtion) {
+        public NameFilter(String fieldName, long fieldNameNameHash, Function function) {
             this.fieldName = fieldName;
             this.fieldNameNameHash = fieldNameNameHash;
-            this.funtion = funtion;
+            this.function = function;
         }
 
         abstract boolean apply(Object fieldValue);
@@ -1560,7 +1537,7 @@ public abstract class JSONPath {
             if (object instanceof List) {
                 List list = (List) object;
                 JSONArray array = new JSONArray(list.size());
-                for (int i = 0; i < list.size(); i++) {
+                for (int i = 0, l = list.size(); i < l; i++) {
                     Object item = list.get(i);
                     if (apply(ctx, item)) {
                         array.add(item);
@@ -1574,8 +1551,7 @@ public abstract class JSONPath {
             if (object instanceof Object[]) {
                 Object[] list = (Object[]) object;
                 JSONArray array = new JSONArray(list.length);
-                for (int i = 0; i < list.length; i++) {
-                    Object item = list[i];
+                for (Object item : list) {
                     if (apply(ctx, item)) {
                         array.add(item);
                     }
@@ -1603,8 +1579,8 @@ public abstract class JSONPath {
                     return false;
                 }
 
-                if (funtion != null) {
-                    fieldValue = funtion.apply(fieldValue);
+                if (function != null) {
+                    fieldValue = function.apply(fieldValue);
                 }
 
                 return apply(fieldValue);
@@ -1615,15 +1591,15 @@ public abstract class JSONPath {
                 FieldWriter fieldWriter = objectWriter.getFieldWriter(fieldNameNameHash);
                 Object fieldValue = fieldWriter.getFieldValue(object);
 
-                if (funtion != null) {
-                    fieldValue = funtion.apply(fieldValue);
+                if (function != null) {
+                    fieldValue = function.apply(fieldValue);
                 }
 
                 return apply(fieldValue);
             }
 
-            if (funtion != null) {
-                Object fieldValue = funtion.apply(object);
+            if (function != null) {
+                Object fieldValue = function.apply(object);
                 return apply(fieldValue);
             }
 
@@ -1793,7 +1769,7 @@ public abstract class JSONPath {
             JSONArray array = new JSONArray();
             if (object instanceof List) {
                 List list = (List) object;
-                for (int i = 0; i < list.size(); i++) {
+                for (int i = 0, l = list.size(); i < l; i++) {
                     Object item = list.get(i);
                     if (item instanceof Map) {
                         if (((Map) item).containsKey(name)) {
@@ -1897,8 +1873,8 @@ public abstract class JSONPath {
                     boolean isNum = IOUtils.isNumber(this.name);
                     Long longValue = null;
 
-                    for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
-                        Map.Entry entry = (Map.Entry) it.next();
+                    for (Object o : map.entrySet()) {
+                        Map.Entry entry = (Map.Entry) o;
                         Object entryKey = entry.getKey();
                         if (entryKey instanceof Enum && ((Enum<?>) entryKey).name().equals(this.name)) {
                             value = entry.getValue();
@@ -2031,10 +2007,7 @@ public abstract class JSONPath {
             if (jsonReader.isJSONB()) {
                 if (jsonReader.isObject()) {
                     jsonReader.nextIfObjectStart();
-                    for (;;) {
-                        if (jsonReader.nextIfObjectEnd()) {
-                            break;
-                        }
+                    while (!jsonReader.nextIfObjectEnd()) {
                         long nameHashCode = jsonReader.readFieldNameHashCode();
                         if (nameHashCode == 0) {
                             continue;
@@ -2057,15 +2030,11 @@ public abstract class JSONPath {
             }
 
             if (jsonReader.nextIfObjectStart()) {
-                _for:
-                for (; ; ) {
-                    if (jsonReader.nextIfObjectEnd()) {
-                        break;
-                    }
+                while (!jsonReader.nextIfObjectEnd()) {
 
                     long nameHashCode = jsonReader.readFieldNameHashCode();
-
                     boolean match = nameHashCode == this.nameHashCode;
+
                     char ch = jsonReader.ch;
                     if (!match && ch != '{' && ch != '[') {
                         jsonReader.skipValue();
@@ -2115,7 +2084,6 @@ public abstract class JSONPath {
         @Override
         public String extractScalar(JSONReader jsonReader) {
             if (jsonReader.nextIfObjectStart()) {
-                _for:
                 for (; ; ) {
                     if (jsonReader.ch == '}') {
                         jsonReader.next();
@@ -2362,12 +2330,10 @@ public abstract class JSONPath {
             }
 
             consumer.acceptNull();
-            return;
         }
 
         public void extract(JSONReader jsonReader, ValueConsumer consumer) {
             if (jsonReader.nextIfObjectStart()) {
-                _for:
                 for (; ; ) {
                     if (jsonReader.ch == '}') {
                         consumer.acceptNull();
@@ -2431,7 +2397,6 @@ public abstract class JSONPath {
             }
 
             consumer.acceptNull();
-            return;
         }
     }
 
@@ -2512,12 +2477,13 @@ public abstract class JSONPath {
             this.segments = segments;
 
             boolean ref = true;
-            for (int i = 0; i < segments.size(); i++) {
+            for (int i = 0, l = segments.size(); i < l; i++) {
                 Segment segment = segments.get(i);
-                if (!(segment instanceof IndexSegment) && !(segment instanceof NameSegment)) {
-                    ref = false;
-                    break;
+                if (segment instanceof IndexSegment || segment instanceof NameSegment) {
+                    continue;
                 }
+                ref = false;
+                break;
             }
             this.ref = ref;
         }
@@ -2654,34 +2620,48 @@ public abstract class JSONPath {
                 return null;
             }
 
+            int size = segments.size();
+            if (size == 0) {
+                return null;
+            }
+
             Context ctx = null;
-            for (int i = 0; i < segments.size(); i++) {
+            for (int i = 0; i < size; i++) {
                 Segment segment = segments.get(i);
                 Segment nextSegment = null;
+
                 int nextIndex = i + 1;
-                if (nextIndex < segments.size()) {
+                if (nextIndex < size) {
                     nextSegment = segments.get(nextIndex);
                 }
 
                 ctx = new Context(this, ctx, segment, nextSegment);
                 segment.accept(jsonReader, ctx);
             }
+
             return ctx.value;
         }
 
         public String extractScalar(JSONReader jsonReader) {
+            int size = segments.size();
+            if (size == 0) {
+                return null;
+            }
+
             Context ctx = null;
-            for (int i = 0; i < segments.size(); i++) {
+            for (int i = 0; i < size; i++) {
                 Segment segment = segments.get(i);
                 Segment nextSegment = null;
+
                 int nextIndex = i + 1;
-                if (nextIndex < segments.size()) {
+                if (nextIndex < size) {
                     nextSegment = segments.get(nextIndex);
                 }
-                ctx = new Context(this, ctx, segment, nextSegment);
 
+                ctx = new Context(this, ctx, segment, nextSegment);
                 segment.accept(jsonReader, ctx);
             }
+
             return JSON.toJSONString(ctx.value);
         }
     }
@@ -2737,10 +2717,7 @@ public abstract class JSONPath {
             if (jsonReader.isObject()) {
                 jsonReader.next();
                 JSONArray array = new JSONArray();
-                for (;;) {
-                    if (jsonReader.nextIfObjectEnd()) {
-                        break;
-                    }
+                while (!jsonReader.nextIfObjectEnd()) {
                     String fieldName = jsonReader.readFieldName();
                     array.add(fieldName);
                     jsonReader.skipValue();
@@ -2825,7 +2802,7 @@ public abstract class JSONPath {
 
             if (value instanceof List) {
                 List list = (List) value;
-                for (int i = 0; i < list.size(); i++) {
+                for (int i = 0, l = list.size(); i < l; i++) {
                     Object item = list.get(i);
                     if (item instanceof Double) {
                         list.set(i, Math.floor((Double) item));
@@ -2908,9 +2885,7 @@ public abstract class JSONPath {
 
             Object min = null;
             if (value instanceof Collection) {
-                Iterator iterator = ((Collection) value).iterator();
-                while (iterator.hasNext()) {
-                    Object next = iterator.next();
+                for (Object next : (Collection) value) {
                     if (next == null) {
                         continue;
                     }
@@ -2923,8 +2898,7 @@ public abstract class JSONPath {
                 }
             } else if (value instanceof Object[]) {
                 Object[] array = (Object[]) value;
-                for (int i = 0; i < array.length; i++) {
-                    Object item = array[i];
+                for (Object item : array) {
                     if (item == null) {
                         continue;
                     }
@@ -2964,9 +2938,7 @@ public abstract class JSONPath {
 
             Object max = null;
             if (value instanceof Collection) {
-                Iterator iterator = ((Collection) value).iterator();
-                while (iterator.hasNext()) {
-                    Object next = iterator.next();
+                for (Object next : (Collection) value) {
                     if (next == null) {
                         continue;
                     }
@@ -2979,8 +2951,7 @@ public abstract class JSONPath {
                 }
             } else if (value instanceof Object[]) {
                 Object[] array = (Object[]) value;
-                for (int i = 0; i < array.length; i++) {
-                    Object item = array[i];
+                for (Object item : array) {
                     if (item == null) {
                         continue;
                     }
@@ -3032,9 +3003,7 @@ public abstract class JSONPath {
             }
 
             if (object instanceof Collection) {
-                for (Iterator it = ((Collection) object).iterator(); it.hasNext();) {
-                    Object item = it.next();
-
+                for (Object item : (Collection) object) {
                     if (item == null) {
                         continue;
                     }
@@ -3116,8 +3085,8 @@ public abstract class JSONPath {
                     boolean isNum = IOUtils.isNumber(this.name);
                     Long longValue = null;
 
-                    for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
-                        Map.Entry entry = (Map.Entry) it.next();
+                    for (Object o : map.entrySet()) {
+                        Map.Entry entry = (Map.Entry) o;
                         Object entryKey = entry.getKey();
                         if (entryKey instanceof Enum && ((Enum<?>) entryKey).name().equals(this.name)) {
                             value = entry.getValue();
@@ -3142,8 +3111,7 @@ public abstract class JSONPath {
                 Collection<?> collection = (Collection<?>) object;
                 int size = collection.size();
                 Collection values = null; // = new JSONArray(collection.size());
-                for (Iterator it = collection.iterator(); it.hasNext();) {
-                    Object item = it.next();
+                for (Object item : collection) {
                     if (item instanceof Map) {
                         Object val = ((Map<?, ?>) item).get(name);
                         if (val instanceof Collection) {
@@ -3297,8 +3265,7 @@ public abstract class JSONPath {
                                     }
                                 }
 
-                                values.add(
-                                        jsonReader.readAny());
+                                values.add(jsonReader.readAny());
                             }
                         } else {
                             jsonReader.skipValue();
@@ -3388,7 +3355,7 @@ public abstract class JSONPath {
             } else if (jsonReader.ch == '[' && ctx.parent != null && ctx.parent.current instanceof AllSegment) {
                 jsonReader.next();
                 List values = new JSONArray();
-                for (int i = 0; jsonReader.ch != JSONReader.EOI; ++i) {
+                while (jsonReader.ch != JSONReader.EOI) {
                     if (jsonReader.ch == ']') {
                         jsonReader.next();
                         break;
@@ -3471,10 +3438,9 @@ public abstract class JSONPath {
                 }
 
                 ctx.value = values;
+            }/* else if (jsonReader.ch == JSONReader.EOI) {
                 return;
-            } else if (jsonReader.ch == JSONReader.EOI) {
-                return;
-            }
+            }*/
         }
 
         @Override
@@ -3611,8 +3577,7 @@ public abstract class JSONPath {
 
             public void accept(Object object) {
                 if (object instanceof Map) {
-                    for (Iterator<Map.Entry> it = ((Map) object).entrySet().iterator(); it.hasNext();) {
-                        Map.Entry entry = it.next();
+                    for (Map.Entry entry : (Iterable<Map.Entry>) ((Map) object).entrySet()) {
                         if (name.equals(entry.getKey())) {
                             entry.setValue(value);
                             context.eval = true;
@@ -3621,7 +3586,6 @@ public abstract class JSONPath {
                             if (entryValue != null) {
                                 accept(entryValue);
                             }
-
                         }
                     }
                 } else if (object instanceof Collection) {
@@ -3661,11 +3625,7 @@ public abstract class JSONPath {
         public void accept(JSONReader jsonReader, Context ctx, List<Object> values) {
             if (jsonReader.isJSONB()) {
                 if (jsonReader.nextIfMatch(BC_OBJECT)) {
-                    for (int i = 0; ; i++) {
-                        if (jsonReader.nextIfMatch(BC_OBJECT_END)) {
-                            break;
-                        }
-
+                    while (!jsonReader.nextIfMatch(BC_OBJECT_END)) {
                         long nameHashCode = jsonReader.readFieldNameHashCode();
                         if (nameHashCode == 0) {
                             continue;
@@ -3676,10 +3636,8 @@ public abstract class JSONPath {
                             if (jsonReader.isArray()) {
                                 values.addAll(jsonReader.readArray());
                             } else {
-                                values.add(
-                                        jsonReader.readAny());
+                                values.add(jsonReader.readAny());
                             }
-                            continue;
                         } else if (jsonReader.isObject() || jsonReader.isArray()) {
                             accept(jsonReader, ctx, values);
                         } else {
@@ -3913,9 +3871,10 @@ public abstract class JSONPath {
                 }
 
                 if (value == null) {
-                    if (map.size() == 1 || map instanceof LinkedHashMap || map instanceof SortedMap) {
-                        Iterator it = map.entrySet().iterator();
-                        for (int i = 0; i <= index && i < map.size() && it.hasNext(); ++i) {
+                    int size = map.size();
+                    Iterator it = map.entrySet().iterator();
+                    if (size == 1 || map instanceof LinkedHashMap || map instanceof SortedMap) {
+                        for (int i = 0; i <= index && i < size && it.hasNext(); ++i) {
                             Map.Entry entry = (Map.Entry) it.next();
                             Object entryKey = entry.getKey();
                             Object entryValue = entry.getValue();
@@ -3931,7 +3890,6 @@ public abstract class JSONPath {
                             }
                         }
                     } else {
-                        Iterator it = map.entrySet().iterator();
                         for (int i = 0; i <= index && i < map.size() && it.hasNext(); ++i) {
                             Map.Entry entry = (Map.Entry) it.next();
                             Object entryKey = entry.getKey();
@@ -4291,7 +4249,6 @@ public abstract class JSONPath {
 
             JSONArray array = new JSONArray();
             jsonReader.next();
-            _for:
             for (int i = 0; jsonReader.ch != JSONReader.EOI; ++i) {
                 if (jsonReader.ch == ']') {
                     jsonReader.next();
@@ -4380,9 +4337,9 @@ public abstract class JSONPath {
 
             if (object instanceof java.util.List) {
                 List list = (List) object;
-                for (int i = 0; i < list.size(); i++) {
+                for (int i = 0, l = list.size(); i < l; i++) {
                     boolean match = Arrays.binarySearch(indexes, i) >= 0
-                            || Arrays.binarySearch(indexes, i - list.size()) >= 0;
+                            || Arrays.binarySearch(indexes, i - l) >= 0;
                     if (match) {
                         result.add(list.get(i));
                     }
@@ -4435,7 +4392,6 @@ public abstract class JSONPath {
             JSONArray array = new JSONArray();
 
             jsonReader.next();
-            _for:
             for (int i = 0; jsonReader.ch != JSONReader.EOI; ++i) {
                 if (jsonReader.ch == ']') {
                     jsonReader.next();
@@ -4604,11 +4560,7 @@ public abstract class JSONPath {
 
             if (jsonReader.isJSONB()) {
                 if (jsonReader.nextIfMatch(BC_OBJECT)) {
-                    for (int i = 0; ; i++) {
-                        if (jsonReader.nextIfMatch(BC_OBJECT_END)) {
-                            break;
-                        }
-
+                    while (!jsonReader.nextIfMatch(BC_OBJECT_END)) {
                         if (jsonReader.skipName()) {
                             Object val = jsonReader.readAny();
 
@@ -4695,11 +4647,14 @@ public abstract class JSONPath {
                 }
                 ctx.value = values;
                 return;
-            } else if (jsonReader.ch == '[' && ctx.next != null) {
-                // skip
-            } else {
-                throw new JSONException("TODO");
             }
+
+            if (jsonReader.ch == '[' && ctx.next != null) {
+                // skip
+                return;
+            }
+
+            throw new JSONException("TODO");
         }
     }
 }
