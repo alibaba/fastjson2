@@ -747,7 +747,7 @@ public abstract class JSONWriter implements Closeable {
         write0('"');
         boolean special = false;
         for (int i = 0; i < str.length; ++i) {
-            if (str[i] == '"') {
+            if (str[i] == '\\' || str[i] == '"') {
                 special = true;
                 break;
             }
@@ -758,7 +758,7 @@ public abstract class JSONWriter implements Closeable {
         } else {
             for (int i = 0; i < str.length; ++i) {
                 char ch = str[i];
-                if (ch == '"') {
+                if (ch == '\\' || ch == '"') {
                     write0('\\');
                 }
                 write0(ch);
