@@ -45,6 +45,12 @@ public interface JSON {
         return (T) objectReader.readObject(reader, 0);
     }
 
+    static <T> T parseObject(String str, TypeReference typeReference) {
+        JSONReader reader = JSONReader.of(str);
+        ObjectReader objectReader = reader.context.provider.getObjectReader(typeReference.getType());
+        return (T) objectReader.readObject(reader, 0);
+    }
+
     static <T> T parseObject(String str, Class<T> objectClass, JSONReader.Feature... features) {
         JSONReader reader = JSONReader.of(str);
 
