@@ -106,8 +106,7 @@ public abstract class JSONReader implements Closeable {
         }
 
         Object previous = null;
-        for (int i = 0; i < resolveTasks.size(); i++) {
-            ResolveTask resolveTask = resolveTasks.get(i);
+        for (ResolveTask resolveTask : resolveTasks) {
             JSONPath path = resolveTask.reference;
             FieldReader fieldReader = resolveTask.fieldReader;
 
@@ -129,64 +128,68 @@ public abstract class JSONReader implements Closeable {
                 previous = fieldValue;
             }
 
+            Object resolvedName= resolveTask.name;
             Object resolvedObject = resolveTask.object;
-            if (resolvedObject instanceof Map && resolveTask.name != null) {
-                Map map = (Map) resolvedObject;
-                if (map instanceof LinkedHashMap) {
-                    if (resolveTask.name instanceof ReferenceKey) {
-                        Object[] keys = new Object[map.size()];
-                        Object[] values = new Object[map.size()];
 
-                        int index = 0;
-                        for (Object o : map.entrySet()) {
-                            Map.Entry entry = (Map.Entry) o;
-                            Object entryKey = entry.getKey();
-                            if (resolveTask.name == entryKey) {
-                                keys[index] = fieldValue;
-                            } else {
-                                keys[index] = entryKey;
+            if (resolvedName != null) {
+                if (resolvedObject instanceof Map) {
+                    Map map = (Map) resolvedObject;
+                    if (resolvedName instanceof ReferenceKey) {
+                        if (map instanceof LinkedHashMap) {
+                            int size = map.size();
+                            if (size == 0) {
+                                continue;
                             }
-                            values[index++] = entry.getValue();
-                        }
 
-                        map.clear();;
+                            Object[] keys = new Object[size];
+                            Object[] values = new Object[size];
 
-                        for (int j = 0; j < keys.length; j++) {
-                            map.put(keys[j], values[j]);
+                            int index = 0;
+                            for (Object o : map.entrySet()) {
+                                Map.Entry entry = (Map.Entry) o;
+                                Object entryKey = entry.getKey();
+                                if (resolvedName == entryKey) {
+                                    keys[index] = fieldValue;
+                                } else {
+                                    keys[index] = entryKey;
+                                }
+                                values[index++] = entry.getValue();
+                            }
+                            map.clear();
+
+                            for (int j = 0; j < keys.length; j++) {
+                                map.put(keys[j], values[j]);
+                            }
+                        } else {
+                            map.put(fieldValue, map.remove(resolvedName));
                         }
                     } else {
-                        map.put(resolveTask.name, fieldValue);
+                        map.put(resolvedName, fieldValue);
                     }
                     continue;
                 }
 
-                if (resolveTask.name instanceof ReferenceKey) {
-                    Object value = map.remove(resolveTask.name);
-                    map.put(fieldValue, value);
-                } else {
-                    map.put(resolveTask.name, fieldValue);
+                if (resolvedName instanceof Integer) {
+                    if (resolvedObject instanceof List) {
+                        int index = (Integer) resolvedName;
+                        List list = (List) resolvedObject;
+                        list.set(index, fieldValue);
+                        continue;
+                    }
+
+                    if (resolvedObject instanceof Object[]) {
+                        int index = (Integer) resolvedName;
+                        Object[] array = (Object[]) resolvedObject;
+                        array[index] = fieldValue;
+                        continue;
+                    }
+
+                    if (resolvedObject instanceof Collection) {
+                        Collection collection = (Collection) resolvedObject;
+                        collection.add(fieldValue);
+                        continue;
+                    }
                 }
-                continue;
-            }
-
-            if (resolvedObject instanceof List && resolveTask.name instanceof Integer) {
-                int index = (Integer) resolveTask.name;
-                List list = (List) resolveTask.object;
-                list.set(index, fieldValue);
-                continue;
-            }
-
-            if (resolvedObject instanceof Object[] && resolveTask.name instanceof Integer) {
-                int index = (Integer) resolveTask.name;
-                Object[] array = (Object[]) resolveTask.object;
-                array[index] = fieldValue;
-                continue;
-            }
-
-            if (resolvedObject instanceof Collection && resolveTask.name instanceof Integer) {
-                Collection collection = (Collection) resolveTask.object;
-                collection.add(fieldValue);
-                continue;
             }
 
             fieldReader.accept(resolvedObject, fieldValue);
@@ -226,7 +229,7 @@ public abstract class JSONReader implements Closeable {
         return null;
     }
 
-    static final char char1(int c) {
+    static char char1(int c) {
         switch (c) {
             case '0':
                 return '\0';
@@ -270,13 +273,13 @@ public abstract class JSONReader implements Closeable {
         }
     }
 
-    static final char char2(int c1, int c2) {
+    static char char2(int c1, int c2) {
         return (char) (DIGITS2[c1] * 0x10
                 + DIGITS2[c2]
         );
     }
 
-    static final char char4(int c1, int c2, int c3, int c4) {
+    static char char4(int c1, int c2, int c3, int c4) {
         return (char) (DIGITS2[c1] * 0x1000
                 + DIGITS2[c2] * 0x100
                 + DIGITS2[c3] * 0x10
@@ -467,7 +470,7 @@ public abstract class JSONReader implements Closeable {
     public int getInt32Value() {
         switch (valueType) {
             case JSON_TYPE_INT:
-                if (mag1 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 :mag3;
                 }
                 return getNumber().intValue();
@@ -520,7 +523,7 @@ public abstract class JSONReader implements Closeable {
     protected Long getInt64() {
         switch (valueType) {
             case JSON_TYPE_INT:
-                if (mag1 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return Long.valueOf(negative ? -mag3 :mag3);
                 }
                 int[] mag;
@@ -1054,7 +1057,6 @@ public abstract class JSONReader implements Closeable {
             readNumber();
             return valueType == JSON_TYPE_INT
                     && mag1 == 0
-                    && mag1 == 0
                     && mag2 == 0
                     && mag3 == 1;
         } else if (ch == 'n') {
@@ -1176,7 +1178,7 @@ public abstract class JSONReader implements Closeable {
     public BigDecimal getBigDecimal() {
         switch (valueType) {
             case JSON_TYPE_INT: {
-                if (mag1 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return BigDecimal.valueOf(negative ? -mag3 :mag3);
                 }
                 int[] mag;
@@ -1229,7 +1231,7 @@ public abstract class JSONReader implements Closeable {
     public Number getNumber() {
         switch (valueType) {
             case JSON_TYPE_INT: {
-                if (mag1 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 :mag3;
                 }
                 int[] mag;
@@ -1977,8 +1979,8 @@ public abstract class JSONReader implements Closeable {
         }
 
         public void config(Feature... features) {
-            for (int i = 0; i < features.length; i++) {
-                this.features |= features[i].mask;
+            for (Feature feature : features) {
+                this.features |= feature.mask;
             }
         }
 

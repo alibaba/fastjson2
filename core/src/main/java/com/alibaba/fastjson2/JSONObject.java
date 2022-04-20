@@ -26,7 +26,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     static ObjectReader<JSONObject> objectReader;
 
     public JSONObject() {
-
+        super();
     }
 
     public JSONObject(int initialCapacity) {
@@ -45,6 +45,10 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     public JSONArray getJSONArray(String key) {
         Object value = get(key);
 
+        if (value instanceof JSONArray){
+            return (JSONArray) value;
+        }
+
         if (value instanceof String) {
             String str = (String) value;
 
@@ -61,10 +65,10 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         }
 
         if (value instanceof Collection) {
-            return new JSONArray((Collection) value);
+            return new JSONArray((Collection<?>) value);
         }
 
-        return (JSONArray) value;
+        return null;
     }
 
     public Integer getInteger(String key) {
@@ -213,6 +217,11 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
 
     public JSONObject getJSONObject(String key) {
         Object value = get(key);
+
+        if (value instanceof JSONObject) {
+            return (JSONObject) value;
+        }
+
         if (value instanceof String) {
             String str = (String) value;
             if (str.isEmpty()
@@ -226,7 +235,12 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             }
             return objectReader.readObject(reader, 0);
         }
-        return (JSONObject) value;
+
+        if (value instanceof Map) {
+            return new JSONObject((Map) value);
+        }
+
+        return null;
     }
 
     public <T> T toJavaObject(Class<T> type) {
@@ -547,7 +561,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         }
 
         if (value instanceof Boolean) {
-            return ((Boolean) value).booleanValue();
+            return (Boolean) value;
         }
 
         if (value instanceof Number) {
