@@ -283,6 +283,26 @@ public interface JSON {
         }
     }
 
+    static byte[] toJSONBytes(Object object, Filter[] filters, JSONWriter.Feature... features) {
+        try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.setRootObject(object);
+
+                if (filters != null && filters.length != 0) {
+                    JSONWriter.Context context = writer.getContext();
+                    context.configFilter(filters);
+                }
+
+                Class<?> valueClass = object.getClass();
+                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+            return writer.getBytes();
+        }
+    }
+
     static int writeTo(
             OutputStream out
             , Object object
