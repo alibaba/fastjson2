@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.reader.ObjectReaderImplList;
 import com.alibaba.fastjson2.reader.ObjectReaderImplListStr;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
-import com.alibaba.fastjson2.reader.ObjectReaderImplList;
 import com.alibaba.fastjson2_vo.IntField1;
 import org.junit.jupiter.api.Test;
 
@@ -77,6 +77,17 @@ public class JSONTest {
     }
 
     @Test
+    public void test_toJSONBytes_1() {
+
+        assertEquals("null",
+                new String(JSON.toJSONBytes(null, new Filter[0], JSONWriter.Feature.WriteNulls)));
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        JSON.writeTo(out, null, JSONWriter.Feature.WriteNulls);
+        assertEquals("null", new String(out.toByteArray()));
+    }
+
+    @Test
     public void test_object_empty() {
         Map object = (Map) JSON.parse("{}");
         assertTrue(object.isEmpty());
@@ -91,7 +102,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_empty() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Object.class,
                 Cloneable.class,
                 Closeable.class,
@@ -118,7 +129,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_map_str_str() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Map.class,
                 AbstractMap.class,
                 ConcurrentMap.class,
@@ -141,7 +152,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_map_str_long() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Map.class,
                 AbstractMap.class,
                 ConcurrentMap.class,
@@ -164,7 +175,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_list() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Object.class,
                 Iterable.class,
                 Collection.class,
@@ -184,7 +195,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_list_parm_emtpy() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Object.class,
                 Iterable.class,
                 Collection.class,
@@ -205,7 +216,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_list_str() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Iterable.class,
                 Collection.class,
                 List.class,
@@ -225,7 +236,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_list_long() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Iterable.class,
                 Collection.class,
                 List.class,
@@ -245,7 +256,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_queue() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Queue.class,
                 Deque.class,
                 AbstractSequentialList.class,
@@ -263,7 +274,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_queue_str() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Queue.class,
                 Deque.class,
                 AbstractSequentialList.class,
@@ -282,7 +293,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_queue_long() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Queue.class,
                 Deque.class,
                 AbstractSequentialList.class,
@@ -301,7 +312,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_set() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Set.class,
                 NavigableSet.class,
                 SortedSet.class,
@@ -320,7 +331,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_set_str() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Set.class,
                 NavigableSet.class,
                 SortedSet.class,
@@ -340,7 +351,7 @@ public class JSONTest {
 
     @Test
     public void test_parse_object_typed_set_long() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Set.class,
                 NavigableSet.class,
                 SortedSet.class,
@@ -439,7 +450,7 @@ public class JSONTest {
 
     @Test
     public void test_num_int() {
-        int[] numbers = new int[] {
+        int[] numbers = new int[]{
                 1
                 , 10
                 , 100
@@ -459,7 +470,7 @@ public class JSONTest {
 
     @Test
     public void test_num_long() {
-        long[] numbers = new long[] {
+        long[] numbers = new long[]{
                 10000000000L
                 , 100000000000L
                 , 1000000000000L
@@ -483,19 +494,23 @@ public class JSONTest {
 
         assertEquals(123
                 , ((List) JSON.parseObject("\"123\""
-                        , new TypeReference<List<Integer>>(){}.getType()))
+                        , new TypeReference<List<Integer>>() {
+                        }.getType()))
                         .get(0));
         assertEquals(123
                 , ((List) JSON.parseObject("\"123\""
-                        , new TypeReference<LinkedList<Integer>>(){}.getType()))
+                        , new TypeReference<LinkedList<Integer>>() {
+                        }.getType()))
                         .get(0));
         assertEquals(123
                 , ((List) JSON.parseObject("\"123\""
-                        , new TypeReference<ArrayList<Integer>>(){}.getType()))
+                        , new TypeReference<ArrayList<Integer>>() {
+                        }.getType()))
                         .get(0));
         assertEquals(123
                 , ((List) JSON.parseObject("\"123\""
-                        , new TypeReference<AbstractList<Integer>>(){}.getType()))
+                        , new TypeReference<AbstractList<Integer>>() {
+                        }.getType()))
                         .get(0));
 
         new ObjectReaderImplList(MyList.class, MyList.class, MyList.class, Integer.class, null).createInstance();
@@ -510,19 +525,23 @@ public class JSONTest {
 
         assertEquals("123"
                 , ((List) JSON.parseObject("[\"123\"]"
-                        , new TypeReference<List<String>>(){}.getType()))
+                        , new TypeReference<List<String>>() {
+                        }.getType()))
                         .get(0));
         assertEquals("123"
                 , ((List) JSON.parseObject("[\"123\"]"
-                        , new TypeReference<LinkedList<String>>(){}.getType()))
+                        , new TypeReference<LinkedList<String>>() {
+                        }.getType()))
                         .get(0));
         assertEquals("123"
                 , ((List) JSON.parseObject("[\"123\"]"
-                        , new TypeReference<ArrayList<String>>(){}.getType()))
+                        , new TypeReference<ArrayList<String>>() {
+                        }.getType()))
                         .get(0));
         assertEquals("123"
                 , ((List) JSON.parseObject("[\"123\"]"
-                        , new TypeReference<AbstractList<String>>(){}.getType()))
+                        , new TypeReference<AbstractList<String>>() {
+                        }.getType()))
                         .get(0));
 
         new ObjectReaderImplListStr(MyList.class, MyList.class).createInstance();
