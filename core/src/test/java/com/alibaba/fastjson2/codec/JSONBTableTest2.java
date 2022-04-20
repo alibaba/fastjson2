@@ -136,7 +136,7 @@ public class JSONBTableTest2 {
     }
 
     public static class C {
-        public ArrayList<Item> list1;
+        public JSONArray list1;
         public com.alibaba.fastjson.JSONArray list2;
     }
 

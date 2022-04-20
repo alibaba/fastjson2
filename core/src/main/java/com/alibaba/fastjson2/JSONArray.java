@@ -12,7 +12,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 
-public class JSONArray extends ArrayList {
+public class JSONArray extends ArrayList<Object> {
     private static final long serialVersionUID = 1L;
 
     static ObjectWriter<JSONArray> arrayWriter;
@@ -20,14 +20,14 @@ public class JSONArray extends ArrayList {
     static ObjectReader<JSONObject> objectReader;
 
     public JSONArray() {
-
+        super();
     }
 
     public JSONArray(int initialCapacity) {
         super(initialCapacity);
     }
 
-    public JSONArray(Collection collection) {
+    public JSONArray(Collection<?> collection) {
         super(collection);
     }
 
@@ -46,6 +46,11 @@ public class JSONArray extends ArrayList {
 
     public JSONArray getJSONArray(int index) {
         Object value = get(index);
+
+        if (value instanceof JSONArray){
+            return (JSONArray) value;
+        }
+
         if (value instanceof String) {
             String str = (String) value;
             if (str.isEmpty()
@@ -59,14 +64,19 @@ public class JSONArray extends ArrayList {
             }
             return arrayReader.readObject(reader, 0);
         }
-        return (JSONArray) value;
+
+        if (value instanceof Collection) {
+            return new JSONArray((Collection<?>) value);
+        }
+
+        return null;
     }
 
     public JSONObject getJSONObject(int index) {
         Object value = get(index);
 
-        if (value == null) {
-            return null;
+        if (value instanceof JSONObject) {
+            return (JSONObject) value;
         }
 
         if (value instanceof String) {
@@ -83,15 +93,11 @@ public class JSONArray extends ArrayList {
             return objectReader.readObject(reader, 0);
         }
 
-        if (value instanceof JSONObject) {
-            return (JSONObject) value;
-        }
-
         if (value instanceof Map) {
             return new JSONObject((Map) value);
         }
 
-        return (JSONObject) value;
+        return null;
     }
 
     public <T> T getObject(int index, Type type) {
@@ -450,7 +456,7 @@ public class JSONArray extends ArrayList {
         }
 
         if (value instanceof Boolean) {
-            return ((Boolean) value).booleanValue();
+            return (Boolean) value;
         }
 
         if (value instanceof Number) {
