@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static junit.framework.TestCase.*;
 
@@ -35,7 +36,7 @@ public class JSONBTableTest2 {
     @Test
     public void test_c() {
         C c = new C();
-        c.list1 = new JSONArray();
+        c.list1 = new ArrayList();
         c.list2 = new com.alibaba.fastjson.JSONArray();
 
         c.list1.add(Item.of(201));
@@ -55,7 +56,7 @@ public class JSONBTableTest2 {
     @Test
     public void test_c_wrteClassName() {
         C c = new C();
-        c.list1 = new JSONArray();
+        c.list1 = new ArrayList<>();
         c.list2 = new com.alibaba.fastjson.JSONArray();
 
         c.list1.add(Item.of(201));
