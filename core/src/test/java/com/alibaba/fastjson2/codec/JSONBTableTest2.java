@@ -36,7 +36,7 @@ public class JSONBTableTest2 {
     @Test
     public void test_c() {
         C c = new C();
-        c.list1 = new ArrayList();
+        c.list1 = new ArrayList<>();
         c.list2 = new com.alibaba.fastjson.JSONArray();
 
         c.list1.add(Item.of(201));
@@ -79,7 +79,7 @@ public class JSONBTableTest2 {
     @Test
     public void test_b() {
         B b = new B();
-        b.list2 = new com.alibaba.fastjson.JSONArray();
+        b.list2 = new JSONArray();
         b.list2.add(Item.of(201));
         b.list2.add(Item.of(201));
 
@@ -92,7 +92,7 @@ public class JSONBTableTest2 {
     @Test
     public void test_b_writeClassName() {
         B b = new B();
-        b.list2 = new com.alibaba.fastjson.JSONArray();
+        b.list2 = new JSONArray();
         b.list2.add(Item.of(201));
         b.list2.add(Item.of(201));
 
@@ -133,11 +133,11 @@ public class JSONBTableTest2 {
     }
 
     public static class B {
-        public com.alibaba.fastjson.JSONArray list2;
+        public JSONArray list2;
     }
 
     public static class C {
-        public JSONArray list1;
+        public ArrayList<Item> list1;
         public com.alibaba.fastjson.JSONArray list2;
     }
 
