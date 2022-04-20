@@ -128,12 +128,13 @@ public abstract class JSONReader implements Closeable {
                 previous = fieldValue;
             }
 
+            Object resolvedName= resolveTask.name;
             Object resolvedObject = resolveTask.object;
 
-            if (resolveTask.name != null) {
+            if (resolvedName != null) {
                 if (resolvedObject instanceof Map) {
                     Map map = (Map) resolvedObject;
-                    if (resolveTask.name instanceof ReferenceKey) {
+                    if (resolvedName instanceof ReferenceKey) {
                         if (map instanceof LinkedHashMap) {
                             int size = map.size();
                             if (size == 0) {
@@ -147,7 +148,7 @@ public abstract class JSONReader implements Closeable {
                             for (Object o : map.entrySet()) {
                                 Map.Entry entry = (Map.Entry) o;
                                 Object entryKey = entry.getKey();
-                                if (resolveTask.name == entryKey) {
+                                if (resolvedName == entryKey) {
                                     keys[index] = fieldValue;
                                 } else {
                                     keys[index] = entryKey;
@@ -160,32 +161,31 @@ public abstract class JSONReader implements Closeable {
                                 map.put(keys[j], values[j]);
                             }
                         } else {
-                            Object value = map.remove(resolveTask.name);
-                            map.put(fieldValue, value);
+                            map.put(fieldValue, map.remove(resolvedName));
                         }
                     } else {
-                        map.put(resolveTask.name, fieldValue);
+                        map.put(resolvedName, fieldValue);
                     }
                     continue;
                 }
 
-                if (resolveTask.name instanceof Integer) {
+                if (resolvedName instanceof Integer) {
                     if (resolvedObject instanceof List) {
-                        int index = (Integer) resolveTask.name;
-                        List list = (List) resolveTask.object;
+                        int index = (Integer) resolvedName;
+                        List list = (List) resolvedObject;
                         list.set(index, fieldValue);
                         continue;
                     }
 
                     if (resolvedObject instanceof Object[]) {
-                        int index = (Integer) resolveTask.name;
-                        Object[] array = (Object[]) resolveTask.object;
+                        int index = (Integer) resolvedName;
+                        Object[] array = (Object[]) resolvedObject;
                         array[index] = fieldValue;
                         continue;
                     }
 
                     if (resolvedObject instanceof Collection) {
-                        Collection collection = (Collection) resolveTask.object;
+                        Collection collection = (Collection) resolvedObject;
                         collection.add(fieldValue);
                         continue;
                     }
@@ -229,7 +229,7 @@ public abstract class JSONReader implements Closeable {
         return null;
     }
 
-    static final char char1(int c) {
+    static char char1(int c) {
         switch (c) {
             case '0':
                 return '\0';
@@ -273,13 +273,13 @@ public abstract class JSONReader implements Closeable {
         }
     }
 
-    static final char char2(int c1, int c2) {
+    static char char2(int c1, int c2) {
         return (char) (DIGITS2[c1] * 0x10
                 + DIGITS2[c2]
         );
     }
 
-    static final char char4(int c1, int c2, int c3, int c4) {
+    static char char4(int c1, int c2, int c3, int c4) {
         return (char) (DIGITS2[c1] * 0x1000
                 + DIGITS2[c2] * 0x100
                 + DIGITS2[c3] * 0x10
@@ -470,7 +470,7 @@ public abstract class JSONReader implements Closeable {
     public int getInt32Value() {
         switch (valueType) {
             case JSON_TYPE_INT:
-                if (mag1 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 :mag3;
                 }
                 return getNumber().intValue();
@@ -523,7 +523,7 @@ public abstract class JSONReader implements Closeable {
     protected Long getInt64() {
         switch (valueType) {
             case JSON_TYPE_INT:
-                if (mag1 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return Long.valueOf(negative ? -mag3 :mag3);
                 }
                 int[] mag;
@@ -1057,7 +1057,6 @@ public abstract class JSONReader implements Closeable {
             readNumber();
             return valueType == JSON_TYPE_INT
                     && mag1 == 0
-                    && mag1 == 0
                     && mag2 == 0
                     && mag3 == 1;
         } else if (ch == 'n') {
@@ -1179,7 +1178,7 @@ public abstract class JSONReader implements Closeable {
     public BigDecimal getBigDecimal() {
         switch (valueType) {
             case JSON_TYPE_INT: {
-                if (mag1 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return BigDecimal.valueOf(negative ? -mag3 :mag3);
                 }
                 int[] mag;
@@ -1232,7 +1231,7 @@ public abstract class JSONReader implements Closeable {
     public Number getNumber() {
         switch (valueType) {
             case JSON_TYPE_INT: {
-                if (mag1 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 :mag3;
                 }
                 int[] mag;
@@ -1980,8 +1979,8 @@ public abstract class JSONReader implements Closeable {
         }
 
         public void config(Feature... features) {
-            for (int i = 0; i < features.length; i++) {
-                this.features |= features[i].mask;
+            for (Feature feature : features) {
+                this.features |= feature.mask;
             }
         }
 
