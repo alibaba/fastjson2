@@ -420,9 +420,18 @@ public class JSONTest {
     }
 
     @Test
-    public void test_writeTo() {
+    public void test_writeTo_0() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         JSON.writeTo(out, Collections.singleton(1));
+        assertEquals("[1]"
+                , new String(out.toByteArray()));
+    }
+
+    @Test
+    public void test_writeTo_1() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        JSON.writeTo(out,
+                Collections.singleton(1), new Filter[0], JSONWriter.Feature.WriteNulls);
         assertEquals("[1]"
                 , new String(out.toByteArray()));
     }
