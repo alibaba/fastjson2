@@ -55,6 +55,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link JSONArray} or null
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public JSONArray getJSONArray(int index) {
         Object value = get(index);
@@ -89,6 +90,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link JSONObject} or null
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public JSONObject getJSONObject(int index) {
         Object value = get(index);
@@ -123,6 +125,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link String} or null
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public String getString(int index) {
         Object value = get(index);
@@ -143,6 +146,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link Double} or null
+     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable double
+     * @throws JSONException             Unsupported type conversion to {@link Double}
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public Double getDouble(int index) {
         Object value = get(index);
@@ -169,7 +175,7 @@ public class JSONArray extends ArrayList<Object> {
             return Double.parseDouble(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Double");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Double");
     }
 
     /**
@@ -177,6 +183,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return double
+     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable double
+     * @throws JSONException             Unsupported type conversion to double value
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public double getDoubleValue(int index) {
         Object value = get(index);
@@ -199,7 +208,7 @@ public class JSONArray extends ArrayList<Object> {
             return Double.parseDouble(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to double");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to double value");
     }
 
     /**
@@ -207,6 +216,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link Float} or null
+     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable float
+     * @throws JSONException             Unsupported type conversion to {@link Float}
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public Float getFloat(int index) {
         Object value = get(index);
@@ -233,7 +245,7 @@ public class JSONArray extends ArrayList<Object> {
             return Float.parseFloat(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Float");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Float");
     }
 
     /**
@@ -241,6 +253,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return float
+     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable float
+     * @throws JSONException             Unsupported type conversion to float value
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public float getFloatValue(int index) {
         Object value = get(index);
@@ -263,7 +278,7 @@ public class JSONArray extends ArrayList<Object> {
             return Float.parseFloat(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to float");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to float value");
     }
 
     /**
@@ -271,6 +286,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link Long} or null
+     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable long
+     * @throws JSONException             Unsupported type conversion to {@link Long}
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public Long getLong(int index) {
         Object value = get(index);
@@ -294,7 +312,7 @@ public class JSONArray extends ArrayList<Object> {
             return Long.parseLong(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Long");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Long");
     }
 
     /**
@@ -302,6 +320,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return long
+     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable long
+     * @throws JSONException             Unsupported type conversion to long value
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public long getLongValue(int index) {
         Object value = get(index);
@@ -324,7 +345,7 @@ public class JSONArray extends ArrayList<Object> {
             return Long.parseLong(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to long");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to long value");
     }
 
     /**
@@ -332,6 +353,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link Integer} or null
+     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable int
+     * @throws JSONException             Unsupported type conversion to {@link Integer}
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public Integer getInteger(int index) {
         Object value = get(index);
@@ -355,7 +379,7 @@ public class JSONArray extends ArrayList<Object> {
             return Integer.parseInt(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Integer");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
     }
 
     /**
@@ -363,6 +387,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return int
+     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable int
+     * @throws JSONException             Unsupported type conversion to int value
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public int getIntValue(int index) {
         Object value = get(index);
@@ -385,7 +412,7 @@ public class JSONArray extends ArrayList<Object> {
             return Integer.parseInt(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to int");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to int value");
     }
 
     /**
@@ -393,6 +420,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link Short} or null
+     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable short
+     * @throws JSONException             Unsupported type conversion to {@link Short}
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public Short getShort(int index) {
         Object value = get(index);
@@ -419,7 +449,7 @@ public class JSONArray extends ArrayList<Object> {
             return Short.parseShort(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to short");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Short");
     }
 
     /**
@@ -427,6 +457,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return short
+     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable short
+     * @throws JSONException             Unsupported type conversion to short value
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public short getShortValue(int index) {
         Object value = get(index);
@@ -449,7 +482,7 @@ public class JSONArray extends ArrayList<Object> {
             return Short.parseShort(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to short");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to short value");
     }
 
     /**
@@ -457,6 +490,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link Byte} or null
+     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable byte
+     * @throws JSONException             Unsupported type conversion to {@link Byte}
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public Byte getByte(int index) {
         Object value = get(index);
@@ -479,7 +515,7 @@ public class JSONArray extends ArrayList<Object> {
             return Byte.parseByte(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to byte");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Byte");
     }
 
     /**
@@ -487,6 +523,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return byte
+     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable byte
+     * @throws JSONException             Unsupported type conversion to byte value
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public byte getByteValue(int index) {
         Object value = get(index);
@@ -509,7 +548,7 @@ public class JSONArray extends ArrayList<Object> {
             return Byte.parseByte(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to byte");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to byte value");
     }
 
     /**
@@ -517,6 +556,8 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link Boolean} or null
+     * @throws JSONException             Unsupported type conversion to {@link Boolean}
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public Boolean getBoolean(int index) {
         Object value = get(index);
@@ -543,7 +584,7 @@ public class JSONArray extends ArrayList<Object> {
             return str.equalsIgnoreCase("true") || str.equals("1");
         }
 
-        throw new JSONException("can not convert to boolean : " + value);
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Boolean");
     }
 
     /**
@@ -551,6 +592,8 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return boolean
+     * @throws JSONException             Unsupported type conversion to boolean value
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public boolean getBooleanValue(int index) {
         Object value = get(index);
@@ -572,7 +615,7 @@ public class JSONArray extends ArrayList<Object> {
             return str.equalsIgnoreCase("true") || str.equals("1");
         }
 
-        throw new JSONException("can not convert to boolean : " + value);
+        throw new JSONException("Can not cast '" + value.getClass() + "' to boolean value");
     }
 
     /**
@@ -580,6 +623,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link BigInteger} or null
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws JSONException             Unsupported type conversion to {@link BigInteger}
+     * @throws NumberFormatException     If the value of get is {@link String} and it is not a valid representation of {@link BigInteger}
      */
     public BigInteger getBigInteger(int index) {
         Object value = get(index);
@@ -611,7 +657,7 @@ public class JSONArray extends ArrayList<Object> {
             return new BigInteger(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Long");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
     }
 
     /**
@@ -619,6 +665,9 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link BigDecimal} or null
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws JSONException             Unsupported type conversion to {@link BigDecimal}
+     * @throws NumberFormatException     If the value of get is {@link String} and it is not a valid representation of {@link BigDecimal}
      */
     public BigDecimal getBigDecimal(int index) {
         Object value = get(index);
@@ -656,7 +705,7 @@ public class JSONArray extends ArrayList<Object> {
             return new BigDecimal(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Long");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
     }
 
     /**
@@ -664,6 +713,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link Date} or null
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public Date getDate(int index) {
         Object value = get(index);
@@ -692,6 +742,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link Instant} or null
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public Instant getInstant(int index) {
         Object value = get(index);
