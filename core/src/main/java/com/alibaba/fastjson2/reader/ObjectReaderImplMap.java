@@ -180,6 +180,14 @@ public final class ObjectReaderImplMap implements ObjectReader {
         }
     }
 
+    public Object createInstance(Map map) {
+        if (mapType.isInstance(map)) {
+            return map;
+        }
+
+        return map;
+    }
+
     public FieldReader getFieldReader(long hashCode) {
         return null;
     }
