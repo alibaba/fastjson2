@@ -51,7 +51,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link JSONArray}
      * Returns the {@link JSONArray} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -86,7 +85,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link JSONObject}
      * Returns the {@link JSONObject} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -121,7 +119,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link String}
      * Returns the {@link String} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -142,7 +139,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link Double}
      * Returns the {@link Double} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -177,8 +173,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 double 数据
-     * Returns a double at the specified location in this list.
+     * Returns a double value at the specified location in this list.
      *
      * @param index index of the element to return
      * @return double
@@ -208,7 +203,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link Float}
      * Returns the {@link Float} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -243,8 +237,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 float 数据
-     * Returns a float at the specified location in this list.
+     * Returns a float value at the specified location in this list.
      *
      * @param index index of the element to return
      * @return float
@@ -274,7 +267,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link Long}
      * Returns the {@link Long} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -306,8 +298,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 long 数据
-     * Returns a long at the specified location in this list.
+     * Returns a long value at the specified location in this list.
      *
      * @param index index of the element to return
      * @return long
@@ -337,7 +328,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link Integer}
      * Returns the {@link Integer} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -369,8 +359,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 int 数据
-     * Returns an int at the specified location in this list.
+     * Returns an int value at the specified location in this list.
      *
      * @param index index of the element to return
      * @return int
@@ -400,7 +389,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link Short}
      * Returns the {@link Short} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -435,8 +423,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 short 数据
-     * Returns a short at the specified location in this list.
+     * Returns a short value at the specified location in this list.
      *
      * @param index index of the element to return
      * @return short
@@ -466,7 +453,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link Byte}
      * Returns the {@link Byte} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -497,8 +483,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 byte 数据
-     * Returns a byte at the specified location in this list.
+     * Returns a byte value at the specified location in this list.
      *
      * @param index index of the element to return
      * @return byte
@@ -528,7 +513,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link Boolean}
      * Returns the {@link Boolean} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -563,8 +547,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 boolean 数据
-     * Returns a boolean at the specified location in this list.
+     * Returns a boolean value at the specified location in this list.
      *
      * @param index index of the element to return
      * @return boolean
@@ -593,7 +576,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link BigInteger}
      * Returns the {@link BigInteger} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -633,7 +615,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link BigDecimal}
      * Returns the {@link BigDecimal} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -679,7 +660,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link Date}
      * Returns the {@link Date} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -708,7 +688,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置的 {@link Instant}
      * Returns the {@link Instant} at the specified location in this list.
      *
      * @param index index of the element to return
@@ -737,7 +716,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 序列化为 JSON 字符串
      * Serialize to JSON {@link String}
      *
      * @return JSON {@link String}
@@ -754,7 +732,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 序列化为 JSON 字符串
      * Serialize to JSON {@link String}
      *
      * @return JSON {@link String}
@@ -764,7 +741,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 将此 {@link JSONArray} 转换为目标类型
      * Convert this {@link JSONArray} to the target type
      *
      * @param type converted goal type
@@ -776,9 +752,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 将此 {@link JSONArray} 的所有成员转换为目标列表
-     * 警告 {@link JSONArray} 的每个成员必须实现 Map 接口
-     * <p>
      * Convert all the members of this {@link JSONArray} into the target List,
      * warning that each member of the {@link JSONArray} must implement the Map interface
      *
@@ -810,7 +783,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 返回此列表中指定位置元素的 {@link Type} 转换器转换结果
      * Returns the result of the {@link Type} converter conversion of the element at the specified position in this list.
      *
      * @param index index of the element to return
@@ -852,7 +824,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 链式添加元素
      * Chained addition of elements
      *
      * <code>
@@ -867,7 +838,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 将多个元素打包成 {@link JSONArray}
      * Pack multiple elements as {@link JSONArray}
      *
      * @param items element set
@@ -877,7 +847,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 将单元素打包成 {@link JSONArray}
      * Pack an element as {@link JSONArray}
      *
      * @param item target element
@@ -889,7 +858,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 将两个元素打包成 {@link JSONArray}
      * Pack two elements as {@link JSONArray}
      *
      * @param first  first element
@@ -903,7 +871,6 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * 将三个元素打包成 {@link JSONArray}
      * Pack three elements as {@link JSONArray}
      *
      * @param first  first element

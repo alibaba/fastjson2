@@ -47,7 +47,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link JSONArray}
      * Returns the {@link JSONArray} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -82,7 +81,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link JSONObject}
      * Returns the {@link JSONObject} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -116,7 +114,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link String}
      * Returns the {@link String} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -137,7 +134,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link Double}
      * Returns the {@link Double} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -172,8 +168,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 double 数据
-     * Returns a double of the associated keys in this object.
+     * Returns a double value of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
      * @return double
@@ -203,7 +198,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link Float}
      * Returns the {@link Float} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -238,8 +232,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 float 数据
-     * Returns a float of the associated keys in this object.
+     * Returns a float value of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
      * @return float
@@ -269,7 +262,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link Long}
      * Returns the {@link Long} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -304,8 +296,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 long 数据
-     * Returns a long of the associated keys in this object.
+     * Returns a long value of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
      * @return long
@@ -335,7 +326,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link Integer}
      * Returns the {@link Integer} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -370,8 +360,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 int 数据
-     * Returns an int of the associated keys in this object.
+     * Returns an int value of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
      * @return int
@@ -401,7 +390,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link Short}
      * Returns the {@link Short} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -436,8 +424,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 short 数据
-     * Returns a short of the associated keys in this object.
+     * Returns a short value of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
      * @return short
@@ -467,7 +454,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link Byte}
      * Returns the {@link Byte} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -498,8 +484,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 byte 数据
-     * Returns a byte of the associated keys in this object.
+     * Returns a byte value of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
      * @return byte
@@ -529,7 +514,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link Boolean}
      * Returns the {@link Boolean} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -564,7 +548,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 boolean 数据
      * Returns a boolean value of the associated key in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -594,7 +577,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link BigInteger}
      * Returns the {@link BigInteger} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -634,7 +616,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link BigDecimal}
      * Returns the {@link BigDecimal} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -680,7 +661,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link BigInteger}
      * Returns the {@link BigInteger} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -709,7 +689,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联键的 {@link BigInteger}
      * Returns the {@link BigInteger} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
@@ -738,7 +717,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 序列化为 JSON 字符串
      * Serialize to JSON {@link String}
      *
      * @return JSON {@link String}
@@ -755,7 +733,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 序列化为 JSON 字符串
      * Serialize to JSON {@link String}
      *
      * @return JSON {@link String}
@@ -765,7 +742,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 将此 {@link JSONObject} 转换为目标类型
      * Convert this {@link JSONObject} to the target type
      *
      * @param type converted goal type
@@ -777,7 +753,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 将此 {@link JSONObject} 转换为目标类型
      * Convert this {@link JSONObject} to the target type
      *
      * @param type converted goal type
@@ -789,7 +764,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 返回此对象中关联值的 {@link Type} 转换器转换结果
      * Returns the result of the {@link Type} converter conversion of the associated value in this object.
      *
      * @param key  the key whose associated value is to be returned
@@ -940,7 +914,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 链式添加元素
      * Chained addition of elements
      *
      * <code>
@@ -956,7 +929,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * 将一对键值打包成 {@link JSONObject}
      * Pack a pair of key-values as {@link JSONObject}
      *
      * @param key   the key of the element
