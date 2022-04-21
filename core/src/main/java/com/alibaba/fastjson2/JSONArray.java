@@ -33,7 +33,6 @@ public class JSONArray extends ArrayList<Object> {
 
     public JSONArray(Object... items) {
         super(items.length);
-
         for (Object item : items) {
             add(item);
         }
@@ -423,7 +422,7 @@ public class JSONArray extends ArrayList<Object> {
         throw new JSONException("can not cast " + value.getClass() + " to byte");
     }
 
-    public short getByteValue(int index) {
+    public byte getByteValue(int index) {
         Object value = get(index);
 
         if (value == null) {
@@ -465,13 +464,7 @@ public class JSONArray extends ArrayList<Object> {
 
         if (value instanceof String) {
             String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return false;
-            }
-
-            return str.equalsIgnoreCase("true");
+            return str.equalsIgnoreCase("true") || str.equals("1");
         }
 
         throw new JSONException("can not convert to boolean : " + value);
@@ -494,13 +487,10 @@ public class JSONArray extends ArrayList<Object> {
 
         if (value instanceof String) {
             String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return null;
             }
-
-            return str.equalsIgnoreCase("true");
+            return str.equalsIgnoreCase("true") || str.equals("1");
         }
 
         throw new JSONException("can not convert to boolean : " + value);
@@ -513,12 +503,17 @@ public class JSONArray extends ArrayList<Object> {
             return null;
         }
 
-        if (value instanceof BigInteger) {
-            return (BigInteger) value;
-        }
+        if (value instanceof Number) {
+            if (value instanceof BigInteger) {
+                return (BigInteger) value;
+            }
 
-        if (value instanceof BigDecimal) {
-            return ((BigDecimal) value).toBigInteger();
+            if (value instanceof BigDecimal) {
+                return ((BigDecimal) value).toBigInteger();
+            }
+
+            long longValue = ((Number) value).longValue();
+            return BigInteger.valueOf(longValue);
         }
 
         if (value instanceof String) {
@@ -528,17 +523,6 @@ public class JSONArray extends ArrayList<Object> {
                 return null;
             }
             return new BigInteger(str);
-        }
-
-        if (value instanceof Byte
-                || value instanceof Short
-                || value instanceof Integer
-                ||  value instanceof Long
-                ||  value instanceof Float
-                ||  value instanceof Double
-        ) {
-            long longValue = ((Number) value).longValue();
-            return BigInteger.valueOf(longValue);
         }
 
         throw new JSONException("can not cast " + value.getClass() + " to Long");
@@ -551,18 +535,21 @@ public class JSONArray extends ArrayList<Object> {
             return null;
         }
 
-        if (value instanceof BigDecimal) {
-            return (BigDecimal) value;
-        }
+        if (value instanceof Number) {
+            if (value instanceof BigDecimal) {
+                return (BigDecimal) value;
+            }
 
-        if (value instanceof BigInteger) {
-            return new BigDecimal((BigInteger) value);
-        }
+            if (value instanceof BigInteger) {
+                return new BigDecimal((BigInteger) value);
+            }
 
-        if (value instanceof Byte
-                || value instanceof Short
-                || value instanceof Integer
-                ||  value instanceof Long) {
+            if (value instanceof Float
+                || value instanceof Double) {
+                // Floating point number have no cached BigDecimal
+                return new BigDecimal(value.toString());
+            }
+
             long longValue = ((Number) value).longValue();
             return BigDecimal.valueOf(longValue);
         }
@@ -574,12 +561,6 @@ public class JSONArray extends ArrayList<Object> {
                 return null;
             }
             return new BigDecimal(str);
-        }
-
-        if (value instanceof Float
-                || value instanceof Double) {
-            double doubleValue = ((Number) value).doubleValue();
-            return BigDecimal.valueOf(doubleValue);
         }
 
         throw new JSONException("can not cast " + value.getClass() + " to Long");
@@ -598,11 +579,15 @@ public class JSONArray extends ArrayList<Object> {
         return JSON.toJSONString(value);
     }
 
-    public java.util.Date getDate(int index) {
+    public Date getDate(int index) {
         Object value = get(index);
 
-        if (value == null || value instanceof Date) {
-            return (java.util.Date) value;
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Date) {
+            return (Date) value;
         }
 
         if (value instanceof Number) {
@@ -610,7 +595,7 @@ public class JSONArray extends ArrayList<Object> {
             if (millis == 0) {
                 return null;
             }
-            return new java.util.Date(millis);
+            return new Date(millis);
         }
 
         return TypeUtils.toDate(value);
@@ -619,7 +604,11 @@ public class JSONArray extends ArrayList<Object> {
     public Instant getInstant(int index) {
         Object value = get(index);
 
-        if (value == null || value instanceof Instant) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Instant) {
             return (Instant) value;
         }
 
@@ -659,6 +648,11 @@ public class JSONArray extends ArrayList<Object> {
         return list;
     }
 
+    public String toJSONString() {
+        return toString();
+    }
+
+    @Override
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
             if (arrayWriter == null) {
@@ -669,22 +663,28 @@ public class JSONArray extends ArrayList<Object> {
         }
     }
 
+    public static JSONArray of(Object... items) {
+        return new JSONArray(items);
+    }
+
     public static JSONArray of(Object item) {
-        return new JSONArray(1)
-                .fluentAdd(item);
+        JSONArray array = new JSONArray(1);
+        array.add(item);
+        return array;
     }
 
     public static JSONArray of(Object first, Object second) {
-        return new JSONArray(2)
-                .fluentAdd(first)
-                .fluentAdd(second);
+        JSONArray array = new JSONArray(2);
+        array.add(first);
+        array.add(second);
+        return array;
     }
 
-    public static JSONArray of(Object... items) {
-        JSONArray array = new JSONArray(items.length);
-        for (Object item : items) {
-            array.add(item);
-        }
+    public static JSONArray of(Object first, Object second, Object third) {
+        JSONArray array = new JSONArray(3);
+        array.add(first);
+        array.add(second);
+        array.add(third);
         return array;
     }
 }

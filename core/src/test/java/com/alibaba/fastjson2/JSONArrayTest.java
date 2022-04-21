@@ -988,4 +988,22 @@ public class JSONArrayTest {
         assertEquals(0F, array.getFloatValue(1));
         assertEquals(false, array.getBooleanValue(1));
     }
+
+    @Test
+    public void test_ofArray() {
+        JSONArray array0 = JSONArray.of("1");
+        assertEquals(array0.get(0), "1");
+
+        JSONArray array1 = JSONArray.of("1", "2", 3);
+        assertEquals(array1.get(0), "1");
+        assertEquals(array1.get(1), "2");
+        assertEquals(array1.get(2), 3);
+
+        JSONArray array2 = JSONArray.of(1, 2, 3, 4, "5");
+        assertEquals(array2.get(0), 1);
+        assertEquals(array2.get(1), 2);
+        assertEquals(array2.get(2), 3);
+        assertEquals(array2.get(3), 4);
+        assertEquals(array2.get(4), "5");
+    }
 }
