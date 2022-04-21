@@ -31,7 +31,7 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into Object with specified {@link JSONReader.Feature}s enabled
+     * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
      *
      * @param text     the JSON {@link String} to be parsed
      * @param features features to be enabled in parsing
@@ -381,9 +381,9 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java objects to JSON byte array
+     * Serialize Java Object to JSON byte array
      *
-     * @param object Java Object to be serialized into JSON {@link String}
+     * @param object Java Object to be serialized into JSON byte array
      */
     static byte[] toJSONBytes(Object object) {
         try (JSONWriter writer = JSONWriter.ofUTF8()) {
@@ -399,9 +399,9 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java objects to JSON byte array
+     * Serialize Java Object to JSON byte array
      *
-     * @param object  Java Object to be serialized into JSON {@link String}
+     * @param object  Java Object to be serialized into JSON byte array
      * @param filters specifies the filter to use in serialization
      */
     static byte[] toJSONBytes(Object object, Filter... filters) {
@@ -424,9 +424,9 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java objects to JSON byte array with specified {@link JSONReader.Feature}s enabled
+     * Serialize Java Object to JSON byte array with specified {@link JSONReader.Feature}s enabled
      *
-     * @param object   Java Object to be serialized into JSON {@link String}
+     * @param object   Java Object to be serialized into JSON byte array
      * @param features features to be enabled in serialization
      */
     static byte[] toJSONBytes(Object object, JSONWriter.Feature... features) {
@@ -445,9 +445,9 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java objects to JSON byte array with specified {@link JSONReader.Feature}s enabled
+     * Serialize Java Object to JSON byte array with specified {@link JSONReader.Feature}s enabled
      *
-     * @param object   Java Object to be serialized into JSON {@link String}
+     * @param object   Java Object to be serialized into JSON byte array
      * @param filters  specifies the filter to use in serialization
      * @param features features to be enabled in serialization
      */
