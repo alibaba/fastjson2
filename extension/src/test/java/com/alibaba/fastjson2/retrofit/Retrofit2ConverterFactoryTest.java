@@ -14,6 +14,8 @@ public class Retrofit2ConverterFactoryTest {
 
     @Test
     public void test_for_coverage() throws Exception {
+        Assert.assertThrows(NullPointerException.class, () -> Retrofit2ConverterFactory.create(null));
+
         Retrofit2ConverterFactory f = new Retrofit2ConverterFactory();
         f.getFastJsonConfig();
         f.setFastJsonConfig(new FastJsonConfig());
@@ -36,6 +38,11 @@ public class Retrofit2ConverterFactoryTest {
                 .convert(body);
 
         Assert.assertEquals(JSON.toJSONString(mode2), json);
+
+        Assert.assertThrows(NullPointerException.class, () -> Retrofit2ConverterFactory.create()
+                .responseBodyConverter(null, null, null)
+                .convert(null));
+
     }
 
     public static class Model {
