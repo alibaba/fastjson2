@@ -25,35 +25,45 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     static ObjectWriter<JSONObject> objectWriter;
     static ObjectReader<JSONObject> objectReader;
 
+    /**
+     * default
+     */
     public JSONObject() {
         super();
     }
 
+    /**
+     * @param initialCapacity the initial capacity
+     */
     public JSONObject(int initialCapacity) {
         super(initialCapacity);
     }
 
+    /**
+     * @param map the map whose mappings are to be placed in this map
+     */
     public JSONObject(Map map) {
         super(map);
     }
 
-    public JSONObject fluentPut(String key, Object value) {
-        put(key, value);
-        return this;
-    }
-
+    /**
+     * 返回此对象中关联键的 {@link JSONArray}
+     * Returns the {@link JSONArray} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link JSONArray} or null
+     */
     public JSONArray getJSONArray(String key) {
         Object value = get(key);
 
-        if (value instanceof JSONArray){
+        if (value instanceof JSONArray) {
             return (JSONArray) value;
         }
 
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return null;
             }
 
@@ -71,6 +81,13 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         return null;
     }
 
+    /**
+     * 返回此对象中关联键的 {@link JSONObject}
+     * Returns the {@link JSONObject} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link JSONObject} or null
+     */
     public JSONObject getJSONObject(String key) {
         Object value = get(key);
 
@@ -80,8 +97,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty()
-                || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return null;
             }
 
@@ -99,34 +115,169 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         return null;
     }
 
-    public Integer getInteger(String key) {
+    /**
+     * 返回此对象中关联键的 {@link String}
+     * Returns the {@link String} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link String} or null
+     */
+    public String getString(String key) {
         Object value = get(key);
+
         if (value == null) {
             return null;
         }
 
-        if (value instanceof Integer) {
-            return ((Integer) value);
+        if (value instanceof String) {
+            return (String) value;
+        }
+
+        return JSON.toJSONString(value);
+    }
+
+    /**
+     * 返回此对象中关联键的 {@link Double}
+     * Returns the {@link Double} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link Double} or null
+     */
+    public Double getDouble(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Double) {
+            return (Double) value;
         }
 
         if (value instanceof Number) {
-            return ((Number) value).intValue();
+            return ((Number) value).doubleValue();
         }
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return null;
             }
-            return Integer.parseInt(str);
+
+            return Double.parseDouble(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Integer");
+        throw new JSONException("can not cast " + value.getClass() + " to Double");
     }
 
+    /**
+     * 返回此对象中关联键的 double 数据
+     * Returns a double of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return double
+     */
+    public double getDoubleValue(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return 0D;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return 0D;
+            }
+
+            return Double.parseDouble(str);
+        }
+
+        throw new JSONException("can not cast " + value.getClass() + " to double");
+    }
+
+    /**
+     * 返回此对象中关联键的 {@link Float}
+     * Returns the {@link Float} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link Float} or null
+     */
+    public Float getFloat(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Float) {
+            return (Float) value;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).floatValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            return Float.parseFloat(str);
+        }
+
+        throw new JSONException("can not cast " + value.getClass() + " to Float");
+    }
+
+    /**
+     * 返回此对象中关联键的 float 数据
+     * Returns a float of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return float
+     */
+    public float getFloatValue(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return 0F;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).floatValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return 0F;
+            }
+
+            return Float.parseFloat(str);
+        }
+
+        throw new JSONException("can not cast " + value.getClass() + " to float");
+    }
+
+    /**
+     * 返回此对象中关联键的 {@link Long}
+     * Returns the {@link Long} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link Long} or null
+     */
     public Long getLong(String key) {
         Object value = get(key);
+
         if (value == null) {
             return null;
         }
@@ -141,16 +292,314 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return null;
             }
+
             return Long.parseLong(str);
         }
 
         throw new JSONException("can not cast " + value.getClass() + " to Long");
     }
 
+    /**
+     * 返回此对象中关联键的 long 数据
+     * Returns a long of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return long
+     */
+    public long getLongValue(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return 0;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return 0;
+            }
+
+            return Long.parseLong(str);
+        }
+
+        throw new JSONException("can not cast " + value.getClass() + " to long");
+    }
+
+    /**
+     * 返回此对象中关联键的 {@link Integer}
+     * Returns the {@link Integer} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link Integer} or null
+     */
+    public Integer getInteger(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Integer) {
+            return ((Integer) value);
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            return Integer.parseInt(str);
+        }
+
+        throw new JSONException("can not cast " + value.getClass() + " to Integer");
+    }
+
+    /**
+     * 返回此对象中关联键的 int 数据
+     * Returns an int of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return int
+     */
+    public int getIntValue(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return 0;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return 0;
+            }
+
+            return Integer.parseInt(str);
+        }
+
+        throw new JSONException("can not cast " + value.getClass() + " to int");
+    }
+
+    /**
+     * 返回此对象中关联键的 {@link Short}
+     * Returns the {@link Short} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link Short} or null
+     */
+    public Short getShort(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Short) {
+            return (Short) value;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).shortValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            return Short.parseShort(str);
+        }
+
+        throw new JSONException("can not cast " + value.getClass() + " to short");
+    }
+
+    /**
+     * 返回此对象中关联键的 short 数据
+     * Returns a short of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return short
+     */
+    public short getShortValue(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return 0;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).shortValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return 0;
+            }
+
+            return Short.parseShort(str);
+        }
+
+        throw new JSONException("can not cast " + value.getClass() + " to short");
+    }
+
+    /**
+     * 返回此对象中关联键的 {@link Byte}
+     * Returns the {@link Byte} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link Byte} or null
+     */
+    public Byte getByte(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).byteValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            return Byte.parseByte(str);
+        }
+
+        throw new JSONException("can not cast " + value.getClass() + " to byte");
+    }
+
+    /**
+     * 返回此对象中关联键的 byte 数据
+     * Returns a byte of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return byte
+     */
+    public byte getByteValue(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return 0;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).byteValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return 0;
+            }
+
+            return Byte.parseByte(str);
+        }
+
+        throw new JSONException("can not cast " + value.getClass() + " to byte");
+    }
+
+    /**
+     * 返回此对象中关联键的 {@link Boolean}
+     * Returns the {@link Boolean} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link Boolean} or null
+     */
+    public Boolean getBoolean(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).intValue() == 1;
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            return str.equalsIgnoreCase("true") || str.equals("1");
+        }
+
+        throw new JSONException("can not convert to boolean : " + value);
+    }
+
+    /**
+     * 返回此对象中关联键的 boolean 数据
+     * Returns a boolean value of the associated key in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return boolean
+     */
+    public boolean getBooleanValue(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return false;
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).intValue() == 1;
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+            return str.equalsIgnoreCase("true") || str.equals("1");
+        }
+
+        throw new JSONException("can not convert to boolean : " + value);
+    }
+
+    /**
+     * 返回此对象中关联键的 {@link BigInteger}
+     * Returns the {@link BigInteger} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link BigInteger} or null
+     */
     public BigInteger getBigInteger(String key) {
         Object value = get(key);
 
@@ -173,16 +622,24 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return null;
             }
+
             return new BigInteger(str);
         }
 
         throw new JSONException("can not cast " + value.getClass() + " to Long");
     }
 
+    /**
+     * 返回此对象中关联键的 {@link BigDecimal}
+     * Returns the {@link BigDecimal} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link BigDecimal} or null
+     */
     public BigDecimal getBigDecimal(String key) {
         Object value = get(key);
 
@@ -211,41 +668,135 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty()
-                || str.equalsIgnoreCase("null")) {
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return null;
             }
+
             return new BigDecimal(str);
         }
 
         throw new JSONException("can not cast " + value.getClass() + " to Long");
     }
 
-    public String getString(String key) {
+    /**
+     * 返回此对象中关联键的 {@link BigInteger}
+     * Returns the {@link BigInteger} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link BigInteger} or null
+     */
+    public Date getDate(String key) {
         Object value = get(key);
+
         if (value == null) {
             return null;
         }
 
-        if (value instanceof String) {
-            return (String) value;
+        if (value instanceof Date) {
+            return (Date) value;
         }
 
-        return JSON.toJSONString(value);
+        if (value instanceof Number) {
+            long millis = ((Number) value).longValue();
+            if (millis == 0) {
+                return null;
+            }
+            return new Date(millis);
+        }
+
+        return TypeUtils.toDate(value);
     }
 
-    public <T> T toJavaObject(Class<T> type) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader objectReader = provider.getObjectReader(type);
-        return (T) objectReader.createInstance(this);
+    /**
+     * 返回此对象中关联键的 {@link BigInteger}
+     * Returns the {@link BigInteger} of the associated keys in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return {@link BigInteger} or null
+     */
+    public Instant getInstant(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Instant) {
+            return (Instant) value;
+        }
+
+        if (value instanceof Number) {
+            long millis = ((Number) value).longValue();
+            if (millis == 0) {
+                return null;
+            }
+            return Instant.ofEpochMilli(millis);
+        }
+
+        return TypeUtils.toInstant(value);
     }
 
+    /**
+     * 序列化为 JSON 字符串
+     * Serialize to JSON {@link String}
+     *
+     * @return JSON {@link String}
+     */
+    @Override
+    public String toString() {
+        try (JSONWriter writer = JSONWriter.of()) {
+            if (objectWriter == null) {
+                objectWriter = writer.getObjectWriter(JSONObject.class);
+            }
+            objectWriter.write(writer, this, null, null, 0);
+            return writer.toString();
+        }
+    }
+
+    /**
+     * 序列化为 JSON 字符串
+     * Serialize to JSON {@link String}
+     *
+     * @return JSON {@link String}
+     */
+    public String toJSONString() {
+        return toString();
+    }
+
+    /**
+     * 将此 {@link JSONObject} 转换为目标类型
+     * Convert this {@link JSONObject} to the target type
+     *
+     * @param type converted goal type
+     */
     public <T> T toJavaObject(Type type) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader objectReader = provider.getObjectReader(type);
         return (T) objectReader.createInstance(this);
     }
 
+    /**
+     * 将此 {@link JSONObject} 转换为目标类型
+     * Convert this {@link JSONObject} to the target type
+     *
+     * @param type converted goal type
+     */
+    public <T> T toJavaObject(Class<T> type) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReader objectReader = provider.getObjectReader(type);
+        return (T) objectReader.createInstance(this);
+    }
+
+    /**
+     * 返回此对象中关联值的 {@link Type} 转换器转换结果
+     * Returns the result of the {@link Type} converter conversion of the associated value in this object.
+     *
+     * @param key  the key whose associated value is to be returned
+     * @param type converted goal type
+     * @return <T> or null
+     * @throws JSONException If no suitable conversion method is found
+     */
     public <T> T getObject(String key, Type type) {
         Object value = get(key);
         if (value == null) {
@@ -282,388 +833,23 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         return (T) objectReader.readObject(jsonReader);
     }
 
-    public double getDoubleValue(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return 0D;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return 0D;
-            }
-
-            return Double.parseDouble(str);
-        }
-
-        throw new JSONException("can not cast " + value.getClass() + " to double");
-    }
-
-    public float getFloatValue(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return 0F;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).floatValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return 0F;
-            }
-
-            return Float.parseFloat(str);
-        }
-
-        throw new JSONException("can not cast " + value.getClass() + " to float");
-    }
-
-    public Float getFloat(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Float) {
-            return (Float) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).floatValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return null;
-            }
-
-            return Float.parseFloat(str);
-        }
-
-        throw new JSONException("can not cast " + value.getClass() + " to Float");
-    }
-
-    public Double getDouble(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Double) {
-            return (Double) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return null;
-            }
-
-            return Double.parseDouble(str);
-        }
-
-        throw new JSONException("can not cast " + value.getClass() + " to Double");
-    }
-
-    public long getLongValue(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).longValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return 0;
-            }
-
-            return Long.parseLong(str);
-        }
-
-        throw new JSONException("can not cast " + value.getClass() + " to long");
-    }
-
-    public int getIntValue(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).intValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return 0;
-            }
-
-            return Integer.parseInt(str);
-        }
-
-        throw new JSONException("can not cast " + value.getClass() + " to int");
-    }
-
-    public short getShortValue(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).shortValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return 0;
-            }
-
-            return Short.parseShort(str);
-        }
-
-        throw new JSONException("can not cast " + value.getClass() + " to short");
-    }
-
-    public Short getShort(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Short) {
-            return (Short) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).shortValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return null;
-            }
-
-            return Short.parseShort(str);
-        }
-
-        throw new JSONException("can not cast " + value.getClass() + " to short");
-    }
-
-    public Byte getByte(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).byteValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return null;
-            }
-
-            return Byte.parseByte(str);
-        }
-
-        throw new JSONException("can not cast " + value.getClass() + " to byte");
-    }
-
-    public byte getByteValue(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return 0;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).byteValue();
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return 0;
-            }
-
-            return Byte.parseByte(str);
-        }
-
-        throw new JSONException("can not cast " + value.getClass() + " to byte");
-    }
-
-    public boolean getBooleanValue(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return false;
-        }
-
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).intValue() == 1;
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            return str.equalsIgnoreCase("true") || str.equals("1");
-        }
-
-        throw new JSONException("can not convert to boolean : " + value);
-    }
-
-    public Boolean getBoolean(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
-
-        if (value instanceof Number) {
-            return ((Number) value).intValue() == 1;
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
-                return null;
-            }
-            return str.equalsIgnoreCase("true") || str.equals("1");
-        }
-
-        throw new JSONException("can not convert to boolean : " + value);
-    }
-
-    public Date getDate(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Date) {
-            return (Date) value;
-        }
-
-        if (value instanceof Number) {
-            long millis = ((Number) value).longValue();
-            if (millis == 0) {
-                return null;
-            }
-            return new Date(millis);
-        }
-
-        return TypeUtils.toDate(value);
-    }
-
-    public Instant getInstant(String key) {
-        Object value = get(key);
-
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Instant) {
-            return (Instant) value;
-        }
-
-        if (value instanceof Number) {
-            long millis = ((Number) value).longValue();
-            if (millis == 0) {
-                return null;
-            }
-            return Instant.ofEpochMilli(millis);
-        }
-
-        return TypeUtils.toInstant(value);
-    }
-
-    public String toJSONString() {
-        return toString();
-    }
-
-    @Override
-    public String toString() {
-        try (JSONWriter writer = JSONWriter.of()) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
-            }
-            objectWriter.write(writer, this, null, null, 0);
-            return writer.toString();
-        }
-    }
-
+    /**
+     * @param proxy  proxy object, currently useless
+     * @param method methods that need reflection
+     * @param args   parameters of invoke
+     * @throws UnsupportedOperationException If reflection for this method is not supported
+     */
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Class<?>[] parameterTypes = method.getParameterTypes();
         final String methodName = method.getName();
+        Class<?>[] parameterTypes = method.getParameterTypes();
 
         if (parameterTypes.length == 1) {
             if (methodName.equals("equals")) {
                 return this.equals(args[0]);
             }
 
-            Class<?> returnType = method.getReturnType();
-            if (returnType != void.class) {
-                throw new JSONException("illegal setter");
+            if (method.getReturnType() != void.class) {
+                throw new JSONException("This method '" + methodName + "' is not a setter");
             }
 
             String name = null;
@@ -678,12 +864,12 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
                 name = methodName;
 
                 if (!name.startsWith("set")) {
-                    throw new JSONException("illegal setter");
+                    throw new JSONException("This method '" + methodName + "' is not a setter");
                 }
 
                 name = name.substring(3);
                 if (name.length() == 0) {
-                    throw new JSONException("illegal setter");
+                    throw new JSONException("This method '" + methodName + "' is an illegal setter");
                 }
                 name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
             }
@@ -693,9 +879,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         }
 
         if (parameterTypes.length == 0) {
-            Class<?> returnType = method.getReturnType();
-            if (returnType == void.class) {
-                throw new JSONException("illegal getter");
+            if (method.getReturnType() == void.class) {
+                throw new JSONException("This method '" + methodName + "' is not a getter");
             }
 
             String name = null;
@@ -711,13 +896,13 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
                 if (name.startsWith("get")) {
                     name = name.substring(3);
                     if (name.length() == 0) {
-                        throw new JSONException("illegal getter");
+                        throw new JSONException("This method '" + methodName + "' is an illegal getter");
                     }
                     name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
                 } else if (name.startsWith("is")) {
                     name = name.substring(2);
                     if (name.length() == 0) {
-                        throw new JSONException("illegal getter");
+                        throw new JSONException("This method '" + methodName + "' is an illegal getter");
                     }
                     name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
                 } else if (name.equals("hashCode")) {
@@ -729,7 +914,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
                 } else if (name.equals("size")) {
                     return this.size();
                 } else {
-                    throw new JSONException("illegal getter : " + name);
+                    throw new JSONException("This method '" + methodName + "' is not a getter");
                 }
             }
 
@@ -739,11 +924,11 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             }
 
             Function typeConvert = JSONFactory
-                    .getDefaultObjectReaderProvider()
-                    .getTypeConvert(
-                            value.getClass(),
-                            method.getGenericReturnType()
-                    );
+                .getDefaultObjectReaderProvider()
+                .getTypeConvert(
+                    value.getClass(),
+                    method.getGenericReturnType()
+                );
             if (typeConvert != null) {
                 return typeConvert.apply(value);
             }
@@ -754,12 +939,38 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         throw new UnsupportedOperationException(method.toGenericString());
     }
 
+    /**
+     * 链式添加元素
+     * Chained addition of elements
+     *
+     * <code>
+     * JSONObject object = new JSONObject().fluentPut("a", 1).fluentPut("b", 2).fluentPut("c", 3);
+     * </code>
+     *
+     * @param key   key with which the specified value is to be associated
+     * @param value value to be associated with the specified key
+     */
+    public JSONObject fluentPut(String key, Object value) {
+        put(key, value);
+        return this;
+    }
+
+    /**
+     * 将一对键值打包成 {@link JSONObject}
+     * Pack a pair of key-values as {@link JSONObject}
+     *
+     * @param key   the key of the element
+     * @param value the value of the element
+     */
     public static JSONObject of(String key, Object value) {
         JSONObject object = new JSONObject(1);
         object.put(key, value);
         return object;
     }
 
+    /**
+     * See {@link JSON#parseObject} for details
+     */
     public static <T> T parseObject(String text, Class<T> clazz) {
         return JSON.parseObject(text, clazz);
     }
