@@ -138,6 +138,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Double} or null
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable double
+     * @throws JSONException         Unsupported type conversion to {@link Double}
      */
     public Double getDouble(String key) {
         Object value = get(key);
@@ -164,7 +166,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return Double.parseDouble(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Double");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Double");
     }
 
     /**
@@ -172,6 +174,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return double
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable double
+     * @throws JSONException         Unsupported type conversion to double value
      */
     public double getDoubleValue(String key) {
         Object value = get(key);
@@ -194,7 +198,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return Double.parseDouble(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to double");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to double value");
     }
 
     /**
@@ -202,6 +206,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Float} or null
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable float
+     * @throws JSONException         Unsupported type conversion to {@link Float}
      */
     public Float getFloat(String key) {
         Object value = get(key);
@@ -228,7 +234,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return Float.parseFloat(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Float");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Float");
     }
 
     /**
@@ -236,6 +242,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return float
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable float
+     * @throws JSONException         Unsupported type conversion to float value
      */
     public float getFloatValue(String key) {
         Object value = get(key);
@@ -258,7 +266,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return Float.parseFloat(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to float");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to float value");
     }
 
     /**
@@ -266,6 +274,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Long} or null
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable long
+     * @throws JSONException         Unsupported type conversion to {@link Long}
      */
     public Long getLong(String key) {
         Object value = get(key);
@@ -292,7 +302,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return Long.parseLong(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Long");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Long");
     }
 
     /**
@@ -300,6 +310,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return long
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable long
+     * @throws JSONException         Unsupported type conversion to long value
      */
     public long getLongValue(String key) {
         Object value = get(key);
@@ -322,7 +334,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return Long.parseLong(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to long");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to long value");
     }
 
     /**
@@ -330,6 +342,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Integer} or null
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable int
+     * @throws JSONException         Unsupported type conversion to {@link Integer}
      */
     public Integer getInteger(String key) {
         Object value = get(key);
@@ -356,7 +370,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return Integer.parseInt(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Integer");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
     }
 
     /**
@@ -364,6 +378,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return int
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable int
+     * @throws JSONException         Unsupported type conversion to int value
      */
     public int getIntValue(String key) {
         Object value = get(key);
@@ -386,7 +402,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return Integer.parseInt(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to int");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to int value");
     }
 
     /**
@@ -394,6 +410,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Short} or null
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable short
+     * @throws JSONException         Unsupported type conversion to {@link Short}
      */
     public Short getShort(String key) {
         Object value = get(key);
@@ -420,7 +438,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return Short.parseShort(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to short");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Short");
     }
 
     /**
@@ -428,6 +446,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return short
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable short
+     * @throws JSONException         Unsupported type conversion to short value
      */
     public short getShortValue(String key) {
         Object value = get(key);
@@ -450,7 +470,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return Short.parseShort(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to short");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to short value");
     }
 
     /**
@@ -458,6 +478,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Byte} or null
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable byte
+     * @throws JSONException         Unsupported type conversion to {@link Byte}
      */
     public Byte getByte(String key) {
         Object value = get(key);
@@ -480,7 +502,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return Byte.parseByte(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to byte");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Byte");
     }
 
     /**
@@ -488,6 +510,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return byte
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable byte
+     * @throws JSONException         Unsupported type conversion to byte value
      */
     public byte getByteValue(String key) {
         Object value = get(key);
@@ -510,7 +534,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return Byte.parseByte(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to byte");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to byte value");
     }
 
     /**
@@ -518,6 +542,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Boolean} or null
+     * @throws JSONException Unsupported type conversion to {@link Boolean}
      */
     public Boolean getBoolean(String key) {
         Object value = get(key);
@@ -544,7 +569,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return str.equalsIgnoreCase("true") || str.equals("1");
         }
 
-        throw new JSONException("can not convert to boolean : " + value);
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Boolean");
     }
 
     /**
@@ -552,6 +577,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return boolean
+     * @throws JSONException Unsupported type conversion to boolean value
      */
     public boolean getBooleanValue(String key) {
         Object value = get(key);
@@ -573,7 +599,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return str.equalsIgnoreCase("true") || str.equals("1");
         }
 
-        throw new JSONException("can not convert to boolean : " + value);
+        throw new JSONException("Can not cast '" + value.getClass() + "' to boolean value");
     }
 
     /**
@@ -581,6 +607,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return {@link BigInteger} or null
+     * @throws JSONException         Unsupported type conversion to {@link BigInteger}
+     * @throws NumberFormatException If the value of get is {@link String} and it is not a valid representation of {@link BigInteger}
      */
     public BigInteger getBigInteger(String key) {
         Object value = get(key);
@@ -612,7 +640,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return new BigInteger(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Long");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
     }
 
     /**
@@ -620,6 +648,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param key the key whose associated value is to be returned
      * @return {@link BigDecimal} or null
+     * @throws JSONException         Unsupported type conversion to {@link BigDecimal}
+     * @throws NumberFormatException If the value of get is {@link String} and it is not a valid representation of {@link BigDecimal}
      */
     public BigDecimal getBigDecimal(String key) {
         Object value = get(key);
@@ -657,14 +687,14 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return new BigDecimal(str);
         }
 
-        throw new JSONException("can not cast " + value.getClass() + " to Long");
+        throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
     }
 
     /**
-     * Returns the {@link BigInteger} of the associated keys in this object.
+     * Returns the {@link Date} of the associated keys in this object.
      *
      * @param key the key whose associated value is to be returned
-     * @return {@link BigInteger} or null
+     * @return {@link Date} or null
      */
     public Date getDate(String key) {
         Object value = get(key);
@@ -811,7 +841,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @param proxy  proxy object, currently useless
      * @param method methods that need reflection
      * @param args   parameters of invoke
-     * @throws UnsupportedOperationException If reflection for this method is not supported
+     * @throws UnsupportedOperationException  If reflection for this method is not supported
+     * @throws ArrayIndexOutOfBoundsException If the length of args does not match the length of the method parameter
      */
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final String methodName = method.getName();
