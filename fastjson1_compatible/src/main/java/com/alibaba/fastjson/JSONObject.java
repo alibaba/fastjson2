@@ -15,6 +15,7 @@
  */
 package com.alibaba.fastjson;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.util.TypeUtils;
@@ -27,7 +28,11 @@ import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 //import com.alibaba.fastjson.util.TypeUtils;
 
 import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 
@@ -304,19 +309,19 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
         return doubleValue.doubleValue();
     }
-//
-//    public BigDecimal getBigDecimal(String key) {
-//        Object value = get(key);
-//
-//        return castToBigDecimal(value);
-//    }
-//
-//    public BigInteger getBigInteger(String key) {
-//        Object value = get(key);
-//
-//        return castToBigInteger(value);
-//    }
-//
+
+    public BigDecimal getBigDecimal(String key) {
+        Object value = get(key);
+
+        return castToBigDecimal(value);
+    }
+
+    public BigInteger getBigInteger(String key) {
+        Object value = get(key);
+
+        return castToBigInteger(value);
+    }
+
     public String getString(String key) {
         Object value = get(key);
 
@@ -326,24 +331,24 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
         return value.toString();
     }
-//
-//    public Date getDate(String key) {
-//        Object value = get(key);
-//
-//        return castToDate(value);
-//    }
-//
-//    public java.sql.Date getSqlDate(String key) {
-//        Object value = get(key);
-//
-//        return castToSqlDate(value);
-//    }
-//
-//    public java.sql.Timestamp getTimestamp(String key) {
-//        Object value = get(key);
-//
-//        return castToTimestamp(value);
-//    }
+
+    public Date getDate(String key) {
+        Object value = get(key);
+
+        return castToDate(value);
+    }
+
+    public java.sql.Date getSqlDate(String key) {
+        Object value = get(key);
+
+        return castToSqlDate(value);
+    }
+
+    public java.sql.Timestamp getTimestamp(String key) {
+        Object value = get(key);
+
+        return castToTimestamp(value);
+    }
 
     public Object put(String key, Object value) {
         return map.put(key, value);
@@ -408,190 +413,190 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
     public int hashCode() {
         return this.map.hashCode();
     }
-//
-//    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-//        Class<?>[] parameterTypes = method.getParameterTypes();
-//        if (parameterTypes.length == 1) {
-//            if (method.getName().equals("equals")) {
-//                return this.equals(args[0]);
-//            }
-//
-//            Class<?> returnType = method.getReturnType();
-//            if (returnType != void.class) {
-//                throw new JSONException("illegal setter");
-//            }
-//
-//            String name = null;
-//            JSONField annotation = method.getAnnotation(JSONField.class);
-//            if (annotation != null) {
-//                if (annotation.name().length() != 0) {
-//                    name = annotation.name();
-//                }
-//            }
-//
-//            if (name == null) {
-//                name = method.getName();
-//
-//                if (!name.startsWith("set")) {
-//                    throw new JSONException("illegal setter");
-//                }
-//
-//                name = name.substring(3);
-//                if (name.length() == 0) {
-//                    throw new JSONException("illegal setter");
-//                }
-//                name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
-//            }
-//
-//            map.put(name, args[0]);
-//            return null;
-//        }
-//
-//        if (parameterTypes.length == 0) {
-//            Class<?> returnType = method.getReturnType();
-//            if (returnType == void.class) {
-//                throw new JSONException("illegal getter");
-//            }
-//
-//            String name = null;
-//            JSONField annotation = method.getAnnotation(JSONField.class);
-//            if (annotation != null) {
-//                if (annotation.name().length() != 0) {
-//                    name = annotation.name();
-//                }
-//            }
-//
-//            if (name == null) {
-//                name = method.getName();
-//                if (name.startsWith("get")) {
-//                    name = name.substring(3);
-//                    if (name.length() == 0) {
-//                        throw new JSONException("illegal getter");
-//                    }
-//                    name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
-//                } else if (name.startsWith("is")) {
-//                    name = name.substring(2);
-//                    if (name.length() == 0) {
-//                        throw new JSONException("illegal getter");
-//                    }
-//                    name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
-//                } else if (name.startsWith("hashCode")) {
-//                    return this.hashCode();
-//                } else if (name.startsWith("toString")) {
-//                    return this.toString();
-//                } else {
-//                    throw new JSONException("illegal getter");
-//                }
-//            }
-//
-//            Object value = map.get(name);
-//            return TypeUtils.cast(value, method.getGenericReturnType(), ParserConfig.getGlobalInstance());
-//        }
-//
-//        throw new UnsupportedOperationException(method.toGenericString());
-//    }
+
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        if (parameterTypes.length == 1) {
+            if (method.getName().equals("equals")) {
+                return this.equals(args[0]);
+            }
+
+            Class<?> returnType = method.getReturnType();
+            if (returnType != void.class) {
+                throw new JSONException("illegal setter");
+            }
+
+            String name = null;
+            JSONField annotation = method.getAnnotation(JSONField.class);
+            if (annotation != null) {
+                if (annotation.name().length() != 0) {
+                    name = annotation.name();
+                }
+            }
+
+            if (name == null) {
+                name = method.getName();
+
+                if (!name.startsWith("set")) {
+                    throw new JSONException("illegal setter");
+                }
+
+                name = name.substring(3);
+                if (name.length() == 0) {
+                    throw new JSONException("illegal setter");
+                }
+                name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+            }
+
+            map.put(name, args[0]);
+            return null;
+        }
+
+        if (parameterTypes.length == 0) {
+            Class<?> returnType = method.getReturnType();
+            if (returnType == void.class) {
+                throw new JSONException("illegal getter");
+            }
+
+            String name = null;
+            JSONField annotation = method.getAnnotation(JSONField.class);
+            if (annotation != null) {
+                if (annotation.name().length() != 0) {
+                    name = annotation.name();
+                }
+            }
+
+            if (name == null) {
+                name = method.getName();
+                if (name.startsWith("get")) {
+                    name = name.substring(3);
+                    if (name.length() == 0) {
+                        throw new JSONException("illegal getter");
+                    }
+                    name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+                } else if (name.startsWith("is")) {
+                    name = name.substring(2);
+                    if (name.length() == 0) {
+                        throw new JSONException("illegal getter");
+                    }
+                    name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+                } else if (name.startsWith("hashCode")) {
+                    return this.hashCode();
+                } else if (name.startsWith("toString")) {
+                    return this.toString();
+                } else {
+                    throw new JSONException("illegal getter");
+                }
+            }
+
+            Object value = map.get(name);
+            return TypeUtils.cast(value, method.getGenericReturnType(), ParserConfig.getGlobalInstance());
+        }
+
+        throw new UnsupportedOperationException(method.toGenericString());
+    }
 
     public Map<String, Object> getInnerMap() {
         return this.map;
     }
 
-//
-//
-//    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
-//        SecureObjectInputStream.ensureFields();
-//        if (SecureObjectInputStream.fields != null && !SecureObjectInputStream.fields_error) {
-//            ObjectInputStream secIn = new SecureObjectInputStream(in);
-//            try {
-//                secIn.defaultReadObject();
-//                return;
-//            } catch (NotActiveException e) {
-//                // skip
-//            }
-//        }
-//
-//        in.defaultReadObject();
-//        for (Entry entry : map.entrySet()) {
-//            final Object key = entry.getKey();
-//            if (key != null) {
+
+
+    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
+        SecureObjectInputStream.ensureFields();
+        if (SecureObjectInputStream.fields != null && !SecureObjectInputStream.fields_error) {
+            ObjectInputStream secIn = new SecureObjectInputStream(in);
+            try {
+                secIn.defaultReadObject();
+                return;
+            } catch (NotActiveException e) {
+                // skip
+            }
+        }
+
+        in.defaultReadObject();
+        for (Entry entry : map.entrySet()) {
+            final Object key = entry.getKey();
+            if (key != null) {
 //                ParserConfig.global.checkAutoType(key.getClass());
-//            }
-//
-//            final Object value = entry.getValue();
-//            if (value != null) {
+            }
+
+            final Object value = entry.getValue();
+            if (value != null) {
 //                ParserConfig.global.checkAutoType(value.getClass());
-//            }
-//        }
-//    }
-//
-//    static class SecureObjectInputStream extends ObjectInputStream {
-//        static Field[] fields;
-//        static volatile boolean fields_error;
-//
-//        static void ensureFields() {
-//            if (fields == null && !fields_error) {
-//                try {
-//                    final Field[] declaredFields = ObjectInputStream.class.getDeclaredFields();
-//                    String[] fieldnames = new String[]{"bin", "passHandle", "handles", "curContext"};
-//                    Field[] array = new Field[fieldnames.length];
-//                    for (int i = 0; i < fieldnames.length; i++) {
-//                        Field field = TypeUtils
-//                                .getField(ObjectInputStream.class
-//                                        , fieldnames[i]
-//                                        , declaredFields
-//                                );
-//                        field.setAccessible(true);
-//                        array[i] = field;
-//                    }
-//                    fields = array;
-//                } catch (Throwable error) {
-//                    fields_error = true;
-//                }
-//            }
-//        }
-//
-//        public SecureObjectInputStream(ObjectInputStream in) throws IOException {
-//            super(in);
-//            try {
-//                for (int i = 0; i < fields.length; i++) {
-//                    final Field field = fields[i];
-//                    final Object value = field.get(in);
-//                    field.set(this, value);
-//                }
-//            } catch (IllegalAccessException e) {
-//                fields_error = true;
-//            }
-//        }
-//
-//        protected Class<?> resolveClass(ObjectStreamClass desc)
-//                throws IOException, ClassNotFoundException {
-//            String name = desc.getName();
-//            if (name.length() > 2) {
-//                int index = name.lastIndexOf('[');
-//                if (index != -1) {
-//                    name = name.substring(index + 1);
-//                }
-//                if (name.length() > 2 && name.charAt(0) == 'L' && name.charAt(name.length() - 1) == ';') {
-//                    name = name.substring(1, name.length() - 1);
-//                }
+            }
+        }
+    }
+
+    static class SecureObjectInputStream extends ObjectInputStream {
+        static Field[] fields;
+        static volatile boolean fields_error;
+
+        static void ensureFields() {
+            if (fields == null && !fields_error) {
+                try {
+                    final Field[] declaredFields = ObjectInputStream.class.getDeclaredFields();
+                    String[] fieldnames = new String[]{"bin", "passHandle", "handles", "curContext"};
+                    Field[] array = new Field[fieldnames.length];
+                    for (int i = 0; i < fieldnames.length; i++) {
+                        Field field = TypeUtils
+                                .getField(ObjectInputStream.class
+                                        , fieldnames[i]
+                                        , declaredFields
+                                );
+                        field.setAccessible(true);
+                        array[i] = field;
+                    }
+                    fields = array;
+                } catch (Throwable error) {
+                    fields_error = true;
+                }
+            }
+        }
+
+        public SecureObjectInputStream(ObjectInputStream in) throws IOException {
+            super(in);
+            try {
+                for (int i = 0; i < fields.length; i++) {
+                    final Field field = fields[i];
+                    final Object value = field.get(in);
+                    field.set(this, value);
+                }
+            } catch (IllegalAccessException e) {
+                fields_error = true;
+            }
+        }
+
+        protected Class<?> resolveClass(ObjectStreamClass desc)
+                throws IOException, ClassNotFoundException {
+            String name = desc.getName();
+            if (name.length() > 2) {
+                int index = name.lastIndexOf('[');
+                if (index != -1) {
+                    name = name.substring(index + 1);
+                }
+                if (name.length() > 2 && name.charAt(0) == 'L' && name.charAt(name.length() - 1) == ';') {
+                    name = name.substring(1, name.length() - 1);
+                }
 //                ParserConfig.global.checkAutoType(name, null, Feature.SupportAutoType.mask);
-//            }
-//            return super.resolveClass(desc);
-//        }
-//
-//        protected Class<?> resolveProxyClass(String[] interfaces)
-//                throws IOException, ClassNotFoundException {
-//            for (String interfacename : interfaces) {
-//                //检查是否处于黑名单
+            }
+            return super.resolveClass(desc);
+        }
+
+        protected Class<?> resolveProxyClass(String[] interfaces)
+                throws IOException, ClassNotFoundException {
+            for (String interfacename : interfaces) {
+                //检查是否处于黑名单
 //                ParserConfig.global.checkAutoType(interfacename, null);
-//            }
-//            return super.resolveProxyClass(interfaces);
-//        }
-//
-//        //Hack:默认构造方法会调用这个方法，重写此方法使用反射还原部分关键属性
-//        protected void readStreamHeader() throws IOException, StreamCorruptedException {
-//
-//        }
-//    }
+            }
+            return super.resolveProxyClass(interfaces);
+        }
+
+        //Hack:默认构造方法会调用这个方法，重写此方法使用反射还原部分关键属性
+        protected void readStreamHeader() throws IOException, StreamCorruptedException {
+
+        }
+    }
 
     public static <T> T toJavaObject(JSON json, Class<T> clazz) {
         return com.alibaba.fastjson2.util.TypeUtils.cast(json, clazz);
@@ -633,11 +638,6 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         }
 
         return TypeUtils.castToJavaBean(this, clazz, config);
-    }
-
-    public Date getDate(String key) {
-        Object value = get(key);
-        return com.alibaba.fastjson2.util.TypeUtils.cast(value, Date.class);
     }
 
     public String toJSONString() {
