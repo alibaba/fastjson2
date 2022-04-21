@@ -20,7 +20,7 @@ public interface JSON {
     String VERSION = "2.0.2";
 
     /**
-     * Parse JSON {@link String} into Object
+     * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject}
      *
      * @param text the JSON {@link String} to be parsed
      */
@@ -44,7 +44,7 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into JSONObject
+     * Parse JSON {@link String} into {@link JSONObject}
      *
      * @param text the JSON {@link String} to be parsed
      */
@@ -55,7 +55,7 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into a JSONObject
+     * Parse UTF8 encoded JSON byte array into {@link JSONObject}
      *
      * @param bytes UTF8 encoded JSON byte array to parse
      */
@@ -213,7 +213,7 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into JSONArray
+     * Parse JSON {@link String} into {@link JSONArray}
      *
      * @param text the JSON {@link String} to be parsed
      */
@@ -614,7 +614,7 @@ public interface JSON {
     }
 
     /**
-     * Convert Java object order to JSON array or JSONObject
+     * Convert Java object order to {@link JSONArray} or {@link JSONObject}
      *
      * @param object Java Object to be converted
      */
@@ -628,7 +628,7 @@ public interface JSON {
     }
 
     /**
-     * Convert this {@link JSONObject} to the target type
+     * Convert the Object to the target type
      *
      * @param object Java Object to be converted
      * @param clazz  converted goal class
