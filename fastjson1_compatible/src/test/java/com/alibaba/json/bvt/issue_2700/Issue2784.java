@@ -21,7 +21,7 @@ public class Issue2784 extends TestCase {
         assertEquals(m.time, m1.time);
     }
 
-    public void test_for_issue_1() throws Exception {
+    public void f_test_for_issue_1() throws Exception {
         Model m = new Model();
         m.ztime = ZonedDateTime.now();
         String str = JSON.toJSONString(m);

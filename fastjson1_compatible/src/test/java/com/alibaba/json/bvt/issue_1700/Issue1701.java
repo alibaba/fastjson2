@@ -82,7 +82,7 @@ public class Issue1701 {
     }
 
 
-    @ComponentScan(basePackages = "com.alibaba.json.bvt.issue_1700")
+    @ComponentScan(basePackages = "com.alibaba.fastjson.issue_1700")
     @Configuration
     @EnableWebMvc
     public static class WebMvcConfig extends WebMvcConfigurerAdapter {
