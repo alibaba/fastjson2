@@ -71,6 +71,34 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         return null;
     }
 
+    public JSONObject getJSONObject(String key) {
+        Object value = get(key);
+
+        if (value instanceof JSONObject) {
+            return (JSONObject) value;
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.isEmpty()
+                || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            JSONReader reader = JSONReader.of(str);
+            if (objectReader == null) {
+                objectReader = reader.getObjectReader(JSONObject.class);
+            }
+            return objectReader.readObject(reader, 0);
+        }
+
+        if (value instanceof Map) {
+            return new JSONObject((Map) value);
+        }
+
+        return null;
+    }
+
     public Integer getInteger(String key) {
         Object value = get(key);
         if (value == null) {
@@ -130,12 +158,17 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return null;
         }
 
-        if (value instanceof BigInteger) {
-            return (BigInteger) value;
-        }
+        if (value instanceof Number) {
+            if (value instanceof BigInteger) {
+                return (BigInteger) value;
+            }
 
-        if (value instanceof BigDecimal) {
-            return ((BigDecimal) value).toBigInteger();
+            if (value instanceof BigDecimal) {
+                return ((BigDecimal) value).toBigInteger();
+            }
+
+            long longValue = ((Number) value).longValue();
+            return BigInteger.valueOf(longValue);
         }
 
         if (value instanceof String) {
@@ -145,17 +178,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
                 return null;
             }
             return new BigInteger(str);
-        }
-
-        if (value instanceof Byte
-                || value instanceof Short
-                || value instanceof Integer
-                ||  value instanceof Long
-                ||  value instanceof Float
-                ||  value instanceof Double
-        ) {
-            long longValue = ((Number) value).longValue();
-            return BigInteger.valueOf(longValue);
         }
 
         throw new JSONException("can not cast " + value.getClass() + " to Long");
@@ -168,18 +190,21 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             return null;
         }
 
-        if (value instanceof BigDecimal) {
-            return (BigDecimal) value;
-        }
+        if (value instanceof Number) {
+            if (value instanceof BigDecimal) {
+                return (BigDecimal) value;
+            }
 
-        if (value instanceof BigInteger) {
-            return new BigDecimal((BigInteger) value);
-        }
+            if (value instanceof BigInteger) {
+                return new BigDecimal((BigInteger) value);
+            }
 
-        if (value instanceof Byte
-                || value instanceof Short
-                || value instanceof Integer
-                ||  value instanceof Long) {
+            if (value instanceof Float
+                || value instanceof Double) {
+                // Floating point number have no cached BigDecimal
+                return new BigDecimal(value.toString());
+            }
+
             long longValue = ((Number) value).longValue();
             return BigDecimal.valueOf(longValue);
         }
@@ -187,16 +212,10 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         if (value instanceof String) {
             String str = (String) value;
             if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
+                || str.equalsIgnoreCase("null")) {
                 return null;
             }
             return new BigDecimal(str);
-        }
-
-        if (value instanceof Float
-                || value instanceof Double) {
-            double doubleValue = ((Number) value).doubleValue();
-            return BigDecimal.valueOf(doubleValue);
         }
 
         throw new JSONException("can not cast " + value.getClass() + " to Long");
@@ -213,34 +232,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         }
 
         return JSON.toJSONString(value);
-    }
-
-    public JSONObject getJSONObject(String key) {
-        Object value = get(key);
-
-        if (value instanceof JSONObject) {
-            return (JSONObject) value;
-        }
-
-        if (value instanceof String) {
-            String str = (String) value;
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return null;
-            }
-
-            JSONReader reader = JSONReader.of(str);
-            if (objectReader == null) {
-                objectReader = reader.getObjectReader(JSONObject.class);
-            }
-            return objectReader.readObject(reader, 0);
-        }
-
-        if (value instanceof Map) {
-            return new JSONObject((Map) value);
-        }
-
-        return null;
     }
 
     public <T> T toJavaObject(Class<T> type) {
@@ -528,7 +519,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         throw new JSONException("can not cast " + value.getClass() + " to byte");
     }
 
-    public short getByteValue(String key) {
+    public byte getByteValue(String key) {
         Object value = get(key);
 
         if (value == null) {
@@ -570,13 +561,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
 
         if (value instanceof String) {
             String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
-                return false;
-            }
-
-            return str.equalsIgnoreCase("true");
+            return str.equalsIgnoreCase("true") || str.equals("1");
         }
 
         throw new JSONException("can not convert to boolean : " + value);
@@ -599,23 +584,24 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
 
         if (value instanceof String) {
             String str = (String) value;
-
-            if (str.isEmpty()
-                    || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return null;
             }
-
-            return str.equalsIgnoreCase("true");
+            return str.equalsIgnoreCase("true") || str.equals("1");
         }
 
         throw new JSONException("can not convert to boolean : " + value);
     }
 
-    public java.util.Date getDate(String key) {
+    public Date getDate(String key) {
         Object value = get(key);
 
-        if (value == null || value instanceof Date) {
-            return (java.util.Date) value;
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Date) {
+            return (Date) value;
         }
 
         if (value instanceof Number) {
@@ -623,7 +609,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             if (millis == 0) {
                 return null;
             }
-            return new java.util.Date(millis);
+            return new Date(millis);
         }
 
         return TypeUtils.toDate(value);
@@ -632,7 +618,11 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     public Instant getInstant(String key) {
         Object value = get(key);
 
-        if (value == null || value instanceof Instant) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Instant) {
             return (Instant) value;
         }
 
@@ -765,8 +755,9 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     public static JSONObject of(String key, Object value) {
-        return new JSONObject(1)
-                .fluentPut(key, value);
+        JSONObject object = new JSONObject(1);
+        object.put(key, value);
+        return object;
     }
 
     public static <T> T parseObject(String text, Class<T> clazz) {
