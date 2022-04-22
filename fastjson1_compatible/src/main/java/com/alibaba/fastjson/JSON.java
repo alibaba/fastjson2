@@ -158,7 +158,18 @@ public class JSON {
                     break;
             }
         }
-        context.config(JSONReader.Feature.SupportSmartMatch);
+
+        boolean disableFieldSmartMatch = false;
+        for (Feature feature : features) {
+            if (feature.equals(Feature.DisableFieldSmartMatch)) {
+                disableFieldSmartMatch = true;
+                break;
+            }
+        }
+
+        if (!disableFieldSmartMatch) {
+            context.config(JSONReader.Feature.SupportSmartMatch);
+        }
     }
 
     public static Object parse(byte[] input, int off, int len, CharsetDecoder charsetDecoder, Feature... features) {

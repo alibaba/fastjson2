@@ -1,4 +1,4 @@
-package com.alibaba.json.bvt.issue_1000;
+package com.alibaba.fastjson.issue_1000;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 public class Issue1089 extends TestCase {
     public void test_for_issue() throws Exception {
         String json = "{\"ab\":123,\"a_b\":456}";
-        TestBean tb = JSON.parseObject(json, TestBean.class);
+        TestBean tb = JSON.parseObject(json, TestBean.class, Feature.DisableFieldSmartMatch);
         assertEquals(123, tb.getAb());
     }
 

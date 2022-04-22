@@ -1,27 +1,22 @@
-package com.alibaba.json.bvt.builder;
+package com.alibaba.fastjson.builder;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.annotation.JSONType;
 import junit.framework.TestCase;
 import org.junit.Assert;
 
-public class BuilderTest_error_private extends TestCase {
+public class BuilderTest0 extends TestCase {
 
     public void test_0() throws Exception {
-        Exception error = null;
-        try {
-            JSON.parseObject("{\"id\":12304,\"name\":\"ljw\"}", VO.class);
-        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
-            error = ex;
-        }
-        Assert.assertNotNull(error);
+        VO vo = JSON.parseObject("{\"id\":12304,\"name\":\"ljw\"}", VO.class);
+
+        Assert.assertEquals(12304, vo.getId());
+        Assert.assertEquals("ljw", vo.getName());
     }
 
-    @JSONType(builder = VOBuilder.class)
+    @JSONType(builder=VOBuilder.class)
     public static class VO {
-
-        private int    id;
+        private int id;
         private String name;
 
         public int getId() {
@@ -33,12 +28,12 @@ public class BuilderTest_error_private extends TestCase {
         }
     }
 
-    private static class VOBuilder {
+    public static class VOBuilder {
 
         private VO vo = new VO();
 
         public VO build() {
-            throw new IllegalStateException();
+            return vo;
         }
 
         public VOBuilder withId(int id) {
