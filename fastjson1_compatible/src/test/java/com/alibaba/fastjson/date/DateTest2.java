@@ -3,12 +3,18 @@ package com.alibaba.fastjson.date;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.TimeZone;
 
-public class DateTest2 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class DateTest2 {
     private TimeZone timeZone;
+
+    @BeforeEach
     protected void setUp() throws Exception {
         timeZone = JSON.defaultTimeZone;
     }
@@ -17,6 +23,7 @@ public class DateTest2 extends TestCase {
         JSON.defaultTimeZone = timeZone;
     }
 
+    @Test
     public void test_date() throws Exception {
         JSON.defaultTimeZone = TimeZone.getTimeZone("America/Chicago");
         Date date = new Date(1531928656055L);

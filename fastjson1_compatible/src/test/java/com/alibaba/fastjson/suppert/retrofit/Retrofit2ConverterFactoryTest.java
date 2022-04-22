@@ -10,11 +10,13 @@ import okhttp3.ResponseBody;
 import okhttp3.internal.http.RealResponseBody;
 import okio.Buffer;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;
 
-public class Retrofit2ConverterFactoryTest extends TestCase {
+public class Retrofit2ConverterFactoryTest {
 
+    @Test
     public void test_for_coverage() throws Exception {
         Retrofit2ConverterFactory f = new Retrofit2ConverterFactory();
         f.getFastJsonConfig();

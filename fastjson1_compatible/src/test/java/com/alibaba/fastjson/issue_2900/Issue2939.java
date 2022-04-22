@@ -2,9 +2,13 @@ package com.alibaba.fastjson.issue_2900;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 import org.springframework.util.LinkedMultiValueMap;
 
-public class Issue2939 extends TestCase {
+import static org.junit.jupiter.api.Assertions.*;
+
+public class Issue2939 {
+    @Test
     public void test_for_issue() throws Exception {
 
         LinkedMultiValueMap multiValueMap = new LinkedMultiValueMap();

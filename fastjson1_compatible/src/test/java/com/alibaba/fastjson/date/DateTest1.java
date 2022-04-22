@@ -3,6 +3,7 @@ package com.alibaba.fastjson.date;
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -11,7 +12,8 @@ import java.util.Map;
 /**
  * Created by wenshao on 16/8/23.
  */
-public class DateTest1 extends TestCase {
+public class DateTest1 {
+    @Test
     public void test_date() throws Exception {
         Model model = new Model();
         model.date = new Date(1471939192128L);

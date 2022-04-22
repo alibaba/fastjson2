@@ -7,16 +7,18 @@ import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 
 
-public class ColorTest2 extends TestCase {
+public class ColorTest2 {
+    @Test
     public void test_color() throws Exception {
         Color color = Color.RED;
         String text = JSON.toJSONString(color, SerializerFeature.WriteClassName);
         System.out.println(text);
-        
+
         Color color2 = (Color) JSON.parse(text, Feature.SupportAutoType);
         Assert.assertEquals(color, color2);
 

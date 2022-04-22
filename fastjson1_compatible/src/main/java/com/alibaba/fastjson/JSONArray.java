@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.function.Function;
 
 public class JSONArray extends JSON implements List {
-    private List list = new ArrayList();
+    private List list = new com.alibaba.fastjson2.JSONArray();
 
     public JSONArray() {
 
@@ -163,6 +163,20 @@ public class JSONArray extends JSON implements List {
         }
 
         return com.alibaba.fastjson2.JSON.toJSONString(value);
+    }
+
+    public JSONArray getJSONArray(int index) {
+        Object value = list.get(index);
+
+        if (value instanceof JSONArray) {
+            return (JSONArray) value;
+        }
+
+        if (value instanceof List) {
+            return new JSONArray((List) value);
+        }
+
+        return (JSONArray) toJSON(value);
     }
 
     public <T> T getObject(int index, Class<T> clazz) {

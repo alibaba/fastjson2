@@ -6,6 +6,7 @@ import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -17,8 +18,9 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class FastJsonHttpMessageConverterTest extends TestCase {
+public class FastJsonHttpMessageConverterTest {
 
+    @Test
     public void test_read() throws Exception {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
 
@@ -64,6 +66,7 @@ public class FastJsonHttpMessageConverterTest extends TestCase {
         Assert.assertEquals("{\"id\":123}", new String(bytes, "UTF-8"));
     }
 
+    @Test
     public void test_1() throws Exception {
 
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();

@@ -3,11 +3,13 @@ package com.alibaba.fastjson.awt;
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 
 
-public class ColorTest extends TestCase {
+public class ColorTest {
+    @Test
     public void test_color() throws Exception {
         Color color = Color.RED;
         String text = JSON.toJSONString(color);
@@ -15,6 +17,7 @@ public class ColorTest extends TestCase {
         Assert.assertEquals(color, color2);
     }
 
+    @Test
     public void test_color_2() throws Exception {
         Color color = Color.RED;
         String text = "{\"r\":" + color.getRed() + ",\"g\":" + color.getGreen() + ",\"b\":" + color.getBlue() +"}";

@@ -2,8 +2,12 @@ package com.alibaba.fastjson.issue_3400;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue3470 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3470 {
+    @Test
     public void test_for_issue() throws Exception {
         String str = JSON.toJSONString(new Privacy().setPassword("test"));
         assertEquals("{\"__password\":\"test\"}", str);

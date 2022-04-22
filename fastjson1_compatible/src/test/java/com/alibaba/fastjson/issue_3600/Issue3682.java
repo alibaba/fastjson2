@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import junit.framework.TestCase;
 import lombok.Data;
+import org.junit.jupiter.api.Test;
 
-public class Issue3682 extends TestCase {
+public class Issue3682 {
+    @Test
     public void test_for_issue() throws Exception {
         Cid cid = JSON.parseObject(SOURCE, Cid.class);
         System.out.println(cid);

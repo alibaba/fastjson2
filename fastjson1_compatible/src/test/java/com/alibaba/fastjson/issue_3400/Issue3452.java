@@ -3,8 +3,12 @@ package com.alibaba.fastjson.issue_3400;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue3452 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3452 {
+    @Test
     public void test_for_issue() throws Exception {
         String s = "{ \"componentKey\" : \"CMDB_UPDATE_SERVER\"}";
         Step step = JSON.parseObject(s, Step.class);

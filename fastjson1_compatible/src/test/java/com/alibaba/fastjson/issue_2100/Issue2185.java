@@ -4,12 +4,16 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.HashMap;
 
-public class Issue2185 extends TestCase {
+import static org.junit.jupiter.api.Assertions.*;
 
+public class Issue2185 {
+
+    @Test
     public void test_for_issue() throws Exception {
         Exception error = null;
         try {
@@ -30,6 +34,7 @@ public class Issue2185 extends TestCase {
      *
      * @throws Exception
      */
+    @Test
     public void test_for_issue_1() throws Exception {
         Exception error = null;
         try {
@@ -50,6 +55,7 @@ public class Issue2185 extends TestCase {
      *
      * @throws Exception
      */
+    @Test
     public void test_for_issue_2() throws Exception {
         Exception error = null;
         try {
@@ -70,6 +76,7 @@ public class Issue2185 extends TestCase {
      *
      * @throws Exception
      */
+    @Test
     public void test_for_issue_3() throws Exception {
         Exception error = null;
         try {

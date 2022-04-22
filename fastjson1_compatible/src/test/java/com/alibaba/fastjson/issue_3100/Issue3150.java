@@ -3,11 +3,13 @@ package com.alibaba.fastjson.issue_3100;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.AfterFilter;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Issue3150 extends TestCase {
+public class Issue3150 {
+    @Test
     public void test_for_issue() throws Exception {
         MyRefAfterFilter refAfterFilterTest = new MyRefAfterFilter();
 

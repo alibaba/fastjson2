@@ -6,12 +6,14 @@ import com.alibaba.fastjson.parser.DefaultJSONParser;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
 
-public class Issue1584 extends TestCase {
+public class Issue1584 {
+    @Test
     public void test_for_issue() throws Exception {
 //        ParserConfig config = new ParserConfig();
 //

@@ -2,8 +2,12 @@ package com.alibaba.fastjson.issue_3300;
 
 import com.alibaba.fastjson.JSONValidator;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue3343 extends TestCase {
+import static org.junit.jupiter.api.Assertions.*;
+
+public class Issue3343 {
+    @Test
     public void test_for_issue() throws Exception {
         assertFalse(
                 JSONValidator.from("{\"name\":\"999}")

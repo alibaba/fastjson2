@@ -2,11 +2,17 @@ package com.alibaba.fastjson.issue_2100;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class Issue2156 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2156 {
+    @BeforeEach
     protected void setUp() throws Exception {
         JSON.defaultTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
         JSON.defaultLocale = Locale.CHINA;
@@ -36,6 +42,7 @@ public class Issue2156 extends TestCase {
 //        assertEquals("\"2018-07-15\"", str);
 //    }
 
+    @Test
     public void test_for_issue_time() throws Exception {
         java.sql.Time date = java.sql.Time.valueOf("12:13:14");
         String str = JSON.toJSONStringWithDateFormat(date, JSON.DEFFAULT_DATE_FORMAT);

@@ -461,11 +461,15 @@ public class JSON {
 
     public static Object toJSON(Object javaObject) {
         if (javaObject instanceof JSON) {
-            return (JSON) javaObject;
+            return javaObject;
         }
 
         String str = JSON.toJSONString(javaObject);
-        return JSON.parse(str);
+        Object object = JSON.parse(str);
+        if (object instanceof List) {
+            return new JSONArray((List) object);
+        }
+        return object;
     }
 
     public static List<Object> parseArray(String text, Type[] types) {

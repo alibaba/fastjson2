@@ -2,10 +2,12 @@ package com.alibaba.fastjson.issue_2200;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-public class Issue2238 extends TestCase {
+public class Issue2238 {
+    @Test
     public void test_for_issue() throws Exception {
         CapitalLimitMonenyDTO capitalLimitMonenyDTO =new CapitalLimitMonenyDTO();
         capitalLimitMonenyDTO.setMaxChargeMoney(new BigDecimal("200000"));

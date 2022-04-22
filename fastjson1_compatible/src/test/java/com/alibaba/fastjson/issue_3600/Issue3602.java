@@ -6,13 +6,16 @@ import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.ObjectSerializer;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 
-public class Issue3602 extends TestCase {
+public class Issue3602 {
     private UnsupportedEncodingException exception = new UnsupportedEncodingException();
+
+    @Test
     public void test_for_issue() throws Exception {
         VO vo = new VO();
 //        vo.id = 1L;

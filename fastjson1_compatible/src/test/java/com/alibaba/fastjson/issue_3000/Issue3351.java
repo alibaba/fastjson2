@@ -2,12 +2,17 @@ package com.alibaba.fastjson.issue_3000;
 
 import com.alibaba.fastjson.JSONValidator;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @Author ：Nanqi
  * @Date ：Created in 00:14 2020/7/18
  */
-public class Issue3351 extends TestCase {
+public class Issue3351 {
+    @Test
     public void test_for_issue() throws Exception {
         String cString = "c110";
         boolean cValid = JSONValidator.from(cString).validate();

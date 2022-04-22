@@ -4,28 +4,32 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.Calendar;
 
-public class CalendarTest extends TestCase {
+public class CalendarTest {
 
+    @Test
     public void test_null() throws Exception {
         String text = "{\"calendar\":null}";
-        
+
         VO vo = JSON.parseObject(text, VO.class);
         Assert.assertNull(vo.getCalendar());
     }
-    
+
+    @Test
     public void test_codec() throws Exception {
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         VO vo = new VO();
         vo.setCalendar(calendar);
         String text = JSON.toJSONString(vo);
-        
+
         VO vo2 = JSON.parseObject(text, VO.class);
         Assert.assertEquals(vo.getCalendar().getTimeInMillis(), vo2.getCalendar().getTimeInMillis());
     }
-    
+
+    @Test
     public void test_codec_iso88591() throws Exception {
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         VO vo = new VO();
@@ -35,7 +39,8 @@ public class CalendarTest extends TestCase {
         VO vo2 = JSON.parseObject(text, VO.class);
         Assert.assertEquals(vo.getCalendar().getTimeInMillis(), vo2.getCalendar().getTimeInMillis());
     }
-    
+
+    @Test
     public void test_codec_iso88591_2() throws Exception {
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.set(Calendar.SECOND, 0);
@@ -44,7 +49,7 @@ public class CalendarTest extends TestCase {
         vo.setCalendar(calendar);
         String text = JSON.toJSONString(vo, SerializerFeature.UseISO8601DateFormat);
         System.out.println(text);
-        
+
         VO vo2 = JSON.parseObject(text, VO.class);
         Assert.assertEquals(vo.getCalendar().getTimeInMillis(), vo2.getCalendar().getTimeInMillis());
     }

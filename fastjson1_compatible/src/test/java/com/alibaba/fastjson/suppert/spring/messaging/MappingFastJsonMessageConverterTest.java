@@ -5,12 +5,14 @@ import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.messaging.MappingFastJsonMessageConverter;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
 
-public class MappingFastJsonMessageConverterTest extends TestCase {
+public class MappingFastJsonMessageConverterTest {
 
+    @Test
     public void test_1() throws Exception {
 
         MappingFastJsonMessageConverter converter = new MappingFastJsonMessageConverter();

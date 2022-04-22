@@ -6,10 +6,14 @@ package com.alibaba.fastjson.issue_2700;
 
 import com.alibaba.fastjson.JSONPath;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2743 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2743 {
 
     // 场景：验证字符串数组，楼主提供的用例
+    @Test
     public void test_0() throws Exception {
         String json = "{\"info\":{\"com.xxx.service.xxxServiceForOrder@queryGoodsV2(Long,Long,Long)\":[{\"method\":\"queryPrepayGoodsV2\"}]}}";
         Object obj = JSONPath.extract(json,
@@ -18,6 +22,7 @@ public class Issue2743 extends TestCase {
     }
 
     // 场景：验证数字数组
+    @Test
     public void test_1() throws Exception {
         String json = "[10,11,12,13,14,15,16,17,18,19,20]";
         Object obj = JSONPath.extract(json, "$[3,4]");
