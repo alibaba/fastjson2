@@ -6,12 +6,16 @@ import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Issue1879 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class Issue1879 {
+    @Test
     public void test_for_issue() throws Exception {
         String json = "{\n" +
                 "   \"ids\" : \"1,2,3\"\n" +
@@ -19,6 +23,7 @@ public class Issue1879 extends TestCase {
         M1 m = JSON.parseObject(json, M1.class);
     }
 
+    @Test
     public void test_for_issue_2() throws Exception {
         String json = "{\n" +
                 "   \"ids\" : \"1,2,3\"\n" +
@@ -27,6 +32,7 @@ public class Issue1879 extends TestCase {
         assertNotNull(m);
     }
 
+    @Test
     public void test_for_issue_2_creators() throws Exception {
         ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
                 ObjectReaderCreator.INSTANCE,

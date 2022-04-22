@@ -2,10 +2,12 @@ package com.alibaba.fastjson2.v1issues.issue_1400;
 
 import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-public class Issue_for_wuye extends TestCase {
+public class Issue_for_wuye {
+    @Test
     public void test_for_issue() throws Exception {
         String poistr = "{\"gmtModified\":\"2017-09-07 16:39:19\",\"gmtCreate\":\"2017-09-07 16:39:19\"}";
         TimeBean poiInfo = JSON.parseObject(poistr, TimeBean.class);

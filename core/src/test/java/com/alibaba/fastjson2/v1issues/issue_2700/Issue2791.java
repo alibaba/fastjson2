@@ -4,8 +4,12 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2791 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2791 {
+    @Test
     public void test_for_issue() throws Exception {
         JSONObject jsonObject = JSON.parseObject("{\"dependencies\":[{\"values\":[{\"name\":\"Demo\"}]}]}");
         JSONPath.of("$.dependencies.values[?(@.name=='Demo')]")
@@ -20,6 +24,7 @@ public class Issue2791 extends TestCase {
 //        assertEquals("{\"dependencies\":[]}", jsonObject.toString());
 //    }
 
+    @Test
     public void test_for_issue2() throws Exception {
         JSONObject jsonObject = JSON.parseObject("{\"values\":[{\"name\":\"Demo\"}]}");
         JSONPath.of("$.values[?(@.name=='Demo')]")

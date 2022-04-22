@@ -2,8 +2,12 @@ package com.alibaba.fastjson2.v1issues.issue_3300;
 
 import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue3334 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3334 {
+    @Test
     public void test_for_issue() throws Exception {
         assertEquals(0,
                 JSON.parseObject("{\"id\":false}", VO.class).id);

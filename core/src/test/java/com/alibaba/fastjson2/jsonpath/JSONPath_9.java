@@ -3,13 +3,17 @@ package com.alibaba.fastjson2.jsonpath;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2_vo.Int1;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class JSONPath_9 extends TestCase {
+import static org.junit.jupiter.api.Assertions.*;
 
+public class JSONPath_9 {
+
+    @Test
     public void test_remove_error() throws Exception {
         Int1 vo = new Int1();
         vo.setV0000(1001);
@@ -23,6 +27,7 @@ public class JSONPath_9 extends TestCase {
         assertEquals(0, vo.getV0000());
     }
 
+    @Test
     public void test_paths() throws Exception {
         Model m = new Model();
         m.f0 = 101;
@@ -36,6 +41,7 @@ public class JSONPath_9 extends TestCase {
         assertNull(m.f1);
     }
 
+    @Test
     public void test_paths_1() throws Exception {
         Map map = new HashMap();
         map.put("f0", 1001);
@@ -45,6 +51,7 @@ public class JSONPath_9 extends TestCase {
         assertEquals(3, paths.size());
     }
 
+    @Test
     public void test_paths_2() throws Exception {
         Map map = new HashMap();
         map.put("f0", 1001);
@@ -61,6 +68,7 @@ public class JSONPath_9 extends TestCase {
         assertEquals(1, map.size());
     }
 
+    @Test
     public void test_paths_3() throws Exception {
         JSONPath.paths(null);
         JSONPath.paths(1);

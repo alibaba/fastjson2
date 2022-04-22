@@ -5,11 +5,15 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.Collections;
 
-public class JSONPath_2 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class JSONPath_2 {
+    @Test
     public void test_path() throws Exception {
         String json ="{\"user\":[{\"amount\":1.11,\"isadmin\":true,\"age\":18},{\"amount\":0.22,\"isadmin\":false,\"age\":28}]}";
         
@@ -98,6 +102,7 @@ public class JSONPath_2 extends TestCase {
         }
     }
 
+    @Test
     public void test_path_1() {
         JSONObject root = new JSONObject()
                 .fluentPut("user"
@@ -141,6 +146,7 @@ public class JSONPath_2 extends TestCase {
         );
     }
 
+    @Test
     public void test_path_len() {
         assertEquals("0",
                 JSONPath.of("$.length()")

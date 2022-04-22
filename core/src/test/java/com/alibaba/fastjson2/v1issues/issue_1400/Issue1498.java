@@ -2,13 +2,19 @@ package com.alibaba.fastjson2.v1issues.issue_1400;
 
 import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1498 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+public class Issue1498 {
+    @Test
     public void test_for_issue() throws Exception {
         Model model = JSON.parseObject("{\"flag\":\"QUALITY_GRADUATE\"}", Model.class);
         assertNull(model.flag);
     }
 
+    @Test
     public void test_for_issue_match() throws Exception {
         Model model = JSON.parseObject("{\"flag\":\"IS_NEED_CHECK_IDENTITY\"}", Model.class);
         assertSame(BuFlag.IS_NEED_CHECK_IDENTITY, model.flag);

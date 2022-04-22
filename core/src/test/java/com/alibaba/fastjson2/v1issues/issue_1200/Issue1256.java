@@ -2,14 +2,18 @@ package com.alibaba.fastjson2.v1issues.issue_1200;
 
 import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  * Created by kimmking on 12/06/2017.
  */
-public class Issue1256 extends TestCase {
+public class Issue1256 {
+    @Test
     public void test_for_issue() throws Exception {
 
 

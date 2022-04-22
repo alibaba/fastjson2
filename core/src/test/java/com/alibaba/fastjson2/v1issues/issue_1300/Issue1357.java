@@ -2,13 +2,15 @@ package com.alibaba.fastjson2.v1issues.issue_1300;
 
 import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
 /**
  * Created by wenshao on 31/07/2017.
  */
-public class Issue1357 extends TestCase {
+public class Issue1357 {
+    @Test
     public void test_for_issue() throws Exception {
 
         String str = "{\"d2\":null}";

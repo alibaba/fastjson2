@@ -4,16 +4,21 @@ import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-public class Issue3544 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+
+public class Issue3544 {
+
+    @Test
     public void test_errorType() {
-        assertNull("", JSON.toJavaObject(
+        assertNull(JSON.toJavaObject(
                 JSON.parseObject("{\"result\":\"\"}"), TestVO.class).result);
 
-        assertNull("", JSON.toJavaObject(
+        assertNull(JSON.toJavaObject(
                 JSON.parseObject("{\"result\":\"null\"}"), TestVO.class).result);
     }
 

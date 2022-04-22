@@ -4,10 +4,13 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class JSONPath_13
-        extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+public class JSONPath_13 {
+
+    @Test
     public void test_0() {
         JSONObject root = new JSONObject();
         root.put("company", new JSONObject());
@@ -20,6 +23,7 @@ public class JSONPath_13
         assertEquals("{\"company\":{\"name\":\"jobs\"}}", JSON.toJSONString(root));
     }
 
+    @Test
     public void test_1() {
         Root root = new Root();
         root.company = new Company();

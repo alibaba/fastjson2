@@ -5,13 +5,17 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JSONPath_between_int extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class JSONPath_between_int {
+    @Test
     public void test_between() throws Exception {
         List list = new ArrayList();
         list.add(new Entity(101, "kiki"));
@@ -21,7 +25,8 @@ public class JSONPath_between_int extends TestCase {
         Assert.assertEquals(1, result.size());
         Assert.assertSame(list.get(0), result.get(0));
     }
-    
+
+    @Test
     public void test_between_2() throws Exception {
         List list = new ArrayList();
         list.add(new Entity(101, "kiki"));
@@ -32,7 +37,8 @@ public class JSONPath_between_int extends TestCase {
         Assert.assertSame(list.get(0), result.get(0));
         Assert.assertSame(list.get(1), result.get(1));
     }
-    
+
+    @Test
     public void test_between_not() throws Exception {
         List list = new ArrayList();
         list.add(new Entity(101, "kiki"));
@@ -43,6 +49,7 @@ public class JSONPath_between_int extends TestCase {
         Assert.assertSame(list.get(2), result.get(0));
     }
 
+    @Test
     public void test_between_3() throws Exception {
         JSONArray array = new JSONArray()
                 .fluentAdd(
@@ -68,6 +75,7 @@ public class JSONPath_between_int extends TestCase {
         );
     }
 
+    @Test
     public void test_between_4() throws Exception {
         JSONArray array = new JSONArray()
                 .fluentAdd(
@@ -93,6 +101,7 @@ public class JSONPath_between_int extends TestCase {
         );
     }
 
+    @Test
     public void test_and_0() throws Exception {
         JSONArray array = new JSONArray()
                 .fluentAdd(
@@ -118,6 +127,7 @@ public class JSONPath_between_int extends TestCase {
         );
     }
 
+    @Test
     public void test_1() throws Exception {
         JSONObject object = new JSONObject()
                 .fluentPut("id", BigDecimal.valueOf(101))

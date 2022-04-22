@@ -6,11 +6,15 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 29/07/2017.
  */
-public class Issue1310 extends TestCase {
+public class Issue1310 {
+    @Test
     public void test_trim() throws Exception {
         Model model = new Model();
         model.value = " a ";
@@ -21,6 +25,7 @@ public class Issue1310 extends TestCase {
         assertEquals("a", model2.value);
     }
 
+    @Test
     public void test_trim_2_lambda() throws Exception {
         Model2 model = new Model2();
         model.value = " a ";

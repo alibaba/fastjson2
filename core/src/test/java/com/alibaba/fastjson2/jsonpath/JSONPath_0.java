@@ -1,33 +1,39 @@
 package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.JSONPath;
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class JSONPath_0 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
+public class JSONPath_0 {
+
+    @Test
     public void test_root() throws Exception {
         Object obj = new Object();
-        Assert.assertSame(obj, JSONPath.of("$").eval(obj));
+        assertSame(obj, JSONPath.of("$").eval(obj));
     }
 
+    @Test
     public void test_null() throws Exception {
-        Assert.assertNull(JSONPath.of("$").extract(null));
+        assertNull(JSONPath.of("$").extract(null));
     }
 
+    @Test
     public void test_map() throws Exception {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("val", new Object());
-        Assert.assertSame(map.get("val"), JSONPath.of("$.val").eval(map));
+        assertSame(map.get("val"), JSONPath.of("$.val").eval(map));
     }
-    
+
+    @Test
     public void test_entity() throws Exception {
         Entity entity = new Entity();
         entity.setValue(new Object());
-        Assert.assertSame(entity.getValue(), JSONPath.of("$.value").eval(entity));
+        assertSame(entity.getValue(), JSONPath.of("$.value").eval(entity));
     }
 
     public static class Entity {

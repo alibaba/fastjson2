@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.v1issues.issue_1300;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.filter.ValueFilter;
 import com.alibaba.fastjson2.filter.Filter;
-import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -12,10 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * Created by kimmking on 02/07/2017.
  */
-public class Issue1307 extends TestCase {
+public class Issue1307 {
     ValueFilter contextValueFilter = new ValueFilter() {
         public Object apply(Object obj, String name, Object value) {
             return "mark-"+value;

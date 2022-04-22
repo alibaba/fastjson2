@@ -3,8 +3,12 @@ package com.alibaba.fastjson2.v1issues.issue_1600;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1627 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class Issue1627 {
+    @Test
     public void test_for_issue() throws Exception {
         String a = "{\"101a0.test-b\":\"tt\"}";
         Object o = JSON.parse(a);

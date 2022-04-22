@@ -4,15 +4,32 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.TimeZone;
 
 import static junit.framework.TestCase.assertEquals;
 
 public class JdbcTimeTest {
+    private TimeZone defaultTimeZone;
+
+    @BeforeEach
+    public void before() {
+        defaultTimeZone  = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+    }
+
+    @AfterEach
+    public void after() {
+        TimeZone.setDefault(defaultTimeZone);
+    }
+
+
     @Test
     public void test_time() {
         A a = JSON.parseObject("{\"value\":\"12:13:14\"}", A.class);

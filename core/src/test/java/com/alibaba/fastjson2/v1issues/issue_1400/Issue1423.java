@@ -5,10 +5,14 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONReader;
 import com.alibaba.fastjson.parser.Feature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 
-public class Issue1423 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class Issue1423 {
+    @Test
     public void test_for_issue() throws Exception {
         Exception error = null;
         try {
@@ -21,6 +25,7 @@ public class Issue1423 extends TestCase {
         error.printStackTrace();
     }
 
+    @Test
     public void test_for_issue_reader() throws Exception {
         Exception error = null;
         try {
@@ -31,6 +36,7 @@ public class Issue1423 extends TestCase {
         assertNotNull(error);
     }
 
+    @Test
     public void test_for_issue_arrayMapping() throws Exception {
         Exception error = null;
         try {
@@ -41,6 +47,7 @@ public class Issue1423 extends TestCase {
         assertNotNull(error);
     }
 
+    @Test
     public void test_for_issue_arrayMapping_reader() throws Exception {
         Exception error = null;
         try {

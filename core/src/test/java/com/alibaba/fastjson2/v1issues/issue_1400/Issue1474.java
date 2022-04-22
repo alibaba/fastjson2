@@ -3,11 +3,15 @@ package com.alibaba.fastjson2.v1issues.issue_1400;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Issue1474 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1474 {
+    @Test
     public void test_for_issue() throws Exception {
         Map<String,Object> extraData = new HashMap<String,Object>();
         extraData.put("ext_1", null);

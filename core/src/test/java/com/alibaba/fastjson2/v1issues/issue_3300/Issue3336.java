@@ -2,8 +2,12 @@ package com.alibaba.fastjson2.v1issues.issue_3300;
 
 import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue3336 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3336 {
+    @Test
     public void test_for_issue() throws Exception {
         String s = "{\"schema\":{\"$ref\":\"#/definitions/URLJumpConfig\"}}";
         assertEquals(s, JSON.parseObject(s)

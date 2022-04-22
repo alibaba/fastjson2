@@ -4,11 +4,15 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 01/04/2017.
  */
-public class Issue1121 extends TestCase {
+public class Issue1121 {
+    @Test
     public void test_for_issue() throws Exception {
         JSONObject userObject = new JSONObject();
         userObject.put("name","jack");

@@ -3,14 +3,16 @@ package com.alibaba.fastjson2.v1issues.issue_1600;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-public class Issue1679 extends TestCase {
-    protected void setUp() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    }
+public class Issue1679 {
 
+
+    @Test
     public void test_for_issue() throws Exception {
         String json = "{\"create\":\"2018-01-10 08:30:00\"}";
         User user = JSON.parseObject(json, User.class);

@@ -6,11 +6,15 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson2.util.TypeUtils;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 01/07/2017.
  */
-public class Issue1300C extends TestCase {
+public class Issue1300C {
+    @Test
     public void testFullJSON() {
         JSONObject data = new JSONObject();
         data.put("name", "string");
@@ -22,12 +26,12 @@ public class Issue1300C extends TestCase {
         assertEquals("pinyin", object.pinyin);
     }
 
+    @Test
     public void testEmptyJSON() {
         City object = TypeUtils.cast(new JSONObject(), City.class);
-        Assert.assertEquals(null, object.name);
-        Assert.assertEquals(0, object.code);
+        assertEquals(null, object.name);
+        assertEquals(0, object.code);
     }
-
 
     public static class City implements Parcelable {
         public final int code;

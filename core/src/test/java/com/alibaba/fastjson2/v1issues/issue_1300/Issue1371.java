@@ -3,18 +3,22 @@ package com.alibaba.fastjson2.v1issues.issue_1300;
 import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.TreeMap;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * Created by wenshao on 05/08/2017.
  */
-public class Issue1371 extends TestCase {
+public class Issue1371 {
     private enum Rooms{
         A, B, C, D ,E ;
     }
 
+    @Test
     public void testFastjsonEnum(){
 
         Map<Rooms, Rooms> enumMap = new TreeMap<Rooms, Rooms>();
@@ -22,7 +26,7 @@ public class Issue1371 extends TestCase {
         enumMap.put(Rooms.C, Rooms.D);
         enumMap.put(Rooms.E, Rooms.A);
 
-        Assert.assertEquals(JSON.toJSONString(enumMap),
+        assertEquals(JSON.toJSONString(enumMap),
                 "{\"C\":\"D\",\"E\":\"A\"}");
 
     }

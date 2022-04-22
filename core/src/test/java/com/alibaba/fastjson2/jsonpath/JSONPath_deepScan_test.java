@@ -3,15 +3,17 @@ package com.alibaba.fastjson2.jsonpath;
 import com.alibaba.fastjson2.JSONPath;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class JSONPath_deepScan_test extends TestCase {
+public class JSONPath_deepScan_test {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
     public void test_0() throws Exception {
         Map root = Collections.singletonMap("company", //
                                             Collections.singletonMap("departs", //

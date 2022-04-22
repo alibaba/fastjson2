@@ -6,8 +6,11 @@ import com.alibaba.fastjson.annotation.JSONField;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
-public class Issue2065 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+public class Issue2065 {
+
+    @Test
     public void test_for_issue() throws Exception {
         Exception error = null;
         try {
@@ -19,6 +22,7 @@ public class Issue2065 extends TestCase {
         error.printStackTrace();
     }
 
+    @Test
     public void test_for_issue_01() {
         Exception error = null;
         try {

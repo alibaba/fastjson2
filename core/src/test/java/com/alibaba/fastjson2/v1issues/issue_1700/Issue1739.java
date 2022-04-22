@@ -4,8 +4,12 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONField;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1739 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1739 {
+    @Test
     public void test_for_issue() throws Exception {
         M0 model = new M0();
         model.data = new JSONObject();
@@ -14,6 +18,7 @@ public class Issue1739 extends TestCase {
         assertEquals("{\"data\":{}}", json);
     }
 
+    @Test
     public void test_for_issue_1() throws Exception {
         M1 model = new M1();
         model.data = new JSONObject();
