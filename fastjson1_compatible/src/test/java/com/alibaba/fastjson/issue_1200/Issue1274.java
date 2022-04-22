@@ -4,11 +4,15 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.NameFilter;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by kimmking on 15/06/2017.
  */
-public class Issue1274 extends TestCase {
+public class Issue1274 {
+    @Test
     public void test_for_issue() throws Exception {
 
         User user = new User();

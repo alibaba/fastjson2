@@ -3,13 +3,15 @@ package com.alibaba.fastjson.issue_1200;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.deserializer.ExtraProcessor;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by kimmking on 15/06/2017.
  */
-public class Issue1271 extends TestCase {
+public class Issue1271 {
+    @Test
     public void test_for_issue() throws Exception {
 
         String json = "{\"a\":1,\"b\":2}";

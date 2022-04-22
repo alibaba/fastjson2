@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1445 extends TestCase {
+public class Issue1445 {
+    @Test
     public void test_for_issue() throws Exception {
 
         JSONObject obj = new JSONObject();

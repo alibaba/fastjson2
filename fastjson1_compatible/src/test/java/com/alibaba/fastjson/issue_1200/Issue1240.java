@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 import org.springframework.util.LinkedMultiValueMap;
 
 /**
  * Created by wenshao on 01/06/2017.
  */
-public class Issue1240 extends TestCase {
+public class Issue1240 {
+    @Test
     public void test_for_issue() throws Exception {
         ParserConfig parserConfig = new ParserConfig();
 //        parserConfig.setAutoTypeSupport(true);

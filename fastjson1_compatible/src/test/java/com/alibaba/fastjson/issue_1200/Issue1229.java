@@ -3,15 +3,18 @@ package com.alibaba.fastjson.issue_1200;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Created by wenshao on 30/05/2017.
  */
-public class Issue1229 extends TestCase {
+public class Issue1229 {
+    @Test
     public void test_for_issue() throws Exception {
         final Object parsed = JSON.parse("{\"data\":{}}");
         assertTrue(parsed instanceof JSONObject);

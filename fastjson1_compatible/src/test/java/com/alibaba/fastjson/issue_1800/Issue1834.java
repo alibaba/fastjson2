@@ -3,11 +3,13 @@ package com.alibaba.fastjson.issue_1800;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class Issue1834 extends TestCase {
+public class Issue1834 {
+    @Test
     public void test_for_issue() throws Exception {
         IndexQuery_Number query_number = new IndexQuery_Number();
         IndexQuery_Comparable query_comparable = new IndexQuery_Comparable();

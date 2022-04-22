@@ -4,10 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
-public class Issue1987 extends TestCase {
+public class Issue1987 {
+    @Test
     public void test_for_issue() throws Exception {
         JsonExample example = new JsonExample();
 

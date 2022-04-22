@@ -5,10 +5,14 @@ import com.alibaba.fastjson.annotation.JSONCreator;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.collect.ImmutableMap;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 
-public class Issue1458 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1458 {
+    @Test
     public void test_for_issue() throws Exception {
         HostPoint hostPoint = new HostPoint(new HostAddress("192.168.10.101"));
         hostPoint.setFingerprint(new Fingerprint("abc"));

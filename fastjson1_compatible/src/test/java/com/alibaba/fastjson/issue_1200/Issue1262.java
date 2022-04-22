@@ -2,6 +2,7 @@ package com.alibaba.fastjson.issue_1200;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,7 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by wenshao on 15/06/2017.
  */
-public class Issue1262 extends TestCase {
+public class Issue1262 {
+    @Test
     public void test_for_issue() throws Exception {
         Model model = JSON.parseObject("{\"chatterMap\":{}}", Model.class);
     }

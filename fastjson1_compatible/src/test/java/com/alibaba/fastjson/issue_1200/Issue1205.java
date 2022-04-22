@@ -4,13 +4,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 /**
  * Created by wenshao on 11/06/2017.
  */
-public class Issue1205 extends TestCase {
+public class Issue1205 {
+    @Test
     public void test_for_issue() throws Exception {
         JSONArray array = new JSONArray();
         array.add(new JSONObject());

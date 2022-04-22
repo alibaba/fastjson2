@@ -3,8 +3,12 @@ package com.alibaba.fastjson.issue_1400;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1465 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1465 {
+    @Test
     public void test_for_issue() throws Exception {
         String json = "{\"id\":3,\"hasSth\":true}";
         Model model = JSON.parseObject(json, Model.class);

@@ -4,12 +4,16 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
 
-public class DoubleTest3_random extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class DoubleTest3_random {
+    @Test
     public void test_extract() throws Exception {
         double val = 7.754693899073573E-4;
         String str = JSON.toJSONString(new Model(val));
@@ -19,6 +23,7 @@ public class DoubleTest3_random extends TestCase {
         assertEquals(val, m.value);
     }
 
+    @Test
     public void test_ran() throws Exception {
         Random rand = new Random();
 
@@ -32,6 +37,7 @@ public class DoubleTest3_random extends TestCase {
         }
     }
 
+    @Test
     public void test_ran_2() throws Exception {
         Random rand = new Random();
 
@@ -45,6 +51,7 @@ public class DoubleTest3_random extends TestCase {
         }
     }
 
+    @Test
     public void test_ran_3() throws Exception {
         Random rand = new Random();
 
@@ -58,6 +65,7 @@ public class DoubleTest3_random extends TestCase {
         }
     }
 
+    @Test
     public void test_ran_4() throws Exception {
         Random rand = new Random();
 

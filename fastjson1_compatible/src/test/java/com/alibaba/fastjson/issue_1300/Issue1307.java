@@ -14,10 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * Created by kimmking on 02/07/2017.
  */
-public class Issue1307 extends TestCase {
+public class Issue1307 {
     ContextValueFilter contextValueFilter = new ContextValueFilter() {
         public Object process(BeanContext beanContext, Object obj, String name, Object value) {
             return "mark-"+value;

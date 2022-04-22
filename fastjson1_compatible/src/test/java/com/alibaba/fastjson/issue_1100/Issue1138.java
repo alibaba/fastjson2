@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created by wenshao on 10/04/2017.
  */
-public class Issue1138 extends TestCase {
-    public void test_for_issue() throws Exception {
+public class Issue1138 {
+    @Test
+    public void test_for_issue() {
         Model model = new Model();
         model.id = 1001;
         model.name = "gaotie";

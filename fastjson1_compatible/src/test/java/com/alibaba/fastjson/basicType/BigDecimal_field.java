@@ -3,12 +3,15 @@ package com.alibaba.fastjson.basicType;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
 import static com.alibaba.fastjson.serializer.SerializerFeature.BrowserCompatible;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BigDecimal_field extends TestCase {
+public class BigDecimal_field {
+    @Test
     public void test_for_issue() throws Exception {
         assertEquals("{\"value\":\"9007199254741992\"}"
                 , JSON.toJSONString(

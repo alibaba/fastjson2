@@ -3,11 +3,15 @@ package com.alibaba.fastjson.issue_1300;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Created by wenshao on 30/07/2017.
  */
-public class Issue1330_boolean extends TestCase {
+public class Issue1330_boolean {
+    @Test
     public void test_for_issue() throws Exception {
         Exception error = null;
         try {
@@ -19,6 +23,7 @@ public class Issue1330_boolean extends TestCase {
 //        assertTrue(error.getMessage().indexOf("parseBoolean error") != -1);
     }
 
+    @Test
     public void test_for_issue_1() throws Exception {
         Exception error = null;
         try {
@@ -30,6 +35,7 @@ public class Issue1330_boolean extends TestCase {
 //        assertTrue(error.getMessage().indexOf("parseBoolean error") != -1);
     }
 
+    @Test
     public void test_for_issue_2() throws Exception {
         Exception error = null;
         try {

@@ -5,11 +5,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.parser.DefaultJSONParser;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by kimmking on 20/06/2017.
  */
-public class Issue1278 extends TestCase {
+public class Issue1278 {
+    @Test
     public void test_for_issue() throws Exception {
 
         String json1 = "{\"name\":\"name\",\"id\":1}";

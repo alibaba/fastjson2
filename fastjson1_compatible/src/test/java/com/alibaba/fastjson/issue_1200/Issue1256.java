@@ -2,17 +2,19 @@ package com.alibaba.fastjson.issue_1200;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  * Created by kimmking on 12/06/2017.
  */
-public class Issue1256 extends TestCase {
+public class Issue1256 {
+    @Test
     public void test_for_issue() throws Exception {
-
-
         // params ={"key_obj":{"age":39,"name":"Mike"},"key_string":"Hello","key_random":-1193959466,"key_int":10000}
 
         A a = new A();

@@ -2,11 +2,13 @@ package com.alibaba.fastjson.issue_2700;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class Issue2779 extends TestCase {
+public class Issue2779 {
 
+    @Test
     public void test_for_issue() throws Exception {
         String str = JSON.toJSONString(new Model());
         JSON.parseObject(str, Model.class);

@@ -3,11 +3,16 @@ package com.alibaba.fastjson.basicType;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Created by wenshao on 04/08/2017.
  */
-public class FloatTest extends TestCase {
+public class FloatTest {
+    @Test
     public void test_0() throws Exception {
         String json = "{\"v1\":-0.012671709,\"v2\":0.6042485,\"v3\":0.13231707,\"v4\":0.80090785,\"v5\":0.6192943}";
         String json2 = "{\"v1\":\"-0.012671709\",\"v2\":\"0.6042485\",\"v3\":\"0.13231707\",\"v4\":\"0.80090785\",\"v5\":\"0.6192943\"}";
@@ -31,6 +36,7 @@ public class FloatTest extends TestCase {
         assertEquals(0.6192943f, m2.v5);
     }
 
+    @Test
     public void test_array_mapping() throws Exception {
         String json = "[-0.012671709,0.6042485,0.13231707,0.80090785,0.6192943]";
         String json2 = "[\"-0.012671709\",\"0.6042485\",\"0.13231707\",\"0.80090785\",\"0.6192943\"]";
