@@ -2,11 +2,15 @@ package com.alibaba.fastjson2.v1issues.issue_1400;
 
 import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Issue1424 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class Issue1424 {
 
     public static class IntegerVal {
         private int v;
@@ -34,6 +38,7 @@ public class Issue1424 extends TestCase {
         }
     }
 
+    @Test
     public void test_for_issue_int() {
         Map<String, Long> intOverflowMap = new HashMap<String, Long>();
         long intOverflow = Integer.MAX_VALUE;
@@ -49,6 +54,7 @@ public class Issue1424 extends TestCase {
         assertNotNull(error);
     }
 
+    @Test
     public void test_for_issue_float() {
         Map<String, Double> floatOverflowMap = new HashMap<String, Double>();
         double floatOverflow = Float.MAX_VALUE;
@@ -62,6 +68,7 @@ public class Issue1424 extends TestCase {
         assertEquals(floatVal.v, Float.parseFloat("3.4028234663852886E38"));
     }
 
+    @Test
     public void test_for_issue_float_infinity() {
         Map<String, Double> floatOverflowMap = new HashMap<String, Double>();
         double floatOverflow = Float.MAX_VALUE;

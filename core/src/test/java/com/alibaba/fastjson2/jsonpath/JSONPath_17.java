@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.*;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -9,7 +10,10 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class JSONPath_17 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class JSONPath_17 {
+    @Test
     public void test_for_jsonpath() throws Exception {
         String str = "cartGroups[0].cartItemGroups[0].cartItems[0].item.category.categoryExtra.stdCategoryDO.pathList";
         JSONPath path = JSONPath.of(str);
@@ -21,6 +25,7 @@ public class JSONPath_17 extends TestCase {
         assertEquals(11, segments.size());
     }
 
+    @Test
     public void test_for_jsonpath_enumKey() throws Exception {
         Map map = new HashMap();
         map.put(TimeUnit.DAYS, "101");
@@ -30,6 +35,7 @@ public class JSONPath_17 extends TestCase {
                         .eval(map));
     }
 
+    @Test
     public void test_for_jsonpath_enumKey_1() throws Exception {
         Map root = new HashMap();
         Map map = new HashMap();
@@ -41,6 +47,7 @@ public class JSONPath_17 extends TestCase {
                         .eval(root));
     }
 
+    @Test
     public void test_for_jsonpath_longKey() throws Exception {
         Map map = new HashMap();
         map.put(2748734281L, "101");
@@ -50,6 +57,7 @@ public class JSONPath_17 extends TestCase {
                         .eval(map));
     }
 
+    @Test
     public void test_for_jsonpath_longKey_1() throws Exception {
         Map root = new HashMap();
         Map map = new HashMap();
@@ -61,6 +69,7 @@ public class JSONPath_17 extends TestCase {
                         .eval(root));
     }
 
+    @Test
     public void test_for_jsonpath_longKey_2() throws Exception {
         Map map = new HashMap();
         map.put(1773193982L, "101");
@@ -70,6 +79,7 @@ public class JSONPath_17 extends TestCase {
                         .eval(map));
     }
 
+    @Test
     public void test_for_jsonpath_longKey_3() throws Exception {
         Map root = new HashMap();
         Map map = new HashMap();

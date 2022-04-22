@@ -3,11 +3,13 @@ package com.alibaba.fastjson2.jsonpath;
 import com.alibaba.fastjson2.JSONPath;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class JSONPath_between_double extends TestCase {
+public class JSONPath_between_double {
+    @Test
     public void test_between() throws Exception {
         List list = new ArrayList();
         list.add(new Entity(101, "kiki"));
@@ -17,7 +19,8 @@ public class JSONPath_between_double extends TestCase {
         Assert.assertEquals(1, result.size());
         Assert.assertSame(list.get(0), result.get(0));
     }
-    
+
+    @Test
     public void test_between_2() throws Exception {
         List list = new ArrayList();
         list.add(new Entity(101, "kiki"));
@@ -28,7 +31,8 @@ public class JSONPath_between_double extends TestCase {
         Assert.assertSame(list.get(0), result.get(0));
         Assert.assertSame(list.get(1), result.get(1));
     }
-    
+
+    @Test
     public void test_between_not() throws Exception {
         List list = new ArrayList();
         list.add(new Entity(101, "kiki"));

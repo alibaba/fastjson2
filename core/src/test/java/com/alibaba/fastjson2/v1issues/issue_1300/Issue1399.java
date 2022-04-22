@@ -2,11 +2,13 @@ package com.alibaba.fastjson2.v1issues.issue_1300;
 
 import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created by wenshao on 15/08/2017.
  */
-public class Issue1399 extends TestCase {
+public class Issue1399 {
+    @Test
     public void test_for_issue() throws Exception {
         JSON.parseObject("false", boolean.class);
         JSON.parseObject("false", Boolean.class);
@@ -19,6 +21,7 @@ public class Issue1399 extends TestCase {
         JSON.parseObject("\"FALSE\"", Boolean.class);
     }
 
+    @Test
     public void test_for_issue_true() throws Exception {
         JSON.parseObject("true", boolean.class);
         JSON.parseObject("true", Boolean.class);

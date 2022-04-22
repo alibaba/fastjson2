@@ -3,18 +3,22 @@ package com.alibaba.fastjson2.v1issues.issue_1100;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 14/04/2017.
  */
-public class Issue1146 extends TestCase {
+public class Issue1146 {
+    @Test
     public void test_for_issue() throws Exception {
-        String json = JSON.toJSONString(new Test());
+        String json = JSON.toJSONString(new Bean());
         assertEquals("{\"id\":101}", json);
     }
 
     @JSONType(ignores = {"id2", "id3"})
-    public static class Test {
+    public static class Bean {
 
         public int getId() {
             return 101;

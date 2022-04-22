@@ -7,11 +7,13 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-public class AtomicIntegerArrayFieldTest extends TestCase {
+public class AtomicIntegerArrayFieldTest {
 
+    @Test
     public void test_codec_null() throws Exception {
         V0 v = new V0();
 
@@ -26,6 +28,7 @@ public class AtomicIntegerArrayFieldTest extends TestCase {
         Assert.assertEquals(v1.getValue(), v.getValue());
     }
 
+    @Test
     public void test_codec_null_1() throws Exception {
         V0 v = new V0();
 
@@ -35,7 +38,8 @@ public class AtomicIntegerArrayFieldTest extends TestCase {
         String text = JSON.toJSONString(v, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.NullAsDefaultValue);
         Assert.assertEquals("{\"value\":[]}", text);
     }
-    
+
+    @Test
     public void test_codec_null_2() throws Exception {
         V0 v = JSON.parseObject("{\"value\":[1,2]}", V0.class);
 

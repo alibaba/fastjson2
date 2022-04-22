@@ -2,11 +2,14 @@ package com.alibaba.fastjson2.v1issues.issue_1700;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-public class Issue1766 extends TestCase {
+import static org.junit.jupiter.api.Assertions.*;
+
+public class Issue1766 {
+    @Test
     public void test_for_issue() throws Exception {
 // succ
         String json = "{\"name\":\"张三\"\n, \"birthday\":\"2017-01-01 01:01:01\"}";

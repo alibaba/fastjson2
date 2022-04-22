@@ -4,9 +4,11 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
-public class JSONPath_4 extends TestCase {
+public class JSONPath_4 {
 
+    @Test
     public void test_path() throws Exception {
         String a = "{\"key\":\"value\",\"10.0.1.1\":\"haha\"}";
         Object x = JSON.parse(a);

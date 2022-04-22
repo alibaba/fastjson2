@@ -8,19 +8,24 @@ import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
 import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Created by wenshao on 16/05/2017.
  */
-public class Issue1202 extends TestCase {
+public class Issue1202 {
+    @Test
     public void test_for_issue_0() throws Exception {
         String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
         Model1 model = JSON.parseObject(text, Model1.class);
         assertNotNull(model.date);
     }
 
+    @Test
     public void test_for_issue_0_creators() throws Exception {
         ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
                 ObjectReaderCreator.INSTANCE,
@@ -38,12 +43,14 @@ public class Issue1202 extends TestCase {
         }
     }
 
+    @Test
     public void test_for_issue_2() throws Exception {
         String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
         Model2 model = JSON.parseObject(text, Model2.class);
         assertNotNull(model.date);
     }
 
+    @Test
     public void test_for_issue_2_creators() throws Exception {
         String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
 
@@ -61,13 +68,14 @@ public class Issue1202 extends TestCase {
         }
     }
 
+    @Test
     public void test_for_issue_3() throws Exception {
         String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
         Model3 model = JSON.parseObject(text, Model3.class);
         assertNotNull(model.date);
     }
 
-
+    @Test
     public void test_for_issue_3_creators() throws Exception {
         String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
 

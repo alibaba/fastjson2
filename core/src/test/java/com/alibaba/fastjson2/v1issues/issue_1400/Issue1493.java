@@ -1,17 +1,18 @@
 package com.alibaba.fastjson2.v1issues.issue_1400;
 
 import com.alibaba.fastjson2.JSON;
-import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-public class Issue1493 extends TestCase {
-    protected void setUp() throws Exception {
-    }
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+public class Issue1493 {
+
+    @Test
     public void test_for_issue() throws Exception {
 
         TestBean test = new TestBean();
@@ -26,7 +27,7 @@ public class Issue1493 extends TestCase {
         String t1 = JSON.toJSONString(time1);
 
         String json = JSON.toJSONString(test);
-        Assert.assertEquals("{\"time1\":"+t1+",\"time2\":\"2017-09-22T15:08:56\"}",json);
+        assertEquals("{\"time1\":"+t1+",\"time2\":\"2017-09-22T15:08:56\"}",json);
 
 
         //String default_format = JSON.DEFFAULT_LOCAL_DATE_TIME_FORMAT;
@@ -34,14 +35,14 @@ public class Issue1493 extends TestCase {
         //String stime1 = DateTimeFormatter.ofPattern(JSON.DEFFAULT_LOCAL_DATE_TIME_FORMAT, Locale.CHINA).format(time1);
 
         json = JSON.toJSONString(test);
-        Assert.assertEquals("{\"time1\":"+ JSON.toJSONString(time1) +",\"time2\":\"2017-09-22T15:08:56\"}",json);
+        assertEquals("{\"time1\":"+ JSON.toJSONString(time1) +",\"time2\":\"2017-09-22T15:08:56\"}",json);
 
 
         String pattern = "yyyy-MM-dd'T'HH:mm:ss";
         String stime1 = DateTimeFormatter.ofPattern(pattern, Locale.CHINA).format(time1);
 
         json = JSON.toJSONString(test, "yyyy-MM-dd'T'HH:mm:ss");
-        Assert.assertEquals("{\"time1\":\""+stime1+"\",\"time2\":\""+stime2+"\"}",json);
+        assertEquals("{\"time1\":\""+stime1+"\",\"time2\":\""+stime2+"\"}",json);
 
         //JSON.DEFFAULT_LOCAL_DATE_TIME_FORMAT = default_format;
     }

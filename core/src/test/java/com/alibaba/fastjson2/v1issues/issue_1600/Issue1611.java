@@ -4,8 +4,12 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1611 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1611 {
+    @Test
     public void test_for_issue() throws Exception {
         String pristineJson = "{\"data\":{\"lists\":[{\"Name\":\"Mark\"}]}}";
         JSONArray list = JSON.parseObject(pristineJson).getJSONObject("data").getJSONArray("lists");

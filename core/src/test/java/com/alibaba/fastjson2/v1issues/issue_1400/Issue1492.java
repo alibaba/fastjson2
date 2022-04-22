@@ -4,10 +4,14 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 
-public class Issue1492 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1492 {
+    @Test
     public void test_for_issue() throws Exception {
         DubboResponse resp = new DubboResponse();
 

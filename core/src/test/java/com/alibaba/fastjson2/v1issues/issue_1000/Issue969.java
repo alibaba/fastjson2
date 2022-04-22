@@ -4,13 +4,17 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.JSONObject;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 08/05/2017.
  */
-public class Issue969 extends TestCase {
+public class Issue969 {
+    @Test
     public void test_for_issue() throws Exception {
         JSONObject jsonObject = new JSONObject();
 
@@ -24,6 +28,7 @@ public class Issue969 extends TestCase {
         assertEquals(Model.class, list.get(0).getClass());
     }
 
+    @Test
     public void test_for_issue_1() throws Exception {
         JSONObject jsonObject = new JSONObject();
 

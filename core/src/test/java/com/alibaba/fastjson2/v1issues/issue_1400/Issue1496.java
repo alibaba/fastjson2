@@ -3,11 +3,15 @@ package com.alibaba.fastjson2.v1issues.issue_1400;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONType;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class Issue1496 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1496 {
+    @Test
     public void test_for_issue() throws Exception {
         String json = JSON.toJSONString(SetupStatus.FINAL_TRAIL);
         assertEquals("{\"canRefuse\":true,\"code\":3,\"name\":\"FINAL_TRAIL\",\"nameCn\":\"公益委员会/理事会/理事长审核\"}", json);

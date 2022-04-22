@@ -3,9 +3,11 @@ package com.alibaba.fastjson2.jsonpath;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class JSONPath_15
-        extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class JSONPath_15 {
     static final String a = "{code:1,msg:'Hello world',data:{list:[1,2,3,4,5], ary2:[{a:2},{a:3,b:{c:'ddd'}}]}}";
     static final String b = "[{b:{c:1}}, {b:{d:1}}, {b:{c:2}}, {b:{c:23}}]";
     static final String c = "[{c:'aaaa'}, {b:'cccc'}, {c:'cccaa'}]";
@@ -25,6 +27,7 @@ public class JSONPath_15
 //        assertEquals("[{\"c\":23}]", JSON.toJSONString(items));
 //    }
 
+    @Test
     public void test_min() {
         Object object = JSON.parse(b);
 
@@ -32,6 +35,7 @@ public class JSONPath_15
         assertEquals("1", JSON.toJSONString(min));
     }
 
+    @Test
     public void test_max() {
         Object object = JSON.parse(b);
 
@@ -39,6 +43,7 @@ public class JSONPath_15
         assertEquals("23", JSON.toJSONString(min));
     }
 
+    @Test
     public void test_3() {
         Object object = JSON.parse(c);
 

@@ -4,10 +4,14 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONType;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 
-public class Issue1764_bean_biginteger_type extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1764_bean_biginteger_type {
+    @Test
     public void test_for_issue() throws Exception {
         assertEquals("{\"value\":\"9007199254741992\"}"
                 , JSON.toJSONString(

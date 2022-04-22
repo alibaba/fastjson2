@@ -3,13 +3,17 @@ package com.alibaba.fastjson2.jsonpath;
 import com.alibaba.fastjson2.JSONPath;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class JSONPath_deepScan_test2 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class JSONPath_deepScan_test2 {
 
     @SuppressWarnings({"unchecked" })
+    @Test
     public void test_0() throws Exception {
         
         Root root = new Root();
@@ -20,10 +24,10 @@ public class JSONPath_deepScan_test2 extends TestCase {
         
 
         List<Object> ids = (List<Object>) JSONPath.eval(root, "$..id");
-        Assert.assertEquals(3, ids.size());
-        Assert.assertEquals(1001, ids.get(0));
-        Assert.assertEquals(1002, ids.get(1));
-        Assert.assertEquals(1003, ids.get(2));
+        assertEquals(3, ids.size());
+        assertEquals(1001, ids.get(0));
+        assertEquals(1002, ids.get(1));
+        assertEquals(1003, ids.get(2));
     }
 
     public static class Root {

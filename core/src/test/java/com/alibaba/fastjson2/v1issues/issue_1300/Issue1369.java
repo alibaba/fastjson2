@@ -3,11 +3,15 @@ package com.alibaba.fastjson2.v1issues.issue_1300;
 import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by kimmking on 03/08/2017.
  */
-public class Issue1369 extends TestCase {
+public class Issue1369 {
+    @Test
     public void test_for_issue() throws Exception {
         Foo foo = new Foo();
         foo.a = 1;
@@ -16,7 +20,7 @@ public class Issue1369 extends TestCase {
         foo.bars.c = 3;
         String json = JSON.toJSONString(foo);
         System.out.println(json);
-        Assert.assertTrue(json.indexOf("\\")<0);
+        assertTrue(json.indexOf("\\")<0);
     }
 
     public static class Foo {

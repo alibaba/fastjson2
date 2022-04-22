@@ -6,13 +6,15 @@ import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
 import junit.framework.TestCase;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 
 
-public class TestExternal extends TestCase {
+public class TestExternal {
+    @Test
     public void test_0 () throws Exception {
         ExtClassLoader classLoader = new ExtClassLoader();
         Class<?> clazz = classLoader.loadClass("external.VO");
@@ -25,6 +27,7 @@ public class TestExternal extends TestCase {
         JSON.parseObject(text, clazz);
     }
 
+    @Test
     public void test_1 () throws Exception {
         ExtClassLoader classLoader = new ExtClassLoader();
         try {

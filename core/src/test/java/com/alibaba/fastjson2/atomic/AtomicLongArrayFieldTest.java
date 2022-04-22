@@ -4,11 +4,13 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicLongArray;
 
-public class AtomicLongArrayFieldTest extends TestCase {
+public class AtomicLongArrayFieldTest {
 
+    @Test
     public void test_codec_null() throws Exception {
         V0 v = new V0();
 
@@ -21,13 +23,15 @@ public class AtomicLongArrayFieldTest extends TestCase {
         Assert.assertEquals(v1.getValue(), v.getValue());
     }
 
+    @Test
     public void test_codec_null_1() throws Exception {
         V0 v = new V0();
 
         String text = JSON.toJSONString(v, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.NullAsDefaultValue);
         Assert.assertEquals("{\"value\":[]}", text);
     }
-    
+
+    @Test
     public void test_codec_null_2() throws Exception {
         V0 v = JSON.parseObject("{\"value\":[1,2]}", V0.class);
 

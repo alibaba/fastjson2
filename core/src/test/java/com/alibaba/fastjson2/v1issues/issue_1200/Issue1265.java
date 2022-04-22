@@ -4,14 +4,18 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 22/07/2017.
  */
-public class Issue1265 extends TestCase {
-    public void test_0() throws Exception {
+public class Issue1265 {
+    @Test
+    public void test_0() {
         Type type = new TypeReference<Response>(){}.getType();
         Object t = ((Response) JSON.parseObject("{\"value\":{\"id\":123}}", type)).value;
         assertEquals(123, ((JSONObject) t).getIntValue("id"));

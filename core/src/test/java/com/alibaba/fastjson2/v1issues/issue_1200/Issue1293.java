@@ -1,30 +1,33 @@
 package com.alibaba.fastjson2.v1issues.issue_1200;
 
 import com.alibaba.fastjson2.JSON;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 /**
  * Created by kimmking on 27/06/2017.
  */
-public class Issue1293 extends TestCase {
+public class Issue1293 {
 
+    @Test
     public void test_for_issue() {
         String data = "{\"idType\":\"123123\",\"userType\":\"134\",\"count\":\"123123\"}";
         {
-            Test test = JSON.parseObject(data, Test.class);
+            Bean test = JSON.parseObject(data, Bean.class);
 
             assertNull(test.idType);
             assertNull(test.userType);
         }
 
-        Test test = JSON.parseObject(data, Test.class);
+        Bean test = JSON.parseObject(data, Bean.class);
         assertNull(test.idType);
         assertNull(test.userType);
 
     }
 
-    static class Test{
+    static class Bean {
         private long count;
         private IdType idType;
         private UserType userType;

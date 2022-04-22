@@ -3,11 +3,13 @@ package com.alibaba.fastjson2.atomic;
 import com.alibaba.fastjson2.JSON;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class AtomicLongReadOnlyTest extends TestCase {
+public class AtomicLongReadOnlyTest {
 
+    @Test
     public void test_codec_null() throws Exception {
         V0 v = new V0(123);
 

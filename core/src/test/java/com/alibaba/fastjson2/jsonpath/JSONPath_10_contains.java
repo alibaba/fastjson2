@@ -4,9 +4,14 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class JSONPath_10_contains extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+public class JSONPath_10_contains {
+
+    @Test
     public void test(){
         String json = "{\n" +
                 "    \"queryScene\":{\n" +
