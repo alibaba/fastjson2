@@ -2,10 +2,14 @@ package com.alibaba.fastjson.serializer;
 
 import com.alibaba.fastjson.PropertyNamingStrategy;
 
-import java.lang.reflect.Type;
-import java.util.concurrent.ConcurrentMap;
-
 public class SerializeConfig {
+
+    public static SerializeConfig global = new SerializeConfig();
+
+    public static SerializeConfig getGlobalInstance() {
+        return global;
+    }
+
     public PropertyNamingStrategy propertyNamingStrategy;
 //    private final ConcurrentMap<Type, ObjectSerializer> serializers;
 
