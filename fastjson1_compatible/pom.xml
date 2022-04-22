@@ -9,6 +9,7 @@
         <version>2.0.2_preview01</version>
     </parent>
 
+    <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
     <packaging>jar</packaging>
     <name>fastjson1-compatible</name>
