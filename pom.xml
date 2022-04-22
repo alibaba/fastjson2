@@ -15,6 +15,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <jackson.version>2.13.2</jackson.version>
+        <jetty.server.version>9.4.17.v20190418</jetty.server.version>
+        <jersey.version>2.23.2</jersey.version>
 
         <junit.jupiter.version>5.8.2</junit.jupiter.version>
         <jmh.version>1.35</jmh.version>
@@ -194,6 +196,43 @@
                 <version>4.0.66</version>
             </dependency>
 
+            <!-- web container libs -->
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-server</artifactId>
+                <version>${jetty.server.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-webapp</artifactId>
+                <version>${jetty.server.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-common</artifactId>
+                <version>${jersey.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.containers</groupId>
+                <artifactId>jersey-container-servlet</artifactId>
+                <version>${jersey.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-client</artifactId>
+                <version>${jersey.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+                <artifactId>jersey-test-framework-provider-jdk-http</artifactId>
+                <version>${jersey.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.media</groupId>
+                <artifactId>jersey-media-json-jackson</artifactId>
+                <version>${jersey.version}</version>
+            </dependency>
+
             <!-- common libs -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -219,6 +258,38 @@
                 <groupId>com.aliyun.odps</groupId>
                 <artifactId>odps-sdk-udf</artifactId>
                 <version>0.38.4-public</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>5.2.10.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>com.diffblue</groupId>
+                <artifactId>deeptestutils</artifactId>
+                <version>1.9.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.gitlab4j</groupId>
+                <artifactId>gitlab4j-api</artifactId>
+                <version>5.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.chinamobile.cmos</groupId>
+                <artifactId>sms-core</artifactId>
+                <version>2.1.12.5</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>3.3.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>3.28.0-GA</version>
             </dependency>
 
             <!-- testing libs -->
