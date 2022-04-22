@@ -1,13 +1,15 @@
-package com.alibaba.json.bvt.builder;
+package com.alibaba.fastjson2.v1issues.builder;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.annotation.JSONType;
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
-public class BuilderTest_error extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+public class BuilderTest_error {
+
+    @Test
     public void test_0() throws Exception {
         Exception error = null;
         try {
@@ -15,7 +17,7 @@ public class BuilderTest_error extends TestCase {
         } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        assertNotNull(error);
     }
 
     @JSONType(builder = VOBuilder.class)

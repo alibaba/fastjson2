@@ -165,7 +165,19 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 );
             }
 
-            getBeanInfo(beanInfo, objectClass.getAnnotations());
+            Annotation[] annotations = objectClass.getAnnotations();
+            getBeanInfo(beanInfo, annotations);
+
+            for (Annotation annotation : annotations) {
+                Class<? extends Annotation> annotationType = annotation.annotationType();
+                switch (annotationType.getName()) {
+                    case "com.alibaba.fastjson.annotation.JSONType":
+                        getBeanInfo1x(beanInfo, annotation);
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             BeanUtils.staticMethod(objectClass
                     , method -> getCreator(beanInfo, objectClass, method)
@@ -269,7 +281,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                                 beanInfo.builder = builderClass;
 
                                 for (Annotation builderAnnation : builderClass.getAnnotations()) {
-                                    Class<? extends Annotation> builderAnnationClass = builderAnnation.getClass();
+                                    Class<? extends Annotation> builderAnnationClass = builderAnnation.annotationType();
                                     String builderAnnationName = builderAnnationClass.getName();
 
                                     switch (builderAnnationName) {
@@ -1577,7 +1589,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             if (str == null) {
                 return null;
             }
-            
+
             try {
                 return new URL(str);
             } catch (MalformedURLException e) {
