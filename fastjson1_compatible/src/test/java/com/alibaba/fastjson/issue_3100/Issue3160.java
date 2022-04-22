@@ -4,11 +4,13 @@ import com.alibaba.fastjson.serializer.SerializeWriter;
 import com.alibaba.fastjson.util.IOUtils;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 
-public class Issue3160 extends TestCase {
+public class Issue3160 {
 
+    @Test
     public void test_for_issue() throws Exception {
         String str = createLargeBasicStr();
         SerializeWriter writer = new SerializeWriter();

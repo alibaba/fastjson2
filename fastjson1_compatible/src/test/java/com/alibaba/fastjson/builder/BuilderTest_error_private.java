@@ -5,9 +5,11 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.annotation.JSONType;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
-public class BuilderTest_error_private extends TestCase {
+public class BuilderTest_error_private {
 
+    @Test
     public void test_0() throws Exception {
         Exception error = null;
         try {

@@ -3,6 +3,7 @@ package com.alibaba.fastjson.issue_3400;
 import com.alibaba.fastjson.JSONValidator;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 /**
  * Description:  <br>
@@ -10,8 +11,9 @@ import org.junit.Assert;
  * @author byw
  * @create 2020/9/20
  */
-public class Issue3453 extends TestCase {
+public class Issue3453 {
 
+    @Test
     public void test_for_issue() throws Exception {
         String str = "[\n" +
                 " {\n" +

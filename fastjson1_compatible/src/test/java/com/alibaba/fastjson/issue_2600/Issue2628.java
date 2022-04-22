@@ -2,10 +2,14 @@ package com.alibaba.fastjson.issue_2600;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 
-public class Issue2628 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2628 {
+    @Test
     public void test_for_issue() throws Exception {
         long MAX_LONG = Long.MAX_VALUE; //9223372036854775807
         long MIN_LONG = Long.MIN_VALUE; //-9223372036854775808

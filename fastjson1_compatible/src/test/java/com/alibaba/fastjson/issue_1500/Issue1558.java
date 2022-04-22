@@ -4,10 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONType;
 import com.alibaba.fastjson.parser.ParserConfig;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 
-public class Issue1558 extends TestCase {
+public class Issue1558 {
+    @Test
     public void test_for_issue() throws Exception {
         ParserConfig config = new ParserConfig();
 //        config.setAutoTypeSupport(true);

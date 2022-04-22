@@ -7,16 +7,20 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @Author ：Nanqi
  * @Date ：Created in 21:25 2020/6/22
  */
-public class Issue3264 extends TestCase {
+public class Issue3264 {
+    @Test
     public void test_for_issue() throws Exception {
         MyData data = MyData.builder().isTest(true).build();
         String string = JSON.toJSONString(data);
-        Assert.assertTrue(string.contains("is_test"));
+        assertTrue(string.contains("is_test"));
     }
 
     @Data

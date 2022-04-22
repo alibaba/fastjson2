@@ -2,15 +2,20 @@ package com.alibaba.fastjson.issue_3000;
 
 import com.alibaba.fastjson.JSONObject;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @Author ：Nanqi
  * @Date ：Created in 17:11 2020/7/11
  */
-public class Issue3338 extends TestCase {
+public class Issue3338 {
+    @Test
     public void test_for_issue() throws Exception {
         Model model = new Model();
         Map map = new HashMap();

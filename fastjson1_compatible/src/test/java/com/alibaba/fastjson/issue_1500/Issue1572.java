@@ -2,25 +2,30 @@ package com.alibaba.fastjson.issue_1500;
 
 import com.alibaba.fastjson.JSONPath;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.Set;
 
-public class Issue1572 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+public class Issue1572 {
+    @Test
     public void test_for_issue() throws Exception {
-//        Person person = new Person();
-//
-//        person.setId("1001");
-//
-//        person.setName("1001");
-//
-//        Map<String, Object> pathValues = JSONPath.paths(person);
-//        Set<String> paths = pathValues.keySet();
-//
-//        assertEquals(3, paths.size());
-//        assertEquals("1001", pathValues.get("/id"));
-//        assertEquals("1001", pathValues.get("/name"));
-//        assertSame(person, pathValues.get("/"));
+        Person person = new Person();
+
+        person.setId("1001");
+
+        person.setName("1001");
+
+        Map<String, Object> pathValues = JSONPath.paths(person);
+        Set<String> paths = pathValues.keySet();
+
+        assertEquals(3, paths.size());
+        assertEquals("1001", pathValues.get("/id"));
+        assertEquals("1001", pathValues.get("/name"));
+        assertSame(person, pathValues.get("/"));
     }
 
     public static class Person {

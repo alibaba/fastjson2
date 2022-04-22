@@ -2,13 +2,15 @@ package com.alibaba.fastjson.issue_2200;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Issue2214 extends TestCase {
+public class Issue2214 {
+    @Test
     public void test_for_issue() throws Exception {
         List list = new ArrayList();
         list.add("robin");

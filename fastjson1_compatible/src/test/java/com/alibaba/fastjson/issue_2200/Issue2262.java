@@ -3,8 +3,13 @@ package com.alibaba.fastjson.issue_2200;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2262 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class Issue2262 {
+    @Test
     public void test_for_issue() throws Exception {
         Model m = new Model();
         m.javaVersion = "1.6";

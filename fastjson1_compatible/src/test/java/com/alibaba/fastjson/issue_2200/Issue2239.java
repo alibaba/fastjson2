@@ -3,10 +3,12 @@ package com.alibaba.fastjson.issue_2200;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class Issue2239 extends TestCase {
+public class Issue2239 {
+    @Test
     public void test_for_issue() throws Exception {
 
         String json = "{\"page\":{}}";

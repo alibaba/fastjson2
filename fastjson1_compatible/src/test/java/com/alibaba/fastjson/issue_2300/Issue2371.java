@@ -3,10 +3,14 @@ package com.alibaba.fastjson.issue_2300;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class Issue2371 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2371 {
+    @Test
     public void test_for_issue() throws Exception {
         RpcRespObj<List<Resource>> resources = convertResult(Resource.class);
         assertEquals(2, resources.data.get(0).resourceId.intValue());

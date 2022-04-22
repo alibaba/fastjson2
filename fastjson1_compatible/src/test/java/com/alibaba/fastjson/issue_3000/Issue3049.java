@@ -2,8 +2,12 @@ package com.alibaba.fastjson.issue_3000;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue3049 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3049 {
+    @Test
     public void test_for_issue() throws Exception {
         String json1 = "{\"date\":\"2019-11-1 21:45:12\"}";
         MyObject myObject1 = JSON.parseObject(json1, MyObject.class);

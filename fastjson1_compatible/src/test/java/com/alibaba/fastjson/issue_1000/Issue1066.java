@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONWriter;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,9 +19,10 @@ import java.util.Map;
 /**
  * Created by wenshao on 25/03/2017.
  */
-public class Issue1066 extends TestCase {
+public class Issue1066 {
     private static final Charset CHARSET = Charset.forName("UTF-8");
 
+    @Test
     public void test_for_issue() throws Exception {
         Map<EnumType, EnumType> map = new HashMap<EnumType, EnumType>();
         map.put(EnumType.ONE, EnumType.TWO);

@@ -4,12 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.List;
 
-public class Issue2516 extends TestCase
-{
+public class Issue2516 {
+    @Test
     public void test_for_issue() throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.toJavaObject(JSONObject.class);

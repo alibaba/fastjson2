@@ -420,6 +420,13 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     }
                     break;
                 }
+                case "typeName": {
+                    String typeName = (String) result;
+                    if (!typeName.isEmpty()) {
+                        beanInfo.typeName = typeName;
+                    }
+                    break;
+                }
                 case "typeKey": {
                     String typeKey = (String) result;
                     if (!typeKey.isEmpty()) {
@@ -483,7 +490,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     break;
             }
         } catch (Throwable ignored) {
-
+            ignored.printStackTrace();
         }
     }
 

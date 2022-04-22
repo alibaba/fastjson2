@@ -7,6 +7,7 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.annotation.JSONType;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.util.List;
@@ -14,8 +15,9 @@ import java.util.List;
 /**
  * Created by SongLing.Dong on 11/7/2017.
  */
-public class Issue1565 extends TestCase{
+public class Issue1565 {
 
+    @Test
     public void test_testLargeBeanContainsOver256Field(){
         SerializeConfig serializeConfig = new SerializeConfig();
         serializeConfig.propertyNamingStrategy = PropertyNamingStrategy.SnakeCase;

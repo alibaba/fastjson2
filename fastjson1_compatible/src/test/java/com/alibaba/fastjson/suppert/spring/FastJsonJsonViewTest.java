@@ -6,7 +6,7 @@ import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonJsonView;
 import junit.framework.TestCase;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -15,8 +15,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-public class FastJsonJsonViewTest extends TestCase {
+public class FastJsonJsonViewTest {
 
+    @Test
     public void test_0() throws Exception {
         FastJsonJsonView view = new FastJsonJsonView();
 
@@ -43,6 +44,7 @@ public class FastJsonJsonViewTest extends TestCase {
 
     }
 
+    @Test
     public void test_1() throws Exception {
 
         FastJsonJsonView view = new FastJsonJsonView();

@@ -4,8 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import junit.framework.TestCase;
 import lombok.Data;
+import org.junit.jupiter.api.Test;
 
-public class Issue3246 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3246 {
+    @Test
     public void test_for_issue() throws Exception {
         String jsonStr = "{\"d_id\":\"bphyean01\",\"isOpenMergeCode\":0,\"offlineOrder\":false,\"offlineOrderType\":-1,\"og\":0,\"pushIdFromRemote\":false,\"qrisAmountPrice\":22000,\"s_req\":0,\"s_t\":1,\"skr_id\":0,\"type\":1,\"c_id\":471,\"o_$\":5500.0,\"am\":4,\"$_tp\":\"bp\",\"o_t\":1,\"a_m\":3}";
         Order parseOrder = JSON.parseObject(jsonStr,Order.class);

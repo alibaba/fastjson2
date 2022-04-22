@@ -2,11 +2,15 @@ package com.alibaba.fastjson.issue_2900;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
-public class Issue2914 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2914 {
+    @Test
     public void test_for_issue() throws Exception {
 
         ComplexInt complexInt = new ComplexInt();
@@ -41,10 +45,7 @@ public class Issue2914 extends TestCase {
         Complex complex1 = JSON.parseObject(json, Complex.class);
 
         assertEquals(3, complex1.getBlockQueue().size());
-
     }
-
-
 
 
     public static class Complex  {

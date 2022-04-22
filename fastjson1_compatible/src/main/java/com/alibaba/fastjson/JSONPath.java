@@ -2,6 +2,8 @@ package com.alibaba.fastjson;
 
 import com.alibaba.fastjson2.JSONReader;
 
+import java.util.Map;
+
 public class JSONPath {
     public static Object eval(Object rootObject, String path) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
@@ -20,6 +22,10 @@ public class JSONPath {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         jsonPath.set(rootObject, value);
         return true;
+    }
+
+    public static Map<String, Object> paths(Object javaObject) {
+        return com.alibaba.fastjson2.JSONPath.paths(javaObject);
     }
 //
 //    public boolean contains(Object rootObject) {

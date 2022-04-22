@@ -2,8 +2,10 @@ package com.alibaba.fastjson.issue_3000;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue3065 extends TestCase {
+public class Issue3065 {
+    @Test
     public void test_for_issue() throws Exception {
         String data = "{\n" +
                 "\t\"code\":\"OK\",\n" +

@@ -5,11 +5,13 @@ import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 
-public class FontTest2 extends TestCase {
+public class FontTest2 {
 
+    @Test
     public void test_color() throws Exception {
         Font[] fonts = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
         for (Font font : fonts) {

@@ -4,8 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.json.bvtVO.basic.LongPrimitiveEntity;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2344 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2344 {
+    @Test
     public void test_for_issue() throws Exception {
         LongPrimitiveEntity vo = new LongPrimitiveEntity(9007199254741992L);
 

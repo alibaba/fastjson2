@@ -4,9 +4,15 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.util.IOUtils;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class Issue3330 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3330 {
     private char[] chars;
+
+    @BeforeEach
     protected void setUp() throws Exception {
         chars = new char[IOUtils.DIGITS.length];
         System.arraycopy(IOUtils.DIGITS, 0, chars, 0, IOUtils.DIGITS.length);
@@ -23,6 +29,7 @@ public class Issue3330 extends TestCase {
         System.arraycopy(chars, 0, IOUtils.DIGITS, 0, chars.length);
     }
 
+    @Test
     public void test_for_issue() throws Exception {
         String str = JSON.toJSONString("中国", SerializerFeature.BrowserCompatible);
         assertEquals("\"中国\"", str);

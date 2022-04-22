@@ -6,11 +6,13 @@ import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.NameFilter;
 import com.alibaba.fastjson.serializer.ObjectSerializer;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-public class Issue1524 extends TestCase {
+public class Issue1524 {
+    @Test
     public void test_for_issue() throws Exception {
         Model model = new Model();
         model.oldValue = new Value();

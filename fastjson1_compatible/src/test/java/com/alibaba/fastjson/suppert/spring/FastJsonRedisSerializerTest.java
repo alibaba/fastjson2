@@ -8,8 +8,8 @@ import com.google.common.base.Objects;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNull;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.serializer.SerializationException;
 
 import java.util.Arrays;
@@ -18,7 +18,7 @@ import java.util.Arrays;
 public class FastJsonRedisSerializerTest {
     private FastJsonRedisSerializer<User> serializer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.serializer = new FastJsonRedisSerializer<User>(User.class);
     }

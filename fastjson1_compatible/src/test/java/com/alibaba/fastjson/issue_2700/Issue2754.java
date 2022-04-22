@@ -2,12 +2,16 @@ package com.alibaba.fastjson.issue_2700;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-public class Issue2754 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2754 {
+    @Test
     public void test_for_issue0() throws Exception {
         String s = "{\"p1\":\"2019-09-18T20:35:00+12:45\"}";
         C c = JSON.parseObject(s, C.class);
@@ -17,6 +21,7 @@ public class Issue2754 extends TestCase {
         assertEquals("2019-09-18T20:35:00+12:45", sdf.format(c.p1.getTime()));
     }
 
+    @Test
     public void test_for_issue1() throws Exception {
         String s = "{\"p1\":\"2019-09-18T20:35:00+12:45\"}";
         C c = JSON.parseObject(s, C.class);
@@ -26,6 +31,7 @@ public class Issue2754 extends TestCase {
         assertEquals("2019-09-18T20:35:00+12:45", sdf.format(c.p1.getTime()));
     }
 
+    @Test
     public void test_for_issue2() throws Exception {
         String s = "{\"p1\":\"2019-09-18T20:35:00+05:45\"}";
         C c = JSON.parseObject(s, C.class);
@@ -35,6 +41,7 @@ public class Issue2754 extends TestCase {
         assertEquals("2019-09-18T20:35:00+05:45", sdf.format(c.p1.getTime()));
     }
 
+    @Test
     public void test_for_issue3() throws Exception {
         String s = "{\"p1\":\"2019-09-18T20:35:00+05:45\"}";
         C c = JSON.parseObject(s, C.class);
@@ -44,6 +51,7 @@ public class Issue2754 extends TestCase {
         assertEquals("2019-09-18T20:35:00+05:45", sdf.format(c.p1.getTime()));
     }
 
+    @Test
     public void test_for_issue4() throws Exception {
         String s = "{\"p1\":\"2019-09-18T20:35:00+08:45\"}";
         C c = JSON.parseObject(s, C.class);

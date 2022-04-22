@@ -5,8 +5,12 @@ import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1580_private extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1580_private {
+    @Test
     public void test_for_issue() throws Exception {
         SimplePropertyPreFilter classAFilter = new SimplePropertyPreFilter(Model.class, "code");
         SerializeFilter[] filters =new SerializeFilter[]{classAFilter};

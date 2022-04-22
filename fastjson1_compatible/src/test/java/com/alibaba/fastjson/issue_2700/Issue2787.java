@@ -9,11 +9,16 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.spi.Module;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public class Issue2787 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class Issue2787 {
+    @Test
     public void test_for_issue() throws Exception {
         Model m = new Model();
         String str = JSON.toJSONString(m, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullListAsEmpty);
@@ -24,8 +29,9 @@ public class Issue2787 extends TestCase {
         public int[] value;
     }
 
-    public static class Issue2752 extends TestCase {
+    public static class Issue2752 {
 
+        @Test
         public void test_for_issue() {
             Pageable pageRequest = new PageRequest(0, 10, new Sort(new Sort.Order("id, desc")));
             SerializeConfig config = new SerializeConfig();

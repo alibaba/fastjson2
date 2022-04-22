@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-public class DateTest_dotnet_4 extends TestCase {
+public class DateTest_dotnet_4 {
 
+    @Test
     public void test_date() throws Exception {
         String text = "{\"date\":\"/Date(1461081600321+5000)/\"}";
 

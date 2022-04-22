@@ -5,11 +5,12 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-public class DateFieldTest extends TestCase {
-
+public class DateFieldTest {
+    @Test
     public void test_codec() throws Exception {
         V0 v = new V0();
         v.setValue(new Date());
@@ -22,6 +23,7 @@ public class DateFieldTest extends TestCase {
         Assert.assertEquals(v1.getValue(), v.getValue());
     }
 
+    @Test
     public void test_codec_null() throws Exception {
         V0 v = new V0();
 
@@ -36,6 +38,7 @@ public class DateFieldTest extends TestCase {
         Assert.assertEquals(v1.getValue(), v.getValue());
     }
 
+    @Test
     public void test_codec_null_asm() throws Exception {
         V0 v = new V0();
 
@@ -50,6 +53,7 @@ public class DateFieldTest extends TestCase {
         Assert.assertEquals(v1.getValue(), v.getValue());
     }
 
+    @Test
     public void test_codec_null_1() throws Exception {
         V0 v = new V0();
 

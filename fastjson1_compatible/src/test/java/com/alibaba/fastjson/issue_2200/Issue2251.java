@@ -2,11 +2,15 @@ package com.alibaba.fastjson.issue_2200;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class Issue2251 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class Issue2251 {
+    @Test
     public void test_for_issue() throws Exception {
         Model m = new Model();
         m.queue = new LinkedList();

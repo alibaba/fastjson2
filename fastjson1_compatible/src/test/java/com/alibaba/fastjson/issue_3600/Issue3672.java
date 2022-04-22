@@ -6,10 +6,14 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import junit.framework.TestCase;
 import lombok.Data;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
-public class Issue3672 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3672 {
+    @Test
     public void test_for_issue() throws Exception {
         Issue3672Root root = new Issue3672Root();
         Issue3672A a = new Issue3672A();

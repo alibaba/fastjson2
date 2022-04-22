@@ -4,10 +4,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.ParameterizedTypeImpl;
 import junit.framework.TestCase;
 import lombok.Data;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * https://github.com/alibaba/fastjson/issues/3810
@@ -15,7 +19,7 @@ import java.util.List;
  * @author hnyyghk
  * @date 2021/06/30 18:40
  */
-public class Issue3810 extends TestCase {
+public class Issue3810 {
     @Data
     static class TestA<T> {
         T a;
@@ -28,6 +32,7 @@ public class Issue3810 extends TestCase {
 
     private static final String json = "{\"a\":[{\"b\":\"b\"}]}";
 
+    @Test
     public void test_for_issue() throws Exception {
         ParameterizedTypeImpl inner = new ParameterizedTypeImpl(new Type[]{TestB.class}, List.class, List.class);
         ParameterizedTypeImpl outer = new ParameterizedTypeImpl(new Type[]{inner}, TestA.class, TestA.class);

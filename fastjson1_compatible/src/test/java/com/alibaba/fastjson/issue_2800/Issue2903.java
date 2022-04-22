@@ -2,9 +2,13 @@ package com.alibaba.fastjson.issue_2800;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2903 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+public class Issue2903 {
+
+    @Test
     public void test_1() {
         String date1 = "{createTime:\"1570636800000\"}";
         String date2 = "{createTime:1570636800000}";
@@ -13,6 +17,7 @@ public class Issue2903 extends TestCase {
         assertEquals(dto.createTime, dto2.createTime);
     }
 
+    @Test
     public void test_2() {
         String date1 = "{createTime:\"1570636800000\"}";
         String date2 = "{createTime:1570636800000}";
@@ -21,6 +26,7 @@ public class Issue2903 extends TestCase {
         assertEquals(dto.createTime, dto2.createTime);
     }
 
+    @Test
     public void test_3() {
         String date1 = "{createTime:\"1570636800000\"}";
         String date2 = "{createTime:1570636800000}";
@@ -29,6 +35,7 @@ public class Issue2903 extends TestCase {
         assertEquals(dto.createTime, dto2.createTime);
     }
 
+    @Test
     public void test_4() {
         String date1 = "{createTime:\"1570636800000\"}";
         String date2 = "{createTime:1570636800000}";
@@ -37,6 +44,7 @@ public class Issue2903 extends TestCase {
         assertEquals(dto.createTime, dto2.createTime);
     }
 
+    @Test
     public void test_5() {
         String date1 = "{createTime:\"1570636800000\"}";
         String date2 = "{createTime:1570636800000}";
@@ -45,6 +53,7 @@ public class Issue2903 extends TestCase {
         assertEquals(dto.createTime, dto2.createTime);
     }
 
+    @Test
     public void test_6() {
         String date1 = "{createTime:\"1570636800000\"}";
         String date2 = "{createTime:1570636800000}";
@@ -53,6 +62,7 @@ public class Issue2903 extends TestCase {
         assertEquals(dto.createTime, dto2.createTime);
     }
 
+    @Test
     public void test_7() {
         String date1 = "{createTime:\"1570636800000\"}";
         String date2 = "{createTime:1570636800000}";
@@ -61,6 +71,7 @@ public class Issue2903 extends TestCase {
         assertEquals(dto.createTime, dto2.createTime);
     }
 
+    @Test
     public void test_8() {
         String date1 = "{createTime:\"1570636800000\"}";
         String date2 = "{createTime:1570636800000}";

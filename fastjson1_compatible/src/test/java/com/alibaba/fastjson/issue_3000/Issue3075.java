@@ -5,10 +5,12 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class Issue3075 extends TestCase {
+public class Issue3075 {
+    @Test
     public void test_for_issue() throws Exception {
         SerializerFeature[] features = {
             SerializerFeature.BrowserSecure,

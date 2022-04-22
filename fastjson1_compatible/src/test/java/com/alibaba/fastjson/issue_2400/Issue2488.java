@@ -3,8 +3,12 @@ package com.alibaba.fastjson.issue_2400;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2488 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2488 {
+    @Test
     public void testForIssue_1() {
         String a = "{\"$a_b\":\"a1_b2\",\"_c_d\":\"c3_d4\",\"aaaa\":\"CC\",\"__flag\":\"true\",\"$flag\":\"true\"}";
         JSONObject obj = (JSONObject) JSONObject.parse(a);
@@ -12,6 +16,7 @@ public class Issue2488 extends TestCase {
         assertEquals("TestJsonObj2{$a_b=\"a1_b2\",_c_d=\"c3_d4\",aaaa=\"CC\",__flag=true,$flag=true}", stu.toString());
     }
 
+    @Test
     public void testForIssue_2() {
         String a = "{\"$a_b\":\"aa3_bb4\",\"_c_d\":\"cc1_dd2\",\"aaaa\":\"BB\",\"__flag\":\"true\",\"$flag\":\"true\"}";
         TestJsonObj2 stu = JSON.parseObject(a, TestJsonObj2.class);
@@ -19,6 +24,7 @@ public class Issue2488 extends TestCase {
                 stu.toString());
     }
 
+    @Test
     public void testForIssue_3() {
         TestJsonObj2 vo = new TestJsonObj2("aa_bb", "cc_dd", "AA", true, true);
         String text = JSON.toJSONString(vo);

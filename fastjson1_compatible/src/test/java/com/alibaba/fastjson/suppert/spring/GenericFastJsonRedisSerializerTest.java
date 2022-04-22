@@ -2,23 +2,26 @@ package com.alibaba.fastjson.suppert.spring;
 
 import com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializer;
 import com.alibaba.fastjson.util.IOUtils;
+import com.alibaba.fastjson2.JSONException;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNull;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.serializer.SerializationException;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 public class GenericFastJsonRedisSerializerTest {
     private GenericFastJsonRedisSerializer serializer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.serializer = new GenericFastJsonRedisSerializer();
     }
@@ -46,12 +49,14 @@ public class GenericFastJsonRedisSerializerTest {
         Assert.assertThat(serializer.deserialize(null), IsNull.nullValue());
     }
 
-    @Test(expected = SerializationException.class)
+    @Test
     public void test_5() {
-        User user = new User(1, "土豆", 25);
-        byte[] serializedValue = serializer.serialize(user);
-        Arrays.sort(serializedValue); // corrupt serialization result
-        serializer.deserialize(serializedValue);
+        assertThrows(SerializationException.class, () -> {
+            User user = new User(1, "土豆", 25);
+            byte[] serializedValue = serializer.serialize(user);
+            Arrays.sort(serializedValue); // corrupt serialization result
+            serializer.deserialize(serializedValue);
+        });
     }
 
     /**

@@ -5,18 +5,22 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class DateFieldTest3 extends TestCase {
+public class DateFieldTest3 {
+    @BeforeEach
     protected void setUp() throws Exception {
         JSON.defaultTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
         JSON.defaultLocale = Locale.CHINA;
     }
-    
+
+    @Test
     public void test_codec() throws Exception {
         V0 v = new V0();
         v.setValue(new Date());
@@ -28,6 +32,7 @@ public class DateFieldTest3 extends TestCase {
         Assert.assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
     }
 
+    @Test
     public void test_codec_no_asm() throws Exception {
         V0 v = new V0();
         v.setValue(new Date());
@@ -37,17 +42,19 @@ public class DateFieldTest3 extends TestCase {
         format.setTimeZone(JSON.defaultTimeZone);
         Assert.assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
     }
-    
+
+    @Test
     public void test_codec_asm() throws Exception {
         V0 v = new V0();
         v.setValue(new Date());
-        
+
         String text = JSON.toJSONStringWithDateFormat(v, "yyyy-MM-dd", SerializerFeature.WriteMapNullValue);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", JSON.defaultLocale);
         format.setTimeZone(JSON.defaultTimeZone);
         Assert.assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
     }
 
+    @Test
     public void test_codec_null_asm() throws Exception {
         V0 v = new V0();
 
@@ -62,7 +69,8 @@ public class DateFieldTest3 extends TestCase {
 
         Assert.assertEquals(v1.getValue(), v.getValue());
     }
-    
+
+    @Test
     public void test_codec_null_no_asm() throws Exception {
         V0 v = new V0();
 
@@ -78,6 +86,7 @@ public class DateFieldTest3 extends TestCase {
         Assert.assertEquals(v1.getValue(), v.getValue());
     }
 
+    @Test
     public void test_codec_null_1() throws Exception {
         V0 v = new V0();
 

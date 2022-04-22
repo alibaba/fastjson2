@@ -2,8 +2,12 @@ package com.alibaba.fastjson.issue_2100;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2164 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2164 {
+    @Test
     public void test_for_issue() throws Exception {
         java.sql.Timestamp ts = new java.sql.Timestamp(-65001600000L);
         String json = JSON.toJSONString(ts);
@@ -12,6 +16,7 @@ public class Issue2164 extends TestCase {
         assertEquals(ts.getTime(), ts2.getTime());
     }
 
+    @Test
     public void test_for_issue_1() throws Exception {
         Model m = new Model(-65001600000L);
         String json = JSON.toJSONString(m);

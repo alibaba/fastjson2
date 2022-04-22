@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -15,7 +16,8 @@ import java.util.HashMap;
  * @Date ：Created in 10:47 2020/6/22
  * @Description：补充测试用例
  */
-public class Issue3281 extends TestCase {
+public class Issue3281 {
+    @Test
     public void test_for_issue() {
         ModelState modelBack = JSON.parseObject("{\"counterMap\":{\"0\":0,\"100\":0,\"200\":0,\"300\":0,\"400\":0," +
                 "\"500\":0,\"600\":0,\"700\":0,\"800\":0,\"900\":0,\"1000\":0},\"formatDate\":null," +
