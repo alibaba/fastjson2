@@ -274,6 +274,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                                         break;
                                 }
                             }
+                            break;
                         }
                         case "builder": {
                             Class<?> builderClass = (Class) result;
@@ -286,29 +287,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
                                     switch (builderAnnationName) {
                                         case "com.alibaba.fastjson.annotation.JSONPOJOBuilder":
-                                            BeanUtils.annatationMethods(builderAnnationClass, m1 -> {
-                                                try {
-                                                    String m1Name = m1.getName();
-                                                    switch (m1Name) {
-                                                        case "buildMethod": {
-                                                            String buildMethodName = (String) m1.invoke(builderAnnation);
-                                                            beanInfo.buildMethod = BeanUtils.buildMethod(builderClass, buildMethodName);
-                                                            break;
-                                                        }
-                                                        case "withPrefix": {
-                                                            String withPrefix = (String) m1.invoke(builderAnnation);
-                                                            if (!withPrefix.isEmpty()) {
-                                                                beanInfo.builderWithPrefix = withPrefix;
-                                                            }
-                                                            break;
-                                                        }
-                                                        default:
-                                                            break;
-                                                    }
-                                                } catch (Throwable ignored) {
-
-                                                }
-                                            });
+                                            getBeanInfo1xJSONPOJOBuilder(beanInfo, builderClass, builderAnnation, builderAnnationClass);
                                             break;
                                         default:
                                             break;
@@ -662,6 +641,32 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 fieldInfo.ordinal = ordinal;
             }
         }
+    }
+
+    private void getBeanInfo1xJSONPOJOBuilder(BeanInfo beanInfo, Class<?> builderClass, Annotation builderAnnatation, Class<? extends Annotation> builderAnnatationClass) {
+        BeanUtils.annatationMethods(builderAnnatationClass, method -> {
+            try {
+                String methodName = method.getName();
+                switch (methodName) {
+                    case "buildMethod": {
+                        String buildMethodName = (String) method.invoke(builderAnnatation);
+                        beanInfo.buildMethod = BeanUtils.buildMethod(builderClass, buildMethodName);
+                        break;
+                    }
+                    case "withPrefix": {
+                        String withPrefix = (String) method.invoke(builderAnnatation);
+                        if (!withPrefix.isEmpty()) {
+                            beanInfo.builderWithPrefix = withPrefix;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+
+            }
+        });
     }
 
     private void getCreator(BeanInfo beanInfo, Class<?> objectClass, Constructor constructor) {
