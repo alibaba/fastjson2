@@ -17,24 +17,6 @@
     <url>https://github.com/alibaba/fastjson2</url>
     <inceptionYear>2022</inceptionYear>
 
-    <scm>
-        <url>https://github.com/alibaba/fastjson2</url>
-        <connection>scm:git:https://git@github.com/alibaba/fastjson2.git</connection>
-    </scm>
-
-    <organization>
-        <name>Alibaba Group</name>
-        <url>https://github.com/alibaba</url>
-    </organization>
-
-    <developers>
-        <developer>
-            <id>wenshao</id>
-            <name>wenshao</name>
-            <email>shaojin.wensj@alibaba-inc.com</email>
-        </developer>
-    </developers>
-
     <licenses>
         <license>
             <name>Apache 2</name>
@@ -43,6 +25,21 @@
             <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
+    <scm>
+        <url>https://github.com/alibaba/fastjson2</url>
+        <connection>scm:git:https://git@github.com/alibaba/fastjson2.git</connection>
+    </scm>
+    <organization>
+        <name>Alibaba Group</name>
+        <url>https://github.com/alibaba</url>
+    </organization>
+    <developers>
+        <developer>
+            <id>wenshao</id>
+            <name>wenshao</name>
+            <email>shaojin.wensj@alibaba-inc.com</email>
+        </developer>
+    </developers>
 
     <dependencies>
         <dependency>
@@ -51,76 +48,22 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.airlift</groupId>
-            <artifactId>slice</artifactId>
-            <version>0.41</version>
-            <scope>provided</scope>
-        </dependency>
-
+        <!--
+            optional support by fastjson2.
+            so the scope of these libs is provided.
+        -->
         <dependency>
             <groupId>com.squareup.retrofit2</groupId>
             <artifactId>retrofit</artifactId>
             <version>2.9.0</version>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>5.2.20.RELEASE</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-messaging</artifactId>
-            <version>5.2.20.RELEASE</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-redis</artifactId>
-            <version>2.3.9.RELEASE</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>5.2.20.RELEASE</version>
-            <scope>test</scope>
-        </dependency>
-
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.1</version>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.79</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>1.4</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sf.trove4j</groupId>
-            <artifactId>trove4j</artifactId>
-            <version>3.0.3</version>
-            <scope>provided</scope>
-        </dependency>
-
         <dependency>
             <groupId>com.aliyun.odps</groupId>
             <artifactId>odps-sdk-udf</artifactId>
@@ -137,6 +80,50 @@
                     <artifactId>gson</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.airlift</groupId>
+            <artifactId>slice</artifactId>
+            <version>0.41</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>5.2.20.RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
+            <version>5.2.20.RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>2.3.9.RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- test libs -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>1.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.trove4j</groupId>
+            <artifactId>trove4j</artifactId>
+            <version>3.0.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>5.2.20.RELEASE</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
