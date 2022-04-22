@@ -17,6 +17,7 @@
         <jackson.version>2.13.2</jackson.version>
         <jetty.server.version>9.4.17.v20190418</jetty.server.version>
         <jersey.version>2.23.2</jersey.version>
+        <springframework.version>5.3.19</springframework.version>
 
         <junit.jupiter.version>5.8.2</junit.jupiter.version>
         <jmh.version>1.35</jmh.version>
@@ -280,7 +281,6 @@
                 <version>2.1.12.5</version>
             </dependency>
 
-
             <dependency>
                 <groupId>cglib</groupId>
                 <artifactId>cglib-nodep</artifactId>
@@ -290,6 +290,39 @@
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
                 <version>3.28.0-GA</version>
+            </dependency>
+
+            <!-- spring libs -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${springframework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${springframework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-messaging</artifactId>
+                <version>${springframework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-websocket</artifactId>
+                <version>${springframework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${springframework.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-redis</artifactId>
+                <version>2.6.3</version>
             </dependency>
 
             <!-- testing libs -->
