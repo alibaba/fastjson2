@@ -4,8 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONType;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1649 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1649 {
+    @Test
     public void test_for_issue() throws Exception {
         Apple apple = new Apple();
         String json = JSON.toJSONString(apple);

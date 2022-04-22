@@ -3,13 +3,18 @@ package com.alibaba.fastjson.issue_1800;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue_for_float_zero extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue_for_float_zero {
+    @Test
     public void test_0() throws Exception {
         M1 m = new M1(1.0f);
         assertEquals("{\"val\":1.0}", JSON.toJSONString(m, SerializerFeature.WriteNullNumberAsZero));
     }
 
+    @Test
     public void test_1() throws Exception {
         M2 m = new M2(1.0);
         assertEquals("{\"val\":1.0}", JSON.toJSONString(m, SerializerFeature.WriteNullNumberAsZero));

@@ -2,8 +2,12 @@ package com.alibaba.fastjson.issue_1900;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1996 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1996 {
+    @Test
     public void test_for_issue() throws Exception {
         StringBuilder sb = new StringBuilder();
 

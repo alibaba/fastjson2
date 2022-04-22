@@ -3,10 +3,15 @@ package com.alibaba.fastjson.issue_1700;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-public class Issue1766 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class Issue1766 {
+    @Test
     public void test_for_issue() throws Exception {
 // succ
         String json = "{\"name\":\"张三\"\n, \"birthday\":\"2017-01-01 01:01:01\"}";

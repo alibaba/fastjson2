@@ -2,11 +2,15 @@ package com.alibaba.fastjson.issue_1200;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 18/06/2017.
  */
-public class Issue1276 extends TestCase {
+public class Issue1276 {
+    @Test
     public void test_for_issue() throws Exception {
         MyException myException = new MyException(100,"error msg");
         String str = JSON.toJSONString(myException);

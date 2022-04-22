@@ -3,12 +3,15 @@ package com.alibaba.fastjson.issue_1700;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 
 import static com.alibaba.fastjson.serializer.SerializerFeature.BrowserCompatible;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class Issue1764_bean_biginteger_field extends TestCase {
+public class Issue1764_bean_biginteger_field {
+    @Test
     public void test_for_issue() throws Exception {
         assertEquals("{\"value\":\"9007199254741992\"}"
                 , JSON.toJSONString(

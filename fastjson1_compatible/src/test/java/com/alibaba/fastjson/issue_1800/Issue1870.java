@@ -1,11 +1,12 @@
 package com.alibaba.fastjson.issue_1800;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class Issue1870 extends TestCase {
+public class Issue1870 {
+    @Test
     public void test_for_issue() throws Exception {
 
     }

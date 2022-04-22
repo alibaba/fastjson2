@@ -3,6 +3,7 @@ package com.alibaba.fastjson.issue_1200;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.util.List;
@@ -10,7 +11,8 @@ import java.util.List;
 /**
  * Created by wenshao on 01/07/2017.
  */
-public class Issue1299 extends TestCase {
+public class Issue1299 {
+    @Test
     public void test_for_issue() throws Exception {
         String jsonStr = "{\"code\":201,\"data\":{\"materials\":[{\"material\":\"locale\",\"success\":true,"
                 + "\"material_id\":356,\"id\":\"5099\"}],\"unitInfo\":{\"languages\":[\"'en_US'\",\"ru_RU\"],"

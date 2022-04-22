@@ -4,20 +4,24 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * Created by wenshao on 30/06/2017.
  */
-public class Issue1298 extends TestCase {
+public class Issue1298 {
     protected void setUp() throws Exception {
         JSON.defaultTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
         JSON.defaultLocale = Locale.US;
     }
 
+    @Test
     public void test_for_issue() throws Exception {
         JSONObject object = new JSONObject();
 
@@ -28,6 +32,7 @@ public class Issue1298 extends TestCase {
         assertEquals("\"2017-06-29T10:36:30+08:00\"", JSON.toJSONString(date, SerializerFeature.UseISO8601DateFormat));
     }
 
+    @Test
     public void test_for_issue_1() throws Exception {
         JSONObject object = new JSONObject();
 

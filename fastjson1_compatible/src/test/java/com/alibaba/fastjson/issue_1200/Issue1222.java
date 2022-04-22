@@ -4,11 +4,15 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONAware;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 01/06/2017.
  */
-public class Issue1222 extends TestCase {
+public class Issue1222 {
+    @Test
     public void test_for_issue() throws Exception {
         Model model = new Model();
         model.type = Type.A;

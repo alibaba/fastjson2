@@ -3,13 +3,15 @@ package com.alibaba.fastjson.issue_1100;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 
 /**
  * Created by wenshao on 02/05/2017.
  */
-public class Issue1178 extends TestCase {
+public class Issue1178 {
+    @Test
     public void test_for_issue() throws Exception {
         String json = "{\n" +
                 " \"info\": {\n" +

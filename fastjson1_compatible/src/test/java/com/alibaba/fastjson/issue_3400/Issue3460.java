@@ -2,6 +2,10 @@ package com.alibaba.fastjson.issue_3400;
 
 import com.alibaba.fastjson.JSONValidator;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Description:  <br>
@@ -9,8 +13,9 @@ import junit.framework.TestCase;
  * @author byw
  * @create 2020/9/20
  */
-public class Issue3460 extends TestCase {
+public class Issue3460 {
 
+    @Test
     public void test_for_issue() throws Exception {
         String body = "11{\"time\":" + System.currentTimeMillis() + "}";
 

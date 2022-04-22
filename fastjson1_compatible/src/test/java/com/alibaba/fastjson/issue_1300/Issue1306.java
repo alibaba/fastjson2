@@ -2,16 +2,21 @@ package com.alibaba.fastjson.issue_1300;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 /**
  * Created by kimmking on 02/07/2017.
  */
-public class Issue1306 extends TestCase {
+public class Issue1306 {
 
+    @Test
     public void test_for_issue() {
         Goods goods = new Goods();
         goods.setProperties(Arrays.asList(new Goods.Property()));

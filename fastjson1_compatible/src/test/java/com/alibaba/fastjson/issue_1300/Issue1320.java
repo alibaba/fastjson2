@@ -3,11 +3,13 @@ package com.alibaba.fastjson.issue_1300;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created by wenshao on 23/07/2017.
  */
-public class Issue1320 extends TestCase {
+public class Issue1320 {
+    @Test
     public void test_for_issue() throws Exception {
         SSOToken token = new SSOToken();
         JSON.toJSONString(token);

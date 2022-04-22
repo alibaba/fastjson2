@@ -3,11 +3,15 @@ package com.alibaba.fastjson.issue_1100;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 05/05/2017.
  */
-public class Issue1177_1 extends TestCase {
+public class Issue1177_1 {
+    @Test
     public void test_for_issue() throws Exception {
         String text = "{\"a\":{\"x\":\"y\"},\"b\":{\"x\":\"y\"}}";
         JSONObject jsonObject = JSONObject.parseObject(text);

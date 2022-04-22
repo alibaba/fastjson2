@@ -3,8 +3,10 @@ package com.alibaba.fastjson.issue_1600;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue_for_gaorui extends TestCase {
+public class Issue_for_gaorui {
+    @Test
     public void test_for_issue() throws Exception {
         String json = "{\"@type\":\"java.util.HashMap\",\"COUPON\":[{\"@type\":\"com.alibaba.fastjson.issue_1600.Issue_for_gaorui.PromotionTermDetail\",\"activityId\":\"1584034\",\"choose\":true,\"couponId\":1251068987,\"couponType\":\"limitp\",\"match\":true,\"realPrice\":{\"amount\":0.6,\"currency\":\"USD\"}}],\"grayTrade\":\"true\"}";
 

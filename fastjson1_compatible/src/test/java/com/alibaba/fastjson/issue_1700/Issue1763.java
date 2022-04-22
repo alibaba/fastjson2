@@ -2,13 +2,17 @@ package com.alibaba.fastjson.issue_1700;
 
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
-public class Issue1763 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1763 {
+    @Test
     public void test_for_issue() throws Exception {
         String s = "{\"result\":{\"modelList\":[{\"sourceId\":\"81900002\"},{\"sourceId\":\"81900002\"},{\"sourceId\":\"81892012\"},{\"sourceId\":\"2062014\"},{\"sourceId\":\"2082007\"},{\"sourceId\":\"2082007\"},{\"sourceId\":\"2082007\"}]}}";
 

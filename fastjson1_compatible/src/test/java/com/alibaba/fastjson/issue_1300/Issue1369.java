@@ -3,11 +3,13 @@ package com.alibaba.fastjson.issue_1300;
 import com.alibaba.fastjson.JSON;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created by kimmking on 03/08/2017.
  */
-public class Issue1369 extends TestCase {
+public class Issue1369 {
+    @Test
     public void test_for_issue() throws Exception {
         Foo foo = new Foo();
         foo.a = 1;
