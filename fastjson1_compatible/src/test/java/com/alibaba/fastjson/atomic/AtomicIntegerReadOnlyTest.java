@@ -7,18 +7,20 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class AtomicIntegerReadOnlyTest {
 
     @Test
-    public void test_codec_null() throws Exception {
+    public void test_codec_null() {
         V0 v = new V0(123);
 
         String text = JSON.toJSONString(v);
-        Assert.assertEquals("{\"value\":123}", text);
+        assertEquals("{\"value\":123}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue().intValue(), v.getValue().intValue());
+        assertEquals(v1.getValue().intValue(), v.getValue().intValue());
     }
 
     public static class V0 {

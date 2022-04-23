@@ -6,19 +6,35 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AtomicIntegerReadOnlyTest {
 
     @Test
-    public void test_codec_null() throws Exception {
+    public void test_readOnly_method() {
         V0 v = new V0(123);
 
         String text = JSON.toJSONString(v);
-        Assert.assertEquals("{\"value\":123}", text);
+        assertEquals("{\"value\":123}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue().intValue(), v.getValue().intValue());
+        assertEquals(v1.getValue().intValue(), v.getValue().intValue());
+    }
+
+    @Test
+    public void test_readOnly_field() {
+        V1 v = new V1();
+        v.value.set(123);
+
+        String text = JSON.toJSONString(v);
+        assertEquals("{\"value\":123}", text);
+
+        V1 v1 = JSON.parseObject(text, V1.class);
+
+        assertEquals(v1.value.intValue(), v.value.intValue());
     }
 
     public static class V0 {
@@ -36,6 +52,9 @@ public class AtomicIntegerReadOnlyTest {
         public AtomicInteger getValue() {
             return value;
         }
+    }
 
+    public static class V1 {
+        public final AtomicInteger value = new AtomicInteger(1);
     }
 }
