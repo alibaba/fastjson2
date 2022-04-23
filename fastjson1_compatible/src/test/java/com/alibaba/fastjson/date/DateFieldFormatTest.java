@@ -13,10 +13,19 @@ import java.util.TimeZone;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateFieldFormatTest {
+    TimeZone defaultTimeZone;
+
     @BeforeEach
-    protected void setUp() throws Exception {
+    public void setUp() {
         JSON.defaultTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
         JSON.defaultLocale = Locale.CHINA;
+
+        defaultTimeZone = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+    }
+
+    public void tearDown() {
+        TimeZone.setDefault(defaultTimeZone);
     }
 
     @Test
