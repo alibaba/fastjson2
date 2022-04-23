@@ -21,6 +21,7 @@ public class AwtRederModule implements ObjectReaderModule {
     static final long HASH_SIZE = Fnv.hashCode64("size");
     static final long HASH_STYLE = Fnv.hashCode64("style");
 
+    @Override
     public ObjectReader getObjectReader(ObjectReaderProvider provider, Type type) {
         if (type == Color.class) {
             return createObjectReader(new ColorCreator()

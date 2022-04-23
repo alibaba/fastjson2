@@ -135,6 +135,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
         return fieldName;
     }
 
+    @Override
     public <T> FieldReader<T> createFieldReader(
             Class objectClass
             , Type objectType
@@ -789,7 +790,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
 
         genCreateObject(mw, classNameType, TYPE_OBJECT, fieldBased);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
-        
+
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfObjectStart", "()Z", false);
         mw.visitInsn(Opcodes.POP);

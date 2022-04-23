@@ -137,10 +137,12 @@ public final class ObjectReaderImplList implements ObjectReader {
         this.itemClassNameHash = itemClassName != null ? Fnv.hashCode64(itemClassName) : 0;
     }
 
+    @Override
     public Class getObjectClass() {
         return listClass;
     }
 
+    @Override
     public Function getBuildFunction() {
         return builder;
     }
@@ -250,10 +252,12 @@ public final class ObjectReaderImplList implements ObjectReader {
         return new ArrayList();
     }
 
+    @Override
     public FieldReader getFieldReader(long hashCode) {
         return null;
     }
 
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         ObjectReader objectReader = jsonReader.checkAutoType(this.listClass, 0, features);
 
@@ -382,6 +386,7 @@ public final class ObjectReaderImplList implements ObjectReader {
         return list;
     }
 
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (itemObjectReader == null) {
             itemObjectReader = jsonReader

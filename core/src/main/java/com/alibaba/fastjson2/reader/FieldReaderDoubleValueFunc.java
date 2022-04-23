@@ -32,6 +32,7 @@ final class FieldReaderDoubleValueFunc<T> extends FieldReaderImpl<T> {
                 , TypeUtils.toDoubleValue(value));
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         function.accept(object
                 , jsonReader.readDoubleValue());

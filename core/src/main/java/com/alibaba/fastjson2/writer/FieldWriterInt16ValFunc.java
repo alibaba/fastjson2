@@ -20,11 +20,13 @@ final class FieldWriterInt16ValFunc extends FieldWriterInt16 {
         return method;
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         short value = function.applyAsShort(object);
         jsonWriter.writeInt32(value);
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         return function.applyAsShort(object);
     }

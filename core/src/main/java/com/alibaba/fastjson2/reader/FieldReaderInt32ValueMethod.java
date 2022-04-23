@@ -12,6 +12,7 @@ final class FieldReaderInt32ValueMethod<T> extends FieldReaderObjectMethod<T> {
         super(fieldName, fieldType, setter);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         int fieldInt = jsonReader.readInt32Value();
         try {
@@ -21,6 +22,7 @@ final class FieldReaderInt32ValueMethod<T> extends FieldReaderObjectMethod<T> {
         }
     }
 
+    @Override
     public void accept(T object, Object value) {
         if (value == null) {
             value = 0;
@@ -34,6 +36,7 @@ final class FieldReaderInt32ValueMethod<T> extends FieldReaderObjectMethod<T> {
         }
     }
 
+    @Override
     public void accept(T object, long value) {
         try {
             method.invoke(object, (int) value);
@@ -42,6 +45,7 @@ final class FieldReaderInt32ValueMethod<T> extends FieldReaderObjectMethod<T> {
         }
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readInt32Value();
     }

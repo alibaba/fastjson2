@@ -14,10 +14,12 @@ class FieldReaderAtomicIntegerMethodReadOnly<T> extends FieldReaderImpl<T> imple
         this.setter = setter;
     }
 
+    @Override
     public boolean isReadOnly() {
         return true;
     }
 
+    @Override
     public void accept(T object, Object value) {
         if (value == null) {
             return;
@@ -31,11 +33,13 @@ class FieldReaderAtomicIntegerMethodReadOnly<T> extends FieldReaderImpl<T> imple
         }
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         Integer value = jsonReader.readInt32();
         accept(object, value);
     }
 
+    @Override
     public String toString() {
         return setter.getName();
     }

@@ -21,6 +21,7 @@ final class FieldReaderStringFunc<T, V> extends FieldReaderImpl<T> {
         trim = "trim".equals(format);
     }
 
+    @Override
     public Method getMethod() {
         return method;
     }

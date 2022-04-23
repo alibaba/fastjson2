@@ -32,6 +32,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
         this.annotationProcessor = new WriterAnnotationProcessor();
     }
 
+    @Override
     public ObjectWriterAnnotationProcessor getAnnotationProcessor() {
         return annotationProcessor;
     }
@@ -527,6 +528,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
         }
     }
 
+    @Override
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         if (objectType == String.class) {
             return ObjectWriterImplString.INSTANCE;
@@ -853,10 +855,12 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
     }
 
     static abstract class PrimitiveImpl<T> implements ObjectWriter<T> {
+        @Override
         public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             writeJSONB(jsonWriter, object, null, null, 0);
         }
 
+        @Override
         public void writeArrayMapping(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             write(jsonWriter, object, null, null, 0);
         }

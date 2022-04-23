@@ -46,6 +46,7 @@ class FieldReaderListField<T>
         return itemType;
     }
 
+    @Override
     public ObjectReader checkObjectAutoType(JSONReader jsonReader) {
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();
@@ -76,6 +77,7 @@ class FieldReaderListField<T>
         return null;
     }
 
+    @Override
     public ObjectReader getItemObjectReader(JSONReader.Context ctx) {
         if (itemReader != null) {
             return itemReader;
@@ -83,6 +85,7 @@ class FieldReaderListField<T>
         return itemReader= ctx.getObjectReader(itemType);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         if (jsonReader.nextIfNull()) {
             return;

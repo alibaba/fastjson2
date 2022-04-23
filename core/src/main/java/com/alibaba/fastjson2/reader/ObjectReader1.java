@@ -47,6 +47,7 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
         return defaultCreator.get();
     }
 
+    @Override
     public T readObject(JSONReader jsonReader) {
         return readObject(jsonReader, features);
     }

@@ -25,10 +25,12 @@ final class FieldReaderNumberFunc<T, V> extends FieldReaderImpl<T> {
         function.accept(object, (V) value);
     }
 
+    @Override
     public void accept(T object, int value) {
         function.accept(object, (V) Integer.valueOf(value));
     }
 
+    @Override
     public void accept(T object, long value) {
         function.accept(object, (V) Long.valueOf(value));
     }

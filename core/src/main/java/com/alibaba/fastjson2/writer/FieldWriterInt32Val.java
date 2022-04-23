@@ -18,6 +18,7 @@ class FieldWriterInt32Val<T> extends FieldWriterInt32<T> {
         return field;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         try {
             return field.get(object);

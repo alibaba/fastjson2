@@ -23,10 +23,12 @@ class FieldReaderObjectMethod<T>
         this.method = method;
     }
 
+    @Override
     public Method getMethod() {
         return method;
     }
 
+    @Override
     public void accept(T object, Object value) {
         if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
             return;
@@ -39,6 +41,7 @@ class FieldReaderObjectMethod<T>
         }
     }
 
+    @Override
     public String toString() {
         if (method != null) {
             return method.getName();
@@ -80,6 +83,7 @@ class FieldReaderObjectMethod<T>
         accept(object, value);
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         if (fieldObjectReader == null) {
             fieldObjectReader = jsonReader

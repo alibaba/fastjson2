@@ -100,7 +100,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         this.classLoader = new DynamicClassLoader(classLoader);
     }
 
-
+    @Override
     public ObjectWriter createObjectWriter(
             Class objectClass,
             long features,
@@ -2326,6 +2326,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         }
     }
 
+    @Override
     public <T> FieldWriter<T> createFieldWriter(
             String fieldName,
             int ordinal,

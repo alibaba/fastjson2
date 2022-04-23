@@ -21,10 +21,12 @@ final class FieldWriterBigIntFunc<T> extends FieldWriterImpl<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return function.apply(object);
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         BigInteger value = (BigInteger) getFieldValue(object);
         jsonWriter.writeBigInt(value, features);

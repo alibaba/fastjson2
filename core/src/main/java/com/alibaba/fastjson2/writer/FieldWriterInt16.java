@@ -119,6 +119,7 @@ abstract class FieldWriterInt16<T> extends FieldWriterImpl<T> {
         jsonWriter.writeInt32(value.shortValue());
     }
 
+    @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         return ObjectWriterImplInt16.INSTANCE;
     }

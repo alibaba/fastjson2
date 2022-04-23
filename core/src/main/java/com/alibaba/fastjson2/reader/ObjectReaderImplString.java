@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 final class ObjectReaderImplString extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplString INSTANCE = new ObjectReaderImplString();
 
+    @Override
     public Class getObjectClass() {
         return String.class;
     }

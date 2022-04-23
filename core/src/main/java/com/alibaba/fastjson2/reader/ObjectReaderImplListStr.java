@@ -18,6 +18,7 @@ public final class ObjectReaderImplListStr implements ObjectReader {
         this.instanceType = instanceType;
     }
 
+    @Override
     public Object createInstance() {
         if (instanceType == ArrayList.class) {
             return new ArrayList();
@@ -34,10 +35,12 @@ public final class ObjectReaderImplListStr implements ObjectReader {
         }
     }
 
+    @Override
     public FieldReader getFieldReader(long hashCode) {
         return null;
     }
 
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         Class listType = this.listType;
 
@@ -108,6 +111,7 @@ public final class ObjectReaderImplListStr implements ObjectReader {
         return list;
     }
 
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.isJSONB()) {
             return readJSONBObject(jsonReader, 0);

@@ -17,6 +17,7 @@ final class FieldWriterBoolValField extends FieldWriterBoolVal {
         return field;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         try {
             return field.getBoolean(object);

@@ -27,6 +27,7 @@ final class FieldReaderFloatValueFunc<T> extends FieldReaderImpl<T> {
         function.accept(object, value);
     }
 
+    @Override
     public void accept(T object, Object value) {
         try {
             method.invoke(object
@@ -36,6 +37,7 @@ final class FieldReaderFloatValueFunc<T> extends FieldReaderImpl<T> {
         }
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         function.accept(object
                 , jsonReader.readFloatValue());

@@ -22,6 +22,7 @@ public abstract class FieldReaderAtomicReference<T> extends FieldReaderImpl<T> {
         this.referenceType = referenceType;
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         if (jsonReader.nextIfNull()) {
             return;
@@ -31,6 +32,7 @@ public abstract class FieldReaderAtomicReference<T> extends FieldReaderImpl<T> {
         accept(object, refValue);
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.read(referenceType);
     }

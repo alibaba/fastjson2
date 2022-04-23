@@ -31,6 +31,7 @@ final class FieldWriterListMethod<T> extends FieldWriterList<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         try {
             return method.invoke(object);

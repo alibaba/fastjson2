@@ -36,6 +36,7 @@ final class ObjectWriterImplEnum<E extends Enum<E>> extends ObjectWriterBaseModu
         }
     }
 
+    @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
             if (typeNameJSONB == null) {
@@ -66,6 +67,7 @@ final class ObjectWriterImplEnum<E extends Enum<E>> extends ObjectWriterBaseModu
         }
     }
 
+    @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         Enum e = (Enum) object;
         String str;

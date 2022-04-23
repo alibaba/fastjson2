@@ -19,10 +19,12 @@ final class FieldReaderAtomicReferenceMethodReadOnly<T>
         this.method = method;
     }
 
+    @Override
     public boolean isReadOnly() {
         return true;
     }
 
+    @Override
     public void accept(T object, Object value) {
         if (value == null) {
             return;

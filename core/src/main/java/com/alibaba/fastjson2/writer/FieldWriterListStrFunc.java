@@ -31,6 +31,7 @@ final class FieldWriterListStrFunc<T> extends FieldWriterImpl<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return function.apply(object);
     }
@@ -94,6 +95,7 @@ final class FieldWriterListStrFunc<T> extends FieldWriterImpl<T> {
         return true;
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         List list = function.apply(object);
         if (list == null) {

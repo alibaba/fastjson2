@@ -27,6 +27,7 @@ final class FieldWriterObjectFuncFinal<T> extends FieldWriterObjectFinal<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         return function.apply(object);
     }

@@ -38,6 +38,7 @@ public abstract class JSONPath {
         return false;
     }
 
+    @Override
     public final String toString() {
         return path;
     }
@@ -1088,6 +1089,7 @@ public abstract class JSONPath {
             this.value = value;
         }
 
+        @Override
         public boolean apply(Object fieldValue) {
             boolean objInt = fieldValue instanceof Boolean
                     || fieldValue instanceof Byte
@@ -1170,6 +1172,7 @@ public abstract class JSONPath {
             this.value = value;
         }
 
+        @Override
         public boolean apply(Object fieldValue) {
             if (fieldValue == null) {
                 return false;
@@ -1322,6 +1325,7 @@ public abstract class JSONPath {
             this.not = not;
         }
 
+        @Override
         public boolean apply(Object fieldValue) {
             if (fieldValue instanceof Byte
                     || fieldValue instanceof Short
@@ -1393,6 +1397,7 @@ public abstract class JSONPath {
             this.not = not;
         }
 
+        @Override
         public boolean apply(Object fieldValue) {
             if (fieldValue instanceof Byte
                     || fieldValue instanceof Short
@@ -1509,6 +1514,7 @@ public abstract class JSONPath {
             eval(ctx);
         }
 
+        @Override
         public boolean remove(Context ctx) {
             Object object = ctx.parent == null
                     ? ctx.root
@@ -1626,6 +1632,7 @@ public abstract class JSONPath {
             this.value = value;
         }
 
+        @Override
         public boolean apply(Object fieldValue) {
             if (!(fieldValue instanceof String)) {
                 return false;
@@ -1662,6 +1669,7 @@ public abstract class JSONPath {
             this.not = not;
         }
 
+        @Override
         public boolean apply(Object fieldValue) {
             for (String value : values) {
                 if (value == fieldValue) {
@@ -1714,6 +1722,7 @@ public abstract class JSONPath {
             this.minLength = len;
         }
 
+        @Override
         boolean apply(Object arg) {
             if (!(arg instanceof String)) {
                 return false;
@@ -1761,6 +1770,7 @@ public abstract class JSONPath {
             this.nameHashCode = nameHashCode;
         }
 
+        @Override
         public void eval(Context ctx) {
             Object object = ctx.parent == null
                     ? ctx.root
@@ -1783,6 +1793,7 @@ public abstract class JSONPath {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public void accept(JSONReader jsonReader, Context ctx) {
             eval(ctx);
         }
@@ -1865,6 +1876,7 @@ public abstract class JSONPath {
             this.nameHashCode = segment.nameHashCode;
         }
 
+        @Override
         public Object eval(Object root) {
             if (root instanceof Map) {
                 Map map = (Map) root;
@@ -1907,6 +1919,7 @@ public abstract class JSONPath {
             return fieldWriter.getFieldValue(root);
         }
 
+        @Override
         public boolean remove(Object root) {
             if (root == null) {
                 return false;
@@ -1936,10 +1949,12 @@ public abstract class JSONPath {
             return true;
         }
 
+        @Override
         public boolean isRef() {
             return true;
         }
 
+        @Override
         public boolean contains(Object root) {
             if (root instanceof Map) {
                 return ((Map) root).get(name) != null;
@@ -1960,6 +1975,7 @@ public abstract class JSONPath {
             return fieldWriter.getFieldValue(root) != null;
         }
 
+        @Override
         public void set(Object rootObject, Object value) {
             if (rootObject instanceof Map) {
                 ((Map) rootObject).put(name, value);
@@ -1982,6 +1998,7 @@ public abstract class JSONPath {
             fieldReader.accept(rootObject, value);
         }
 
+        @Override
         public void setInt(Object rootObject, int value) {
             if (rootObject instanceof Map) {
                 ((Map) rootObject).put(name, value);
@@ -1992,6 +2009,7 @@ public abstract class JSONPath {
             objectReader.setFieldValue(rootObject, name, nameHashCode, value);
         }
 
+        @Override
         public void setLong(Object rootObject, long value) {
             if (rootObject instanceof Map) {
                 ((Map) rootObject).put(name, value);
@@ -2261,6 +2279,7 @@ public abstract class JSONPath {
             return 0;
         }
 
+        @Override
         public void extractScalar(JSONReader jsonReader, ValueConsumer consumer) {
             if (jsonReader.nextIfObjectStart()) {
                 _for:
@@ -2332,6 +2351,7 @@ public abstract class JSONPath {
             consumer.acceptNull();
         }
 
+        @Override
         public void extract(JSONReader jsonReader, ValueConsumer consumer) {
             if (jsonReader.nextIfObjectStart()) {
                 for (; ; ) {
@@ -2410,22 +2430,26 @@ public abstract class JSONPath {
             this.ref = segment instanceof IndexSegment || segment instanceof NameSegment;
         }
 
+        @Override
         public boolean remove(Object root) {
             Context ctx = new Context(this, null, segment, null);
             ctx.root = root;
             return segment.remove(ctx);
         }
 
+        @Override
         public boolean contains(Object root) {
             Context ctx = new Context(this, null, segment, null);
             ctx.root = root;
             return segment.contains(ctx);
         }
 
+        @Override
         public boolean isRef() {
             return ref;
         }
 
+        @Override
         public Object eval(Object root) {
             Context ctx = new Context(this, null, segment, null);
             ctx.root = root;
@@ -2461,6 +2485,7 @@ public abstract class JSONPath {
             return ctx.value;
         }
 
+        @Override
         public String extractScalar(JSONReader jsonReader) {
             Context ctx = new Context(this, null, segment, null);
             segment.accept(jsonReader, ctx);
@@ -2488,6 +2513,7 @@ public abstract class JSONPath {
             this.ref = ref;
         }
 
+        @Override
         public boolean remove(Object root) {
             Context ctx = null;
 
@@ -2521,6 +2547,7 @@ public abstract class JSONPath {
             return false;
         }
 
+        @Override
         public boolean contains(Object root) {
             Context ctx = null;
 
@@ -2550,10 +2577,12 @@ public abstract class JSONPath {
             return false;
         }
 
+        @Override
         public boolean isRef() {
             return ref;
         }
 
+        @Override
         public Object eval(Object root) {
             Context ctx = null;
 
@@ -2642,6 +2671,7 @@ public abstract class JSONPath {
             return ctx.value;
         }
 
+        @Override
         public String extractScalar(JSONReader jsonReader) {
             int size = segments.size();
             if (size == 0) {
@@ -2983,6 +3013,7 @@ public abstract class JSONPath {
             this.nameHashCode = nameHashCode;
         }
 
+        @Override
         public boolean remove(Context context) {
             set(context, null);
             return context.eval = true;
@@ -3069,6 +3100,7 @@ public abstract class JSONPath {
             return false;
         }
 
+        @Override
         public void eval(Context ctx) {
             Object object = ctx.parent == null
                     ? ctx.root
@@ -3458,15 +3490,18 @@ public abstract class JSONPath {
             this.nameHashCode = nameHashCode;
         }
 
+        @Override
         public String toString() {
             return ".." + name;
         }
 
+        @Override
         public boolean remove(Context context) {
             set(context, null);
             return context.eval = true;
         }
 
+        @Override
         public void eval(Context context) {
             Object object = context.parent == null
                     ? context.root
@@ -3498,6 +3533,7 @@ public abstract class JSONPath {
             context.eval = true;
         }
 
+        @Override
         public void set(Context context, Object value) {
             Object object = context.parent == null
                     ? context.root
@@ -3788,6 +3824,7 @@ public abstract class JSONPath {
             return new IndexSegment(index);
         }
 
+        @Override
         public void eval(Context ctx) {
             Object object = ctx.parent == null
                     ? ctx.root
@@ -4136,6 +4173,7 @@ public abstract class JSONPath {
             }
         }
 
+        @Override
         public String toString() {
             int size = (index < 0) ? IOUtils.stringSize(-index) + 1 : IOUtils.stringSize(index);
             byte[] bytes = new byte[size + 2];
@@ -4161,6 +4199,7 @@ public abstract class JSONPath {
             this.end = end;
         }
 
+        @Override
         public void eval(Context ctx) {
             Object object = ctx.parent == null
                     ? ctx.root
@@ -4328,6 +4367,7 @@ public abstract class JSONPath {
             this.indexes = indexes;
         }
 
+        @Override
         public void eval(Context ctx) {
             Object object = ctx.parent == null
                     ? ctx.root
@@ -4466,6 +4506,7 @@ public abstract class JSONPath {
             }
         }
 
+        @Override
         public void eval(Context context) {
             Object object = context.parent == null
                     ? context.root
@@ -4497,6 +4538,7 @@ public abstract class JSONPath {
             context.value = array;
         }
 
+        @Override
         public void accept(JSONReader jsonReader, Context ctx) {
 
         }

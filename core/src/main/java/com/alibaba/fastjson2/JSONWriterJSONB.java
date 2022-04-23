@@ -60,6 +60,7 @@ final class JSONWriterJSONB extends JSONWriter {
         this.symbolTable = symbolTable;
     }
 
+    @Override
     public void close() {
         if (bytes.length > CACHE_THREAD) {
             return;
@@ -67,22 +68,27 @@ final class JSONWriterJSONB extends JSONWriter {
         byteUpdater.set(JSONFactory.CACHE, bytes);
     }
 
+    @Override
     public boolean isUTF8() {
         return false;
     }
 
+    @Override
     public boolean isUTF16() {
         return false;
     }
 
+    @Override
     public boolean isJSONB() {
         return true;
     }
 
+    @Override
     public JSONB.SymbolTable getSymbolTable() {
         return symbolTable;
     }
 
+    @Override
     public void writeAny(Object value) {
         if (value == null) {
             writeNull();
@@ -121,6 +127,7 @@ final class JSONWriterJSONB extends JSONWriter {
         bytes[off++] = BC_OBJECT;
     }
 
+    @Override
     public void endObject() {
         level--;
         if (off == bytes.length) {
@@ -140,10 +147,12 @@ final class JSONWriterJSONB extends JSONWriter {
         bytes[off++] = BC_OBJECT_END;
     }
 
+    @Override
     public void startArray() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void startArray(Object array, int size) {
         if (isWriteTypeInfo(array)) {
             writeTypeName(array.getClass().getName());
@@ -173,6 +182,7 @@ final class JSONWriterJSONB extends JSONWriter {
         }
     }
 
+    @Override
     public void startArray(int size) {
         level++;
         if (off == bytes.length) {
@@ -198,6 +208,7 @@ final class JSONWriterJSONB extends JSONWriter {
         }
     }
 
+    @Override
     public void writeRaw(byte b) {
         if (off == bytes.length) {
             int minCapacity = off + 1;
@@ -216,10 +227,12 @@ final class JSONWriterJSONB extends JSONWriter {
         bytes[off++] = b;
     }
 
+    @Override
     public void writeName(String name) {
         writeString(name);
     }
 
+    @Override
     public void writeNull() {
         if (off == bytes.length) {
             int minCapacity = off + 1;
@@ -238,10 +251,12 @@ final class JSONWriterJSONB extends JSONWriter {
         bytes[off++] = BC_NULL;
     }
 
+    @Override
     public void endArray() {
         level--;
     }
 
+    @Override
     public void writeComma() {
         throw new UnsupportedOperationException();
     }
@@ -251,10 +266,12 @@ final class JSONWriterJSONB extends JSONWriter {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void writeString(char ch) {
         writeString(new char[] {ch});
     }
 
+    @Override
     public void writeString(char[] str) {
         if (str == null) {
             writeNull();
@@ -637,6 +654,7 @@ final class JSONWriterJSONB extends JSONWriter {
         }
     }
 
+    @Override
     public void writeMillis(long millis) {
         if (millis % 1000 == 0) {
             long seconds = (millis / 1000);
@@ -838,6 +856,7 @@ final class JSONWriterJSONB extends JSONWriter {
         bytes[off++] = (byte) val;
     }
 
+    @Override
     public void writeInt64(long[] value) {
         if (value == null) {
             writeArrayNull();
@@ -965,6 +984,7 @@ final class JSONWriterJSONB extends JSONWriter {
         level--;
     }
 
+    @Override
     public void writeFloat(float value) {
         if (value >= INT32_SHORT_MIN && value <= INT32_SHORT_MAX) {
             int int32Value = (int) value;
@@ -985,6 +1005,7 @@ final class JSONWriterJSONB extends JSONWriter {
         bytes[off++] = (byte) i;
     }
 
+    @Override
     public void writeFloat(float[] value) {
         if (value == null) {
             writeNull();
@@ -997,6 +1018,7 @@ final class JSONWriterJSONB extends JSONWriter {
         endArray();
     }
 
+    @Override
     public void writeDouble(double value) {
         if (value == 0) {
             ensureCapacity(off + 1);
@@ -1033,6 +1055,7 @@ final class JSONWriterJSONB extends JSONWriter {
         bytes[off++] = (byte) i;
     }
 
+    @Override
     public void writeDouble(double[] value) {
         if (value == null) {
             writeNull();
@@ -1045,6 +1068,7 @@ final class JSONWriterJSONB extends JSONWriter {
         endArray();
     }
 
+    @Override
     public void writeInt16(short[] value) {
         if (value == null) {
             writeNull();
@@ -1057,6 +1081,7 @@ final class JSONWriterJSONB extends JSONWriter {
         endArray();
     }
 
+    @Override
     public void writeInt32(int[] values) {
         if (values == null) {
             writeArrayNull();
@@ -1312,6 +1337,7 @@ final class JSONWriterJSONB extends JSONWriter {
         bytes[off++] = (byte) val;
     }
 
+    @Override
     public void writeArrayNull() {
         if (off == bytes.length) {
             int minCapacity = off + 1;
@@ -1340,6 +1366,7 @@ final class JSONWriterJSONB extends JSONWriter {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void writeRaw(byte[] bytes) {
         int minCapacity = this.off + bytes.length;
         if (minCapacity - this.bytes.length > 0) {
@@ -1359,6 +1386,7 @@ final class JSONWriterJSONB extends JSONWriter {
         off += bytes.length;
     }
 
+    @Override
     public void writeNameRaw(byte[] name, long nameHash) {
         if (symbolTable != null) {
             int symbol = symbolTable.getOrdinalByHashCode(nameHash);
@@ -1455,6 +1483,7 @@ final class JSONWriterJSONB extends JSONWriter {
         writeInt32(symbol);
     }
 
+    @Override
     public void writeLocalDate(LocalDate date) {
         if (date == null) {
             writeNull();
@@ -1471,6 +1500,7 @@ final class JSONWriterJSONB extends JSONWriter {
         bytes[off++] = (byte) date.getDayOfMonth();
     }
 
+    @Override
     public void writeLocalTime(LocalTime time) {
         if (time == null) {
             writeNull();
@@ -1488,6 +1518,7 @@ final class JSONWriterJSONB extends JSONWriter {
         writeInt32(nano);
     }
 
+    @Override
     public void writeLocalDateTime(LocalDateTime dateTime) {
         if (dateTime == null) {
             writeNull();
@@ -1510,6 +1541,7 @@ final class JSONWriterJSONB extends JSONWriter {
         writeInt32(nano);
     }
 
+    @Override
     public void writeZonedDateTime(ZonedDateTime dateTime) {
         if (dateTime == null) {
             writeNull();
@@ -1535,6 +1567,7 @@ final class JSONWriterJSONB extends JSONWriter {
         writeString(zoneId);
     }
 
+    @Override
     public void writeInstant(Instant instant) {
         if (instant == null) {
             writeNull();
@@ -1549,6 +1582,7 @@ final class JSONWriterJSONB extends JSONWriter {
         writeInt32(nano);
     }
 
+    @Override
     public void writeUUID(UUID value) {
         if (value == null) {
             writeNull();
@@ -1583,7 +1617,7 @@ final class JSONWriterJSONB extends JSONWriter {
     }
 
 
-
+    @Override
     public void writeBigInt(BigInteger value, long features) {
         if (value == null) {
             writeNull();
@@ -1620,6 +1654,7 @@ final class JSONWriterJSONB extends JSONWriter {
         off += bytes.length;
     }
 
+    @Override
     public void writeBinary(byte[] bytes) {
         if (bytes == null) {
             writeNull();
@@ -1634,10 +1669,12 @@ final class JSONWriterJSONB extends JSONWriter {
         off += bytes.length;
     }
 
+    @Override
     public void writeDecimal(BigDecimal value, long features) {
         writeDecimal(value);
     }
 
+    @Override
     public void writeDecimal(BigDecimal value) {
         if (value == null) {
             writeNull();
@@ -1664,6 +1701,7 @@ final class JSONWriterJSONB extends JSONWriter {
         writeBigInt(unscaledValue);
     }
 
+    @Override
     public void writeBool(boolean value) {
         if (off == bytes.length) {
             int minCapacity = off + 1;
@@ -1682,6 +1720,7 @@ final class JSONWriterJSONB extends JSONWriter {
         this.bytes[off++] = value ? BC_TRUE : BC_FALSE;
     }
 
+    @Override
     public void writeBool(boolean[] value) {
         if (value == null) {
             writeNull();
@@ -1695,6 +1734,7 @@ final class JSONWriterJSONB extends JSONWriter {
         endArray();
     }
 
+    @Override
     public void writeReference(String path) {
         if (off == bytes.length) {
             int minCapacity = off + 1;
@@ -1721,6 +1761,7 @@ final class JSONWriterJSONB extends JSONWriter {
         this.lastReference = path;
     }
 
+    @Override
     public void writeDateTime19(
             int year,
             int month,
@@ -1744,10 +1785,12 @@ final class JSONWriterJSONB extends JSONWriter {
         writeInt32(nano);
     }
 
+    @Override
     public byte[] getBytes() {
         return Arrays.copyOf(bytes, off);
     }
 
+    @Override
     public int flushTo(OutputStream to) throws IOException {
         int len = off;
         to.write(bytes, 0, off);
@@ -1755,6 +1798,7 @@ final class JSONWriterJSONB extends JSONWriter {
         return len;
     }
 
+    @Override
     public String toString() {
         if (bytes.length == 0) {
             return "<empty>";
