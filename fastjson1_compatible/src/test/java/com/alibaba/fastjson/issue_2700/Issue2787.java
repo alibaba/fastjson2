@@ -8,7 +8,6 @@ import com.alibaba.fastjson.serializer.ObjectSerializer;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.spi.Module;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,9 +32,10 @@ public class Issue2787 {
 
         @Test
         public void test_for_issue() {
-            Pageable pageRequest = new PageRequest(0, 10, new Sort(new Sort.Order("id, desc")));
+
+            Pageable pageRequest = PageRequest.of(0, 10, Sort.Direction.DESC, "id");
             SerializeConfig config = new SerializeConfig();
-    //        config.register(new MyModule());
+            //        config.register(new MyModule());
             String result = JSON.toJSONString(pageRequest, config);
             assertTrue(result.indexOf("\"property\":\"id, desc\"") != -1);
         }
