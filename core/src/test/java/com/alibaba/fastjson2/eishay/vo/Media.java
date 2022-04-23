@@ -12,7 +12,7 @@ public class Media implements java.io.Serializable {
     }
 
     public int bitrate;   // Can be unset.
-    @JSONField(write = false, read = false)
+    @JSONField(serialize = false, deserialize = false)
     public boolean hasBitrate;
 
     public long duration;

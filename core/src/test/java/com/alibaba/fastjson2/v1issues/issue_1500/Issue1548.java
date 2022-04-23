@@ -31,12 +31,12 @@ public class Issue1548 {
             this.doc = new JSONObject();
         }
 
-        @JSONField(read = false)
+        @JSONField(deserialize = false)
         public void addMeta(String name, Object value) {
             this.meta.put(name, value);
         }
 
-        @JSONField(write = false)
+        @JSONField(serialize = false)
         public Object getMeta(String name) {
             return this.meta.get(name);
         }

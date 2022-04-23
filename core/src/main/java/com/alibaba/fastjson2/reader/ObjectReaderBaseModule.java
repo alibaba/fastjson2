@@ -629,7 +629,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             }
 
             if (!fieldInfo.ignore) {
-                fieldInfo.ignore = !jsonField.read();
+                fieldInfo.ignore = !jsonField.deserialize();
             }
 
             for (JSONReader.Feature feature : jsonField.readeFeatures()) {

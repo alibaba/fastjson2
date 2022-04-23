@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.v1issues.issue_1400;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,14 +17,14 @@ public class Issue1465 {
 
     public static class Model {
         private int id;
-        @JSONField(read = false)
+        @JSONField(deserialize = false)
         private int hasSth;
 
         public int getHasSth() {
             return hasSth;
         }
 
-        @JSONField(read = false)
+        @JSONField(deserialize = false)
         public void setHasSth(int hasSth) {
             this.hasSth = hasSth;
         }

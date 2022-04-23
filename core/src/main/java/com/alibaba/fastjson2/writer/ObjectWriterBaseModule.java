@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
@@ -199,7 +198,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             }
 
             if (!fieldInfo.ignore) {
-                fieldInfo.ignore = !jsonField.write();
+                fieldInfo.ignore = !jsonField.serialize();
             }
 
             if (jsonField.unwrapped()) {
@@ -378,7 +377,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 }
 
                 if (!fieldInfo.ignore) {
-                    fieldInfo.ignore = !jsonField.write();
+                    fieldInfo.ignore = !jsonField.serialize();
                 }
 
                 if (jsonField.unwrapped()) {

@@ -3,12 +3,6 @@ package com.alibaba.fastjson2.util;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
-import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
-
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class ApacheLang3Support {
     @JSONType(typeName = "org.apache.commons.lang3.tuple.Pair")
@@ -18,7 +12,7 @@ public class ApacheLang3Support {
             return null;
         }
 
-        @JSONField(read = false)
+        @JSONField(deserialize = false)
         Object setValue(Object value);
     }
 
@@ -31,7 +25,7 @@ public class ApacheLang3Support {
         Object getLeft();
         Object getRight();
 
-        @JSONField(read = false)
+        @JSONField(deserialize = false)
         Object setValue(Object value);
     }
 

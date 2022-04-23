@@ -15,8 +15,8 @@ public @interface JSONField {
     String name() default "";
     String format() default "";
 
-    boolean write() default true;
-    boolean read() default true;
+    boolean serialize() default true;
+    boolean deserialize() default true;
 
     JSONWriter.Feature[] writeFeatures() default {};
     JSONReader.Feature[] readeFeatures() default {};
