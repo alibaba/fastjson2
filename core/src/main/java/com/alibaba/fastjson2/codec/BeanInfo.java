@@ -22,4 +22,5 @@ public class BeanInfo {
 
     public String namingStrategy;
     public String[] ignores;
+    public String[] orders;
 }

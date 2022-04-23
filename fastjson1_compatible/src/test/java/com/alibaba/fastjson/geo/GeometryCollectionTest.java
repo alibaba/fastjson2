@@ -1,13 +1,16 @@
-package com.alibaba.json.bvt.geo;
+package com.alibaba.fastjson.geo;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.support.geo.Geometry;
 import com.alibaba.fastjson.support.geo.GeometryCollection;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class GeometryCollectionTest
-        extends TestCase {
-    public void test_geo() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class GeometryCollectionTest {
+    @Test
+    public void test_geo() {
         String str = "{\n" +
                 "    \"type\": \"GeometryCollection\",\n" +
                 "    \"geometries\": [{\n" +
