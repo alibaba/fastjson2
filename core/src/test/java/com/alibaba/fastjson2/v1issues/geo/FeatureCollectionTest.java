@@ -1,13 +1,15 @@
-package com.alibaba.json.bvt.geo;
+package com.alibaba.fastjson2.v1issues.geo;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson.support.geo.FeatureCollection;
 import com.alibaba.fastjson.support.geo.Geometry;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class FeatureCollectionTest
-        extends TestCase {
-    public void test_geo() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class FeatureCollectionTest {
+    @Test
+    public void test_geo() {
         String str = "{\n" +
                 "    \"type\": \"FeatureCollection\",\n" +
                 "    \"features\": [{\n" +

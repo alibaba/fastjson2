@@ -354,6 +354,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         fieldInfo.ignore = true;
                         break;
+                    case "com.alibaba.fastjson.annotation.JSONField":
+                        processJSONField1x(fieldInfo, annotation);
+                        break;
                     default:
                         break;
                 }
@@ -483,7 +486,17 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     break;
                 }
                 case "ignores": {
-                    beanInfo.ignores = (String[]) result;
+                    String[] fields = (String[]) result;
+                    if (fields.length != 0) {
+                        beanInfo.ignores = fields;
+                    }
+                    break;
+                }
+                case "orders": {
+                    String[] fields = (String[]) result;
+                    if (fields.length != 0) {
+                        beanInfo.orders = fields;
+                    }
                     break;
                 }
                 default:
