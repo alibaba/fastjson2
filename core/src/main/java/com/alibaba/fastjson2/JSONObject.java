@@ -1002,23 +1002,38 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
                 }
             }
 
+            Object value;
             if (name == null) {
                 name = methodName;
                 if (name.startsWith("get")) {
                     name = name.substring(3);
-                    if (name.length() == 0) {
+                    if (name.isEmpty()) {
                         throw new JSONException("This method '" + methodName + "' is an illegal getter");
                     }
                     name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+
+                    value = get(name);
+                    if (value == null) {
+                        return null;
+                    }
                 } else if (name.startsWith("is")) {
                     if (name.equals("isEmpty")) {
-                        return this.isEmpty();
+                        value = get("empty");
+                        if (value == null) {
+                            return this.isEmpty();
+                        }
+                    } else {
+                        name = name.substring(2);
+                        if (name.isEmpty()) {
+                            throw new JSONException("This method '" + methodName + "' is an illegal getter");
+                        }
+                        name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+
+                        value = get(name);
+                        if (value == null) {
+                            return false;
+                        }
                     }
-                    name = name.substring(2);
-                    if (name.length() == 0) {
-                        throw new JSONException("This method '" + methodName + "' is an illegal getter");
-                    }
-                    name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
                 } else if (name.equals("hashCode")) {
                     return this.hashCode();
                 } else if (name.equals("toString")) {
@@ -1030,11 +1045,11 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
                 } else {
                     throw new JSONException("This method '" + methodName + "' is not a getter");
                 }
-            }
-
-            Object value = get(name);
-            if (value == null) {
-                return null;
+            } else {
+                value = get(name);
+                if (value == null) {
+                    return null;
+                }
             }
 
             Function typeConvert = JSONFactory
