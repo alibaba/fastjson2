@@ -12,6 +12,7 @@ public class FieldInfo {
     public void init() {
         fieldName = null;
         format = null;
+        ordinal = 0;
         features = 0;
         ignore = false;
         alternateNames = null;

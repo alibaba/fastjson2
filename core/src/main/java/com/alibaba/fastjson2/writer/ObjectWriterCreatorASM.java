@@ -201,6 +201,21 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
                         fieldName = fieldInfo.fieldName;
                     }
 
+                    if (beanInfo.orders != null) {
+                        boolean match = false;
+                        for (int i = 0; i < beanInfo.orders.length; i++) {
+                            if (fieldName.equals(beanInfo.orders[i])) {
+                                fieldInfo.ordinal = i;
+                                match = true;
+                            }
+                        }
+                        if (!match) {
+                            if (fieldInfo.ordinal == 0) {
+                                fieldInfo.ordinal = beanInfo.orders.length;
+                            }
+                        }
+                    }
+
                     method.setAccessible(true);
 
                     ObjectWriter writeUsingWriter = null;

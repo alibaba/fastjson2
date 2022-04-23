@@ -379,6 +379,7 @@ public abstract class BeanUtils {
         }
 
         switch (namingStrategy) {
+            case "NeverUseThisValueExceptDefaultValue":
             case "CamelCase": {
                 char[] chars = new char[methodNameLength - 3];
                 methodName.getChars(3, methodNameLength, chars, 0);
