@@ -27,10 +27,12 @@ final class FieldWriterBigDecimalFunc<T> extends FieldWriterImpl<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return function.apply(object);
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         BigDecimal value = function.apply(object);
         jsonWriter.writeDecimal(value);

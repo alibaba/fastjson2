@@ -217,10 +217,14 @@ public class TLongIntHashMap {
         final StringBuilder buf = new StringBuilder( "{" );
         forEachEntry( new TLongIntProcedure() {
             private boolean first = true;
+            @Override
             public boolean execute( long key, int value ) {
-                if ( first ) first = false;
-                else buf.append( ", " );
-
+                if ( first ) {
+                    first = false;
+                }
+                else {
+                    buf.append( ", " );
+                }
                 buf.append(key);
                 buf.append("=");
                 buf.append(value);

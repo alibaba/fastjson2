@@ -13,6 +13,7 @@ class FielderReaderImplMapFieldReadOnly<T> extends FieldReaderObjectField<T> imp
         super(fieldName, fieldType, fieldClass, ordinal, features, format, field);
     }
 
+    @Override
     public void accept(T object, Object value) {
         if (value == null) {
             return;
@@ -37,6 +38,7 @@ class FielderReaderImplMapFieldReadOnly<T> extends FieldReaderObjectField<T> imp
         map.putAll((Map) value);
     }
 
+    @Override
     public boolean isReadOnly() {
         return true;
     }

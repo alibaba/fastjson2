@@ -12,6 +12,7 @@ final class FieldReaderDoubleValueMethod<T> extends FieldReaderObjectMethod<T> {
         super(fieldName, fieldType, setter);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         double fieldValue = jsonReader.readDoubleValue();
         try {
@@ -21,6 +22,7 @@ final class FieldReaderDoubleValueMethod<T> extends FieldReaderObjectMethod<T> {
         }
     }
 
+    @Override
     public void accept(T object, Object value) {
         try {
             method.invoke(object
@@ -30,6 +32,7 @@ final class FieldReaderDoubleValueMethod<T> extends FieldReaderObjectMethod<T> {
         }
     }
 
+    @Override
     public void accept(T object, int value) {
         try {
             method.invoke(object, (double) value);

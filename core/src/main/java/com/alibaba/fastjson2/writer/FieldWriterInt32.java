@@ -17,6 +17,7 @@ abstract class FieldWriterInt32<T> extends FieldWriterImpl<T> {
                 || "string".equals(format);
     }
 
+    @Override
     public void writeInt32(JSONWriter jsonWriter, int value) {
         if (toString) {
             writeFieldName(jsonWriter);
@@ -106,6 +107,7 @@ abstract class FieldWriterInt32<T> extends FieldWriterImpl<T> {
         jsonWriter.writeInt32(value);
     }
 
+    @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (valueClass == this.fieldClass) {
             return ObjectWriterImplInt32.INSTANCE;

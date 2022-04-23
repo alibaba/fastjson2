@@ -42,6 +42,7 @@ final class FieldReaderObjectFunc<T, V> extends FieldReaderImpl<T> implements Fi
         function.accept(object, (V) value);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         ObjectReader objectReader;
         if (this.fieldObjectReader != null) {
@@ -75,6 +76,7 @@ final class FieldReaderObjectFunc<T, V> extends FieldReaderImpl<T> implements Fi
         return fieldObjectReader;
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         ObjectReader objectReader;
         if (this.fieldObjectReader != null) {

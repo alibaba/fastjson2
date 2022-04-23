@@ -17,6 +17,7 @@ final class FieldWriterInt8Field<T> extends FieldWriterInt8<T> {
         return field;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         try {
             return field.get(object);

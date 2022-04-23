@@ -1289,6 +1289,7 @@ public abstract class JSONReader implements Closeable {
         }
     }
 
+    @Override
     public void close() {
 
     }
@@ -1306,9 +1307,9 @@ public abstract class JSONReader implements Closeable {
             if (signum < 0) {
                 // Check if magnitude is a power of two
                 boolean pow2 = (Integer.bitCount(mag[0]) == 1);
-                for (int i=1; i< mag.length && pow2; i++)
+                for (int i=1; i< mag.length && pow2; i++) {
                     pow2 = (mag[i] == 0);
-
+                }
                 bitLength = (pow2 ? magBitLength - 1 : magBitLength);
             } else {
                 bitLength = magBitLength;
@@ -2028,6 +2029,7 @@ public abstract class JSONReader implements Closeable {
             this.reference = reference;
         }
 
+        @Override
         public String toString() {
             return reference.toString();
         }

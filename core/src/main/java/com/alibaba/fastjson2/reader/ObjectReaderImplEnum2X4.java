@@ -86,6 +86,7 @@ final class ObjectReaderImplEnum2X4 implements ObjectReader {
         return fieldValue;
     }
 
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         Enum fieldValue;
         if (jsonReader.isInt()) {

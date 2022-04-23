@@ -174,6 +174,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
         return createObjectReader(objectClass, beanInfo.readerFeatures, supplier, null, fieldReaderArray);
     }
 
+    @Override
     public  <T> FieldReader createFieldReaderMethod(
             Class<T> objectClass
             , Type objectType
@@ -276,6 +277,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
         }
     }
 
+    @Override
     public <T, R> Function<T, R> createBuildFunction(Method builderMethod) {
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         MethodType invokedType = METHODTYPE_Function;

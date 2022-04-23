@@ -28,10 +28,12 @@ final class FieldReaderBigDecimalFunc<T, V> extends FieldReaderImpl<T> {
                 , (V) TypeUtils.toBigDecimal(value));
     }
 
+    @Override
     public void accept(T object, int value) {
         function.accept(object, (V) BigDecimal.valueOf(value));
     }
 
+    @Override
     public void accept(T object, long value) {
         function.accept(object, (V) BigDecimal.valueOf(value));
     }

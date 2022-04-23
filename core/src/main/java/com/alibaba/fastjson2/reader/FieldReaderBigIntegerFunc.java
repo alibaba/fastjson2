@@ -28,10 +28,12 @@ final class FieldReaderBigIntegerFunc<T, V> extends FieldReaderImpl<T> {
                 , (V) TypeUtils.toBigInteger(value));
     }
 
+    @Override
     public void accept(T object, int value) {
         function.accept(object, (V) BigInteger.valueOf(value));
     }
 
+    @Override
     public void accept(T object, long value) {
         function.accept(object, (V) BigInteger.valueOf(value));
     }

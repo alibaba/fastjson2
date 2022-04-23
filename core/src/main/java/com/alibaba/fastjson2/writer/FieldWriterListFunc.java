@@ -32,6 +32,7 @@ final class FieldWriterListFunc<T> extends FieldWriterList<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return function.apply(object);
     }

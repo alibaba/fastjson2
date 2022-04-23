@@ -114,6 +114,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @param defaultValue the default mapping of the key
      * @since 2.0.2
      */
+    @Override
     public Object getOrDefault(Object key, Object defaultValue) {
         if (key instanceof Number
             || key instanceof Character
@@ -940,6 +941,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws UnsupportedOperationException  If reflection for this method is not supported
      * @throws ArrayIndexOutOfBoundsException If the length of args does not match the length of the method parameter
      */
+    @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final String methodName = method.getName();
         Class<?>[] parameterTypes = method.getParameterTypes();

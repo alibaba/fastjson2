@@ -20,10 +20,12 @@ final class FieldWriterDoubleValueFunc extends FieldWriterImpl {
         return method;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         return function.applyAsDouble(object);
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         double fieldValue = function.applyAsDouble(object);
         jsonWriter.writeDouble(fieldValue);

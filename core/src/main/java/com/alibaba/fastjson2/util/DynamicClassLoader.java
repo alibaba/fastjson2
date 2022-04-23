@@ -24,7 +24,7 @@ public class DynamicClassLoader extends ClassLoader {
     final static ClassLoader FASTJSON_CLASSLOADER;
 
     private static java.security.ProtectionDomain DOMAIN;
-    
+
     private static Map<String, Class<?>> classMapping = new HashMap<String, Class<?>>();
     static {
         FASTJSON_PACKAGE = JSON.class.getPackage().getName() + ".";
@@ -69,16 +69,16 @@ public class DynamicClassLoader extends ClassLoader {
 
     static {
         DOMAIN = (java.security.ProtectionDomain) java.security.AccessController.doPrivileged(new PrivilegedAction<Object>() {
-
+            @Override
             public Object run() {
                 return DynamicClassLoader.class.getProtectionDomain();
             }
         });
-        
+
     }
 
     private final ClassLoader parent;
-    
+
     public DynamicClassLoader(){
         this(getParentClassLoader());
     }
@@ -101,6 +101,7 @@ public class DynamicClassLoader extends ClassLoader {
         return DynamicClassLoader.class.getClassLoader();
     }
 
+    @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         Class<?> mappingClass = classMapping.get(name);
         if (mappingClass != null) {

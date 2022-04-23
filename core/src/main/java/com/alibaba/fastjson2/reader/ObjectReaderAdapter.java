@@ -92,10 +92,12 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
         }
     }
 
+    @Override
     public String getTypeKey() {
         return typeKey;
     }
 
+    @Override
     public long getTypeKeyHash() {
         return typeKeyHashCode;
     }
@@ -271,6 +273,7 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
         return (T) autoTypeObjectReader.readJSONBObject(jsonReader, features);
     }
 
+    @Override
     public T readJSONBObject(JSONReader jsonReader, long features) {
         if (jsonReader.nextIfNull()) {
             return null;

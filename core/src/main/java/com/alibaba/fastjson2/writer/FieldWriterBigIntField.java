@@ -19,6 +19,7 @@ final class FieldWriterBigIntField<T> extends FieldWriterImpl<T> {
         return field;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         try {
             return field.get(object);
@@ -42,6 +43,7 @@ final class FieldWriterBigIntField<T> extends FieldWriterImpl<T> {
         return true;
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         BigInteger value = (BigInteger) getFieldValue(object);
         jsonWriter.writeBigInt(value, features);

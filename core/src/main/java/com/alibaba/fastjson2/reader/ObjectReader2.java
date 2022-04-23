@@ -141,6 +141,7 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
         return (T) object;
     }
 
+    @Override
     public T readObject(JSONReader jsonReader) {
         return readObject(jsonReader, features);
     }

@@ -12,6 +12,7 @@ final class JSONWriterUTF8JDK9 extends JSONWriterUTF8 {
         super(ctx);
     }
 
+    @Override
     public void writeString(String str) {
         if (str == null) {
             writeNull();
