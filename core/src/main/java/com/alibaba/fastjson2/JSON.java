@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface JSON {
@@ -253,9 +254,8 @@ public interface JSON {
      * @param text  the JSON {@link String} to be parsed
      * @param types specify some {@link Type}s to be converted
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> List<T> parseArray(String text, Type[] types) {
-        List array = new JSONArray(types.length);
+        List<T> array = new ArrayList<>(types.length);
         JSONReader reader = JSONReader.of(text);
 
         reader.startArray();
