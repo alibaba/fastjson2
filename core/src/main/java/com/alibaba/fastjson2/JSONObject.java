@@ -35,9 +35,31 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
 
     /**
      * @param initialCapacity the initial capacity = (number of elements to store / load factor) + 1
+     * @throws IllegalArgumentException If the initial capacity is negative
      */
     public JSONObject(int initialCapacity) {
         super(initialCapacity);
+    }
+
+    /**
+     * @param initialCapacity the initial capacity = (number of elements to store / load factor) + 1
+     * @param loadFactor      the load factor
+     * @throws IllegalArgumentException If the initial capacity is negative or the load factor is negative
+     * @since 2.0.2
+     */
+    public JSONObject(int initialCapacity, float loadFactor) {
+        super(initialCapacity, loadFactor);
+    }
+
+    /**
+     * @param initialCapacity the initial capacity = (number of elements to store / load factor) + 1
+     * @param loadFactor      the load factor
+     * @param accessOrder     the ordering mode - true for access-order, false for insertion-order
+     * @throws IllegalArgumentException If the initial capacity is negative or the load factor is negative
+     * @since 2.0.2
+     */
+    public JSONObject(int initialCapacity, float loadFactor, boolean accessOrder) {
+        super(initialCapacity, loadFactor, accessOrder);
     }
 
     /**
@@ -989,7 +1011,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Packs two key-value pairs as {@link JSONObject}
+     * Pack two key-value pairs as {@link JSONObject}
      *
      * <code>
      * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2");
@@ -1009,7 +1031,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Packs three key-value pairs as {@link JSONObject}
+     * Pack three key-value pairs as {@link JSONObject}
      *
      * <code>
      * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3");
@@ -1019,6 +1041,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @param v1 first value
      * @param k2 second key
      * @param v2 second value
+     * @param k3 third key
+     * @param v3 third value
      * @since 2.0.2
      */
     public static JSONObject of(String k1, Object v1, String k2, Object v2, String k3, Object v3) {
