@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 
@@ -173,7 +174,7 @@ public interface ObjectReader<T> {
             if (hash == 0) {
                 continue;
             }
-            
+
             FieldReader fieldReader = getFieldReader(hash);
             if (fieldReader == null && jsonReader.isSupportSmartMatch(features | this.getFeatures())) {
                 long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
@@ -304,5 +305,23 @@ public interface ObjectReader<T> {
         }
 
         return (T) object;
+    }
+
+    /**
+     * Specify {@link Type} to get its {@link ObjectReader} instance, not singleton mode
+     *
+     * @since 2.0.2
+     */
+    static <T> ObjectReader<T> getInstance(Type type) {
+        return JSONFactory.getDefaultObjectReaderProvider().getObjectReader(type, false);
+    }
+
+    /**
+     * Specify {@link Type} to get its {@link ObjectReader} instance, not singleton mode
+     *
+     * @since 2.0.2
+     */
+    static <T> ObjectReader<T> getInstance(Type type, boolean fieldBased) {
+        return JSONFactory.getDefaultObjectReaderProvider().getObjectReader(type, fieldBased);
     }
 }

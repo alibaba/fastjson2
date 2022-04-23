@@ -22,9 +22,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
 
     private static final long serialVersionUID = 1L;
 
-    static ObjectReader<JSONArray> arrayReader;
-    static ObjectWriter<JSONObject> objectWriter;
-    static ObjectReader<JSONObject> objectReader;
+    public static final ObjectReader<JSONObject> READER = ObjectReader.getInstance(JSONObject.class);
+    public static final ObjectWriter<JSONObject> WRITER = ObjectWriter.getInstance(JSONObject.class);
 
     /**
      * default
@@ -150,10 +149,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             }
 
             JSONReader reader = JSONReader.of(str);
-            if (arrayReader == null) {
-                arrayReader = reader.getObjectReader(JSONArray.class);
-            }
-            return arrayReader.readObject(reader, 0);
+            return JSONArray.READER.readObject(reader, 0);
         }
 
         if (value instanceof Collection) {
@@ -184,10 +180,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             }
 
             JSONReader reader = JSONReader.of(str);
-            if (objectReader == null) {
-                objectReader = reader.getObjectReader(JSONObject.class);
-            }
-            return objectReader.readObject(reader, 0);
+            return READER.readObject(reader, 0);
         }
 
         if (value instanceof Map) {
@@ -838,10 +831,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     @Override
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
-            }
-            objectWriter.write(writer, this, null, null, 0);
+            WRITER.write(writer, this, null, null, 0);
             return writer.toString();
         }
     }

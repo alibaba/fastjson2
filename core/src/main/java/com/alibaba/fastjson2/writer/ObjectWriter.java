@@ -1,15 +1,14 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.PropertyFilter;
 import com.alibaba.fastjson2.filter.PropertyPreFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
 
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public interface ObjectWriter<T> {
     default long getFeatures() {
@@ -127,5 +126,23 @@ public interface ObjectWriter<T> {
 
     default void writeWithFilter(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Specify {@link Class} to get its {@link ObjectWriter} instance, not singleton mode
+     *
+     * @since 2.0.2
+     */
+    static <T> ObjectWriter<T> getInstance(Class<T> clazz) {
+        return JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(clazz, clazz, false);
+    }
+
+    /**
+     * Specify {@link Class} to get its {@link ObjectWriter} instance, not singleton mode
+     *
+     * @since 2.0.2
+     */
+    static <T> ObjectWriter<T> getInstance(Class<T> clazz, boolean fieldBased) {
+        return JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(clazz, clazz, fieldBased);
     }
 }

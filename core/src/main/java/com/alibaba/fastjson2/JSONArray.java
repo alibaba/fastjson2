@@ -16,9 +16,8 @@ public class JSONArray extends ArrayList<Object> {
 
     private static final long serialVersionUID = 1L;
 
-    static ObjectWriter<JSONArray> arrayWriter;
-    static ObjectReader<JSONArray> arrayReader;
-    static ObjectReader<JSONObject> objectReader;
+    public static final ObjectReader<JSONArray> READER = ObjectReader.getInstance(JSONArray.class);
+    public static final ObjectWriter<JSONArray> WRITER = ObjectWriter.getInstance(JSONArray.class);
 
     /**
      * default
@@ -76,10 +75,7 @@ public class JSONArray extends ArrayList<Object> {
             }
 
             JSONReader reader = JSONReader.of(str);
-            if (arrayReader == null) {
-                arrayReader = reader.getObjectReader(JSONArray.class);
-            }
-            return arrayReader.readObject(reader, 0);
+            return READER.readObject(reader, 0);
         }
 
         if (value instanceof Collection) {
@@ -111,10 +107,7 @@ public class JSONArray extends ArrayList<Object> {
             }
 
             JSONReader reader = JSONReader.of(str);
-            if (objectReader == null) {
-                objectReader = reader.getObjectReader(JSONObject.class);
-            }
-            return objectReader.readObject(reader, 0);
+            return JSONObject.READER.readObject(reader, 0);
         }
 
         if (value instanceof Map) {
@@ -782,10 +775,7 @@ public class JSONArray extends ArrayList<Object> {
     @Override
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
-            if (arrayWriter == null) {
-                arrayWriter = writer.getObjectWriter(JSONArray.class, JSONArray.class);
-            }
-            arrayWriter.write(writer, this, null, null, 0);
+            WRITER.write(writer, this, null, null, 0);
             return writer.toString();
         }
     }
