@@ -54,6 +54,7 @@ class JSONWriterUTF8 extends JSONWriter {
         }
     }
 
+    @Override
     public void writeReference(String path) {
         this.lastReference = path;
 
@@ -76,6 +77,7 @@ class JSONWriterUTF8 extends JSONWriter {
         bytes[off++] = (byte) '}';
     }
 
+    @Override
     public void close() {
         if (bytes.length > CACHE_THREAD) {
             return;
@@ -83,10 +85,12 @@ class JSONWriterUTF8 extends JSONWriter {
         byteUpdater.set(JSONFactory.CACHE, bytes);
     }
 
+    @Override
     public byte[] getBytes() {
         return Arrays.copyOf(bytes, off);
     }
 
+    @Override
     public int flushTo(OutputStream to) throws IOException {
         int len = off;
         to.write(bytes, 0, off);
@@ -100,6 +104,7 @@ class JSONWriterUTF8 extends JSONWriter {
         bytes[off++] = (byte) c;
     }
 
+    @Override
     public void startObject() {
         level++;
         startObject = true;
@@ -120,6 +125,7 @@ class JSONWriterUTF8 extends JSONWriter {
         bytes[off++] = (byte) '{';
     }
 
+    @Override
     public void endObject() {
         level--;
         if (off == bytes.length) {
@@ -140,6 +146,7 @@ class JSONWriterUTF8 extends JSONWriter {
         startObject = false;
     }
 
+    @Override
     public void writeComma() {
         startObject = false;
         if (off == bytes.length) {
@@ -159,6 +166,7 @@ class JSONWriterUTF8 extends JSONWriter {
         bytes[off++] = (byte) ',';
     }
 
+    @Override
     public void startArray() {
         level++;
         if (off == bytes.length) {
@@ -178,6 +186,7 @@ class JSONWriterUTF8 extends JSONWriter {
         bytes[off++] = (byte) '[';
     }
 
+    @Override
     public void endArray() {
         level--;
         if (off == bytes.length) {
@@ -197,6 +206,7 @@ class JSONWriterUTF8 extends JSONWriter {
         bytes[off++] = (byte) ']';
     }
 
+    @Override
     public void writeString(String str) {
         if (str == null) {
             writeNull();
@@ -472,6 +482,7 @@ class JSONWriterUTF8 extends JSONWriter {
         off += bytes.length;
     }
 
+    @Override
     public void writeNameRaw(byte[] bytes, int off, int len) {
         {
             // inline ensureCapacity
@@ -516,6 +527,7 @@ class JSONWriterUTF8 extends JSONWriter {
         }
     }
 
+    @Override
     public void writeInt32(int i) {
         if ((context.features & Feature.WriteNonStringValueAsString.mask) != 0) {
             writeString(Integer.toString(i));
@@ -601,7 +613,9 @@ class JSONWriterUTF8 extends JSONWriter {
                 r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
                 bytes[--p] = digits[r];
                 i = q;
-                if (i == 0) break;
+                if (i == 0) {
+                    break;
+                }
             }
             if (sign != 0) {
                 bytes[--p] = sign;
@@ -610,6 +624,7 @@ class JSONWriterUTF8 extends JSONWriter {
         off += size;
     }
 
+    @Override
     public void writeInt64(long i) {
         if ((context.features & Feature.WriteNonStringValueAsString.mask) != 0
                 || ((context.features & Feature.BrowserCompatible.mask) != 0
@@ -730,7 +745,9 @@ class JSONWriterUTF8 extends JSONWriter {
                 r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
                 bytes[--charPos] = digits[r];
                 i2 = q2;
-                if (i2 == 0) break;
+                if (i2 == 0) {
+                    break;
+                }
             }
             if (sign != 0) {
                 bytes[--charPos] = sign;
@@ -739,18 +756,21 @@ class JSONWriterUTF8 extends JSONWriter {
         off += size;
     }
 
+    @Override
     public void writeFloat(float value) {
         ensureCapacity(off + 15);
         int len = RyuFloat.toString(value, bytes, off);
         off += len;
     }
 
+    @Override
     public void writeDouble(double value) {
         ensureCapacity(off + 24);
         int len = RyuDouble.toString(value, bytes, off);
         off += len;
     }
 
+    @Override
     public void writeDateTime19(
             int year,
             int month,
@@ -786,6 +806,7 @@ class JSONWriterUTF8 extends JSONWriter {
         bytes[off++] = '"';
     }
 
+    @Override
     public void writeLocalDateTime(LocalDateTime dateTime) {
         int year = dateTime.getYear();
         int month = dateTime.getMonthValue();
@@ -852,6 +873,7 @@ class JSONWriterUTF8 extends JSONWriter {
         writeRaw(chars);
     }
 
+    @Override
     public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
         byte[] chars = new byte[12];
 
@@ -871,6 +893,7 @@ class JSONWriterUTF8 extends JSONWriter {
         writeRaw(chars);
     }
 
+    @Override
     public void writeTimeHHMMSS8(int hour, int minute, int second) {
         byte[] chars = new byte[10];
 
@@ -888,6 +911,7 @@ class JSONWriterUTF8 extends JSONWriter {
         writeRaw(chars);
     }
 
+    @Override
     public void writeLocalTime(LocalTime time) {
         int hour = time.getHour();
         int minute = time.getMinute();
@@ -944,6 +968,7 @@ class JSONWriterUTF8 extends JSONWriter {
         writeRaw(chars);
     }
 
+    @Override
     public void writeZonedDateTime(ZonedDateTime dateTime) {
         if (dateTime == null) {
             writeNull();
@@ -1034,6 +1059,7 @@ class JSONWriterUTF8 extends JSONWriter {
         writeRaw(chars);
     }
 
+    @Override
     public void writeBigInt(BigInteger value, long features) {
         if (value == null) {
             writeNull();
@@ -1070,6 +1096,7 @@ class JSONWriterUTF8 extends JSONWriter {
         off += strlen;
     }
 
+    @Override
     public void writeDateTimeISO8601(
             int year,
             int month,
@@ -1182,6 +1209,7 @@ class JSONWriterUTF8 extends JSONWriter {
         }
     }
 
+    @Override
     public String toString() {
         return new String(bytes, 0, off, StandardCharsets.UTF_8);
     }

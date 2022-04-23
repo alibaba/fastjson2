@@ -38,6 +38,7 @@ final class FieldWriterObjectArrayField<T> extends FieldWriterImpl<T> {
         return field;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         try {
             return field.get(object);
@@ -46,6 +47,7 @@ final class FieldWriterObjectArrayField<T> extends FieldWriterImpl<T> {
         }
     }
 
+    @Override
     public ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
         if (itemType == null || itemType == this.itemType) {
             if (itemObjectWriter != null) {
@@ -185,6 +187,7 @@ final class FieldWriterObjectArrayField<T> extends FieldWriterImpl<T> {
         jsonWriter.endArray();
     }
 
+    @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (valueClass == String[].class) {
             return ObjectWriterImplStringArray.INSTANCE;

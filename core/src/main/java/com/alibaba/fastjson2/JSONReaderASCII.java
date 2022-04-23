@@ -19,6 +19,7 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
         nameAscii = true;
     }
 
+    @Override
     public void next() {
         if (offset >= length) {
             ch = EOI;
@@ -37,6 +38,7 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
         offset++;
     }
 
+    @Override
     public boolean nextIfMatch(char ch) {
         if (this.ch != ch) {
             return false;
@@ -60,6 +62,7 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
         return true;
     }
 
+    @Override
     public long readFieldNameHashCode() {
         if (ch != '"' && ch != '\'') {
             return -1;
@@ -140,6 +143,7 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
         return hashCode;
     }
 
+    @Override
     public long readValueHashCode() {
         if (ch != '"') {
             return -1;
@@ -220,6 +224,7 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
         return hashCode;
     }
 
+    @Override
     public long getNameHashCodeLCase() {
         long hashCode = Fnv.MAGIC_HASH_CODE;
         int offset = nameBegin;
@@ -283,6 +288,7 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
         return hashCode;
     }
 
+    @Override
     public String getFieldName() {
         int length = nameEnd - nameBegin;
         if (!nameEscape) {
@@ -421,6 +427,7 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
         return new String(chars);
     }
 
+    @Override
     public String readFieldName() {
         if (ch != '"' && ch != '\'') {
             return null;
@@ -591,6 +598,7 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
         stringValue = str;
     }
 
+    @Override
     public String readString() {
         if (ch == '"' || ch == '\'') {
             final char quote = ch;

@@ -16,5 +16,7 @@
 package com.alibaba.fastjson.serializer;
 
 public interface NameFilter extends SerializeFilter, com.alibaba.fastjson2.filter.NameFilter {
+
+    @Override
     String process(Object object, String name, Object value);
 }

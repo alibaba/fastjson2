@@ -59,6 +59,7 @@ public interface FieldWriter<T> extends Comparable {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     default int compareTo(Object o) {
         FieldWriter fw = (FieldWriter) o;
 

@@ -28,10 +28,12 @@ final class FieldWriterDateFunc<T> extends FieldWriterDate<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return function.apply(object);
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         Date value = function.apply(object);
 

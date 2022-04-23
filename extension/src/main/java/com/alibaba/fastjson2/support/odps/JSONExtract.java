@@ -69,6 +69,7 @@ public class JSONExtract extends UDF {
             text.set(val ? BYTES_TRUE : BYTES_FALSE);
         }
 
+        @Override
         public void accept(int val) {
             if (val >= -1 && val < 511) {
                 text = cache[val + 1];
@@ -84,6 +85,7 @@ public class JSONExtract extends UDF {
             text.length = size + 2;
         }
 
+        @Override
         public void accept(long val) {
             int size = (val < 0) ? IOUtils.stringSize(-val) + 1 : IOUtils.stringSize(val);
             byte[] bytes = new byte[size + 2];

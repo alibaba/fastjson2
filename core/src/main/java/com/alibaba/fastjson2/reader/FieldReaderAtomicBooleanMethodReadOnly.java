@@ -16,10 +16,12 @@ final class FieldReaderAtomicBooleanMethodReadOnly<T>
         this.method = method;
     }
 
+    @Override
     public boolean isReadOnly() {
         return true;
     }
 
+    @Override
     public void accept(T object, Object value) {
         if (value == null) {
             return;
@@ -33,15 +35,18 @@ final class FieldReaderAtomicBooleanMethodReadOnly<T>
         }
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         Boolean value = jsonReader.readBool();
         accept(object, value);
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readBool();
     }
 
+    @Override
     public String toString() {
         return method.getName();
     }

@@ -32,6 +32,7 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
                 || fieldClass == AtomicIntegerArray.class;
     }
 
+    @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (initValueClass == null) {
             initValueClass = valueClass;
@@ -176,6 +177,7 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
         return true;
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         Object value = getFieldValue(object);
         if (value == null) {

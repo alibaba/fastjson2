@@ -200,14 +200,17 @@ public final class JSONFactory {
             this.hashCode64 = hashCode64;
         }
 
+        @Override
         public int size() {
             return names.length;
         }
 
+        @Override
         public long hashCode64() {
             return hashCode64;
         }
 
+        @Override
         public String getNameByHashCode(long hashCode) {
             int m = Arrays.binarySearch(hashCodes, hashCode);
             if (m < 0) {
@@ -218,6 +221,7 @@ public final class JSONFactory {
             return names[index];
         }
 
+        @Override
         public int getOrdinalByHashCode(long hashCode) {
             int m = Arrays.binarySearch(hashCodes, hashCode);
             if (m < 0) {
@@ -227,6 +231,7 @@ public final class JSONFactory {
             return this.mapping[m] + 1;
         }
 
+        @Override
         public int getOrdinal(String name) {
             long hashCode = Fnv.hashCode64(name);
             int m = Arrays.binarySearch(hashCodes, hashCode);
@@ -237,10 +242,12 @@ public final class JSONFactory {
             return this.mapping[m] + 1;
         }
 
+        @Override
         public String getName(int ordinal) {
             return names[ordinal - 1];
         }
 
+        @Override
         public long getHashCode(int ordinal) {
             return hashCodesOrigin[ordinal - 1];
         }

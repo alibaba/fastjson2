@@ -72,6 +72,7 @@ class ObjectReaderImplMapTyped implements ObjectReader {
         return object;
     }
 
+    @Override
     public Object createInstance() {
         if (instanceType != null && !instanceType.isInterface()) {
             try {
@@ -83,10 +84,12 @@ class ObjectReaderImplMapTyped implements ObjectReader {
         return new HashMap();
     }
 
+    @Override
     public FieldReader getFieldReader(long hashCode) {
         return null;
     }
 
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         ObjectReader objectReader = null;
         Function builder = this.builder;
@@ -190,6 +193,7 @@ class ObjectReaderImplMapTyped implements ObjectReader {
         return object;
     }
 
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         boolean match = jsonReader.nextIfMatch('{');
         if (!match) {

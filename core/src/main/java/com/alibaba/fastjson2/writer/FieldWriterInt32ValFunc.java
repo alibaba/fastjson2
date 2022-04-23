@@ -20,6 +20,7 @@ final class FieldWriterInt32ValFunc extends FieldWriterInt32 {
         return method;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         return function.applyAsInt(object);
     }
@@ -40,6 +41,7 @@ final class FieldWriterInt32ValFunc extends FieldWriterInt32 {
         return true;
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         int value = function.applyAsInt(object);
         jsonWriter.writeInt32(value);

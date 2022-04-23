@@ -20,6 +20,7 @@ final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
         super(fieldName, fieldType, fieldType, ordinal, features, format, field);
     }
 
+    @Override
     public ObjectReader getObjectReader(JSONReader jsonReader) {
         if (dateReader == null) {
             dateReader = format == null
@@ -29,6 +30,7 @@ final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
         return dateReader;
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         Date fieldValue;
         if (jsonReader.isInt()) {
@@ -66,6 +68,7 @@ final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public void accept(T object, Object value) {
         if (value instanceof String) {
             JSONReader jsonReader = JSONReader.of(

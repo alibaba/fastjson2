@@ -32,6 +32,7 @@ final class FieldReaderListFunc<T, V>
         return method;
     }
 
+    @Override
     public ObjectReader getItemObjectReader(JSONReader.Context ctx) {
         if (itemObjectReader != null) {
             return itemObjectReader;

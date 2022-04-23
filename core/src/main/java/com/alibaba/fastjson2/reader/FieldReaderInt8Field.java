@@ -21,6 +21,7 @@ final class FieldReaderInt8Field<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public void accept(T object, int value) {
         try {
             field.set(object, (byte) value);
@@ -29,6 +30,7 @@ final class FieldReaderInt8Field<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public void accept(T object, long value) {
         try {
             field.set(object, (byte) value);
@@ -47,6 +49,7 @@ final class FieldReaderInt8Field<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return (byte) jsonReader.readInt32Value();
     }

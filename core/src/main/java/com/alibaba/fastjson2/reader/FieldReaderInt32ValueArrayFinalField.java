@@ -10,10 +10,12 @@ final class FieldReaderInt32ValueArrayFinalField<T> extends FieldReaderObjectFie
         super(fieldName, fieldType, fieldType, ordinal, 0, null, field);
     }
 
+    @Override
     public boolean isReadOnly() {
         return true;
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         if (jsonReader.readIfNull()) {
             return;

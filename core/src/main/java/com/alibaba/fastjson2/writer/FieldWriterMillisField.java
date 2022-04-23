@@ -23,6 +23,7 @@ final class FieldWriterMillisField<T> extends FieldWriterDate<T> {
         return field;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return getFieldLong(object);
     }
@@ -42,6 +43,7 @@ final class FieldWriterMillisField<T> extends FieldWriterDate<T> {
         return true;
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         long millis = getFieldLong(object);
         writeDate(jsonWriter, false, millis);

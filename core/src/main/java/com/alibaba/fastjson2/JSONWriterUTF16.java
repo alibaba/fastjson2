@@ -27,6 +27,7 @@ class JSONWriterUTF16 extends JSONWriter {
         }
     }
 
+    @Override
     public void close() {
         if (chars.length > CACHE_THREAD) {
             return;
@@ -53,6 +54,7 @@ class JSONWriterUTF16 extends JSONWriter {
         chars[off++] = c;
     }
 
+    @Override
     public void startObject() {
         level++;
         startObject = true;
@@ -73,6 +75,7 @@ class JSONWriterUTF16 extends JSONWriter {
         chars[off++] = '{';
     }
 
+    @Override
     public void endObject() {
         level--;
         if (off == chars.length) {
@@ -93,6 +96,7 @@ class JSONWriterUTF16 extends JSONWriter {
         startObject = false;
     }
 
+    @Override
     public void writeComma() {
         if (off == chars.length) {
             int minCapacity = off + 1;
@@ -111,6 +115,7 @@ class JSONWriterUTF16 extends JSONWriter {
         chars[off++] = ',';
     }
 
+    @Override
     public void startArray() {
         level++;
         if (off == chars.length) {
@@ -130,6 +135,7 @@ class JSONWriterUTF16 extends JSONWriter {
         chars[off++] = '[';
     }
 
+    @Override
     public void endArray() {
         level--;
         if (off == chars.length) {
@@ -149,6 +155,7 @@ class JSONWriterUTF16 extends JSONWriter {
         chars[off++] = ']';
     }
 
+    @Override
     public void writeString(String str) {
         if (str == null) {
             if (isEnabled(Feature.NullAsDefaultValue.mask)) {
@@ -263,6 +270,7 @@ class JSONWriterUTF16 extends JSONWriter {
         chars[off++] = '"';
     }
 
+    @Override
     public void writeReference(String path) {
         this.lastReference = path;
 
@@ -273,6 +281,7 @@ class JSONWriterUTF16 extends JSONWriter {
         endObject();
     }
 
+    @Override
     public void writeBase64(byte[] bytes) {
         int charsLen = ((bytes.length - 1) / 3 + 1) << 2; // base64 character count
 
@@ -456,6 +465,7 @@ class JSONWriterUTF16 extends JSONWriter {
         off += chars.length;
     }
 
+    @Override
     public void writeNameRaw(char[] chars, int off, int len) {
         {
             // inline ensureCapacity
@@ -500,6 +510,7 @@ class JSONWriterUTF16 extends JSONWriter {
         }
     }
 
+    @Override
     public void writeInt32(int i) {
         if ((context.features & Feature.WriteNonStringValueAsString.mask) != 0) {
             writeString(Integer.toString(i));
@@ -585,7 +596,9 @@ class JSONWriterUTF16 extends JSONWriter {
                 r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
                 chars[--p] = (char) digits[r];
                 i = q;
-                if (i == 0) break;
+                if (i == 0) {
+                    break;
+                }
             }
             if (sign != 0) {
                 chars[--p] = sign;
@@ -594,6 +607,7 @@ class JSONWriterUTF16 extends JSONWriter {
         off += size;
     }
 
+    @Override
     public void writeInt64(long i) {
         if ((context.features & Feature.WriteNonStringValueAsString.mask) != 0
                 || ((context.features & Feature.BrowserCompatible.mask) != 0
@@ -715,7 +729,9 @@ class JSONWriterUTF16 extends JSONWriter {
                 r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
                 chars[--charPos] = (char) digits[r];
                 i2 = q2;
-                if (i2 == 0) break;
+                if (i2 == 0) {
+                    break;
+                }
             }
             if (sign != 0) {
                 chars[--charPos] = sign;
@@ -764,19 +780,23 @@ class JSONWriterUTF16 extends JSONWriter {
             r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
             chars[--charPos] = (char) digits[r];
             i2 = q2;
-            if (i2 == 0) break;
+            if (i2 == 0) {
+                break;
+            }
         }
         if (sign != 0) {
             chars[--charPos] = sign;
         }
     }
 
+    @Override
     public void writeFloat(float value) {
         ensureCapacity(off + 15);
         int len = RyuFloat.toString(value, chars, off);
         off += len;
     }
 
+    @Override
     public void writeFloat(float[] value) {
         if (value == null) {
             writeNull();
@@ -808,12 +828,14 @@ class JSONWriterUTF16 extends JSONWriter {
         chars[off++] = ']';
     }
 
+    @Override
     public void writeDouble(double value) {
         ensureCapacity(off + 24);
         int len = RyuDouble.toString(value, chars, off);
         off += len;
     }
 
+    @Override
     public void writeDouble(double[] value) {
         if (value == null) {
             writeNull();
@@ -881,6 +903,7 @@ class JSONWriterUTF16 extends JSONWriter {
         chars[off++] = '"';
     }
 
+    @Override
     public String toString() {
         return new String(chars, 0, off);
     }

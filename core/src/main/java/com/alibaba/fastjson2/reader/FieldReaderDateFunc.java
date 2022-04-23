@@ -44,6 +44,7 @@ final class FieldReaderDateFunc<T> extends FieldReaderImpl<T> {
         function.accept(object, (Date) value);
     }
 
+    @Override
     public ObjectReader getObjectReader(JSONReader jsonReader) {
         if (dateReader == null) {
             dateReader = format == null

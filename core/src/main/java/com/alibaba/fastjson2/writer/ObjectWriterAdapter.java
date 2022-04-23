@@ -141,6 +141,7 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
         return fieldWriterArray[index];
     }
 
+    @Override
     public boolean hasFilter(JSONWriter jsonWriter) {
         return propertyPreFilter != null
                 || propertyFilter != null
@@ -175,6 +176,7 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
         jsonWriter.writeTypeName(typeNameJSONB, typeNameHash);
     }
 
+    @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (jsonWriter.isJSONB()) {
             if (jsonWriter.isBeanToArray()) {
@@ -284,6 +286,7 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
         return true;
     }
 
+    @Override
     public void writeWithFilter(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         boolean comma = true;
         jsonWriter.startObject();
@@ -370,6 +373,7 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
         jsonWriter.endObject();
     }
 
+    @Override
     public String toString() {
         return objectType.getName();
     }

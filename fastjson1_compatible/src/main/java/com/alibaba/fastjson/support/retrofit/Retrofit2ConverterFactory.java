@@ -41,7 +41,9 @@ public class Retrofit2ConverterFactory extends Converter.Factory {
     }
 
     public static Retrofit2ConverterFactory create(FastJsonConfig fastJsonConfig) {
-        if (fastJsonConfig == null) throw new NullPointerException("fastJsonConfig == null");
+        if (fastJsonConfig == null) {
+            throw new NullPointerException("fastJsonConfig == null");
+        }
         return new Retrofit2ConverterFactory(fastJsonConfig);
     }
 
@@ -76,6 +78,7 @@ public class Retrofit2ConverterFactory extends Converter.Factory {
             this.type = type;
         }
 
+        @Override
         public T convert(ResponseBody value) throws IOException {
             try {
                 return JSON.parseObject(value.bytes(), type, fastJsonConfig.getFeatures()
@@ -92,6 +95,7 @@ public class Retrofit2ConverterFactory extends Converter.Factory {
         RequestBodyConverter() {
         }
 
+        @Override
         public RequestBody convert(T value) throws IOException {
             try {
                 byte[] content = JSON.toJSONBytes(value,

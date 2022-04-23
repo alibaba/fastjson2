@@ -16,6 +16,7 @@ public class Fastjson1xWriterModule implements ObjectWriterModule {
         this.provider = provider;
     }
 
+    @Override
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         if (objectClass != null && JSONAware.class.isAssignableFrom(objectClass)) {
             return JSONAwareWriter.INSTANCE;
@@ -41,6 +42,7 @@ public class Fastjson1xWriterModule implements ObjectWriterModule {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             if (object == null) {
                 jsonWriter.writeNull();

@@ -15,6 +15,7 @@ public class Fastjson1xReaderModule implements ObjectReaderModule {
         this.provider = provider;
     }
 
+    @Override
     public ObjectReader getObjectReader(ObjectReaderProvider provider, Type type) {
         if (type == JSON.class) {
             return new JSONImpl();
@@ -23,6 +24,7 @@ public class Fastjson1xReaderModule implements ObjectReaderModule {
     }
 
     static class JSONImpl implements ObjectReader {
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.isObject()) {
                 return jsonReader.read(JSONObject.class);

@@ -20,6 +20,7 @@ public final class ObjectReaderInterface<T> extends ObjectReaderAdapter<T> {
         super(objectClass, typeKey, typeName, features, creator, buildFunction, fieldReaders);
     }
 
+    @Override
     public T readJSONBObject(JSONReader jsonReader, long features) {
         ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
         if (autoTypeReader != null && autoTypeReader.getObjectClass() != this.objectClass) {

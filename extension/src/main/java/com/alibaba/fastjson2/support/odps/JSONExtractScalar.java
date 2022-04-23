@@ -54,6 +54,7 @@ public class JSONExtractScalar extends UDF {
             text.set(val ? BYTES_TRUE : BYTES_FALSE);
         }
 
+        @Override
         public void accept(int val) {
             int size = (val < 0) ? IOUtils.stringSize(-val) + 1 : IOUtils.stringSize(val);
             text.setCapacity(size, false);
@@ -62,6 +63,7 @@ public class JSONExtractScalar extends UDF {
             text.length = size;
         }
 
+        @Override
         public void accept(long val) {
             int size = (val < 0) ? IOUtils.stringSize(-val) + 1 : IOUtils.stringSize(val);
             text.setCapacity(size, false);
