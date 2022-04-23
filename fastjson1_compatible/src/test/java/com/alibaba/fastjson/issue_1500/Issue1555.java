@@ -1,13 +1,17 @@
-package com.alibaba.json.bvt.issue_1500;
+package com.alibaba.fastjson.issue_1500;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.PropertyNamingStrategy;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1555 extends TestCase {
-    public void test_for_issue() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1555 {
+    @Test
+    public void test_for_issue() {
         Model model = new Model();
         model.userId = 1001;
         model.userName = "test";
@@ -24,7 +28,8 @@ public class Issue1555 extends TestCase {
      * 当某个字段有JSONField注解，JSONField中name属性不存在，json属性名也要用类上的属性名转换策略
      * @throws Exception
      */
-    public void test_when_JSONField_have_not_name_attr() throws Exception {
+    @Test
+    public void test_when_JSONField_have_not_name_attr() {
         ModelTwo modelTwo = new ModelTwo();
         modelTwo.userId = 1001;
         modelTwo.userName = "test";

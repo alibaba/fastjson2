@@ -1,4 +1,4 @@
-package com.alibaba.json.bvt.date;
+package com.alibaba.fastjson.date;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
@@ -6,18 +6,24 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class DateFieldTest2 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class DateFieldTest4 {
+    @BeforeEach
     protected void setUp() throws Exception {
         JSON.defaultTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
         JSON.defaultLocale = Locale.CHINA;
     }
-    
+
+    @Test
     public void test_codec() throws Exception {
         SerializeConfig mapping = new SerializeConfig();
 
@@ -28,9 +34,10 @@ public class DateFieldTest2 extends TestCase {
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", JSON.defaultLocale);
         format.setTimeZone(JSON.defaultTimeZone);
-        Assert.assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
+        assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
     }
 
+    @Test
     public void test_codec_no_asm() throws Exception {
         V0 v = new V0();
         v.setValue(new Date());
@@ -41,9 +48,10 @@ public class DateFieldTest2 extends TestCase {
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", JSON.defaultLocale);
         format.setTimeZone(JSON.defaultTimeZone);
-        Assert.assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
+        assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
     }
 
+    @Test
     public void test_codec_asm() throws Exception {
         V0 v = new V0();
         v.setValue(new Date());
@@ -54,9 +62,10 @@ public class DateFieldTest2 extends TestCase {
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", JSON.defaultLocale);
         format.setTimeZone(JSON.defaultTimeZone);
-        Assert.assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
+        assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
     }
 
+    @Test
     public void test_codec_null_asm() throws Exception {
         V0 v = new V0();
 
@@ -64,13 +73,14 @@ public class DateFieldTest2 extends TestCase {
         mapping.setAsmEnable(true);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue);
-        Assert.assertEquals("{\"value\":null}", text);
+        assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue(), v.getValue());
+        assertEquals(v1.getValue(), v.getValue());
     }
 
+    @Test
     public void test_codec_null_1() throws Exception {
         V0 v = new V0();
 
@@ -78,18 +88,18 @@ public class DateFieldTest2 extends TestCase {
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullNumberAsZero);
-        Assert.assertEquals("{\"value\":null}", text);
+        assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(null, v1.getValue());
+        assertEquals(null, v1.getValue());
     }
 
     public static class V0 {
 
-        @JSONField(format = "yyyy-MM-dd")
         private Date value;
 
+        @JSONField(format = "yyyy-MM-dd")
         public Date getValue() {
             return value;
         }

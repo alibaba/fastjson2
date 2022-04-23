@@ -2417,6 +2417,9 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         }
 
         if (fieldClass == java.util.Date.class) {
+            if ("unwrapped".equals(format)) {
+                format = null;
+            }
             return new FieldWriterDateField(fieldName, ordinal, features, format, field);
         }
 

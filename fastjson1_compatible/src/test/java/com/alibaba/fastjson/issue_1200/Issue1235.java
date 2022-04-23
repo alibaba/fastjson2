@@ -1,15 +1,20 @@
-package com.alibaba.json.bvt.issue_1200;
+package com.alibaba.fastjson.issue_1200;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONType;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson2.annotation.JSONField;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Created by wenshao on 30/05/2017.
  */
-public class Issue1235 extends TestCase {
+public class Issue1235 {
+    @Test
     public void test_for_issue() throws Exception {
         String json = "{\"type\":\"floorV2\",\"templateId\":\"x123\"}";
 

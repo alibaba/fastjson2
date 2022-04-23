@@ -1,4 +1,4 @@
-package com.alibaba.json.bvt.issue_1700.issue1763_2.bean;
+package com.alibaba.fastjson.issue_1700.issue1763_2.bean;
 
 import java.util.List;
 

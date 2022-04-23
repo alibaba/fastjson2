@@ -1,26 +1,29 @@
-package com.alibaba.json.bvt.issue_3300;
+package com.alibaba.fastjson.issue_3300;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
-import junit.framework.TestCase;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
 @Slf4j
-public class Issue3361 extends TestCase {
+public class Issue3361 {
     private static String ORIGIN_JSON_DEFAULT_DATE_FORMAT;
 
-    @Override
+    @BeforeEach
     public void setUp() throws Exception {
         ORIGIN_JSON_DEFAULT_DATE_FORMAT = JSON.DEFFAULT_DATE_FORMAT;
     }
 
+    @Test
     public void test_for_issue() throws Exception {
         Model model = new Model();
         model.setOldDate(new Date());
@@ -42,7 +45,7 @@ public class Issue3361 extends TestCase {
         log.info("{}", model3);
     }
 
-    @Override
+    @AfterEach
     public void tearDown() throws Exception {
         JSON.DEFFAULT_DATE_FORMAT = ORIGIN_JSON_DEFAULT_DATE_FORMAT;
     }
