@@ -12,9 +12,6 @@ public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
     final protected String typeName;
     final protected long typeNameHash;
 
-    byte[] jsonbClassInfo;
-    long[] jsonbClassInfoFieldNameHashCodes;
-
     protected ObjectReaderBean(Class objectClass, String typeName) {
         if (typeName == null) {
             if (objectClass != null) {
@@ -26,8 +23,6 @@ public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
         this.typeName = typeName;
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
     }
-
-
 
     public ObjectReader checkAutoType(JSONReader jsonReader, Class listClass, long features) {
         ObjectReader autoTypeObjectReader = null;
