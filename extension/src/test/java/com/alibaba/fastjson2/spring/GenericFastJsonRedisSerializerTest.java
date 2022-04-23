@@ -3,20 +3,22 @@ package com.alibaba.fastjson2.spring;
 import com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonRedisSerializer;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNull;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.serializer.SerializationException;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class GenericFastJsonRedisSerializerTest {
 
     private GenericFastJsonRedisSerializer serializer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.serializer = new GenericFastJsonRedisSerializer();
     }
@@ -24,32 +26,34 @@ public class GenericFastJsonRedisSerializerTest {
     @Test
     public void test_1() {
         User user = (User) serializer.deserialize(serializer.serialize(new User(1, "土豆", 25)));
-        Assert.assertTrue(user.getId().equals(1));
-        Assert.assertTrue(user.getName().equals("土豆"));
-        Assert.assertTrue(user.getAge().equals(25));
+        assertTrue(user.getId().equals(1));
+        assertTrue(user.getName().equals("土豆"));
+        assertTrue(user.getAge().equals(25));
     }
 
     @Test
     public void test_2() {
-        Assert.assertThat(serializer.serialize(null), Is.is(new byte[0]));
+        assertThat(serializer.serialize(null), Is.is(new byte[0]));
     }
 
     @Test
     public void test_3() {
-        Assert.assertThat(serializer.deserialize(new byte[0]), IsNull.nullValue());
+        assertThat(serializer.deserialize(new byte[0]), IsNull.nullValue());
     }
 
     @Test
     public void test_4() {
-        Assert.assertThat(serializer.deserialize(null), IsNull.nullValue());
+        assertThat(serializer.deserialize(null), IsNull.nullValue());
     }
 
-    @Test(expected = SerializationException.class)
+    @Test
     public void test_5() {
-        User user = new User(1, "土豆", 25);
-        byte[] serializedValue = serializer.serialize(user);
-        Arrays.sort(serializedValue); // corrupt serialization result
-        serializer.deserialize(serializedValue);
+        assertThrows(SerializationException.class, () -> {
+            User user = new User(1, "土豆", 25);
+            byte[] serializedValue = serializer.serialize(user);
+            Arrays.sort(serializedValue); // corrupt serialization result
+            serializer.deserialize(serializedValue);
+        });
     }
 
     @Test
@@ -64,8 +68,8 @@ public class GenericFastJsonRedisSerializerTest {
         byte[] bytes = genericFastJsonRedisSerializer.serialize(baseResult);
         BaseResult<List<String>> baseResult2 = (BaseResult<List<String>>) genericFastJsonRedisSerializer.deserialize(bytes);
 
-        Assert.assertEquals(baseResult2.getCode(), "1000");
-        Assert.assertEquals(baseResult2.getData().size(), 3);
+        assertEquals(baseResult2.getCode(), "1000");
+        assertEquals(baseResult2.getData().size(), 3);
 
         String json = "{\n" +
                 "\"@type\": \"com.alibaba.fastjson2.spring.GenericFastJsonRedisSerializerTest$BaseResult\",\n" +
@@ -82,8 +86,8 @@ public class GenericFastJsonRedisSerializerTest {
                 "}";
 
         BaseResult<List<String>> baseResult3 = (BaseResult<List<String>>) genericFastJsonRedisSerializer.deserialize(json.getBytes());
-        Assert.assertEquals(baseResult3.getCode(), "1000");
-        Assert.assertEquals(baseResult3.getData().size(), 6);
+        assertEquals(baseResult3.getCode(), "1000");
+        assertEquals(baseResult3.getData().size(), 6);
     }
 
     static class User {

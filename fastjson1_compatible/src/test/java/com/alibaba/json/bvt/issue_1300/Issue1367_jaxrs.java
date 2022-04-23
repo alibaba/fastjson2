@@ -1,5 +1,6 @@
 package com.alibaba.json.bvt.issue_1300;
 
+import com.alibaba.fastjson.issue_1300.Issue1367;
 import com.alibaba.fastjson.support.jaxrs.FastJsonProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.server.ResourceConfig;
