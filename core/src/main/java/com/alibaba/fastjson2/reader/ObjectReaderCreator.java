@@ -1173,8 +1173,11 @@ public class ObjectReaderCreator {
             , Field field
     ) {
         if (field != null) {
-            field.setAccessible(true);
+            if (!objectClass.getName().startsWith("java.lang")) {
+                field.setAccessible(true);
+            }
         }
+
         if (fieldClass == int.class) {
             return new FieldReaderInt32ValueField(fieldName, fieldClass, ordinal, field);
         }
