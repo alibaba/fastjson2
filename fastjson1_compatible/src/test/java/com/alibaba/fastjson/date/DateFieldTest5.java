@@ -1,4 +1,4 @@
-package com.alibaba.json.bvt.date;
+package com.alibaba.fastjson.date;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
@@ -6,14 +6,14 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-public class DateFieldTest5 extends TestCase {
+public class DateFieldTest5 {
 
-    public void test_codec() throws Exception {
-//        SerializeConfig mapping = new SerializeConfig();
-
+    @Test
+    public void test_codec() {
         V0 v = new V0();
         v.setValue(new Date());
 
@@ -22,7 +22,8 @@ public class DateFieldTest5 extends TestCase {
         Assert.assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
     }
 
-    public void test_codec_no_asm() throws Exception {
+    @Test
+    public void test_codec_no_asm() {
         V0 v = new V0();
         v.setValue(new Date());
 
@@ -33,7 +34,8 @@ public class DateFieldTest5 extends TestCase {
         Assert.assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
     }
 
-    public void test_codec_asm() throws Exception {
+    @Test
+    public void test_codec_asm() {
         V0 v = new V0();
         v.setValue(new Date());
 
@@ -44,7 +46,8 @@ public class DateFieldTest5 extends TestCase {
         Assert.assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
     }
 
-    public void test_codec_null_asm() throws Exception {
+    @Test
+    public void test_codec_null_asm() {
         V0 v = new V0();
 
         SerializeConfig mapping = new SerializeConfig();
@@ -58,7 +61,8 @@ public class DateFieldTest5 extends TestCase {
         Assert.assertEquals(v1.getValue(), v.getValue());
     }
 
-    public void test_codec_null_1() throws Exception {
+    @Test
+    public void test_codec_null_1() {
         V0 v = new V0();
 
         SerializeConfig mapping = new SerializeConfig();
@@ -105,7 +109,7 @@ public class DateFieldTest5 extends TestCase {
         public Object getA() {
             return true;
         }
-        
+
         public static Object getB() {
             return true;
         }

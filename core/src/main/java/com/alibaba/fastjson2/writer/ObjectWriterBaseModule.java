@@ -395,19 +395,17 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 }
             }
 
-            String fieldName = BeanUtils.setterName(methodName, null);
-            Field declaredField = null;
-            try {
-                declaredField = objectClass.getDeclaredField(fieldName);
-            } catch (Throwable ignored) {
-                // skip
-            }
+            if (!objectClass.getName().startsWith("java.lang")) {
+                String fieldName = BeanUtils.setterName(methodName, null);
 
-            if (declaredField != null) {
-                int modifiers = declaredField.getModifiers();
-                if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
-                    getFieldInfo(fieldInfo, objectClass, declaredField);
-                }
+                BeanUtils.declaredFields(objectClass, field -> {
+                    if (field.getName().equalsIgnoreCase(fieldName)) {
+                        int modifiers = field.getModifiers();
+                        if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
+                            getFieldInfo(fieldInfo, objectClass, field);
+                        }
+                    }
+                });
             }
         }
     }
