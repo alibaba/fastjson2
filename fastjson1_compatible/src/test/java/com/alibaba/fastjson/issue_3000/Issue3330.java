@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.util.IOUtils;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,8 @@ public class Issue3330 {
         IOUtils.DIGITS[15] = 'f';
     }
 
-    protected void tearDown() throws Exception {
+    @AfterEach
+    public void tearDown() throws Exception {
         System.arraycopy(chars, 0, IOUtils.DIGITS, 0, chars.length);
     }
 

@@ -18,7 +18,7 @@ public class Issue1901 extends TestCase {
         JSON.defaultTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
     }
 
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         JSON.defaultLocale = locale;
         JSON.defaultTimeZone = timeZone;
     }
