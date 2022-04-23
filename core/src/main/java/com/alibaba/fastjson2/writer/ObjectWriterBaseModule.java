@@ -620,6 +620,10 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             return ObjectWriterImplAtomicLong.INSTANCE;
         }
 
+        if (objectType == AtomicReference.class) {
+            return ObjectWriterImplAtomicReference.INSTANCE;
+        }
+
         if (objectType == Float.class) {
             return ObjectWriterImplFloat.INSTANCE;
         }

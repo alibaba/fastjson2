@@ -1,24 +1,24 @@
 package com.alibaba.fastjson.atomic;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class AtomicBooleanReadOnlyTest {
 
     @Test
-    public void test_codec_null() throws Exception {
+    public void test_codec_null() {
         V0 v = new V0(true);
 
         String text = JSON.toJSONString(v);
-        Assert.assertEquals("{\"value\":true}", text);
+        assertEquals("{\"value\":true}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue().get(), v.getValue().get());
+        assertEquals(v1.getValue().get(), v.getValue().get());
     }
 
     public static class V0 {
