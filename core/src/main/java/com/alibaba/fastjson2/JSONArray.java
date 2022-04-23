@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.function.Function;
 
 public class JSONArray extends ArrayList<Object> {
+
     private static final long serialVersionUID = 1L;
 
     static ObjectWriter<JSONArray> arrayWriter;
@@ -27,21 +28,21 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * @param initialCapacity the initial capacity of the list
+     * @param initialCapacity the initial capacity of the {@link JSONArray}
      */
     public JSONArray(int initialCapacity) {
         super(initialCapacity);
     }
 
     /**
-     * @param collection the collection whose elements are to be placed into this list
+     * @param collection the collection whose elements are to be placed into this {@link JSONArray}
      */
     public JSONArray(Collection<?> collection) {
         super(collection);
     }
 
     /**
-     * @param items the array whose elements are to be placed into this list
+     * @param items the array whose elements are to be placed into this {@link JSONArray}
      */
     public JSONArray(Object... items) {
         super(items.length);
@@ -51,7 +52,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link JSONArray} at the specified location in this list.
+     * Returns the {@link JSONArray} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link JSONArray} or null
@@ -86,7 +87,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link JSONObject} at the specified location in this list.
+     * Returns the {@link JSONObject} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link JSONObject} or null
@@ -121,7 +122,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link String} at the specified location in this list.
+     * Returns the {@link String} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link String} or null
@@ -142,7 +143,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link Double} at the specified location in this list.
+     * Returns the {@link Double} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link Double} or null
@@ -179,7 +180,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns a double value at the specified location in this list.
+     * Returns a double value at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return double
@@ -212,7 +213,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link Float} at the specified location in this list.
+     * Returns the {@link Float} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link Float} or null
@@ -249,7 +250,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns a float value at the specified location in this list.
+     * Returns a float value at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return float
@@ -282,7 +283,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link Long} at the specified location in this list.
+     * Returns the {@link Long} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link Long} or null
@@ -306,9 +307,11 @@ public class JSONArray extends ArrayList<Object> {
 
         if (value instanceof String) {
             String str = (String) value;
+
             if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return null;
             }
+
             return Long.parseLong(str);
         }
 
@@ -316,7 +319,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns a long value at the specified location in this list.
+     * Returns a long value at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return long
@@ -349,7 +352,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link Integer} at the specified location in this list.
+     * Returns the {@link Integer} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link Integer} or null
@@ -373,9 +376,11 @@ public class JSONArray extends ArrayList<Object> {
 
         if (value instanceof String) {
             String str = (String) value;
+
             if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return null;
             }
+
             return Integer.parseInt(str);
         }
 
@@ -383,7 +388,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns an int value at the specified location in this list.
+     * Returns an int value at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return int
@@ -416,7 +421,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link Short} at the specified location in this list.
+     * Returns the {@link Short} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link Short} or null
@@ -453,7 +458,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns a short value at the specified location in this list.
+     * Returns a short value at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return short
@@ -486,7 +491,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link Byte} at the specified location in this list.
+     * Returns the {@link Byte} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link Byte} or null
@@ -519,7 +524,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns a byte value at the specified location in this list.
+     * Returns a byte value at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return byte
@@ -552,7 +557,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link Boolean} at the specified location in this list.
+     * Returns the {@link Boolean} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link Boolean} or null
@@ -588,7 +593,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns a boolean value at the specified location in this list.
+     * Returns a boolean value at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return boolean
@@ -619,7 +624,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link BigInteger} at the specified location in this list.
+     * Returns the {@link BigInteger} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link BigInteger} or null
@@ -661,7 +666,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link BigDecimal} at the specified location in this list.
+     * Returns the {@link BigDecimal} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link BigDecimal} or null
@@ -709,7 +714,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link Date} at the specified location in this list.
+     * Returns the {@link Date} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link Date} or null
@@ -738,7 +743,7 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the {@link Instant} at the specified location in this list.
+     * Returns the {@link Instant} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return
      * @return {@link Instant} or null
@@ -792,9 +797,12 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Convert this {@link JSONArray} to the target type
+     * Convert this {@link JSONArray} to the specified Object
+     * <code>
+     * List<User> users = jsonArray.toJavaObject(new TypeReference<ArrayList<User>>(){}.getType());
+     * </code>
      *
-     * @param type converted goal type
+     * @param type specify the {@link Type} to be converted
      */
     public <T> T toJavaObject(Type type) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
@@ -803,8 +811,8 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Convert all the members of this {@link JSONArray} into the target List,
-     * warning that each member of the {@link JSONArray} must implement the Map interface
+     * Convert all the members of this {@link JSONArray} into the specified Object.
+     * Warning that each member of the {@link JSONArray} must implement the {@link Map} interface.
      *
      * <code>
      * String json = "[{\"id\": 1, \"name\": \"fastjson\"}, {\"id\": 2, \"name\": \"fastjson2\"}]";
@@ -812,7 +820,7 @@ public class JSONArray extends ArrayList<Object> {
      * List<User> users = array.toJavaList(User.class);
      * </code>
      *
-     * @param clazz converted goal class
+     * @param clazz specify the {@link Class<T>} to be converted
      */
     public <T> List<T> toJavaList(Class<T> clazz) {
         List<T> list = new ArrayList<>(size());
@@ -834,12 +842,17 @@ public class JSONArray extends ArrayList<Object> {
     }
 
     /**
-     * Returns the result of the {@link Type} converter conversion of the element at the specified position in this list.
+     * Returns the result of the {@link Type} converter conversion of the element at the specified position in this {@link JSONArray}.
+     *
+     * <code>
+     * User user = jsonArray.getObject(0, User.class);
+     * </code>
      *
      * @param index index of the element to return
-     * @param type  converted goal type
+     * @param type  specify the {@link Type} to be converted
      * @return <T> or null
-     * @throws JSONException If no suitable conversion method is found
+     * @throws JSONException             If no suitable conversion method is found
+     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
     public <T> T getObject(int index, Type type) {
         Object value = get(index);
@@ -891,6 +904,10 @@ public class JSONArray extends ArrayList<Object> {
     /**
      * Pack multiple elements as {@link JSONArray}
      *
+     * <code>
+     * JSONArray array = JSONArray.of(1, 2, "3", 4F, 5L, 6D, true);
+     * </code>
+     *
      * @param items element set
      */
     public static JSONArray of(Object... items) {
@@ -899,6 +916,10 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * Pack an element as {@link JSONArray}
+     *
+     * <code>
+     * JSONArray array = JSONArray.of("fastjson");
+     * </code>
      *
      * @param item target element
      */
@@ -910,6 +931,10 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * Pack two elements as {@link JSONArray}
+     *
+     * <code>
+     * JSONArray array = JSONArray.of("fastjson", 2);
+     * </code>
      *
      * @param first  first element
      * @param second second element
@@ -923,6 +948,10 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * Pack three elements as {@link JSONArray}
+     *
+     * <code>
+     * JSONArray array = JSONArray.of("fastjson", 2, true);
+     * </code>
      *
      * @param first  first element
      * @param second second element
