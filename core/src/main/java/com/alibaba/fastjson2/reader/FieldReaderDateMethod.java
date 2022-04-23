@@ -21,6 +21,7 @@ final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
         this.format = format;
     }
 
+    @Override
     public ObjectReader getObjectReader(JSONReader jsonReader) {
         if (dateReader == null) {
             dateReader = format == null

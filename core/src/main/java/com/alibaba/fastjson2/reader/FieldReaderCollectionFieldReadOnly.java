@@ -13,6 +13,7 @@ final class FieldReaderCollectionFieldReadOnly<T> extends FieldReaderObjectField
         super(fieldName, fieldType, fieldClass, ordinal, features, format, field);
     }
 
+    @Override
     public void accept(T object, Object value) {
         if (value == null) {
             return;
@@ -38,6 +39,7 @@ final class FieldReaderCollectionFieldReadOnly<T> extends FieldReaderObjectField
         collection.addAll((Collection) value);
     }
 
+    @Override
     public boolean isReadOnly() {
         return true;
     }

@@ -26,20 +26,24 @@ final class FieldReaderInt64ValueFunc<T> extends FieldReaderImpl<T> {
         function.accept(object, value);
     }
 
+    @Override
     public void accept(T object, Object value) {
         function.accept(object
                 , TypeUtils.toLongValue(value));
     }
 
+    @Override
     public void accept(T object, int value) {
         function.accept(object, value);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         function.accept(object
                 , jsonReader.readInt64Value());
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readInt64Value();
     }

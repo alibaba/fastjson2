@@ -32,6 +32,7 @@ class FieldReaderCollectionMethodReadOnly<T> extends FieldReaderObjectMethod<T> 
         return itemType;
     }
 
+    @Override
     public void accept(T object, Object value) {
         if (value == null) {
             return;
@@ -76,6 +77,7 @@ class FieldReaderCollectionMethodReadOnly<T> extends FieldReaderObjectMethod<T> 
         }
     }
 
+    @Override
     public boolean isReadOnly() {
         return true;
     }

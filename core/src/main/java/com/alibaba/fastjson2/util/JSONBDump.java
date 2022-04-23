@@ -904,6 +904,7 @@ public class JSONBDump {
         throw new JSONException("reference not support input " + typeName(type));
     }
 
+    @Override
     public String toString() {
         return jsonWriter.toString();
     }

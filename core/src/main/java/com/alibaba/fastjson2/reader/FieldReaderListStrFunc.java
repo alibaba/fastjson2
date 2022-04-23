@@ -35,6 +35,7 @@ final class FieldReaderListStrFunc<T> extends FieldReaderImpl<T>
         return String.class;
     }
 
+    @Override
     public ObjectReader getItemObjectReader(JSONReader.Context ctx) {
         return ObjectReaderImplString.INSTANCE;
     }

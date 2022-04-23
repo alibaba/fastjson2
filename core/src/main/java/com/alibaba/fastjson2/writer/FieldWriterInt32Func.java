@@ -18,6 +18,7 @@ final class FieldWriterInt32Func<T> extends FieldWriterInt32<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return function.apply(object);
     }

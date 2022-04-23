@@ -27,6 +27,7 @@ final class FieldWriterDateFieldMethod<T> extends FieldWriterDate<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         try {
             return method.invoke(object);
@@ -35,6 +36,7 @@ final class FieldWriterDateFieldMethod<T> extends FieldWriterDate<T> {
         }
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         Date value = (Date) getFieldValue(object);
 

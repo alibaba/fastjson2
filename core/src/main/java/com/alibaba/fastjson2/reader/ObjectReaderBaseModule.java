@@ -1654,6 +1654,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     static class CalendarImpl extends PrimitiveImpl {
         static final CalendarImpl INSTANCE = new CalendarImpl();
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
@@ -1672,6 +1673,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return calendar;
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.current() == '"') {
                 long millis = jsonReader.readMillisFromString();
@@ -1703,6 +1705,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             this.format = format;
         }
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
@@ -1716,7 +1719,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return readDate(jsonReader);
         }
 
-
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
@@ -1759,10 +1762,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     static class LocalDateImpl extends PrimitiveImpl {
         static final LocalDateImpl INSTANCE = new LocalDateImpl();
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             return jsonReader.readLocalDate();
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             return jsonReader.readLocalDate();
         }
@@ -1770,10 +1775,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     static class LocalTimeImpl extends PrimitiveImpl {
         static final LocalTimeImpl INSTANCE = new LocalTimeImpl();
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             return jsonReader.readLocalTime();
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             return jsonReader.readLocalTime();
         }
@@ -1782,10 +1789,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     static class ZonedDateTimeImpl extends PrimitiveImpl {
         static final ZonedDateTimeImpl INSTANCE = new ZonedDateTimeImpl();
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             return jsonReader.readZonedDateTime();
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
@@ -1803,6 +1812,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     static class LocaleImpl extends PrimitiveImpl {
         static final LocaleImpl INSTANCE = new LocaleImpl();
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             String strVal = jsonReader.readString();
             if (strVal == null || strVal.isEmpty()) {
@@ -1818,6 +1828,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return new Locale(items[0], items[1], items[2]);
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             String strVal = jsonReader.readString();
             if (strVal == null || strVal.isEmpty()) {
@@ -1837,6 +1848,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     static class ZoneIdImpl extends PrimitiveImpl {
         static final ZoneIdImpl INSTANCE = new ZoneIdImpl();
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             String strVal = jsonReader.readString();
             if (strVal == null || strVal.isEmpty()) {
@@ -1845,6 +1857,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return ZoneId.of(strVal);
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             String strVal = jsonReader.readString();
             if (strVal == null || strVal.isEmpty()) {
@@ -1857,6 +1870,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     static class TimeZoneImpl extends PrimitiveImpl {
         static final TimeZoneImpl INSTANCE = new TimeZoneImpl();
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             String strVal = jsonReader.readString();
             if (strVal == null || strVal.isEmpty()) {
@@ -1865,6 +1879,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return TimeZone.getTimeZone(strVal);
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             String strVal = jsonReader.readString();
             if (strVal == null || strVal.isEmpty()) {
@@ -1877,10 +1892,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     static class LocalDateTimeImpl extends PrimitiveImpl {
         static final LocalDateTimeImpl INSTANCE = new LocalDateTimeImpl();
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             return jsonReader.readLocalDateTime();
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
@@ -2497,6 +2514,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             this.interfaceType = interfaceType;
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.nextIfMatch('{')) {
                 long hash = jsonReader.readFieldNameHashCode();
@@ -2692,14 +2710,17 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             this.componentClass = TypeUtils.getMapping(itemType);
         }
 
+        @Override
         public Object createInstance() {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public FieldReader getFieldReader(long hashCode) {
             return null;
         }
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             int entryCnt = jsonReader.startArray();
 
@@ -2719,6 +2740,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return array;
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             if (itemObjectReader == null) {
                 itemObjectReader = jsonReader

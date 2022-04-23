@@ -25,6 +25,7 @@ final class FieldReaderCharValueFunc<T> extends FieldReaderImpl<T> {
         function.accept(object, value);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         String str = jsonReader.readString();
         if (str == null || str.isEmpty()) {
@@ -33,6 +34,7 @@ final class FieldReaderCharValueFunc<T> extends FieldReaderImpl<T> {
         function.accept(object, str.charAt(0));
     }
 
+    @Override
     public String readFieldValue(JSONReader jsonReader) {
         return jsonReader.readString();
     }

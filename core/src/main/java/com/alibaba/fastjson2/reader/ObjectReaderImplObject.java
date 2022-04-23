@@ -7,6 +7,7 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
 final class ObjectReaderImplObject extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplObject INSTANCE = new ObjectReaderImplObject();
 
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.isJSONB()) {
             return jsonReader.readAny();

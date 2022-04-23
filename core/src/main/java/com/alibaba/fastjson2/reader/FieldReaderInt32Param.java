@@ -9,6 +9,7 @@ final class FieldReaderInt32Param<T> extends FieldReaderObjectParam<T> {
         super(fieldName, fieldType, fieldType, paramName, parameter, ordinal, 0, null);
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readInt32();
     }

@@ -39,6 +39,7 @@ class JSONReaderUTF8 extends JSONReader {
         next();
     }
 
+    @Override
     public boolean nextIfMatch(char e) {
         if (this.ch != e) {
             return false;
@@ -72,9 +73,10 @@ class JSONReaderUTF8 extends JSONReader {
                 /* 110x xxxx   10xx xxxx*/
                 offset += 2;
                 int char2 = bytes[offset - 1];
-                if ((char2 & 0xC0) != 0x80)
+                if ((char2 & 0xC0) != 0x80) {
                     throw new JSONException(
                             "malformed input around byte " + offset);
+                }
                 ch = (char) (((c & 0x1F) << 6) | (char2 & 0x3F));
                 break;
             }
@@ -83,8 +85,9 @@ class JSONReaderUTF8 extends JSONReader {
                 offset += 3;
                 int char2 = bytes[offset - 2];
                 int char3 = bytes[offset - 1];
-                if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
+                if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
                     throw new JSONException("malformed input around byte " + (offset - 1));
+                }
                 ch = (char)
                         (((c    & 0x0F) << 12) |
                                 ((char2 & 0x3F) << 6)  |
@@ -98,6 +101,7 @@ class JSONReaderUTF8 extends JSONReader {
         return true;
     }
 
+    @Override
     public void next() {
         if (offset >= length) {
             ch = EOI;
@@ -127,9 +131,10 @@ class JSONReaderUTF8 extends JSONReader {
                 /* 110x xxxx   10xx xxxx*/
                 offset += 2;
                 int char2 = bytes[offset - 1];
-                if ((char2 & 0xC0) != 0x80)
+                if ((char2 & 0xC0) != 0x80) {
                     throw new JSONException(
                             "malformed input around byte " + offset);
+                }
                 ch = (char) (((c & 0x1F) << 6) | (char2 & 0x3F));
                 break;
             }
@@ -138,8 +143,9 @@ class JSONReaderUTF8 extends JSONReader {
                 offset += 3;
                 int char2 = bytes[offset - 2];
                 int char3 = bytes[offset - 1];
-                if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
+                if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
                     throw new JSONException("malformed input around byte " + (offset - 1));
+                }
                 ch = (char)
                         (((c    & 0x0F) << 12) |
                         ((char2 & 0x3F) << 6)  |
@@ -152,6 +158,7 @@ class JSONReaderUTF8 extends JSONReader {
         }
     }
 
+    @Override
     public long readFieldNameHashCodeUnquote() {
         this.nameEscape = false;
         this.nameBegin = this.offset - 1;
@@ -334,6 +341,7 @@ class JSONReaderUTF8 extends JSONReader {
         return hashCode;
     }
 
+    @Override
     public long readFieldNameHashCode() {
         if (ch != '"' && ch != '\'') {
             return -1;
@@ -411,8 +419,9 @@ class JSONReaderUTF8 extends JSONReader {
                     case 13: {
                         /* 110x xxxx   10xx xxxx*/
                         int c2 = bytes[offset + 1];
-                        if ((c2 & 0xC0) != 0x80)
+                        if ((c2 & 0xC0) != 0x80) {
                             throw new JSONException("malformed input around byte " + offset);
+                        }
                         c = (char) (((c & 0x1F) << 6)
                                 | (c2 & 0x3F)
                         );
@@ -424,8 +433,9 @@ class JSONReaderUTF8 extends JSONReader {
                     case 14: {
                         int c2 = bytes[offset + 1];
                         int c3 = bytes[offset + 2];
-                        if (((c2 & 0xC0) != 0x80) || ((c3 & 0xC0) != 0x80))
+                        if (((c2 & 0xC0) != 0x80) || ((c3 & 0xC0) != 0x80)) {
                             throw new JSONException("malformed input around byte " + offset);
+                        }
                         c = (char) (((c & 0x0F) << 12) |
                                 ((c2 & 0x3F) << 6) |
                                 ((c3 & 0x3F) << 0));
@@ -446,6 +456,7 @@ class JSONReaderUTF8 extends JSONReader {
         return hashCode;
     }
 
+    @Override
     public long readValueHashCode() {
         if (ch != '"') {
             return -1;
@@ -525,8 +536,9 @@ class JSONReaderUTF8 extends JSONReader {
                     case 13: {
                         /* 110x xxxx   10xx xxxx*/
                         int c2 = bytes[offset + 1];
-                        if ((c2 & 0xC0) != 0x80)
+                        if ((c2 & 0xC0) != 0x80) {
                             throw new JSONException("malformed input around byte " + offset);
+                        }
                         c = (char) (((c & 0x1F) << 6)
                                 | (c2 & 0x3F)
                         );
@@ -538,8 +550,9 @@ class JSONReaderUTF8 extends JSONReader {
                     case 14: {
                         int c2 = bytes[offset + 1];
                         int c3 = bytes[offset + 2];
-                        if (((c2 & 0xC0) != 0x80) || ((c3 & 0xC0) != 0x80))
+                        if (((c2 & 0xC0) != 0x80) || ((c3 & 0xC0) != 0x80)) {
                             throw new JSONException("malformed input around byte " + offset);
+                        }
                         c = (char) (((c & 0x0F) << 12) |
                                 ((c2 & 0x3F) << 6) |
                                 ((c3 & 0x3F) << 0));
@@ -592,6 +605,7 @@ class JSONReaderUTF8 extends JSONReader {
         return hashCode;
     }
 
+    @Override
     public long getNameHashCodeLCase() {
         long hashCode = Fnv.MAGIC_HASH_CODE;
         int offset = nameBegin;
@@ -687,6 +701,7 @@ class JSONReaderUTF8 extends JSONReader {
         return hashCode;
     }
 
+    @Override
     public String getFieldName() {
         int length = nameEnd - nameBegin;
         if (!nameEscape) {
@@ -806,6 +821,7 @@ class JSONReaderUTF8 extends JSONReader {
         return new String(chars);
     }
 
+    @Override
     public String readFieldName() {
         if (ch != '"' && ch != '\'') {
             return null;
@@ -928,6 +944,7 @@ class JSONReaderUTF8 extends JSONReader {
         return getFieldName();
     }
 
+    @Override
     public final int readInt32Value() {
         boolean negative = false;
         int firstOffset = offset;
@@ -1026,6 +1043,7 @@ class JSONReaderUTF8 extends JSONReader {
         return negative ? -intValue : intValue;
     }
 
+    @Override
     public Integer readInt32() {
         boolean negative = false;
         int firstOffset = offset;
@@ -1119,6 +1137,7 @@ class JSONReaderUTF8 extends JSONReader {
         return negative ? -intValue : intValue;
     }
 
+    @Override
     public final long readInt64Value() {
         boolean negative = false;
         int firstOffset = offset;
@@ -1217,6 +1236,7 @@ class JSONReaderUTF8 extends JSONReader {
         return negative ? -longValue : longValue;
     }
 
+    @Override
     public Long readInt64() {
         boolean negative = false;
         int firstOffset = offset;
@@ -1308,6 +1328,7 @@ class JSONReaderUTF8 extends JSONReader {
         return negative ? -longValue : longValue;
     }
 
+    @Override
     public void readString(ValueConsumer consumer, boolean quoted) {
         char quote = this.ch;
         int valueLength;
@@ -1671,6 +1692,7 @@ class JSONReaderUTF8 extends JSONReader {
         stringValue = str;
     }
 
+    @Override
     public boolean skipName() {
         if (ch != '"') {
             throw new JSONException("not support unquoted name");
@@ -1715,6 +1737,7 @@ class JSONReaderUTF8 extends JSONReader {
         return true;
     }
 
+    @Override
     public void skipValue() {
         switch (ch) {
             case '[': {
@@ -1808,6 +1831,7 @@ class JSONReaderUTF8 extends JSONReader {
         }
     }
 
+    @Override
     public String getString() {
         if (stringValue != null) {
             return stringValue;
@@ -1980,6 +2004,7 @@ class JSONReaderUTF8 extends JSONReader {
         this.ch = (char) ch;
     }
 
+    @Override
     public String readString() {
         if (ch == '"' || ch == '\'') {
             char quote = this.ch;
@@ -2239,6 +2264,7 @@ class JSONReaderUTF8 extends JSONReader {
         }
     }
 
+    @Override
     public void readNumber0() {
         this.wasNull = false;
         this.mag0 = 0;
@@ -2648,6 +2674,7 @@ class JSONReaderUTF8 extends JSONReader {
         consumer.accept(number);
     }
 
+    @Override
     public boolean readIfNull() {
         if (ch == 'n'
                 && bytes[offset] == 'u'
@@ -2685,6 +2712,7 @@ class JSONReaderUTF8 extends JSONReader {
         return true;
     }
 
+    @Override
     public void readNull() {
         if (bytes[offset] == 'u'
                 && bytes[offset + 1] == 'l'
@@ -2719,6 +2747,7 @@ class JSONReaderUTF8 extends JSONReader {
         }
     }
 
+    @Override
     public int getStringLength() {
         if (ch != '"') {
             throw new JSONException("date only support string input");
@@ -2733,6 +2762,7 @@ class JSONReaderUTF8 extends JSONReader {
         return len;
     }
 
+    @Override
     protected ZonedDateTime readZonedDateTimeX(int len) {
         if (ch != '"') {
             throw new JSONException("date only support string input");
@@ -3274,6 +3304,7 @@ class JSONReaderUTF8 extends JSONReader {
         return zdt;
     }
 
+    @Override
     public LocalDateTime readLocalDate8() {
         if (ch != '"') {
             throw new JSONException("localDate only support string input");
@@ -3354,6 +3385,7 @@ class JSONReaderUTF8 extends JSONReader {
         return ldt;
     }
 
+    @Override
     public LocalDateTime readLocalDate9() {
         if (ch != '"') {
             throw new JSONException("localDate only support string input");
@@ -3436,6 +3468,7 @@ class JSONReaderUTF8 extends JSONReader {
         return ldt;
     }
 
+    @Override
     public LocalDateTime readLocalDate10() {
         if (ch != '"') {
             throw new JSONException("localDate only support string input");
@@ -3544,6 +3577,7 @@ class JSONReaderUTF8 extends JSONReader {
         }
         return ldt;
     }
+    @Override
     protected LocalDateTime readLocalDateTime17() {
         if (ch != '"') {
             throw new JSONException("date only support string input");
@@ -3702,6 +3736,7 @@ class JSONReaderUTF8 extends JSONReader {
         return ldt;
     }
 
+    @Override
     protected LocalTime readLocalTime8 () {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
@@ -3764,6 +3799,7 @@ class JSONReaderUTF8 extends JSONReader {
         return LocalTime.of(hour, minute, seccond);
     }
 
+    @Override
     protected LocalTime readLocalTime11 () {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
@@ -3844,6 +3880,7 @@ class JSONReaderUTF8 extends JSONReader {
     }
 
 
+    @Override
     protected LocalTime readLocalTime10 () {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
@@ -3922,6 +3959,7 @@ class JSONReaderUTF8 extends JSONReader {
         return LocalTime.of(hour, minute, seccond, millis);
     }
 
+    @Override
     protected LocalTime readLocalTime12 () {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
@@ -4002,6 +4040,7 @@ class JSONReaderUTF8 extends JSONReader {
         return LocalTime.of(hour, minute, seccond, millis);
     }
 
+    @Override
     protected LocalTime readLocalTime18 () {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
@@ -4107,6 +4146,7 @@ class JSONReaderUTF8 extends JSONReader {
         return LocalTime.of(hour, minute, seccond, millis);
     }
 
+    @Override
     protected LocalDateTime readLocalDateTime16() {
         if (ch != '"') {
             throw new JSONException("date only support string input");
@@ -4258,6 +4298,7 @@ class JSONReaderUTF8 extends JSONReader {
         return ldt;
     }
 
+    @Override
     protected LocalDateTime readLocalDateTime18() {
         if (ch != '"') {
             throw new JSONException("date only support string input");
@@ -4393,6 +4434,7 @@ class JSONReaderUTF8 extends JSONReader {
         return ldt;
     }
 
+    @Override
     protected LocalDateTime readLocalDateTime19() {
         if (ch != '"') {
             throw new JSONException("date only support string input");
@@ -4550,6 +4592,7 @@ class JSONReaderUTF8 extends JSONReader {
         return ldt;
     }
 
+    @Override
     protected LocalDateTime readLocalDateTimeX(int len) {
         if (ch != '"') {
             throw new JSONException("date only support string input");
@@ -4694,6 +4737,7 @@ class JSONReaderUTF8 extends JSONReader {
         return ldt;
     }
 
+    @Override
     public UUID readUUID() {
         if (ch == 'n') {
             readNull();
@@ -4748,6 +4792,7 @@ class JSONReaderUTF8 extends JSONReader {
         return UUID.fromString(str);
     }
 
+    @Override
     public String readPattern() {
         if (ch != '/') {
             throw new JSONException("illegal pattern");

@@ -18,6 +18,7 @@ final class FieldWriterCharValField<T> extends FieldWriterImpl<T> {
         return field;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         try {
             return field.getChar(object);

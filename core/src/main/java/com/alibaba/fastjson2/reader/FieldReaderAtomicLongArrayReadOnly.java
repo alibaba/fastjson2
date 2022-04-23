@@ -14,10 +14,12 @@ final class FieldReaderAtomicLongArrayReadOnly<T> extends FieldReaderImpl<T> {
         this.method = method;
     }
 
+    @Override
     public boolean isReadOnly() {
         return true;
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         if (jsonReader.readIfNull()) {
             return;
@@ -43,6 +45,7 @@ final class FieldReaderAtomicLongArrayReadOnly<T> extends FieldReaderImpl<T> {
         }
     }
 
+    @Override
     public String toString() {
         return method.getName();
     }

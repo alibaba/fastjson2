@@ -12,10 +12,12 @@ final class FieldWriterInt32Field<T> extends FieldWriterInt32<T> {
         this.field = field;
     }
 
+    @Override
     public Field getField() {
         return field;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         try {
             return field.get(object);

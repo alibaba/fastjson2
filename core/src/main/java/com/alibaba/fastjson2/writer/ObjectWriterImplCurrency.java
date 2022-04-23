@@ -21,6 +21,7 @@ final class ObjectWriterImplCurrency extends ObjectWriterBaseModule.PrimitiveImp
         this.defineClass = defineClass;
     }
 
+    @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
             jsonWriter.writeNull();

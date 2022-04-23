@@ -11,6 +11,7 @@ final class FieldReaderFloatValueMethod<T> extends FieldReaderObjectMethod<T> {
         super(fieldName, fieldType, setter);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         float fieldValue = jsonReader.readFloatValue();
         try {
@@ -20,6 +21,7 @@ final class FieldReaderFloatValueMethod<T> extends FieldReaderObjectMethod<T> {
         }
     }
 
+    @Override
     public void accept(T object, Object value) {
         if (value == null) {
             value = 0F;
@@ -32,6 +34,7 @@ final class FieldReaderFloatValueMethod<T> extends FieldReaderObjectMethod<T> {
         }
     }
 
+    @Override
     public void accept(T object, int value) {
         try {
             method.invoke(object, (float) value);

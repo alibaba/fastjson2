@@ -21,6 +21,7 @@ public final class FieldReaderListInt64 implements ObjectReader {
         this.instanceTypeHash = Fnv.hashCode64(TypeUtils.getTypeName(instanceType));
     }
 
+    @Override
     public Object createInstance() {
         if (instanceType == ArrayList.class) {
             return new ArrayList<>();
@@ -37,10 +38,12 @@ public final class FieldReaderListInt64 implements ObjectReader {
         }
     }
 
+    @Override
     public FieldReader getFieldReader(long hashCode) {
         return null;
     }
 
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         if (jsonReader.nextIfNull()) {
             return null;
@@ -76,6 +79,7 @@ public final class FieldReaderListInt64 implements ObjectReader {
         return list;
     }
 
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.isJSONB()) {
             return readJSONBObject(jsonReader, 0);

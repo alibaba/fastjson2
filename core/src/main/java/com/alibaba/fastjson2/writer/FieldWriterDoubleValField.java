@@ -18,6 +18,7 @@ final class FieldWriterDoubleValField<T> extends FieldWriterImpl<T> {
         return field;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return getFieldValueDouble(object);
     }

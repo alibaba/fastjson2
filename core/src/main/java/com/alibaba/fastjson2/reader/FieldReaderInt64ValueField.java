@@ -10,6 +10,7 @@ final class FieldReaderInt64ValueField<T> extends FieldReaderObjectField<T> {
         super(fieldName, fieldType, fieldType, ordinal, 0, null, field);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         long fieldLong = jsonReader.readInt64Value();
         try {

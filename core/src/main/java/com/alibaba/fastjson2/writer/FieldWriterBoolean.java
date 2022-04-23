@@ -15,6 +15,7 @@ abstract class FieldWriterBoolean extends FieldWriterImpl {
         super(name, ordinal, features, format, fieldType, fieldClass);
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         Boolean value = (Boolean) getFieldValue(object);
         if (value == null) {
@@ -24,6 +25,7 @@ abstract class FieldWriterBoolean extends FieldWriterImpl {
         jsonWriter.writeBool(value);
     }
 
+    @Override
     public void writeBool(JSONWriter jsonWriter, boolean value) {
         if (jsonWriter.isUTF8()) {
             if (value) {
@@ -105,6 +107,7 @@ abstract class FieldWriterBoolean extends FieldWriterImpl {
         return true;
     }
 
+    @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         return ObjectWriterImplBoolean.INSTANCE;
     }

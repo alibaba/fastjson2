@@ -12,6 +12,7 @@ final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
         super(fieldName, fieldType, fieldType, ordinal, features, format, field);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         BigDecimal fieldValue = jsonReader.readBigDecimal();
         try {
@@ -21,6 +22,7 @@ final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public void accept(T object, int value) {
         try {
             field.set(object, BigDecimal.valueOf(value));
@@ -29,6 +31,7 @@ final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public void accept(T object, long value) {
         try {
             field.set(object, BigDecimal.valueOf(value));
@@ -37,6 +40,7 @@ final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public void accept(T object, Object value) {
         try {
             field.set(object

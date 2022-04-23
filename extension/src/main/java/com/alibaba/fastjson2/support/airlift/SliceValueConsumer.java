@@ -17,10 +17,12 @@ public class SliceValueConsumer implements ValueConsumer {
         slice = Slices.wrappedBuffer(bytes, off, len);
     }
 
+    @Override
     public void acceptNull() {
         slice = null;
     }
 
+    @Override
     public void accept(int value) {
         int size = (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
         byte[] bytes = new byte[size];
@@ -28,6 +30,7 @@ public class SliceValueConsumer implements ValueConsumer {
         slice = Slices.wrappedBuffer(bytes);
     }
 
+    @Override
     public void accept(boolean val) {
         byte[] bytes = val
                 ? new byte[] {'t', 'r', 'u', 'e'}
@@ -35,6 +38,7 @@ public class SliceValueConsumer implements ValueConsumer {
         slice = Slices.wrappedBuffer(bytes);
     }
 
+    @Override
     public void accept(long value) {
         int size = (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
         byte[] bytes = new byte[size];
@@ -42,6 +46,7 @@ public class SliceValueConsumer implements ValueConsumer {
         slice = Slices.wrappedBuffer(bytes);
     }
 
+    @Override
     public void accept(Number val) {
         if (val == null) {
             slice = null;
@@ -70,10 +75,12 @@ public class SliceValueConsumer implements ValueConsumer {
         slice = Slices.utf8Slice(str);
     }
 
+    @Override
     public void accept(String val) {
         slice = Slices.utf8Slice(val);
     }
 
+    @Override
     public void accept(Map object) {
         if (object.isEmpty()) {
             slice = Slices.wrappedBuffer(new byte[] {'{', '}'});
@@ -87,6 +94,7 @@ public class SliceValueConsumer implements ValueConsumer {
         }
     }
 
+    @Override
     public void accept(List array) {
         if (array.isEmpty()) {
             slice = Slices.wrappedBuffer(new byte[] {'[', ']'});
