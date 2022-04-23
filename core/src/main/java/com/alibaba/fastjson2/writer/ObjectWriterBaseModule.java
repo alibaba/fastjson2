@@ -264,7 +264,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         }
                         case "unwrapped": {
                             Boolean unwrapped = (Boolean) result;
-                            if (!unwrapped.booleanValue()) {
+                            if (unwrapped.booleanValue()) {
                                 fieldInfo.format = "unwrapped";
                             }
                             break;

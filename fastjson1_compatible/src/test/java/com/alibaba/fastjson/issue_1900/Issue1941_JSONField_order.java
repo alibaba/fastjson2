@@ -1,12 +1,17 @@
-package com.alibaba.json.bvt.issue_1900;
+package com.alibaba.fastjson.issue_1900;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1941 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    public void test_for_issue() throws Exception {
+public class Issue1941_JSONField_order {
+
+    @Test
+    public void test_for_issue() {
         String json = "{\"type\":\"floorV2\",\"templateId\":\"x123\",\"name\":\"floorname2\"}";
         FloorV2  a=(FloorV2) JSON.parseObject(json,Area.class);
         assertEquals("floorname2", a.name);
@@ -19,6 +24,7 @@ public class Issue1941 extends TestCase {
 
     @JSONType(typeName = "floorV2")
     public static class FloorV2 implements Area {
+        @JSONField(ordinal = -1)
         public String type;
         public String templateId;
         public String name;

@@ -1,14 +1,18 @@
-package com.alibaba.json.bvt.issue_1200;
+package com.alibaba.fastjson.issue_1200;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by kimmking on 06/06/2017.
  */
-public class Issue1246 extends TestCase {
-    public void test_for_issue() throws Exception {
+public class Issue1246 {
+    @Test
+    public void test_for_issue() {
         B b = new B();
         b.setX("xx");
 

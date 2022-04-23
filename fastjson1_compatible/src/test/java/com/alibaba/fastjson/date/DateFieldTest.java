@@ -9,63 +9,65 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class DateFieldTest {
     @Test
-    public void test_codec() throws Exception {
+    public void test_codec() {
         V0 v = new V0();
         v.setValue(new Date());
 
         String text = JSON.toJSONString(v);
-        Assert.assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
+        assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue(), v.getValue());
+        assertEquals(v1.getValue(), v.getValue());
     }
 
     @Test
-    public void test_codec_null() throws Exception {
+    public void test_codec_null() {
         V0 v = new V0();
 
         SerializeConfig mapping = new SerializeConfig();
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue);
-        Assert.assertEquals("{\"value\":null}", text);
+        assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue(), v.getValue());
+        assertEquals(v1.getValue(), v.getValue());
     }
 
     @Test
-    public void test_codec_null_asm() throws Exception {
+    public void test_codec_null_asm() {
         V0 v = new V0();
 
         SerializeConfig mapping = new SerializeConfig();
         mapping.setAsmEnable(true);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue);
-        Assert.assertEquals("{\"value\":null}", text);
+        assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue(), v.getValue());
+        assertEquals(v1.getValue(), v.getValue());
     }
 
     @Test
-    public void test_codec_null_1() throws Exception {
+    public void test_codec_null_1() {
         V0 v = new V0();
 
         SerializeConfig mapping = new SerializeConfig();
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullNumberAsZero);
-        Assert.assertEquals("{\"value\":null}", text);
+        assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(null, v1.getValue());
+        assertEquals(null, v1.getValue());
     }
 
     public static class V0 {

@@ -15,13 +15,13 @@ import java.util.TimeZone;
 
 public class DateFieldTest3 {
     @BeforeEach
-    protected void setUp() throws Exception {
+    protected void setUp() {
         JSON.defaultTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
         JSON.defaultLocale = Locale.CHINA;
     }
 
     @Test
-    public void test_codec() throws Exception {
+    public void test_codec() {
         V0 v = new V0();
         v.setValue(new Date());
 
@@ -33,7 +33,7 @@ public class DateFieldTest3 {
     }
 
     @Test
-    public void test_codec_no_asm() throws Exception {
+    public void test_codec_no_asm() {
         V0 v = new V0();
         v.setValue(new Date());
 
@@ -44,7 +44,7 @@ public class DateFieldTest3 {
     }
 
     @Test
-    public void test_codec_asm() throws Exception {
+    public void test_codec_asm() {
         V0 v = new V0();
         v.setValue(new Date());
 
@@ -55,7 +55,7 @@ public class DateFieldTest3 {
     }
 
     @Test
-    public void test_codec_null_asm() throws Exception {
+    public void test_codec_null_asm() {
         V0 v = new V0();
 
         SerializeConfig mapping = new SerializeConfig();
@@ -71,7 +71,7 @@ public class DateFieldTest3 {
     }
 
     @Test
-    public void test_codec_null_no_asm() throws Exception {
+    public void test_codec_null_no_asm() {
         V0 v = new V0();
 
 //        SerializeConfig mapping = new SerializeConfig();
@@ -87,7 +87,7 @@ public class DateFieldTest3 {
     }
 
     @Test
-    public void test_codec_null_1() throws Exception {
+    public void test_codec_null_1() {
         V0 v = new V0();
 
 //        SerializeConfig mapping = new SerializeConfig();

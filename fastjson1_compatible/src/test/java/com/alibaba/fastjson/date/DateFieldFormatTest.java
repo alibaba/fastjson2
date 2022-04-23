@@ -1,28 +1,32 @@
-package com.alibaba.json.bvt.date;
+package com.alibaba.fastjson.date;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class DateFieldFormatTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+public class DateFieldFormatTest {
+    @BeforeEach
     protected void setUp() throws Exception {
         JSON.defaultTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
         JSON.defaultLocale = Locale.CHINA;
     }
-    
-    public void test_format_() throws Exception {
+
+    @Test
+    public void test_format_() {
         Date now = new Date();
         Model model = new Model();
         model.serverTime = now;
         model.publishTime = now;
         model.setStartDate( now );
-        
+
         String text = JSON.toJSONString(model);
         System.out.println(text);
 
@@ -39,7 +43,7 @@ public class DateFieldFormatTest extends TestCase {
         String t3 = df3.format(now);
 
         assertEquals("{\"publishTime\":\""+t2+"\",\"serverTime\":\""+t1+"\",\"startDate\":\""+t3+"\"}",text);
-        
+
         Model model2 = JSON.parseObject(text, Model.class);
         SimpleDateFormat df4 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.CHINA);
         SimpleDateFormat df5 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
@@ -52,7 +56,7 @@ public class DateFieldFormatTest extends TestCase {
         assertEquals(t2, df4.format(model2.publishTime));
         assertEquals(t1, df5.format(model2.serverTime));
         assertEquals(t3, df6.format(model2.getStartDate()));
-        
+
     }
 
     public static class Model {

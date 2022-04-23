@@ -452,6 +452,9 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == Date.class) {
+            if ("unwrapped".equals(format)) {
+                format = null;
+            }
             return new FieldWriterDateFieldMethod(fieldName, ordinal, features, format, fieldClass, method);
         }
 

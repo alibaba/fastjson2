@@ -16,9 +16,6 @@ final class ObjectReaderImplEnum implements ObjectReader {
     protected final Enum[] ordinalEnums;
     protected long[] enumNameHashCodes;
 
-    final static long HASH_NAME = Fnv.hashCode64("name");
-    final static long HASH_ORDINAL = Fnv.hashCode64("ordinal");
-
     public ObjectReaderImplEnum(Class enumClass, Enum[] enums, Enum[] ordinalEnums, long[] enumNameHashCodes) {
         this.enumClass = enumClass;
         this.typeNameHash = Fnv.hashCode64(TypeUtils.getTypeName(enumClass));

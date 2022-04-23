@@ -1,4 +1,4 @@
-package com.alibaba.json.bvtVO;
+package com.alibaba.fastjson.bvtVO;
 
 import com.alibaba.fastjson.JSON;
 import org.junit.jupiter.api.Test;
