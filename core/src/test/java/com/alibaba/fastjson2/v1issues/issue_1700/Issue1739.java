@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.v1issues.issue_1700;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONField;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,7 +29,7 @@ public class Issue1739 {
     public static class M0 {
         private JSONObject data;
 
-        @JSONField(read = false)
+        @JSONField(deserialize = false)
         public JSONObject getData() {
             return data;
         }
@@ -43,7 +42,7 @@ public class Issue1739 {
     public static class M1 {
         private JSONObject data;
 
-        @JSONField(write = false)
+        @JSONField(serialize = false)
         public JSONObject getData() {
             return data;
         }
