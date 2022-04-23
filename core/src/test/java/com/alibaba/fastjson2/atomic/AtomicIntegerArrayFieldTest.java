@@ -11,43 +11,45 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class AtomicIntegerArrayFieldTest {
 
     @Test
-    public void test_codec_null() throws Exception {
+    public void test_codec_null() {
         V0 v = new V0();
 
         SerializeConfig mapping = new SerializeConfig();
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, JSONWriter.Feature.WriteNulls);
-        Assert.assertEquals("{\"value\":null}", text);
+        assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue(), v.getValue());
+        assertEquals(v1.getValue(), v.getValue());
     }
 
     @Test
-    public void test_codec_null_1() throws Exception {
+    public void test_codec_null_1() {
         V0 v = new V0();
 
         SerializeConfig mapping = new SerializeConfig();
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.NullAsDefaultValue);
-        Assert.assertEquals("{\"value\":[]}", text);
+        assertEquals("{\"value\":[]}", text);
     }
 
     @Test
-    public void test_codec_null_2() throws Exception {
+    public void test_codec_null_2() {
         V0 v = JSON.parseObject("{\"value\":[1,2]}", V0.class);
 
         SerializeConfig mapping = new SerializeConfig();
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.NullAsDefaultValue);
-        Assert.assertEquals("{\"value\":[1,2]}", text);
+        assertEquals("{\"value\":[1,2]}", text);
     }
 
     public static class V0 {

@@ -1031,6 +1031,10 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return ObjectReaderImplAtomicLongArray.INSTANCE;
         }
 
+        if (type == AtomicReference.class) {
+            return ObjectReaderImplAtomicReference.INSTANCE;
+        }
+
         if (type == Object[].class) {
             return ObjectArrayReader.INSTANCE;
         }
@@ -1285,6 +1289,10 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
                 if (rawType == Optional.class) {
                     return new OptionalImpl(itemType);
+                }
+
+                if (rawType == AtomicReference.class) {
+                    return new ObjectReaderImplAtomicReference(itemType);
                 }
             }
 
