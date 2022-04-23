@@ -978,4 +978,13 @@ public class JSONObjectTest {
         JSONObject jsonObject = JSONObject.of("key", "1");
         assertNull(jsonObject.getObject("a", String.class));
     }
+
+    @Test
+    public void test_get() {
+        JSONObject jsonObject = JSONObject.of("123", "value1", "456.789", "value2", null, "value3");
+        assertEquals("value1", jsonObject.get(123));
+        assertEquals("value2", jsonObject.get(456.789));
+        assertEquals("value3", jsonObject.get(null));
+        assertEquals("value4", jsonObject.getOrDefault(false, "value4"));
+    }
 }
