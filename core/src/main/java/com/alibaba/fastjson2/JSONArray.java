@@ -29,6 +29,7 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * @param initialCapacity the initial capacity of the {@link JSONArray}
+     * @throws IllegalArgumentException If the specified initial capacity is negative
      */
     public JSONArray(int initialCapacity) {
         super(initialCapacity);
