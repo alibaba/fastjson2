@@ -3,6 +3,7 @@ package com.alibaba.fastjson.date;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,8 @@ public class DateTest2 {
         timeZone = JSON.defaultTimeZone;
     }
 
-    protected void tearDown() throws Exception {
+    @AfterEach
+    public void tearDown() throws Exception {
         JSON.defaultTimeZone = timeZone;
     }
 
