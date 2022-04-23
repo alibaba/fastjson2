@@ -64,9 +64,69 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
 
     /**
      * @param map the map whose mappings are to be placed in this map
+     * @throws NullPointerException If the specified map is null
      */
     public JSONObject(Map map) {
         super(map);
+    }
+
+    /**
+     * Returns the Object of the associated keys in this {@link JSONObject}.
+     *
+     * @param key the key whose associated value is to be returned
+     */
+    public Object get(String key) {
+        return super.get(key);
+    }
+
+    /**
+     * Returns the Object of the associated keys in this {@link JSONObject}.
+     *
+     * @param key the key whose associated value is to be returned
+     * @since 2.0.2
+     */
+    @Override
+    public Object get(Object key) {
+        if (key instanceof Number
+            || key instanceof Character
+            || key instanceof Boolean
+        ) {
+            return super.get(
+                key.toString()
+            );
+        }
+
+        return super.get(key);
+    }
+
+    /**
+     * @param key          the key whose associated value is to be returned
+     * @param defaultValue the default mapping of the key
+     */
+    public Object getOrDefault(String key, Object defaultValue) {
+        return super.getOrDefault(
+            key, defaultValue
+        );
+    }
+
+    /**
+     * @param key          the key whose associated value is to be returned
+     * @param defaultValue the default mapping of the key
+     * @since 2.0.2
+     */
+    public Object getOrDefault(Object key, Object defaultValue) {
+        if (key instanceof Number
+            || key instanceof Character
+            || key instanceof Boolean
+        ) {
+            return super.getOrDefault(
+                key.toString(), defaultValue
+            );
+        }
+
+        return super.getOrDefault(
+            key, defaultValue
+        );
     }
 
     /**
@@ -76,7 +136,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @return {@link JSONArray} or null
      */
     public JSONArray getJSONArray(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value instanceof JSONArray) {
             return (JSONArray) value;
@@ -110,7 +170,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @return {@link JSONObject} or null
      */
     public JSONObject getJSONObject(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value instanceof JSONObject) {
             return (JSONObject) value;
@@ -118,6 +178,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
 
         if (value instanceof String) {
             String str = (String) value;
+
             if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return null;
             }
@@ -143,7 +204,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @return {@link String} or null
      */
     public String getString(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return null;
@@ -165,7 +226,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException         Unsupported type conversion to {@link Double}
      */
     public Double getDouble(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return null;
@@ -201,7 +262,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException         Unsupported type conversion to double value
      */
     public double getDoubleValue(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return 0D;
@@ -233,7 +294,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException         Unsupported type conversion to {@link Float}
      */
     public Float getFloat(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return null;
@@ -269,7 +330,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException         Unsupported type conversion to float value
      */
     public float getFloatValue(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return 0F;
@@ -301,7 +362,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException         Unsupported type conversion to {@link Long}
      */
     public Long getLong(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return null;
@@ -337,7 +398,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException         Unsupported type conversion to long value
      */
     public long getLongValue(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return 0;
@@ -369,7 +430,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException         Unsupported type conversion to {@link Integer}
      */
     public Integer getInteger(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return null;
@@ -405,7 +466,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException         Unsupported type conversion to int value
      */
     public int getIntValue(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return 0;
@@ -437,7 +498,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException         Unsupported type conversion to {@link Short}
      */
     public Short getShort(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return null;
@@ -473,7 +534,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException         Unsupported type conversion to short value
      */
     public short getShortValue(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return 0;
@@ -505,7 +566,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException         Unsupported type conversion to {@link Byte}
      */
     public Byte getByte(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return null;
@@ -537,7 +598,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException         Unsupported type conversion to byte value
      */
     public byte getByteValue(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return 0;
@@ -568,7 +629,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException Unsupported type conversion to {@link Boolean}
      */
     public Boolean getBoolean(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return null;
@@ -603,7 +664,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException Unsupported type conversion to boolean value
      */
     public boolean getBooleanValue(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return false;
@@ -634,7 +695,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws NumberFormatException If the value of get is {@link String} and it is not a valid representation of {@link BigInteger}
      */
     public BigInteger getBigInteger(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return null;
@@ -675,7 +736,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws NumberFormatException If the value of get is {@link String} and it is not a valid representation of {@link BigDecimal}
      */
     public BigDecimal getBigDecimal(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return null;
@@ -720,7 +781,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @return {@link Date} or null
      */
     public Date getDate(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return null;
@@ -748,7 +809,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @return {@link BigInteger} or null
      */
     public Instant getInstant(String key) {
-        Object value = get(key);
+        Object value = super.get(key);
 
         if (value == null) {
             return null;
@@ -837,7 +898,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws JSONException If no suitable conversion method is found
      */
     public <T> T getObject(String key, Type type) {
-        Object value = get(key);
+        Object value = super.get(key);
         if (value == null) {
             return null;
         }
