@@ -2279,6 +2279,9 @@ class JSONReaderUTF8 extends JSONReader {
                     intOverflow = true;
                 } else {
                     mag3 -= digit;
+                    if (mag3 < multmin) {
+                        intOverflow = true;
+                    }
                 }
             }
             if (offset == end) {
@@ -2301,6 +2304,9 @@ class JSONReaderUTF8 extends JSONReader {
                         intOverflow = true;
                     } else {
                         mag3 -= digit;
+                        if (mag3 < multmin) {
+                            intOverflow = true;
+                        }
                     }
                 }
 
