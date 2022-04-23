@@ -603,7 +603,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
 
         if (Map.Entry.class.isAssignableFrom(objectClass)) {
             String objectClassName = objectClass.getName();
-            if (!objectClassName.equals("org.apache.commons.lang3.tuple.ImmutablePair") && !objectClassName.equals("org.apache.commons.lang3.tuple.MutablePair")
+            if (!"org.apache.commons.lang3.tuple.ImmutablePair".equals(objectClassName) && !"org.apache.commons.lang3.tuple.MutablePair".equals(objectClassName)
             ) {
                 return ObjectWriterImplMapEntry.INSTANCE;
             }

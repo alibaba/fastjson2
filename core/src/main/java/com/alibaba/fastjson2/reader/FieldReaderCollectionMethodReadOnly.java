@@ -50,8 +50,8 @@ class FieldReaderCollectionMethodReadOnly<T> extends FieldReaderObjectMethod<T> 
         }
 
         String name = collection.getClass().getName();
-        if (name.equals("java.util.Collections$UnmodifiableRandomAccessList")
-                || name.equals("java.util.Collections$UnmodifiableRandomAccessList")) {
+        if ("java.util.Collections$UnmodifiableRandomAccessList".equals(name)
+                || "java.util.Collections$UnmodifiableRandomAccessList".equals(name)) {
             return;
         }
 

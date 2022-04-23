@@ -100,7 +100,7 @@ public class ObjectWriterProvider {
 
         if (objectWriter == null
                 && objectClass != null
-                && objectClass.getName().equals("com.alibaba.fastjson.JSONObject")
+                && "com.alibaba.fastjson.JSONObject".equals(objectClass.getName())
                 && !fieldBased
         ) {
             objectWriter = ObjectWriterImplMap.of(objectClass);

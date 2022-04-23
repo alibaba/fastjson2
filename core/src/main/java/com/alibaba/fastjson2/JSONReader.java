@@ -1081,11 +1081,11 @@ public abstract class JSONReader implements Closeable {
                 throw new JSONException("can not convert to boolean : " + ch);
             }
             String str = readString();
-            if (str.equalsIgnoreCase("true")) {
+            if ("true".equalsIgnoreCase(str)) {
                 return true;
             }
 
-            if (str.equalsIgnoreCase("false")) {
+            if ("false".equalsIgnoreCase(str)) {
                 return false;
             }
             throw new JSONException("can not convert to boolean : " + str);

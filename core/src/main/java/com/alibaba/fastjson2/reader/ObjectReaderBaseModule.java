@@ -911,7 +911,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return typedMap((Class) type, TreeMap.class, Object.class);
         }
 
-        if (type == Calendar.class || typeName.equals("javax.xml.datatype.XMLGregorianCalendar")) {
+        if (type == Calendar.class || "javax.xml.datatype.XMLGregorianCalendar".equals(typeName)) {
             return CalendarImpl.INSTANCE;
         }
 

@@ -117,7 +117,7 @@ final class ObjectArrayTypedReader extends ObjectReaderBaseModule.PrimitiveImpl 
 
             if (jsonReader.isReference()) {
                 String reference = jsonReader.readReference();
-                if (reference.equals("..")) {
+                if ("..".equals(reference)) {
                     value = values;
                 } else {
                     value = null;

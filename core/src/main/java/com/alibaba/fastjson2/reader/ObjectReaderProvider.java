@@ -111,7 +111,7 @@ public class ObjectReaderProvider {
                 property = property.trim();
             }
 
-            SAFE_MODE = property != null && property.equals("true");
+            SAFE_MODE = property != null && "true".equals(property);
         }
     }
 

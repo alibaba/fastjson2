@@ -153,7 +153,7 @@ class ObjectReaderImplMapTyped implements ObjectReader {
 
             if (jsonReader.isReference()) {
                 String reference = jsonReader.readReference();
-                if (reference.equals("..")) {
+                if ("..".equals(reference)) {
                     object.put(name, object);
                 } else {
                     jsonReader.addResolveTask((Map) object, name, JSONPath.of(reference));

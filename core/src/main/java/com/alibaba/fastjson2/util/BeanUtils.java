@@ -356,7 +356,7 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if ( returnClass == Class.class && methodName.equals("getClass")) {
+            if ( returnClass == Class.class && "getClass".equals(methodName)) {
                 continue;
             }
 

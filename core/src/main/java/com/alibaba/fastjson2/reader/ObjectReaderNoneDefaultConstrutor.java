@@ -151,7 +151,7 @@ class ObjectReaderNoneDefaultConstrutor<T>
                 Long hashCode = entry.getKey();
                 String reference = entry.getValue();
                 FieldReader fieldReader = getFieldReader(hashCode);
-                if (reference.equals("..")) {
+                if ("..".equals(reference)) {
                     fieldReader.accept(object, object);
                     continue;
                 }

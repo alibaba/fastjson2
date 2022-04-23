@@ -82,13 +82,13 @@ public final class ObjectReaderImplMap implements ObjectReader {
 
         Function builder;
         String instanceTypeName = instanceType.getName();
-        if (instanceTypeName.equals("com.alibaba.fastjson.JSONObject")) {
+        if ("com.alibaba.fastjson.JSONObject".equals(instanceTypeName)) {
             builder = Fastjson1xSupport.createObjectSupplier(instanceType);
             instanceType = HashMap.class;
-        } else if (instanceTypeName.equals("com.google.common.collect.RegularImmutableMap")) {
+        } else if ("com.google.common.collect.RegularImmutableMap".equals(instanceTypeName)) {
             builder = GuavaSupport.immutableMapConverter();
             instanceType = HashMap.class;
-        } else if (instanceTypeName.equals("com.google.common.collect.SingletonImmutableBiMap")) {
+        } else if ("com.google.common.collect.SingletonImmutableBiMap".equals(instanceTypeName)) {
             builder = GuavaSupport.singletonBiMapConverter();
             instanceType = HashMap.class;
         } else if (instanceType == JSONObject1O.class) {
@@ -282,7 +282,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
 
                 if (jsonReader.isReference()) {
                     String reference = jsonReader.readReference();
-                    if (reference.equals("..")) {
+                    if ("..".equals(reference)) {
                         map.put(fieldName, map);
                     } else {
                         jsonReader.addResolveTask((Map) map, fieldName, JSONPath.of(reference));
@@ -306,7 +306,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
                     jsonReader.next();
                 } else if (type == BC_REFERENCE) {
                     String reference = jsonReader.readReference();
-                    if (reference.equals("..")) {
+                    if ("..".equals(reference)) {
                         value = map;
                     } else {
                         value = null;

@@ -392,7 +392,7 @@ public class Differ {
                     return false;
                 }
 
-                if (field.getName().equals("this$0")) {
+                if ("this$0".equals(field.getName())) {
                     boolean result = (leftFieldValue != null) == (rightFieldValue != null);
                     if (!result) {
                         if (out != null) {
@@ -523,7 +523,7 @@ public class Differ {
 
         Object leftInnerMap = null;
         Object rightInnerMap = null;
-        if (leftClass.getName().equals("com.alibaba.fastjson.JSONObject")) {
+        if ("com.alibaba.fastjson.JSONObject".equals(leftClass.getName())) {
             Field mapField = BeanUtils.getDeclaredField(leftClass, "map");
             mapField.setAccessible(true);
             try {

@@ -431,7 +431,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes.length == 1) {
-            if (method.getName().equals("equals")) {
+            if ("equals".equals(method.getName())) {
                 return this.equals(args[0]);
             }
 

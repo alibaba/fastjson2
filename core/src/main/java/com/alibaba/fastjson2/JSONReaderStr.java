@@ -3158,9 +3158,9 @@ final class JSONReaderStr extends JSONReader {
                     }
                 }
                 if (zoneIdStr != null) {
-                    if (zoneIdStr.equals("000")) {
+                    if ("000".equals(zoneIdStr)) {
                         zoneId = UTC;
-                    } else if (zoneIdStr.equals("+08:00[Asia/Shanghai]") || zoneIdStr.equals("Asia/Shanghai")) {
+                    } else if ("+08:00[Asia/Shanghai]".equals(zoneIdStr) || "Asia/Shanghai".equals(zoneIdStr)) {
                         zoneId = SHANGHAI;
                     } else {
                         zoneId = ZoneId.of(zoneIdStr);

@@ -927,7 +927,7 @@ public abstract class JSONWriter implements Closeable {
         int len = 17;
 
         int zoneSize;
-        if (zoneId.equals("UTC")) {
+        if ("UTC".equals(zoneId)) {
             zoneId = "Z";
             zoneSize = 1;
         } else {

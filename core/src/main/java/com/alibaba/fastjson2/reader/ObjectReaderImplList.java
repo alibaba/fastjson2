@@ -306,7 +306,7 @@ public final class ObjectReaderImplList implements ObjectReader {
 
                 if (jsonReader.isReference()) {
                     String reference = jsonReader.readReference();
-                    if (reference.equals("..")) {
+                    if ("..".equals(reference)) {
                         item = list;
                     } else {
                         item = null;
@@ -357,7 +357,7 @@ public final class ObjectReaderImplList implements ObjectReader {
 
             if (jsonReader.isReference()) {
                 String reference = jsonReader.readReference();
-                if (reference.equals("..")) {
+                if ("..".equals(reference)) {
                     item = list;
                 } else {
                     jsonReader.addResolveTask(list, i, JSONPath.of(reference));

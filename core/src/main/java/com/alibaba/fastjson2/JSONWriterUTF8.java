@@ -987,7 +987,7 @@ class JSONWriterUTF8 extends JSONWriter {
         int len = 17;
 
         int zoneSize;
-        if (zoneId.equals("UTC")) {
+        if ("UTC".equals(zoneId)) {
             zoneId = "Z";
             zoneSize = 1;
         } else {
