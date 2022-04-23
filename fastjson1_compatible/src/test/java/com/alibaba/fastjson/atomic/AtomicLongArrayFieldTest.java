@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLongArray;
 public class AtomicLongArrayFieldTest {
 
     @Test
-    public void test_codec_null() throws Exception {
+    public void test_codec_null() {
         V0 v = new V0();
 
         SerializeConfig mapping = new SerializeConfig();
@@ -27,7 +27,7 @@ public class AtomicLongArrayFieldTest {
     }
 
     @Test
-    public void test_codec_null_1() throws Exception {
+    public void test_codec_null_1() {
         V0 v = new V0();
 
         SerializeConfig mapping = new SerializeConfig();
@@ -38,7 +38,7 @@ public class AtomicLongArrayFieldTest {
     }
 
     @Test
-    public void test_codec_null_2() throws Exception {
+    public void test_codec_null_2() {
         V0 v = JSON.parseObject("{\"value\":[1,2]}", V0.class);
 
         SerializeConfig mapping = new SerializeConfig();

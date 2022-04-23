@@ -1075,6 +1075,10 @@ public class ObjectReaderCreator {
                 return new FieldReaderAtomicBooleanMethodReadOnly(fieldName, fieldClass, ordinal, method);
             }
 
+            if (fieldClass == AtomicReference.class) {
+                return new FieldReaderAtomicReferenceMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, method);
+            }
+
             if(Collection.class.isAssignableFrom(fieldClass)) {
                 return new FieldReaderCollectionMethodReadOnly(fieldName, fieldType, method);
             }
@@ -1236,6 +1240,14 @@ public class ObjectReaderCreator {
 
         if (fieldClass == Date.class) {
             return new FieldReaderDateField(fieldName, fieldClass, ordinal, features, format, field);
+        }
+
+        if (fieldClass == AtomicBoolean.class) {
+            return new FieldReaderAtomicBooleanFieldReadOnly(fieldName, fieldClass, ordinal, field);
+        }
+
+        if (fieldClass == AtomicReference.class) {
+            return new FieldReaderAtomicReferenceField(fieldName, fieldType, fieldClass, ordinal, field);
         }
 
         Type fieldTypeResolved = null;
