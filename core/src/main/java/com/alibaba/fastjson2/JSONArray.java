@@ -61,6 +61,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return {@link JSONArray} or null
      * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
+    @SuppressWarnings("unchecked")
     public JSONArray getJSONArray(int index) {
         Object value = get(index);
 
@@ -96,6 +97,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return {@link JSONObject} or null
      * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public JSONObject getJSONObject(int index) {
         Object value = get(index);
 
@@ -780,6 +782,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return JSON {@link String}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
             if (arrayWriter == null) {
@@ -807,10 +810,11 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param type specify the {@link Type} to be converted
      */
+    @SuppressWarnings("unchecked")
     public <T> T toJavaObject(Type type) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader objectReader = provider.getObjectReader(type);
-        return (T) objectReader.createInstance(this);
+        ObjectReader<T> objectReader = provider.getObjectReader(type);
+        return objectReader.createInstance(this);
     }
 
     /**
@@ -825,18 +829,20 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param clazz specify the {@link Class<T>} to be converted
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> List<T> toJavaList(Class<T> clazz) {
-        List<T> list = new ArrayList<>(size());
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader objectReader = provider.getObjectReader(clazz);
+        ObjectReader<?> objectReader = provider.getObjectReader(clazz);
 
+        List<T> list = new ArrayList<>(size());
         for (Object item : this) {
             T classItem;
             if (item instanceof Map) {
                 classItem = (T) objectReader.createInstance((Map) item);
-                System.out.println(item);
             } else {
-                throw new JSONException("TODO");
+                throw new JSONException(
+                    (item == null ? "null" : item.getClass()) + " cannot be converted to " + clazz
+                );
             }
             list.add(classItem);
         }
@@ -857,8 +863,10 @@ public class JSONArray extends ArrayList<Object> {
      * @throws JSONException             If no suitable conversion method is found
      * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> T getObject(int index, Type type) {
         Object value = get(index);
+
         if (value == null) {
             return null;
         }
@@ -866,20 +874,19 @@ public class JSONArray extends ArrayList<Object> {
         Class<?> valueClass = value.getClass();
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         Function typeConvert = provider.getTypeConvert(valueClass, type);
+
         if (typeConvert != null) {
             return (T) typeConvert.apply(value);
         }
 
         if (value instanceof Map) {
-            Map map = (Map) value;
-
-            ObjectReader objectReader = provider.getObjectReader(type);
-            return (T) objectReader.createInstance(map);
+            ObjectReader<T> objectReader = provider.getObjectReader(type);
+            return objectReader.createInstance((Map) value);
         }
 
         if (value instanceof Collection) {
-            ObjectReader objectReader = provider.getObjectReader(type);
-            return (T) objectReader.createInstance((Collection) value);
+            ObjectReader<T> objectReader = provider.getObjectReader(type);
+            return objectReader.createInstance((Collection) value);
         }
 
         Class clazz = TypeUtils.getMapping(type);
@@ -887,7 +894,7 @@ public class JSONArray extends ArrayList<Object> {
             return (T) value;
         }
 
-        throw new JSONException("can not convert from " + valueClass + " to " + type);
+        throw new JSONException("Can not convert from " + valueClass + " to " + type);
     }
 
     /**

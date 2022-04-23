@@ -66,6 +66,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @param map the map whose mappings are to be placed in this map
      * @throws NullPointerException If the specified map is null
      */
+    @SuppressWarnings("unchecked")
     public JSONObject(Map map) {
         super(map);
     }
@@ -136,6 +137,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @param key the key whose associated value is to be returned
      * @return {@link JSONArray} or null
      */
+    @SuppressWarnings("unchecked")
     public JSONArray getJSONArray(String key) {
         Object value = super.get(key);
 
@@ -170,6 +172,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @param key the key whose associated value is to be returned
      * @return {@link JSONObject} or null
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public JSONObject getJSONObject(String key) {
         Object value = super.get(key);
 
@@ -837,6 +840,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @return JSON {@link String}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
             if (objectWriter == null) {
@@ -865,10 +869,11 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param type specify the {@link Type} to be converted
      */
+    @SuppressWarnings("unchecked")
     public <T> T toJavaObject(Type type) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader objectReader = provider.getObjectReader(type);
-        return (T) objectReader.createInstance(this);
+        ObjectReader<T> objectReader = provider.getObjectReader(type);
+        return objectReader.createInstance(this);
     }
 
     /**
@@ -880,10 +885,11 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      *
      * @param clazz specify the {@link Class<T>} to be converted
      */
+    @SuppressWarnings("unchecked")
     public <T> T toJavaObject(Class<T> clazz) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader objectReader = provider.getObjectReader(clazz);
-        return (T) objectReader.createInstance(this);
+        ObjectReader<T> objectReader = provider.getObjectReader(clazz);
+        return objectReader.createInstance(this);
     }
 
     /**
@@ -898,8 +904,10 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @return <T> or null
      * @throws JSONException If no suitable conversion method is found
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> T getObject(String key, Type type) {
         Object value = super.get(key);
+
         if (value == null) {
             return null;
         }
@@ -912,15 +920,13 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         }
 
         if (value instanceof Map) {
-            Map map = (Map) value;
-
-            ObjectReader objectReader = provider.getObjectReader(type);
-            return (T) objectReader.createInstance(map);
+            ObjectReader<T> objectReader = provider.getObjectReader(type);
+            return objectReader.createInstance((Map) value);
         }
 
         if (value instanceof Collection) {
-            ObjectReader objectReader = provider.getObjectReader(type);
-            return (T) objectReader.createInstance((Collection) value);
+            ObjectReader<T> objectReader = provider.getObjectReader(type);
+            return objectReader.createInstance((Collection) value);
         }
 
         Class clazz = TypeUtils.getMapping(type);
@@ -929,8 +935,9 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         }
 
         String json = JSON.toJSONString(value);
-        ObjectReader objectReader = provider.getObjectReader(clazz);
         JSONReader jsonReader = JSONReader.of(json);
+
+        ObjectReader objectReader = provider.getObjectReader(clazz);
         return (T) objectReader.readObject(jsonReader);
     }
 
@@ -942,6 +949,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      * @throws ArrayIndexOutOfBoundsException If the length of args does not match the length of the method parameter
      */
     @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final String methodName = method.getName();
         Class<?>[] parameterTypes = method.getParameterTypes();
@@ -994,20 +1002,38 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
                 }
             }
 
+            Object value;
             if (name == null) {
                 name = methodName;
                 if (name.startsWith("get")) {
                     name = name.substring(3);
-                    if (name.length() == 0) {
+                    if (name.isEmpty()) {
                         throw new JSONException("This method '" + methodName + "' is an illegal getter");
                     }
                     name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+
+                    value = get(name);
+                    if (value == null) {
+                        return null;
+                    }
                 } else if (name.startsWith("is")) {
-                    name = name.substring(2);
-                    if (name.length() == 0) {
-                        throw new JSONException("This method '" + methodName + "' is an illegal getter");
+                    if (name.equals("isEmpty")) {
+                        value = get("empty");
+                        if (value == null) {
+                            return this.isEmpty();
+                        }
+                    } else {
+                        name = name.substring(2);
+                        if (name.isEmpty()) {
+                            throw new JSONException("This method '" + methodName + "' is an illegal getter");
+                        }
+                        name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
+
+                        value = get(name);
+                        if (value == null) {
+                            return false;
+                        }
                     }
-                    name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
                 } else if (name.equals("hashCode")) {
                     return this.hashCode();
                 } else if (name.equals("toString")) {
@@ -1019,19 +1045,19 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
                 } else {
                     throw new JSONException("This method '" + methodName + "' is not a getter");
                 }
-            }
-
-            Object value = get(name);
-            if (value == null && methodName.equals("isEmpty")) {
-                return this.isEmpty();
+            } else {
+                value = get(name);
+                if (value == null) {
+                    return null;
+                }
             }
 
             Function typeConvert = JSONFactory
                 .getDefaultObjectReaderProvider()
                 .getTypeConvert(
-                    value.getClass(),
-                    method.getGenericReturnType()
+                    value.getClass(), method.getGenericReturnType()
                 );
+
             if (typeConvert != null) {
                 return typeConvert.apply(value);
             }

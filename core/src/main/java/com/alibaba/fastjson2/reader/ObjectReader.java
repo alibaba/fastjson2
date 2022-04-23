@@ -9,81 +9,106 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.util.*;
 import java.util.function.Function;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface ObjectReader<T> {
+
     long HASH_TYPE = Fnv.hashCode64("@type");
 
-    default Class getObjectClass() {
-        return null;
-    }
-
-    default long getFeatures() {
-        return 0;
-    }
-
+    /**
+     * @return {@link T}
+     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     */
     default T createInstance() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @return {@link T}
+     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     */
     default T createInstance(Collection collection) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @return {@link T}
+     * @throws JSONException If a suitable ObjectReader is not found
+     */
     default T createInstance(Map map) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        Object typeKey = map.get(getTypeKey());
 
-        Object typeKeyValue = map.get(getTypeKey());
-        if (typeKeyValue instanceof String) {
-            String typeName = (String) typeKeyValue;
+        if (typeKey instanceof String) {
+            String typeName = (String) typeKey;
             long typeHash = Fnv.hashCode64(typeName);
-            ObjectReader autoTypeObjectReader = autoType(provider, typeHash);
+            ObjectReader<T> reader = autoType(provider, typeHash);
 
-            if (autoTypeObjectReader == null) {
-                autoTypeObjectReader = provider.getObjectReader(typeName, getObjectClass(), getFeatures());
+            if (reader == null) {
+                reader = provider.getObjectReader(
+                    typeName, getObjectClass(), getFeatures()
+                );
 
-                if (autoTypeObjectReader == null) {
-                    throw new JSONException("auotype not support : " + typeName);
+                if (reader == null) {
+                    throw new JSONException("No suitable ObjectReader found for" + typeName);
                 }
             }
 
-            if (autoTypeObjectReader != this) {
-                return (T) autoTypeObjectReader.createInstance(map);
+            if (reader != this) {
+                return reader.createInstance(map);
             }
         }
 
-        Object object = createInstance();
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
-            Map.Entry entry = it.next();
-            String fieldName = entry.getKey().toString();
+        T object = createInstance();
+        for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
+            FieldReader fieldReader = getFieldReader(
+                entry.getKey().toString()
+            );
+            if (fieldReader == null) continue;
+
             Object fieldValue = entry.getValue();
+            Class fieldClass = fieldReader.getFieldClass();
 
-            FieldReader fieldReader = getFieldReader(fieldName);
-            if (fieldReader != null) {
-                Class fieldClass = fieldReader.getFieldClass();
-                if (fieldValue != null) {
-                    Class<?> valueClass = fieldValue.getClass();
-                    if (valueClass != fieldClass) {
-                        Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
-                        if (typeConvert != null) {
-                            fieldValue = typeConvert.apply(fieldValue);
-                        }
+            if (fieldValue != null) {
+                Class<?> valueClass = fieldValue.getClass();
+
+                if (valueClass != fieldClass) {
+                    Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+
+                    if (typeConvert != null) {
+                        fieldValue = typeConvert.apply(fieldValue);
                     }
                 }
-
-                if (!fieldClass.isInstance(fieldValue)) {
-                    if (fieldReader.getFormat() == null) {
-                        fieldValue = TypeUtils.cast(fieldValue, fieldClass);
-                    }
-                }
-
-                fieldReader.accept(object, fieldValue);
             }
+
+            if (!fieldClass.isInstance(fieldValue)) {
+                if (fieldReader.getFormat() == null) {
+                    fieldValue = TypeUtils.cast(fieldValue, fieldClass);
+                }
+            }
+
+            fieldReader.accept(object, fieldValue);
         }
 
         Function buildFunction = getBuildFunction();
         if (buildFunction != null) {
             return (T) buildFunction.apply(object);
         }
-        return (T) object;
+
+        return object;
+    }
+
+    /**
+     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     */
+    default T createInstanceNoneDefaultConstructor(Map<Long, Object> values) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Features enabled by ObjectReader
+     */
+    default long getFeatures() {
+        return 0L;
     }
 
     default String getTypeKey() {
@@ -94,11 +119,15 @@ public interface ObjectReader<T> {
         return HASH_TYPE;
     }
 
-    default T createInstanceNoneDefaultConstructor(Map<Long, Object> values) {
-        throw new UnsupportedOperationException();
+    default Class<T> getObjectClass() {
+        return null;
     }
 
     default FieldReader getFieldReader(long hashCode) {
+        return null;
+    }
+
+    default FieldReader getFieldReaderLCase(long hashCode) {
         return null;
     }
 
@@ -120,90 +149,26 @@ public interface ObjectReader<T> {
         return true;
     }
 
-    default FieldReader getFieldReaderLCase(long hashCode) {
-        return null;
-    }
-
     default FieldReader getFieldReader(String fieldName) {
-        FieldReader fieldReader = getFieldReader(Fnv.hashCode64(fieldName));
+        FieldReader fieldReader = getFieldReader(
+            Fnv.hashCode64(fieldName)
+        );
+
         if (fieldReader == null) {
             String fieldNameLCase = fieldName.toLowerCase();
+
             if (!fieldNameLCase.equals(fieldName)) {
-                fieldReader = getFieldReader(Fnv.hashCode64(fieldNameLCase));
+                fieldReader = getFieldReader(
+                    Fnv.hashCode64(fieldNameLCase)
+                );
             }
         }
+
         return fieldReader;
     }
 
-    default T readJSONBObject(JSONReader jsonReader, long features) {
-        if (jsonReader.isArray()
-                && jsonReader.isSupportBeanArray()) {
-            return readArrayMappingJSONBObject(jsonReader);
-        }
-
-        jsonReader.nextIfObjectStart();
-
-        Object object = null;
-        for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfObjectEnd()) {
-                break;
-            }
-
-            long hash = jsonReader.readFieldNameHashCode();
-            if (hash == getTypeKeyHash() && i == 0) {
-                long typeHash = jsonReader.readTypeHashCode();
-                JSONReader.Context context = jsonReader.getContext();
-                ObjectReader autoTypeObjectReader = autoType(context, typeHash);
-                if (autoTypeObjectReader == null) {
-                    String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
-
-                    if (autoTypeObjectReader == null) {
-                        throw new JSONException("auotype not support : " + typeName);
-                    }
-                }
-
-                if (autoTypeObjectReader == this) {
-                    continue;
-                }
-
-                return (T) autoTypeObjectReader.readJSONBObject(jsonReader, features);
-            }
-
-            if (hash == 0) {
-                continue;
-            }
-            
-            FieldReader fieldReader = getFieldReader(hash);
-            if (fieldReader == null && jsonReader.isSupportSmartMatch(features | this.getFeatures())) {
-                long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
-                if (nameHashCodeLCase != hash) {
-                    fieldReader = getFieldReaderLCase(nameHashCodeLCase);
-                }
-            }
-            if (fieldReader == null) {
-                jsonReader.skipValue();
-                continue;
-            }
-
-            if (object == null) {
-                object = createInstance();
-            }
-            fieldReader.readFieldValue(jsonReader, object);
-        }
-
-        if (object == null) {
-            object = createInstance();
-        }
-        return (T) object;
-    }
-
-    default T readArrayMappingJSONBObject(JSONReader jsonReader) {
-        throw new UnsupportedOperationException();
-    }
-
-    default T readArrayMappingObject(JSONReader jsonReader) {
-        throw new UnsupportedOperationException();
+    default Function getBuildFunction() {
+        return null;
     }
 
     default ObjectReader autoType(JSONReader.Context context, long typeHash) {
@@ -214,28 +179,115 @@ public interface ObjectReader<T> {
         return provider.getObjectReader(typeHash);
     }
 
-    default Function getBuildFunction() {
-        return null;
+    /**
+     * @return {@link T}
+     * @throws JSONException If a suitable ObjectReader is not found
+     */
+    default T readJSONBObject(JSONReader jsonReader, long features) {
+        if (jsonReader.isArray() &&
+            jsonReader.isSupportBeanArray()) {
+            return readArrayMappingJSONBObject(jsonReader);
+        }
+
+        T object = null;
+        jsonReader.nextIfObjectStart();
+
+        for (int i = 0; ; ++i) {
+            if (jsonReader.nextIfObjectEnd()) break;
+            long hash = jsonReader.readFieldNameHashCode();
+
+            if (hash == getTypeKeyHash() && i == 0) {
+                long typeHash = jsonReader.readTypeHashCode();
+                JSONReader.Context context = jsonReader.getContext();
+                ObjectReader reader = autoType(context, typeHash);
+
+                if (reader == null) {
+                    String typeName = jsonReader.getString();
+                    reader = context.getObjectReaderAutoType(typeName, null);
+
+                    if (reader == null) {
+                        throw new JSONException("No suitable ObjectReader found for" + typeName);
+                    }
+                }
+
+                if (reader == this) {
+                    continue;
+                }
+
+                return (T) reader.readJSONBObject(jsonReader, features);
+            }
+
+            if (hash == 0) {
+                continue;
+            }
+
+            FieldReader fieldReader = getFieldReader(hash);
+            if (fieldReader == null && jsonReader.isSupportSmartMatch(features | getFeatures())) {
+                long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
+
+                if (nameHashCodeLCase != hash) {
+                    fieldReader = getFieldReaderLCase(nameHashCodeLCase);
+                }
+            }
+
+            if (fieldReader == null) {
+                jsonReader.skipValue();
+                continue;
+            }
+
+            if (object == null) {
+                object = createInstance();
+            }
+
+            fieldReader.readFieldValue(jsonReader, object);
+        }
+
+        if (object == null) {
+            object = createInstance();
+        }
+
+        return object;
     }
 
+    /**
+     * @return {@link T}
+     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     */
+    default T readArrayMappingJSONBObject(JSONReader jsonReader) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return {@link T}
+     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     */
+    default T readArrayMappingObject(JSONReader jsonReader) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return {@link T}
+     */
     default T readObject(JSONReader jsonReader) {
         return readObject(jsonReader, getFeatures());
     }
 
+    /**
+     * @return {@link T}
+     * @throws JSONException If a suitable ObjectReader is not found
+     */
     default T readObject(JSONReader jsonReader, long features) {
         if (jsonReader.isJSONB()) {
             return readJSONBObject(jsonReader, features);
         }
 
-        if (jsonReader.isArray()
-                && jsonReader.isSupportBeanArray(getFeatures() | features)) {
+        if (jsonReader.isArray() && jsonReader.isSupportBeanArray(getFeatures() | features)) {
             return readArrayMappingObject(jsonReader);
         }
 
+        T object = null;
         jsonReader.nextIfMatch('{');
 
-
-        Object object = null;
         for (int i = 0; ; i++) {
             if (jsonReader.nextIfMatch('}')) {
                 if (object == null) {
@@ -244,39 +296,44 @@ public interface ObjectReader<T> {
                 break;
             }
 
-            long hash = jsonReader.readFieldNameHashCode();
-            long features3;
-            if (hash == getTypeKeyHash()
-                    && i == 0
-                    && ((features3 = (features | getFeatures() | jsonReader.getContext().getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0
+            long features3, hash = jsonReader.readFieldNameHashCode();
+            if (hash == getTypeKeyHash() && i == 0 &&
+                ((features3 = (features | getFeatures() | jsonReader.getContext().getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0
             ) {
                 long typeHash = jsonReader.readTypeHashCode();
-                String typeName = null;
                 JSONReader.Context context = jsonReader.getContext();
-                ObjectReader autoTypeObjectReader = autoType(context, typeHash);
-                if (autoTypeObjectReader == null) {
-                    typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, getObjectClass(), features3);
+                ObjectReader reader = autoType(context, typeHash);
 
-                    if (autoTypeObjectReader == null) {
-                        throw new JSONException("auotype not support : " + typeName);
+                String typeName = null;
+                if (reader == null) {
+                    typeName = jsonReader.getString();
+                    reader = context.getObjectReaderAutoType(
+                        typeName, getObjectClass(), features3
+                    );
+
+                    if (reader == null) {
+                        throw new JSONException("No suitable ObjectReader found for" + typeName);
                     }
                 }
 
-                if (autoTypeObjectReader == this) {
+                if (reader == this) {
                     continue;
                 }
 
-                FieldReader typeFieldReader = autoTypeObjectReader.getFieldReader(hash);
-                if (typeFieldReader != null && typeName == null) {
+                FieldReader fieldReader = reader.getFieldReader(hash);
+                if (fieldReader != null && typeName == null) {
                     typeName = jsonReader.getString();
                 }
 
-                object = autoTypeObjectReader.readObject(jsonReader, features | getFeatures());
-                if (typeFieldReader != null) {
-                    typeFieldReader.accept(object, typeName);
+                object = (T) reader.readObject(
+                    jsonReader, features | getFeatures()
+                );
+
+                if (fieldReader != null) {
+                    fieldReader.accept(object, typeName);
                 }
-                return (T) object;
+
+                return object;
             }
 
             FieldReader fieldReader = getFieldReader(hash);
@@ -284,6 +341,7 @@ public interface ObjectReader<T> {
                 long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
                 fieldReader = getFieldReaderLCase(nameHashCodeLCase);
             }
+
             if (fieldReader == null) {
                 jsonReader.skipValue();
                 continue;
@@ -303,6 +361,6 @@ public interface ObjectReader<T> {
             return (T) buildFunction.apply(object);
         }
 
-        return (T) object;
+        return object;
     }
 }
