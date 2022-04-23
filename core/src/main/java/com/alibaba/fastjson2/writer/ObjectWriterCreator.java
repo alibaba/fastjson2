@@ -452,6 +452,14 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == Date.class) {
+            if (format != null) {
+                format = format.trim();
+
+                if (format.isEmpty()) {
+                    format = null;
+                }
+            }
+
             if ("unwrapped".equals(format)) {
                 format = null;
             }
