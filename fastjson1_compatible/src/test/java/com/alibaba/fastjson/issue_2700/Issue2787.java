@@ -35,9 +35,9 @@ public class Issue2787 {
 
             Pageable pageRequest = PageRequest.of(0, 10, Sort.Direction.DESC, "id");
             SerializeConfig config = new SerializeConfig();
-            //        config.register(new MyModule());
+//                    config.register(new MyModule());
             String result = JSON.toJSONString(pageRequest, config);
-            assertTrue(result.indexOf("\"property\":\"id, desc\"") != -1);
+            assertTrue(result.indexOf("\"property\":\"id\"") != -1);
         }
 
         public class MyModule implements Module {
