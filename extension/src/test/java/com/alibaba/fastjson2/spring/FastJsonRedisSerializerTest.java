@@ -6,19 +6,21 @@ import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import com.alibaba.fastjson2.support.spring.data.redis.FastJsonRedisSerializer;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNull;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.serializer.SerializationException;
 
 import java.util.Arrays;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class FastJsonRedisSerializerTest {
 
     private FastJsonRedisSerializer<User> serializer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.serializer = new FastJsonRedisSerializer<User>(User.class);
     }
@@ -26,24 +28,24 @@ public class FastJsonRedisSerializerTest {
     @Test
     public void test_1() {
         User user = serializer.deserialize(serializer.serialize(new User(1, "土豆", 25)));
-        Assert.assertTrue(user.getId().equals(1));
-        Assert.assertTrue(user.getName().equals("土豆"));
-        Assert.assertTrue(user.getAge().equals(25));
+        assertTrue(user.getId().equals(1));
+        assertTrue(user.getName().equals("土豆"));
+        assertTrue(user.getAge().equals(25));
     }
 
     @Test
     public void test_2() {
-        Assert.assertThat(serializer.serialize(null), Is.is(new byte[0]));
+        assertThat(serializer.serialize(null), Is.is(new byte[0]));
     }
 
     @Test
     public void test_3() {
-        Assert.assertThat(serializer.deserialize(new byte[0]), IsNull.nullValue());
+        assertThat(serializer.deserialize(new byte[0]), IsNull.nullValue());
     }
 
     @Test
     public void test_4() {
-        Assert.assertThat(serializer.deserialize(null), IsNull.nullValue());
+        assertThat(serializer.deserialize(null), IsNull.nullValue());
     }
 
     @Test
@@ -51,7 +53,7 @@ public class FastJsonRedisSerializerTest {
         User user = new User(1, "土豆", 25);
         byte[] serializedValue = serializer.serialize(user);
         Arrays.sort(serializedValue); // corrupt serialization result
-        Assert.assertThrows(SerializationException.class, () -> serializer.deserialize(serializedValue));
+        assertThrows(SerializationException.class, () -> serializer.deserialize(serializedValue));
     }
 
     /**
@@ -65,7 +67,7 @@ public class FastJsonRedisSerializerTest {
         fastJsonConfig.setWriterFeatures(JSONWriter.Feature.WriteClassName);
 
         FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(Object.class);
-        Assert.assertNotNull(fastJsonRedisSerializer.getFastJsonConfig());
+        assertNotNull(fastJsonRedisSerializer.getFastJsonConfig());
         fastJsonRedisSerializer.setFastJsonConfig(fastJsonConfig);
 
         User userSer = new User(1, "土豆", 25);
@@ -73,7 +75,7 @@ public class FastJsonRedisSerializerTest {
         byte[] serializedValue = fastJsonRedisSerializer.serialize(userSer);
         User userDes = (User) fastJsonRedisSerializer.deserialize(serializedValue);
 
-        Assert.assertEquals(userDes.getName(), "土豆");
+        assertEquals(userDes.getName(), "土豆");
     }
 
     static class User {

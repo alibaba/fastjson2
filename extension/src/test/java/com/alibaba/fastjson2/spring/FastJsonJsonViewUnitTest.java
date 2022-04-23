@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.spring;
 
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import com.alibaba.fastjson2.support.spring.web.view.FastJsonJsonView;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -11,6 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FastJsonJsonViewUnitTest {
 
@@ -46,7 +47,7 @@ public class FastJsonJsonViewUnitTest {
 
         FastJsonJsonView view = new FastJsonJsonView();
 
-        Assert.assertNotNull(view.getFastJsonConfig());
+        assertNotNull(view.getFastJsonConfig());
         view.setFastJsonConfig(new FastJsonConfig());
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -61,7 +62,7 @@ public class FastJsonJsonViewUnitTest {
         view.render(model, request, response);
 
         view.setExtractValueFromSingleKeyModel(true);
-        Assert.assertEquals(true, view.isExtractValueFromSingleKeyModel());
+        assertEquals(true, view.isExtractValueFromSingleKeyModel());
 
         view.setDisableCaching(true);
         view.render(Collections.singletonMap("abc", "cde"), request, response);
@@ -72,7 +73,7 @@ public class FastJsonJsonViewUnitTest {
     public void test_jsonp() throws Exception {
         FastJsonJsonView view = new FastJsonJsonView();
 
-        Assert.assertNotNull(view.getFastJsonConfig());
+        assertNotNull(view.getFastJsonConfig());
         view.setFastJsonConfig(new FastJsonConfig());
         view.setExtractValueFromSingleKeyModel(true);
         view.setDisableCaching(true);
@@ -82,21 +83,21 @@ public class FastJsonJsonViewUnitTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
 
-        Assert.assertEquals(true, view.isExtractValueFromSingleKeyModel());
+        assertEquals(true, view.isExtractValueFromSingleKeyModel());
 
 
         view.render(Collections.singletonMap("abc", "cde中文"), request, response);
         String contentAsString = response.getContentAsString();
         int contentLength = response.getContentLength();
 
-        Assert.assertEquals(contentLength, contentAsString.getBytes(view.getFastJsonConfig().getCharset().name()).length);
+        assertEquals(contentLength, contentAsString.getBytes(view.getFastJsonConfig().getCharset().name()).length);
     }
 
     @Test
     public void test_jsonp_invalidParam() throws Exception {
         FastJsonJsonView view = new FastJsonJsonView();
 
-        Assert.assertNotNull(view.getFastJsonConfig());
+        assertNotNull(view.getFastJsonConfig());
         view.setFastJsonConfig(new FastJsonConfig());
         view.setExtractValueFromSingleKeyModel(true);
         view.setDisableCaching(true);
@@ -105,10 +106,10 @@ public class FastJsonJsonViewUnitTest {
         request.addParameter("callback", "-methodName");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        Assert.assertEquals(true, view.isExtractValueFromSingleKeyModel());
+        assertEquals(true, view.isExtractValueFromSingleKeyModel());
 
         view.render(Collections.singletonMap("doesn't matter", Collections.singletonMap("abc", "cde中文")), request, response);
         String contentAsString = response.getContentAsString();
-        Assert.assertTrue(contentAsString.startsWith("{\"abc\":\"cde中文\"}"));
+        assertTrue(contentAsString.startsWith("{\"abc\":\"cde中文\"}"));
     }
 }

@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.spring;
 
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -31,7 +30,7 @@ public class FastJsonHttpMessageConverterUnitTest {
 
         messageConverter.setSupportedMediaTypes(Arrays
                 .asList(new MediaType[]{MediaType.APPLICATION_JSON}));
-        Assert.assertEquals(1, messageConverter.getSupportedMediaTypes().size());
+        assertEquals(1, messageConverter.getSupportedMediaTypes().size());
 
         Method method = FastJsonHttpMessageConverter.class.getDeclaredMethod(
                 "supports", Class.class);
