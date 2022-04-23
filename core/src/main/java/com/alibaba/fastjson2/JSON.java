@@ -26,7 +26,7 @@ public interface JSON {
      */
     static Object parse(String text) {
         JSONReader reader = JSONReader.of(text);
-        ObjectReader objectReader = reader.getObjectReader(Object.class);
+        ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
         return objectReader.readObject(reader, 0);
     }
 
@@ -38,8 +38,8 @@ public interface JSON {
      */
     static Object parse(String text, JSONReader.Feature... features) {
         JSONReader reader = JSONReader.of(text);
-        reader.getContext().config(features);
-        ObjectReader objectReader = reader.getObjectReader(Object.class);
+        reader.context.config(features);
+        ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
         return objectReader.readObject(reader, 0);
     }
 
@@ -48,6 +48,7 @@ public interface JSON {
      *
      * @param text the JSON {@link String} to be parsed
      */
+    @SuppressWarnings("unchecked")
     static JSONObject parseObject(String text) {
         JSONReader reader = JSONReader.of(text);
         ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
@@ -59,6 +60,7 @@ public interface JSON {
      *
      * @param bytes UTF8 encoded JSON byte array to parse
      */
+    @SuppressWarnings("unchecked")
     static JSONObject parseObject(byte[] bytes) {
         JSONReader reader = JSONReader.of(bytes);
         ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
@@ -66,42 +68,45 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into Java object
+     * Parse JSON {@link String} into Java Object
      *
      * @param text  the JSON {@link String} to be parsed
      * @param clazz specify the Class to be converted
      */
+    @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz) {
         JSONReader reader = JSONReader.of(text);
         JSONReader.Context context = reader.context;
 
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
-        ObjectReader objectReader = context.provider.getObjectReader(clazz, fieldBased);
-        return (T) objectReader.readObject(reader, 0);
+        ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
+        return objectReader.readObject(reader, 0);
     }
 
     /**
-     * Parse JSON {@link String} into Java object
+     * Parse JSON {@link String} into Java Object
      *
      * @param text the JSON {@link String} to be parsed
      * @param type specify the {@link Type} to be converted
      */
+    @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type) {
         JSONReader reader = JSONReader.of(text);
-        ObjectReader objectReader = reader.context.provider.getObjectReader(type);
-        return (T) objectReader.readObject(reader, 0);
+        ObjectReader<T> objectReader = reader.context.provider.getObjectReader(type);
+        return objectReader.readObject(reader, 0);
     }
 
     /**
-     * Parse JSON {@link String} into Java object
+     * Parse JSON {@link String} into Java Object
      *
      * @param text          the JSON {@link String} to be parsed
      * @param typeReference specify the {@link TypeReference} to be converted
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> T parseObject(String text, TypeReference typeReference) {
         JSONReader reader = JSONReader.of(text);
-        ObjectReader objectReader = reader.context.provider.getObjectReader(typeReference.getType());
-        return (T) objectReader.readObject(reader, 0);
+        ObjectReader<T> objectReader = reader.context.provider.getObjectReader(typeReference.getType());
+        return objectReader.readObject(reader, 0);
     }
 
     /**
@@ -111,16 +116,16 @@ public interface JSON {
      * @param clazz    specify the Class to be converted
      * @param features features to be enabled in parsing
      */
+    @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, JSONReader.Feature... features) {
         JSONReader reader = JSONReader.of(text);
 
         JSONReader.Context context = reader.context;
         context.config(features);
-
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
 
-        ObjectReader objectReader = context.provider.getObjectReader(clazz, fieldBased);
-        return (T) objectReader.readObject(reader, 0);
+        ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
+        return objectReader.readObject(reader, 0);
     }
 
     /**
@@ -131,6 +136,7 @@ public interface JSON {
      * @param format   the specified date format
      * @param features features to be enabled in parsing
      */
+    @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, String format, JSONReader.Feature... features) {
         JSONReader reader = JSONReader.of(text);
 
@@ -140,8 +146,8 @@ public interface JSON {
         }
         context.config(features);
 
-        ObjectReader objectReader = context.provider.getObjectReader(clazz);
-        return (T) objectReader.readObject(reader, 0);
+        ObjectReader<T> objectReader = context.provider.getObjectReader(clazz);
+        return objectReader.readObject(reader, 0);
     }
 
     /**
@@ -151,11 +157,12 @@ public interface JSON {
      * @param type     specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
+    @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type, JSONReader.Feature... features) {
         JSONReader reader = JSONReader.of(text);
-        reader.getContext().config(features);
-        ObjectReader objectReader = reader.getObjectReader(type);
-        return (T) objectReader.readObject(reader, 0);
+        reader.context.config(features);
+        ObjectReader<T> objectReader = reader.getObjectReader(type);
+        return objectReader.readObject(reader, 0);
     }
 
     /**
@@ -164,10 +171,11 @@ public interface JSON {
      * @param bytes UTF8 encoded JSON byte array to parse
      * @param type  specify the {@link Type} to be converted
      */
+    @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type) {
         JSONReader reader = JSONReader.of(bytes);
-        ObjectReader objectReader = reader.getObjectReader(type);
-        return (T) objectReader.readObject(reader, 0);
+        ObjectReader<T> objectReader = reader.getObjectReader(type);
+        return objectReader.readObject(reader, 0);
     }
 
     /**
@@ -176,10 +184,11 @@ public interface JSON {
      * @param bytes UTF8 encoded JSON byte array to parse
      * @param clazz specify the Class to be converted
      */
+    @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Class<T> clazz) {
         JSONReader reader = JSONReader.of(bytes);
-        ObjectReader objectReader = reader.getObjectReader(clazz);
-        return (T) objectReader.readObject(reader, 0);
+        ObjectReader<T> objectReader = reader.getObjectReader(clazz);
+        return objectReader.readObject(reader, 0);
     }
 
     /**
@@ -189,15 +198,16 @@ public interface JSON {
      * @param type     specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
+    @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type, JSONReader.Feature... features) {
         JSONReader reader = JSONReader.of(bytes);
         reader.getContext().config(features);
-        ObjectReader objectReader = reader.getObjectReader(type);
-        return (T) objectReader.readObject(reader, 0);
+        ObjectReader<T> objectReader = reader.getObjectReader(type);
+        return objectReader.readObject(reader, 0);
     }
 
     /**
-     * Parses the JSON byte array of the specified {@link Charset} into a Java object
+     * Parses the JSON byte array of the specified {@link Charset} into a Java Object
      *
      * @param bytes   JSON byte array to parse
      * @param offset  the index of the first byte to parse
@@ -206,10 +216,11 @@ public interface JSON {
      * @param type    specify the {@link Type} to be converted
      * @throws IndexOutOfBoundsException If the offset and the length arguments index characters outside the bounds of the bytes array
      */
+    @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, int offset, int length, Charset charset, Type type) {
         JSONReader reader = JSONReader.of(bytes, offset, length, charset);
-        ObjectReader objectReader = reader.getObjectReader(type);
-        return (T) objectReader.readObject(reader, 0);
+        ObjectReader<T> objectReader = reader.getObjectReader(type);
+        return objectReader.readObject(reader, 0);
     }
 
     /**
@@ -217,6 +228,7 @@ public interface JSON {
      *
      * @param text the JSON {@link String} to be parsed
      */
+    @SuppressWarnings("unchecked")
     static JSONArray parseArray(String text) {
         JSONReader reader = JSONReader.of(text);
         ObjectReader<JSONArray> objectReader = reader.getObjectReader(JSONArray.class);
@@ -224,7 +236,7 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into Java object
+     * Parse JSON {@link String} into {@link List}
      *
      * @param text the JSON {@link String} to be parsed
      * @param type specify the {@link Type} to be converted
@@ -235,21 +247,25 @@ public interface JSON {
         return reader.read(paramType);
     }
 
-
     /**
-     * Parse JSON {@link String} into Java object
+     * Parse JSON {@link String} into {@link List}
      *
      * @param text  the JSON {@link String} to be parsed
      * @param types specify some {@link Type}s to be converted
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> List<T> parseArray(String text, Type[] types) {
         List array = new JSONArray(types.length);
-        JSONReader jsonReader = JSONReader.of(text);
-        jsonReader.startArray();
+        JSONReader reader = JSONReader.of(text);
+
+        reader.startArray();
         for (Type itemType : types) {
-            array.add(jsonReader.read(itemType));
+            array.add(
+                reader.read(itemType)
+            );
         }
-        jsonReader.endArray();
+        reader.endArray();
+
         return array;
     }
 
@@ -264,7 +280,7 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();
@@ -291,10 +307,10 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
-
                 Class<?> valueClass = object.getClass();
+
                 boolean fieldBased = (writeContext.features & JSONWriter.Feature.FieldBased.mask) != 0;
-                ObjectWriter objectWriter = writeContext.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                ObjectWriter<?> objectWriter = writeContext.provider.getObjectWriter(valueClass, valueClass, fieldBased);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();
@@ -314,14 +330,12 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
-
                 if (filters != null && filters.length != 0) {
-                    JSONWriter.Context context = writer.getContext();
-                    context.configFilter(filters);
+                    writer.context.configFilter(filters);
                 }
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();
@@ -341,14 +355,12 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
-
                 if (filter != null) {
-                    JSONWriter.Context context = writer.getContext();
-                    context.configFilter(new Filter[]{filter});
+                    writer.context.configFilter(filter);
                 }
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();
@@ -368,12 +380,10 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
-
-                JSONWriter.Context context = writer.getContext();
-                context.setDateFormat(format);
+                writer.context.setDateFormat(format);
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();
@@ -391,7 +401,7 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.getBytes();
@@ -406,17 +416,15 @@ public interface JSON {
      */
     static byte[] toJSONBytes(Object object, Filter... filters) {
         try (JSONWriter writer = JSONWriter.ofUTF8()) {
-            JSONWriter.Context context = writer.getContext();
-
-            if (filters.length != 0) {
-                context.configFilter(filters);
+            if (filters != null && filters.length != 0) {
+                writer.context.configFilter(filters);
             }
 
             if (object == null) {
                 writer.writeNull();
             } else {
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.getBytes();
@@ -437,7 +445,7 @@ public interface JSON {
                 writer.setRootObject(object);
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.getBytes();
@@ -457,14 +465,12 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
-
                 if (filters != null && filters.length != 0) {
-                    JSONWriter.Context context = writer.getContext();
-                    context.configFilter(filters);
+                    writer.context.configFilter(filters);
                 }
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.getBytes();
@@ -487,7 +493,7 @@ public interface JSON {
                 writer.setRootObject(object);
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
             }
 
@@ -512,14 +518,12 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
-
                 if (filters != null && filters.length != 0) {
-                    JSONWriter.Context context = writer.getContext();
-                    context.configFilter(filters);
+                    writer.context.configFilter(filters);
                 }
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
             }
 

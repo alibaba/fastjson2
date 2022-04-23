@@ -1264,7 +1264,7 @@ public abstract class JSONWriter implements Closeable {
             }
         }
 
-        protected void configFilter(Filter[] filters) {
+        protected void configFilter(Filter... filters) {
             for (Filter filter : filters) {
                 if (filter instanceof NameFilter) {
                     setNameFilter((NameFilter) filter);
