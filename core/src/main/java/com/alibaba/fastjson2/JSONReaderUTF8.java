@@ -2749,13 +2749,14 @@ class JSONReaderUTF8 extends JSONReader {
 
     @Override
     public int getStringLength() {
-        if (ch != '"') {
+        if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
         }
+        char quote = ch;
 
         int len = 0;
         for (int i = offset; i < end; ++i, ++len) {
-            if (bytes[i] == '"') {
+            if (bytes[i] == quote) {
                 break;
             }
         }
@@ -2764,9 +2765,10 @@ class JSONReaderUTF8 extends JSONReader {
 
     @Override
     protected ZonedDateTime readZonedDateTimeX(int len) {
-        if (ch != '"') {
+        if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
         }
+        final char quote = ch;
 
         if (len < 20) {
             throw new JSONException("illeal localdatetime string : " + readString());
