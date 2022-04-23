@@ -19,6 +19,7 @@ final class FieldWriterCharMethod<T> extends FieldWriterImpl<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         try {
             return method.invoke(object);
@@ -27,6 +28,7 @@ final class FieldWriterCharMethod<T> extends FieldWriterImpl<T> {
         }
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         Character value = (Character) getFieldValue(object);
 

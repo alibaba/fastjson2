@@ -13,6 +13,7 @@ final class FieldWriterInt8Func<T> extends FieldWriterInt8<T> {
         this.function = function;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return function.apply(object);
     }

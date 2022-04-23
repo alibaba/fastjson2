@@ -69,6 +69,7 @@ public class JSONArray extends JSON implements List {
         return list.toArray(a);
     }
 
+    @Override
     public boolean add(Object item) {
         return list.add(item);
     }
@@ -108,6 +109,7 @@ public class JSONArray extends JSON implements List {
         return list.containsAll(c);
     }
 
+    @Override
     public Object get(int index) {
         return list.get(index);
     }

@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 public class AwtWriterModule implements ObjectWriterModule {
     public static AwtWriterModule INSTANCE = new AwtWriterModule();
 
+    @Override
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         if (objectType == Color.class) {
             return objectWriter(Color.class,

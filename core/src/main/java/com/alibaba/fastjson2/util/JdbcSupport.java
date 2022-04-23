@@ -99,6 +99,7 @@ public class JdbcSupport {
     }
 
     static class TimeWriter implements ObjectWriter {
+        @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             if (object == null) {
                 jsonWriter.writeNull();

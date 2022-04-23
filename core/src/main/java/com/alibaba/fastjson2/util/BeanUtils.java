@@ -873,30 +873,36 @@ public abstract class BeanUtils {
             }
         }
 
+        @Override
         public Type[] getActualTypeArguments() {
             return typeArguments.clone();
         }
 
+        @Override
         public Type getRawType() {
             return rawType;
         }
 
+        @Override
         public Type getOwnerType() {
             return ownerType;
         }
 
-        @Override public boolean equals(Object other) {
+        @Override
+        public boolean equals(Object other) {
             return other instanceof ParameterizedType
                     && BeanUtils.equals(this, (ParameterizedType) other);
         }
 
-        @Override public int hashCode() {
+        @Override
+        public int hashCode() {
             return Arrays.hashCode(typeArguments)
                     ^ rawType.hashCode()
                     ^ hashCodeOrZero(ownerType);
         }
 
-        @Override public String toString() {
+        @Override
+        public String toString() {
             int length = typeArguments.length;
             if (length == 0) {
                 return typeToString(rawType);
@@ -920,7 +926,7 @@ public abstract class BeanUtils {
             this.componentType = canonicalize(componentType);
         }
 
-        public Type getGenericComponentType() {
+        @Override public Type getGenericComponentType() {
             return componentType;
         }
 
@@ -968,11 +974,11 @@ public abstract class BeanUtils {
             }
         }
 
-        public Type[] getUpperBounds() {
+        @Override public Type[] getUpperBounds() {
             return new Type[] { upperBound };
         }
 
-        public Type[] getLowerBounds() {
+        @Override public Type[] getLowerBounds() {
             return lowerBound != null ? new Type[] { lowerBound } : EMPTY_TYPE_ARRAY;
         }
 

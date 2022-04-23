@@ -11,6 +11,7 @@ final class FieldReaderBoolMethod<T> extends FieldReaderObjectMethod<T> {
         super(fieldName, fieldType, setter);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         Boolean fieldValue = jsonReader.readBool();
         try {

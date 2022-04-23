@@ -39,6 +39,7 @@ final class FieldWriterObjectArrayMethod<T> extends FieldWriterImpl<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         try {
             return method.invoke(object);
@@ -47,6 +48,7 @@ final class FieldWriterObjectArrayMethod<T> extends FieldWriterImpl<T> {
         }
     }
 
+    @Override
     public ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
         if (itemType == null || itemType == this.itemType) {
             if (itemObjectWriter != null) {

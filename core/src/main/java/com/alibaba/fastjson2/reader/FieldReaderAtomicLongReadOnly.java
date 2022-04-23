@@ -19,10 +19,12 @@ final class FieldReaderAtomicLongReadOnly<T> extends FieldReaderImpl<T> implemen
         return method;
     }
 
+    @Override
     public boolean isReadOnly() {
         return true;
     }
 
+    @Override
     public void accept(T object, Object value) {
         if (value == null) {
             return;
@@ -36,11 +38,13 @@ final class FieldReaderAtomicLongReadOnly<T> extends FieldReaderImpl<T> implemen
         }
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         Long value = jsonReader.readInt64();
         accept(object, value);
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         long longValue = jsonReader.readInt64Value();
         if (jsonReader.wasNull()) {
@@ -50,6 +54,7 @@ final class FieldReaderAtomicLongReadOnly<T> extends FieldReaderImpl<T> implemen
         return new AtomicLong(longValue);
     }
 
+    @Override
     public String toString() {
         return method.getName();
     }

@@ -11,6 +11,7 @@ final class ObjectReaderImplMapString extends ObjectReaderImplMapTyped {
         super(mapType, instanceType, null, String.class, features, null);
     }
 
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.isJSONB()) {
             return this.readJSONBObject(jsonReader, features);

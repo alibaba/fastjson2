@@ -20,6 +20,7 @@ final class FieldWriterInt8ValFunc extends FieldWriterInt8 {
         return method;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         return function.applyAsByte(object);
     }

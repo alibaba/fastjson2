@@ -20,6 +20,7 @@ final class FieldWriterCharValFunc extends FieldWriterImpl {
         return method;
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         char value = function.applyAsChar(object);
         jsonWriter.writeString(value);

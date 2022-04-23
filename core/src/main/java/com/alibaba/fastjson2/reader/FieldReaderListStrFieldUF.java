@@ -15,6 +15,7 @@ final class FieldReaderListStrFieldUF<T> extends FieldReaderListStrField<T> {
         fieldOffset = UnsafeUtils.objectFieldOffset(field);
     }
 
+    @Override
     public void accept(Object object, Object value) {
         UNSAFE.putObject(object, fieldOffset, value);
     }

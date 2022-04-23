@@ -82,10 +82,12 @@ public class JodaSupport {
             }
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             throw new JSONException("not support");
         }
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             Integer minimumDaysInFirstWeek = null;
             String zoneId = null;
@@ -138,6 +140,7 @@ public class JodaSupport {
             }
         }
 
+        @Override
         public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             try {
                 Object zone = getZone.invoke(object);
@@ -163,6 +166,7 @@ public class JodaSupport {
             }
         }
 
+        @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             try {
                 Object zone = getZone.invoke(object);
@@ -188,10 +192,12 @@ public class JodaSupport {
             this.objectClass = objectClass;
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             throw new JSONException("not support");
         }
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             throw new JSONException("not support");
         }
@@ -212,6 +218,7 @@ public class JodaSupport {
             }
         }
 
+        @Override
         public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             try {
                 Object zone = getZone.invoke(object);
@@ -226,6 +233,7 @@ public class JodaSupport {
             }
         }
 
+        @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             try {
                 Object zone = getZone.invoke(object);
@@ -271,10 +279,12 @@ public class JodaSupport {
             }
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             throw new JSONException("not support");
         }
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             byte type = jsonReader.getType();
 
@@ -351,6 +361,7 @@ public class JodaSupport {
             }
         }
 
+        @Override
         public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             try {
                 int year = (Integer) getYear.invoke(object);
@@ -387,6 +398,7 @@ public class JodaSupport {
             }
         }
 
+        @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             try {
                 int year = (Integer) getYear.invoke(object);
@@ -450,10 +462,12 @@ public class JodaSupport {
             }
         }
 
+        @Override
         public Object readObject(JSONReader jsonReader, long features) {
             throw new JSONException("not support");
         }
 
+        @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             byte type = jsonReader.getType();
 
@@ -561,6 +575,7 @@ public class JodaSupport {
             }
         }
 
+        @Override
         public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             try {
                 int year = (Integer) getYear.invoke(object);
@@ -616,6 +631,7 @@ public class JodaSupport {
             }
         }
 
+        @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             try {
                 int year = (Integer) getYear.invoke(object);

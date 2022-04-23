@@ -20,10 +20,12 @@ final class FieldWriterFloatValueFunc extends FieldWriterImpl {
         return method;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         return function.applyAsFloat(object);
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         float fieldValue = function.applyAsFloat(object);
         jsonWriter.writeFloat(fieldValue);

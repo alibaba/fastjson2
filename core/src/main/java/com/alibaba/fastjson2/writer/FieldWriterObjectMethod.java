@@ -28,6 +28,7 @@ class FieldWriterObjectMethod<T>
         return method;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         try {
             return method.invoke(object);

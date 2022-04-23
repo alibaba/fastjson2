@@ -39,6 +39,7 @@ final class FieldReaderBoolValFunc<T> extends FieldReaderImpl<T> {
                 , jsonReader.readBoolValue());
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readBool();
     }

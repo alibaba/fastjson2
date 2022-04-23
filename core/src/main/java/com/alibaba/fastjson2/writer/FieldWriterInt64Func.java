@@ -18,6 +18,7 @@ final class FieldWriterInt64Func<T> extends FieldWriterInt64<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return function.apply(object);
     }

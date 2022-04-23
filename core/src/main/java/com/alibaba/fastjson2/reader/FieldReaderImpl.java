@@ -43,6 +43,7 @@ abstract class FieldReaderImpl<T>
         this.format = format;
     }
 
+    @Override
     public ObjectReader getObjectReader(JSONReader jsonReader) {
         if (reader != null) {
             return reader;
@@ -70,10 +71,12 @@ abstract class FieldReaderImpl<T>
         return ordinal;
     }
 
+    @Override
     public long getFeatures() {
         return features;
     }
 
+    @Override
     public long getFieldNameHash() {
         return fieldNameHash;
     }
@@ -98,10 +101,12 @@ abstract class FieldReaderImpl<T>
         return fieldName;
     }
 
+    @Override
     public String toString() {
         return fieldName;
     }
 
+    @Override
     public void addResolveTask(JSONReader jsonReader, Object object, String reference) {
         JSONPath path;
         if (referenceCache != null && referenceCache.toString().equals(reference)) {

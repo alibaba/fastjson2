@@ -35,7 +35,7 @@ import java.util.Properties;
  * @author wenshao[szujobs@hotmail.com]
  */
 public class IOUtils {
-    
+
     public static final String     FASTJSON_PROPERTIES              = "fastjson.properties";
     public static final String     FASTJSON_COMPATIBLEWITHJAVABEAN  = "fastjson.compatibleWithJavaBean";
     public static final String     FASTJSON_COMPATIBLEWITHFIELDNAME = "fastjson.compatibleWithFieldName";
@@ -73,7 +73,7 @@ public class IOUtils {
             //skip
         }
     }
-    
+
     public static String getStringProperty(String name) {
         String prop = null;
         try {
@@ -83,9 +83,10 @@ public class IOUtils {
         }
         return (prop == null) ? DEFAULT_PROPERTIES.getProperty(name) : prop;
     }
-    
+
     public static void loadPropertiesFromFile(){
         InputStream imputStream = AccessController.doPrivileged(new PrivilegedAction<InputStream>() {
+            @Override
             public InputStream run() {
                 ClassLoader cl = Thread.currentThread().getContextClassLoader();
                 if (cl != null) {
@@ -95,7 +96,7 @@ public class IOUtils {
                 }
             }
         });
-        
+
         if (null != imputStream) {
             try {
                 DEFAULT_PROPERTIES.load(imputStream);
@@ -156,7 +157,7 @@ public class IOUtils {
             specicalFlags_doubleQuotes[i] = 4;
             specicalFlags_singleQuotes[i] = 4;
         }
-        
+
         for (int i = 0; i < 161; ++i) {
             specicalFlags_doubleQuotesFlags[i] = specicalFlags_doubleQuotes[i] != 0;
             specicalFlags_singleQuotesFlags[i] = specicalFlags_singleQuotes[i] != 0;
@@ -203,7 +204,9 @@ public class IOUtils {
     public static int stringSize(long x) {
         long p = 10;
         for (int i = 1; i < 19; i++) {
-            if (x < p) return i;
+            if (x < p) {
+                return i;
+            }
             p = 10 * p;
         }
         return 19;
@@ -249,7 +252,9 @@ public class IOUtils {
             r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
             buf[--charPos] = digits[r];
             i2 = q2;
-            if (i2 == 0) break;
+            if (i2 == 0) {
+                break;
+            }
         }
         if (sign != 0) {
             buf[--charPos] = sign;
@@ -286,7 +291,9 @@ public class IOUtils {
             r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
             buf[--p] = digits[r];
             i = q;
-            if (i == 0) break;
+            if (i == 0) {
+                break;
+            }
         }
         if (sign != 0) {
             buf[--p] = sign;
@@ -311,7 +318,9 @@ public class IOUtils {
             r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
             buf[--charPos] = digits[r];
             i = q;
-            if (i == 0) break;
+            if (i == 0) {
+                break;
+            }
         }
         if (sign != 0) {
             buf[--charPos] = sign;
@@ -370,17 +379,18 @@ public class IOUtils {
     public static boolean firstIdentifier(char ch) {
         return ch < IOUtils.firstIdentifierFlags.length && IOUtils.firstIdentifierFlags[ch];
     }
-    
+
     public static boolean isIdent(char ch) {
         return ch < identifierFlags.length && identifierFlags[ch];
     }
-    
+
     public static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     public static final int[]  IA = new int[256];
     static {
         Arrays.fill(IA, -1);
-        for (int i = 0, iS = CA.length; i < iS; i++)
+        for (int i = 0, iS = CA.length; i < iS; i++) {
             IA[CA[i]] = i;
+        }
         IA['='] = 0;
     }
 
@@ -405,13 +415,13 @@ public class IOUtils {
         int sIx = offset, eIx = offset + charsLen - 1; // Start and end index after trimming.
 
         // Trim illegal chars from start
-        while (sIx < eIx && IA[chars[sIx]] < 0)
+        while (sIx < eIx && IA[chars[sIx]] < 0) {
             sIx++;
-
+        }
         // Trim illegal chars from end
-        while (eIx > 0 && IA[chars[eIx]] < 0)
+        while (eIx > 0 && IA[chars[eIx]] < 0) {
             eIx--;
-
+        }
         // get the padding count (=) (0, 1 or 2)
         int pad = chars[eIx] == '=' ? (chars[eIx - 1] == '=' ? 2 : 1) : 0; // Count '=' at end.
         int cCnt = eIx - sIx + 1; // Content count including possible separators
@@ -441,11 +451,12 @@ public class IOUtils {
         if (d < len) {
             // Decode last 1-3 bytes (incl '=') into 1-3 bytes
             int i = 0;
-            for (int j = 0; sIx <= eIx - pad; j++)
+            for (int j = 0; sIx <= eIx - pad; j++) {
                 i |= IA[chars[sIx++]] << (18 - j * 6);
-
-            for (int r = 16; d < len; r -= 8)
+            }
+            for (int r = 16; d < len; r -= 8) {
                 bytes[d++] = (byte) (i >> r);
+            }
         }
 
         return bytes;
@@ -463,13 +474,13 @@ public class IOUtils {
         int sIx = offset, eIx = offset + charsLen - 1; // Start and end index after trimming.
 
         // Trim illegal chars from start
-        while (sIx < eIx && IA[chars.charAt(sIx)] < 0)
+        while (sIx < eIx && IA[chars.charAt(sIx)] < 0) {
             sIx++;
-
+        }
         // Trim illegal chars from end
-        while (eIx > 0 && IA[chars.charAt(eIx)] < 0)
+        while (eIx > 0 && IA[chars.charAt(eIx)] < 0) {
             eIx--;
-
+        }
         // get the padding count (=) (0, 1 or 2)
         int pad = chars.charAt(eIx) == '=' ? (chars.charAt(eIx - 1) == '=' ? 2 : 1) : 0; // Count '=' at end.
         int cCnt = eIx - sIx + 1; // Content count including possible separators
@@ -502,11 +513,12 @@ public class IOUtils {
         if (d < len) {
             // Decode last 1-3 bytes (incl '=') into 1-3 bytes
             int i = 0;
-            for (int j = 0; sIx <= eIx - pad; j++)
+            for (int j = 0; sIx <= eIx - pad; j++) {
                 i |= IA[chars.charAt(sIx++)] << (18 - j * 6);
-
-            for (int r = 16; d < len; r -= 8)
+            }
+            for (int r = 16; d < len; r -= 8) {
                 bytes[d++] = (byte) (i >> r);
+            }
         }
 
         return bytes;
@@ -534,13 +546,13 @@ public class IOUtils {
         int sIx = 0, eIx = sLen - 1; // Start and end index after trimming.
 
         // Trim illegal chars from start
-        while (sIx < eIx && IA[s.charAt(sIx) & 0xff] < 0)
+        while (sIx < eIx && IA[s.charAt(sIx) & 0xff] < 0) {
             sIx++;
-
+        }
         // Trim illegal chars from end
-        while (eIx > 0 && IA[s.charAt(eIx) & 0xff] < 0)
+        while (eIx > 0 && IA[s.charAt(eIx) & 0xff] < 0) {
             eIx--;
-
+        }
         // get the padding count (=) (0, 1 or 2)
         int pad = s.charAt(eIx) == '=' ? (s.charAt(eIx - 1) == '=' ? 2 : 1) : 0; // Count '=' at end.
         int cCnt = eIx - sIx + 1; // Content count including possible separators
@@ -571,16 +583,17 @@ public class IOUtils {
         if (d < len) {
             // Decode last 1-3 bytes (incl '=') into 1-3 bytes
             int i = 0;
-            for (int j = 0; sIx <= eIx - pad; j++)
+            for (int j = 0; sIx <= eIx - pad; j++) {
                 i |= IA[s.charAt(sIx++)] << (18 - j * 6);
-
-            for (int r = 16; d < len; r -= 8)
+            }
+            for (int r = 16; d < len; r -= 8) {
                 dArr[d++] = (byte) (i >> r);
+            }
         }
 
         return dArr;
     }
-    
+
     public static int encodeUTF8(char[] chars, int offset, int len, byte[] bytes) {
         int sl = offset + len;
         int dp = 0;
@@ -627,7 +640,7 @@ public class IOUtils {
                         uc = c;
                     }
                 }
-                
+
                 if (uc < 0) {
                     bytes[dp++] = (byte) '?';
                 } else {
@@ -656,9 +669,9 @@ public class IOUtils {
         int dlASCII = Math.min(len, da.length);
 
         // ASCII only optimized loop
-        while (dp < dlASCII && sa[sp] >= 0)
+        while (dp < dlASCII && sa[sp] >= 0) {
             da[dp++] = (char) sa[sp++];
-
+        }
         while (sp < sl) {
             int b1 = sa[sp++];
             if (b1 >= 0) {

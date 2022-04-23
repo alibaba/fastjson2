@@ -10,6 +10,7 @@ final class FieldReaderBoolValueField<T> extends FieldReaderObjectField<T> {
         super(fieldName, fieldType, fieldType, ordinal, 0, null, field);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         boolean fieldValue = jsonReader.readBoolValue();
         try {
@@ -19,6 +20,7 @@ final class FieldReaderBoolValueField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readBool();
     }

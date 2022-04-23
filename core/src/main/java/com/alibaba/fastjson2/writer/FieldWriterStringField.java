@@ -28,6 +28,7 @@ final class FieldWriterStringField<T> extends FieldWriterImpl<T> {
         return field;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         try {
             return field.get(object);
@@ -62,6 +63,7 @@ final class FieldWriterStringField<T> extends FieldWriterImpl<T> {
         return true;
     }
 
+    @Override
     public void writeString(JSONWriter jsonWriter, String value) {
         writeFieldName(jsonWriter);
 

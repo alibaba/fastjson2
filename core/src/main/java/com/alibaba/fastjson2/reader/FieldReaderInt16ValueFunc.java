@@ -26,6 +26,7 @@ final class FieldReaderInt16ValueFunc<T> extends FieldReaderImpl<T> {
         function.accept(object, value);
     }
 
+    @Override
     public void accept(T object, Object value) {
         function.accept(object
                 , TypeUtils.toShortValue(value));

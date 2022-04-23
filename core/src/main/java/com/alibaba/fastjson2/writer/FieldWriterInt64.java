@@ -15,6 +15,7 @@ abstract class FieldWriterInt64<T> extends FieldWriterImpl<T> {
         browserCompatible = (features & JSONWriter.Feature.BrowserCompatible.mask) != 0;
     }
 
+    @Override
     public void writeInt64(JSONWriter jsonWriter, long value) {
         if (jsonWriter.isUTF8()) {
             if (value >= -1 && value < 1039) {

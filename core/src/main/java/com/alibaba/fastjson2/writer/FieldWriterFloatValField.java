@@ -18,6 +18,7 @@ final class FieldWriterFloatValField<T> extends FieldWriterImpl<T> {
         return field;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return getFieldValueFloat(object);
     }

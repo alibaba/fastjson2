@@ -26,6 +26,7 @@ final class FieldWriterMillisFunc<T> extends FieldWriterDate<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return function.applyAsLong(object);
     }
@@ -37,6 +38,7 @@ final class FieldWriterMillisFunc<T> extends FieldWriterDate<T> {
         return true;
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         long millis = function.applyAsLong(object);
         writeDate(jsonWriter, false, millis);

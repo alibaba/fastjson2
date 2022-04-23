@@ -11,6 +11,7 @@ public class ObjectWriterException extends ObjectWriterAdapter {
         super(objectType, null, null, features, fieldWriters);
     }
 
+    @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         writeClassInfo(jsonWriter);
 
@@ -24,6 +25,7 @@ public class ObjectWriterException extends ObjectWriterAdapter {
         jsonWriter.endObject();
     }
 
+    @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (jsonWriter.isJSONB()) {
             writeJSONB(jsonWriter, object, fieldName, fieldType, features);

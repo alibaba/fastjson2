@@ -9,6 +9,7 @@ import java.util.Map;
 public final class ObjectReaderImplInstant implements ObjectReader  {
     public static final ObjectReaderImplInstant INSTANCE = new ObjectReaderImplInstant();
 
+    @Override
     public Object createInstance(Map map) {
         Number nano = (Number) map.get("nano");
         Number epochSecond = (Number) map.get("epochSecond");
@@ -29,10 +30,12 @@ public final class ObjectReaderImplInstant implements ObjectReader  {
         throw new JSONException("can not create instant.");
     }
 
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         return jsonReader.readInstant();
     }
 
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         return jsonReader.readInstant();
     }
