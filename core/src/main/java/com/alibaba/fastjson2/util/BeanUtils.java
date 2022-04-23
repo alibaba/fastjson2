@@ -202,6 +202,7 @@ public abstract class BeanUtils {
                         || returnType == AtomicBoolean.class
                         || returnType == AtomicIntegerArray.class
                         || returnType == AtomicLongArray.class
+                        || returnType == AtomicReference.class
                         || Collection.class.isAssignableFrom(returnType)
                 ) {
                     methodConsumer.accept(method);
