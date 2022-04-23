@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class JSONObject extends LinkedHashMap<String, Object> implements InvocationHandler {
+
     private static final long serialVersionUID = 1L;
 
     static ObjectReader<JSONArray> arrayReader;
@@ -33,7 +34,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * @param initialCapacity the initial capacity
+     * @param initialCapacity the initial capacity = (number of elements to store / load factor) + 1
      */
     public JSONObject(int initialCapacity) {
         super(initialCapacity);
@@ -47,7 +48,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link JSONArray} of the associated keys in this object.
+     * Returns the {@link JSONArray} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link JSONArray} or null
@@ -81,7 +82,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link JSONObject} of the associated keys in this object.
+     * Returns the {@link JSONObject} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link JSONObject} or null
@@ -114,7 +115,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link String} of the associated keys in this object.
+     * Returns the {@link String} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link String} or null
@@ -134,7 +135,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link Double} of the associated keys in this object.
+     * Returns the {@link Double} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Double} or null
@@ -170,7 +171,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns a double value of the associated keys in this object.
+     * Returns a double value of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return double
@@ -202,7 +203,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link Float} of the associated keys in this object.
+     * Returns the {@link Float} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Float} or null
@@ -238,7 +239,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns a float value of the associated keys in this object.
+     * Returns a float value of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return float
@@ -270,7 +271,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link Long} of the associated keys in this object.
+     * Returns the {@link Long} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Long} or null
@@ -306,7 +307,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns a long value of the associated keys in this object.
+     * Returns a long value of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return long
@@ -338,7 +339,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link Integer} of the associated keys in this object.
+     * Returns the {@link Integer} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Integer} or null
@@ -374,7 +375,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns an int value of the associated keys in this object.
+     * Returns an int value of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return int
@@ -406,7 +407,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link Short} of the associated keys in this object.
+     * Returns the {@link Short} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Short} or null
@@ -442,7 +443,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns a short value of the associated keys in this object.
+     * Returns a short value of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return short
@@ -474,7 +475,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link Byte} of the associated keys in this object.
+     * Returns the {@link Byte} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Byte} or null
@@ -506,7 +507,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns a byte value of the associated keys in this object.
+     * Returns a byte value of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return byte
@@ -538,7 +539,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link Boolean} of the associated keys in this object.
+     * Returns the {@link Boolean} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Boolean} or null
@@ -603,7 +604,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link BigInteger} of the associated keys in this object.
+     * Returns the {@link BigInteger} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link BigInteger} or null
@@ -644,7 +645,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link BigDecimal} of the associated keys in this object.
+     * Returns the {@link BigDecimal} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link BigDecimal} or null
@@ -691,7 +692,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link Date} of the associated keys in this object.
+     * Returns the {@link Date} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link Date} or null
@@ -719,7 +720,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Returns the {@link BigInteger} of the associated keys in this object.
+     * Returns the {@link BigInteger} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
      * @return {@link BigInteger} or null
@@ -772,9 +773,13 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Convert this {@link JSONObject} to the target type
+     * Convert this {@link JSONObject} to the specified Object
      *
-     * @param type converted goal type
+     * <code>
+     * Map<String, User> users = jsonObject.toJavaObject(new TypeReference<HashMap<String, User>>(){}.getType());
+     * </code>
+     *
+     * @param type specify the {@link Type} to be converted
      */
     public <T> T toJavaObject(Type type) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
@@ -783,21 +788,29 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     }
 
     /**
-     * Convert this {@link JSONObject} to the target type
+     * Convert this {@link JSONObject} to the specified Object
      *
-     * @param type converted goal type
+     * <code>
+     * User user = jsonObject.toJavaObject(User.class);
+     * </code>
+     *
+     * @param clazz specify the {@link Class<T>} to be converted
      */
-    public <T> T toJavaObject(Class<T> type) {
+    public <T> T toJavaObject(Class<T> clazz) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader objectReader = provider.getObjectReader(type);
+        ObjectReader objectReader = provider.getObjectReader(clazz);
         return (T) objectReader.createInstance(this);
     }
 
     /**
-     * Returns the result of the {@link Type} converter conversion of the associated value in this object.
+     * Returns the result of the {@link Type} converter conversion of the associated value in this {@link JSONObject}.
+     *
+     * <code>
+     * User user = jsonObject.getObject("user", User.class);
+     * </code>
      *
      * @param key  the key whose associated value is to be returned
-     * @param type converted goal type
+     * @param type specify the {@link Type} to be converted
      * @return <T> or null
      * @throws JSONException If no suitable conversion method is found
      */
@@ -962,12 +975,57 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     /**
      * Pack a pair of key-values as {@link JSONObject}
      *
+     * <code>
+     * JSONObject jsonObject = JSONObject.of("name", "fastjson2");
+     * </code>
+     *
      * @param key   the key of the element
      * @param value the value of the element
      */
     public static JSONObject of(String key, Object value) {
-        JSONObject object = new JSONObject(1);
+        JSONObject object = new JSONObject(2);
         object.put(key, value);
+        return object;
+    }
+
+    /**
+     * Packs two key-value pairs as {@link JSONObject}
+     *
+     * <code>
+     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2");
+     * </code>
+     *
+     * @param k1 first key
+     * @param v1 first value
+     * @param k2 second key
+     * @param v2 second value
+     * @since 2.0.2
+     */
+    public static JSONObject of(String k1, Object v1, String k2, Object v2) {
+        JSONObject object = new JSONObject(3);
+        object.put(k1, v1);
+        object.put(k2, v2);
+        return object;
+    }
+
+    /**
+     * Packs three key-value pairs as {@link JSONObject}
+     *
+     * <code>
+     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3");
+     * </code>
+     *
+     * @param k1 first key
+     * @param v1 first value
+     * @param k2 second key
+     * @param v2 second value
+     * @since 2.0.2
+     */
+    public static JSONObject of(String k1, Object v1, String k2, Object v2, String k3, Object v3) {
+        JSONObject object = new JSONObject(5);
+        object.put(k1, v1);
+        object.put(k2, v2);
+        object.put(k3, v3);
         return object;
     }
 

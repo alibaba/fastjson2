@@ -82,9 +82,24 @@ public abstract class TypeReference<T> {
      * </code>
      *
      * @param text the JSON {@link String} to be parsed
+     * @since 2.0.2
      */
     public T parseObject(String text) {
         return JSON.parseObject(text, type);
+    }
+
+    /**
+     * See {@link JSONObject#toJavaObject} for details
+     *
+     * <code>
+     * Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.parseObject(jsonObject);
+     * </code>
+     *
+     * @param object Specify the {@link JSONObject} to convert
+     * @since 2.0.2
+     */
+    public T parseObject(JSONObject object) {
+        return object.toJavaObject(type);
     }
 
     /**
@@ -97,9 +112,24 @@ public abstract class TypeReference<T> {
      * </code>
      *
      * @param text the JSON {@link String} to be parsed
+     * @since 2.0.2
      */
     public List<T> parseArray(String text) {
         return JSON.parseArray(text, type);
+    }
+
+    /**
+     * See {@link JSONArray#toJavaObject} for details
+     *
+     * <code>
+     * List<User> users = new TypeReference<ArrayList<User>>(){}.parseObject(jsonArray);
+     * </code>
+     *
+     * @param object Specify the {@link JSONArray} to convert
+     * @since 2.0.2
+     */
+    public T parseArray(JSONArray object) {
+        return object.toJavaObject(type);
     }
 
     /**
