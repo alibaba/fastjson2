@@ -8,6 +8,7 @@ import java.util.Map;
 final class ObjectWriterImplMapEntry extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplMapEntry INSTANCE = new ObjectWriterImplMapEntry();
 
+    @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         Map.Entry entry = (Map.Entry) object;
         if (entry == null) {
@@ -20,6 +21,7 @@ final class ObjectWriterImplMapEntry extends ObjectWriterBaseModule.PrimitiveImp
         jsonWriter.writeAny(entry.getValue());
     }
 
+    @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         Map.Entry entry = (Map.Entry) object;
         if (entry == null) {

@@ -33,10 +33,12 @@ abstract class FieldWriterDate<T> extends FieldWriterImpl<T> {
         this.formatISO8601 = "iso8601".equalsIgnoreCase(format);
     }
 
+    @Override
     public boolean isDateFormatMillis() {
         return formatMillis;
     }
 
+    @Override
     public boolean isDateFormatISO8601() {
         return formatISO8601;
     }
@@ -49,6 +51,7 @@ abstract class FieldWriterDate<T> extends FieldWriterImpl<T> {
         return formatter;
     }
 
+    @Override
     public void writeDate(JSONWriter jsonWriter, long timeMillis) {
         if (jsonWriter.isJSONB()) {
             writeFieldName(jsonWriter);

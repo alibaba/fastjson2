@@ -52,6 +52,7 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
         return null;
     }
 
+    @Override
     default int compareTo(FieldReader o) {
         int ordinal0 = this.ordinal();
         int ordinal1 = o.ordinal();

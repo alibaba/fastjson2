@@ -130,6 +130,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
         return builder;
     }
 
+    @Override
     public Object createInstance() {
         if (instanceType == HashMap.class) {
             return new HashMap<>();
@@ -180,6 +181,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
         }
     }
 
+    @Override
     public Object createInstance(Map map) {
         if (mapType.isInstance(map)) {
             return map;
@@ -188,10 +190,12 @@ public final class ObjectReaderImplMap implements ObjectReader {
         return map;
     }
 
+    @Override
     public FieldReader getFieldReader(long hashCode) {
         return null;
     }
 
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         ObjectReader objectReader = jsonReader.checkAutoType(mapType, 0, this.features | features);
         if (objectReader != null && objectReader != this) {
@@ -321,6 +325,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
         return map;
     }
 
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         Class objectClass = jsonReader.getContext().getObjectClass();
         Map object;

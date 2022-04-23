@@ -12,6 +12,7 @@ final class FieldReaderBigIntegerField<T> extends FieldReaderObjectField<T> {
         super(fieldName, fieldType, fieldType, ordinal, 0, null, field);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         BigInteger fieldValue = jsonReader.readBigInteger();
         try {
@@ -21,6 +22,7 @@ final class FieldReaderBigIntegerField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public void accept(T object, int value) {
         try {
             field.set(object, BigInteger.valueOf(value));
@@ -29,6 +31,7 @@ final class FieldReaderBigIntegerField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public void accept(T object, long value) {
         try {
             field.set(object, BigInteger.valueOf(value));
@@ -37,6 +40,7 @@ final class FieldReaderBigIntegerField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public void accept(T object, Object value) {
         try {
             field.set(object

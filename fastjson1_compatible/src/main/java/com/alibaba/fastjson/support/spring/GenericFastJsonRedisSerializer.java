@@ -18,6 +18,7 @@ import org.springframework.data.redis.serializer.SerializationException;
  */
 public class GenericFastJsonRedisSerializer implements RedisSerializer<Object> {
 
+    @Override
     public byte[] serialize(Object object) throws SerializationException {
         if (object == null) {
             return new byte[0];
@@ -29,6 +30,7 @@ public class GenericFastJsonRedisSerializer implements RedisSerializer<Object> {
         }
     }
 
+    @Override
     public Object deserialize(byte[] bytes) throws SerializationException {
         if (bytes == null || bytes.length == 0) {
             return null;

@@ -8,14 +8,18 @@ import java.util.Arrays;
 import java.util.List;
 
 interface FieldListStrReader<T> extends FieldReader<T> {
+
+    @Override
     default Type getFieldType() {
         return List.class;
     }
 
+    @Override
     default Class getFieldClass() {
         return List.class;
     }
 
+    @Override
     default Type getItemType() {
         return String.class;
     }
@@ -29,6 +33,7 @@ interface FieldListStrReader<T> extends FieldReader<T> {
                 getItemType());
     }
 
+    @Override
     default void readFieldValue(JSONReader jsonReader, T object) {
         if (jsonReader.isJSONB()) {
             int entryCnt = jsonReader.startArray();

@@ -12,6 +12,7 @@ final class FieldReaderInt64Method<T> extends FieldReaderObjectMethod<T> {
         super(fieldName, fieldType, setter);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         Long fieldValue = jsonReader.readInt64();
         try {
@@ -21,6 +22,7 @@ final class FieldReaderInt64Method<T> extends FieldReaderObjectMethod<T> {
         }
     }
 
+    @Override
     public void accept(T object, Object value) {
         try {
             method.invoke(object

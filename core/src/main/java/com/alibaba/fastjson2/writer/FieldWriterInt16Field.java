@@ -17,6 +17,7 @@ final class FieldWriterInt16Field<T> extends FieldWriterInt16<T> {
         return field;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         try {
             return field.get(object);

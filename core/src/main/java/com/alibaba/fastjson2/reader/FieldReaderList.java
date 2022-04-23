@@ -10,25 +10,31 @@ import java.util.List;
 import java.util.function.Function;
 
 public interface FieldReaderList<T, V> extends FieldReader<T> {
+
+    @Override
     default Type getFieldType() {
         return List.class;
     }
 
+    @Override
     default Class getFieldClass() {
         return List.class;
     }
 
+    @Override
     Type getItemType();
 
     default List<V> createList() {
         return new ArrayList<>();
     }
 
+    @Override
     default ObjectReader<V> getItemObjectReader(JSONReader.Context ctx) {
         return ctx.getObjectReader(
                 getItemType());
     }
 
+    @Override
     default void readFieldValue(JSONReader jsonReader, T object) {
         if (jsonReader.isJSONB()) {
             int entryCnt = jsonReader.startArray();
@@ -78,6 +84,7 @@ public interface FieldReaderList<T, V> extends FieldReader<T> {
         accept(object, value);
     }
 
+    @Override
     default Object readFieldValue(JSONReader jsonReader) {
         if (jsonReader.isJSONB()) {
             int entryCnt = jsonReader.startArray();

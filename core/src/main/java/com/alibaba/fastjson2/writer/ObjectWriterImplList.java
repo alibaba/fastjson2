@@ -39,6 +39,7 @@ final class ObjectWriterImplList extends ObjectWriterBaseModule.PrimitiveImpl {
         this.itemClassRefDetect = itemClass != null && !ObjectWriterProvider.isNotReferenceDetect(itemClass);
     }
 
+    @Override
     public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
             jsonWriter.writeArrayNull();

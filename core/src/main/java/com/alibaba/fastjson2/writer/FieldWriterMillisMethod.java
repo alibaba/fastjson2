@@ -25,6 +25,7 @@ final class FieldWriterMillisMethod<T> extends FieldWriterDate<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         try {
             return method.invoke(object);
@@ -40,6 +41,7 @@ final class FieldWriterMillisMethod<T> extends FieldWriterDate<T> {
         return true;
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         long millis = (Long) getFieldValue(object);
         writeDate(jsonWriter, false, millis);

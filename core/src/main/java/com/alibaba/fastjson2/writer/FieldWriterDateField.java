@@ -19,6 +19,7 @@ final class FieldWriterDateField<T> extends FieldWriterDate<T> {
         return field;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         try {
             return field.get(object);
@@ -27,6 +28,7 @@ final class FieldWriterDateField<T> extends FieldWriterDate<T> {
         }
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         Date value = (Date) getFieldValue(object);
 

@@ -14,6 +14,7 @@ final class JSONWriterPretty extends JSONWriter {
         this.jsonWriter = jsonWriter;
     }
 
+    @Override
     public void writeComma() {
         write0(',');
         write0('\n');
@@ -72,6 +73,7 @@ final class JSONWriterPretty extends JSONWriter {
         jsonWriter.writeReference(path);
     }
 
+    @Override
     public void startObject() {
         level++;
         jsonWriter.startObject = true;
@@ -84,6 +86,7 @@ final class JSONWriterPretty extends JSONWriter {
         startObjectOff = jsonWriter.off;
     }
 
+    @Override
     public void endObject() {
         level--;
         indent--;
@@ -95,6 +98,7 @@ final class JSONWriterPretty extends JSONWriter {
         jsonWriter.startObject = false;
     }
 
+    @Override
     public void startArray() {
         level++;
         write0('[');
@@ -105,6 +109,7 @@ final class JSONWriterPretty extends JSONWriter {
         }
     }
 
+    @Override
     public void endArray() {
         level++;
         indent--;
@@ -118,22 +123,27 @@ final class JSONWriterPretty extends JSONWriter {
         jsonWriter.startObject = false;
     }
 
+    @Override
     public void writeRaw(char[] chars) {
         jsonWriter.writeRaw(chars);
     }
 
+    @Override
     public void writeNameRaw(char[] chars) {
         jsonWriter.writeNameRaw(chars);
     }
 
+    @Override
     public void writeRaw(byte[] bytes) {
         jsonWriter.writeRaw(bytes);
     }
 
+    @Override
     public void writeNameRaw(byte[] bytes) {
         jsonWriter.writeNameRaw(bytes);
     }
 
+    @Override
     public void writeName(String name) {
         if (jsonWriter.startObject) {
             jsonWriter.startObject = false;
@@ -144,10 +154,12 @@ final class JSONWriterPretty extends JSONWriter {
         jsonWriter.writeString(name);
     }
 
+    @Override
     public void writeNameRaw(byte[] bytes, int offset, int len) {
         jsonWriter.writeNameRaw(bytes, offset, len);
     }
 
+    @Override
     public void writeNameRaw(char[] bytes, int offset, int len) {
         jsonWriter.writeNameRaw(bytes, offset, len);
     }
@@ -162,6 +174,7 @@ final class JSONWriterPretty extends JSONWriter {
         jsonWriter.writeRaw(str);
     }
 
+    @Override
     public String toString() {
         return jsonWriter.toString();
     }

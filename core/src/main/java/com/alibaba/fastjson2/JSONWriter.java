@@ -1186,6 +1186,7 @@ public abstract class JSONWriter implements Closeable {
 
     public abstract void writeReference(String path);
 
+    @Override
     public void close() {
 
     }
@@ -1442,6 +1443,7 @@ public abstract class JSONWriter implements Closeable {
             return Objects.hash(parent, name, index);
         }
 
+        @Override
         public String toString() {
             if (fullPath != null) {
                 return fullPath;

@@ -35,7 +35,9 @@ public class IOUtils {
     public static int stringSize(long x) {
         long p = 10;
         for (int i = 1; i < 19; i++) {
-            if (x < p) return i;
+            if (x < p) {
+                return i;
+            }
             p = 10 * p;
         }
         return 19;
@@ -66,7 +68,9 @@ public class IOUtils {
             r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
             buf[--p] = digits[r];
             i = q;
-            if (i == 0) break;
+            if (i == 0) {
+                break;
+            }
         }
         if (sign != 0) {
             buf[--p] = sign;
@@ -98,7 +102,9 @@ public class IOUtils {
             r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
             buf[--p] = (char) digits[r];
             i = q;
-            if (i == 0) break;
+            if (i == 0) {
+                break;
+            }
         }
         if (sign != 0) {
             buf[--p] = sign;
@@ -145,7 +151,9 @@ public class IOUtils {
             r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
             buf[--charPos] = digits[r];
             i2 = q2;
-            if (i2 == 0) break;
+            if (i2 == 0) {
+                break;
+            }
         }
         if (sign != 0) {
             buf[--charPos] = sign;
@@ -192,7 +200,9 @@ public class IOUtils {
             r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
             buf[--charPos] = (char) digits[r];
             i2 = q2;
-            if (i2 == 0) break;
+            if (i2 == 0) {
+                break;
+            }
         }
         if (sign != 0) {
             buf[--charPos] = sign;
@@ -452,9 +462,9 @@ public class IOUtils {
         int asciilen = Math.min(len, dst.length);
 
         // ASCII only optimized loop
-        while (dp < asciilen && src[off] >= 0)
+        while (dp < asciilen && src[off] >= 0) {
             dst[dp++] = (char) src[off++];
-
+        }
         while (off < sl) {
             int b0 = src[off++];
             if (b0 >= 0) {

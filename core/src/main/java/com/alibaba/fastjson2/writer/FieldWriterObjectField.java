@@ -26,6 +26,7 @@ class FieldWriterObjectField<T> extends FieldWriterObject<T> {
         return field;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         try {
             return field.get(object);

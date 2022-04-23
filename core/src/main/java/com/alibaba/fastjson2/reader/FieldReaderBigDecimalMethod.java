@@ -13,6 +13,7 @@ final class FieldReaderBigDecimalMethod<T> extends FieldReaderObjectMethod<T> {
         super(fieldName, fieldType, method);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         BigDecimal fieldValue = jsonReader.readBigDecimal();
         try {
@@ -22,6 +23,7 @@ final class FieldReaderBigDecimalMethod<T> extends FieldReaderObjectMethod<T> {
         }
     }
 
+    @Override
     public void accept(T object, Object value) {
         try {
             method.invoke(object
@@ -31,6 +33,7 @@ final class FieldReaderBigDecimalMethod<T> extends FieldReaderObjectMethod<T> {
         }
     }
 
+    @Override
     public void accept(T object, int value) {
         try {
             method.invoke(object, BigDecimal.valueOf(value));
@@ -39,6 +42,7 @@ final class FieldReaderBigDecimalMethod<T> extends FieldReaderObjectMethod<T> {
         }
     }
 
+    @Override
     public void accept(T object, long value) {
         try {
             method.invoke(object, BigDecimal.valueOf(value));

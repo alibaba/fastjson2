@@ -49,6 +49,7 @@ abstract class FieldWriterList<T> extends FieldWriterImpl<T> {
         return itemClass;
     }
 
+    @Override
     public ObjectWriter getItemWriter(JSONWriter jsonWriter, Type itemType) {
         if (itemType == null || itemType == this.itemType) {
             if (itemObjectWriter != null) {
@@ -62,6 +63,7 @@ abstract class FieldWriterList<T> extends FieldWriterImpl<T> {
                 .getObjectWriter(itemType, null);
     }
 
+    @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (listWriter != null) {
             return listWriter;
@@ -74,6 +76,7 @@ abstract class FieldWriterList<T> extends FieldWriterImpl<T> {
         return jsonWriter.getObjectWriter(valueClass);
     }
 
+    @Override
     public void writeList(JSONWriter jsonWriter, boolean writeFieldName, List list) {
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
@@ -161,6 +164,7 @@ abstract class FieldWriterList<T> extends FieldWriterImpl<T> {
         jsonWriter.endArray();
     }
 
+    @Override
     public void writeListStr(JSONWriter jsonWriter, boolean writeFieldName, List<String> list) {
         if (writeFieldName) {
             writeFieldName(jsonWriter);

@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ObjectReaderCreatorDynamicCompile extends ObjectReaderCreator {
     public static final ObjectReaderCreatorDynamicCompile INSTANCE = new ObjectReaderCreatorDynamicCompile();
 
+    @Override
     public <T> ObjectReader<T> createObjectReader(Class<T> objectType) {
         if (JDKUtils.JVM_VERSION >= 17 && !JDKUtils.JAVAC_UNNAMED) {
             return super.createObjectReader(objectType);

@@ -138,6 +138,7 @@ abstract class FieldWriterImpl<T> implements FieldWriter<T> {
         jsonWriter.writeColon();
     }
 
+    @Override
     public String toString() {
         return name;
     }

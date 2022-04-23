@@ -10,6 +10,7 @@ final class FieldReaderDoubleValueField<T> extends FieldReaderObjectField<T> {
         super(fieldName, fieldType, fieldType, ordinal, features, format, field);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         double fieldValue = jsonReader.readDoubleValue();
         try {
@@ -19,6 +20,7 @@ final class FieldReaderDoubleValueField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readDoubleValue();
     }

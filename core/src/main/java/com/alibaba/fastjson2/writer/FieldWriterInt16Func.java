@@ -18,6 +18,7 @@ final class FieldWriterInt16Func<T> extends FieldWriterInt16<T> {
         return method;
     }
 
+    @Override
     public Object getFieldValue(T object) {
         return function.apply(object);
     }

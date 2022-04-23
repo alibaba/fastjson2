@@ -18,6 +18,7 @@ final class FieldWriterInt8Method extends FieldWriterInt8 {
         return method;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         try {
             return method.invoke(object);

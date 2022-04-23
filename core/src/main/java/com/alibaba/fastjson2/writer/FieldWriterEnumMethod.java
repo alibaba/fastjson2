@@ -19,6 +19,7 @@ final class FieldWriterEnumMethod extends FieldWriterEnum {
         return method;
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         try {
             return method.invoke(object);
@@ -27,6 +28,7 @@ final class FieldWriterEnumMethod extends FieldWriterEnum {
         }
     }
 
+    @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         Enum value = (Enum) getFieldValue(object);
         jsonWriter.writeEnum(value);

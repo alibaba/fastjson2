@@ -24,6 +24,7 @@ final class FieldWriterObjectFieldUF extends FieldWriterObjectField {
         fieldOffset = UnsafeUtils.objectFieldOffset(field);
     }
 
+    @Override
     public Object getFieldValue(Object object) {
         return UNSAFE.getObject(object, fieldOffset);
     }

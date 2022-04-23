@@ -17,10 +17,12 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
         this.field = field;
     }
 
+    @Override
     public Field getField() {
         return field;
     }
 
+    @Override
     public ObjectReader getObjectReader(JSONReader jsonReader) {
         if (reader != null) {
             return reader;
@@ -120,6 +122,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
         accept(object, value);
     }
 
+    @Override
     public void accept(T object, boolean value) {
         try {
             field.setBoolean(object, value);
@@ -128,6 +131,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
         }
     }
 
+    @Override
     public void accept(T object, byte value) {
         try {
             field.setByte(object, value);
@@ -136,6 +140,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
         }
     }
 
+    @Override
     public void accept(T object, short value) {
         try {
             field.setShort(object, value);
@@ -144,6 +149,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
         }
     }
 
+    @Override
     public void accept(T object, int value) {
         try {
             field.setInt(object, value);
@@ -152,6 +158,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
         }
     }
 
+    @Override
     public void accept(T object, long value) {
         try {
             field.setLong(object, value);
@@ -160,6 +167,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
         }
     }
 
+    @Override
     public void accept(T object, float value) {
         try {
             field.setFloat(object, value);
@@ -168,6 +176,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
         }
     }
 
+    @Override
     public void accept(T object, double value) {
         try {
             field.setDouble(object, value);
@@ -176,6 +185,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
         }
     }
 
+    @Override
     public void accept(T object, char value) {
         try {
             field.setChar(object, value);
@@ -184,6 +194,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
         }
     }
 
+    @Override
     public void accept(T object, Object value) {
         try {
             field.set(object, value);
@@ -192,6 +203,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
         }
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         if (fieldObjectReader == null) {
             fieldObjectReader = jsonReader

@@ -13,6 +13,7 @@ final class FieldReaderStringField<T> extends FieldReaderObjectField<T> {
         trim = "trim".equals(format);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         String fieldValue = jsonReader.readString();
         if (trim && fieldValue != null) {
@@ -26,6 +27,7 @@ final class FieldReaderStringField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public String readFieldValue(JSONReader jsonReader) {
         String fieldValue = jsonReader.readString();
         if (trim && fieldValue != null) {
@@ -34,6 +36,7 @@ final class FieldReaderStringField<T> extends FieldReaderObjectField<T> {
         return fieldValue;
     }
 
+    @Override
     public void accept(T object, Object value) {
         if (value != null && !(value instanceof String)) {
             value = value.toString();

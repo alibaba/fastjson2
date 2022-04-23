@@ -11,6 +11,7 @@ final class FieldReaderInt16ValueField<T> extends FieldReaderObjectField<T> {
         super(fieldName, fieldType, fieldType, ordinal, 0, null, field);
     }
 
+    @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         int fieldInt = jsonReader.readInt32Value();
         try {
@@ -20,6 +21,7 @@ final class FieldReaderInt16ValueField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public void accept(T object, Object value) {
         try {
             field.setShort(object, TypeUtils.toShortValue(value));
@@ -28,6 +30,7 @@ final class FieldReaderInt16ValueField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public void accept(T object, int value) {
         try {
             field.setShort(object, (short) value);
@@ -36,6 +39,7 @@ final class FieldReaderInt16ValueField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public void accept(T object, long value) {
         try {
             field.setShort(object, (short) value);
@@ -44,6 +48,7 @@ final class FieldReaderInt16ValueField<T> extends FieldReaderObjectField<T> {
         }
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return (short) jsonReader.readInt32Value();
     }

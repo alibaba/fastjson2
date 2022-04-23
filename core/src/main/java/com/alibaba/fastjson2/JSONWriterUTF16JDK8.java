@@ -9,6 +9,7 @@ final class JSONWriterUTF16JDK8 extends JSONWriterUTF16 {
         super(ctx);
     }
 
+    @Override
     public void writeString(String str) {
         if (str == null) {
             if (isEnabled(Feature.NullAsDefaultValue.mask)) {
