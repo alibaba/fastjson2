@@ -3,16 +3,12 @@ package com.alibaba.fastjson.suppert.retrofit;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.retrofit.Retrofit2ConverterFactory;
-import junit.framework.TestCase;
-import okhttp3.Headers;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import okhttp3.internal.http.RealResponseBody;
 import okio.Buffer;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
-
-import java.nio.charset.Charset;
 
 public class Retrofit2ConverterFactoryTest {
 
@@ -26,9 +22,8 @@ public class Retrofit2ConverterFactoryTest {
 
         final Model model = new Model().setId(1).setName("test");
         final String json = JSON.toJSONString(model);
-        final Buffer buffer = new Buffer().writeString(json, Charset.defaultCharset());
-        final Headers headers = Headers.of("Content-Type", "application/json; charset=UTF-8");
-        final ResponseBody body = new RealResponseBody(headers, buffer);
+        final ResponseBody body = new RealResponseBody("application/json; charset=UTF-8",
+                json.length(), new Buffer().writeUtf8(json));
 
         RequestBody requestBody = Retrofit2ConverterFactory.create()
                 .requestBodyConverter(Model.class, null, null, null)
