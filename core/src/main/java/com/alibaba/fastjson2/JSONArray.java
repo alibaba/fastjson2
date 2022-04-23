@@ -37,6 +37,7 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * @param collection the collection whose elements are to be placed into this {@link JSONArray}
+     * @throws NullPointerException If the specified collection is null
      */
     public JSONArray(Collection<?> collection) {
         super(collection);
@@ -44,6 +45,7 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * @param items the array whose elements are to be placed into this {@link JSONArray}
+     * @throws NullPointerException If the specified items is null
      */
     public JSONArray(Object... items) {
         super(items.length);
