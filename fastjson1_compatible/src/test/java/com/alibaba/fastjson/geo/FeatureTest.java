@@ -1,13 +1,16 @@
-package com.alibaba.json.bvt.geo;
+package com.alibaba.fastjson.geo;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.support.geo.Feature;
 import com.alibaba.fastjson.support.geo.Geometry;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class FeatureTest
-        extends TestCase {
-    public void test_geo() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class FeatureTest {
+    @Test
+    public void test_geo() {
         String str = "{\n" +
                 "    \"type\": \"Feature\",\n" +
                 "    \"bbox\": [-10.0, -10.0, 10.0, 10.0],\n" +
@@ -33,6 +36,7 @@ public class FeatureTest
         assertEquals(str2, JSON.toJSONString(JSON.parseObject(str2, Geometry.class)));
     }
 
+    @Test
     public void test_geo_1() throws Exception {
         String str = "{\n" +
                 "    \"type\": \"Feature\",\n" +
