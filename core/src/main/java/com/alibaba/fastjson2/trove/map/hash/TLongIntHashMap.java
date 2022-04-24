@@ -137,9 +137,9 @@ public class TLongIntHashMap {
                 {
                     int oldCapacity = _set.length;
 
-                    long oldKeys[] = _set;
-                    int oldVals[] = _values;
-                    byte oldStates[] = _states;
+                    long[] oldKeys = _set;
+                    int[] oldVals = _values;
+                    byte[] oldStates = _states;
 
                     _set = new long[newCapacity];
                     _values = new int[newCapacity];
