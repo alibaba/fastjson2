@@ -352,9 +352,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             }
 
             beanInfo.namingStrategy =
-                    jsonType
-                            .naming()
-                            .name();
+                    jsonType.naming().name();
 
             for (JSONReader.Feature feature : jsonType.readFeatures()) {
                 beanInfo.readerFeatures |= feature.mask;
@@ -604,12 +602,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             }
 
             String jsonFieldName = jsonField.name();
-            if (jsonFieldName != null && !jsonFieldName.isEmpty()) {
+            if (!jsonFieldName.isEmpty()) {
                 fieldInfo.fieldName = jsonFieldName;
             }
 
             String jsonFieldFormat = jsonField.format();
-            if (jsonFieldFormat != null && !jsonFieldFormat.isEmpty()) {
+            if (!jsonFieldFormat.isEmpty()) {
                 if (jsonFieldFormat.indexOf('T') != -1 && !jsonFieldFormat.contains("'T'")) {
                     jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
                 }
