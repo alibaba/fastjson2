@@ -35,7 +35,7 @@ final class ObjectReaderImplMapString extends ObjectReaderImplMapTyped {
         Map<String, Object> object
                 = instanceType == HashMap.class
                 ? new HashMap<>()
-                : (Map) createInstance();
+                : (Map) createInstance(jsonReader.getContext().getFeatures() | features);
 
         for (; ; ) {
             if (jsonReader.nextIfMatch('}')) {

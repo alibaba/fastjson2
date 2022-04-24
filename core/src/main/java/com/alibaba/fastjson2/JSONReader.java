@@ -100,6 +100,10 @@ public abstract class JSONReader implements Closeable {
         return context;
     }
 
+    public long features(long features) {
+        return context.features | features;
+    }
+
     public void handleResolveTasks(Object root) {
         if (resolveTasks == null) {
             return;
@@ -2002,14 +2006,15 @@ public abstract class JSONReader implements Closeable {
     }
 
     public enum Feature {
-        FieldBased(1),
-        SupportArrayToBean(1 << 1),
-        InitStringFieldAsEmpty(1 << 2),
-        SupportAutoType(1 << 3),
-        SupportSmartMatch(1 << 4),
-        UseNativeObject(1 << 4),
-        SupportClassForName(1 << 5),
-        IgnoreSetNullValue(1 << 6),
+        FieldBased                      (1),
+        SupportArrayToBean              (1 << 1),
+        InitStringFieldAsEmpty          (1 << 2),
+        SupportAutoType                 (1 << 3),
+        SupportSmartMatch               (1 << 4),
+        UseNativeObject                 (1 << 5),
+        SupportClassForName             (1 << 6),
+        IgnoreSetNullValue              (1 << 7),
+        UseDefaultConstructorAsPossible (1 << 8),
         ;
 
         public final long mask;

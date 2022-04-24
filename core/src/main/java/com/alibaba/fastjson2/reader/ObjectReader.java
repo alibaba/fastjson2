@@ -19,6 +19,15 @@ public interface ObjectReader<T> {
      * @throws UnsupportedOperationException If the method is not overloaded or otherwise
      */
     default T createInstance() {
+        return createInstance(0);
+    }
+
+    /**
+     * @return {@link T}
+     * @throws UnsupportedOperationException If the method is not overloaded or otherwise
+     * @param features
+     */
+    default T createInstance(long features) {
         throw new UnsupportedOperationException();
     }
 
@@ -58,7 +67,7 @@ public interface ObjectReader<T> {
             }
         }
 
-        T object = createInstance();
+        T object = createInstance(0L);
         for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             FieldReader fieldReader = getFieldReader(
                     entry.getKey().toString()
@@ -240,14 +249,14 @@ public interface ObjectReader<T> {
             }
 
             if (object == null) {
-                object = createInstance();
+                object = createInstance(jsonReader.getContext().getFeatures() | features);
             }
 
             fieldReader.readFieldValue(jsonReader, object);
         }
 
         if (object == null) {
-            object = createInstance();
+            object = createInstance(jsonReader.getContext().getFeatures() | features);
         }
 
         return object;
@@ -295,7 +304,7 @@ public interface ObjectReader<T> {
         for (int i = 0; ; i++) {
             if (jsonReader.nextIfMatch('}')) {
                 if (object == null) {
-                    object = createInstance();
+                    object = createInstance(jsonReader.getContext().getFeatures() | features);
                 }
                 break;
             }
@@ -352,7 +361,7 @@ public interface ObjectReader<T> {
             }
 
             if (object == null) {
-                object = createInstance();
+                object = createInstance(jsonReader.getContext().getFeatures() | features);
             }
 
             fieldReader.readFieldValue(jsonReader, object);

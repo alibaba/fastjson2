@@ -79,7 +79,7 @@ class ObjectReaderImplMapTyped implements ObjectReader {
     }
 
     @Override
-    public Object createInstance() {
+    public Object createInstance(long features) {
         if (instanceType != null && !instanceType.isInterface()) {
             try {
                 return instanceType.newInstance();
@@ -122,7 +122,7 @@ class ObjectReaderImplMapTyped implements ObjectReader {
 
         Map object;
         if (objectReader != null) {
-            object = (Map) objectReader.createInstance();
+            object = (Map) objectReader.createInstance(jsonReader.getContext().getFeatures() | features);
         } else {
             object = instanceType == HashMap.class
                     ? new HashMap<>()
@@ -209,7 +209,7 @@ class ObjectReaderImplMapTyped implements ObjectReader {
         Map object
                 = instanceType == HashMap.class
                 ? new HashMap<>()
-                : (Map) createInstance();
+                : (Map) createInstance(jsonReader.getContext().getFeatures() | features);
 
         for (; ; ) {
             if (jsonReader.nextIfMatch('}')) {

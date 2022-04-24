@@ -131,7 +131,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
     }
 
     @Override
-    public Object createInstance() {
+    public Object createInstance(long features) {
         if (instanceType == HashMap.class) {
             return new HashMap<>();
         }
@@ -336,7 +336,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
                 throw new JSONException("create object instance error, objectClass " + objectClass.getName());
             }
         } else {
-            object = (Map) createInstance();
+            object = (Map) createInstance(jsonReader.getContext().getFeatures() | features);
         }
 
         boolean match = jsonReader.nextIfMatch('{');
