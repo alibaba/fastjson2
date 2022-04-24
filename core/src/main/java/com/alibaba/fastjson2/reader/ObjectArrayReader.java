@@ -88,6 +88,13 @@ public final class ObjectArrayReader extends ObjectReaderBaseModule.PrimitiveImp
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
+        if (jsonReader.getType() == BC_TYPED_ANY) {
+            ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object[].class, TYPE_HASH_CODE, features);
+            if (autoTypeObjectReader != this) {
+                return autoTypeObjectReader.readJSONBObject(jsonReader, features);
+            }
+        }
+
         int itemCnt = jsonReader.startArray();
         if (itemCnt == -1) {
             return null;
