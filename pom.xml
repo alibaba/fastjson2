@@ -77,7 +77,7 @@
     <modules>
         <module>core</module>
         <module>extension</module>
-        <module>fastjson1_compatible</module>
+        <module>fastjson1-compatible</module>
     </modules>
 
     <properties>
