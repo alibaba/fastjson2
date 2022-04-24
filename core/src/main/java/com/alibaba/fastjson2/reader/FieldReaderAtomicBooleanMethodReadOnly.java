@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -14,6 +15,10 @@ final class FieldReaderAtomicBooleanMethodReadOnly<T>
     FieldReaderAtomicBooleanMethodReadOnly(String fieldName, Class fieldClass, int ordinal, Method method) {
         super(fieldName, fieldClass, fieldClass, ordinal, 0, null);
         this.method = method;
+    }
+
+    public Method getMethod() {
+        return method;
     }
 
     @Override

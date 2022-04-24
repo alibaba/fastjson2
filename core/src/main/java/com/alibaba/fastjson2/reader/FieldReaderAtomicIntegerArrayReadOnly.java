@@ -7,11 +7,15 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 final class FieldReaderAtomicIntegerArrayReadOnly<T> extends FieldReaderImpl<T> {
-    final Method setter;
+    final Method method;
 
-    FieldReaderAtomicIntegerArrayReadOnly(String fieldName, Class fieldType, int ordinal, Method setter) {
+    FieldReaderAtomicIntegerArrayReadOnly(String fieldName, Class fieldType, int ordinal, Method method) {
         super(fieldName, fieldType, fieldType, ordinal, 0, null);
-        this.setter = setter;
+        this.method = method;
+    }
+
+    public Method getMethod() {
+        return method;
     }
 
     @Override
@@ -27,7 +31,7 @@ final class FieldReaderAtomicIntegerArrayReadOnly<T> extends FieldReaderImpl<T> 
 
         AtomicIntegerArray atomic;
         try {
-            atomic = (AtomicIntegerArray) setter.invoke(object);
+            atomic = (AtomicIntegerArray) method.invoke(object);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
@@ -48,6 +52,6 @@ final class FieldReaderAtomicIntegerArrayReadOnly<T> extends FieldReaderImpl<T> 
 
     @Override
     public String toString() {
-        return setter.getName();
+        return method.getName();
     }
 }

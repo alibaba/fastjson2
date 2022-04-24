@@ -19,6 +19,10 @@ final class FieldReaderAtomicReferenceMethodReadOnly<T>
         this.method = method;
     }
 
+    public Method getMethod() {
+        return method;
+    }
+
     @Override
     public boolean isReadOnly() {
         return true;

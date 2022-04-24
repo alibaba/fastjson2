@@ -20,6 +20,10 @@ final class FieldReaderAtomicReferenceField<T>
         readOnly = Modifier.isFinal(field.getModifiers());
     }
 
+    public Field getField() {
+        return field;
+    }
+
     @Override
     public boolean isReadOnly() {
         return true;

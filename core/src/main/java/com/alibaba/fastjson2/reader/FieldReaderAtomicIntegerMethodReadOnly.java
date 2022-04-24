@@ -7,11 +7,15 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class FieldReaderAtomicIntegerMethodReadOnly<T> extends FieldReaderImpl<T> implements FieldReaderReadOnly<T> {
-    final Method setter;
+    final Method method;
 
-    FieldReaderAtomicIntegerMethodReadOnly(String fieldName, Class fieldType, int ordinal, Method setter) {
+    FieldReaderAtomicIntegerMethodReadOnly(String fieldName, Class fieldType, int ordinal, Method method) {
         super(fieldName, fieldType, fieldType, ordinal, 0, null);
-        this.setter = setter;
+        this.method = method;
+    }
+
+    public Method getMethod() {
+        return method;
     }
 
     @Override
@@ -26,7 +30,7 @@ class FieldReaderAtomicIntegerMethodReadOnly<T> extends FieldReaderImpl<T> imple
         }
 
         try {
-            AtomicInteger atomic = (AtomicInteger) setter.invoke(object);
+            AtomicInteger atomic = (AtomicInteger) method.invoke(object);
             atomic.set((Integer) value);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
@@ -41,6 +45,6 @@ class FieldReaderAtomicIntegerMethodReadOnly<T> extends FieldReaderImpl<T> imple
 
     @Override
     public String toString() {
-        return setter.getName();
+        return method.getName();
     }
 }
