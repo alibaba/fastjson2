@@ -30,11 +30,11 @@ public class ObjectReaderProvider {
     static Consumer<Class> DEFAULT_AUTO_TYPE_HANDLER;
     static boolean DEFAULT_AUTO_TYPE_HANDLER_INIT_ERROR;
 
-    static  {
+    static {
         {
             String property = System.getProperty(PROPERTY_DENY_PROPERTY);
             if (property == null) {
-                property= JSONFactory.getProperty(PROPERTY_DENY_PROPERTY);
+                property = JSONFactory.getProperty(PROPERTY_DENY_PROPERTY);
             }
             if (property != null && property.length() > 0) {
                 DENYS = property.split(",");
@@ -377,7 +377,7 @@ public class ObjectReaderProvider {
         if (clazz != null) {
             if (expectClass != null
                     && expectClass != Object.class
-                    &&  clazz != java.util.HashMap.class
+                    && clazz != java.util.HashMap.class
                     && !expectClass.isAssignableFrom(clazz)
             ) {
                 throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());

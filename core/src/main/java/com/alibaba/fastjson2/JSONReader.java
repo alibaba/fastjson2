@@ -128,7 +128,7 @@ public abstract class JSONReader implements Closeable {
                 previous = fieldValue;
             }
 
-            Object resolvedName= resolveTask.name;
+            Object resolvedName = resolveTask.name;
             Object resolvedObject = resolveTask.object;
 
             if (resolvedName != null) {
@@ -406,8 +406,11 @@ public abstract class JSONReader implements Closeable {
     }
 
     public abstract long readFieldNameHashCode();
+
     public abstract long getNameHashCodeLCase();
+
     public abstract String readFieldName();
+
     public abstract String getFieldName();
 
     public void setTypeRedirect(boolean typeRedirect) {
@@ -471,7 +474,7 @@ public abstract class JSONReader implements Closeable {
         switch (valueType) {
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    return negative ? -mag3 :mag3;
+                    return negative ? -mag3 : mag3;
                 }
                 return getNumber().intValue();
             case JSON_TYPE_DEC:
@@ -524,7 +527,7 @@ public abstract class JSONReader implements Closeable {
         switch (valueType) {
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    return Long.valueOf(negative ? -mag3 :mag3);
+                    return Long.valueOf(negative ? -mag3 : mag3);
                 }
                 int[] mag;
                 if (mag0 == 0) {
@@ -540,12 +543,12 @@ public abstract class JSONReader implements Closeable {
                             long v23 = (v2 << 32) + (v3);
                             return negative ? -v23 : v23;
                         }
-                        mag = new int[] {mag2, mag3};
+                        mag = new int[]{mag2, mag3};
                     } else {
-                        mag = new int[] {mag1, mag2, mag3};
+                        mag = new int[]{mag1, mag2, mag3};
                     }
                 } else {
-                    mag = new int[] {mag0, mag1, mag2, mag3};
+                    mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
                 return getBigInt(negative, mag).longValue();
@@ -747,7 +750,7 @@ public abstract class JSONReader implements Closeable {
                 LocalDateTime date = readLocalDate8();
                 if (date != null) {
                     return ZonedDateTime.of(date
-                                    , context.getZoneId())
+                            , context.getZoneId())
                             .toInstant()
                             .toEpochMilli();
                 }
@@ -760,7 +763,7 @@ public abstract class JSONReader implements Closeable {
                 }
 
                 return ZonedDateTime.of(date
-                                , context.getZoneId())
+                        , context.getZoneId())
                         .toInstant()
                         .toEpochMilli();
             }
@@ -768,7 +771,7 @@ public abstract class JSONReader implements Closeable {
                 LocalDateTime date = readLocalDate10();
                 if (date != null) {
                     return ZonedDateTime.of(date
-                                    , context.getZoneId())
+                            , context.getZoneId())
                             .toInstant()
                             .toEpochMilli();
                 }
@@ -781,40 +784,40 @@ public abstract class JSONReader implements Closeable {
             case 11: {
                 LocalDateTime date = readLocalDate11();
                 return ZonedDateTime.of(date
-                                , context.getZoneId())
+                        , context.getZoneId())
                         .toInstant()
                         .toEpochMilli();
             }
             case 16: {
                 LocalDateTime date = readLocalDateTime16();
                 return ZonedDateTime.of(date
-                                , context.getZoneId())
+                        , context.getZoneId())
                         .toInstant()
                         .toEpochMilli();
             }
             case 17: {
                 LocalDateTime ldt = readLocalDateTime17();
                 return ZonedDateTime.of(ldt
-                                , context.getZoneId())
+                        , context.getZoneId())
                         .toInstant()
                         .toEpochMilli();
             }
             case 18: {
                 LocalDateTime date = readLocalDateTime18();
                 return ZonedDateTime.of(date
-                                , context.getZoneId())
+                        , context.getZoneId())
                         .toInstant()
                         .toEpochMilli();
             }
             case 19: {
                 LocalDateTime date = readLocalDateTime19();
                 return ZonedDateTime.of(date
-                                , context.getZoneId())
+                        , context.getZoneId())
                         .toInstant()
                         .toEpochMilli();
             }
             default:
-               break;
+                break;
         }
 
         if (len >= 20) {
@@ -859,47 +862,47 @@ public abstract class JSONReader implements Closeable {
         throw new JSONException("TODO : " + str + ", len : " + len);
     }
 
-    protected LocalDateTime readLocalDateTime16 () {
+    protected LocalDateTime readLocalDateTime16() {
         throw new UnsupportedOperationException();
     }
 
-    protected LocalDateTime readLocalDateTime17 () {
+    protected LocalDateTime readLocalDateTime17() {
         throw new UnsupportedOperationException();
     }
 
-    protected LocalDateTime readLocalDateTime18 () {
+    protected LocalDateTime readLocalDateTime18() {
         throw new UnsupportedOperationException();
     }
 
-    protected abstract LocalDateTime readLocalDateTime19 ();
+    protected abstract LocalDateTime readLocalDateTime19();
 
     protected abstract LocalDateTime readLocalDateTimeX(int len);
 
-    protected abstract LocalTime readLocalTime8 ();
+    protected abstract LocalTime readLocalTime8();
 
-    protected LocalTime readLocalTime10 () {
+    protected LocalTime readLocalTime10() {
         throw new UnsupportedOperationException();
     }
 
-    protected LocalTime readLocalTime11 () {
+    protected LocalTime readLocalTime11() {
         throw new UnsupportedOperationException();
     }
 
-    protected abstract LocalTime readLocalTime12 ();
+    protected abstract LocalTime readLocalTime12();
 
-    protected abstract LocalTime readLocalTime18 ();
+    protected abstract LocalTime readLocalTime18();
 
-    protected abstract LocalDateTime readLocalDate8 ();
+    protected abstract LocalDateTime readLocalDate8();
 
-    protected abstract LocalDateTime readLocalDate9 ();
+    protected abstract LocalDateTime readLocalDate9();
 
-    protected abstract LocalDateTime readLocalDate10 ();
+    protected abstract LocalDateTime readLocalDate10();
 
-    protected LocalDateTime readLocalDate11 () {
+    protected LocalDateTime readLocalDate11() {
         throw new UnsupportedOperationException();
     }
 
-    protected ZonedDateTime readZonedDateTimeX (int len) {
+    protected ZonedDateTime readZonedDateTimeX(int len) {
         throw new UnsupportedOperationException();
     }
 
@@ -955,7 +958,7 @@ public abstract class JSONReader implements Closeable {
             }
         }
 
-        for (;;) {
+        for (; ; ) {
             if (ch == '}') {
                 next();
                 break;
@@ -1110,7 +1113,7 @@ public abstract class JSONReader implements Closeable {
         List list = new JSONArray();
 
         _for:
-        for (;;) {
+        for (; ; ) {
             Object val;
             switch (ch) {
                 case ']':
@@ -1179,7 +1182,7 @@ public abstract class JSONReader implements Closeable {
         switch (valueType) {
             case JSON_TYPE_INT: {
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    return BigDecimal.valueOf(negative ? -mag3 :mag3);
+                    return BigDecimal.valueOf(negative ? -mag3 : mag3);
                 }
                 int[] mag;
                 if (mag0 == 0) {
@@ -1191,12 +1194,12 @@ public abstract class JSONReader implements Closeable {
                             long v23 = (v2 << 32) + (v3);
                             return BigDecimal.valueOf(negative ? -v23 : v23);
                         }
-                        mag = new int[] {mag2, mag3};
+                        mag = new int[]{mag2, mag3};
                     } else {
-                        mag = new int[] {mag1, mag2, mag3};
+                        mag = new int[]{mag1, mag2, mag3};
                     }
                 } else {
-                    mag = new int[] {mag0, mag1, mag2, mag3};
+                    mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
                 return new BigDecimal(getBigInt(negative, mag));
@@ -1232,7 +1235,7 @@ public abstract class JSONReader implements Closeable {
         switch (valueType) {
             case JSON_TYPE_INT: {
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    return negative ? -mag3 :mag3;
+                    return negative ? -mag3 : mag3;
                 }
                 int[] mag;
                 if (mag0 == 0) {
@@ -1244,12 +1247,12 @@ public abstract class JSONReader implements Closeable {
                             long v23 = (v2 << 32) + (v3);
                             return negative ? -v23 : v23;
                         }
-                        mag = new int[] {mag2, mag3};
+                        mag = new int[]{mag2, mag3};
                     } else {
-                        mag = new int[] {mag1, mag2, mag3};
+                        mag = new int[]{mag1, mag2, mag3};
                     }
                 } else {
-                    mag = new int[] {mag0, mag1, mag2, mag3};
+                    mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
                 return getBigInt(negative, mag);
@@ -1300,14 +1303,14 @@ public abstract class JSONReader implements Closeable {
         final int bitLength;
         if (mag.length == 0) {
             bitLength = 0; // offset by one to initialize
-        }  else {
+        } else {
             // Calculate the bit length of the magnitude
             int bitLengthForInt = 32 - Integer.numberOfLeadingZeros(mag[0]);
             int magBitLength = ((mag.length - 1) << 5) + bitLengthForInt;
             if (signum < 0) {
                 // Check if magnitude is a power of two
                 boolean pow2 = (Integer.bitCount(mag[0]) == 1);
-                for (int i=1; i< mag.length && pow2; i++) {
+                for (int i = 1; i < mag.length && pow2; i++) {
                     pow2 = (mag[i] == 0);
                 }
                 bitLength = (pow2 ? magBitLength - 1 : magBitLength);
@@ -1352,7 +1355,7 @@ public abstract class JSONReader implements Closeable {
                 nextInt >>>= 8;
                 bytesCopied++;
             }
-            bytes[i] = (byte)nextInt;
+            bytes[i] = (byte) nextInt;
         }
 
         return new BigInteger(bytes);
@@ -1534,7 +1537,7 @@ public abstract class JSONReader implements Closeable {
                 throw new JSONException("illegal input utf16 bytes, length " + off);
             }
 
-            char[] chars = new char[off/2];
+            char[] chars = new char[off / 2];
             for (int i = 0, j = 0; i < off; i += 2, ++j) {
                 byte c0 = bytes[i];
                 byte c1 = bytes[i + 1];
@@ -1698,19 +1701,19 @@ public abstract class JSONReader implements Closeable {
                 switch (i) {
                     case 0:
                         product = ylong * (mag0 & LONG_MASK) + carry;
-                        mag0 = (int)product;
+                        mag0 = (int) product;
                         break;
                     case 1:
                         product = ylong * (mag1 & LONG_MASK) + carry;
-                        mag1 = (int)product;
+                        mag1 = (int) product;
                         break;
                     case 2:
                         product = ylong * (mag2 & LONG_MASK) + carry;
-                        mag2 = (int)product;
+                        mag2 = (int) product;
                         break;
                     case 3:
                         product = ylong * (mag3 & LONG_MASK) + carry;
-                        mag3 = (int)product;
+                        mag3 = (int) product;
                         break;
                     default:
                         throw new ArithmeticException("BigInteger would overflow supported range");
@@ -1728,19 +1731,19 @@ public abstract class JSONReader implements Closeable {
                 switch (i) {
                     case 0:
                         sum = (mag0 & LONG_MASK) + carry;
-                        mag0 = (int)sum;
+                        mag0 = (int) sum;
                         break;
                     case 1:
                         sum = (mag1 & LONG_MASK) + carry;
-                        mag1 = (int)sum;
+                        mag1 = (int) sum;
                         break;
                     case 2:
                         sum = (mag2 & LONG_MASK) + carry;
-                        mag2 = (int)sum;
+                        mag2 = (int) sum;
                         break;
                     case 3:
                         sum = (mag3 & LONG_MASK) + carry;
-                        mag3 = (int)sum;
+                        mag3 = (int) sum;
                         break;
                     default:
                         throw new ArithmeticException("BigInteger would overflow supported range");
@@ -1837,19 +1840,19 @@ public abstract class JSONReader implements Closeable {
                 switch (i) {
                     case 0:
                         product = ylong * (mag0 & LONG_MASK) + carry;
-                        mag0 = (int)product;
+                        mag0 = (int) product;
                         break;
                     case 1:
                         product = ylong * (mag1 & LONG_MASK) + carry;
-                        mag1 = (int)product;
+                        mag1 = (int) product;
                         break;
                     case 2:
                         product = ylong * (mag2 & LONG_MASK) + carry;
-                        mag2 = (int)product;
+                        mag2 = (int) product;
                         break;
                     case 3:
                         product = ylong * (mag3 & LONG_MASK) + carry;
-                        mag3 = (int)product;
+                        mag3 = (int) product;
                         break;
                     default:
                         throw new ArithmeticException("BigInteger would overflow supported range");
@@ -1866,19 +1869,19 @@ public abstract class JSONReader implements Closeable {
                 switch (i) {
                     case 0:
                         sum = (mag0 & LONG_MASK) + carry;
-                        mag0 = (int)sum;
+                        mag0 = (int) sum;
                         break;
                     case 1:
                         sum = (mag1 & LONG_MASK) + carry;
-                        mag1 = (int)sum;
+                        mag1 = (int) sum;
                         break;
                     case 2:
                         sum = (mag2 & LONG_MASK) + carry;
-                        mag2 = (int)sum;
+                        mag2 = (int) sum;
                         break;
                     case 3:
                         sum = (mag3 & LONG_MASK) + carry;
-                        mag3 = (int)sum;
+                        mag3 = (int) sum;
                         break;
                     default:
                         throw new ArithmeticException("BigInteger would overflow supported range");
@@ -1999,14 +2002,14 @@ public abstract class JSONReader implements Closeable {
     }
 
     public enum Feature {
-        FieldBased              (1),
-        SupportArrayToBean      (1 << 1),
-        InitStringFieldAsEmpty  (1 << 2),
-        SupportAutoType         (1 << 3),
-        SupportSmartMatch       (1 << 4),
-        UseNativeObject         (1 << 4),
-        SupportClassForName     (1 << 5),
-        IgnoreSetNullValue      (1 << 6),
+        FieldBased(1),
+        SupportArrayToBean(1 << 1),
+        InitStringFieldAsEmpty(1 << 2),
+        SupportAutoType(1 << 3),
+        SupportSmartMatch(1 << 4),
+        UseNativeObject(1 << 4),
+        SupportClassForName(1 << 5),
+        IgnoreSetNullValue(1 << 6),
         ;
 
         public final long mask;
@@ -2127,7 +2130,7 @@ public abstract class JSONReader implements Closeable {
                 && S7 >= '0' && S7 <= '9'
                 && S8 >= '0' && S8 <= '9'
         ) {
-            nanos = (S0 - '0')   * 1000_000_00
+            nanos = (S0 - '0') * 1000_000_00
                     + (S1 - '0') * 1000_000_0
                     + (S2 - '0') * 1000_000
                     + (S3 - '0') * 1000_00

@@ -38,5 +38,5 @@ public interface TLongIntProcedure {
      * @return true if additional invocations of the procedure are
      * allowed.
      */
-    boolean execute( long a, int b );
+    boolean execute(long a, int b);
 }

@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;

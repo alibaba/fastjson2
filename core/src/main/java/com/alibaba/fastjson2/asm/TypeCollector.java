@@ -9,8 +9,8 @@ import java.util.Map;
 public class TypeCollector {
     static final String JSON_TYPE = ASMUtils.desc(JSONType.class);
     static final Map<String, String> PRIMITIVES;
-    static
-    {
+
+    static {
         HashMap map = new HashMap();
         map.put("int", "I");
         map.put("boolean", "Z");

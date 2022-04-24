@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+
 import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
 import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
 
@@ -393,15 +394,15 @@ public abstract class JSONWriter implements Closeable {
 
     public static JSONWriter ofJSONB() {
         return new JSONWriterJSONB(
-                    new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider)
-                    , null
+                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider)
+                , null
         );
     }
 
     public static JSONWriter ofJSONB(JSONB.SymbolTable symbolTable) {
         return new JSONWriterJSONB(
-                    new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider)
-                    , symbolTable
+                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider)
+                , symbolTable
         );
     }
 
@@ -465,7 +466,7 @@ public abstract class JSONWriter implements Closeable {
         throw new UnsupportedOperationException();
     }
 
-    public void writeNameRaw(byte[] bytes, int offset ,int len) {
+    public void writeNameRaw(byte[] bytes, int offset, int len) {
         throw new UnsupportedOperationException();
     }
 
@@ -485,7 +486,7 @@ public abstract class JSONWriter implements Closeable {
         throw new UnsupportedOperationException();
     }
 
-    public void writeNameRaw(char[] bytes, int offset ,int len) {
+    public void writeNameRaw(char[] bytes, int offset, int len) {
         throw new UnsupportedOperationException();
     }
 
@@ -1047,25 +1048,25 @@ public abstract class JSONWriter implements Closeable {
         char[] chars = new char[len];
 
         chars[0] = '"';
-        chars[1] = (char) (year/1000 + '0');
-        chars[2] = (char) ((year/100)%10 + '0');
-        chars[3] = (char) ((year/10)%10 + '0');
-        chars[4] = (char) (year%10 + '0');
+        chars[1] = (char) (year / 1000 + '0');
+        chars[2] = (char) ((year / 100) % 10 + '0');
+        chars[3] = (char) ((year / 10) % 10 + '0');
+        chars[4] = (char) (year % 10 + '0');
         chars[5] = '-';
-        chars[6] = (char) (month/10 + '0');
-        chars[7] = (char) (month%10 + '0');
+        chars[6] = (char) (month / 10 + '0');
+        chars[7] = (char) (month % 10 + '0');
         chars[8] = '-';
-        chars[9] = (char) (dayOfMonth/10 + '0');
-        chars[10] = (char) (dayOfMonth%10 + '0');
+        chars[9] = (char) (dayOfMonth / 10 + '0');
+        chars[10] = (char) (dayOfMonth % 10 + '0');
         chars[11] = 'T';
-        chars[12] = (char) (hour/10 + '0');
-        chars[13] = (char) (hour%10 + '0');
+        chars[12] = (char) (hour / 10 + '0');
+        chars[13] = (char) (hour % 10 + '0');
         chars[14] = ':';
-        chars[15] = (char) (minute/10 + '0');
-        chars[16] = (char) (minute%10 + '0');
+        chars[15] = (char) (minute / 10 + '0');
+        chars[16] = (char) (minute % 10 + '0');
         chars[17] = ':';
-        chars[18] = (char) (second/10 + '0');
-        chars[19] = (char) (second%10 + '0');
+        chars[18] = (char) (second / 10 + '0');
+        chars[19] = (char) (second % 10 + '0');
         if (millislen > 0) {
             chars[20] = '.';
             Arrays.fill(chars, 21, 20 + millislen, '0');
@@ -1124,14 +1125,14 @@ public abstract class JSONWriter implements Closeable {
     public void writeTimeHHMMSS8(int hour, int minute, int second) {
         char[] chars = new char[8];
 
-        chars[0] = (char) (hour/10 + '0');
-        chars[1] = (char) (hour%10 + '0');
+        chars[0] = (char) (hour / 10 + '0');
+        chars[1] = (char) (hour % 10 + '0');
         chars[2] = ':';
-        chars[3] = (char) (minute/10 + '0');
-        chars[4] = (char) (minute%10 + '0');
+        chars[3] = (char) (minute / 10 + '0');
+        chars[4] = (char) (minute % 10 + '0');
         chars[5] = ':';
-        chars[6] = (char) (second/10 + '0');
-        chars[7] = (char) (second%10 + '0');
+        chars[6] = (char) (second / 10 + '0');
+        chars[7] = (char) (second % 10 + '0');
 
         writeString(chars);
     }
@@ -1152,7 +1153,7 @@ public abstract class JSONWriter implements Closeable {
     public void write(Map map) {
         write0('{');
         boolean first = true;
-        for (Iterator<Map.Entry> it = map.entrySet().iterator();it.hasNext();) {
+        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
             if (!first) {
                 write0(',');
             }
@@ -1374,26 +1375,25 @@ public abstract class JSONWriter implements Closeable {
     }
 
     public enum Feature {
-        FieldBased                              (1),
-        BeanToArray                             (1 << 1),
-        WriteNulls                              (1 << 2),
-        BrowserCompatible                       (1 << 3),
-        NullAsDefaultValue                      (1 << 4),
-        WriteBooleanAsNumber                    (1 << 5),
-        WriteNonStringValueAsString             (1 << 6),
+        FieldBased(1),
+        BeanToArray(1 << 1),
+        WriteNulls(1 << 2),
+        BrowserCompatible(1 << 3),
+        NullAsDefaultValue(1 << 4),
+        WriteBooleanAsNumber(1 << 5),
+        WriteNonStringValueAsString(1 << 6),
 
-        WriteClassName                          (1 << 7),
-        NotWriteRootClassName                   (1 << 8),
-        NotWriteHashMapArrayListClassName       (1 << 9),
-        NotWriteDefaultValue                    (1 << 10),
+        WriteClassName(1 << 7),
+        NotWriteRootClassName(1 << 8),
+        NotWriteHashMapArrayListClassName(1 << 9),
+        NotWriteDefaultValue(1 << 10),
 
-        WriteEnumsUsingName                     (1 << 11),
-        WriteEnumUsingToString                  (1 << 12),
-        IgnoreErrorGetter                       (1 << 13),
-        PrettyFormat                            (1 << 14),
-        ReferenceDetection                      (1 << 15),
-        WriteNameAsSymbol                       (1 << 16)
-        ;
+        WriteEnumsUsingName(1 << 11),
+        WriteEnumUsingToString(1 << 12),
+        IgnoreErrorGetter(1 << 13),
+        PrettyFormat(1 << 14),
+        ReferenceDetection(1 << 15),
+        WriteNameAsSymbol(1 << 16);
 
         public final long mask;
 
@@ -1459,12 +1459,12 @@ public abstract class JSONWriter implements Closeable {
                     items = Arrays.copyOf(items, items.length + 4);
                 }
                 items[level] = p;
-                level ++;
+                level++;
             }
 
             boolean ascii = true;
 
-            for (int i = level - 1; i >= 0 ; i--) {
+            for (int i = level - 1; i >= 0; i--) {
                 Path item = items[i];
                 String name = item.name;
                 if (name == null) {

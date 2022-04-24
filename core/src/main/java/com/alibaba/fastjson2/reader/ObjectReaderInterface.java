@@ -28,6 +28,6 @@ public final class ObjectReaderInterface<T> extends ObjectReaderAdapter<T> {
         }
 
         JSONObject object = jsonReader.read(JSONObject.class);
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[] {objectClass}, object);
+        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
     }
 }

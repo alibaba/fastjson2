@@ -89,8 +89,8 @@ class JSONReaderUTF8 extends JSONReader {
                     throw new JSONException("malformed input around byte " + (offset - 1));
                 }
                 ch = (char)
-                        (((c    & 0x0F) << 12) |
-                                ((char2 & 0x3F) << 6)  |
+                        (((c & 0x0F) << 12) |
+                                ((char2 & 0x3F) << 6) |
                                 ((char3 & 0x3F) << 0));
                 break;
             }
@@ -147,9 +147,9 @@ class JSONReaderUTF8 extends JSONReader {
                     throw new JSONException("malformed input around byte " + (offset - 1));
                 }
                 ch = (char)
-                        (((c    & 0x0F) << 12) |
-                        ((char2 & 0x3F) << 6)  |
-                        ((char3 & 0x3F) << 0));
+                        (((c & 0x0F) << 12) |
+                                ((char2 & 0x3F) << 6) |
+                                ((char3 & 0x3F) << 0));
                 break;
             }
             default:
@@ -184,16 +184,16 @@ class JSONReaderUTF8 extends JSONReader {
                         ch = char2(c1, c2);
                         break;
                     }
-                    case '.' :
-                    case '-' :
-                    case '+' :
-                    case '*' :
-                    case '/' :
-                    case '>' :
-                    case '<' :
-                    case '=' :
-                    case '@' :
-                    case ':' :
+                    case '.':
+                    case '-':
+                    case '+':
+                    case '*':
+                    case '/':
+                    case '>':
+                    case '<':
+                    case '=':
+                    case '@':
+                    case ':':
                         break;
                     default:
                         ch = char1(ch);
@@ -215,13 +215,13 @@ class JSONReaderUTF8 extends JSONReader {
                 case '\b':
                 case '.':
                 case '-':
-                case '+' :
-                case '*' :
-                case '/' :
-                case '>' :
-                case '<' :
-                case '=' :
-                case '!' :
+                case '+':
+                case '*':
+                case '/':
+                case '>':
+                case '<':
+                case '=':
+                case '!':
                 case '[':
                 case ']':
                 case '{':
@@ -281,7 +281,7 @@ class JSONReaderUTF8 extends JSONReader {
                         ch = char2(c1, c2);
                         break;
                     }
-                    case '.' :
+                    case '.':
                         break;
                     default:
                         ch = char1(ch);
@@ -303,13 +303,13 @@ class JSONReaderUTF8 extends JSONReader {
                 case '\b':
                 case '.':
                 case '-':
-                case '+' :
-                case '*' :
-                case '/' :
-                case '>' :
-                case '<' :
-                case '=' :
-                case '!' :
+                case '+':
+                case '*':
+                case '/':
+                case '>':
+                case '<':
+                case '=':
+                case '!':
                 case '[':
                 case ']':
                 case '{':
@@ -503,7 +503,7 @@ class JSONReaderUTF8 extends JSONReader {
                 this.nameEnd = offset;
                 offset++;
                 if (offset == end) {
-                   c = EOI;
+                    c = EOI;
                 } else {
                     c = bytes[offset];
                 }
@@ -569,20 +569,20 @@ class JSONReaderUTF8 extends JSONReader {
                             int c4 = bytes[offset++];
                             int uc = ((c << 18) ^
                                     (c2 << 12) ^
-                                    (c3 <<  6) ^
-                                    (c4 ^   (((byte) 0xF0 << 18) ^
+                                    (c3 << 6) ^
+                                    (c4 ^ (((byte) 0xF0 << 18) ^
                                             ((byte) 0x80 << 12) ^
-                                            ((byte) 0x80 <<  6) ^
-                                            ((byte) 0x80 <<  0))));
+                                            ((byte) 0x80 << 6) ^
+                                            ((byte) 0x80 << 0))));
 
                             if (((c2 & 0xc0) != 0x80 || (c3 & 0xc0) != 0x80 || (c4 & 0xc0) != 0x80) // isMalformed4
                                     ||
                                     // shortest form check
-                                    !(uc >= 0x010000 && uc <  0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
+                                    !(uc >= 0x010000 && uc < 0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
                             ) {
                                 throw new JSONException("malformed input around byte " + offset);
                             } else {
-                                char x1 =  (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
+                                char x1 = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
                                 char x2 = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
 
                                 hashCode ^= x1;
@@ -747,7 +747,7 @@ class JSONReaderUTF8 extends JSONReader {
         int offset = nameBegin;
         for (int i = 0; offset < nameEnd; ++i) {
             int c = bytes[offset];
-            if ( c < 0) {
+            if (c < 0) {
                 c &= 0xFF;
                 switch (c >> 4) {
                     case 12:
@@ -796,16 +796,16 @@ class JSONReaderUTF8 extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
-                    case '.' :
-                    case '-' :
-                    case '+' :
-                    case '*' :
-                    case '/' :
-                    case '>' :
-                    case '<' :
-                    case '=' :
-                    case '@' :
-                    case ':' :
+                    case '.':
+                    case '-':
+                    case '+':
+                    case '*':
+                    case '/':
+                    case '>':
+                    case '<':
+                    case '=':
+                    case '@':
+                    case ':':
                         break;
                     default:
                         c = char1(c);
@@ -1442,8 +1442,8 @@ class JSONReaderUTF8 extends JSONReader {
                         int c2 = bytes[offset++];
                         int c3 = bytes[offset++];
                         chars[i] = (char)
-                                (((c     & 0x0F) << 12) |
-                                        ((c2 & 0x3F) << 6)  |
+                                (((c & 0x0F) << 12) |
+                                        ((c2 & 0x3F) << 6) |
                                         ((c3 & 0x3F) << 0));
                         break;
                     }
@@ -1456,20 +1456,20 @@ class JSONReaderUTF8 extends JSONReader {
                             int c4 = bytes[offset++];
                             int uc = ((c << 18) ^
                                     (c2 << 12) ^
-                                    (c3 <<  6) ^
-                                    (c4 ^   (((byte) 0xF0 << 18) ^
+                                    (c3 << 6) ^
+                                    (c4 ^ (((byte) 0xF0 << 18) ^
                                             ((byte) 0x80 << 12) ^
-                                            ((byte) 0x80 <<  6) ^
-                                            ((byte) 0x80 <<  0))));
+                                            ((byte) 0x80 << 6) ^
+                                            ((byte) 0x80 << 0))));
 
                             if (((c2 & 0xc0) != 0x80 || (c3 & 0xc0) != 0x80 || (c4 & 0xc0) != 0x80) // isMalformed4
                                     ||
                                     // shortest form check
-                                    !(uc >= 0x010000 && uc <  0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
+                                    !(uc >= 0x010000 && uc < 0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
                             ) {
                                 throw new JSONException("malformed input around byte " + offset);
                             } else {
-                                chars[i++] =  (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
+                                chars[i++] = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
                                 chars[i] = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
                             }
 
@@ -1629,9 +1629,9 @@ class JSONReaderUTF8 extends JSONReader {
                                 int c2 = bytes[offset++];
                                 int c3 = bytes[offset++];
                                 chars[i] = (char)
-                                        (((c     & 0x0F) << 12) |
-                                        ((c2 & 0x3F) << 6)  |
-                                        ((c3 & 0x3F) << 0));
+                                        (((c & 0x0F) << 12) |
+                                                ((c2 & 0x3F) << 6) |
+                                                ((c3 & 0x3F) << 0));
                                 break;
                             }
                             default: {
@@ -1643,20 +1643,20 @@ class JSONReaderUTF8 extends JSONReader {
                                     int c4 = bytes[offset++];
                                     int uc = ((c << 18) ^
                                             (c2 << 12) ^
-                                            (c3 <<  6) ^
-                                            (c4 ^   (((byte) 0xF0 << 18) ^
+                                            (c3 << 6) ^
+                                            (c4 ^ (((byte) 0xF0 << 18) ^
                                                     ((byte) 0x80 << 12) ^
-                                                    ((byte) 0x80 <<  6) ^
-                                                    ((byte) 0x80 <<  0))));
+                                                    ((byte) 0x80 << 6) ^
+                                                    ((byte) 0x80 << 0))));
 
                                     if (((c2 & 0xc0) != 0x80 || (c3 & 0xc0) != 0x80 || (c4 & 0xc0) != 0x80) // isMalformed4
                                             ||
                                             // shortest form check
-                                            !(uc >= 0x010000 && uc <  0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
+                                            !(uc >= 0x010000 && uc < 0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
                                     ) {
                                         throw new JSONException("malformed input around byte " + offset);
                                     } else {
-                                        chars[i++] =  (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
+                                        chars[i++] = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
                                         chars[i] = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
                                     }
                                     break;
@@ -1850,7 +1850,7 @@ class JSONReaderUTF8 extends JSONReader {
         for_:
         for (int i = 0; ; ++i) {
             int c = bytes[offset];
-            if ( c < 0) {
+            if (c < 0) {
                 switch ((c & 0xFF) >> 4) {
                     case 12:
                     case 13: {
@@ -1882,20 +1882,20 @@ class JSONReaderUTF8 extends JSONReader {
                             int c4 = bytes[offset++];
                             int uc = ((c << 18) ^
                                     (c2 << 12) ^
-                                    (c3 <<  6) ^
-                                    (c4 ^   (((byte) 0xF0 << 18) ^
+                                    (c3 << 6) ^
+                                    (c4 ^ (((byte) 0xF0 << 18) ^
                                             ((byte) 0x80 << 12) ^
-                                            ((byte) 0x80 <<  6) ^
-                                            ((byte) 0x80 <<  0))));
+                                            ((byte) 0x80 << 6) ^
+                                            ((byte) 0x80 << 0))));
 
                             if (((c2 & 0xc0) != 0x80 || (c3 & 0xc0) != 0x80 || (c4 & 0xc0) != 0x80) // isMalformed4
                                     ||
                                     // shortest form check
-                                    !(uc >= 0x010000 && uc <  0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
+                                    !(uc >= 0x010000 && uc < 0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
                             ) {
                                 throw new JSONException("malformed input around byte " + offset);
                             } else {
-                                chars[i++] =  (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
+                                chars[i++] = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
                                 chars[i] = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
                             }
                             continue for_;
@@ -3579,22 +3579,23 @@ class JSONReaderUTF8 extends JSONReader {
         }
         return ldt;
     }
+
     @Override
     protected LocalDateTime readLocalDateTime17() {
         if (ch != '"') {
             throw new JSONException("date only support string input");
         }
 
-        byte c0 =  bytes[offset + 0];
-        byte c1 =  bytes[offset + 1];
-        byte c2 =  bytes[offset + 2];
-        byte c3 =  bytes[offset + 3];
-        byte c4 =  bytes[offset + 4];
-        byte c5 =  bytes[offset + 5];
-        byte c6 =  bytes[offset + 6];
-        byte c7 =  bytes[offset + 7];
-        byte c8 =  bytes[offset + 8];
-        byte c9 =  bytes[offset + 9];
+        byte c0 = bytes[offset + 0];
+        byte c1 = bytes[offset + 1];
+        byte c2 = bytes[offset + 2];
+        byte c3 = bytes[offset + 3];
+        byte c4 = bytes[offset + 4];
+        byte c5 = bytes[offset + 5];
+        byte c6 = bytes[offset + 6];
+        byte c7 = bytes[offset + 7];
+        byte c8 = bytes[offset + 8];
+        byte c9 = bytes[offset + 9];
         byte c10 = bytes[offset + 10];
         byte c11 = bytes[offset + 11];
         byte c12 = bytes[offset + 12];
@@ -3739,7 +3740,7 @@ class JSONReaderUTF8 extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime8 () {
+    protected LocalTime readLocalTime8() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3802,7 +3803,7 @@ class JSONReaderUTF8 extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime11 () {
+    protected LocalTime readLocalTime11() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3883,7 +3884,7 @@ class JSONReaderUTF8 extends JSONReader {
 
 
     @Override
-    protected LocalTime readLocalTime10 () {
+    protected LocalTime readLocalTime10() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3962,7 +3963,7 @@ class JSONReaderUTF8 extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime12 () {
+    protected LocalTime readLocalTime12() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -4043,7 +4044,7 @@ class JSONReaderUTF8 extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime18 () {
+    protected LocalTime readLocalTime18() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -4126,7 +4127,7 @@ class JSONReaderUTF8 extends JSONReader {
                 && m7 >= '0' && m7 <= '9'
                 && m8 >= '0' && m8 <= '9'
         ) {
-            millis =  (m0 - '0') * 1000_000_00
+            millis = (m0 - '0') * 1000_000_00
                     + (m1 - '0') * 1000_000_0
                     + (m2 - '0') * 1000_000
                     + (m3 - '0') * 1000_00
@@ -4154,16 +4155,16 @@ class JSONReaderUTF8 extends JSONReader {
             throw new JSONException("date only support string input");
         }
 
-        byte c0 =  bytes[offset + 0];
-        byte c1 =  bytes[offset + 1];
-        byte c2 =  bytes[offset + 2];
-        byte c3 =  bytes[offset + 3];
-        byte c4 =  bytes[offset + 4];
-        byte c5 =  bytes[offset + 5];
-        byte c6 =  bytes[offset + 6];
-        byte c7 =  bytes[offset + 7];
-        byte c8 =  bytes[offset + 8];
-        byte c9 =  bytes[offset + 9];
+        byte c0 = bytes[offset + 0];
+        byte c1 = bytes[offset + 1];
+        byte c2 = bytes[offset + 2];
+        byte c3 = bytes[offset + 3];
+        byte c4 = bytes[offset + 4];
+        byte c5 = bytes[offset + 5];
+        byte c6 = bytes[offset + 6];
+        byte c7 = bytes[offset + 7];
+        byte c8 = bytes[offset + 8];
+        byte c9 = bytes[offset + 9];
         byte c10 = bytes[offset + 10];
         byte c11 = bytes[offset + 11];
         byte c12 = bytes[offset + 12];

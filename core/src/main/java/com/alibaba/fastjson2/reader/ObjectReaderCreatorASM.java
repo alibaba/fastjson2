@@ -66,6 +66,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
 
     static final String packageName;
     static Map<Class, FieldReaderInfo> infos = new HashMap<>();
+
     static {
         Package pkg = ObjectReaderCreatorASM.class.getPackage();
         packageName = pkg != null ? pkg.getName() : "";
@@ -80,7 +81,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
         infos.put(double.class, new FieldReaderInfo(ASMUtils.type(ObjDoubleConsumer.class), "(Ljava/lang/Object;D)V", "(D)V", Opcodes.DLOAD, "readFloatDoubleValue", "()D", Opcodes.DSTORE));
 
         infos.put(String.class, new FieldReaderInfo(ASMUtils.type(BiConsumer.class), "(Ljava/lang/Object;Ljava/lang/Object;)V", "(Ljava/lang/String;)V", Opcodes.ALOAD, "readString", "()Ljava/lang/String;", Opcodes.ASTORE));
-        infos.put(Integer.class, new FieldReaderInfo(ASMUtils.type(BiConsumer.class), "(Ljava/lang/Object;Ljava/lang/Integer;)V", "(Ljava/lang/Integer;)V", Opcodes.ALOAD, "readInt32", "()Ljava/lang/Integer;",  Opcodes.ASTORE));
+        infos.put(Integer.class, new FieldReaderInfo(ASMUtils.type(BiConsumer.class), "(Ljava/lang/Object;Ljava/lang/Integer;)V", "(Ljava/lang/Integer;)V", Opcodes.ALOAD, "readInt32", "()Ljava/lang/Integer;", Opcodes.ASTORE));
     }
 
     static String[] fieldReaderCache = new String[1024];
@@ -865,7 +866,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
                         , ITEM_CNT
                         , J
                         , i
-                        ,  true // JSONB
+                        , true // JSONB
                         , TYPE_OBJECT
                 );
 
@@ -1092,7 +1093,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
     private <T> void genMethodReadObject(
             Class<T> objectType
             , long readerFeatures
-            , String  TYPE_OBJECT
+            , String TYPE_OBJECT
             , Supplier<T> supplier
             , FieldReader[] fieldReaderArray
             , ClassWriter cw
@@ -1677,7 +1678,8 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
 
                 String LIST_TYPE = fieldClass.isInterface() ? "java/util/ArrayList" : TYPE_FIELD_CLASS;
 
-                Label loadList_ = new Label(), listNotNull_ = new Label();;
+                Label loadList_ = new Label(), listNotNull_ = new Label();
+                ;
 
                 if (jsonb) {
                     Label checkAutoTypeNull_ = new Label();
@@ -1775,7 +1777,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
                     mw.visitVarInsn(Opcodes.ALOAD, THIS);
                     mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                    mw.visitMethodInsn(Opcodes.INVOKEINTERFACE,  TYPE_FIELD_READE, "getItemObjectReader", METHOD_DESC_GET_ITEM_OBJECT_READER, true);
+                    mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_FIELD_READE, "getItemObjectReader", METHOD_DESC_GET_ITEM_OBJECT_READER, true);
 //
 //                    mw.visitMethodInsn(Opcodes.INVOKEINTERFACE,  TYPE_FIELD_READE, "getItemType", "()Ljava/lang/reflect/Type;", true);
 //                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL,  TYPE_JSON_READER, "getObjectReader", METHOD_DESC_GET_OBJECT_READER, false);
@@ -1948,7 +1950,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
                 if (FIELD_VALUE == null) {
                     variants.put(fieldClass, FIELD_VALUE = varIndex);
                     if (fieldClass == long.class || fieldClass == double.class) {
-                        varIndex+=2;
+                        varIndex += 2;
                     } else {
                         varIndex++;
                     }

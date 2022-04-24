@@ -5,7 +5,10 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
-import javax.money.*;
+import javax.money.CurrencyUnit;
+import javax.money.Monetary;
+import javax.money.MonetaryAmountFactory;
+import javax.money.NumberValue;
 
 public class MoneySupport {
     public static ObjectReader createCurrencyUnitReader() {

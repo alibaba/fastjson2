@@ -10,6 +10,7 @@ final class ObjectWriterImplOptional extends ObjectWriterBaseModule.PrimitiveImp
 
     Type valueType;
     long features;
+
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {

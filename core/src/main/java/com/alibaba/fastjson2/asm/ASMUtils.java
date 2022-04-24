@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ASMUtils {
     static Map<Class, String> descMapping = new HashMap<>();
     static Map<Class, String> typeMapping = new HashMap<>();
+
     static {
         descMapping.put(int.class, "I");
         descMapping.put(void.class, "V");
@@ -58,6 +59,7 @@ public class ASMUtils {
     }
 
     static final AtomicReference<char[]> descCacheRef = new AtomicReference<>();
+
     public static String desc(Class<?> clazz) {
         String desc = descMapping.get(clazz);
         if (desc != null) {
