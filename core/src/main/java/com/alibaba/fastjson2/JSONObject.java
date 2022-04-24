@@ -863,9 +863,9 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     /**
      * Convert this {@link JSONObject} to the specified Object
      *
-     * <code>
+     * <pre>
      * Map<String, User> users = jsonObject.toJavaObject(new TypeReference<HashMap<String, User>>(){}.getType());
-     * </code>
+     * </pre>
      *
      * @param type specify the {@link Type} to be converted
      */
@@ -879,9 +879,9 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     /**
      * Convert this {@link JSONObject} to the specified Object
      *
-     * <code>
+     * <pre>
      * User user = jsonObject.toJavaObject(User.class);
-     * </code>
+     * </pre>
      *
      * @param clazz specify the {@link Class<T>} to be converted
      */
@@ -895,9 +895,9 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     /**
      * Returns the result of the {@link Type} converter conversion of the associated value in this {@link JSONObject}.
      *
-     * <code>
+     * <pre>
      * User user = jsonObject.getObject("user", User.class);
-     * </code>
+     * </pre>
      *
      * @param key  the key whose associated value is to be returned
      * @param type specify the {@link Type} to be converted
@@ -966,8 +966,9 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             String name = null;
             JSONField annotation = method.getAnnotation(JSONField.class);
             if (annotation != null) {
-                if (annotation.name().length() != 0) {
-                    name = annotation.name();
+                name = annotation.name();
+                if (name.isEmpty()) {
+                    name = null;
                 }
             }
 
@@ -997,8 +998,9 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             String name = null;
             JSONField annotation = method.getAnnotation(JSONField.class);
             if (annotation != null) {
-                if (annotation.name().length() != 0) {
-                    name = annotation.name();
+                name = annotation.name();
+                if (name.isEmpty()) {
+                    name = null;
                 }
             }
 
@@ -1071,9 +1073,9 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     /**
      * Chained addition of elements
      *
-     * <code>
+     * <pre>
      * JSONObject object = new JSONObject().fluentPut("a", 1).fluentPut("b", 2).fluentPut("c", 3);
-     * </code>
+     * </pre>
      *
      * @param key   key with which the specified value is to be associated
      * @param value value to be associated with the specified key
@@ -1086,9 +1088,9 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     /**
      * Pack a pair of key-values as {@link JSONObject}
      *
-     * <code>
+     * <pre>
      * JSONObject jsonObject = JSONObject.of("name", "fastjson2");
-     * </code>
+     * </pre>
      *
      * @param key   the key of the element
      * @param value the value of the element
@@ -1102,9 +1104,9 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     /**
      * Pack two key-value pairs as {@link JSONObject}
      *
-     * <code>
+     * <pre>
      * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2");
-     * </code>
+     * </pre>
      *
      * @param k1 first key
      * @param v1 first value
@@ -1122,9 +1124,9 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     /**
      * Pack three key-value pairs as {@link JSONObject}
      *
-     * <code>
+     * <pre>
      * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3");
-     * </code>
+     * </pre>
      *
      * @param k1 first key
      * @param v1 first value
