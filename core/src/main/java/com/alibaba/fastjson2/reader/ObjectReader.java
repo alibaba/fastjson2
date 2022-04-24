@@ -63,7 +63,9 @@ public interface ObjectReader<T> {
             FieldReader fieldReader = getFieldReader(
                 entry.getKey().toString()
             );
-            if (fieldReader == null) continue;
+            if (fieldReader == null) {
+                continue;
+            }
 
             Object fieldValue = entry.getValue();
             Class fieldClass = fieldReader.getFieldClass();
@@ -193,7 +195,9 @@ public interface ObjectReader<T> {
         jsonReader.nextIfObjectStart();
 
         for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfObjectEnd()) break;
+            if (jsonReader.nextIfObjectEnd()) {
+                break;
+            }
             long hash = jsonReader.readFieldNameHashCode();
 
             if (hash == getTypeKeyHash() && i == 0) {
