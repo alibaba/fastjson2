@@ -8,7 +8,7 @@ public class PascalNameFilter implements NameFilter {
         }
 
         char[] chars = name.toCharArray();
-        chars[0]= Character.toUpperCase(chars[0]);
+        chars[0] = Character.toUpperCase(chars[0]);
 
         String pascalName = new String(chars);
         return pascalName;

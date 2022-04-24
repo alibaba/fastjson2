@@ -16,15 +16,14 @@ import java.util.List;
  * <p>
  * For example, to create a type literal for {@link List<String>}, you can
  * create an empty anonymous inner class:
- * <code>
+ * <pre>
  * TypeReference<List<String>> typeReference = new TypeReference<List<String>>(){};
- * </code>
+ * </pre>
  * For example, use it quickly
- * <code>
+ * <pre>
  * String text = "{\"id\":1,\"name\":\"kraity\"}";
  * User user = new TypeReference<User>(){}.parseObject(text);
- * </code>
- * <p>
+ * </pre>
  */
 public abstract class TypeReference<T> {
 
@@ -75,11 +74,11 @@ public abstract class TypeReference<T> {
     /**
      * See {@link JSON#parseObject} for details
      *
-     * <code>
+     * <pre>
      * String text = "{\"id\":1,\"name\":\"kraity\"}";
      * <p>
      * User user = new TypeReference<User>(){}.parseObject(text);
-     * </code>
+     * </pre>
      *
      * @param text the JSON {@link String} to be parsed
      * @since 2.0.2
@@ -91,9 +90,9 @@ public abstract class TypeReference<T> {
     /**
      * See {@link JSONObject#toJavaObject} for details
      *
-     * <code>
+     * <pre>
      * Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.parseObject(jsonObject);
-     * </code>
+     * </pre>
      *
      * @param object Specify the {@link JSONObject} to convert
      * @since 2.0.2
@@ -105,11 +104,11 @@ public abstract class TypeReference<T> {
     /**
      * See {@link JSON#parseArray} for details
      *
-     * <code>
+     * <pre>
      * String text = "[{\"id\":1,\"name\":\"kraity\"}]";
      * <p>
      * List<User> users = new TypeReference<User>(){}.parseArray(text);
-     * </code>
+     * </pre>
      *
      * @param text the JSON {@link String} to be parsed
      * @since 2.0.2
@@ -121,9 +120,9 @@ public abstract class TypeReference<T> {
     /**
      * See {@link JSONArray#toJavaObject} for details
      *
-     * <code>
+     * <pre>
      * List<User> users = new TypeReference<ArrayList<User>>(){}.parseObject(jsonArray);
-     * </code>
+     * </pre>
      *
      * @param object Specify the {@link JSONArray} to convert
      * @since 2.0.2

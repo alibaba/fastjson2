@@ -45,7 +45,7 @@ public interface ObjectReader<T> {
 
             if (reader == null) {
                 reader = provider.getObjectReader(
-                    typeName, getObjectClass(), getFeatures()
+                        typeName, getObjectClass(), getFeatures()
                 );
 
                 if (reader == null) {
@@ -61,9 +61,11 @@ public interface ObjectReader<T> {
         T object = createInstance();
         for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             FieldReader fieldReader = getFieldReader(
-                entry.getKey().toString()
+                    entry.getKey().toString()
             );
-            if (fieldReader == null) continue;
+            if (fieldReader == null) {
+                continue;
+            }
 
             Object fieldValue = entry.getValue();
             Class fieldClass = fieldReader.getFieldClass();
@@ -151,7 +153,7 @@ public interface ObjectReader<T> {
 
     default FieldReader getFieldReader(String fieldName) {
         FieldReader fieldReader = getFieldReader(
-            Fnv.hashCode64(fieldName)
+                Fnv.hashCode64(fieldName)
         );
 
         if (fieldReader == null) {
@@ -159,7 +161,7 @@ public interface ObjectReader<T> {
 
             if (!fieldNameLCase.equals(fieldName)) {
                 fieldReader = getFieldReader(
-                    Fnv.hashCode64(fieldNameLCase)
+                        Fnv.hashCode64(fieldNameLCase)
                 );
             }
         }
@@ -185,7 +187,7 @@ public interface ObjectReader<T> {
      */
     default T readJSONBObject(JSONReader jsonReader, long features) {
         if (jsonReader.isArray() &&
-            jsonReader.isSupportBeanArray()) {
+                jsonReader.isSupportBeanArray()) {
             return readArrayMappingJSONBObject(jsonReader);
         }
 
@@ -193,7 +195,9 @@ public interface ObjectReader<T> {
         jsonReader.nextIfObjectStart();
 
         for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfObjectEnd()) break;
+            if (jsonReader.nextIfObjectEnd()) {
+                break;
+            }
             long hash = jsonReader.readFieldNameHashCode();
 
             if (hash == getTypeKeyHash() && i == 0) {
@@ -298,7 +302,7 @@ public interface ObjectReader<T> {
 
             long features3, hash = jsonReader.readFieldNameHashCode();
             if (hash == getTypeKeyHash() && i == 0 &&
-                ((features3 = (features | getFeatures() | jsonReader.getContext().getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0
+                    ((features3 = (features | getFeatures() | jsonReader.getContext().getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0
             ) {
                 long typeHash = jsonReader.readTypeHashCode();
                 JSONReader.Context context = jsonReader.getContext();
@@ -308,7 +312,7 @@ public interface ObjectReader<T> {
                 if (reader == null) {
                     typeName = jsonReader.getString();
                     reader = context.getObjectReaderAutoType(
-                        typeName, getObjectClass(), features3
+                            typeName, getObjectClass(), features3
                     );
 
                     if (reader == null) {
@@ -326,7 +330,7 @@ public interface ObjectReader<T> {
                 }
 
                 object = (T) reader.readObject(
-                    jsonReader, features | getFeatures()
+                        jsonReader, features | getFeatures()
                 );
 
                 if (fieldReader != null) {

@@ -2,30 +2,29 @@ package com.alibaba.fastjson2.util;
 
 import java.io.Closeable;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 public class IOUtils {
     public final static Charset GB18030 = Charset.forName("GB18030");
 
-    public final static byte[] digits    = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
-            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+    public final static byte[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
+            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 
-    public static final byte[] DigitTens = { '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1',
+    public static final byte[] DigitTens = {'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1',
             '1', '1', '1', '1', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '3', '3', '3', '3', '3', '3', '3',
             '3', '3', '3', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '5', '5', '5', '5', '5', '5', '5', '5',
             '5', '5', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '7', '7', '7', '7', '7', '7', '7', '7', '7',
-            '7', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', };
+            '7', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9',};
 
-    public static final byte[] DigitOnes = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5',
+    public static final byte[] DigitOnes = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5',
             '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6',
             '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7',
             '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8',
-            '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', };
+            '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',};
 
-    static final int[]  sizeTable = { 9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999, Integer.MAX_VALUE };
+    static final int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999, Integer.MAX_VALUE};
 
     public static int stringSize(int x) {
-        for (int i = 0;; i++) {
+        for (int i = 0; ; i++) {
             if (x <= sizeTable[i]) {
                 return i + 1;
             }
@@ -63,7 +62,7 @@ public class IOUtils {
 
         // Fall thru to fast mode for smaller numbers
         // assert(i <= 65536, i);
-        for (;;) {
+        for (; ; ) {
             q = (i * 52429) >>> (16 + 3);
             r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
             buf[--p] = digits[r];
@@ -97,7 +96,7 @@ public class IOUtils {
 
         // Fall thru to fast mode for smaller numbers
         // assert(i <= 65536, i);
-        for (;;) {
+        for (; ; ) {
             q = (i * 52429) >>> (16 + 3);
             r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
             buf[--p] = (char) digits[r];
@@ -146,7 +145,7 @@ public class IOUtils {
 
         // Fall thru to fast mode for smaller numbers
         // assert(i2 <= 65536, i2);
-        for (;;) {
+        for (; ; ) {
             q2 = (i2 * 52429) >>> (16 + 3);
             r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
             buf[--charPos] = digits[r];
@@ -195,7 +194,7 @@ public class IOUtils {
 
         // Fall thru to fast mode for smaller numbers
         // assert(i2 <= 65536, i2);
-        for (;;) {
+        for (; ; ) {
             q2 = (i2 * 52429) >>> (16 + 3);
             r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
             buf[--charPos] = (char) digits[r];
@@ -218,7 +217,7 @@ public class IOUtils {
             if (b1 == 0 && b0 >= 0) {
                 dst[dp++] = b0;
             } else {
-                char c = (char)(((b0 & 0xff) << 0) | ((b1 & 0xff) << 8));
+                char c = (char) (((b0 & 0xff) << 0) | ((b1 & 0xff) << 8));
                 if (c < 0x800) {
                     // 2 bytes, 11 bits
                     dst[dp++] = (byte) (0xc0 | (c >> 6));
@@ -399,10 +398,10 @@ public class IOUtils {
                     } else {
                         char c = (char)
                                 ((b0 << 12) ^
-                                        (b1 <<  6) ^
+                                        (b1 << 6) ^
                                         (b2 ^ (((byte) 0xE0 << 12) ^
-                                                ((byte) 0x80 <<  6) ^
-                                                ((byte) 0x80 <<  0)))
+                                                ((byte) 0x80 << 6) ^
+                                                ((byte) 0x80 << 0)))
                                 );
                         boolean isSurrogate = c >= '\uD800' && c < ('\uDFFF' + 1);
                         if (isSurrogate) {
@@ -423,17 +422,16 @@ public class IOUtils {
                     int b4 = src[off++];
                     int uc = ((b0 << 18) ^
                             (b2 << 12) ^
-                            (b3 <<  6) ^
+                            (b3 << 6) ^
                             (b4 ^
                                     (((byte) 0xF0 << 18) ^
                                             ((byte) 0x80 << 12) ^
-                                            ((byte) 0x80 <<  6) ^
-                                            ((byte) 0x80 <<  0))))
-                            ;
+                                            ((byte) 0x80 << 6) ^
+                                            ((byte) 0x80 << 0))));
                     if (((b2 & 0xc0) != 0x80 || (b3 & 0xc0) != 0x80 || (b4 & 0xc0) != 0x80) // isMalformed4
                             ||
                             // shortest form check
-                            !(uc >= 0x010000 && uc <  0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
+                            !(uc >= 0x010000 && uc < 0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
                     ) {
                         return -1;
                     } else {
@@ -477,7 +475,7 @@ public class IOUtils {
                     if ((b1 & 0xc0) != 0x80) { // isNotContinuation(b2)
                         return -1;
                     } else {
-                        dst[dp++] = (char) (((b0 << 6) ^ b1)^
+                        dst[dp++] = (char) (((b0 << 6) ^ b1) ^
                                 (((byte) 0xC0 << 6) ^
                                         ((byte) 0x80 << 0)));
                     }
@@ -496,10 +494,10 @@ public class IOUtils {
                     } else {
                         char c = (char)
                                 ((b0 << 12) ^
-                                (b1 <<  6) ^
-                                (b2 ^ (((byte) 0xE0 << 12) ^
-                                        ((byte) 0x80 <<  6) ^
-                                        ((byte) 0x80 <<  0)))
+                                        (b1 << 6) ^
+                                        (b2 ^ (((byte) 0xE0 << 12) ^
+                                                ((byte) 0x80 << 6) ^
+                                                ((byte) 0x80 << 0)))
                                 );
                         boolean isSurrogate = c >= '\uD800' && c < ('\uDFFF' + 1);
                         if (isSurrogate) {
@@ -519,21 +517,20 @@ public class IOUtils {
                     int b4 = src[off++];
                     int uc = ((b0 << 18) ^
                             (b2 << 12) ^
-                            (b3 <<  6) ^
+                            (b3 << 6) ^
                             (b4 ^
                                     (((byte) 0xF0 << 18) ^
                                             ((byte) 0x80 << 12) ^
-                                            ((byte) 0x80 <<  6) ^
-                                            ((byte) 0x80 <<  0))))
-                            ;
+                                            ((byte) 0x80 << 6) ^
+                                            ((byte) 0x80 << 0))));
                     if (((b2 & 0xc0) != 0x80 || (b3 & 0xc0) != 0x80 || (b4 & 0xc0) != 0x80) // isMalformed4
                             ||
                             // shortest form check
-                            !(uc >= 0x010000 && uc <  0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
+                            !(uc >= 0x010000 && uc < 0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
                     ) {
                         return -1;
                     } else {
-                        dst[dp++] =  (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
+                        dst[dp++] = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
                         dst[dp++] = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
                     }
                     continue;

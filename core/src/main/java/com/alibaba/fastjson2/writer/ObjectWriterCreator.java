@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.ToByteFunction;
@@ -10,7 +11,6 @@ import com.alibaba.fastjson2.function.ToShortFunction;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.BeanUtils;
-import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.reflect.*;
@@ -437,7 +437,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == long.class || fieldClass == Long.class) {
-            if(format == null || format.isEmpty()) {
+            if (format == null || format.isEmpty()) {
                 return new FieldWriterInt64Method(fieldName, ordinal, features, format, method, fieldClass);
             }
             return new FieldWriterMillisMethod(fieldName, ordinal, features, format, method, fieldClass);
@@ -485,7 +485,7 @@ public class ObjectWriterCreator {
             } else {
                 itemType = Object.class;
             }
-            return new FieldWriterListMethod(fieldName, itemType, ordinal,  0, format, method, fieldType, fieldClass);
+            return new FieldWriterListMethod(fieldName, itemType, ordinal, 0, format, method, fieldType, fieldClass);
         }
 
         return new FieldWriterObjectMethod(fieldName, ordinal, features, format, fieldType, fieldClass, method);

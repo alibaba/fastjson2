@@ -1,16 +1,17 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.function.ToByteFunction;
 import com.alibaba.fastjson2.function.ToCharFunction;
 import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.function.ToShortFunction;
-import com.alibaba.fastjson2.JSONException;
 
 import java.lang.invoke.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.*;
 
 public class ObjectWriterCreatorLambda extends ObjectWriterCreator {
@@ -71,7 +72,7 @@ public class ObjectWriterCreatorLambda extends ObjectWriterCreator {
         }
 
         if (returnClass == long.class) {
-            if(format == null || format.isEmpty()) {
+            if (format == null || format.isEmpty()) {
                 return new FieldWriterInt64ValFunc(fieldName, ordinal, features, format, method, (ToLongFunction) lambda);
             }
 
@@ -114,6 +115,7 @@ public class ObjectWriterCreatorLambda extends ObjectWriterCreator {
     private static Map<Class, LambdaInfo> fieldReaderMapping = new HashMap<>();
     private static Map<Class, MethodType> methodTypeMapping = new HashMap<>();
     private static MethodType METHODTYPE_FUNCTION = MethodType.methodType(Function.class);
+
     static {
         fieldReaderMapping.put(boolean.class, new LambdaInfo(Predicate.class, "test"));
         fieldReaderMapping.put(char.class, new LambdaInfo(ToCharFunction.class, "applyAsChar"));

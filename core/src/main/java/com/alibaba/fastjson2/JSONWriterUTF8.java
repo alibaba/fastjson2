@@ -608,7 +608,7 @@ class JSONWriterUTF8 extends JSONWriter {
 
             // Fall thru to fast mode for smaller numbers
             // assert(i <= 65536, i);
-            for (;;) {
+            for (; ; ) {
                 q = (i * 52429) >>> (16 + 3);
                 r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
                 bytes[--p] = digits[r];
@@ -740,7 +740,7 @@ class JSONWriterUTF8 extends JSONWriter {
 
             // Fall thru to fast mode for smaller numbers
             // assert(i2 <= 65536, i2);
-            for (;;) {
+            for (; ; ) {
                 q2 = (i2 * 52429) >>> (16 + 3);
                 r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
                 bytes[--charPos] = digits[r];
@@ -1127,25 +1127,25 @@ class JSONWriterUTF8 extends JSONWriter {
         byte[] chars = new byte[len];
 
         chars[0] = '"';
-        chars[1] = (byte) (year/1000 + '0');
-        chars[2] = (byte) ((year/100)%10 + '0');
-        chars[3] = (byte) ((year/10)%10 + '0');
-        chars[4] = (byte) (year%10 + '0');
+        chars[1] = (byte) (year / 1000 + '0');
+        chars[2] = (byte) ((year / 100) % 10 + '0');
+        chars[3] = (byte) ((year / 10) % 10 + '0');
+        chars[4] = (byte) (year % 10 + '0');
         chars[5] = '-';
-        chars[6] = (byte) (month/10 + '0');
-        chars[7] = (byte) (month%10 + '0');
+        chars[6] = (byte) (month / 10 + '0');
+        chars[7] = (byte) (month % 10 + '0');
         chars[8] = '-';
-        chars[9] = (byte) (dayOfMonth/10 + '0');
-        chars[10] = (byte) (dayOfMonth%10 + '0');
+        chars[9] = (byte) (dayOfMonth / 10 + '0');
+        chars[10] = (byte) (dayOfMonth % 10 + '0');
         chars[11] = 'T';
-        chars[12] = (byte) (hour/10 + '0');
-        chars[13] = (byte) (hour%10 + '0');
+        chars[12] = (byte) (hour / 10 + '0');
+        chars[13] = (byte) (hour % 10 + '0');
         chars[14] = ':';
-        chars[15] = (byte) (minute/10 + '0');
-        chars[16] = (byte) (minute%10 + '0');
+        chars[15] = (byte) (minute / 10 + '0');
+        chars[16] = (byte) (minute % 10 + '0');
         chars[17] = ':';
-        chars[18] = (byte) (second/10 + '0');
-        chars[19] = (byte) (second%10 + '0');
+        chars[18] = (byte) (second / 10 + '0');
+        chars[19] = (byte) (second % 10 + '0');
         if (millislen > 0) {
             chars[20] = '.';
             Arrays.fill(chars, 21, 20 + millislen, (byte) '0');

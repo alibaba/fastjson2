@@ -6,10 +6,8 @@ import com.alibaba.fastjson2.filter.PropertyPreFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
 
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public interface ObjectWriter<T> {
     default long getFeatures() {

@@ -8,6 +8,4 @@ final class ObjectWriterCreatorASMUtils {
     static final String TYPE_UNSAFE_UTILS = type(UnsafeUtils.class);
 
 
-
-
 }

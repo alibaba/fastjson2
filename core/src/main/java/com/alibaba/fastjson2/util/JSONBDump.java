@@ -86,13 +86,13 @@ public class JSONBDump {
                 jsonWriter.writeDouble(1);
                 return;
             case BC_INT8:
-                jsonWriter.writeInt8 (bytes[offset++]);
+                jsonWriter.writeInt8(bytes[offset++]);
                 return;
             case BC_INT16:
-                jsonWriter.writeInt16 (
+                jsonWriter.writeInt16(
                         (short) (
-                            (bytes[offset++] << 8)
-                                + (bytes[offset++] & 0xFF)
+                                (bytes[offset++] << 8)
+                                        + (bytes[offset++] & 0xFF)
                         )
                 );
                 return;
@@ -105,7 +105,7 @@ public class JSONBDump {
                                 ((bytes[offset + 1] & 0xFF) << 16) +
                                 ((bytes[offset]) << 24);
                 offset += 4;
-                jsonWriter.writeInt32 (int32Value);
+                jsonWriter.writeInt32(int32Value);
                 return;
             }
             case BC_INT64_INT: {
@@ -115,7 +115,7 @@ public class JSONBDump {
                                 ((bytes[offset + 1] & 0xFF) << 16) +
                                 ((bytes[offset]) << 24);
                 offset += 4;
-                jsonWriter.writeInt64 (int32Value);
+                jsonWriter.writeInt64(int32Value);
                 return;
             }
             case BC_TIMESTAMP_MILLIS:
@@ -134,7 +134,7 @@ public class JSONBDump {
                 jsonWriter.writeInt64(int64Value);
                 return;
             }
-            case BC_BIGINT:{
+            case BC_BIGINT: {
                 int len = readInt32Value();
                 byte[] bytes = new byte[len];
                 System.arraycopy(this.bytes, offset, bytes, 0, len);
@@ -208,7 +208,7 @@ public class JSONBDump {
                 String str;
                 if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
                     byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, offset,  chars, 0, strlen);
+                    System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 } else {
                     str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
@@ -224,7 +224,7 @@ public class JSONBDump {
                 String str;
                 if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 1) {
                     byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, offset,  chars, 0, strlen);
+                    System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 } else {
                     str = new String(bytes, offset, strlen, StandardCharsets.UTF_16BE);
@@ -491,12 +491,12 @@ public class JSONBDump {
         }
 
         _for:
-        for (int valueCount = 0;;) {
+        for (int valueCount = 0; ; ) {
             byte type = bytes[offset];
             switch (type) {
                 case BC_OBJECT_END:
                     offset++;
-                    break  _for;
+                    break _for;
                 case BC_TRUE:
                     offset++;
                     jsonWriter.writeName("true");
@@ -714,7 +714,7 @@ public class JSONBDump {
         }
 
         if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-            return  ((type - BC_INT32_SHORT_ZERO) << 16)
+            return ((type - BC_INT32_SHORT_ZERO) << 16)
                     + ((bytes[offset++] & 0xFF) << 8)
                     + (bytes[offset++] & 0xFF);
         }
@@ -838,7 +838,8 @@ public class JSONBDump {
                 strlen = readLength();
                 strBegin = offset;
             } else {
-                strlen = strtype - BC_STR_ASCII_FIX_MIN;;
+                strlen = strtype - BC_STR_ASCII_FIX_MIN;
+                ;
             }
 
             charset = StandardCharsets.US_ASCII;
@@ -857,7 +858,7 @@ public class JSONBDump {
 
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
                 byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset,  chars, 0, strlen);
+                System.arraycopy(bytes, offset, chars, 0, strlen);
                 String str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 offset += strlen;
                 return str;
@@ -870,7 +871,7 @@ public class JSONBDump {
 
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 1) {
                 byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset,  chars, 0, strlen);
+                System.arraycopy(bytes, offset, chars, 0, strlen);
                 String str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 offset += strlen;
                 return str;

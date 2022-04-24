@@ -93,7 +93,7 @@ final class JSONReaderJSONB extends JSONReader {
 
                 if (STRING_CREATOR_JDK11 != null) {
                     byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, strBegin,  chars, 0, strlen);
+                    System.arraycopy(bytes, strBegin, chars, 0, strlen);
                     return STRING_CREATOR_JDK11.apply(chars);
                 }
             }
@@ -220,7 +220,7 @@ final class JSONReaderJSONB extends JSONReader {
                 String name;
                 if (type == BC_SYMBOL) {
                     name = readFieldName();
-                }  else {
+                } else {
                     name = readString();
                 }
 
@@ -294,7 +294,7 @@ final class JSONReaderJSONB extends JSONReader {
                 offset += 8;
                 return Long.valueOf(int64Value);
             }
-            case BC_BIGINT:{
+            case BC_BIGINT: {
                 int len = readInt32Value();
                 byte[] bytes = new byte[len];
                 System.arraycopy(this.bytes, offset, bytes, 0, len);
@@ -372,7 +372,7 @@ final class JSONReaderJSONB extends JSONReader {
                 String str;
                 if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
                     byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, offset,  chars, 0, strlen);
+                    System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 } else {
                     str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
@@ -387,7 +387,7 @@ final class JSONReaderJSONB extends JSONReader {
                 String str;
                 if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 1) {
                     byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, offset,  chars, 0, strlen);
+                    System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 } else {
                     str = new String(bytes, offset, strlen, StandardCharsets.UTF_16BE);
@@ -421,7 +421,7 @@ final class JSONReaderJSONB extends JSONReader {
             case BC_BINARY: {
                 int len = readLength();
                 byte[] binary = Arrays.copyOfRange(this.bytes, offset, offset + len);
-                offset+= len;
+                offset += len;
                 return binary;
             }
             case BC_TIMESTAMP_MINUTES: {
@@ -667,7 +667,7 @@ final class JSONReaderJSONB extends JSONReader {
 
                         if (STRING_CREATOR_JDK11 != null) {
                             byte[] chars = new byte[strlen];
-                            System.arraycopy(bytes, offset,  chars, 0, strlen);
+                            System.arraycopy(bytes, offset, chars, 0, strlen);
                             offset += strlen;
                             return STRING_CREATOR_JDK11.apply(chars);
                         }
@@ -979,7 +979,7 @@ final class JSONReaderJSONB extends JSONReader {
         } else if (strtype == BC_STR_UTF8) {
             hashCode = Fnv.MAGIC_HASH_CODE;
             int end = offset + strlen;
-            for (; offset < end;) {
+            for (; offset < end; ) {
                 int c = bytes[offset];
 
                 if (c >= 0) {
@@ -1100,7 +1100,7 @@ final class JSONReaderJSONB extends JSONReader {
         } else if (strtype == BC_STR_UTF8) {
             hashCode = Fnv.MAGIC_HASH_CODE;
             int end = offset + strlen;
-            for (; offset < end;) {
+            for (; offset < end; ) {
                 int c = bytes[offset];
 
                 if (c >= 0) {
@@ -1322,7 +1322,7 @@ final class JSONReaderJSONB extends JSONReader {
                 }
 
                 if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-                    offset ++;
+                    offset++;
                     return;
                 }
 
@@ -1421,7 +1421,8 @@ final class JSONReaderJSONB extends JSONReader {
                 strlen = readLength();
                 strBegin = offset;
             } else {
-                strlen = strtype - BC_STR_ASCII_FIX_MIN;;
+                strlen = strtype - BC_STR_ASCII_FIX_MIN;
+                ;
             }
 
             if (JDKUtils.JVM_VERSION == 8 && strlen >= 0) {
@@ -1455,7 +1456,7 @@ final class JSONReaderJSONB extends JSONReader {
 
                 if (STRING_CREATOR_JDK11 != null) {
                     byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, offset,  chars, 0, strlen);
+                    System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = STRING_CREATOR_JDK11.apply(chars);
                     offset += strlen;
                 }
@@ -1499,7 +1500,7 @@ final class JSONReaderJSONB extends JSONReader {
 
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
                 byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset,  chars, 0, strlen);
+                System.arraycopy(bytes, offset, chars, 0, strlen);
                 str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 offset += strlen;
             }
@@ -1511,7 +1512,7 @@ final class JSONReaderJSONB extends JSONReader {
 
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 1) {
                 byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset,  chars, 0, strlen);
+                System.arraycopy(bytes, offset, chars, 0, strlen);
                 str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 offset += strlen;
             }
@@ -1568,7 +1569,8 @@ final class JSONReaderJSONB extends JSONReader {
                 strlen = readLength();
                 strBegin = offset;
             } else {
-                strlen = strtype - BC_STR_ASCII_FIX_MIN;;
+                strlen = strtype - BC_STR_ASCII_FIX_MIN;
+                ;
             }
 
             if (JDKUtils.JVM_VERSION == 8 && strlen >= 0) {
@@ -1602,7 +1604,7 @@ final class JSONReaderJSONB extends JSONReader {
 
                 if (STRING_CREATOR_JDK11 != null) {
                     byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, offset,  chars, 0, strlen);
+                    System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = STRING_CREATOR_JDK11.apply(chars);
                     offset += strlen;
                     return str;
@@ -1652,7 +1654,7 @@ final class JSONReaderJSONB extends JSONReader {
 
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
                 byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset,  chars, 0, strlen);
+                System.arraycopy(bytes, offset, chars, 0, strlen);
                 str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 offset += strlen;
                 return str;
@@ -1665,7 +1667,7 @@ final class JSONReaderJSONB extends JSONReader {
 
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 1) {
                 byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset,  chars, 0, strlen);
+                System.arraycopy(bytes, offset, chars, 0, strlen);
                 str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 offset += strlen;
                 return str;
@@ -1688,7 +1690,7 @@ final class JSONReaderJSONB extends JSONReader {
                     + (bytes[offset++] & 0xFF);
             return Integer.toString(intValue);
         } else if (strtype >= BC_INT64_NUM_MIN && strtype <= BC_INT64_NUM_MAX) {
-            int intValue =INT64_NUM_LOW_VALUE + (strtype - BC_INT64_NUM_MIN);
+            int intValue = INT64_NUM_LOW_VALUE + (strtype - BC_INT64_NUM_MIN);
             return Integer.toString(intValue);
         } else if (strtype >= BC_INT64_BYTE_MIN && strtype <= BC_INT64_BYTE_MAX) {
             int intValue = ((strtype - BC_INT64_BYTE_ZERO) << 8)
@@ -1775,7 +1777,7 @@ final class JSONReaderJSONB extends JSONReader {
                                     ((long) (bytes[offset]) << 56);
                     offset += 8;
                     return Long.toString(int64Value);
-                case BC_BIGINT:{
+                case BC_BIGINT: {
                     int len = readInt32Value();
                     byte[] bytes = new byte[len];
                     System.arraycopy(this.bytes, offset, bytes, 0, len);
@@ -2708,7 +2710,7 @@ final class JSONReaderJSONB extends JSONReader {
                 offset += 8;
                 return BigDecimal.valueOf(int64Value);
             }
-            case BC_BIGINT:{
+            case BC_BIGINT: {
                 return new BigDecimal(
                         readBigInteger()
                 );
@@ -2722,7 +2724,7 @@ final class JSONReaderJSONB extends JSONReader {
                     return new BigDecimal(unscaledValue, scale);
                 }
             }
-            case BC_DECIMAL_LONG : {
+            case BC_DECIMAL_LONG: {
                 return BigDecimal.valueOf(
                         readInt64Value()
                 );
@@ -3471,7 +3473,7 @@ final class JSONReaderJSONB extends JSONReader {
     }
 
     @Override
-    protected LocalDateTime readLocalDate10 () {
+    protected LocalDateTime readLocalDate10() {
         type = bytes[offset];
         if (type != BC_STR_ASCII_FIX_MIN + 10) {
             throw new JSONException("date only support string input");
@@ -3578,7 +3580,7 @@ final class JSONReaderJSONB extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime8 () {
+    protected LocalTime readLocalTime8() {
         type = bytes[offset];
         if (type != BC_STR_ASCII_FIX_MIN + 8) {
             throw new JSONException("date only support string input");
@@ -3638,7 +3640,7 @@ final class JSONReaderJSONB extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime12 () {
+    protected LocalTime readLocalTime12() {
         type = bytes[offset];
         if (type != BC_STR_ASCII_FIX_MIN + 12) {
             throw new JSONException("date only support string input");
@@ -3716,7 +3718,7 @@ final class JSONReaderJSONB extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime18 () {
+    protected LocalTime readLocalTime18() {
         type = bytes[offset];
         if (type != BC_STR_ASCII_FIX_MIN + 18) {
             throw new JSONException("date only support string input");
@@ -3800,7 +3802,7 @@ final class JSONReaderJSONB extends JSONReader {
                 && m7 >= '0' && m7 <= '9'
                 && m8 >= '0' && m8 <= '9'
         ) {
-            millis =  (m0 - '0') * 1000_000_00
+            millis = (m0 - '0') * 1000_000_00
                     + (m1 - '0') * 1000_000_0
                     + (m2 - '0') * 1000_000
                     + (m3 - '0') * 1000_00
@@ -3835,15 +3837,15 @@ final class JSONReaderJSONB extends JSONReader {
         char c7 = (char) bytes[offset + 8];
         char c8 = (char) bytes[offset + 9];
         char c9 = (char) bytes[offset + 10];
-        char c10 =(char)  bytes[offset + 11];
-        char c11 =(char)  bytes[offset + 12];
-        char c12 =(char)  bytes[offset + 13];
-        char c13 =(char)  bytes[offset + 14];
-        char c14 =(char)  bytes[offset + 15];
-        char c15 =(char)  bytes[offset + 16];
-        char c16 =(char)  bytes[offset + 17];
-        char c17 =(char)  bytes[offset + 18];
-        char c18 =(char)  bytes[offset + 19];
+        char c10 = (char) bytes[offset + 11];
+        char c11 = (char) bytes[offset + 12];
+        char c12 = (char) bytes[offset + 13];
+        char c13 = (char) bytes[offset + 14];
+        char c14 = (char) bytes[offset + 15];
+        char c15 = (char) bytes[offset + 16];
+        char c16 = (char) bytes[offset + 17];
+        char c17 = (char) bytes[offset + 18];
+        char c18 = (char) bytes[offset + 19];
 
         char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2;
         if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
@@ -3984,27 +3986,27 @@ final class JSONReaderJSONB extends JSONReader {
             throw new JSONException("illeal localdatetime string : " + readString());
         }
 
-       byte c0 = bytes[offset + 1];
-       byte c1 = bytes[offset + 2];
-       byte c2 = bytes[offset + 3];
-       byte c3 = bytes[offset + 4];
-       byte c4 = bytes[offset + 5];
-       byte c5 = bytes[offset + 6];
-       byte c6 = bytes[offset + 7];
-       byte c7 = bytes[offset + 8];
-       byte c8 = bytes[offset + 9];
-       byte c9 = bytes[offset + 10];
-       byte c10 = bytes[offset + 11];
-       byte c11 = bytes[offset + 12];
-       byte c12 = bytes[offset + 13];
-       byte c13 = bytes[offset + 14];
-       byte c14 = bytes[offset + 15];
-       byte c15 = bytes[offset + 16];
-       byte c16 = bytes[offset + 17];
-       byte c17 = bytes[offset + 18];
-       byte c18 = bytes[offset + 19];
-       byte c19 = bytes[offset + 20];
-       byte c20, c21 = '0', c22 = '0', c23 = '0', c24 = '0', c25 = '0', c26 = '0', c27 = '0', c28 = '0';
+        byte c0 = bytes[offset + 1];
+        byte c1 = bytes[offset + 2];
+        byte c2 = bytes[offset + 3];
+        byte c3 = bytes[offset + 4];
+        byte c4 = bytes[offset + 5];
+        byte c5 = bytes[offset + 6];
+        byte c6 = bytes[offset + 7];
+        byte c7 = bytes[offset + 8];
+        byte c8 = bytes[offset + 9];
+        byte c9 = bytes[offset + 10];
+        byte c10 = bytes[offset + 11];
+        byte c11 = bytes[offset + 12];
+        byte c12 = bytes[offset + 13];
+        byte c13 = bytes[offset + 14];
+        byte c14 = bytes[offset + 15];
+        byte c15 = bytes[offset + 16];
+        byte c16 = bytes[offset + 17];
+        byte c17 = bytes[offset + 18];
+        byte c18 = bytes[offset + 19];
+        byte c19 = bytes[offset + 20];
+        byte c20, c21 = '0', c22 = '0', c23 = '0', c24 = '0', c25 = '0', c26 = '0', c27 = '0', c28 = '0';
         switch (len) {
             case 21:
                 c20 = bytes[offset + 21];
