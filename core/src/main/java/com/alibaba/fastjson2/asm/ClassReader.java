@@ -8,11 +8,11 @@ import java.io.InputStream;
  * Created by wenshao on 05/08/2017.
  */
 public class ClassReader {
-    public  final byte[] b;
+    public final byte[] b;
     private final int[] items;
     private final String[] strings;
     private final int maxStringLength;
-    public  final int header;
+    public final int header;
     private boolean readAnnotations;
 
     public ClassReader(InputStream is, boolean readAnnotations) throws IOException {

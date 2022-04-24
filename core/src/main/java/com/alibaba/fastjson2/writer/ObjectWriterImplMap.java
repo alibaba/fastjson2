@@ -33,7 +33,7 @@ final class ObjectWriterImplMap extends ObjectWriterBaseModule.PrimitiveImpl {
     final Field jsonObject1InnerMap;
     long jsonObject1InnerMapOffset = -1;
 
-    public ObjectWriterImplMap( Class objectClass, long features) {
+    public ObjectWriterImplMap(Class objectClass, long features) {
         this(null, null, objectClass, objectClass, features);
     }
 

@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 import java.time.Instant;
 import java.util.Map;
 
-public final class ObjectReaderImplInstant implements ObjectReader  {
+public final class ObjectReaderImplInstant implements ObjectReader {
     public static final ObjectReaderImplInstant INSTANCE = new ObjectReaderImplInstant();
 
     @Override

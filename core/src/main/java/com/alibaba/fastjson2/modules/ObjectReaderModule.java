@@ -3,7 +3,7 @@ package com.alibaba.fastjson2.modules;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Type;
 
 public interface ObjectReaderModule {
     default void init(ObjectReaderProvider provider) {

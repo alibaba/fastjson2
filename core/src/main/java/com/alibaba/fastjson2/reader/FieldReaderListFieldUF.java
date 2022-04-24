@@ -17,9 +17,9 @@ final class FieldReaderListFieldUF<T> extends FieldReaderListField<T> {
             Type itemType,
             int ordinal,
             long features,
-            String fromat,
+            String format,
             Field field) {
-        super(fieldName, fieldType, fieldClass, itemType, ordinal, features, fromat, field);
+        super(fieldName, fieldType, fieldClass, itemType, ordinal, features, format, field);
         fieldOffset = UnsafeUtils.objectFieldOffset(field);
     }
 

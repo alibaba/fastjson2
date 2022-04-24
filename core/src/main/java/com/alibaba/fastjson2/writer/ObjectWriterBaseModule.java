@@ -874,7 +874,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         ObjectWriters.fieldWriter("actualTypeArguments", Type[].class, ParameterizedType::getActualTypeArguments),
                         ObjectWriters.fieldWriter("ownerType", Type.class, ParameterizedType::getOwnerType),
                         ObjectWriters.fieldWriter("rawType", Type.class, ParameterizedType::getRawType)
-                        );
+                );
             }
         }
 

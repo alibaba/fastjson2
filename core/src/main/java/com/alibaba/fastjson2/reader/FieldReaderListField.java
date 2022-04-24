@@ -82,7 +82,7 @@ class FieldReaderListField<T>
         if (itemReader != null) {
             return itemReader;
         }
-        return itemReader= ctx.getObjectReader(itemType);
+        return itemReader = ctx.getObjectReader(itemType);
     }
 
     @Override

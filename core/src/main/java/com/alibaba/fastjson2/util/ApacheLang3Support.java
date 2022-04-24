@@ -23,6 +23,7 @@ public class ApacheLang3Support {
         }
 
         Object getLeft();
+
         Object getRight();
 
         @JSONField(deserialize = false)

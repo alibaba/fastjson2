@@ -92,7 +92,7 @@ public class JodaSupport {
             Integer minimumDaysInFirstWeek = null;
             String zoneId = null;
             jsonReader.nextIfObjectStart();
-            for (;;) {
+            for (; ; ) {
                 if (jsonReader.nextIfObjectEnd()) {
                     break;
                 }
@@ -301,7 +301,7 @@ public class JodaSupport {
                 Integer year = null, month = null, day = null;
                 Object chronology = null;
                 jsonReader.nextIfObjectStart();
-                for (;;) {
+                for (; ; ) {
                     if (jsonReader.nextIfObjectEnd()) {
                         break;
                     }
@@ -483,7 +483,7 @@ public class JodaSupport {
             if (type == BC_LOCAL_DATETIME) {
                 LocalDateTime ldt = jsonReader.readLocalDateTime();
                 try {
-                    return constructor7.newInstance(ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth(), ldt.getHour(), ldt.getMinute(), ldt.getSecond(), ldt.getNano()/1000_000);
+                    return constructor7.newInstance(ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth(), ldt.getHour(), ldt.getMinute(), ldt.getSecond(), ldt.getNano() / 1000_000);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                     throw new JSONException("read org.joda.time.LocalDate error", e);
                 }
@@ -493,7 +493,7 @@ public class JodaSupport {
                 Integer year = null, month = null, day = null, hour = null, minute = null, second = null, millis = null;
                 Object chronology = null;
                 jsonReader.nextIfObjectStart();
-                for (;;) {
+                for (; ; ) {
                     if (jsonReader.nextIfObjectEnd()) {
                         break;
                     }

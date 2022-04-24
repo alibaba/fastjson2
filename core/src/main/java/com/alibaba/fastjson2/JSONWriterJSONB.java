@@ -268,7 +268,7 @@ final class JSONWriterJSONB extends JSONWriter {
 
     @Override
     public void writeString(char ch) {
-        writeString(new char[] {ch});
+        writeString(new char[]{ch});
     }
 
     @Override
@@ -474,7 +474,7 @@ final class JSONWriterJSONB extends JSONWriter {
             return 3;
         }
 
-        return  5;
+        return 5;
     }
 
     @Override
@@ -539,11 +539,11 @@ final class JSONWriterJSONB extends JSONWriter {
                 }
 
                 int asciiCount = 0;
-                for (int i = 0; i + 2 < check_cnt; i+= 2) {
+                for (int i = 0; i + 2 < check_cnt; i += 2) {
                     byte b0 = value[i];
                     byte b1 = value[i + 1];
                     if (b0 == 0 || b1 == 0) {
-                        asciiCount ++;
+                        asciiCount++;
                     }
                 }
 

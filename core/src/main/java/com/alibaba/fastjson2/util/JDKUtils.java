@@ -4,7 +4,6 @@ import java.lang.invoke.*;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.function.*;
@@ -90,8 +89,7 @@ public class JDKUtils {
                 break;
             case 17:
             case 18:
-            case 19:
-            {
+            case 19: {
                 final boolean INVOKE_UNNAMED = inputArguments.contains("--add-opens=java.base/java.lang.invoke=ALL-UNNAMED");
                 final boolean REFLECT_UNNAMED = inputArguments.contains("--add-opens=java.base/jdk.internal.reflect=ALL-UNNAMED");
                 STRING_BYTES_INTERNAL_API = ILLEGAL_ACCESS_PERMIT || (INVOKE_UNNAMED && REFLECT_UNNAMED);
@@ -122,7 +120,7 @@ public class JDKUtils {
             } catch (Exception ignored) {
             }
         }
-        BIG_ENDIAN  = bigEndian == null
+        BIG_ENDIAN = bigEndian == null
                 ? -1
                 : bigEndian.booleanValue() ? (byte) 1 : (byte) 0;
 
@@ -158,8 +156,8 @@ public class JDKUtils {
         Function<byte[], String> utf16Creator = null, asciiCreator = null;
         if (unsafeSupport) {
             try {
-                utf16Creator = ((Supplier<Function<byte[], String>>)() -> UnsafeUtils.getStringCreatorUTF16()).get();
-                asciiCreator = ((Supplier<Function<byte[], String>>)() -> UnsafeUtils.getStringCreatorASCII()).get();
+                utf16Creator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorUTF16()).get();
+                asciiCreator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorASCII()).get();
             } catch (Throwable ignored) {
 
             }
