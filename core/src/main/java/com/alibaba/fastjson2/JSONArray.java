@@ -59,7 +59,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link JSONArray} or null
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     @SuppressWarnings("unchecked")
     public JSONArray getJSONArray(int index) {
@@ -95,7 +95,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link JSONObject} or null
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public JSONObject getJSONObject(int index) {
@@ -131,7 +131,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link String} or null
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public String getString(int index) {
         Object value = get(index);
@@ -154,7 +154,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return {@link Double} or null
      * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable double
      * @throws JSONException             Unsupported type conversion to {@link Double}
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Double getDouble(int index) {
         Object value = get(index);
@@ -191,7 +191,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return double
      * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable double
      * @throws JSONException             Unsupported type conversion to double value
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public double getDoubleValue(int index) {
         Object value = get(index);
@@ -224,7 +224,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return {@link Float} or null
      * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable float
      * @throws JSONException             Unsupported type conversion to {@link Float}
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Float getFloat(int index) {
         Object value = get(index);
@@ -261,7 +261,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return float
      * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable float
      * @throws JSONException             Unsupported type conversion to float value
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public float getFloatValue(int index) {
         Object value = get(index);
@@ -294,7 +294,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return {@link Long} or null
      * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable long
      * @throws JSONException             Unsupported type conversion to {@link Long}
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Long getLong(int index) {
         Object value = get(index);
@@ -330,7 +330,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return long
      * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable long
      * @throws JSONException             Unsupported type conversion to long value
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public long getLongValue(int index) {
         Object value = get(index);
@@ -363,7 +363,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return {@link Integer} or null
      * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable int
      * @throws JSONException             Unsupported type conversion to {@link Integer}
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Integer getInteger(int index) {
         Object value = get(index);
@@ -399,7 +399,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return int
      * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable int
      * @throws JSONException             Unsupported type conversion to int value
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public int getIntValue(int index) {
         Object value = get(index);
@@ -432,7 +432,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return {@link Short} or null
      * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable short
      * @throws JSONException             Unsupported type conversion to {@link Short}
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Short getShort(int index) {
         Object value = get(index);
@@ -469,7 +469,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return short
      * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable short
      * @throws JSONException             Unsupported type conversion to short value
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public short getShortValue(int index) {
         Object value = get(index);
@@ -502,7 +502,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return {@link Byte} or null
      * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable byte
      * @throws JSONException             Unsupported type conversion to {@link Byte}
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Byte getByte(int index) {
         Object value = get(index);
@@ -535,7 +535,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return byte
      * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable byte
      * @throws JSONException             Unsupported type conversion to byte value
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public byte getByteValue(int index) {
         Object value = get(index);
@@ -567,7 +567,7 @@ public class JSONArray extends ArrayList<Object> {
      * @param index index of the element to return
      * @return {@link Boolean} or null
      * @throws JSONException             Unsupported type conversion to {@link Boolean}
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Boolean getBoolean(int index) {
         Object value = get(index);
@@ -603,7 +603,7 @@ public class JSONArray extends ArrayList<Object> {
      * @param index index of the element to return
      * @return boolean
      * @throws JSONException             Unsupported type conversion to boolean value
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public boolean getBooleanValue(int index) {
         Object value = get(index);
@@ -633,7 +633,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link BigInteger} or null
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      * @throws JSONException             Unsupported type conversion to {@link BigInteger}
      * @throws NumberFormatException     If the value of get is {@link String} and it is not a valid representation of {@link BigInteger}
      */
@@ -675,7 +675,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link BigDecimal} or null
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      * @throws JSONException             Unsupported type conversion to {@link BigDecimal}
      * @throws NumberFormatException     If the value of get is {@link String} and it is not a valid representation of {@link BigDecimal}
      */
@@ -723,7 +723,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link Date} or null
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Date getDate(int index) {
         Object value = get(index);
@@ -752,7 +752,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param index index of the element to return
      * @return {@link Instant} or null
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Instant getInstant(int index) {
         Object value = get(index);
@@ -804,9 +804,9 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * Convert this {@link JSONArray} to the specified Object
-     * <code>
+     * <pre>
      * List<User> users = jsonArray.toJavaObject(new TypeReference<ArrayList<User>>(){}.getType());
-     * </code>
+     * </pre>
      *
      * @param type specify the {@link Type} to be converted
      */
@@ -821,11 +821,11 @@ public class JSONArray extends ArrayList<Object> {
      * Convert all the members of this {@link JSONArray} into the specified Object.
      * Warning that each member of the {@link JSONArray} must implement the {@link Map} interface.
      *
-     * <code>
+     * <pre>
      * String json = "[{\"id\": 1, \"name\": \"fastjson\"}, {\"id\": 2, \"name\": \"fastjson2\"}]";
      * JSONArray array = JSON.parseArray(json);
      * List<User> users = array.toJavaList(User.class);
-     * </code>
+     * </pre>
      *
      * @param clazz specify the {@link Class<T>} to be converted
      */
@@ -853,15 +853,15 @@ public class JSONArray extends ArrayList<Object> {
     /**
      * Returns the result of the {@link Type} converter conversion of the element at the specified position in this {@link JSONArray}.
      *
-     * <code>
+     * <pre>
      * User user = jsonArray.getObject(0, User.class);
-     * </code>
+     * </pre>
      *
      * @param index index of the element to return
      * @param type  specify the {@link Type} to be converted
      * @return <T> or null
      * @throws JSONException             If no suitable conversion method is found
-     * @throws IndexOutOfBoundsException if the index is out of range (index < 0 || index >= size())
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> T getObject(int index, Type type) {
@@ -900,9 +900,9 @@ public class JSONArray extends ArrayList<Object> {
     /**
      * Chained addition of elements
      *
-     * <code>
+     * <pre>
      * JSONArray array = new JSONArray().fluentAdd(1).fluentAdd(2).fluentAdd(3);
-     * </code>
+     * </pre>
      *
      * @param element element to be appended to this list
      */
@@ -914,9 +914,9 @@ public class JSONArray extends ArrayList<Object> {
     /**
      * Pack multiple elements as {@link JSONArray}
      *
-     * <code>
+     * <pre>
      * JSONArray array = JSONArray.of(1, 2, "3", 4F, 5L, 6D, true);
-     * </code>
+     * </pre>
      *
      * @param items element set
      */
@@ -927,9 +927,9 @@ public class JSONArray extends ArrayList<Object> {
     /**
      * Pack an element as {@link JSONArray}
      *
-     * <code>
+     * <pre>
      * JSONArray array = JSONArray.of("fastjson");
-     * </code>
+     * </pre>
      *
      * @param item target element
      */
@@ -942,9 +942,9 @@ public class JSONArray extends ArrayList<Object> {
     /**
      * Pack two elements as {@link JSONArray}
      *
-     * <code>
+     * <pre>
      * JSONArray array = JSONArray.of("fastjson", 2);
-     * </code>
+     * </pre>
      *
      * @param first  first element
      * @param second second element
@@ -959,9 +959,9 @@ public class JSONArray extends ArrayList<Object> {
     /**
      * Pack three elements as {@link JSONArray}
      *
-     * <code>
+     * <pre>
      * JSONArray array = JSONArray.of("fastjson", 2, true);
-     * </code>
+     * </pre>
      *
      * @param first  first element
      * @param second second element
