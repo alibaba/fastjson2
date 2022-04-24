@@ -181,13 +181,11 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
-            <version>1.4.21</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
-            <version>1.4.21</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -302,28 +300,7 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
-            <version>5.2.10.RELEASE</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security.oauth</groupId>
-            <artifactId>spring-security-oauth2</artifactId>
-            <version>2.3.5.RELEASE</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-codec</artifactId>
-                    <groupId>commons-codec</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jackson</artifactId>
-                    <groupId>jackson-mapper-asl</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jackson</artifactId>
-                    <groupId>jackson-core-asl</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 
