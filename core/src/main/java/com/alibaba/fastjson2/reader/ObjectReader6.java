@@ -10,7 +10,8 @@ import com.alibaba.fastjson2.util.UnsafeUtils;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 
 final class ObjectReader6<T> extends ObjectReaderBean<T> {
     final Supplier<T> defaultCreator;
@@ -137,7 +138,7 @@ final class ObjectReader6<T> extends ObjectReaderBean<T> {
             object = null;
         }
 
-        for (;;) {
+        for (; ; ) {
             if (jsonReader.nextIfMatch(BC_OBJECT_END)) {
                 break;
             }

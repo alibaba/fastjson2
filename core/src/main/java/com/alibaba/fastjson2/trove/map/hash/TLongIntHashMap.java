@@ -21,7 +21,7 @@
 package com.alibaba.fastjson2.trove.map.hash;
 
 import com.alibaba.fastjson2.trove.impl.PrimeFinder;
-import com.alibaba.fastjson2.trove.procedure.*;
+import com.alibaba.fastjson2.trove.procedure.TLongIntProcedure;
 
 /**
  * An open addressed Map implementation for long keys and int values.
@@ -200,12 +200,12 @@ public class TLongIntHashMap {
         return DEFAULT_ENTRY_VALUE;
     }
 
-    public boolean forEachEntry( TLongIntProcedure procedure ) {
+    public boolean forEachEntry(TLongIntProcedure procedure) {
         byte[] states = _states;
         long[] keys = _set;
         int[] values = _values;
-        for ( int i = keys.length; i-- > 0; ) {
-            if ( states[i] == FULL && ! procedure.execute( keys[i], values[i] ) ) {
+        for (int i = keys.length; i-- > 0; ) {
+            if (states[i] == FULL && !procedure.execute(keys[i], values[i])) {
                 return false;
             }
         }
@@ -214,16 +214,16 @@ public class TLongIntHashMap {
 
     @Override
     public String toString() {
-        final StringBuilder buf = new StringBuilder( "{" );
-        forEachEntry( new TLongIntProcedure() {
+        final StringBuilder buf = new StringBuilder("{");
+        forEachEntry(new TLongIntProcedure() {
             private boolean first = true;
+
             @Override
-            public boolean execute( long key, int value ) {
-                if ( first ) {
+            public boolean execute(long key, int value) {
+                if (first) {
                     first = false;
-                }
-                else {
-                    buf.append( ", " );
+                } else {
+                    buf.append(", ");
                 }
                 buf.append(key);
                 buf.append("=");
@@ -231,7 +231,7 @@ public class TLongIntHashMap {
                 return true;
             }
         });
-        buf.append( "}" );
+        buf.append("}");
         return buf.toString();
     }
 

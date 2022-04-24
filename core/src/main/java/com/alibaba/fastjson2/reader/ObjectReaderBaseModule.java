@@ -166,7 +166,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 );
 
                 BeanUtils.constructor(mixInSource, constructor ->
-                    getCreator(beanInfo, objectClass, constructor)
+                        getCreator(beanInfo, objectClass, constructor)
                 );
             }
 
@@ -352,9 +352,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             }
 
             beanInfo.namingStrategy =
-                    jsonType
-                            .naming()
-                            .name();
+                    jsonType.naming().name();
 
             for (JSONReader.Feature feature : jsonType.readFeatures()) {
                 beanInfo.readerFeatures |= feature.mask;
@@ -367,7 +365,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 JSONBuilder jsonBuilder = builderClass.getAnnotation(JSONBuilder.class);
                 if (jsonBuilder != null) {
                     String buildMethodName = jsonBuilder.buildMethod();
-                    beanInfo.buildMethod = BeanUtils.buildMethod(builderClass,buildMethodName);
+                    beanInfo.buildMethod = BeanUtils.buildMethod(builderClass, buildMethodName);
                     String withPrefix = jsonBuilder.withPrefix();
                     if (!withPrefix.isEmpty()) {
                         beanInfo.builderWithPrefix = withPrefix;
@@ -604,12 +602,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             }
 
             String jsonFieldName = jsonField.name();
-            if (jsonFieldName != null && !jsonFieldName.isEmpty()) {
+            if (!jsonFieldName.isEmpty()) {
                 fieldInfo.fieldName = jsonFieldName;
             }
 
             String jsonFieldFormat = jsonField.format();
-            if (jsonFieldFormat != null && !jsonFieldFormat.isEmpty()) {
+            if (!jsonFieldFormat.isEmpty()) {
                 if (jsonFieldFormat.indexOf('T') != -1 && !jsonFieldFormat.contains("'T'")) {
                     jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
                 }
@@ -896,7 +894,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         if (type == Map.class || type == AbstractMap.class) {
-            return ObjectReaderImplMap.of(null, (Class) type,   0);
+            return ObjectReaderImplMap.of(null, (Class) type, 0);
         }
 
         if (type == ConcurrentMap.class || type == ConcurrentHashMap.class) {
@@ -1477,7 +1475,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             Object value;
             if (itemType == null) {
                 value = jsonReader.readAny();
-            }  else {
+            } else {
                 if (itemObjectReader == null) {
                     itemObjectReader = jsonReader.getObjectReader(itemType);
                 }
@@ -1495,7 +1493,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             Object value;
             if (itemType == null) {
                 value = jsonReader.readAny();
-            }  else {
+            } else {
                 if (itemObjectReader == null) {
                     itemObjectReader = jsonReader.getObjectReader(itemType);
                 }
@@ -1777,6 +1775,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return jsonReader.readLocalDate();
         }
     }
+
     static class LocalTimeImpl extends PrimitiveImpl {
         static final LocalTimeImpl INSTANCE = new LocalTimeImpl();
 
@@ -2637,7 +2636,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             Object value = jsonReader.readAny();
             jsonReader.nextIfMatch('}');
             jsonReader.nextIfMatch(',');
-            return new AbstractMap.SimpleEntry(key,value);
+            return new AbstractMap.SimpleEntry(key, value);
         }
     }
 
@@ -2776,7 +2775,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             }
             jsonReader.next();
 
-            for (;;) {
+            for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
                     break;
                 }

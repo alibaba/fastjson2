@@ -31,7 +31,7 @@ public class UnsafeUtils {
         return UNSAFE.objectFieldOffset(field);
     }
 
-     public static Function<byte[], String> getStringCreatorUTF16() {
+    public static Function<byte[], String> getStringCreatorUTF16() {
         if (STRING_CREATOR_UTF16 == null) {
             if (!STRING_CREATOR_UTF16_ERROR) {
                 try {
@@ -42,9 +42,9 @@ public class UnsafeUtils {
             }
         }
         return STRING_CREATOR_UTF16;
-     }
+    }
 
-     public static Function<byte[], String> getStringCreatorASCII() {
+    public static Function<byte[], String> getStringCreatorASCII() {
         if (STRING_CREATOR_ASCII == null) {
             if (!STRING_CREATOR_ASCII_ERROR) {
                 try {
@@ -55,9 +55,9 @@ public class UnsafeUtils {
             }
         }
         return STRING_CREATOR_ASCII;
-     }
+    }
 
-     static final class UTF16StringCreator implements Function<byte[], String> {
+    static final class UTF16StringCreator implements Function<byte[], String> {
         final long CODER_OFFSET;
         final long VALUE_OFFSET;
 
@@ -71,8 +71,8 @@ public class UnsafeUtils {
             VALUE_OFFSET = UNSAFE.objectFieldOffset(fieldValue);
         }
 
-         @Override
-         public String apply(byte[] bytes) {
+        @Override
+        public String apply(byte[] bytes) {
             try {
                 Object str = UNSAFE.allocateInstance(String.class);
                 UNSAFE.putByte(str, CODER_OFFSET, (byte) 1);
@@ -81,10 +81,10 @@ public class UnsafeUtils {
             } catch (Throwable ex) {
                 throw new JSONException("create string error");
             }
-         }
-     }
+        }
+    }
 
-     static final class ASCIIStringCreator implements Function<byte[], String> {
+    static final class ASCIIStringCreator implements Function<byte[], String> {
         final long CODER_OFFSET;
         final long VALUE_OFFSET;
 
@@ -98,8 +98,8 @@ public class UnsafeUtils {
             VALUE_OFFSET = UNSAFE.objectFieldOffset(fieldValue);
         }
 
-         @Override
-         public String apply(byte[] bytes) {
+        @Override
+        public String apply(byte[] bytes) {
             try {
                 Object str = UNSAFE.allocateInstance(String.class);
                 UNSAFE.putByte(str, CODER_OFFSET, (byte) 0);
@@ -108,6 +108,6 @@ public class UnsafeUtils {
             } catch (Throwable ex) {
                 throw new JSONException("create string error");
             }
-         }
-     }
+        }
+    }
 }

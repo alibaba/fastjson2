@@ -5,10 +5,10 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import static com.alibaba.fastjson2.JSONB.Constants.*;
-
 import java.lang.reflect.*;
 import java.util.Arrays;
+
+import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 final class ObjectReaderImplEnum implements ObjectReader {
     final Method createMethod;

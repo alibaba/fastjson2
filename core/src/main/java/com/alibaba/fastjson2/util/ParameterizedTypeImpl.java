@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONType;
-import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -12,11 +12,11 @@ import java.util.Arrays;
 public class ParameterizedTypeImpl implements ParameterizedType {
 
     private final Type[] actualTypeArguments;
-    private final Type   ownerType;
-    private final Type   rawType;
+    private final Type ownerType;
+    private final Type rawType;
 
     @JSONCreator
-    public ParameterizedTypeImpl(Type[] actualTypeArguments, Type ownerType, Type rawType){
+    public ParameterizedTypeImpl(Type[] actualTypeArguments, Type ownerType, Type rawType) {
         this.actualTypeArguments = actualTypeArguments;
         this.ownerType = ownerType;
         this.rawType = rawType;

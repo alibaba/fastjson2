@@ -328,7 +328,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             genMethodWrite(objectClass, fieldWriters, cw, classNameType, writerFeatures);
         }
 
-        genMethodWriteArrayMappingJSONB(objectClass, writerFeatures, fieldWriters,  cw, classNameType, writerFeatures);
+        genMethodWriteArrayMappingJSONB(objectClass, writerFeatures, fieldWriters, cw, classNameType, writerFeatures);
 
         genMethodWriteArrayMapping("writeArrayMapping", objectClass, writerFeatures, fieldWriters, cw, classNameType);
 

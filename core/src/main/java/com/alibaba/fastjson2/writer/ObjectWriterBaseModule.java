@@ -107,9 +107,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 }
 
                 beanInfo.namingStrategy =
-                        jsonType
-                                .naming()
-                                .name();
+                        jsonType.naming().name();
 
                 String[] ignores = jsonType.ignores();
                 if (ignores.length > 0) {
@@ -190,9 +188,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 return;
             }
 
-            String jsonFIeldName = jsonField.name();
-            if (!jsonFIeldName.isEmpty()) {
-                fieldInfo.fieldName = jsonFIeldName;
+            String jsonFieldName = jsonField.name();
+            if (!jsonFieldName.isEmpty()) {
+                fieldInfo.fieldName = jsonFieldName;
             }
 
             String jsonFieldFormat = jsonField.format();
@@ -374,9 +372,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             }
 
             if (jsonField != null) {
-                String jsonFIeldName = jsonField.name();
-                if (!jsonFIeldName.isEmpty()) {
-                    fieldInfo.fieldName = jsonFIeldName;
+                String jsonFieldName = jsonField.name();
+                if (!jsonFieldName.isEmpty()) {
+                    fieldInfo.fieldName = jsonFieldName;
                 }
 
                 String jsonFieldFormat = jsonField.format();
@@ -876,7 +874,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         ObjectWriters.fieldWriter("actualTypeArguments", Type[].class, ParameterizedType::getActualTypeArguments),
                         ObjectWriters.fieldWriter("ownerType", Type.class, ParameterizedType::getOwnerType),
                         ObjectWriters.fieldWriter("rawType", Type.class, ParameterizedType::getRawType)
-                        );
+                );
             }
         }
 

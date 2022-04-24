@@ -213,7 +213,7 @@ public final class RyuFloat {
                 int e = q - 1;
                 int l = 59 + (e == 0 ? 1 : (int) ((e * 23219280L + 10000000L - 1) / 10000000L)) - 1;
                 int qx = q - 1, ii = -e2 + q - 1 + l;
-                long mulPow5InvDivPow2 =  (mv * (long) POW5_INV_SPLIT[qx][0] + ((mv * (long) POW5_INV_SPLIT[qx][1]) >> 31)) >> (ii - 31);
+                long mulPow5InvDivPow2 = (mv * (long) POW5_INV_SPLIT[qx][0] + ((mv * (long) POW5_INV_SPLIT[qx][1]) >> 31)) >> (ii - 31);
                 lastRemovedDigit = (int) (mulPow5InvDivPow2 % 10);
             }
             e10 = q;
@@ -525,7 +525,7 @@ public final class RyuFloat {
                 int e = q - 1;
                 int l = 59 + (e == 0 ? 1 : (int) ((e * 23219280L + 10000000L - 1) / 10000000L)) - 1;
                 int qx = q - 1, ii = -e2 + q - 1 + l;
-                long mulPow5InvDivPow2 =  (mv * (long) POW5_INV_SPLIT[qx][0] + ((mv * (long) POW5_INV_SPLIT[qx][1]) >> 31)) >> (ii - 31);
+                long mulPow5InvDivPow2 = (mv * (long) POW5_INV_SPLIT[qx][0] + ((mv * (long) POW5_INV_SPLIT[qx][1]) >> 31)) >> (ii - 31);
                 lastRemovedDigit = (int) (mulPow5InvDivPow2 % 10);
             }
             e10 = q;

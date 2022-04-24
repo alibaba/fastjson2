@@ -25,6 +25,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
     private static final MethodType METHODTYPE_BiFunction = MethodType.methodType(BiConsumer.class);
     private static final MethodType METHODTYPE_Function = MethodType.methodType(Function.class);
     private static final MethodType METHODTYPE_VOID = MethodType.methodType(void.class);
+
     static {
         classFunctionMapping.put(boolean.class, ObjBoolConsumer.class);
         classFunctionMapping.put(byte.class, ObjByteConsumer.class);
@@ -175,7 +176,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
     }
 
     @Override
-    public  <T> FieldReader createFieldReaderMethod(
+    public <T> FieldReader createFieldReaderMethod(
             Class<T> objectClass
             , Type objectType
             , String fieldName

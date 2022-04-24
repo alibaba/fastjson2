@@ -79,7 +79,7 @@ final class ObjectWriterImplEnum<E extends Enum<E>> extends ObjectWriterBaseModu
         Enum e = (Enum) object;
 
         if (valueField != null) {
-            Object fieldValue ;
+            Object fieldValue;
             try {
                 if (valueField instanceof Field) {
                     fieldValue = ((Field) valueField).get(object);

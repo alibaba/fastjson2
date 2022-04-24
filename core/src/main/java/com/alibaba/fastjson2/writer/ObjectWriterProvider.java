@@ -1,14 +1,17 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -131,8 +134,9 @@ public class ObjectWriterProvider {
     static final int ENUM = 0x00004000;
     static final int[] PRIMITIVE_HASH_CODES;
     static final int[] NOT_REFERENCES_TYPE_HASH_CODES;
+
     static {
-        Class[] classes = new Class[] {
+        Class[] classes = new Class[]{
                 boolean.class,
                 Boolean.class,
                 Character.class,

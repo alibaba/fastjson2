@@ -398,10 +398,10 @@ public final class RyuDouble {
         // Above, we moved the decimal dot all the way to the right, so now we need to count digits to
         // figure out the correct exponent for scientific notation.
         final int vplength; //  = decimalLength(dp);
-        if (dp >=        1000000000000000000L) {
-            vplength= 19;
+        if (dp >= 1000000000000000000L) {
+            vplength = 19;
         } else if (dp >= 100000000000000000L) {
-            vplength=  18;
+            vplength = 18;
         } else if (dp >= 10000000000000000L) {
             vplength = 17;
         } else if (dp >= 1000000000000000L) {
@@ -904,10 +904,10 @@ public final class RyuDouble {
         // Above, we moved the decimal dot all the way to the right, so now we need to count digits to
         // figure out the correct exponent for scientific notation.
         final int vplength; //  = decimalLength(dp);
-        if (dp >=        1000000000000000000L) {
-            vplength= 19;
+        if (dp >= 1000000000000000000L) {
+            vplength = 19;
         } else if (dp >= 100000000000000000L) {
-            vplength=  18;
+            vplength = 18;
         } else if (dp >= 10000000000000000L) {
             vplength = 17;
         } else if (dp >= 1000000000000000L) {

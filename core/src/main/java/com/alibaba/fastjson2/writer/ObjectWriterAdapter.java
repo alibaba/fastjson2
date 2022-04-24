@@ -218,10 +218,10 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
         JSONObject map = new JSONObject(fieldWriters.size());
         for (int i = 0; i < fieldWriters.size(); i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
-             map.put(
-                     fieldWriter.getFieldName()
-                     , fieldWriter.getFieldValue(object)
-             );
+            map.put(
+                    fieldWriter.getFieldName()
+                    , fieldWriter.getFieldValue(object)
+            );
         }
         return map;
     }

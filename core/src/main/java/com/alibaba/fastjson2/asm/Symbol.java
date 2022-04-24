@@ -31,40 +31,40 @@ package com.alibaba.fastjson2.asm;
  * An entry of the constant pool, of the BootstrapMethods attribute, or of the (ASM specific) type
  * table of a class.
  *
- * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.4">JVMS
- *     4.4</a>
- * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.23">JVMS
- *     4.7.23</a>
  * @author Eric Bruneton
+ * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.4">JVMS
+ * 4.4</a>
+ * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.23">JVMS
+ * 4.7.23</a>
  */
 abstract class Symbol {
-  final int index;
-  final int tag;
-  final String owner;
-  final String name;
-  final String value;
-  final long data;
-  int info;
+    final int index;
+    final int tag;
+    final String owner;
+    final String name;
+    final String value;
+    final long data;
+    int info;
 
-  Symbol(
-      final int index,
-      final int tag,
-      final String owner,
-      final String name,
-      final String value,
-      final long data) {
-    this.index = index;
-    this.tag = tag;
-    this.owner = owner;
-    this.name = name;
-    this.value = value;
-    this.data = data;
-  }
-
-  int getArgumentsAndReturnSizes() {
-    if (info == 0) {
-      info = Type.getArgumentsAndReturnSizes(value);
+    Symbol(
+            final int index,
+            final int tag,
+            final String owner,
+            final String name,
+            final String value,
+            final long data) {
+        this.index = index;
+        this.tag = tag;
+        this.owner = owner;
+        this.name = name;
+        this.value = value;
+        this.data = data;
     }
-    return info;
-  }
+
+    int getArgumentsAndReturnSizes() {
+        if (info == 0) {
+            info = Type.getArgumentsAndReturnSizes(value);
+        }
+        return info;
+    }
 }
