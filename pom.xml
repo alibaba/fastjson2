@@ -9,26 +9,26 @@
     <version>2.0.2_preview01</version>
     <packaging>pom</packaging>
 
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <fastjson1x.version>1.2.79</fastjson1x.version>
-        <jackson.version>2.13.2</jackson.version>
-        <jetty.server.version>9.4.17.v20190418</jetty.server.version>
-        <jersey.version>2.23.2</jersey.version>
-        <springframework.version>5.3.19</springframework.version>
-
-        <junit.jupiter.version>5.8.2</junit.jupiter.version>
-        <jmh.version>1.35</jmh.version>
-    </properties>
-
     <modules>
         <module>core</module>
         <module>extension</module>
         <module>fastjson1_compatible</module>
     </modules>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <fastjson1x.version>1.2.80</fastjson1x.version>
+        <jackson.version>2.13.2</jackson.version>
+        <jetty.version>9.4.17.v20190418</jetty.version>
+        <jersey.version>2.23.2</jersey.version>
+        <springframework.version>5.3.19</springframework.version>
+
+        <junit5.version>5.8.2</junit5.version>
+        <jmh.version>1.35</jmh.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -127,24 +127,11 @@
                 <version>${fastjson1x.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-afterburner</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-kotlin</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.jaxrs</groupId>
-                <artifactId>jackson-jaxrs-json-provider</artifactId>
-                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -184,13 +171,10 @@
             </dependency>
             <dependency>
                 <groupId>com.google.protobuf</groupId>
-                <artifactId>protobuf-java</artifactId>
-                <version>3.20.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.protobuf</groupId>
-                <artifactId>protobuf-java-util</artifactId>
-                <version>3.20.0</version>
+                <artifactId>protobuf-bom</artifactId>
+                <version>3.20.1</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.msgpack</groupId>
@@ -206,38 +190,17 @@
             <!-- web container libs -->
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-server</artifactId>
-                <version>${jetty.server.version}</version>
+                <artifactId>jetty-bom</artifactId>
+                <version>${jetty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-webapp</artifactId>
-                <version>${jetty.server.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.core</groupId>
-                <artifactId>jersey-common</artifactId>
+                <groupId>org.glassfish.jersey</groupId>
+                <artifactId>jersey-bom</artifactId>
                 <version>${jersey.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.containers</groupId>
-                <artifactId>jersey-container-servlet</artifactId>
-                <version>${jersey.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.core</groupId>
-                <artifactId>jersey-client</artifactId>
-                <version>${jersey.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.test-framework.providers</groupId>
-                <artifactId>jersey-test-framework-provider-jdk-http</artifactId>
-                <version>${jersey.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.media</groupId>
-                <artifactId>jersey-media-json-jackson</artifactId>
-                <version>${jersey.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- common libs -->
@@ -298,38 +261,37 @@
                 <version>3.28.0-GA</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-bom</artifactId>
+                <version>1.4.32</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- spring libs -->
             <dependency>
                 <groupId>org.springframework</groupId>
-                <artifactId>spring-core</artifactId>
+                <artifactId>spring-framework-bom</artifactId>
                 <version>${springframework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>${springframework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-messaging</artifactId>
-                <version>${springframework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-websocket</artifactId>
-                <version>${springframework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-test</artifactId>
-                <version>${springframework.version}</version>
-                <scope>test</scope>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.springframework.data</groupId>
-                <artifactId>spring-data-redis</artifactId>
-                <version>2.6.3</version>
+                <artifactId>spring-data-bom</artifactId>
+                <version>2021.1.4</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-bom</artifactId>
+                <version>5.6.3</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
 
             <!-- testing libs -->
             <dependency>
@@ -339,16 +301,11 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter</artifactId>
-                <version>${junit.jupiter.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.vintage</groupId>
-                <artifactId>junit-vintage-engine</artifactId>
-                <version>${junit.jupiter.version}</version>
-                <scope>test</scope>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit5.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
