@@ -715,7 +715,7 @@ class JSONReaderUTF8 extends JSONReader {
                         }
                     }
                     if (STRING_CREATOR_JDK8 != null) {
-                        char chars[] = new char[length];
+                        char[] chars = new char[length];
                         for (int i = 0; i < length; ++i) {
                             chars[i] = (char) bytes[nameBegin + i];
                         }
@@ -914,7 +914,7 @@ class JSONReaderUTF8 extends JSONReader {
                         }
                     }
                     if (STRING_CREATOR_JDK8 != null) {
-                        char chars[] = new char[length];
+                        char[] chars = new char[length];
                         for (int i = 0; i < length; ++i) {
                             chars[i] = (char) bytes[nameBegin + i];
                         }
@@ -2168,7 +2168,7 @@ class JSONReaderUTF8 extends JSONReader {
             } else if (ascii) {
                 if (JDKUtils.JVM_VERSION == 8) {
                     int strlen = offset - this.offset;
-                    char chars[] = new char[strlen];
+                    char[] chars = new char[strlen];
                     for (int i = 0; i < strlen; ++i) {
                         chars[i] = (char) bytes[this.offset + i];
                     }

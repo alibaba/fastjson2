@@ -65,7 +65,7 @@ final class JSONReaderJSONB extends JSONReader {
             charset = StandardCharsets.US_ASCII;
         } else if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII_FIX_MAX) {
             if (JDKUtils.JVM_VERSION == 8) {
-                char chars[] = new char[strlen];
+                char[] chars = new char[strlen];
                 for (int i = 0; i < strlen; ++i) {
                     chars[i] = (char) bytes[strBegin + i];
                 }
@@ -638,7 +638,7 @@ final class JSONReaderJSONB extends JSONReader {
                     }
 
                     if (JDKUtils.JVM_VERSION == 8) {
-                        char chars[] = new char[strlen];
+                        char[] chars = new char[strlen];
                         for (int i = 0; i < strlen; ++i) {
                             chars[i] = (char) bytes[offset + i];
                         }
@@ -2143,7 +2143,7 @@ final class JSONReaderJSONB extends JSONReader {
     private String readFixedAsciiString(int strlen) {
         String str;
         if (JDKUtils.JVM_VERSION == 8) {
-            char chars[] = new char[strlen];
+            char[] chars = new char[strlen];
             for (int i = 0; i < strlen; ++i) {
                 chars[i] = (char) bytes[offset + i];
             }
