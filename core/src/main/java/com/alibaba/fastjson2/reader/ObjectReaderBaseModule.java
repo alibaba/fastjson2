@@ -1353,7 +1353,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
     static abstract class PrimitiveImpl<T> implements ObjectReader<T> {
         @Override
-        public T createInstance() {
+        public T createInstance(long features) {
             throw new UnsupportedOperationException();
         }
 
@@ -2646,7 +2646,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         static final EmptyListImpl INSTANCE = new EmptyListImpl();
 
         @Override
-        public Object createInstance() {
+        public Object createInstance(long features) {
             return Collections.emptyList();
         }
 
@@ -2656,7 +2656,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             if (entryCnt != 0) {
                 throw new JSONException("input not empty");
             }
-            return createInstance();
+            return createInstance(jsonReader.getContext().getFeatures() | features);
         }
 
         @Override
@@ -2667,7 +2667,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             } else {
                 throw new JSONException("input not empty");
             }
-            return createInstance();
+            return createInstance(jsonReader.getContext().getFeatures() | features);
         }
     }
 
@@ -2715,7 +2715,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         @Override
-        public Object createInstance() {
+        public Object createInstance(long features) {
             throw new UnsupportedOperationException();
         }
 

@@ -42,7 +42,7 @@ final class ObjectReaderSeeAlso<T> extends ObjectReaderAdapter<T> {
     }
 
     @Override
-    public T createInstance() {
+    public T createInstance(long features) {
         if (creator == null) {
             return null;
         }

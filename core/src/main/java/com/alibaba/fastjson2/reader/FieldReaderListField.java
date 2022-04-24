@@ -123,9 +123,9 @@ class FieldReaderListField<T>
 
             Collection list;
             if (autoTypeReader != null) {
-                list = (Collection) autoTypeReader.createInstance();
+                list = (Collection) autoTypeReader.createInstance(jsonReader.getContext().getFeatures() | features);
             } else {
-                list = (Collection) this.fieldObjectReader.createInstance();
+                list = (Collection) this.fieldObjectReader.createInstance(jsonReader.getContext().getFeatures() | features);
             }
 
             int entryCnt = jsonReader.startArray();

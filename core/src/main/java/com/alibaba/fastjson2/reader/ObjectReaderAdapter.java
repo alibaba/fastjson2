@@ -10,8 +10,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.alibaba.fastjson2.JSONB.Constants.*;
-
 public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
     final protected String typeKey;
     final protected long typeKeyHashCode;
@@ -128,30 +126,6 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
         return autoTypeObjectReader.readObject(jsonReader, features);
     }
 
-    public void readTableJSONBBody(JSONReader jsonReader, List objectList, int rowCount, long features) {
-        for (int i = 0; i < rowCount; i++) {
-            Object object = createInstance();
-            for (int j = 0; j < fieldReaders.length; j++) {
-                FieldReader fieldReader = fieldReaders[j];
-                fieldReader.readFieldValue(jsonReader, object);
-            }
-            objectList.add(object);
-        }
-    }
-
-    public byte[] getJSONBTableHeader() {
-        if (jsonbHeader == null) {
-            try (JSONWriter headerWriter = JSONWriter.ofJSONB()) {
-                headerWriter.writeInt32(fieldReaders.length);
-                for (int i = 0; i < fieldReaders.length; i++) {
-                    headerWriter.writeString(fieldReaders[i].getFieldName());
-                }
-                jsonbHeader = headerWriter.getBytes();
-            }
-        }
-        return jsonbHeader;
-    }
-
     @Override
     public Function getBuildFunction() {
         return buildFunction;
@@ -196,7 +170,7 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
         return (T) object;
     }
 
-    protected Object createInstance0() throws InstantiationException {
+    protected Object createInstance0(long features) throws InstantiationException {
         if (creator == null) {
             throw new JSONException("create instance error, " + objectClass);
         }
@@ -204,8 +178,18 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
     }
 
     @Override
-    public T createInstance() {
+    public T createInstance(long features) {
         if (instantiationError) {
+            if (constructor != null) {
+                try {
+                    return (T) constructor.newInstance();
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+                    throw new JSONException("create instance error, " + objectClass, ex);
+                }
+            }
+        }
+
+        if ((features & JSONReader.Feature.UseDefaultConstructorAsPossible.mask) != 0 && constructor.getParameterCount() == 0) {
             if (constructor != null) {
                 try {
                     return (T) constructor.newInstance();
@@ -217,7 +201,7 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
 
         InstantiationException error;
         try {
-            return (T) createInstance0();
+            return (T) createInstance0(features);
         } catch (InstantiationException ex) {
             error = ex;
         }
@@ -339,14 +323,14 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
             }
 
             if (object == null) {
-                object = createInstance();
+                object = createInstance(jsonReader.getContext().getFeatures() | features);
             }
 
             fieldReader.readFieldValue(jsonReader, object);
         }
 
         if (object == null) {
-            object = createInstance();
+            object = createInstance(jsonReader.getContext().getFeatures() | features);
         }
         return (T) object;
     }

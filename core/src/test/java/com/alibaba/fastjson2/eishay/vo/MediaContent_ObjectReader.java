@@ -25,7 +25,7 @@ public class MediaContent_ObjectReader implements ObjectReader {
     }
 
     @Override
-    public Object createInstance() {
+    public Object createInstance(long features) {
         return new MediaContent();
     }
 

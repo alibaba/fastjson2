@@ -77,7 +77,7 @@ final class ObjectReader4<T> extends ObjectReaderBean<T> {
     }
 
     @Override
-    public T createInstance() {
+    public T createInstance(long features) {
         return defaultCreator.get();
     }
 

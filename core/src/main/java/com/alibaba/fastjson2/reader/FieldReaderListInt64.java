@@ -22,7 +22,7 @@ public final class FieldReaderListInt64 implements ObjectReader {
     }
 
     @Override
-    public Object createInstance() {
+    public Object createInstance(long features) {
         if (instanceType == ArrayList.class) {
             return new ArrayList<>();
         }
@@ -68,7 +68,7 @@ public final class FieldReaderListInt64 implements ObjectReader {
                 throw new JSONException("create instance error " + listType, e);
             }
         } else {
-            list = (Collection) createInstance();
+            list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
         }
 
         int entryCnt = jsonReader.startArray();
@@ -90,7 +90,7 @@ public final class FieldReaderListInt64 implements ObjectReader {
         }
 
         if (jsonReader.isString()) {
-            Collection list = (Collection) createInstance();
+            Collection list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
             String str = jsonReader.readString();
             if (str.indexOf(',') != -1) {
                 String[] items = str.split(",");
@@ -112,7 +112,7 @@ public final class FieldReaderListInt64 implements ObjectReader {
         jsonReader.next();
 
 
-        Collection list = (Collection) createInstance();
+        Collection list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
         for (; ; ) {
             if (jsonReader.nextIfMatch(']')) {
                 break;

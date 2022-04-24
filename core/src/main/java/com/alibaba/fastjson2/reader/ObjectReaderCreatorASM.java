@@ -358,7 +358,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
         {
             MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
                     , fieldBased ? "createInstance0" : "createInstance",
-                    "()Ljava/lang/Object;"
+                    "(J)Ljava/lang/Object;"
             );
 
             if (fieldBased) {
@@ -1485,9 +1485,15 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
     }
 
     private <T> void genCreateObject(MethodWriter mw, String classNameType, String TYPE_OBJECT, boolean fieldBased) {
+        final int JSON_READER = 1;
+        final int FEATURES = 2;
+
         if (fieldBased) {
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "createInstance", "()Ljava/lang/Object;", false);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "features", "(J)J", false);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "createInstance", "(J)Ljava/lang/Object;", false);
         } else {
             mw.visitTypeInsn(Opcodes.NEW, TYPE_OBJECT);
             mw.visitInsn(Opcodes.DUP);

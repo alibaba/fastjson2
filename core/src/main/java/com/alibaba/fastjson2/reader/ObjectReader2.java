@@ -60,7 +60,7 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
     }
 
     @Override
-    public T createInstance() {
+    public T createInstance(long features) {
         return defaultCreator.get();
     }
 

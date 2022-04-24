@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -161,7 +160,7 @@ public final class ObjectReaderImplList implements ObjectReader {
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
-        List list = (List) createInstance();
+        List list = (List) createInstance(0L);
         for (Object item : collection) {
             Object value = item;
             Class<?> valueClass = value.getClass();
@@ -195,7 +194,7 @@ public final class ObjectReaderImplList implements ObjectReader {
     }
 
     @Override
-    public Object createInstance() {
+    public Object createInstance(long features) {
         if (instanceType == ArrayList.class) {
             return new ArrayList();
         }
@@ -349,7 +348,7 @@ public final class ObjectReaderImplList implements ObjectReader {
                 throw new JSONException("create instance error " + listType, e);
             }
         } else {
-            list = (Collection) createInstance();
+            list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
         }
 
         for (int i = 0; i < entryCnt; ++i) {
@@ -388,9 +387,9 @@ public final class ObjectReaderImplList implements ObjectReader {
 
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
+        JSONReader.Context context = jsonReader.getContext();
         if (itemObjectReader == null) {
-            itemObjectReader = jsonReader
-                    .getContext()
+            itemObjectReader = context
                     .getObjectReader(itemType);
         }
 
@@ -402,7 +401,7 @@ public final class ObjectReaderImplList implements ObjectReader {
             return null;
         }
 
-        Collection list = (Collection) createInstance();
+        Collection list = (Collection) createInstance(context.getFeatures() | features);
         char ch = jsonReader.current();
         if (ch == '"') {
             String str = jsonReader.readString();
@@ -410,7 +409,7 @@ public final class ObjectReaderImplList implements ObjectReader {
                 jsonReader.nextIfMatch(',');
                 return null;
             }
-            Function typeConvert = jsonReader.getContext().getProvider().getTypeConvert(String.class, itemType);
+            Function typeConvert = context.getProvider().getTypeConvert(String.class, itemType);
             if (typeConvert != null) {
                 Object converted = typeConvert.apply(str);
                 jsonReader.nextIfMatch(',');

@@ -19,7 +19,7 @@ public final class ObjectReaderImplListStr implements ObjectReader {
     }
 
     @Override
-    public Object createInstance() {
+    public Object createInstance(long features) {
         if (instanceType == ArrayList.class) {
             return new ArrayList();
         }
@@ -96,7 +96,7 @@ public final class ObjectReaderImplListStr implements ObjectReader {
                 throw new JSONException("create instance error " + listType, e);
             }
         } else {
-            list = (Collection) createInstance();
+            list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
         }
 
         int entryCnt = jsonReader.startArray();
@@ -127,7 +127,7 @@ public final class ObjectReaderImplListStr implements ObjectReader {
         jsonReader.next();
 
 
-        Collection list = (Collection) createInstance();
+        Collection list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
         for (; ; ) {
             if (jsonReader.nextIfMatch(']')) {
                 break;
