@@ -8,6 +8,71 @@
     <artifactId>fastjson-parent</artifactId>
     <version>2.0.2_preview01</version>
     <packaging>pom</packaging>
+    <name>${project.artifactId}</name>
+    <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
+    <url>https://github.com/alibaba/fastjson2</url>
+    <inceptionYear>2022</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>Apache 2</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://github.com/alibaba/fastjson2</url>
+        <connection>scm:git:https://git@github.com/alibaba/fastjson2.git</connection>
+    </scm>
+    <organization>
+        <name>Alibaba Group</name>
+        <url>https://github.com/alibaba</url>
+    </organization>
+    <developers>
+        <developer>
+            <id>wenshao</id>
+            <name>wenshao</name>
+            <email>shaojin.wensj(at)alibaba-inc.com</email>
+            <roles>
+                <role>Developer</role>
+                <role>Teach Leader</role>
+            </roles>
+            <timezone>+8</timezone>
+            <url>https://github.com/wenshao</url>
+        </developer>
+        <developer>
+            <id>oldratlee</id>
+            <name>Jerry Lee</name>
+            <email>oldratlee(at)gmail.com</email>
+            <roles>
+                <role>Developer</role>
+                <role>CI/SCM Engineer</role>
+            </roles>
+            <timezone>+8</timezone>
+            <url>https://github.com/oldratlee</url>
+        </developer>
+        <developer>
+            <id>VictorZeng</id>
+            <name>Victor Zeng</name>
+            <email>Victor.Zxy(at)outlook.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+8</timezone>
+            <url>https://github.com/VictorZeng</url>
+        </developer>
+        <developer>
+            <id>kraity</id>
+            <name>陆之岇</name>
+            <email>kat(at)krait.cn</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+8</timezone>
+            <url>https://github.com/kraity</url>
+        </developer>
+    </developers>
 
     <modules>
         <module>core</module>
