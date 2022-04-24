@@ -227,6 +227,10 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
                         }
                     }
 
+                    if (writeUsingWriter == null && fieldInfo.fieldClassMixIn) {
+                        writeUsingWriter = ObjectWriterBaseModule.VoidObjectWriter.INSTANCE;
+                    }
+
                     FieldWriter fieldWriter = createFieldWriter(
                             objectClass
                             , fieldName
@@ -1305,7 +1309,10 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
 
         } else if (fieldClass == String.class) {
             gwFieldValueString(mwc, fieldWriter, OBJECT, i);
-        } else if (fieldClass.isEnum()) {
+        } else if (fieldClass.isEnum()
+                && BeanUtils.getEnumValueField(fieldClass) == null
+                && !(fieldWriter instanceof FieldWriterObject)
+        ) {
             gwFieldValueEnum(mwc, fieldWriter, OBJECT, i);
         } else if (fieldClass == Date.class) {
             gwFieldValueDate(mwc, fieldWriter, OBJECT, i);
@@ -2335,7 +2342,10 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             Field field,
             ObjectWriter initObjectWriter
     ) {
-        field.setAccessible(true);
+        Class<?> declaringClass = field.getDeclaringClass();
+        if (!declaringClass.getName().startsWith("java.lang")) {
+            field.setAccessible(true);
+        }
 
         Class<?> fieldClass = field.getType();
 
@@ -2350,7 +2360,9 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
                     field
             );
             objImp.initValueClass = fieldClass;
-            objImp.initObjectWriter = initObjectWriter;
+            if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
+                objImp.initObjectWriter = initObjectWriter;
+            }
             return objImp;
         }
 
@@ -2438,7 +2450,10 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         }
 
         if (fieldClass.isEnum()) {
-            return new FIeldWriterEnumField(fieldName, ordinal, format, features, fieldClass, field);
+            Member enumValueField = BeanUtils.getEnumValueField(fieldClass);
+            if (enumValueField == null) {
+                return new FIeldWriterEnumField(fieldName, ordinal, format, features, fieldClass, field);
+            }
         }
 
         if (fieldClass == List.class || fieldClass == ArrayList.class) {
@@ -2454,7 +2469,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             Class<?> itemClass = fieldClass.getComponentType();
             Type fieldType = field.getGenericType();
 
-            if (field.getDeclaringClass() == Throwable.class && "stackTrace".equals(fieldName)) {
+            if (declaringClass == Throwable.class && "stackTrace".equals(fieldName)) {
                 try {
                     Method method = Throwable.class.getMethod("getStackTrace");
                     return new FieldWriterObjectArrayMethod(fieldName, itemClass, 0, 0, null, fieldType, fieldClass, method);

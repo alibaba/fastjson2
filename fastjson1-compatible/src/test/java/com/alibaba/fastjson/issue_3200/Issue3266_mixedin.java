@@ -1,20 +1,29 @@
-package com.alibaba.json.bvt.issue_3200;
+package com.alibaba.fastjson.issue_3200;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONCreator;
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
+import com.alibaba.fastjson2.JSONFactory;
+import org.junit.jupiter.api.Test;
 
-public class Issue3266 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3266_mixedin {
+    @Test
     public void test_for_issue() throws Exception {
+        JSONFactory.mixIn(Color.class, ColorMixedIn.class);
+
         VO vo = new VO();
         vo.type = Color.Black;
+
+        assertEquals("1003"
+                , JSON.toJSONString(vo.type));
 
         String str = JSON.toJSONString(vo);
         assertEquals("{\"type\":1003}", str);
 
         VO vo2 = JSON.parseObject(str, VO.class);
-
+        assertEquals(vo.type, vo2.type);
     }
 
     public static class VO {
@@ -33,12 +42,10 @@ public class Issue3266 extends TestCase {
             this.code = code;
         }
 
-        @JSONField
         public int getCode() {
             return code;
         }
 
-        @JSONCreator
         public static Color from(int code) {
             for (Color v : values()) {
                 if (v.code == code) {
@@ -47,6 +54,18 @@ public class Issue3266 extends TestCase {
             }
 
             throw new IllegalArgumentException("code " + code);
+        }
+    }
+
+    public static class ColorMixedIn {
+        @JSONField
+        public int getCode() {
+            return 0;
+        }
+
+        @JSONCreator
+        public static Color from(int code) {
+            return null;
         }
     }
 }

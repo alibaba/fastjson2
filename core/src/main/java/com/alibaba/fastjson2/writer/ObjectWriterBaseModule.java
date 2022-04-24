@@ -82,6 +82,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
 
                 if (mixInSource != null) {
                     jsonType = (JSONType) mixInSource.getAnnotation(JSONType.class);
+                    beanInfo.mixIn = true;
                 }
             }
 
@@ -116,7 +117,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
-                BeanUtils.annatationMethods(jsonType1x.annotationType(), method -> processJSONType1x(beanInfo, annotation, method));
+                BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> processJSONType1x(beanInfo, annotation, method));
             }
 
             if (beanInfo.seeAlso != null && beanInfo.seeAlso.length != 0) {
@@ -152,6 +153,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 if (mixInField != null) {
                     getFieldInfo(fieldInfo, mixInSource, mixInField);
                 }
+            }
+
+            Class fieldClassMixInSource = provider.mixInCache.get(field.getType());
+            if (fieldClassMixInSource != null) {
+                fieldInfo.fieldClassMixIn = true;
             }
 
             int modifiers = field.getModifiers();
@@ -226,7 +232,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
 
         private void processJSONField1x(FieldInfo fieldInfo, Annotation annotation) {
             Class<? extends Annotation> annotationClass = annotation.getClass();
-            BeanUtils.annatationMethods(annotationClass, m -> {
+            BeanUtils.annotationMethods(annotationClass, m -> {
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
@@ -336,6 +342,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 if (mixInMethod != null) {
                     getFieldInfo(fieldInfo, mixInSource, mixInMethod);
                 }
+            }
+
+            Class fieldClassMixInSource = provider.mixInCache.get(method.getReturnType());
+            if (fieldClassMixInSource != null) {
+                fieldInfo.fieldClassMixIn = true;
             }
 
             if (JDKUtils.CLASS_TRANSIENT != null && method.getAnnotation(JDKUtils.CLASS_TRANSIENT) != null) {
@@ -694,12 +705,32 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
 
         if (objectType instanceof Class) {
             Class clazz = (Class) objectType;
+
             if (clazz.isEnum()) {
-                return new ObjectWriterImplEnum(null, clazz, 0);
+                Member valueField = BeanUtils.getEnumValueField(clazz);
+                if (valueField == null) {
+                    Class mixInSource = provider.mixInCache.get(objectClass);
+                    Member mixedValueField = BeanUtils.getEnumValueField(mixInSource);
+                    if (mixedValueField instanceof Field) {
+                        try {
+                            valueField = clazz.getField(mixedValueField.getName());
+                        } catch (NoSuchFieldException ignored) {
+
+                        }
+                    } else if (mixedValueField instanceof Method) {
+                        try {
+                            valueField = clazz.getMethod(mixedValueField.getName());
+                        } catch (NoSuchMethodException ignored) {
+
+                        }
+                    }
+                }
+
+                return new ObjectWriterImplEnum(null, clazz, valueField, 0);
             }
 
             if (TimeUnit.class.isAssignableFrom(clazz)) {
-                return new ObjectWriterImplEnum(null, TimeUnit.class, 0);
+                return new ObjectWriterImplEnum(null, TimeUnit.class, null, 0);
             }
 
             if (clazz == boolean[].class) {
@@ -864,5 +895,8 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
         }
     }
 
+    static class VoidObjectWriter implements ObjectWriter {
+        public final static VoidObjectWriter INSTANCE = new VoidObjectWriter();
+    }
 
 }

@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.TypeReference;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -278,7 +279,7 @@ public abstract class BeanUtils {
         }
     }
 
-    public static void annatationMethods(Class objectClass, Consumer<Method> methodConsumer) {
+    public static void annotationMethods(Class objectClass, Consumer<Method> methodConsumer) {
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
             methods = objectClass.getMethods();
@@ -306,6 +307,98 @@ public abstract class BeanUtils {
 
             methodConsumer.accept(method);
         }
+    }
+
+    public static Member getEnumValueField(Class clazz) {
+        if (clazz == null) {
+            return null;
+        }
+
+        Member member = null;
+
+        Method[] methods = methodCache.get(clazz);
+        if (methods == null) {
+            methods = clazz.getMethods();
+            methodCache.putIfAbsent(clazz, methods);
+        }
+
+        for (Method method : methods) {
+            if (method.getReturnType() == Void.class) {
+                continue;
+            }
+
+            Annotation[] annotations = method.getAnnotations();
+            for (Annotation annotation : annotations) {
+                Class<? extends Annotation> annotationType = annotation.annotationType();
+                switch (annotationType.getName()) {
+                    case "com.alibaba.fastjson.annotation.JSONField":
+                    case "com.alibaba.fastjson2.annotation.JSONField":
+                        member = method;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        Field[] fields = fieldCache.get(clazz);
+        if (fields == null) {
+            fields = clazz.getFields();
+            fieldCache.putIfAbsent(clazz, fields);
+        }
+
+        for (Field field : fields) {
+            Annotation[] annotations = field.getAnnotations();
+            for (Annotation annotation : annotations) {
+                Class<? extends Annotation> annotationType = annotation.annotationType();
+                switch (annotationType.getName()) {
+                    case "com.alibaba.fastjson.annotation.JSONField":
+                    case "com.alibaba.fastjson.annotation2.JSONField":
+                        member = field;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return member;
+    }
+
+    public static boolean hasStaticCreatorOrBuilder(Class clazz) {
+        if (clazz == null) {
+            return false;
+        }
+
+        Method[] methods = methodCache.get(clazz);
+        if (methods == null) {
+            methods = clazz.getMethods();
+            methodCache.putIfAbsent(clazz, methods);
+        }
+
+        for (Method method : methods) {
+            if (!Modifier.isStatic(method.getModifiers())) {
+                continue;
+            }
+
+            if (method.getReturnType() == Void.class) {
+                continue;
+            }
+
+            Annotation[] annotations = method.getAnnotations();
+            for (Annotation annotation : annotations) {
+                Class<? extends Annotation> annotationType = annotation.annotationType();
+                switch (annotationType.getName()) {
+                    case "com.alibaba.fastjson.annotation.JSONCreator":
+                    case "com.alibaba.fastjson2.annotation.JSONCreator":
+                        return true;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return false;
     }
 
     public static void getters(Method[] methods, Consumer<Method> methodConsumer) {

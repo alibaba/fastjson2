@@ -218,7 +218,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
         }
 
         if (Enum.class.isAssignableFrom(objectClass)) {
-            return createEnumReader(objectClass, modules);
+            return createEnumReader(objectClass, beanInfo.createMethod, modules);
         }
 
         if (beanInfo.creatorConstructor != null || beanInfo.createMethod != null) {

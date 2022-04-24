@@ -51,7 +51,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
         }
 
         if (Enum.class.isAssignableFrom(objectClass)) {
-            return createEnumReader(objectClass, modules);
+            return createEnumReader(objectClass, beanInfo.createMethod, modules);
         }
 
         if (fieldBased && (objectClass.isInterface() || objectClass.isInterface())) {

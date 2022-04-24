@@ -56,7 +56,9 @@ public class ObjectWriterCreatorLambda extends ObjectWriterCreator {
 
             FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, fieldType, fieldClass, method);
             objMethod.initValueClass = fieldClass;
-            objMethod.initObjectWriter = initObjectWriter;
+            if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
+                objMethod.initObjectWriter = initObjectWriter;
+            }
             return objMethod;
         }
 

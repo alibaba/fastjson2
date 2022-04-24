@@ -7,17 +7,37 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
+import java.lang.reflect.*;
 import java.util.Arrays;
 
 final class ObjectReaderImplEnum implements ObjectReader {
+    final Method createMethod;
+    final Type createMethodParamType;
+    final Member valueField;
+
     final Class enumClass;
     final long typeNameHash;
     protected final Enum[] enums;
     protected final Enum[] ordinalEnums;
     protected long[] enumNameHashCodes;
 
-    public ObjectReaderImplEnum(Class enumClass, Enum[] enums, Enum[] ordinalEnums, long[] enumNameHashCodes) {
+    public ObjectReaderImplEnum(
+            Class enumClass,
+            Method createMethod,
+            Member valueField,
+            Enum[] enums,
+            Enum[] ordinalEnums,
+            long[] enumNameHashCodes) {
         this.enumClass = enumClass;
+        this.createMethod = createMethod;
+        this.valueField = valueField;
+
+        Type createMethodParamType = null;
+        if (createMethod != null && createMethod.getParameterCount() == 1) {
+            createMethodParamType = createMethod.getParameterTypes()[0];
+        }
+        this.createMethodParamType = createMethodParamType;
+
         this.typeNameHash = Fnv.hashCode64(TypeUtils.getTypeName(enumClass));
         this.enums = enums;
         this.ordinalEnums = ordinalEnums;
@@ -75,10 +95,42 @@ final class ObjectReaderImplEnum implements ObjectReader {
 
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
-        Enum fieldValue;
+        if (createMethodParamType != null) {
+            Object paramValue = jsonReader.read(createMethodParamType);
+            try {
+                return createMethod.invoke(null, paramValue);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new JSONException("create enum error, enumClass " + enumClass.getName() + ", paramValue " + paramValue, e);
+            }
+        }
+
+        Enum fieldValue = null;
         if (jsonReader.isInt()) {
-            fieldValue = getEnumByOrdinal(
-                    jsonReader.readInt32Value());
+            int intValue = jsonReader.readInt32Value();
+            if (valueField == null) {
+                fieldValue = getEnumByOrdinal(intValue);
+            } else {
+                try {
+                    if (valueField instanceof Field) {
+                        for (Enum e : enums) {
+                            if (((Field) valueField).getInt(e) == intValue) {
+                                fieldValue = e;
+                                break;
+                            }
+                        }
+                    } else {
+                        Method valueMethod = (Method) valueField;
+                        for (Enum e : enums) {
+                            if (((Number) valueMethod.invoke(e)).intValue() == intValue) {
+                                fieldValue = e;
+                                break;
+                            }
+                        }
+                    }
+                } catch (Exception error) {
+                    throw new JSONException("parse enum error, class " + enumClass.getName() + ", value " + intValue, error);
+                }
+            }
         } else {
             fieldValue = getEnumByHashCode(
                     jsonReader.readValueHashCode()

@@ -99,6 +99,10 @@ public class ObjectWriterCreator {
 
         field.setAccessible(true);
 
+        if (writeUsingWriter == null && fieldInfo.fieldClassMixIn) {
+            writeUsingWriter = ObjectWriterBaseModule.VoidObjectWriter.INSTANCE;
+        }
+
         return createFieldWriter(fieldName, fieldInfo.ordinal, fieldInfo.features, fieldInfo.format, field, writeUsingWriter);
     }
 
@@ -274,7 +278,9 @@ public class ObjectWriterCreator {
         if (initObjectWriter != null) {
             FieldWriterObjectField objImp = new FieldWriterObjectField(fieldName, ordinal, features, format, field.getGenericType(), fieldClass, field);
             objImp.initValueClass = fieldClass;
-            objImp.initObjectWriter = initObjectWriter;
+            if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
+                objImp.initObjectWriter = initObjectWriter;
+            }
             return objImp;
         }
 
@@ -412,7 +418,9 @@ public class ObjectWriterCreator {
         if (initObjectWriter != null) {
             FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, fieldType, fieldClass, method);
             objMethod.initValueClass = fieldClass;
-            objMethod.initObjectWriter = initObjectWriter;
+            if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
+                objMethod.initObjectWriter = initObjectWriter;
+            }
             return objMethod;
         }
 

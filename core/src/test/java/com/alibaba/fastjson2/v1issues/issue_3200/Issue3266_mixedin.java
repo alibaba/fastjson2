@@ -1,26 +1,62 @@
-package com.alibaba.json.bvt.issue_3200;
+package com.alibaba.fastjson2.v1issues.issue_3200;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.annotation.JSONCreator;
-import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.annotation.JSONCreator;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.JSONFactory;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue3266_mixedin extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3266_mixedin {
+    @Test
     public void test_for_issue() throws Exception {
         JSONFactory.mixIn(Color.class, ColorMixedIn.class);
 
         VO vo = new VO();
         vo.type = Color.Black;
 
+        assertEquals("1003"
+                , JSON.toJSONString(vo.type));
+
         String str = JSON.toJSONString(vo);
         assertEquals("{\"type\":1003}", str);
 
         VO vo2 = JSON.parseObject(str, VO.class);
+        assertEquals(vo.type, vo2.type);
+    }
+
+    @Test
+    public void test_for_issue_method() throws Exception {
+        JSONFactory.mixIn(Color.class, ColorMixedIn.class);
+
+        V1 vo = new V1();
+        vo.type = Color.Black;
+
+        assertEquals("1003"
+                , JSON.toJSONString(vo.type));
+
+        String str = JSON.toJSONString(vo);
+        assertEquals("{\"type\":1003}", str);
+
+        V1 vo2 = JSON.parseObject(str, V1.class);
+        assertEquals(vo.type, vo2.type);
     }
 
     public static class VO {
         public Color type;
+    }
+
+    public static class V1 {
+        private Color type;
+
+        public Color getType() {
+            return type;
+        }
+
+        public void setType(Color type) {
+            this.type = type;
+        }
     }
 
     public enum Color {

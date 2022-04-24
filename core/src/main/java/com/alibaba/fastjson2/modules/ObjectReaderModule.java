@@ -10,6 +10,10 @@ public interface ObjectReaderModule {
 
     }
 
+    default ObjectReaderProvider getProvider() {
+        return null;
+    }
+
     default ObjectReaderAnnotationProcessor getAnnotationProcessor() {
         return null;
     }
