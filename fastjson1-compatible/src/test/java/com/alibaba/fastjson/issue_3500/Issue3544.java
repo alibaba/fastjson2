@@ -1,7 +1,6 @@
 package com.alibaba.fastjson.issue_3500;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;

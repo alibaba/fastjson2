@@ -1,7 +1,6 @@
 package com.alibaba.fastjson.emoji;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;

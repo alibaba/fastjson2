@@ -1,7 +1,6 @@
 package com.alibaba.fastjson.issue_1500;
 
 import com.alibaba.fastjson.JSONPath;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

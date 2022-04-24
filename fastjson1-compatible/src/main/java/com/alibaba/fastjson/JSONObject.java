@@ -20,12 +20,10 @@ import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-//import com.alibaba.fastjson.parser.ParserConfig;
-//import com.alibaba.fastjson.util.TypeUtils;
 
 import java.io.*;
 import java.lang.reflect.Field;

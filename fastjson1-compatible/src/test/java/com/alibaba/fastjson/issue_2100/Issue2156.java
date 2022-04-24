@@ -1,8 +1,6 @@
 package com.alibaba.fastjson.issue_2100;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
