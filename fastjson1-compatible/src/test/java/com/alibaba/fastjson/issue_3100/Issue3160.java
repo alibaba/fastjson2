@@ -2,7 +2,6 @@ package com.alibaba.fastjson.issue_3100;
 
 import com.alibaba.fastjson.serializer.SerializeWriter;
 import com.alibaba.fastjson.util.IOUtils;
-import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 

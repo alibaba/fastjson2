@@ -2,7 +2,6 @@ package com.alibaba.fastjson.issue_3000;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.Assert;

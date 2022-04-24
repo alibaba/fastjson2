@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.alibaba.fastjson.TypeReference;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

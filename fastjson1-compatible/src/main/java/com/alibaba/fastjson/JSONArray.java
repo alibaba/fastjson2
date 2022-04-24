@@ -1,8 +1,8 @@
 package com.alibaba.fastjson;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 

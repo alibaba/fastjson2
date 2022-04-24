@@ -1,8 +1,6 @@
 package com.alibaba.fastjson.atomic;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;

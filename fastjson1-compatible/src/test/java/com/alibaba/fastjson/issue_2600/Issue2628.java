@@ -1,7 +1,6 @@
 package com.alibaba.fastjson.issue_2600;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
