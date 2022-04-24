@@ -36,7 +36,7 @@ public class ObjectReaderCreatorDynamicCompile extends ObjectReaderCreator {
                     gen.getPackageName()
                     , gen.getClassName()
                     , sourceCode
-                    , new Class[] {FieldReader[].class}
+                    , new Class[]{FieldReader[].class}
                     , new Object[]{fieldReaderArray}
             );
         } catch (Exception e) {

@@ -349,16 +349,16 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
                             b = (byte) c;
                             break;
                         }
-                        case '.' :
-                        case '-' :
-                        case '+' :
-                        case '*' :
-                        case '/' :
-                        case '>' :
-                        case '<' :
-                        case '=' :
-                        case '@' :
-                        case ':' :
+                        case '.':
+                        case '-':
+                        case '+':
+                        case '*':
+                        case '/':
+                        case '>':
+                        case '<':
+                        case '=':
+                        case '@':
+                        case ':':
                             break;
                         default:
                             b = (byte) char1(b);
@@ -403,15 +403,15 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
                         c = char2(c1, c2);
                         break;
                     }
-                    case '.' :
-                    case '-' :
-                    case '+' :
-                    case '*' :
-                    case '/' :
-                    case '>' :
-                    case '<' :
-                    case '=' :
-                    case '@' :
+                    case '.':
+                    case '-':
+                    case '+':
+                    case '*':
+                    case '/':
+                    case '>':
+                    case '<':
+                    case '=':
+                    case '@':
                         break;
                     default:
                         c = char1(c);

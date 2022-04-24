@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * @author Shaojin Wen
  */
 public abstract class BeanUtils {
-    static final Type[] EMPTY_TYPE_ARRAY = new Type[] {};
+    static final Type[] EMPTY_TYPE_ARRAY = new Type[]{};
 
     static ConcurrentMap<Class, Field[]> fieldCache = new ConcurrentHashMap<>();
     static ConcurrentMap<Class, Map<String, Field>> fieldMapCache = new ConcurrentHashMap<>();
@@ -449,7 +449,7 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if ( returnClass == Class.class && methodName.equals("getClass")) {
+            if (returnClass == Class.class && methodName.equals("getClass")) {
                 continue;
             }
 
@@ -607,7 +607,7 @@ public abstract class BeanUtils {
         if (bound instanceof WildcardType) {
             upperBounds = ((WildcardType) bound).getUpperBounds();
         } else {
-            upperBounds = new Type[] { bound };
+            upperBounds = new Type[]{bound};
         }
         return new WildcardTypeImpl(upperBounds, EMPTY_TYPE_ARRAY);
     }
@@ -622,9 +622,9 @@ public abstract class BeanUtils {
         if (bound instanceof WildcardType) {
             lowerBounds = ((WildcardType) bound).getLowerBounds();
         } else {
-            lowerBounds = new Type[] { bound };
+            lowerBounds = new Type[]{bound};
         }
-        return new WildcardTypeImpl(new Type[] { Object.class }, lowerBounds);
+        return new WildcardTypeImpl(new Type[]{Object.class}, lowerBounds);
     }
 
     /**
@@ -672,7 +672,7 @@ public abstract class BeanUtils {
             return (Class<?>) rawType;
 
         } else if (type instanceof GenericArrayType) {
-            Type componentType = ((GenericArrayType)type).getGenericComponentType();
+            Type componentType = ((GenericArrayType) type).getGenericComponentType();
             return Array.newInstance(getRawType(componentType), 0).getClass();
 
         } else if (type instanceof TypeVariable) {
@@ -1019,20 +1019,24 @@ public abstract class BeanUtils {
             this.componentType = canonicalize(componentType);
         }
 
-        @Override public Type getGenericComponentType() {
+        @Override
+        public Type getGenericComponentType() {
             return componentType;
         }
 
-        @Override public boolean equals(Object o) {
+        @Override
+        public boolean equals(Object o) {
             return o instanceof GenericArrayType
                     && BeanUtils.equals(this, (GenericArrayType) o);
         }
 
-        @Override public int hashCode() {
+        @Override
+        public int hashCode() {
             return componentType.hashCode();
         }
 
-        @Override public String toString() {
+        @Override
+        public String toString() {
             return typeToString(componentType) + "[]";
         }
 
@@ -1067,26 +1071,31 @@ public abstract class BeanUtils {
             }
         }
 
-        @Override public Type[] getUpperBounds() {
-            return new Type[] { upperBound };
+        @Override
+        public Type[] getUpperBounds() {
+            return new Type[]{upperBound};
         }
 
-        @Override public Type[] getLowerBounds() {
-            return lowerBound != null ? new Type[] { lowerBound } : EMPTY_TYPE_ARRAY;
+        @Override
+        public Type[] getLowerBounds() {
+            return lowerBound != null ? new Type[]{lowerBound} : EMPTY_TYPE_ARRAY;
         }
 
-        @Override public boolean equals(Object other) {
+        @Override
+        public boolean equals(Object other) {
             return other instanceof WildcardType
                     && BeanUtils.equals(this, (WildcardType) other);
         }
 
-        @Override public int hashCode() {
+        @Override
+        public int hashCode() {
             // this equals Arrays.hashCode(getLowerBounds()) ^ Arrays.hashCode(getUpperBounds());
             return (lowerBound != null ? 31 + lowerBound.hashCode() : 1)
                     ^ (31 + upperBound.hashCode());
         }
 
-        @Override public String toString() {
+        @Override
+        public String toString() {
             if (lowerBound != null) {
                 return "? super " + typeToString(lowerBound);
             } else if (upperBound == Object.class) {

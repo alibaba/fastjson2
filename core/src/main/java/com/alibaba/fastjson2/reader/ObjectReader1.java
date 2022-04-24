@@ -10,7 +10,8 @@ import com.alibaba.fastjson2.util.UnsafeUtils;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 
 final class ObjectReader1<T> extends ObjectReaderBean<T> {
     final long features;
@@ -22,7 +23,7 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
     final long hashCodeLCase;
 
     ObjectReader1(Class objectClass, long features, Supplier<T> defaultCreator, Function buildFunction, FieldReader fieldReader) {
-        super (objectClass, null);
+        super(objectClass, null);
 
         this.features = features;
         this.defaultCreator = defaultCreator;

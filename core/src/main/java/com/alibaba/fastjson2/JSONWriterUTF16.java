@@ -290,7 +290,7 @@ class JSONWriterUTF16 extends JSONWriter {
 
         int eLen = (bytes.length / 3) * 3; // Length of even 24-bits.
 
-        for (int s = 0; s < eLen;) {
+        for (int s = 0; s < eLen; ) {
             // Copy next three bytes into lower 24 bits of int, paying attension to sign.
             int i = (bytes[s++] & 0xff) << 16 | (bytes[s++] & 0xff) << 8 | (bytes[s++] & 0xff);
 
@@ -591,7 +591,7 @@ class JSONWriterUTF16 extends JSONWriter {
 
             // Fall thru to fast mode for smaller numbers
             // assert(i <= 65536, i);
-            for (;;) {
+            for (; ; ) {
                 q = (i * 52429) >>> (16 + 3);
                 r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
                 chars[--p] = (char) digits[r];
@@ -724,7 +724,7 @@ class JSONWriterUTF16 extends JSONWriter {
 
             // Fall thru to fast mode for smaller numbers
             // assert(i2 <= 65536, i2);
-            for (;;) {
+            for (; ; ) {
                 q2 = (i2 * 52429) >>> (16 + 3);
                 r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
                 chars[--charPos] = (char) digits[r];
@@ -775,7 +775,7 @@ class JSONWriterUTF16 extends JSONWriter {
 
         // Fall thru to fast mode for smaller numbers
         // assert(i2 <= 65536, i2);
-        for (;;) {
+        for (; ; ) {
             q2 = (i2 * 52429) >>> (16 + 3);
             r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
             chars[--charPos] = (char) digits[r];

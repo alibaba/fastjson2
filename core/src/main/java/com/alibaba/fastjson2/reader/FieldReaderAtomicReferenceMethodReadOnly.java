@@ -1,12 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class FieldReaderAtomicReferenceMethodReadOnly<T>

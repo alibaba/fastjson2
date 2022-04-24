@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 final class ObjectReaderImplAtomicInteger extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplAtomicInteger INSTANCE = new ObjectReaderImplAtomicInteger();

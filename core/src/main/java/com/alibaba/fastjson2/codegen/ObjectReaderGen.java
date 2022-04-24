@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2.codegen;
 
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.reader.*;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.io.IOException;
@@ -86,7 +86,7 @@ public class ObjectReaderGen {
 
         for (int i = 0; i < this.hashCodes.length; i++) {
             long hashCode64 = this.hashCodes[i];
-            int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
+            int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
             List<Long> hashCode64List = this.map.get(hashCode32);
             if (hashCode64List == null) {
                 hashCode64List = new ArrayList<>();
@@ -307,7 +307,7 @@ public class ObjectReaderGen {
                 if (fieldNameHashCode64 != hashCode64) {
                     throw new IllegalStateException();
                 }
-                if (hashCode32 != (int)(fieldNameHashCode64 ^ (fieldNameHashCode64 >>> 32))) {
+                if (hashCode32 != (int) (fieldNameHashCode64 ^ (fieldNameHashCode64 >>> 32))) {
                     throw new IllegalStateException();
                 }
 
@@ -559,7 +559,7 @@ public class ObjectReaderGen {
                 if (fieldNameHashCode64 != hashCode64) {
                     throw new IllegalStateException();
                 }
-                if (hashCode32 != (int)(fieldNameHashCode64 ^ (fieldNameHashCode64 >>> 32))) {
+                if (hashCode32 != (int) (fieldNameHashCode64 ^ (fieldNameHashCode64 >>> 32))) {
                     throw new IllegalStateException();
                 }
 
