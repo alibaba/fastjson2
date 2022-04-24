@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2.JSONB;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -14,6 +14,7 @@ import java.util.List;
 
 public interface FieldReader<T> extends Comparable<FieldReader> {
     Type getFieldType();
+
     default Class getFieldClass() {
         return TypeUtils.getMapping(getFieldType());
     }
@@ -157,6 +158,7 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
     }
 
     void readFieldValue(JSONReader jsonReader, T object);
+
     default void readFieldValueJSONB(JSONReader jsonReader, T object) {
         readFieldValue(jsonReader, object);
     }

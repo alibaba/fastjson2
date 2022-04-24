@@ -24,7 +24,7 @@ final class JSONReaderUTF16 extends JSONReader {
     protected int nameLength;
 
     protected JSONReaderUTF16(Context ctx, byte[] bytes, int offset, int length) {
-        super (ctx);
+        super(ctx);
 
         this.str = null;
         this.chars = new char[length / 2];
@@ -171,16 +171,16 @@ final class JSONReaderUTF16 extends JSONReader {
                         ch = char2(c1, c2);
                         break;
                     }
-                    case '.' :
-                    case '-' :
-                    case '+' :
-                    case '*' :
-                    case '/' :
-                    case '>' :
-                    case '<' :
-                    case '=' :
-                    case '@' :
-                    case ':' :
+                    case '.':
+                    case '-':
+                    case '+':
+                    case '*':
+                    case '/':
+                    case '>':
+                    case '<':
+                    case '=':
+                    case '@':
+                    case ':':
                         break;
                     default:
                         ch = char1(ch);
@@ -202,13 +202,13 @@ final class JSONReaderUTF16 extends JSONReader {
                 case '\b':
                 case '.':
                 case '-':
-                case '+' :
-                case '*' :
-                case '/' :
-                case '>' :
-                case '<' :
-                case '=' :
-                case '!' :
+                case '+':
+                case '*':
+                case '/':
+                case '>':
+                case '<':
+                case '=':
+                case '!':
                 case '[':
                 case ']':
                 case '{':
@@ -481,16 +481,16 @@ final class JSONReaderUTF16 extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
-                    case '.' :
-                    case '-' :
-                    case '+' :
-                    case '*' :
-                    case '/' :
-                    case '>' :
-                    case '<' :
-                    case '=' :
-                    case '@' :
-                    case ':' :
+                    case '.':
+                    case '-':
+                    case '+':
+                    case '*':
+                    case '/':
+                    case '>':
+                    case '<':
+                    case '=':
+                    case '@':
+                    case ':':
                         break;
                     default:
                         c = char1(c);
@@ -2209,7 +2209,7 @@ final class JSONReaderUTF16 extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime8 () {
+    protected LocalTime readLocalTime8() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3651,7 +3651,7 @@ final class JSONReaderUTF16 extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime10 () {
+    protected LocalTime readLocalTime10() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3730,7 +3730,7 @@ final class JSONReaderUTF16 extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime11 () {
+    protected LocalTime readLocalTime11() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3810,7 +3810,7 @@ final class JSONReaderUTF16 extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime12 () {
+    protected LocalTime readLocalTime12() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3891,7 +3891,7 @@ final class JSONReaderUTF16 extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime18 () {
+    protected LocalTime readLocalTime18() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3974,7 +3974,7 @@ final class JSONReaderUTF16 extends JSONReader {
                 && m7 >= '0' && m7 <= '9'
                 && m8 >= '0' && m8 <= '9'
         ) {
-            millis =  (m0 - '0') * 1000_000_00
+            millis = (m0 - '0') * 1000_000_00
                     + (m1 - '0') * 1000_000_0
                     + (m2 - '0') * 1000_000
                     + (m3 - '0') * 1000_00

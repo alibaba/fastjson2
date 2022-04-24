@@ -1,13 +1,11 @@
 package com.alibaba.fastjson2.util;
 
-import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -16,6 +14,7 @@ public class Fastjson1xSupport {
     static final Class CLASS_FASTJSON_OBJECT;
     static Function UNSAFE_OBJECT_CREATOR;
     static Supplier UNSAFE_OBJECT_WRITER;
+
     static {
         Class objectClass = null;
         try {

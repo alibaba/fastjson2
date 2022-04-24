@@ -696,7 +696,7 @@ public class JSONArray extends ArrayList<Object> {
             }
 
             if (value instanceof Float
-                || value instanceof Double) {
+                    || value instanceof Double) {
                 // Floating point number have no cached BigDecimal
                 return new BigDecimal(value.toString());
             }
@@ -841,7 +841,7 @@ public class JSONArray extends ArrayList<Object> {
                 classItem = (T) objectReader.createInstance((Map) item);
             } else {
                 throw new JSONException(
-                    (item == null ? "null" : item.getClass()) + " cannot be converted to " + clazz
+                        (item == null ? "null" : item.getClass()) + " cannot be converted to " + clazz
                 );
             }
             list.add(classItem);

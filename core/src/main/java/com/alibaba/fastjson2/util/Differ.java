@@ -217,7 +217,7 @@ public class Differ {
 
             Iterator leftIt = leftCollection.iterator();
             Iterator rightIt = rightCollection.iterator();
-            for (int i = 0; ;++i) {
+            for (int i = 0; ; ++i) {
                 if (!leftIt.hasNext()) {
                     break;
                 }
@@ -294,7 +294,7 @@ public class Differ {
             }
 
             Iterator rightIt = rightMap.entrySet().iterator();
-            for (Iterator leftIt = leftMap.entrySet().iterator(); leftIt.hasNext();) {
+            for (Iterator leftIt = leftMap.entrySet().iterator(); leftIt.hasNext(); ) {
                 Map.Entry leftEntry = (Map.Entry) leftIt.next();
                 Map.Entry rightEntry = (Map.Entry) rightIt.next();
                 Object key = leftEntry.getKey();
@@ -445,7 +445,7 @@ public class Differ {
         }
 
         Iterator leftIt = leftSet.iterator();
-        for (int i = 0; ;++i) {
+        for (int i = 0; ; ++i) {
             if (!leftIt.hasNext()) {
                 break;
             }
@@ -473,7 +473,7 @@ public class Differ {
     boolean diffMap(Map leftMap, Map rightMap, JSONWriter.Path path, boolean match, Class leftClass) {
         Map rightMapClone = new HashMap(rightMap);
 
-        for (Iterator leftIt = leftMap.entrySet().iterator(); leftIt.hasNext();) {
+        for (Iterator leftIt = leftMap.entrySet().iterator(); leftIt.hasNext(); ) {
             Map.Entry leftEntry = (Map.Entry) leftIt.next();
             Object leftKey = leftEntry.getKey();
 
@@ -483,7 +483,7 @@ public class Differ {
             if (rightValue == null) {
                 JSONWriter.Path keyPath = new JSONWriter.Path(new JSONWriter.Path(path, 0), "key");
 
-                for (Iterator it = rightMapClone.entrySet().iterator(); it.hasNext();) {
+                for (Iterator it = rightMapClone.entrySet().iterator(); it.hasNext(); ) {
                     Map.Entry rightEntry = (Map.Entry) it.next();
                     final boolean referenceDetect = this.referenceDetect;
                     final PrintStream out = this.out;

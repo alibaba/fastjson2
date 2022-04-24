@@ -259,7 +259,7 @@ class ObjectReaderNoneDefaultConstrutor<T>
 
         LinkedHashMap<Long, Object> valueMap = null;
 
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = it.next();
             String fieldName = entry.getKey().toString();
             Object fieldValue = entry.getValue();

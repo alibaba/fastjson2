@@ -124,16 +124,16 @@ final class JSONReaderStr extends JSONReader {
                         ch = char2(c1, c2);
                         break;
                     }
-                    case '.' :
-                    case '-' :
-                    case '+' :
-                    case '*' :
-                    case '/' :
-                    case '>' :
-                    case '<' :
-                    case '=' :
-                    case '@' :
-                    case ':' :
+                    case '.':
+                    case '-':
+                    case '+':
+                    case '*':
+                    case '/':
+                    case '>':
+                    case '<':
+                    case '=':
+                    case '@':
+                    case ':':
                         break;
                     default:
                         ch = char1(ch);
@@ -155,13 +155,13 @@ final class JSONReaderStr extends JSONReader {
                 case '\b':
                 case '.':
                 case '-':
-                case '+' :
-                case '*' :
-                case '/' :
-                case '>' :
-                case '<' :
-                case '=' :
-                case '!' :
+                case '+':
+                case '*':
+                case '/':
+                case '>':
+                case '<':
+                case '=':
+                case '!':
                 case '[':
                 case ']':
                 case '{':
@@ -430,16 +430,16 @@ final class JSONReaderStr extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
-                    case '.' :
-                    case '-' :
-                    case '+' :
-                    case '*' :
-                    case '/' :
-                    case '>' :
-                    case '<' :
-                    case '=' :
-                    case '@' :
-                    case ':' :
+                    case '.':
+                    case '-':
+                    case '+':
+                    case '*':
+                    case '/':
+                    case '>':
+                    case '<':
+                    case '=':
+                    case '@':
+                    case ':':
                         break;
                     default:
                         c = char1(c);
@@ -2153,7 +2153,7 @@ final class JSONReaderStr extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime8 () {
+    protected LocalTime readLocalTime8() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3146,7 +3146,8 @@ final class JSONReaderStr extends JSONReader {
             } else {
                 String zoneIdStr;
                 if (first == '+' || first == '-') {
-                    zoneIdStr = this.str.substring(this.offset + zoneIdBegin, this.offset + len);;
+                    zoneIdStr = this.str.substring(this.offset + zoneIdBegin, this.offset + len);
+                    ;
 //                    zoneIdStr = new String(chars, this.offset + zoneIdBegin, len - zoneIdBegin);
                 } else if (first == ' ') {
                     zoneIdStr = this.str.substring(this.offset + zoneIdBegin + 1, this.offset + len - 1);
@@ -3597,7 +3598,7 @@ final class JSONReaderStr extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime10 () {
+    protected LocalTime readLocalTime10() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3676,7 +3677,7 @@ final class JSONReaderStr extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime11 () {
+    protected LocalTime readLocalTime11() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3756,7 +3757,7 @@ final class JSONReaderStr extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime12 () {
+    protected LocalTime readLocalTime12() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3837,7 +3838,7 @@ final class JSONReaderStr extends JSONReader {
     }
 
     @Override
-    protected LocalTime readLocalTime18 () {
+    protected LocalTime readLocalTime18() {
         if (ch != '"') {
             throw new JSONException("localTime only support string input");
         }
@@ -3920,7 +3921,7 @@ final class JSONReaderStr extends JSONReader {
                 && m7 >= '0' && m7 <= '9'
                 && m8 >= '0' && m8 <= '9'
         ) {
-            millis =  (m0 - '0') * 1000_000_00
+            millis = (m0 - '0') * 1000_000_00
                     + (m1 - '0') * 1000_000_0
                     + (m2 - '0') * 1000_000
                     + (m3 - '0') * 1000_00
@@ -4079,19 +4080,19 @@ final class JSONReaderStr extends JSONReader {
                 switch (i) {
                     case 0:
                         product = ylong * (mag0 & LONG_MASK) + carry;
-                        mag0 = (int)product;
+                        mag0 = (int) product;
                         break;
                     case 1:
                         product = ylong * (mag1 & LONG_MASK) + carry;
-                        mag1 = (int)product;
+                        mag1 = (int) product;
                         break;
                     case 2:
                         product = ylong * (mag2 & LONG_MASK) + carry;
-                        mag2 = (int)product;
+                        mag2 = (int) product;
                         break;
                     case 3:
                         product = ylong * (mag3 & LONG_MASK) + carry;
-                        mag3 = (int)product;
+                        mag3 = (int) product;
                         break;
                     default:
                         throw new ArithmeticException("BigInteger would overflow supported range");
@@ -4109,19 +4110,19 @@ final class JSONReaderStr extends JSONReader {
                 switch (i) {
                     case 0:
                         sum = (mag0 & LONG_MASK) + carry;
-                        mag0 = (int)sum;
+                        mag0 = (int) sum;
                         break;
                     case 1:
                         sum = (mag1 & LONG_MASK) + carry;
-                        mag1 = (int)sum;
+                        mag1 = (int) sum;
                         break;
                     case 2:
                         sum = (mag2 & LONG_MASK) + carry;
-                        mag2 = (int)sum;
+                        mag2 = (int) sum;
                         break;
                     case 3:
                         sum = (mag3 & LONG_MASK) + carry;
-                        mag3 = (int)sum;
+                        mag3 = (int) sum;
                         break;
                     default:
                         throw new ArithmeticException("BigInteger would overflow supported range");

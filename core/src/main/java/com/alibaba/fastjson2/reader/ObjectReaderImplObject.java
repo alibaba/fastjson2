@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONReader;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 

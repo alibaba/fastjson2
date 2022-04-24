@@ -90,7 +90,7 @@ public class JdbcSupport {
                     FORMATTER_UPDATER.set(this, formatter);
                 }
             } else {
-                String str =jsonReader.readString();
+                String str = jsonReader.readString();
                 return java.sql.Time.valueOf(str);
             }
 

@@ -19,13 +19,13 @@ import static com.alibaba.fastjson2.JSONFactory.Utils.*;
  * x91			# binary len_int32 bytes
  * x92          # type [str] symbol_int32 jsonb
  * x93          # reference
- *
+ * <p>
  * x94 - xa3    # array_0 - array_15
  * xa4          # array len_int32 item*
- *
+ * <p>
  * xa5			# object_end
  * xa6			# object_start
- *
+ * <p>
  * xa7			# local time b0 b1 b2
  * xa8			# local datetime b0 b1 b2 b3 b4 b5 b6
  * xa9			# local date b0 b1 b2 b3
@@ -33,7 +33,7 @@ import static com.alibaba.fastjson2.JSONFactory.Utils.*;
  * xac          # timestamp seconds b0 b1 b2 b3
  * xad          # timestamp minutes b0 b1 b2 b3
  * xae          # timestamp b0 b1 b2 b3 b4 b5 b6 b7 nano_int32
- *
+ * <p>
  * xaf          # null
  * xb0          # boolean false
  * xb1          # boolean true
@@ -54,14 +54,14 @@ import static com.alibaba.fastjson2.JSONFactory.Utils.*;
  * xc0 - xc7    # three-octet compact long (-x40000 to x3ffff)
  * xc8 - xd7    # two-octet compact long (-x800 to x7ff, xd0 is 0)
  * xd8 - xef    # one-octet compact long (-x8 to xf, xe0 is 0)
- *
+ * <p>
  * xf0 - xff    # one-octet compact int
  * x00 - x2f    # one-octet compact int
- *
+ * <p>
  * x30 - x3f    # two-octet compact int (-x800 to x7ff)
  * x40 - x47    # three-octet compact int (-x40000 to x3ffff)
  * x48          # 32-bit signed integer ('I')
- *
+ * <p>
  * x49 - x78    # ascii string length 0-47
  * x79          # ascii-8 string variable-length
  * x7a          # utf-8 string variable-length
@@ -185,10 +185,10 @@ public interface JSONB {
             return new byte[]{(byte) i};
         }
 
-       try (JSONWriter jsonWriter = JSONWriter.ofJSONB()) {
-           jsonWriter.writeInt32(i);
-           return jsonWriter.getBytes();
-       }
+        try (JSONWriter jsonWriter = JSONWriter.ofJSONB()) {
+            jsonWriter.writeInt32(i);
+            return jsonWriter.getBytes();
+        }
     }
 
     static byte[] toBytes(long i) {
@@ -249,7 +249,7 @@ public interface JSONB {
                 , jsonbBytes
                 , 0
                 , jsonbBytes.length, null);
-        JSONObject object =  (JSONObject) reader.readObject();
+        JSONObject object = (JSONObject) reader.readObject();
         if (reader.resolveTasks != null) {
             reader.handleResolveTasks(object);
         }
@@ -262,7 +262,7 @@ public interface JSONB {
                 , jsonbBytes
                 , 0
                 , jsonbBytes.length, null);
-        JSONArray array =  (JSONArray) reader.readArray();
+        JSONArray array = (JSONArray) reader.readArray();
         if (reader.resolveTasks != null) {
             reader.handleResolveTasks(array);
         }
@@ -537,7 +537,7 @@ public interface JSONB {
 
     static byte[] toBytes(String str) {
         if (str == null) {
-            return new byte[] {BC_NULL};
+            return new byte[]{BC_NULL};
         }
 
         if (JDKUtils.JVM_VERSION == 8) {
@@ -597,7 +597,7 @@ public interface JSONB {
 
     static byte[] toBytes(String str, Charset charset) {
         if (str == null) {
-            return new byte[] {BC_NULL};
+            return new byte[]{BC_NULL};
         }
 
         final byte type;
@@ -728,14 +728,19 @@ public interface JSONB {
 
     interface SymbolTable {
         long hashCode64();
+
         String getNameByHashCode(long hashCode);
+
         int getOrdinalByHashCode(long hashCode);
+
         int getOrdinal(String name);
+
         String getName(int ordinal);
+
         long getHashCode(int ordinal);
+
         int size();
     }
-
 
 
     static String toJSONString(byte[] jsonbBytes) {
@@ -785,13 +790,13 @@ public interface JSONB {
     static String typeName(byte type) {
         switch (type) {
             case BC_OBJECT:
-                return  "OBJECT " + Integer.toString(type);
+                return "OBJECT " + Integer.toString(type);
             case BC_OBJECT_END:
-                return  "OBJECT_END " + Integer.toString(type);
+                return "OBJECT_END " + Integer.toString(type);
             case BC_REFERENCE:
-                return  "REFERENCE " + Integer.toString(type);
+                return "REFERENCE " + Integer.toString(type);
             case BC_SYMBOL:
-                return  "SYMBOL " + Integer.toString(type);
+                return "SYMBOL " + Integer.toString(type);
             case BC_NULL:
                 return "NULL " + Integer.toString(type);
             case BC_TRUE:

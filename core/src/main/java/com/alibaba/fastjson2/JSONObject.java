@@ -89,11 +89,11 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     @Override
     public Object get(Object key) {
         if (key instanceof Number
-            || key instanceof Character
-            || key instanceof Boolean
+                || key instanceof Character
+                || key instanceof Boolean
         ) {
             return super.get(
-                key.toString()
+                    key.toString()
             );
         }
 
@@ -106,7 +106,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
      */
     public Object getOrDefault(String key, Object defaultValue) {
         return super.getOrDefault(
-            key, defaultValue
+                key, defaultValue
         );
     }
 
@@ -118,16 +118,16 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     @Override
     public Object getOrDefault(Object key, Object defaultValue) {
         if (key instanceof Number
-            || key instanceof Character
-            || key instanceof Boolean
+                || key instanceof Character
+                || key instanceof Boolean
         ) {
             return super.getOrDefault(
-                key.toString(), defaultValue
+                    key.toString(), defaultValue
             );
         }
 
         return super.getOrDefault(
-            key, defaultValue
+                key, defaultValue
         );
     }
 
@@ -756,7 +756,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             }
 
             if (value instanceof Float
-                || value instanceof Double) {
+                    || value instanceof Double) {
                 // Floating point number have no cached BigDecimal
                 return new BigDecimal(value.toString());
             }
@@ -1055,10 +1055,10 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
             }
 
             Function typeConvert = JSONFactory
-                .getDefaultObjectReaderProvider()
-                .getTypeConvert(
-                    value.getClass(), method.getGenericReturnType()
-                );
+                    .getDefaultObjectReaderProvider()
+                    .getTypeConvert(
+                            value.getClass(), method.getGenericReturnType()
+                    );
 
             if (typeConvert != null) {
                 return typeConvert.apply(value);

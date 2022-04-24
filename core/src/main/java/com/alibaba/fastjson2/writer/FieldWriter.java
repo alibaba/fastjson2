@@ -145,7 +145,7 @@ public interface FieldWriter<T> extends Comparable {
         jsonWriter.writeDouble(value);
     }
 
-    default void writeDate(JSONWriter jsonWriter,  Date value) {
+    default void writeDate(JSONWriter jsonWriter, Date value) {
         if (value == null) {
             writeFieldName(jsonWriter);
             jsonWriter.writeNull();

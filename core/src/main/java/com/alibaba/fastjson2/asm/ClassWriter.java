@@ -32,223 +32,233 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 public class ClassWriter {
 
-  /**
-   * The minor_version and major_version fields of the JVMS ClassFile structure. minor_version is
-   * stored in the 16 most significant bits, and major_version in the 16 least significant bits.
-   */
-  private int version;
+    /**
+     * The minor_version and major_version fields of the JVMS ClassFile structure. minor_version is
+     * stored in the 16 most significant bits, and major_version in the 16 least significant bits.
+     */
+    private int version;
 
-  /** The symbol table for this class (contains the constant_pool and the BootstrapMethods). */
-  private final SymbolTable symbolTable;
+    /**
+     * The symbol table for this class (contains the constant_pool and the BootstrapMethods).
+     */
+    private final SymbolTable symbolTable;
 
-  private int accessFlags;
+    private int accessFlags;
 
-  /** The this_class field of the JVMS ClassFile structure. */
-  private int thisClass;
+    /**
+     * The this_class field of the JVMS ClassFile structure.
+     */
+    private int thisClass;
 
-  /** The super_class field of the JVMS ClassFile structure. */
-  private int superClass;
+    /**
+     * The super_class field of the JVMS ClassFile structure.
+     */
+    private int superClass;
 
-  /** The interface_count field of the JVMS ClassFile structure. */
-  private int interfaceCount;
+    /**
+     * The interface_count field of the JVMS ClassFile structure.
+     */
+    private int interfaceCount;
 
-  /** The 'interfaces' array of the JVMS ClassFile structure. */
-  private int[] interfaces;
+    /**
+     * The 'interfaces' array of the JVMS ClassFile structure.
+     */
+    private int[] interfaces;
 
-  /**
-   * The fields of this class, stored in a linked list of {@link FieldWriter} linked via their
-   * {@link FieldWriter#fv} field. This field stores the first element of this list.
-   */
-  private FieldWriter firstField;
+    /**
+     * The fields of this class, stored in a linked list of {@link FieldWriter} linked via their
+     * {@link FieldWriter#fv} field. This field stores the first element of this list.
+     */
+    private FieldWriter firstField;
 
-  /**
-   * The fields of this class, stored in a linked list of {@link FieldWriter} linked via their
-   * {@link FieldWriter#fv} field. This field stores the last element of this list.
-   */
-  private FieldWriter lastField;
+    /**
+     * The fields of this class, stored in a linked list of {@link FieldWriter} linked via their
+     * {@link FieldWriter#fv} field. This field stores the last element of this list.
+     */
+    private FieldWriter lastField;
 
-  private MethodWriter firstMethod;
+    private MethodWriter firstMethod;
 
-  private MethodWriter lastMethod;
+    private MethodWriter lastMethod;
 
-  public ClassWriter() {
-    symbolTable = new SymbolTable(this);
-  }
-
-  public final void visit(
-      final int version,
-      final int access,
-      final String name,
-      final String superName,
-      final String[] interfaces) {
-    this.version = version;
-    this.accessFlags = access;
-    this.thisClass = symbolTable.setMajorVersionAndClassName(version & 0xFFFF, name);
-    this.superClass = superName == null ? 0 : symbolTable.addConstantClass(superName).index;
-    if (interfaces != null && interfaces.length > 0) {
-      interfaceCount = interfaces.length;
-      this.interfaces = new int[interfaceCount];
-      for (int i = 0; i < interfaceCount; ++i) {
-        this.interfaces[i] = symbolTable.addConstantClass(interfaces[i]).index;
-      }
-    }
-  }
-
-  public final FieldWriter visitField(
-      final int access,
-      final String name,
-      final String descriptor) {
-    FieldWriter fieldWriter =
-        new FieldWriter(symbolTable, access, name, descriptor);
-    if (firstField == null) {
-      firstField = fieldWriter;
-    } else {
-      lastField.fv = fieldWriter;
-    }
-    return lastField = fieldWriter;
-  }
-
-  public final MethodWriter visitMethod(
-      final int access,
-      final String name,
-      final String descriptor) {
-    MethodWriter methodWriter =
-        new MethodWriter(symbolTable, access, name, descriptor);
-    if (firstMethod == null) {
-      firstMethod = methodWriter;
-    } else {
-      lastMethod.mv = methodWriter;
-    }
-    return lastMethod = methodWriter;
-  }
-
-  /**
-   * Returns the content of the class file that was built by this ClassWriter.
-   *
-   * @return the binary content of the JVMS ClassFile structure that was built by this ClassWriter.
-   */
-  public byte[] toByteArray() {
-    // First step: compute the size in bytes of the ClassFile structure.
-    // The magic field uses 4 bytes, 10 mandatory fields (minor_version, major_version,
-    // constant_pool_count, access_flags, this_class, super_class, interfaces_count, fields_count,
-    // methods_count and attributes_count) use 2 bytes each, and each interface uses 2 bytes too.
-    int size = 24 + 2 * interfaceCount;
-    int fieldsCount = 0;
-    FieldWriter fieldWriter = firstField;
-    while (fieldWriter != null) {
-      ++fieldsCount;
-      size += 8;
-      fieldWriter = (FieldWriter) fieldWriter.fv;
-    }
-    int methodsCount = 0;
-    MethodWriter methodWriter = firstMethod;
-    while (methodWriter != null) {
-      ++methodsCount;
-      size += methodWriter.computeMethodInfoSize();
-      methodWriter = (MethodWriter) methodWriter.mv;
+    public ClassWriter() {
+        symbolTable = new SymbolTable(this);
     }
 
-    // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
-    int attributesCount = 0;
-    if (symbolTable.computeBootstrapMethodsSize() > 0) {
-      ++attributesCount;
-      size += symbolTable.computeBootstrapMethodsSize();
+    public final void visit(
+            final int version,
+            final int access,
+            final String name,
+            final String superName,
+            final String[] interfaces) {
+        this.version = version;
+        this.accessFlags = access;
+        this.thisClass = symbolTable.setMajorVersionAndClassName(version & 0xFFFF, name);
+        this.superClass = superName == null ? 0 : symbolTable.addConstantClass(superName).index;
+        if (interfaces != null && interfaces.length > 0) {
+            interfaceCount = interfaces.length;
+            this.interfaces = new int[interfaceCount];
+            for (int i = 0; i < interfaceCount; ++i) {
+                this.interfaces[i] = symbolTable.addConstantClass(interfaces[i]).index;
+            }
+        }
     }
 
-    // IMPORTANT: this must be the last part of the ClassFile size computation, because the previous
-    // statements can add attribute names to the constant pool, thereby changing its size!
-    size += symbolTable.getConstantPoolLength();
-    int constantPoolCount = symbolTable.getConstantPoolCount();
-    if (constantPoolCount > 0xFFFF) {
-      throw new JSONException("Class too large: " + symbolTable.getClassName() + ", constantPoolCount " + constantPoolCount);
+    public final FieldWriter visitField(
+            final int access,
+            final String name,
+            final String descriptor) {
+        FieldWriter fieldWriter =
+                new FieldWriter(symbolTable, access, name, descriptor);
+        if (firstField == null) {
+            firstField = fieldWriter;
+        } else {
+            lastField.fv = fieldWriter;
+        }
+        return lastField = fieldWriter;
     }
 
-    // Second step: allocate a ByteVector of the correct size (in order to avoid any array copy in
-    // dynamic resizes) and fill it with the ClassFile content.
-    ByteVector result = new ByteVector(size);
-    result.putInt(0xCAFEBABE).putInt(version);
-    symbolTable.putConstantPool(result);
-    int mask = 0;
-    result.putShort(accessFlags & ~mask).putShort(thisClass).putShort(superClass);
-    result.putShort(interfaceCount);
-    for (int i = 0; i < interfaceCount; ++i) {
-      result.putShort(interfaces[i]);
-    }
-    result.putShort(fieldsCount);
-    fieldWriter = firstField;
-    while (fieldWriter != null) {
-      fieldWriter.putFieldInfo(result);
-      fieldWriter = (FieldWriter) fieldWriter.fv;
-    }
-    result.putShort(methodsCount);
-    boolean hasFrames = false;
-    boolean hasAsmInstructions = false;
-    methodWriter = firstMethod;
-    while (methodWriter != null) {
-      hasFrames |= methodWriter.hasFrames();
-      hasAsmInstructions |= methodWriter.hasAsmInstructions();
-      methodWriter.putMethodInfo(result);
-      methodWriter = (MethodWriter) methodWriter.mv;
-    }
-    // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
-    result.putShort(attributesCount);
-    symbolTable.putBootstrapMethods(result);
-
-    // Third step: replace the ASM specific instructions, if any.
-    if (hasAsmInstructions) {
-      throw new UnsupportedOperationException();
-    } else {
-      return result.data;
-    }
-  }
-
-  /**
-   * Returns the common super type of the two given types. The default implementation of this method
-   * <i>loads</i> the two given classes and uses the java.lang.Class methods to find the common
-   * super class. It can be overridden to compute this common super type in other ways, in
-   * particular without actually loading any class, or to take into account the class that is
-   * currently being generated by this ClassWriter, which can of course not be loaded since it is
-   * under construction.
-   *
-   * @param type1 the internal name of a class.
-   * @param type2 the internal name of another class.
-   * @return the internal name of the common super class of the two given classes.
-   */
-  protected String getCommonSuperClass(final String type1, final String type2) {
-    Class<?> class1 = TypeUtils.loadClass(type1.replace('/', '.'));
-    if (class1 == null) {
-      throw new JSONException(type1);
+    public final MethodWriter visitMethod(
+            final int access,
+            final String name,
+            final String descriptor) {
+        MethodWriter methodWriter =
+                new MethodWriter(symbolTable, access, name, descriptor);
+        if (firstMethod == null) {
+            firstMethod = methodWriter;
+        } else {
+            lastMethod.mv = methodWriter;
+        }
+        return lastMethod = methodWriter;
     }
 
-    Class<?> class2 = TypeUtils.loadClass(type2.replace('/', '.'));
-    if (class2 == null) {
-      throw new JSONException(type2);
+    /**
+     * Returns the content of the class file that was built by this ClassWriter.
+     *
+     * @return the binary content of the JVMS ClassFile structure that was built by this ClassWriter.
+     */
+    public byte[] toByteArray() {
+        // First step: compute the size in bytes of the ClassFile structure.
+        // The magic field uses 4 bytes, 10 mandatory fields (minor_version, major_version,
+        // constant_pool_count, access_flags, this_class, super_class, interfaces_count, fields_count,
+        // methods_count and attributes_count) use 2 bytes each, and each interface uses 2 bytes too.
+        int size = 24 + 2 * interfaceCount;
+        int fieldsCount = 0;
+        FieldWriter fieldWriter = firstField;
+        while (fieldWriter != null) {
+            ++fieldsCount;
+            size += 8;
+            fieldWriter = (FieldWriter) fieldWriter.fv;
+        }
+        int methodsCount = 0;
+        MethodWriter methodWriter = firstMethod;
+        while (methodWriter != null) {
+            ++methodsCount;
+            size += methodWriter.computeMethodInfoSize();
+            methodWriter = (MethodWriter) methodWriter.mv;
+        }
+
+        // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
+        int attributesCount = 0;
+        if (symbolTable.computeBootstrapMethodsSize() > 0) {
+            ++attributesCount;
+            size += symbolTable.computeBootstrapMethodsSize();
+        }
+
+        // IMPORTANT: this must be the last part of the ClassFile size computation, because the previous
+        // statements can add attribute names to the constant pool, thereby changing its size!
+        size += symbolTable.getConstantPoolLength();
+        int constantPoolCount = symbolTable.getConstantPoolCount();
+        if (constantPoolCount > 0xFFFF) {
+            throw new JSONException("Class too large: " + symbolTable.getClassName() + ", constantPoolCount " + constantPoolCount);
+        }
+
+        // Second step: allocate a ByteVector of the correct size (in order to avoid any array copy in
+        // dynamic resizes) and fill it with the ClassFile content.
+        ByteVector result = new ByteVector(size);
+        result.putInt(0xCAFEBABE).putInt(version);
+        symbolTable.putConstantPool(result);
+        int mask = 0;
+        result.putShort(accessFlags & ~mask).putShort(thisClass).putShort(superClass);
+        result.putShort(interfaceCount);
+        for (int i = 0; i < interfaceCount; ++i) {
+            result.putShort(interfaces[i]);
+        }
+        result.putShort(fieldsCount);
+        fieldWriter = firstField;
+        while (fieldWriter != null) {
+            fieldWriter.putFieldInfo(result);
+            fieldWriter = (FieldWriter) fieldWriter.fv;
+        }
+        result.putShort(methodsCount);
+        boolean hasFrames = false;
+        boolean hasAsmInstructions = false;
+        methodWriter = firstMethod;
+        while (methodWriter != null) {
+            hasFrames |= methodWriter.hasFrames();
+            hasAsmInstructions |= methodWriter.hasAsmInstructions();
+            methodWriter.putMethodInfo(result);
+            methodWriter = (MethodWriter) methodWriter.mv;
+        }
+        // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
+        result.putShort(attributesCount);
+        symbolTable.putBootstrapMethods(result);
+
+        // Third step: replace the ASM specific instructions, if any.
+        if (hasAsmInstructions) {
+            throw new UnsupportedOperationException();
+        } else {
+            return result.data;
+        }
     }
 
-    if (class1.isAssignableFrom(class2)) {
-      return type1;
-    }
-    if (class2.isAssignableFrom(class1)) {
-      return type2;
-    }
-    if (class1.isInterface() || class2.isInterface()) {
-      return "java/lang/Object";
-    } else {
-      do {
-        class1 = class1.getSuperclass();
-      } while (!class1.isAssignableFrom(class2));
-      return class1.getName().replace('.', '/');
-    }
-  }
+    /**
+     * Returns the common super type of the two given types. The default implementation of this method
+     * <i>loads</i> the two given classes and uses the java.lang.Class methods to find the common
+     * super class. It can be overridden to compute this common super type in other ways, in
+     * particular without actually loading any class, or to take into account the class that is
+     * currently being generated by this ClassWriter, which can of course not be loaded since it is
+     * under construction.
+     *
+     * @param type1 the internal name of a class.
+     * @param type2 the internal name of another class.
+     * @return the internal name of the common super class of the two given classes.
+     */
+    protected String getCommonSuperClass(final String type1, final String type2) {
+        Class<?> class1 = TypeUtils.loadClass(type1.replace('/', '.'));
+        if (class1 == null) {
+            throw new JSONException(type1);
+        }
 
-  /**
-   * Returns the {@link ClassLoader} to be used by the default implementation of {@link
-   * #getCommonSuperClass(String, String)}, that of this {@link ClassWriter}'s runtime type by
-   * default.
-   *
-   * @return ClassLoader
-   */
-  protected ClassLoader getClassLoader() {
-    return getClass().getClassLoader();
-  }
+        Class<?> class2 = TypeUtils.loadClass(type2.replace('/', '.'));
+        if (class2 == null) {
+            throw new JSONException(type2);
+        }
+
+        if (class1.isAssignableFrom(class2)) {
+            return type1;
+        }
+        if (class2.isAssignableFrom(class1)) {
+            return type2;
+        }
+        if (class1.isInterface() || class2.isInterface()) {
+            return "java/lang/Object";
+        } else {
+            do {
+                class1 = class1.getSuperclass();
+            } while (!class1.isAssignableFrom(class2));
+            return class1.getName().replace('.', '/');
+        }
+    }
+
+    /**
+     * Returns the {@link ClassLoader} to be used by the default implementation of {@link
+     * #getCommonSuperClass(String, String)}, that of this {@link ClassWriter}'s runtime type by
+     * default.
+     *
+     * @return ClassLoader
+     */
+    protected ClassLoader getClassLoader() {
+        return getClass().getClassLoader();
+    }
 }

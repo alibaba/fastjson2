@@ -809,7 +809,7 @@ public class ObjectReaderCreator {
         }
     }
 
-    protected  <T> FieldReader[] createFieldReaders(Class<T> objectClass, Type objectType, BeanInfo beanInfo, boolean fieldBased, List<ObjectReaderModule> modules) {
+    protected <T> FieldReader[] createFieldReaders(Class<T> objectClass, Type objectType, BeanInfo beanInfo, boolean fieldBased, List<ObjectReaderModule> modules) {
         if (beanInfo == null) {
             beanInfo = new BeanInfo();
             for (ObjectReaderModule module : modules) {
@@ -942,7 +942,7 @@ public class ObjectReaderCreator {
         return createFieldReaderMethod(objectClass, objectClass, fieldName, 0, 0L, format, fieldType, fieldClass, method);
     }
 
-    protected <T> FieldReader createFieldReaderParam (
+    protected <T> FieldReader createFieldReaderParam(
             Class<T> objectClass
             , Type objectType
             , String fieldName
@@ -1079,7 +1079,7 @@ public class ObjectReaderCreator {
                 return new FieldReaderAtomicReferenceMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, method);
             }
 
-            if(Collection.class.isAssignableFrom(fieldClass)) {
+            if (Collection.class.isAssignableFrom(fieldClass)) {
                 return new FieldReaderCollectionMethodReadOnly(fieldName, fieldType, method);
             }
 

@@ -29,20 +29,20 @@ public class TypeUtils {
     static final AtomicReferenceFieldUpdater<Cache, char[]> CHARS_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(Cache.class, char[].class, "chars");
 
-    public static Class<?> getMapping(Type type){
+    public static Class<?> getMapping(Type type) {
         if (type == null) {
             return null;
         }
 
-        if(type.getClass() == Class.class){
+        if (type.getClass() == Class.class) {
             return (Class<?>) type;
         }
 
-        if(type instanceof ParameterizedType){
+        if (type instanceof ParameterizedType) {
             return getMapping(((ParameterizedType) type).getRawType());
         }
 
-        if(type instanceof TypeVariable){
+        if (type instanceof TypeVariable) {
             Type boundType = ((TypeVariable<?>) type).getBounds()[0];
             if (boundType instanceof Class) {
                 return (Class) boundType;
@@ -50,7 +50,7 @@ public class TypeUtils {
             return getMapping(boundType);
         }
 
-        if(type instanceof WildcardType){
+        if (type instanceof WildcardType) {
             Type[] upperBounds = ((WildcardType) type).getUpperBounds();
             if (upperBounds.length == 1) {
                 return getMapping(upperBounds[0]);
@@ -60,7 +60,7 @@ public class TypeUtils {
         return Object.class;
     }
 
-    public static Date toDate(Object obj){
+    public static Date toDate(Object obj) {
         if (obj == null) {
             return null;
         }
@@ -100,7 +100,7 @@ public class TypeUtils {
         throw new JSONException("can not cast to Date from " + obj.getClass());
     }
 
-    public static Instant toInstant(Object obj){
+    public static Instant toInstant(Object obj) {
         if (obj == null) {
             return null;
         }
@@ -140,7 +140,7 @@ public class TypeUtils {
         throw new JSONException("can not cast to Date from " + obj.getClass());
     }
 
-    public static <T> T cast(Object obj, Class<T> targetClass){
+    public static <T> T cast(Object obj, Class<T> targetClass) {
         if (obj == null) {
             return null;
         }
@@ -198,6 +198,7 @@ public class TypeUtils {
 
     static final Map<Class, String> NAME_MAPPINGS = new IdentityHashMap<>();
     static final Map<String, Class> TYPE_MAPPINGS = new ConcurrentHashMap<>();
+
     static {
         NAME_MAPPINGS.put(byte.class, "B");
         NAME_MAPPINGS.put(short.class, "S");
@@ -355,7 +356,7 @@ public class TypeUtils {
                 java.util.concurrent.ConcurrentSkipListMap.class,
                 java.util.concurrent.ConcurrentSkipListSet.class,
         };
-        for(Class clazz : classes){
+        for (Class clazz : classes) {
             TYPE_MAPPINGS.put(clazz.getSimpleName(), clazz);
             TYPE_MAPPINGS.put(clazz.getName(), clazz);
             NAME_MAPPINGS.put(clazz, clazz.getSimpleName());
@@ -371,19 +372,19 @@ public class TypeUtils {
                 "java.util.Collections$UnmodifiableCollection",
         };
 
-        for(String className : items){
+        for (String className : items) {
             Class<?> clazz = loadClass(className);
             TYPE_MAPPINGS.put(clazz.getName(), clazz);
         }
 
         {
             Class<?> objectClass = loadClass("com.alibaba.fastjson.JSONObject");
-            if(objectClass != null){
+            if (objectClass != null) {
                 TYPE_MAPPINGS.putIfAbsent("JO1", objectClass);
                 TYPE_MAPPINGS.putIfAbsent(objectClass.getName(), objectClass);
             }
             Class<?> arrayClass = loadClass("com.alibaba.fastjson.JSONArray");
-            if(arrayClass != null){
+            if (arrayClass != null) {
                 TYPE_MAPPINGS.putIfAbsent("JA1", arrayClass);
                 TYPE_MAPPINGS.putIfAbsent(arrayClass.getName(), arrayClass);
             }
@@ -889,11 +890,11 @@ public class TypeUtils {
 
     public static Object getDefaultValue(Type paramType) {
         if (paramType == int.class) {
-            return  0;
+            return 0;
         }
 
         if (paramType == long.class) {
-            return  0L;
+            return 0L;
         }
 
         if (paramType == float.class) {
@@ -961,20 +962,20 @@ public class TypeUtils {
         return null;
     }
 
-    public static Class<?> getClass(Type type){
+    public static Class<?> getClass(Type type) {
         if (type == null) {
             return null;
         }
 
-        if(type.getClass() == Class.class){
+        if (type.getClass() == Class.class) {
             return (Class<?>) type;
         }
 
-        if(type instanceof ParameterizedType){
+        if (type instanceof ParameterizedType) {
             return getClass(((ParameterizedType) type).getRawType());
         }
 
-        if(type instanceof TypeVariable){
+        if (type instanceof TypeVariable) {
             Type boundType = ((TypeVariable<?>) type).getBounds()[0];
             if (boundType instanceof Class) {
                 return (Class) boundType;
@@ -982,7 +983,7 @@ public class TypeUtils {
             return getClass(boundType);
         }
 
-        if(type instanceof WildcardType){
+        if (type instanceof WildcardType) {
             Type[] upperBounds = ((WildcardType) type).getUpperBounds();
             if (upperBounds.length == 1) {
                 return getClass(upperBounds[0]);

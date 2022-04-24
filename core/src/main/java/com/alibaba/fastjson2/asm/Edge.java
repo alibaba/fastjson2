@@ -34,26 +34,28 @@ package com.alibaba.fastjson2.asm;
  * respectively). An edge corresponds either to a jump or ret instruction or to an exception
  * handler.
  *
- * @see Label
  * @author Eric Bruneton
+ * @see Label
  */
 final class Edge {
-  /** The successor block of this control flow graph edge. */
-  final Label successor;
+    /**
+     * The successor block of this control flow graph edge.
+     */
+    final Label successor;
 
-  /**
-   * The next edge in the list of outgoing edges of a basic block. See {@link Label#outgoingEdges}.
-   */
-  Edge nextEdge;
+    /**
+     * The next edge in the list of outgoing edges of a basic block. See {@link Label#outgoingEdges}.
+     */
+    Edge nextEdge;
 
-  /**
-   * Constructs a new Edge.
-   *
-   * @param successor see {@link #successor}.
-   * @param nextEdge see {@link #nextEdge}.
-   */
-  Edge(final Label successor, final Edge nextEdge) {
-    this.successor = successor;
-    this.nextEdge = nextEdge;
-  }
+    /**
+     * Constructs a new Edge.
+     *
+     * @param successor see {@link #successor}.
+     * @param nextEdge  see {@link #nextEdge}.
+     */
+    Edge(final Label successor, final Edge nextEdge) {
+        this.successor = successor;
+        this.nextEdge = nextEdge;
+    }
 }

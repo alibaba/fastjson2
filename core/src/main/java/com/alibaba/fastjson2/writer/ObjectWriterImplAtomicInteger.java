@@ -3,11 +3,9 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 final class ObjectWriterImplAtomicInteger extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplAtomicInteger INSTANCE = new ObjectWriterImplAtomicInteger(null);
