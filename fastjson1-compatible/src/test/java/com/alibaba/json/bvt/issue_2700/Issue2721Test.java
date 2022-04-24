@@ -1,7 +1,6 @@
 package com.alibaba.json.bvt.issue_2700;
 
 import com.alibaba.fastjson.JSONPath;
-import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 

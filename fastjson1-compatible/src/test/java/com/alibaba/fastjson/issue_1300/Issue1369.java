@@ -1,7 +1,6 @@
 package com.alibaba.fastjson.issue_1300;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 

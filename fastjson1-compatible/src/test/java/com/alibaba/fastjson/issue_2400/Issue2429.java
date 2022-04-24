@@ -1,7 +1,6 @@
 package com.alibaba.fastjson.issue_2400;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 public class Issue2429 {

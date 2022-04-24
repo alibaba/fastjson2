@@ -2,12 +2,10 @@ package com.alibaba.fastjson.issue_3800;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.ParameterizedTypeImpl;
-import junit.framework.TestCase;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

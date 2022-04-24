@@ -1,16 +1,6 @@
 package com.alibaba.fastjson.issue_1500;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.DefaultJSONParser;
-import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
-
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.Map;
 
 public class Issue1584 {
     @Test

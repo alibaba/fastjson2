@@ -2,11 +2,9 @@ package com.alibaba.fastjson.issue_3200;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

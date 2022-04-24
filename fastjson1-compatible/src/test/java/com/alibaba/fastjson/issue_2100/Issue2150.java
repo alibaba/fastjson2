@@ -1,7 +1,6 @@
 package com.alibaba.fastjson.issue_2100;
 
 import com.alibaba.fastjson.JSONArray;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;

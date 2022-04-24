@@ -2,7 +2,6 @@ package com.alibaba.fastjson.issue_3100;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.json.bvtVO.一个中文名字的包.User;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 public class Issue3132 {

@@ -5,7 +5,6 @@ package com.alibaba.fastjson.issue_2700;
 //import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSONPath;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

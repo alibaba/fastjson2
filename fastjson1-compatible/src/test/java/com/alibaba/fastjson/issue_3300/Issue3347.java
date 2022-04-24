@@ -2,7 +2,6 @@ package com.alibaba.fastjson.issue_3300;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

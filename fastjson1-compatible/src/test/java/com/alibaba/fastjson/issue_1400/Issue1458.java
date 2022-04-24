@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONCreator;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.google.common.collect.ImmutableMap;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;

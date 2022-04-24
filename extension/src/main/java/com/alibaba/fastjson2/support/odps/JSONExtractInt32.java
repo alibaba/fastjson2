@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.support.odps;
 
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONPath;
+import com.alibaba.fastjson2.JSONReader;
 import com.aliyun.odps.io.IntWritable;
 import com.aliyun.odps.io.Text;
 import com.aliyun.odps.udf.UDF;

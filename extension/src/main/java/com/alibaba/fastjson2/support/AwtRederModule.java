@@ -5,12 +5,13 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
 
-import static com.alibaba.fastjson2.reader.ObjectReaders.*;
-
 import java.awt.*;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.function.Function;
+
+import static com.alibaba.fastjson2.reader.ObjectReaders.createObjectReader;
+import static com.alibaba.fastjson2.reader.ObjectReaders.fieldReader;
 
 public class AwtRederModule implements ObjectReaderModule {
     public static AwtRederModule INSTANCE = new AwtRederModule();
