@@ -42,6 +42,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     }
 
     @Override
+    public ObjectReaderProvider getProvider() {
+        return provider;
+    }
+
+    @Override
     public void init(ObjectReaderProvider provider) {
         {
             // cast to BigDecimal
@@ -210,7 +215,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
         void getBeanInfo1x(BeanInfo beanInfo, Annotation annotation) {
             Class<? extends Annotation> annotationClass = annotation.getClass();
-            BeanUtils.annatationMethods(annotationClass, m -> {
+            BeanUtils.annotationMethods(annotationClass, m -> {
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
@@ -510,7 +515,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
         private void processJSONField1x(FieldInfo fieldInfo, Annotation annotation) {
             Class<? extends Annotation> annotationClass = annotation.getClass();
-            BeanUtils.annatationMethods(annotationClass, m -> {
+            BeanUtils.annotationMethods(annotationClass, m -> {
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
@@ -644,7 +649,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     }
 
     private void getBeanInfo1xJSONPOJOBuilder(BeanInfo beanInfo, Class<?> builderClass, Annotation builderAnnatation, Class<? extends Annotation> builderAnnatationClass) {
-        BeanUtils.annatationMethods(builderAnnatationClass, method -> {
+        BeanUtils.annotationMethods(builderAnnatationClass, method -> {
             try {
                 String methodName = method.getName();
                 switch (methodName) {
@@ -684,7 +689,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             switch (annotationType.getName()) {
                 case "com.alibaba.fastjson.annotation.JSONCreator":
                     creatorMethod = true;
-                    BeanUtils.annatationMethods(annotationType, m1 -> {
+                    BeanUtils.annotationMethods(annotationType, m1 -> {
                         try {
                             switch (m1.getName()) {
                                 case "parameterNames":
@@ -743,7 +748,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             switch (annotationType.getName()) {
                 case "com.alibaba.fastjson.annotation.JSONCreator":
                     creatorMethod = true;
-                    BeanUtils.annatationMethods(annotationType, m1 -> {
+                    BeanUtils.annotationMethods(annotationType, m1 -> {
                         try {
                             switch (m1.getName()) {
                                 case "parameterNames":

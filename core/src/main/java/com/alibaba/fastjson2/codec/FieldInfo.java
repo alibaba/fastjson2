@@ -8,6 +8,7 @@ public class FieldInfo {
     public boolean ignore;
     public String[] alternateNames;
     public Class<?> writeUsing;
+    public boolean fieldClassMixIn;
 
     public void init() {
         fieldName = null;
@@ -17,5 +18,6 @@ public class FieldInfo {
         ignore = false;
         alternateNames = null;
         writeUsing = null;
+        fieldClassMixIn = false;
     }
 }

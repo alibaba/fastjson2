@@ -34,7 +34,7 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        if (initValueClass == null) {
+        if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
             initValueClass = valueClass;
             if (Map.class.isAssignableFrom(valueClass)) {
                 if (fieldClass.isAssignableFrom(valueClass)) {

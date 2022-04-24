@@ -473,7 +473,7 @@ public class ObjectReaderCreator {
         }
 
         if (Enum.class.isAssignableFrom(objectClass)) {
-            return createEnumReader(objectClass, modules);
+            return createEnumReader(objectClass, beanInfo.createMethod, modules);
         }
 
         if (fieldBased && JDKUtils.JVM_VERSION >= 11 && !JDKUtils.LANG_UNNAMED && Throwable.class.isAssignableFrom(objectClass)) {
@@ -1316,8 +1316,6 @@ public class ObjectReaderCreator {
                 Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
                 if (actualTypeArguments.length == 2) {
-                    Type itemType = actualTypeArguments[1];
-                    Class itemClass = TypeUtils.getMapping(itemType);
                     if (finalField && (!JDKUtils.UNSAFE_SUPPORT || (features & JSONReader.Feature.FieldBased.mask) == 0)) {
                         return new FielderReaderImplMapFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, field);
                     }
@@ -1458,7 +1456,11 @@ public class ObjectReaderCreator {
     }
 
 
-    protected ObjectReader createEnumReader(Class objectClass, List<ObjectReaderModule> modules) {
+    protected ObjectReader createEnumReader(
+            Class objectClass,
+            Method createMethod,
+            List<ObjectReaderModule> modules
+    ) {
         FieldInfo fieldInfo = new FieldInfo();
 
         Enum[] ordinalEnums = (Enum[]) objectClass.getEnumConstants();
@@ -1514,6 +1516,30 @@ public class ObjectReaderCreator {
             Arrays.sort(enumNameHashCodes);
         }
 
+        Member enumValueField = BeanUtils.getEnumValueField(objectClass);
+        if (enumValueField == null && modules.size() > 0) {
+            ObjectReaderProvider provider = modules.get(0).getProvider();
+            if (provider != null) {
+                Class fieldClassMixInSource = provider.getMixIn(objectClass);
+                if (fieldClassMixInSource != null) {
+                    Member mixedValueField = BeanUtils.getEnumValueField(fieldClassMixInSource);
+                    if (mixedValueField instanceof Field) {
+                        try {
+                            enumValueField = objectClass.getField(mixedValueField.getName());
+                        } catch (NoSuchFieldException ignored) {
+
+                        }
+                    } else if (mixedValueField instanceof Method) {
+                        try {
+                            enumValueField = objectClass.getMethod(mixedValueField.getName());
+                        } catch (NoSuchMethodException ignored) {
+
+                        }
+                    }
+                }
+            }
+        }
+
         Enum[] enums = new Enum[enumNameHashCodes.length];
         for (int i = 0; i < enumNameHashCodes.length; ++i) {
             long hash = enumNameHashCodes[i];
@@ -1521,22 +1547,24 @@ public class ObjectReaderCreator {
             enums[i] = e;
         }
 
-        if (ordinalEnums.length == 2) {
-            Enum first = ordinalEnums[0];
+        if (createMethod == null && enumValueField == null) {
+            if (ordinalEnums.length == 2) {
+                Enum first = ordinalEnums[0];
 
-            int matchCount = 0;
-            for (int i = 0; i < enums.length; i++) {
-                if (enums[i] == first) {
-                    matchCount++;
+                int matchCount = 0;
+                for (int i = 0; i < enums.length; i++) {
+                    if (enums[i] == first) {
+                        matchCount++;
+                    }
                 }
-            }
 
-            if (matchCount == 2) {
-                return new ObjectReaderImplEnum2X4(objectClass, enums, ordinalEnums, enumNameHashCodes);
+                if (matchCount == 2) {
+                    return new ObjectReaderImplEnum2X4(objectClass, enums, ordinalEnums, enumNameHashCodes);
+                }
             }
         }
 
-        return new ObjectReaderImplEnum(objectClass, enums, ordinalEnums, enumNameHashCodes);
+        return new ObjectReaderImplEnum(objectClass, createMethod, enumValueField, enums, ordinalEnums, enumNameHashCodes);
     }
 
 }
