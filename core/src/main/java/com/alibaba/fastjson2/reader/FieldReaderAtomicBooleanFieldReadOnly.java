@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 final class FieldReaderAtomicBooleanFieldReadOnly<T>
@@ -20,6 +19,10 @@ final class FieldReaderAtomicBooleanFieldReadOnly<T>
     @Override
     public boolean isReadOnly() {
         return true;
+    }
+
+    public Field getField() {
+        return field;
     }
 
     @Override
