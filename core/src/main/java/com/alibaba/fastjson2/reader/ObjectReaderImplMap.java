@@ -58,7 +58,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
             ParameterizedType parameterizedType = (ParameterizedType) fieldType;
 
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-            if (actualTypeArguments.length == 2) {
+            if (actualTypeArguments.length == 2 && !instanceType.getName().equals("org.springframework.util.LinkedMultiValueMap")) {
                 Type keyType = actualTypeArguments[0];
                 Type valueType = actualTypeArguments[1];
 

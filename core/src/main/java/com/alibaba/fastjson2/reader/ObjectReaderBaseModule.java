@@ -889,6 +889,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
             case "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet":
                 return null;
+            case "org.springframework.util.LinkedMultiValueMap":
+                return ObjectReaderImplMap.of(type, (Class) type, 0L);
             default:
                 break;
         }
@@ -1206,6 +1208,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                         return new ObjectReaderImplMapTyped((Class) rawType, HashMap.class, actualTypeParam0, actualTypeParam1, 0, GuavaSupport.immutableMapConverter());
                     case "com.google.common.collect.SingletonImmutableBiMap":
                         return new ObjectReaderImplMapTyped((Class) rawType, HashMap.class, actualTypeParam0, actualTypeParam1, 0, GuavaSupport.singletonBiMapConverter());
+                    case "org.springframework.util.LinkedMultiValueMap":
+                        return ObjectReaderImplMap.of(type, (Class) rawType, 0L);
                     default:
                         break;
                 }
