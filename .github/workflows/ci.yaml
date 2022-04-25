@@ -33,7 +33,7 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -B
       - name: Generate code coverage
-        run: mvn -Pgen-code-cov clean test jacoco:report
+        run: mvn -Pgen-code-cov clean test
       # https://github.com/marketplace/actions/codecov
       - uses: codecov/codecov-action@v2
         with:
