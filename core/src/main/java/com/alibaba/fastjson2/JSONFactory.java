@@ -288,11 +288,6 @@ public final class JSONFactory {
         return defaultObjectReaderProvider;
     }
 
-    public static void mixIn(Class target, Class mixinSource) {
-        defaultObjectWriterProvider.mixIn(target, mixinSource);
-        getDefaultObjectReaderProvider().mixIn(target, mixinSource);
-    }
-
     public static void setContextReaderCreator(ObjectReaderCreator creator) {
         readerCreatorLocal.set(creator);
     }

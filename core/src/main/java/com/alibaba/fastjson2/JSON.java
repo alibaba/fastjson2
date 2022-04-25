@@ -644,4 +644,9 @@ public interface JSON {
 
         return TypeUtils.cast(object, clazz);
     }
+
+    static void mixIn(Class target, Class mixinSource) {
+        JSONFactory.defaultObjectWriterProvider.mixIn(target, mixinSource);
+        JSONFactory.getDefaultObjectReaderProvider().mixIn(target, mixinSource);
+    }
 }

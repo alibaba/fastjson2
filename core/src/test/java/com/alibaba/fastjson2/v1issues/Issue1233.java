@@ -1,10 +1,8 @@
 package com.alibaba.fastjson2.v1issues;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONType;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -20,8 +18,8 @@ public class Issue1233 {
     public void test_for_issue() throws Exception {
         JSONObject jsonObject = JSON.parseObject("{\"type\":\"floorV2\",\"templateId\":\"x123\"}");
 
-        JSONFactory.mixIn(Area.class, AreaMixIn.class);
-        JSONFactory.mixIn(FloorV2.class, FloorV2MixIn.class);
+        JSON.mixIn(Area.class, AreaMixIn.class);
+        JSON.mixIn(FloorV2.class, FloorV2MixIn.class);
 
         FloorV2 floorV2 = (FloorV2) jsonObject.toJavaObject(Area.class);
         assertNotNull(floorV2);

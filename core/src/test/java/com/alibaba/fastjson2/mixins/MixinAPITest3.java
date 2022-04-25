@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.mixins;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.JSONFactory;
 import org.junit.jupiter.api.Test;
 
 import static junit.framework.TestCase.assertEquals;
@@ -36,7 +35,7 @@ public class MixinAPITest3 {
     public void test_mixIn_get_methods() throws Exception {
         BaseClass base = new BaseClass(1, 2);
 
-        JSONFactory.mixIn(BaseClass.class, MixIn1.class);
+        JSON.mixIn(BaseClass.class, MixIn1.class);
 
         String str = JSON.toJSONString(base);
         assertEquals("{\"apple\":1,\"banana\":2}", str);

@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.v1issues.issue_3200;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.JSONFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue3266_mixedin {
     @Test
     public void test_for_issue() throws Exception {
-        JSONFactory.mixIn(Color.class, ColorMixedIn.class);
+        JSON.mixIn(Color.class, ColorMixedIn.class);
 
         VO vo = new VO();
         vo.type = Color.Black;
@@ -28,7 +27,7 @@ public class Issue3266_mixedin {
 
     @Test
     public void test_for_issue_method() throws Exception {
-        JSONFactory.mixIn(Color.class, ColorMixedIn.class);
+        JSON.mixIn(Color.class, ColorMixedIn.class);
 
         V1 vo = new V1();
         vo.type = Color.Black;
