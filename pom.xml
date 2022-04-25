@@ -509,13 +509,19 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <show>public</show>
+                            <show>protected</show>
                             <charset>UTF-8</charset>
                             <encoding>UTF-8</encoding>
                             <docencoding>UTF-8</docencoding>
+                            <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/examples/exclude-package-names.html -->
+                            <excludePackageNames>*.internal:*.internal.*</excludePackageNames>
+                            <doclint>all,-missing</doclint>
                             <links>
                                 <link>https://docs.oracle.com/javase/8/docs/api</link>
                             </links>
+                            <additionalJOptions>
+                                <additionalJOption>-J-Duser.language=en -J-Duser.country=US</additionalJOption>
+                            </additionalJOptions>
                         </configuration>
                     </plugin>
                 </plugins>
