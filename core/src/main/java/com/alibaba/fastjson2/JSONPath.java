@@ -2055,7 +2055,7 @@ public abstract class JSONPath {
                     boolean match = nameHashCode == this.nameHashCode;
 
                     char ch = jsonReader.ch;
-                    if (!match && ch != '{' && ch != '[') {
+                    if (!match) {
                         jsonReader.skipValue();
                         continue;
                     }
