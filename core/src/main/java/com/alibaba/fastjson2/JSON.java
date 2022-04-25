@@ -24,8 +24,12 @@ public interface JSON {
      * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject}
      *
      * @param text the JSON {@link String} to be parsed
+     * @return Object
      */
     static Object parse(String text) {
+        if (text == null) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(text);
         ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
         return objectReader.readObject(reader, 0);
@@ -36,8 +40,12 @@ public interface JSON {
      *
      * @param text     the JSON {@link String} to be parsed
      * @param features features to be enabled in parsing
+     * @return Object
      */
     static Object parse(String text, JSONReader.Feature... features) {
+        if (text == null) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(text);
         reader.context.config(features);
         ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
@@ -48,9 +56,13 @@ public interface JSON {
      * Parse JSON {@link String} into {@link JSONObject}
      *
      * @param text the JSON {@link String} to be parsed
+     * @return JSONObject
      */
     @SuppressWarnings("unchecked")
     static JSONObject parseObject(String text) {
+        if (text == null) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(text);
         ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
         return objectReader.readObject(reader, 0);
@@ -60,9 +72,13 @@ public interface JSON {
      * Parse UTF8 encoded JSON byte array into {@link JSONObject}
      *
      * @param bytes UTF8 encoded JSON byte array to parse
+     * @return JSONObject
      */
     @SuppressWarnings("unchecked")
     static JSONObject parseObject(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(bytes);
         ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
         return objectReader.readObject(reader, 0);
@@ -73,9 +89,13 @@ public interface JSON {
      *
      * @param text  the JSON {@link String} to be parsed
      * @param clazz specify the Class to be converted
+     * @return Class
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz) {
+        if (text == null) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(text);
         JSONReader.Context context = reader.context;
 
@@ -92,6 +112,9 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(text);
         ObjectReader<T> objectReader = reader.context.provider.getObjectReader(type);
         return objectReader.readObject(reader, 0);
@@ -105,6 +128,9 @@ public interface JSON {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> T parseObject(String text, TypeReference typeReference) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(text);
         ObjectReader<T> objectReader = reader.context.provider.getObjectReader(typeReference.getType());
         return objectReader.readObject(reader, 0);
@@ -119,6 +145,9 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, JSONReader.Feature... features) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(text);
 
         JSONReader.Context context = reader.context;
@@ -139,6 +168,9 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, String format, JSONReader.Feature... features) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(text);
 
         JSONReader.Context context = reader.context;
@@ -160,6 +192,9 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type, JSONReader.Feature... features) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(text);
         reader.context.config(features);
         ObjectReader<T> objectReader = reader.getObjectReader(type);
@@ -174,6 +209,9 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(bytes);
         ObjectReader<T> objectReader = reader.getObjectReader(type);
         return objectReader.readObject(reader, 0);
@@ -187,6 +225,9 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Class<T> clazz) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(bytes);
         ObjectReader<T> objectReader = reader.getObjectReader(clazz);
         return objectReader.readObject(reader, 0);
@@ -201,6 +242,9 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(bytes);
         reader.getContext().config(features);
         ObjectReader<T> objectReader = reader.getObjectReader(type);
@@ -219,6 +263,9 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, int offset, int length, Charset charset, Type type) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(bytes, offset, length, charset);
         ObjectReader<T> objectReader = reader.getObjectReader(type);
         return objectReader.readObject(reader, 0);
@@ -231,6 +278,9 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static JSONArray parseArray(String text) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
         JSONReader reader = JSONReader.of(text);
         ObjectReader<JSONArray> objectReader = reader.getObjectReader(JSONArray.class);
         return objectReader.readObject(reader, 0);
@@ -243,6 +293,9 @@ public interface JSON {
      * @param type specify the {@link Type} to be converted
      */
     static <T> List<T> parseArray(String text, Type type) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
         JSONReader reader = JSONReader.of(text);
         return reader.read(paramType);
@@ -255,6 +308,9 @@ public interface JSON {
      * @param types specify some {@link Type}s to be converted
      */
     static <T> List<T> parseArray(String text, Type[] types) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
         List<T> array = new ArrayList<>(types.length);
         JSONReader reader = JSONReader.of(text);
 
@@ -537,8 +593,12 @@ public interface JSON {
      * Verify the {@link String} is JSON Object
      *
      * @param text the {@link String} to validate
+     * @return T/F
      */
     static boolean isValid(String text) {
+        if (text == null || text.length() == 0) {
+            return false;
+        }
         JSONReader jsonReader = JSONReader.of(text);
         try {
             jsonReader.skipValue();
@@ -552,8 +612,12 @@ public interface JSON {
      * Verify the {@link String} is JSON Array
      *
      * @param text the {@link String} to validate
+     * @return T/F
      */
     static boolean isValidArray(String text) {
+        if (text == null || text.length() == 0) {
+            return false;
+        }
         JSONReader jsonReader = JSONReader.of(text);
         try {
             if (!jsonReader.isArray()) {
@@ -570,8 +634,12 @@ public interface JSON {
      * Verify the byte array is JSON Object
      *
      * @param bytes the byte array to validate
+     * @return T/F
      */
     static boolean isValid(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return false;
+        }
         JSONReader jsonReader = JSONReader.of(bytes);
         try {
             jsonReader.skipValue();
@@ -585,8 +653,12 @@ public interface JSON {
      * Verify the byte array is JSON Array
      *
      * @param bytes the byte array to validate
+     * @return T/F
      */
     static boolean isValidArray(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return false;
+        }
         JSONReader jsonReader = JSONReader.of(bytes);
         try {
             if (!jsonReader.isArray()) {
@@ -606,8 +678,12 @@ public interface JSON {
      * @param offset  the index of the first byte to validate
      * @param length  the number of bytes to validate
      * @param charset specify {@link Charset} to validate
+     * @return T/F
      */
     static boolean isValid(byte[] bytes, int offset, int length, Charset charset) {
+        if (bytes == null || bytes.length == 0) {
+            return false;
+        }
         JSONReader jsonReader = JSONReader.of(bytes, offset, length, charset);
         try {
             jsonReader.skipValue();
@@ -621,8 +697,12 @@ public interface JSON {
      * Convert Java object order to {@link JSONArray} or {@link JSONObject}
      *
      * @param object Java Object to be converted
+     * @return Java Object
      */
     static Object toJSON(Object object) {
+        if (object == null) {
+            return null;
+        }
         if (object instanceof JSONObject || object instanceof JSONArray) {
             return object;
         }
@@ -638,6 +718,9 @@ public interface JSON {
      * @param clazz  converted goal class
      */
     static <T> T toJavaObject(Object object, Class<T> clazz) {
+        if (object == null) {
+            return null;
+        }
         if (object instanceof JSONObject) {
             return ((JSONObject) object).toJavaObject(clazz);
         }
