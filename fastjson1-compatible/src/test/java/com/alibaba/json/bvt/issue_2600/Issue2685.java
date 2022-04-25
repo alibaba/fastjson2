@@ -6,7 +6,6 @@ import com.alibaba.fastjson.parser.DefaultJSONParser;
 import com.alibaba.fastjson.parser.JSONToken;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.StringCodec;
-import com.alibaba.fastjson2.JSONFactory;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitResponseMessage;
 import com.zx.sms.codec.smgp.msg.SMGPSubmitMessage;
 import com.zx.sms.common.util.CMPPCommonUtil;
@@ -31,7 +30,7 @@ public class Issue2685 extends TestCase {
         String smsMsg = JSON.toJSONString(smgpSubmitMessage);
         // System.out.println(smsMsg);
 
-        JSONFactory.mixIn(SMGPSubmitMessage.class, Mixin.class);
+        com.alibaba.fastjson2.JSON.mixIn(SMGPSubmitMessage.class, Mixin.class);
         smgpSubmitMessage = JSON.parseObject(smsMsg, SMGPSubmitMessage.class);
         assertEquals("hello", smgpSubmitMessage.getMsgContent());
     }
