@@ -31,7 +31,7 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}
       - name: Build with Maven
-        run: ./mvnw clean package -B
+        run: ./mvnw -Pgen-javadoc clean package -B
       - name: Generate code coverage
         run: ./mvnw -Pgen-code-cov clean test
       # https://github.com/marketplace/actions/codecov
