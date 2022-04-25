@@ -13,7 +13,7 @@ import java.nio.charset.Charset;
  * @see JSONReader.Feature
  * @see JSONWriter.Feature
  * @see Filter
- * @see 2.0.2
+ * @since 2.0.2
  */
 public class FastJsonConfig {
 

@@ -863,9 +863,7 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     /**
      * Convert this {@link JSONObject} to the specified Object
      *
-     * <pre>
-     * Map<String, User> users = jsonObject.toJavaObject(new TypeReference<HashMap<String, User>>(){}.getType());
-     * </pre>
+     * {@code Map<String, User> users = jsonObject.toJavaObject(new TypeReference<HashMap<String, User>>(){}.getType());}
      *
      * @param type specify the {@link Type} to be converted
      */
@@ -879,11 +877,9 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     /**
      * Convert this {@link JSONObject} to the specified Object
      *
-     * <pre>
-     * User user = jsonObject.toJavaObject(User.class);
-     * </pre>
+     * {@code User user = jsonObject.toJavaObject(User.class);}
      *
-     * @param clazz specify the {@link Class<T>} to be converted
+     * @param clazz specify the {@code Class<T>} to be converted
      */
     @SuppressWarnings("unchecked")
     public <T> T toJavaObject(Class<T> clazz) {
@@ -895,13 +891,11 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     /**
      * Returns the result of the {@link Type} converter conversion of the associated value in this {@link JSONObject}.
      *
-     * <pre>
-     * User user = jsonObject.getObject("user", User.class);
-     * </pre>
+     * {@code User user = jsonObject.getObject("user", User.class);}
      *
      * @param key  the key whose associated value is to be returned
      * @param type specify the {@link Type} to be converted
-     * @return <T> or null
+     * @return {@code <T>} or null
      * @throws JSONException If no suitable conversion method is found
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
