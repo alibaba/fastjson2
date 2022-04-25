@@ -43,7 +43,7 @@ final class ObjectReaderImplMapString extends ObjectReaderImplMapTyped {
             }
 
             String name = jsonReader.readFieldName();
-            Object value = jsonReader.readString();
+            String value = jsonReader.readString();
             object.put(name, value);
         }
 
