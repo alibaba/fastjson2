@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-/** 
+/**
  * Represents a generic type {@code T}. Java doesn't yet provide a way to
  * represent generic types, so this class does. Forces clients to create a
  * subclass of this class which enables retrieval the type information even at
@@ -56,7 +56,6 @@ public class TypeReference<T> {
 
     /**
      * @since 1.2.9
-     * @param actualTypeArguments
      */
     protected TypeReference(Type... actualTypeArguments){
         Class<?> thisClass = this.getClass();
@@ -120,7 +119,7 @@ public class TypeReference<T> {
         Type key = new ParameterizedTypeImpl(argTypes, thisClass, rawType);
         return key;
     }
-    
+
     /**
      * Gets underlying {@code Type} instance.
      */

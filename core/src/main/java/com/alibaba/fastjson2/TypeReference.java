@@ -12,18 +12,17 @@ import java.util.List;
  * subclass of this class which enables retrieval the type information even at runtime.
  * <p>
  * This syntax cannot be used to create type literals that have wildcard
- * parameters, such as {@link Class<T>} or {@code List<? extends CharSequence>}.
+ * parameters, such as {@code Class<T>} or {@code List<? extends CharSequence>}.
  * <p>
- * For example, to create a type literal for {@link List<String>}, you can
+ * For example, to create a type literal for {@code List<String>}, you can
  * create an empty anonymous inner class:
- * <pre>
- * TypeReference<List<String>> typeReference = new TypeReference<List<String>>(){};
- * </pre>
+ * <p>
+ * {@code TypeReference<List<String>> typeReference = new TypeReference<List<String>>(){};}
+ * <p>
  * For example, use it quickly
- * <pre>
- * String text = "{\"id\":1,\"name\":\"kraity\"}";
+ * <pre>{@code String text = "{\"id\":1,\"name\":\"kraity\"}";
  * User user = new TypeReference<User>(){}.parseObject(text);
- * </pre>
+ * }</pre>
  */
 public abstract class TypeReference<T> {
 
@@ -74,11 +73,10 @@ public abstract class TypeReference<T> {
     /**
      * See {@link JSON#parseObject} for details
      *
-     * <pre>
-     * String text = "{\"id\":1,\"name\":\"kraity\"}";
-     * <p>
+     * <pre>{@code String text = "{\"id\":1,\"name\":\"kraity\"}";
+     *
      * User user = new TypeReference<User>(){}.parseObject(text);
-     * </pre>
+     * }</pre>
      *
      * @param text the JSON {@link String} to be parsed
      * @since 2.0.2
@@ -89,10 +87,8 @@ public abstract class TypeReference<T> {
 
     /**
      * See {@link JSONObject#toJavaObject} for details
-     *
-     * <pre>
-     * Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.parseObject(jsonObject);
-     * </pre>
+     * <p>
+     * {@code Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.parseObject(jsonObject);}
      *
      * @param object Specify the {@link JSONObject} to convert
      * @since 2.0.2
@@ -104,11 +100,10 @@ public abstract class TypeReference<T> {
     /**
      * See {@link JSON#parseArray} for details
      *
-     * <pre>
-     * String text = "[{\"id\":1,\"name\":\"kraity\"}]";
-     * <p>
+     * <pre>{@code String text = "[{\"id\":1,\"name\":\"kraity\"}]";
+     *
      * List<User> users = new TypeReference<User>(){}.parseArray(text);
-     * </pre>
+     * }</pre>
      *
      * @param text the JSON {@link String} to be parsed
      * @since 2.0.2
@@ -119,10 +114,8 @@ public abstract class TypeReference<T> {
 
     /**
      * See {@link JSONArray#toJavaObject} for details
-     *
-     * <pre>
-     * List<User> users = new TypeReference<ArrayList<User>>(){}.parseObject(jsonArray);
-     * </pre>
+     * <p>
+     * {@code List<User> users = new TypeReference<ArrayList<User>>(){}.parseObject(jsonArray);}
      *
      * @param object Specify the {@link JSONArray} to convert
      * @since 2.0.2
