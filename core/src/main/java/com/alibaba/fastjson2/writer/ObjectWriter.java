@@ -115,9 +115,7 @@ public interface ObjectWriter<T> {
         write(jsonWriter, object, null, null, 0);
     }
 
-    default void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-
-    }
+    public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features);
 
     default void writeWithFilter(JSONWriter jsonWriter, Object object) {
         writeWithFilter(jsonWriter, object, null, null, 0);

@@ -895,6 +895,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
 
     static class VoidObjectWriter implements ObjectWriter {
         public final static VoidObjectWriter INSTANCE = new VoidObjectWriter();
+
+        @Override
+        public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+
+        }
     }
 
 }

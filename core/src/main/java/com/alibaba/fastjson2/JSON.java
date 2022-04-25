@@ -649,4 +649,12 @@ public interface JSON {
         JSONFactory.defaultObjectWriterProvider.mixIn(target, mixinSource);
         JSONFactory.getDefaultObjectReaderProvider().mixIn(target, mixinSource);
     }
+
+    static boolean register(Type type, ObjectReader objectReader) {
+        return JSONFactory.getDefaultObjectReaderProvider().register(type, objectReader);
+    }
+
+    static boolean register(Type type, ObjectWriter objectReader) {
+        return JSONFactory.defaultObjectWriterProvider.register(type, objectReader);
+    }
 }
