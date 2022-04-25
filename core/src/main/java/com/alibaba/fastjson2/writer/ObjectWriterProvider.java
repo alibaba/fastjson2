@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
+import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
@@ -43,6 +44,10 @@ public class ObjectWriterProvider {
             return contextCreator;
         }
         return creator;
+    }
+
+    public boolean register(Type type, ObjectWriter objectWriter) {
+        return cache.put(type, objectWriter) == null;
     }
 
     public Class getMixIn(Class target) {
