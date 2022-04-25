@@ -804,9 +804,8 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * Convert this {@link JSONArray} to the specified Object
-     * <pre>
-     * List<User> users = jsonArray.toJavaObject(new TypeReference<ArrayList<User>>(){}.getType());
-     * </pre>
+     * <p>
+     * {@code List<User> users = jsonArray.toJavaObject(new TypeReference<ArrayList<User>>(){}.getType());}
      *
      * @param type specify the {@link Type} to be converted
      */
@@ -821,13 +820,12 @@ public class JSONArray extends ArrayList<Object> {
      * Convert all the members of this {@link JSONArray} into the specified Object.
      * Warning that each member of the {@link JSONArray} must implement the {@link Map} interface.
      *
-     * <pre>
-     * String json = "[{\"id\": 1, \"name\": \"fastjson\"}, {\"id\": 2, \"name\": \"fastjson2\"}]";
+     * <pre>{@code String json = "[{\"id\": 1, \"name\": \"fastjson\"}, {\"id\": 2, \"name\": \"fastjson2\"}]";
      * JSONArray array = JSON.parseArray(json);
      * List<User> users = array.toJavaList(User.class);
-     * </pre>
+     * }</pre>
      *
-     * @param clazz specify the {@link Class<T>} to be converted
+     * @param clazz specify the {@code Class<T>} to be converted
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> List<T> toJavaList(Class<T> clazz) {
@@ -852,14 +850,12 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * Returns the result of the {@link Type} converter conversion of the element at the specified position in this {@link JSONArray}.
-     *
-     * <pre>
-     * User user = jsonArray.getObject(0, User.class);
-     * </pre>
+     * <p>
+     * {@code User user = jsonArray.getObject(0, User.class);}
      *
      * @param index index of the element to return
      * @param type  specify the {@link Type} to be converted
-     * @return <T> or null
+     * @return {@code <T>} or null
      * @throws JSONException             If no suitable conversion method is found
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */

@@ -32,7 +32,6 @@ public @interface JSONField {
     /**
      * config encode/decode ordinal
      * @since 1.1.42
-     * @return
      */
     int ordinal() default 0;
 
@@ -47,25 +46,25 @@ public @interface JSONField {
     SerializerFeature[] serialzeFeatures() default {};
 
     Feature[] parseFeatures() default {};
-    
+
     String label() default "";
-    
+
     /**
      * @since 1.2.12
      */
     boolean jsonDirect() default false;
-    
+
     /**
      * Serializer class to use for serializing associated value.
-     * 
+     *
      * @since 1.2.16
      */
     Class<?> serializeUsing() default Void.class;
-    
+
     /**
-     * Deserializer class to use for deserializing associated value. 
-     * 
-     * @since 1.2.16 
+     * Deserializer class to use for deserializing associated value.
+     *
+     * @since 1.2.16
      */
     Class<?> deserializeUsing() default Void.class;
 
