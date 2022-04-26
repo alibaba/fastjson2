@@ -9,13 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class Issue81 {
     @Test
     public void test_issue() {
-        String jsono = "{\"a\":1}";
-        String jsona = "[{\"a\":1}]";
+        String jsonObjectStr = "{\"a\":1}";
+        String jsonArrayStr = "[{\"a\":1}]";
         String value = "1111";
-        assertFalse(JSON.isValid(jsona));
-        assertTrue(JSON.isValid(jsono));
-        assertFalse(JSON.isValidArray(jsono));
-        assertTrue(JSON.isValidArray(jsona));
+        assertTrue(JSON.isValid(jsonArrayStr));
+        assertTrue(JSON.isValid(jsonObjectStr));
+        assertFalse(JSON.isValidArray(jsonObjectStr));
+        assertTrue(JSON.isValidArray(jsonArrayStr));
         assertFalse(JSON.isValid(value));
         assertFalse(JSON.isValidArray(value));
     }
