@@ -647,6 +647,16 @@ public abstract class JSONWriter implements Closeable {
         writeRaw("null");
     }
 
+    public void writeStringNull() {
+        String raw;
+        if ((this.context.features & Feature.NullAsDefaultValue.mask) != 0) {
+            raw = "";
+        } else {
+            raw = "null";
+        }
+        writeRaw(raw);
+    }
+
     public void writeArrayNull() {
         String raw;
         if ((this.context.features & Feature.NullAsDefaultValue.mask) != 0) {

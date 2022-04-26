@@ -527,8 +527,42 @@ public abstract class BeanUtils {
                 }
                 return new String(chars);
             }
+            case "PascalCase": {
+                char[] chars = new char[methodNameLength - prefixLength];
+                methodName.getChars(is ? 2 : 3, methodNameLength, chars, 0);
+                char c0 = chars[0];
+                boolean c1UCase = chars.length > 1 && chars[1] >= 'a' && chars[1] <= 'z';
+                if (c0 >= 'a' && c0 <= 'z' && !c1UCase) {
+                    chars[0] = (char) (c0 - 32);
+                }
+                return new String(chars);
+            }
             case "SnakeCase": {
                 return snakeCase(methodName, prefixLength);
+            }
+            case "KebabCase": {
+                StringBuilder buf = new StringBuilder();
+                final int firstIndex;
+                if (methodName.startsWith("is")) {
+                    firstIndex = 2;
+                } else if (methodName.startsWith("get")) {
+                    firstIndex = 3;
+                } else {
+                    firstIndex = 0;
+                }
+                for (int i = firstIndex; i < methodName.length(); ++i) {
+                    char ch = methodName.charAt(i);
+                    if (ch >= 'A' && ch <= 'Z') {
+                        char ch_ucase = (char) (ch + 32);
+                        if (i > firstIndex) {
+                            buf.append('-');
+                        }
+                        buf.append(ch_ucase);
+                    } else {
+                        buf.append(ch);
+                    }
+                }
+                return buf.toString();
             }
             default:
                 throw new JSONException("TODO : " + namingStrategy);

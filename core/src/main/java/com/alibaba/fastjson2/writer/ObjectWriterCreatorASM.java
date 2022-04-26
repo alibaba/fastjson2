@@ -241,8 +241,11 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
                             , writeUsingWriter
                     );
 
-                    fieldWriterMap.putIfAbsent(fieldName, fieldWriter);
+                    FieldWriter origin = fieldWriterMap.putIfAbsent(fieldName, fieldWriter);
 
+                    if (origin != null && origin.compareTo(fieldWriter) > 0) {
+                        fieldWriterMap.put(fieldName, fieldWriter);
+                    }
                 });
             }
             fieldWriters = new ArrayList<>(fieldWriterMap.values());
@@ -1457,6 +1460,8 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             WRITE_NULL_METHOD = "writeNumberNull";
         } else if (fieldClass == Boolean.class) {
             WRITE_NULL_METHOD = "writeBooleanNull";
+        } else if (fieldClass == String.class) {
+            WRITE_NULL_METHOD = "writeStringNull";
         } else {
             WRITE_NULL_METHOD = "writeNull";
         }
@@ -2262,7 +2267,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         // jw.writeNulll
         mw.visitLabel(writeNullValue_);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeNull", "()V", false);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeStringNull", "()V", false);
 
         mw.visitLabel(endIfNull_);
     }

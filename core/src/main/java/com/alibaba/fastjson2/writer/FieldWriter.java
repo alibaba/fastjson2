@@ -61,10 +61,10 @@ public interface FieldWriter<T> extends Comparable {
 
     @Override
     default int compareTo(Object o) {
-        FieldWriter fw = (FieldWriter) o;
+        FieldWriter otherFieldWriter = (FieldWriter) o;
 
         int ordinal0 = this.ordinal();
-        int ordinal1 = fw.ordinal();
+        int ordinal1 = otherFieldWriter.ordinal();
         if (ordinal0 < ordinal1) {
             return -1;
         }
@@ -72,9 +72,19 @@ public interface FieldWriter<T> extends Comparable {
             return 1;
         }
 
-        int cmp = this.getFieldName().compareTo(fw.getFieldName());
+        int cmp = this.getFieldName().compareTo(otherFieldWriter.getFieldName());
         if (cmp != 0) {
             return cmp;
+        }
+
+        Class otherFieldClass = otherFieldWriter.getFieldClass();
+        Class thisFieldClass = this.getFieldClass();
+        if (thisFieldClass != otherFieldClass && thisFieldClass != null && otherFieldClass != null) {
+            if (thisFieldClass.isAssignableFrom(otherFieldClass)) {
+                return 1;
+            } else if (otherFieldClass.isAssignableFrom(thisFieldClass)) {
+                return -1;
+            }
         }
 
         return cmp;
