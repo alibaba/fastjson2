@@ -989,6 +989,8 @@ final class JSONReaderStr extends JSONReader {
         }
 
         if (ch == ',') {
+            comma = true;
+
             if (offset >= end) {
                 ch = EOI;
                 return;
@@ -1320,11 +1322,16 @@ final class JSONReaderStr extends JSONReader {
         switch (ch) {
             case '[': {
                 next();
-                for (; ; ) {
+                for (int i = 0; ; ++i) {
                     if (ch == ']') {
                         next();
                         break;
                     }
+
+                    if (i != 0 && !comma) {
+                        throw new JSONValidException("offset " + this.offset);
+                    }
+                    comma = false;
                     skipValue();
                 }
                 break;
@@ -1391,6 +1398,8 @@ final class JSONReaderStr extends JSONReader {
         }
 
         if (ch == ',') {
+            comma = true;
+
             if (offset >= length) {
                 ch = EOI;
                 return;
