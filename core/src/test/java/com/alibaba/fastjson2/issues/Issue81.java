@@ -16,7 +16,7 @@ public class Issue81 {
         assertTrue(JSON.isValid(jsonObjectStr));
         assertFalse(JSON.isValidArray(jsonObjectStr));
         assertTrue(JSON.isValidArray(jsonArrayStr));
-        assertFalse(JSON.isValid(value));
+        assertTrue(JSON.isValid(value));
         assertFalse(JSON.isValidArray(value));
     }
 }

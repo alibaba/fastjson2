@@ -1417,7 +1417,7 @@ final class JSONReaderUTF16 extends JSONReader {
             case 't':
             case 'f':
             case 'n':
-                for (; ; ) {
+                for (; offset < end; ) {
                     ch = chars[offset++];
                     if (ch == '}' || ch == ']') {
                         break;
