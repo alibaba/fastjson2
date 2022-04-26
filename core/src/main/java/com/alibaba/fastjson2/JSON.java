@@ -599,7 +599,6 @@ public interface JSON {
         if (text == null || text.length() == 0) {
             return false;
         }
-        text = text.trim();
         if(!text.startsWith("{") || !text.endsWith("}")){
             return false;
         }
@@ -622,7 +621,6 @@ public interface JSON {
         if (text == null || text.length() == 0) {
             return false;
         }
-        text = text.trim();
         if(!text.startsWith("[") || !text.endsWith("]")){
             return false;
         }
