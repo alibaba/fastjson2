@@ -1783,7 +1783,7 @@ class JSONReaderUTF8 extends JSONReader {
             case 't':
             case 'f':
             case 'n':
-                for (; ; ) {
+                for (; offset < end; ) {
                     ch = (char) bytes[offset++];
                     if (ch == '}' || ch == ']') {
                         break;
