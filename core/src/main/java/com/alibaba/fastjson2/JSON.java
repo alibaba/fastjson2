@@ -599,6 +599,9 @@ public interface JSON {
         if (text == null || text.length() == 0) {
             return false;
         }
+        if(!text.startsWith("{") & !text.startsWith("[")){
+            return false;
+        }
         JSONReader jsonReader = JSONReader.of(text);
         try {
             jsonReader.skipValue();
@@ -616,6 +619,9 @@ public interface JSON {
      */
     static boolean isValidArray(String text) {
         if (text == null || text.length() == 0) {
+            return false;
+        }
+        if(!text.startsWith("[")){
             return false;
         }
         JSONReader jsonReader = JSONReader.of(text);
