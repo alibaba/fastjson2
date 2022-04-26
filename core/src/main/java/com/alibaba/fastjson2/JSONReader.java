@@ -47,6 +47,7 @@ public abstract class JSONReader implements Closeable {
 
     protected int offset;
     protected char ch;
+    protected boolean comma;
 
     protected boolean nameEscape = false;
     protected boolean valueEscape = false;
