@@ -224,7 +224,7 @@ final class ObjectReader6<T> extends ObjectReaderBean<T> {
         Object object = defaultCreator.get();
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfMatch('}')) {
-                //jsonReader.next();
+                jsonReader.next();
                 break;
             }
 
