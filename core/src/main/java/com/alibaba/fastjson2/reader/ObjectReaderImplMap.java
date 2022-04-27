@@ -411,7 +411,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
                     value = null;
                     break;
                 default:
-                    throw new JSONException("TODO : " + jsonReader.current());
+                    throw new JSONException("error, offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
             }
             object.put(name, value);
         }
