@@ -204,7 +204,7 @@
                                     exports com.alibaba.fastjson2.codegen;
                                     exports com.alibaba.fastjson2.filter;
                                     exports com.alibaba.fastjson2.function;
-                                    exports com.alibaba.fastjson2.modules;
+                                    exports com.alibaba.fastjson2.support.money;
                                     exports com.alibaba.fastjson2.reader;
                                     exports com.alibaba.fastjson2.writer;
                                     exports com.alibaba.fastjson2.util;
