@@ -26,4 +26,6 @@ public @interface JSONType {
     boolean writeEnumAsJavaBean() default false;
 
     String[] ignores() default {};
+
+    String[] includes() default {};
 }
