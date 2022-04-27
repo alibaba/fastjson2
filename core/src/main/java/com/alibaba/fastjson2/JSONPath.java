@@ -528,6 +528,18 @@ public abstract class JSONPath {
                             jsonReader.next();
                             segments.add(parseFilter(jsonReader));
                             break;
+                        case 'r':
+                            String fieldName = jsonReader.readFieldNameUnquote();
+                            if (fieldName.equals("randomIndex")) {
+                                if (!jsonReader.nextIfMatch('(')
+                                        || !jsonReader.nextIfMatch(')')
+                                        || !jsonReader.nextIfMatch(']')) {
+                                    throw new JSONException("not support : " + fieldName);
+                                }
+                                segments.add(RandomIndexSegment.INSTANCE);
+                                break;
+                            }
+                            throw new JSONException("not support : " + fieldName);
                         default:
                             throw new JSONException("TODO : " + jsonReader.current());
                     }
@@ -4194,6 +4206,50 @@ public abstract class JSONPath {
                 str = new String(bytes, StandardCharsets.US_ASCII);
             }
             return str;
+        }
+    }
+
+    static final class RandomIndexSegment extends Segment {
+        public static final RandomIndexSegment INSTANCE = new RandomIndexSegment();
+
+        Random random = new Random();
+
+        @Override
+        public void accept(JSONReader jsonReader, Context ctx) {
+            throw new JSONException("not support");
+        }
+
+        @Override
+        public void eval(Context ctx) {
+            Object object = ctx.parent == null
+                    ? ctx.root
+                    : ctx.parent.value;
+
+            if (object instanceof java.util.List) {
+                List list = (List) object;
+                if (list.isEmpty()) {
+                    return;
+                }
+
+                int randomIndex = Math.abs(random.nextInt()) % list.size();
+                ctx.value = list.get(randomIndex);
+                ctx.eval = true;
+                return;
+            }
+
+            if (object instanceof Object[]) {
+                Object[] array = (Object[]) object;
+                if (array.length == 0) {
+                    return;
+                }
+
+                int randomIndex = random.nextInt() % array.length;
+                ctx.value = array[randomIndex];
+                ctx.eval = true;
+                return;
+            }
+
+            throw new JSONException("TODO");
         }
     }
 
