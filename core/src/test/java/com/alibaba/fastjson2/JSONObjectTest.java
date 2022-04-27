@@ -146,6 +146,14 @@ public class JSONObjectTest {
     }
 
     @Test
+    public void test_clone() {
+        JSONObject object = new JSONObject();
+        object.put("val", BigDecimal.valueOf(123));
+        JSONObject clone = (JSONObject) object.clone();
+        assertEquals(object, clone);
+    }
+
+    @Test
     public void test_null() {
         JSONObject object = new JSONObject();
         object.put("val", null);
