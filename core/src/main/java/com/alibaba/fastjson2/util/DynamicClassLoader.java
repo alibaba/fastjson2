@@ -117,9 +117,8 @@ public class DynamicClassLoader extends ClassLoader {
     }
 
     public Class<?> defineClassPublic(String name, byte[] b, int off, int len) throws ClassFormatError {
-        Class<?> clazz = defineClass(name, b, off, len, DOMAIN);
 
-        return clazz;
+        return defineClass(name, b, off, len, DOMAIN);
     }
 
     public boolean isExternalClass(Class<?> clazz) {
