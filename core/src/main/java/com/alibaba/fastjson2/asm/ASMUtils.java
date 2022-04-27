@@ -55,7 +55,8 @@ public class ASMUtils {
         }
 
         String clsName = clazz.getName();
-        return clsName.replace('.', '/'); // 直接基于字符串替换，不使用正则替换
+        // 直接基于字符串替换，不使用正则替换
+        return clsName.replace('.', '/');
     }
 
     static final AtomicReference<char[]> descCacheRef = new AtomicReference<>();
@@ -131,9 +132,8 @@ public class ASMUtils {
             ClassReader reader = new ClassReader(is, false);
             TypeCollector visitor = new TypeCollector(name, types);
             reader.accept(visitor);
-            String[] parameterNames = visitor.getParameterNamesForMethod();
 
-            return parameterNames;
+            return visitor.getParameterNamesForMethod();
         } catch (IOException e) {
             return new String[0];
         } finally {
