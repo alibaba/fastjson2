@@ -276,7 +276,7 @@ public class ObjectReaderProvider {
     }
 
     public ObjectReader getObjectReader(long hashCode) {
-        final Long hashCodeObj = new Long(hashCode);
+        final Long hashCodeObj = hashCode;
 
         ObjectReader objectReader = null;
         ClassLoader tcl = Thread.currentThread().getContextClassLoader();
@@ -341,7 +341,7 @@ public class ObjectReaderProvider {
         }
 
         boolean autoTypeSupport = (features & JSONReader.Feature.SupportAutoType.mask) != 0;
-        Class<?> clazz = null;
+        Class<?> clazz;
 
         final long BASIC = 0xcbf29ce484222325L;
         final long PRIME = 0x100000001b3L;
@@ -370,9 +370,7 @@ public class ObjectReaderProvider {
             }
         }
 
-        if (clazz == null) {
-            clazz = TypeUtils.getMapping(typeName);
-        }
+        clazz = TypeUtils.getMapping(typeName);
 
         if (clazz != null) {
             if (expectClass != null
@@ -405,11 +403,9 @@ public class ObjectReaderProvider {
 
                 // white list
                 if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
-                    if (clazz == null) {
-                        clazz = loadClass(typeName);
-                    }
+                    clazz = loadClass(typeName);
 
-                    if (expectClass != null && expectClass.isAssignableFrom(clazz)) {
+                    if (clazz != null && expectClass != null && expectClass.isAssignableFrom(clazz)) {
                         throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
                     }
 
@@ -418,7 +414,7 @@ public class ObjectReaderProvider {
             }
         }
 
-        if (clazz == null && autoTypeSupport) {
+        if (autoTypeSupport) {
             clazz = loadClass(typeName);
         }
 
@@ -491,7 +487,8 @@ public class ObjectReaderProvider {
                 if (bound instanceof Class) {
                     ObjectReader boundObjectReader = getObjectReader(bound, fieldBased);
                     if (boundObjectReader != null) {
-                        ObjectReader previous = fieldBased ? cacheFieldBased.putIfAbsent(objectType, boundObjectReader) : cache.putIfAbsent(objectType, boundObjectReader);
+                        ObjectReader previous = fieldBased ? cacheFieldBased.putIfAbsent(objectType, boundObjectReader)
+                                : cache.putIfAbsent(objectType, boundObjectReader);
                         if (previous != null) {
                             boundObjectReader = previous;
                         }
@@ -532,10 +529,8 @@ public class ObjectReaderProvider {
 
         Class<?> objectClass = TypeUtils.getMapping(objectType);
 
-        if (objectReader == null) {
-            objectReader = getCreator()
-                    .createObjectReader(objectClass, objectType, fieldBased, modules);
-        }
+        objectReader = getCreator()
+                .createObjectReader(objectClass, objectType, fieldBased, modules);
 
         ObjectReader previous = fieldBased
                 ? cacheFieldBased.putIfAbsent(objectType, objectReader)

@@ -14,16 +14,16 @@ import java.util.UUID;
 import static com.alibaba.fastjson2.JSONFactory.UUIDUtils.*;
 
 final class JSONReaderUTF16 extends JSONReader {
-    protected final String str;
-    protected final char[] chars;
-    protected final int length;
-    protected final int end;
+    private final String str;
+    private final char[] chars;
+    private final int length;
+    private final int end;
 
-    protected int nameBegin;
-    protected int nameEnd;
-    protected int nameLength;
+    private int nameBegin;
+    private int nameEnd;
+    private int nameLength;
 
-    protected JSONReaderUTF16(Context ctx, byte[] bytes, int offset, int length) {
+    JSONReaderUTF16(Context ctx, byte[] bytes, int offset, int length) {
         super(ctx);
 
         this.str = null;
@@ -69,7 +69,7 @@ final class JSONReaderUTF16 extends JSONReader {
         }
     }
 
-    protected JSONReaderUTF16(Context ctx, String str, char[] chars, int offset, int length) {
+    JSONReaderUTF16(Context ctx, String str, char[] chars, int offset, int length) {
         super(ctx);
 
         this.str = str;
@@ -312,7 +312,7 @@ final class JSONReaderUTF16 extends JSONReader {
                 }
 
                 this.offset = offset + 1;
-                this.ch = (char) c;
+                this.ch = c;
                 break;
             }
 
@@ -602,7 +602,6 @@ final class JSONReaderUTF16 extends JSONReader {
             }
 
             if (c == '"') {
-                ;
                 offset++;
                 c = chars[offset];
 
@@ -654,14 +653,12 @@ final class JSONReaderUTF16 extends JSONReader {
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                int intValue10 = intValue * 10 + (ch - '0');
-                if (intValue10 < intValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    intValue = intValue10;
-                }
+            int intValue10 = intValue * 10 + (ch - '0');
+            if (intValue10 < intValue) {
+                overflow = true;
+                break;
+            } else {
+                intValue = intValue10;
             }
             if (offset == end) {
                 ch = EOI;
@@ -694,7 +691,7 @@ final class JSONReaderUTF16 extends JSONReader {
                 try {
                     return bigInteger.intValueExact();
                 } catch (ArithmeticException ex) {
-                    throw new JSONException("int overflow, value " + bigInteger.toString());
+                    throw new JSONException("int overflow, value " + bigInteger);
                 }
             } else {
                 return getInt32Value();
@@ -753,14 +750,12 @@ final class JSONReaderUTF16 extends JSONReader {
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                int intValue10 = intValue * 10 + (ch - '0');
-                if (intValue10 < intValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    intValue = intValue10;
-                }
+            int intValue10 = intValue * 10 + (ch - '0');
+            if (intValue10 < intValue) {
+                overflow = true;
+                break;
+            } else {
+                intValue = intValue10;
             }
             if (offset == end) {
                 ch = EOI;
@@ -847,14 +842,12 @@ final class JSONReaderUTF16 extends JSONReader {
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
-                if (intValue10 < longValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    longValue = intValue10;
-                }
+            long intValue10 = longValue * 10 + (ch - '0');
+            if (intValue10 < longValue) {
+                overflow = true;
+                break;
+            } else {
+                longValue = intValue10;
             }
             if (offset >= end) {
                 ch = EOI;
@@ -888,7 +881,7 @@ final class JSONReaderUTF16 extends JSONReader {
                 try {
                     return bigInteger.longValueExact();
                 } catch (ArithmeticException ex) {
-                    throw new JSONException("long overflow, value " + bigInteger.toString());
+                    throw new JSONException("long overflow, value " + bigInteger);
                 }
             } else {
                 return getInt64Value();
@@ -947,14 +940,12 @@ final class JSONReaderUTF16 extends JSONReader {
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
-                if (intValue10 < longValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    longValue = intValue10;
-                }
+            long intValue10 = longValue * 10 + (ch - '0');
+            if (intValue10 < longValue) {
+                overflow = true;
+                break;
+            } else {
+                longValue = intValue10;
             }
 
             if (offset == end) {
@@ -1017,7 +1008,7 @@ final class JSONReaderUTF16 extends JSONReader {
         return negative ? -longValue : longValue;
     }
 
-    protected void skipString() {
+    private void skipString() {
         char quote = this.ch;
         ch = chars[offset++];
         _for:
@@ -1106,7 +1097,7 @@ final class JSONReaderUTF16 extends JSONReader {
         return stringValue = new String(chars);
     }
 
-    protected void readString0() {
+    private void readString0() {
         char quote = this.ch;
         int offset = this.offset;
         int start = offset;
@@ -1770,7 +1761,7 @@ final class JSONReaderUTF16 extends JSONReader {
         }
 
         if (offset + 32 < chars.length && chars[offset + 32] == '"') {
-            long msb1 = parse4Nibbles(chars, offset + 0);
+            long msb1 = parse4Nibbles(chars, offset);
             long msb2 = parse4Nibbles(chars, offset + 4);
             long msb3 = parse4Nibbles(chars, offset + 8);
             long msb4 = parse4Nibbles(chars, offset + 12);
@@ -1791,7 +1782,7 @@ final class JSONReaderUTF16 extends JSONReader {
             char ch3 = chars[offset + 18];
             char ch4 = chars[offset + 23];
             if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
-                long msb1 = parse4Nibbles(chars, offset + 0);
+                long msb1 = parse4Nibbles(chars, offset);
                 long msb2 = parse4Nibbles(chars, offset + 4);
                 long msb3 = parse4Nibbles(chars, offset + 9);
                 long msb4 = parse4Nibbles(chars, offset + 14);
@@ -1836,7 +1827,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("date only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -1948,7 +1939,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("date only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -2084,7 +2075,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("date only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -2220,7 +2211,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("localTime only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -2259,11 +2250,11 @@ final class JSONReaderUTF16 extends JSONReader {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
@@ -2274,7 +2265,7 @@ final class JSONReaderUTF16 extends JSONReader {
             next();
         }
 
-        return LocalTime.of(hour, minute, seccond);
+        return LocalTime.of(hour, minute, second);
     }
 
     @Override
@@ -2283,7 +2274,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("localDate only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -2364,7 +2355,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("localDate only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -2469,7 +2460,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("localDate only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -2623,7 +2614,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("localDate only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -2712,7 +2703,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("illeal localdatetime string : " + readString());
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -3218,9 +3209,9 @@ final class JSONReaderUTF16 extends JSONReader {
                     }
                 }
                 if (zoneIdStr != null) {
-                    if (zoneIdStr.equals("000")) {
+                    if ("000".equals(zoneIdStr)) {
                         zoneId = UTC;
-                    } else if (zoneIdStr.equals("+08:00[Asia/Shanghai]") || zoneIdStr.equals("Asia/Shanghai")) {
+                    } else if ("+08:00[Asia/Shanghai]".equals(zoneIdStr) || "Asia/Shanghai".equals(zoneIdStr)) {
                         zoneId = SHANGHAI;
                     } else {
                         zoneId = ZoneId.of(zoneIdStr);
@@ -3250,7 +3241,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("date only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -3409,10 +3400,10 @@ final class JSONReaderUTF16 extends JSONReader {
         }
 
         if (len < 21 || len > 29) {
-            throw new JSONException("illeal localdatetime string : " + readString());
+            throw new JSONException("illegal localDatetime string : " + readString());
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -3652,8 +3643,7 @@ final class JSONReaderUTF16 extends JSONReader {
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second, nanos);
-        return ldt;
+        return LocalDateTime.of(year, month, dom, hour, minute, second, nanos);
     }
 
     @Override
@@ -3662,7 +3652,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("localTime only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -3706,11 +3696,11 @@ final class JSONReaderUTF16 extends JSONReader {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
@@ -3732,7 +3722,7 @@ final class JSONReaderUTF16 extends JSONReader {
             next();
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return LocalTime.of(hour, minute, second, millis);
     }
 
     @Override
@@ -3741,7 +3731,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("localTime only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -3786,11 +3776,11 @@ final class JSONReaderUTF16 extends JSONReader {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
@@ -3812,7 +3802,7 @@ final class JSONReaderUTF16 extends JSONReader {
             next();
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return LocalTime.of(hour, minute, second, millis);
     }
 
     @Override
@@ -3821,7 +3811,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("localTime only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -3867,11 +3857,11 @@ final class JSONReaderUTF16 extends JSONReader {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
@@ -3893,7 +3883,7 @@ final class JSONReaderUTF16 extends JSONReader {
             next();
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return LocalTime.of(hour, minute, second, millis);
     }
 
     @Override
@@ -3902,7 +3892,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("localTime only support string input");
         }
 
-        char c0 = chars[offset + 0];
+        char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
         char c3 = chars[offset + 3];
@@ -3960,11 +3950,11 @@ final class JSONReaderUTF16 extends JSONReader {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
@@ -3999,7 +3989,7 @@ final class JSONReaderUTF16 extends JSONReader {
             next();
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return LocalTime.of(hour, minute, second, millis);
     }
 
     @Override
@@ -4009,7 +3999,7 @@ final class JSONReaderUTF16 extends JSONReader {
         }
 
         int offset = this.offset;
-        for (int i = 0; ; ++i) {
+        for (; ; ) {
             char c = chars[offset];
             if (c == '/') {
                 break;
