@@ -81,8 +81,24 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 }
 
                 if (mixInSource != null) {
-                    jsonType = (JSONType) mixInSource.getAnnotation(JSONType.class);
                     beanInfo.mixIn = true;
+
+                    Annotation[] mixInAnnotations = mixInSource.getAnnotations();
+                    for (Annotation annotation : mixInAnnotations) {
+                        Class<? extends Annotation> annotationType = annotation.annotationType();
+                        if (annotationType == JSONType.class) {
+                            jsonType = (JSONType) annotation;
+                            continue;
+                        }
+                        String annotationTypeName = annotationType.getName();
+                        switch (annotationTypeName) {
+                            case "com.alibaba.fastjson.annotation.JSONType":
+                                jsonType1x = annotation;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 }
             }
 
@@ -112,6 +128,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 String[] ignores = jsonType.ignores();
                 if (ignores.length > 0) {
                     beanInfo.ignores = ignores;
+                }
+
+                String[] includes = jsonType.includes();
+                if (includes.length > 0) {
+                    beanInfo.includes = includes;
                 }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
@@ -496,6 +517,13 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     String[] fields = (String[]) result;
                     if (fields.length != 0) {
                         beanInfo.ignores = fields;
+                    }
+                    break;
+                }
+                case "includes": {
+                    String[] fields = (String[]) result;
+                    if (fields.length != 0) {
+                        beanInfo.includes = fields;
                     }
                     break;
                 }

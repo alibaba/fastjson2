@@ -1,12 +1,16 @@
-package com.alibaba.json.bvt.issue_3400;
+package com.alibaba.fastjson.issue_3400;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONCreator;
 import com.alibaba.fastjson.annotation.JSONType;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.FileSystemResource;
 
-public class Issue3436 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3436 {
+    @Test
     public void test_for_issue() throws Exception {
         com.alibaba.fastjson2.JSON.mixIn(FileSystemResource.class, FileSystemResourceMixedIn.class);
 

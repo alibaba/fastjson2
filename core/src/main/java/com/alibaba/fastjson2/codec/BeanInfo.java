@@ -23,6 +23,7 @@ public class BeanInfo {
     public String namingStrategy;
     public String[] ignores;
     public String[] orders;
+    public String[] includes;
 
     public boolean mixIn;
 }
