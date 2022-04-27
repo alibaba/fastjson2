@@ -46,10 +46,8 @@ public abstract class BeanUtils {
     public static Field getDeclaredField(Class objectClass, String fieldName) {
         Map<String, Field> fieldMap = fieldMapCache.get(objectClass);
         if (fieldMap == null) {
-            Map map = new HashMap();
-            declaredFields(objectClass, field -> {
-                map.put(field.getName(), field);
-            });
+            Map<String, Field> map = new HashMap<>();
+            declaredFields(objectClass, field -> map.put(field.getName(), field));
 
             fieldMapCache.putIfAbsent(objectClass, map);
             fieldMap = fieldMapCache.get(objectClass);
@@ -68,9 +66,8 @@ public abstract class BeanUtils {
         if (fields == null) {
             Field[] declaredFields = objectClass.getDeclaredFields();
 
-            boolean allMatch = false;
-            for (int i = 0; i < declaredFields.length; i++) {
-                Field field = declaredFields[i];
+            boolean allMatch = true;
+            for (Field field : declaredFields) {
                 int modifiers = field.getModifiers();
                 if (Modifier.isStatic(modifiers)) {
                     allMatch = false;
@@ -81,16 +78,15 @@ public abstract class BeanUtils {
             if (allMatch) {
                 fields = declaredFields;
             } else {
-                List list = new ArrayList(declaredFields.length);
-                for (int i = 0; i < declaredFields.length; i++) {
-                    Field field = declaredFields[i];
+                List<Field> list = new ArrayList<>(declaredFields.length);
+                for (Field field : declaredFields) {
                     int modifiers = field.getModifiers();
                     if (Modifier.isStatic(modifiers)) {
                         continue;
                     }
                     list.add(field);
                 }
-                fields = (Field[]) list.toArray(new Field[list.size()]);
+                fields = list.toArray(new Field[list.size()]);
             }
 
             fieldCache.putIfAbsent(objectClass, fields);
@@ -431,7 +427,7 @@ public abstract class BeanUtils {
                 nameMatch = methodName.startsWith("is") && methodNameLength > 2;
                 if (nameMatch) {
                     char firstChar = methodName.charAt(2);
-                    if (nameMatch && firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 3) {
+                    if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 3) {
                         nameMatch = false;
                     }
                 }
@@ -439,7 +435,7 @@ public abstract class BeanUtils {
                 nameMatch = methodName.startsWith("get") && methodNameLength > 3;
                 if (nameMatch) {
                     char firstChar = methodName.charAt(3);
-                    if (nameMatch && firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 4) {
+                    if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 4) {
                         nameMatch = false;
                     }
                 }
@@ -887,9 +883,7 @@ public abstract class BeanUtils {
                         break;
                     }
                 }
-                toResolve = original;
                 break;
-
             } else {
                 break;
             }
