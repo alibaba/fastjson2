@@ -1448,7 +1448,7 @@ final class JSONReaderUTF16 extends JSONReader {
                 }
                 break;
             default:
-                throw new JSONException("TODO : " + ch);
+                throw new JSONException("error, offset " + offset + ", char " + ch);
         }
 
         if (ch == ',') {

@@ -1,10 +1,14 @@
-package com.alibaba.json.bvt.issue_3400;
+package com.alibaba.fastjson.issue_3400;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue_20201016_01 extends TestCase {
+import static org.junit.jupiter.api.Assertions.*;
+
+public class Issue_20201016_01 {
+    @Test
     public void testToString() {
         UserConfig user = new UserConfig();
         user.setAccount("account");
@@ -17,14 +21,16 @@ public class Issue_20201016_01 extends TestCase {
         String s = JSON.toJSONString(config, SerializerFeature.WriteMapNullValue,
                 SerializerFeature.QuoteFieldNames, SerializerFeature.WriteNullListAsEmpty);
 
-        System.out.println(s);
+        assertEquals("{\"agent\":null,\"creator\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"},\"owner\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"}}", s);
     }
 
-
+    @Test
     public void testFastJson() {
         String s = "{\"agent\":null,\"creator\":{\"account\":\"account\",\"name\":\"name\",\"workid\":null},\"owner\":{\"$ref\":\"$.creator\"}}";
 
-        System.out.println( JSON.parseObject(s, Config.class));
+        Config config = JSON.parseObject(s, Config.class);
+        assertNotNull(config.creator);
+        assertNull(config.agent);
     }
 
     public static class Config {
