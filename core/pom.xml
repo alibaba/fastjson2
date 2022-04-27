@@ -181,6 +181,61 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.moditect</groupId>
+                <artifactId>moditect-maven-plugin</artifactId>
+                <version>1.0.0.RC2</version>
+                <executions>
+                    <execution>
+                        <id>add-module-infos</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>add-module-info</goal>
+                        </goals>
+                        <configuration>
+                            <jvmVersion>9</jvmVersion>
+                            <module>
+                                <moduleInfoSource>
+                                    module com.alibaba.fastjson2 {
+
+                                    exports com.alibaba.fastjson2;
+                                    exports com.alibaba.fastjson2.codec;
+                                    exports com.alibaba.fastjson2.codegen;
+                                    exports com.alibaba.fastjson2.filter;
+                                    exports com.alibaba.fastjson2.function;
+                                    exports com.alibaba.fastjson2.modules;
+                                    exports com.alibaba.fastjson2.reader;
+                                    exports com.alibaba.fastjson2.writer;
+                                    exports com.alibaba.fastjson2.util;
+
+                                    // optional dependency on java.sql
+                                    requires static java.sql;
+
+                                    // optional dependency on javax.money.Monetary
+                                    requires static java.money;
+
+                                    // optional dependency on jdk.unsupported for JDK's sun.misc.Unsafe
+                                    requires static jdk.unsupported;
+
+                                    // optional dependency on java.compiler for javax.tools.*
+                                    requires static java.compiler;
+
+                                    // optional dependency on java.management for java.lang.management.ManagementFactory
+                                    requires static java.management;
+
+                                    // optional dependency on moneta for org.javamoney.moneta.spi.DefaultNumberValue
+                                    requires static moneta;
+
+                                    // optional dependency on com.google.common for com.google.common.collect.*
+                                    requires static com.google.common;
+                                    }
+                                </moduleInfoSource>
+                            </module>
+                            <overwriteExistingFiles>true</overwriteExistingFiles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -198,7 +253,9 @@
                     <plugin>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
-                            <excludePackageNames>*.internal:*.internal.*:com.alibaba.fastjson2.trove.*::com.alibaba.fastjson2.trove.*.*</excludePackageNames>
+                            <excludePackageNames>
+                                *.internal:*.internal.*:com.alibaba.fastjson2.trove.*::com.alibaba.fastjson2.trove.*.*
+                            </excludePackageNames>
                         </configuration>
                     </plugin>
                 </plugins>
