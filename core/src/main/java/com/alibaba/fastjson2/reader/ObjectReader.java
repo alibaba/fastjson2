@@ -293,6 +293,11 @@ public interface ObjectReader<T> {
             return readJSONBObject(jsonReader, features);
         }
 
+        if (jsonReader.nextIfNull()) {
+            jsonReader.nextIfMatch(',');
+            return null;
+        }
+
         if (jsonReader.isArray() && jsonReader.isSupportBeanArray(getFeatures() | features)) {
             return readArrayMappingObject(jsonReader);
         }
