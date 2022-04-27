@@ -153,6 +153,11 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
             return readJSONBObject(jsonReader, features);
         }
 
+        if (jsonReader.nextIfNull()) {
+            jsonReader.nextIfMatch(',');
+            return null;
+        }
+
         Object object;
         if (jsonReader.isArray()
                 && jsonReader.isSupportBeanArray(this.features | features)) {
