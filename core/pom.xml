@@ -199,6 +199,7 @@
                                     module com.alibaba.fastjson2 {
 
                                     exports com.alibaba.fastjson2;
+                                    exports com.alibaba.fastjson2.annotation;
                                     exports com.alibaba.fastjson2.codec;
                                     exports com.alibaba.fastjson2.codegen;
                                     exports com.alibaba.fastjson2.filter;
