@@ -46,6 +46,7 @@ abstract class FieldReaderImpl<T>
         this.format = format;
     }
 
+    @Override
     public boolean isFieldClassSerializable() {
         return fieldClassSerializable;
     }

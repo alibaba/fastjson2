@@ -73,6 +73,7 @@ abstract class FieldWriterImpl<T> implements FieldWriter<T> {
         nameWithColonUTF16[nameWithColonUTF16.length - 1] = ':';
     }
 
+    @Override
     public boolean isFieldClassSerializable() {
         return fieldClassSerializable;
     }
