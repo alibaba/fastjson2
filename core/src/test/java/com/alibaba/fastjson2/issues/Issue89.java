@@ -2,13 +2,9 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
-
-import javax.swing.text.html.Option;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
