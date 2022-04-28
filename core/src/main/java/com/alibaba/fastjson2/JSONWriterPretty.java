@@ -130,7 +130,13 @@ final class JSONWriterPretty extends JSONWriter {
 
     @Override
     public void writeNameRaw(char[] chars) {
-        jsonWriter.writeNameRaw(chars);
+        if (jsonWriter.startObject) {
+            jsonWriter.startObject = false;
+        } else {
+            writeComma();
+        }
+
+        jsonWriter.writeRaw(chars);
     }
 
     @Override
@@ -140,7 +146,13 @@ final class JSONWriterPretty extends JSONWriter {
 
     @Override
     public void writeNameRaw(byte[] bytes) {
-        jsonWriter.writeNameRaw(bytes);
+        if (jsonWriter.startObject) {
+            jsonWriter.startObject = false;
+        } else {
+            writeComma();
+        }
+
+        jsonWriter.writeRaw(bytes);
     }
 
     @Override
@@ -172,6 +184,10 @@ final class JSONWriterPretty extends JSONWriter {
     @Override
     public void writeRaw(String str) {
         jsonWriter.writeRaw(str);
+    }
+
+    public byte[] getBytes() {
+        return jsonWriter.getBytes();
     }
 
     @Override

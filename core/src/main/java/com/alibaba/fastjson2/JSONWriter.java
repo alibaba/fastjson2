@@ -430,13 +430,22 @@ public abstract class JSONWriter implements Closeable {
     }
 
     public static JSONWriter ofUTF8(Feature... features) {
+        Context writeContext = createWriteContext(features);
+
+        JSONWriter jsonWriter;
         if (JDKUtils.JVM_VERSION >= 9) {
-            return new JSONWriterUTF8JDK9(
-                    JSONFactory.createWriteContext(features));
+            jsonWriter = new JSONWriterUTF8JDK9(
+                    writeContext);
         } else {
-            return new JSONWriterUTF8(
-                    JSONFactory.createWriteContext(features));
+            jsonWriter = new JSONWriterUTF8(
+                    writeContext);
         }
+
+        boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
+        if (pretty) {
+            jsonWriter = new JSONWriterPretty(jsonWriter);
+        }
+        return jsonWriter;
     }
 
     public void writeBinary(byte[] bytes) {
