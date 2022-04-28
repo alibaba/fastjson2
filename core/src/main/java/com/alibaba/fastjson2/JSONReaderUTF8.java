@@ -45,7 +45,7 @@ class JSONReaderUTF8 extends JSONReader {
             return false;
         }
 
-        if (offset >= length) {
+        if (offset >= end) {
             ch = EOI;
             return true;
         }
@@ -53,7 +53,7 @@ class JSONReaderUTF8 extends JSONReader {
         int c = bytes[offset];
         while (c <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
-            if (offset >= length) {
+            if (offset >= end) {
                 ch = EOI;
                 return true;
             }
@@ -103,7 +103,7 @@ class JSONReaderUTF8 extends JSONReader {
 
     @Override
     public void next() {
-        if (offset >= length) {
+        if (offset >= end) {
             ch = EOI;
             return;
         }
@@ -111,7 +111,7 @@ class JSONReaderUTF8 extends JSONReader {
         int c = bytes[offset];
         while (c <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
-            if (offset >= length) {
+            if (offset >= end) {
                 ch = EOI;
                 return;
             }
@@ -1820,7 +1820,7 @@ class JSONReaderUTF8 extends JSONReader {
         if (ch == ',') {
             comma = true;
 
-            if (offset >= length) {
+            if (offset >= end) {
                 ch = EOI;
                 return;
             }
@@ -1828,7 +1828,7 @@ class JSONReaderUTF8 extends JSONReader {
             ch = (char) bytes[offset];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 offset++;
-                if (offset >= length) {
+                if (offset >= end) {
                     ch = EOI;
                     return;
                 }
@@ -1994,7 +1994,7 @@ class JSONReaderUTF8 extends JSONReader {
         if (ch == ',') {
             comma = true;
 
-            if (offset >= length) {
+            if (offset >= end) {
                 this.ch = EOI;
                 return;
             }
@@ -2002,7 +2002,7 @@ class JSONReaderUTF8 extends JSONReader {
             ch = bytes[offset];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 offset++;
-                if (offset >= length) {
+                if (offset >= end) {
                     this.ch = EOI;
                     return;
                 }

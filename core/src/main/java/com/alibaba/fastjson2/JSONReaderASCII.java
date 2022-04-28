@@ -21,7 +21,7 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
 
     @Override
     public void next() {
-        if (offset >= length) {
+        if (offset >= end) {
             ch = EOI;
             return;
         }
@@ -29,7 +29,7 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
         ch = (char) (bytes[offset] & 0xFF);
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             offset++;
-            if (offset >= length) {
+            if (offset >= end) {
                 ch = EOI;
                 return;
             }
@@ -44,7 +44,7 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
             return false;
         }
 
-        if (offset >= length) {
+        if (offset >= end) {
             this.ch = EOI;
             return true;
         }
@@ -52,7 +52,7 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
         this.ch = (char) (bytes[offset] & 0xFF);
         while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
             offset++;
-            if (offset >= length) {
+            if (offset >= end) {
                 this.ch = EOI;
                 return true;
             }

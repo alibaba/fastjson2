@@ -8,11 +8,16 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.function.Consumer;
 
 public interface JSON {
     /**
@@ -741,5 +746,105 @@ public interface JSON {
 
     static boolean register(Type type, ObjectWriter objectReader) {
         return JSONFactory.defaultObjectWriterProvider.register(type, objectReader);
+    }
+
+    static void parseObject(InputStream input, Charset charset, char delimiter, Type type, Consumer consumer) {
+        ObjectReader objectReader = null;
+
+        int identityHashCode = System.identityHashCode(Thread.currentThread());
+        final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> byteUpdater;
+        switch (identityHashCode & 3) {
+            case 0:
+                byteUpdater = JSONFactory.BYTES0_UPDATER;
+                break;
+            case 1:
+                byteUpdater = JSONFactory.BYTES1_UPDATER;
+                break;
+            case 2:
+                byteUpdater = JSONFactory.BYTES2_UPDATER;
+                break;
+            default:
+                byteUpdater = JSONFactory.BYTES3_UPDATER;
+                break;
+        }
+
+        byte[] bytes = byteUpdater.getAndSet(JSONFactory.CACHE, null);
+        if (bytes == null) {
+            bytes = new byte[8192];
+        }
+
+        int limit = 0, start = 0, end = -1;
+        try {
+            for (; ; ) {
+                int n = input.read(bytes, limit, bytes.length - limit);
+                if (n == -1) {
+                    break;
+                }
+
+                for (int i = 0; i < n; ++i) {
+                    int j = limit + i;
+                    if (bytes[j] == delimiter) {
+                        end = j;
+
+                        JSONReader jsonReader = JSONReader.of(bytes, start, end - start, charset);
+                        if (objectReader == null) {
+                            objectReader = jsonReader.getObjectReader(type);
+                        }
+
+                        Object object = objectReader.readObject(jsonReader);
+                        consumer.accept(object);
+                        start = end + 1;
+                    }
+                }
+                limit += n;
+
+                if (limit == bytes.length) {
+                    bytes = Arrays.copyOf(bytes, bytes.length + 8192);
+                }
+            }
+        } catch (IOException ioe) {
+            throw new JSONException("read error", ioe);
+        }
+    }
+
+    static void parseObject(Reader input, char delimiter, Type type, Consumer consumer) {
+        ObjectReader objectReader = null;
+        char[] chars = JSONFactory.CHARS_UPDATER.getAndSet(JSONFactory.CACHE, null);
+        if (chars == null) {
+            chars = new char[8192];
+        }
+
+        int limit = 0, start = 0, end = -1;
+        try {
+            for (; ; ) {
+                int n = input.read(chars, limit, chars.length - limit);
+                if (n == -1) {
+                    break;
+                }
+
+                for (int i = 0; i < n; ++i) {
+                    int j = limit + i;
+                    if (chars[j] == delimiter) {
+                        end = j;
+
+                        JSONReader jsonReader = JSONReader.of(chars, start, end - start);
+                        if (objectReader == null) {
+                            objectReader = jsonReader.getObjectReader(type);
+                        }
+
+                        Object object = objectReader.readObject(jsonReader);
+                        consumer.accept(object);
+                        start = end + 1;
+                    }
+                }
+                limit += n;
+
+                if (limit == chars.length) {
+                    chars = Arrays.copyOf(chars, chars.length + 8192);
+                }
+            }
+        } catch (IOException ioe) {
+            throw new JSONException("read error", ioe);
+        }
     }
 }

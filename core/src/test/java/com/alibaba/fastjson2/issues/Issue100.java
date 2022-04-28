@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.primitves.Int64Field_1;
 import com.alibaba.fastjson2_vo.Long1;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue100 {
@@ -27,6 +29,26 @@ public class Issue100 {
         String tmp = json.toString();
         JSONObject json2 = JSON.parseObject(tmp);
         assertEquals("{\"t1\":-3234567890}",json2.toString());
+    }
+
+    @Test
+    public void test_long() {
+        JSONObject json = new JSONObject();
+        json.put("t1", new BigDecimal("10223372036854775808"));
+
+        String tmp = json.toString();
+        JSONObject json2 = JSON.parseObject(tmp);
+        assertEquals("{\"t1\":10223372036854775808}",json2.toString());
+    }
+
+    @Test
+    public void test_long_neg() {
+        JSONObject json = new JSONObject();
+        json.put("t1", new BigDecimal("-10223372036854775808"));
+
+        String tmp = json.toString();
+        JSONObject json2 = JSON.parseObject(tmp);
+        assertEquals("{\"t1\":-10223372036854775808}",json2.toString());
     }
 
     @Test
