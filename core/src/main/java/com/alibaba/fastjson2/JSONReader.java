@@ -1244,7 +1244,17 @@ public abstract class JSONReader implements Closeable {
         switch (valueType) {
             case JSON_TYPE_INT: {
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    return negative ? -mag3 : mag3;
+                    if (negative) {
+                        if (mag3 < 0) {
+                            return -(mag3 & 0xFFFFFFFFL);
+                        }
+                        return -mag3;
+                    } else {
+                        if (mag3 < 0) {
+                            return mag3 & 0xFFFFFFFFL;
+                        }
+                        return mag3;
+                    }
                 }
                 int[] mag;
                 if (mag0 == 0) {
