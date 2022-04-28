@@ -5,6 +5,7 @@ public class JSONValidException extends JSONException {
         super(message);
     }
 
+    @Override
     public synchronized Throwable fillInStackTrace() {
         // fast valid
         return null;

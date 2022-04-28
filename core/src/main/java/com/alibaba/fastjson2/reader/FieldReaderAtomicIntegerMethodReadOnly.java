@@ -14,6 +14,7 @@ class FieldReaderAtomicIntegerMethodReadOnly<T> extends FieldReaderImpl<T> imple
         this.method = method;
     }
 
+    @Override
     public Method getMethod() {
         return method;
     }

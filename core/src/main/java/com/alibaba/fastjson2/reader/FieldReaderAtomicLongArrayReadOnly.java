@@ -14,6 +14,7 @@ final class FieldReaderAtomicLongArrayReadOnly<T> extends FieldReaderImpl<T> {
         this.method = method;
     }
 
+    @Override
     public Method getMethod() {
         return method;
     }
