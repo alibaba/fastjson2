@@ -329,7 +329,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
     public Object readObject(JSONReader jsonReader, long features) {
         Class objectClass = jsonReader.getContext().getObjectClass();
         Map object;
-        if (mapType == null && objectClass != null && objectClass != Object.class) {
+        if ((mapType == null || mapType == JSONObject.class) && objectClass != null && objectClass != Object.class) {
             try {
                 object = (Map) objectClass.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {

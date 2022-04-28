@@ -1,11 +1,16 @@
-package com.alibaba.json.bvt.issue_1500;
+package com.alibaba.fastjson.issue_1500;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1513 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class Issue1513 {
+    @Test
     public void test_for_issue() throws Exception {
         {
             Model<Object> model = JSON.parseObject("{\"values\":[{\"id\":123}]}", new TypeReference<Model<Object>>(){});
