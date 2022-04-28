@@ -11,7 +11,7 @@ public class Issue1429 {
     @Test
     public void test_for_issue() throws Exception {
         String json = "[{\n" +
-                "            \"@type\": \"com.alibaba.fastjson.issue_1400.Issue1429$Student\",\n" +
+                "            \"@type\": \"com.alibaba.fastjson2.v1issues.issue_1400.Issue1429$Student\",\n" +
                 "            \"age\": 22,\n" +
                 "            \"id\": 1,\n" +
                 "            \"name\": \"hello\"\n" +
@@ -19,7 +19,7 @@ public class Issue1429 {
                 "            \"age\": 22,\n" +
                 "            \"id\": 1,\n" +
                 "            \"name\": \"hhh\",\n" +
-                "            \"@type\": \"com.alibaba.fastjson.issue_1400.Issue1429$Student\"\n" +
+                "            \"@type\": \"com.alibaba.fastjson2.v1issues.issue_1400.Issue1429$Student\"\n" +
                 "        }]";
 
         JSONArray list = JSON.parseArray(json, JSONReader.Feature.SupportAutoType);
