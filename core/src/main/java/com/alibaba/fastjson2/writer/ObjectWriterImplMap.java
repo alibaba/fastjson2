@@ -363,7 +363,7 @@ final class ObjectWriterImplMap extends ObjectWriterBaseModule.PrimitiveImpl {
                 valueWriter = jsonWriter.getObjectWriter(valueType);
             }
 
-            if (refDetect) {
+            if (refDetect && !ObjectWriterProvider.isPrimitiveOrEnum(value.getClass())) {
                 if (value == object) {
                     jsonWriter.writeReference("..");
                     continue;

@@ -23,7 +23,7 @@ public class Issue1480 extends TestCase {
 
         String json = JSON.toJSONString(map);
         System.out.println(json);
-        Assert.assertEquals("{1:10,2:4,3:5,4:5,37306:98,36796:9}",json);
+        Assert.assertEquals("{\"1\":10,\"2\":4,\"3\":5,\"4\":5,\"37306\":98,\"36796\":9}",json);
 
         Map<Integer,Integer> map1 = JSON.parseObject(json,new TypeReference<HashMap<Integer,Integer>>() {}.getType());
 
