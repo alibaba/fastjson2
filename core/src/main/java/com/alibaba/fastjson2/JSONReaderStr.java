@@ -1400,7 +1400,7 @@ final class JSONReaderStr extends JSONReader {
         if (ch == ',') {
             comma = true;
 
-            if (offset >= length) {
+            if (offset >= end) {
                 ch = EOI;
                 return;
             }
@@ -1408,7 +1408,7 @@ final class JSONReaderStr extends JSONReader {
             ch = str.charAt(offset);
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 offset++;
-                if (offset >= length) {
+                if (offset >= end) {
                     ch = EOI;
                     return;
                 }
@@ -1716,7 +1716,7 @@ final class JSONReaderStr extends JSONReader {
             throw new JSONException("syntax error, can not read uuid, position " + offset);
         }
 
-        if (offset + 32 < length && str.charAt(offset + 32) == '"') {
+        if (offset + 32 < end && str.charAt(offset + 32) == '"') {
             long msb1 = parse4Nibbles(str, offset + 0);
             long msb2 = parse4Nibbles(str, offset + 4);
             long msb3 = parse4Nibbles(str, offset + 8);

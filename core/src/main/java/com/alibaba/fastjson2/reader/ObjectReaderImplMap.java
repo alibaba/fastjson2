@@ -351,7 +351,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
                         return object;
                     }
                 }
-                throw new JSONException("illegal input : " + jsonReader.current());
+                throw new JSONException("illegal input， offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
             }
         }
 
