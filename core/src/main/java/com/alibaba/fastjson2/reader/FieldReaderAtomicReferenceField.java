@@ -20,6 +20,7 @@ final class FieldReaderAtomicReferenceField<T>
         readOnly = Modifier.isFinal(field.getModifiers());
     }
 
+    @Override
     public Field getField() {
         return field;
     }

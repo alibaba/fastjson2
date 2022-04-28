@@ -21,6 +21,7 @@ final class FieldReaderAtomicBooleanFieldReadOnly<T>
         return true;
     }
 
+    @Override
     public Field getField() {
         return field;
     }
