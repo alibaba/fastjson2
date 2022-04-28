@@ -57,6 +57,10 @@ public abstract class JSONWriter implements Closeable {
         return false;
     }
 
+    public boolean isIgnoreNoneSerializable() {
+        return (context.features & Feature.IgnoreNoneSerializable.mask) != 0;
+    }
+
     public JSONB.SymbolTable getSymbolTable() {
         throw new UnsupportedOperationException();
     }
@@ -1386,24 +1390,24 @@ public abstract class JSONWriter implements Closeable {
 
     public enum Feature {
         FieldBased(1),
-        BeanToArray(1 << 1),
-        WriteNulls(1 << 2),
-        BrowserCompatible(1 << 3),
-        NullAsDefaultValue(1 << 4),
-        WriteBooleanAsNumber(1 << 5),
-        WriteNonStringValueAsString(1 << 6),
-
-        WriteClassName(1 << 7),
-        NotWriteRootClassName(1 << 8),
-        NotWriteHashMapArrayListClassName(1 << 9),
-        NotWriteDefaultValue(1 << 10),
-
-        WriteEnumsUsingName(1 << 11),
-        WriteEnumUsingToString(1 << 12),
-        IgnoreErrorGetter(1 << 13),
-        PrettyFormat(1 << 14),
-        ReferenceDetection(1 << 15),
-        WriteNameAsSymbol(1 << 16);
+        IgnoreNoneSerializable(1 << 1),
+        BeanToArray(1 << 2),
+        WriteNulls(1 << 3),
+        BrowserCompatible(1 << 4),
+        NullAsDefaultValue(1 << 5),
+        WriteBooleanAsNumber(1 << 6),
+        WriteNonStringValueAsString(1 << 7),
+        WriteClassName(1 << 8),
+        NotWriteRootClassName(1 << 9),
+        NotWriteHashMapArrayListClassName(1 << 10),
+        NotWriteDefaultValue(1 << 11),
+        WriteEnumsUsingName(1 << 12),
+        WriteEnumUsingToString(1 << 13),
+        IgnoreErrorGetter(1 << 14),
+        PrettyFormat(1 << 15),
+        ReferenceDetection(1 << 16),
+        WriteNameAsSymbol(1 << 17),
+        ;
 
         public final long mask;
 
