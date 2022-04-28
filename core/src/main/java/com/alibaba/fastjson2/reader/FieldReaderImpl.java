@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JdbcSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
@@ -14,6 +15,7 @@ abstract class FieldReaderImpl<T>
     final int ordinal;
     final String fieldName;
     final Class fieldClass;
+    final boolean fieldClassSerializable;
     final Type fieldType;
     final long fieldNameHash;
     final long features;
@@ -26,6 +28,7 @@ abstract class FieldReaderImpl<T>
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldClass = TypeUtils.getMapping(fieldType);
+        this.fieldClassSerializable = fieldClass != null && Serializable.class.isAssignableFrom(fieldClass);
         this.fieldNameHash = Fnv.hashCode64(fieldName);
         this.features = 0;
         this.ordinal = 0;
@@ -36,10 +39,15 @@ abstract class FieldReaderImpl<T>
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
+        this.fieldClassSerializable = fieldClass != null && Serializable.class.isAssignableFrom(fieldClass);
         this.features = features;
         this.fieldNameHash = Fnv.hashCode64(fieldName);
         this.ordinal = ordinal;
         this.format = format;
+    }
+
+    public boolean isFieldClassSerializable() {
+        return fieldClassSerializable;
     }
 
     @Override

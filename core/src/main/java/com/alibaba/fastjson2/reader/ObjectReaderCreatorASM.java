@@ -1660,6 +1660,20 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
                 mw.visitLabel(endReference_);
             }
 
+            if (!fieldReader.isFieldClassSerializable()) {
+                Label endIgnoreCheck_ = new Label();
+
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isIgnoreNoneSerializable", "()Z", false);
+                mw.visitJumpInsn(Opcodes.IFEQ, endIgnoreCheck_);
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "skipValue", "()V", false);
+                mw.visitInsn(Opcodes.POP);
+                mw.visitJumpInsn(Opcodes.GOTO, endSet_);
+
+                mw.visitLabel(endIgnoreCheck_);
+            }
+
             boolean list = List.class.isAssignableFrom(fieldClass)
                     && !fieldClass.getName().startsWith("com.google.common.collect.Immutable");
 

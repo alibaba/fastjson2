@@ -19,6 +19,10 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
         return TypeUtils.getMapping(getFieldType());
     }
 
+    default boolean isFieldClassSerializable() {
+        return false;
+    }
+
     default ObjectReader getObjectReader(JSONReader jsonReader) {
         return jsonReader.getObjectReader(getFieldType());
     }

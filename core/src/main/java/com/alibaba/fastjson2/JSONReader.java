@@ -230,6 +230,10 @@ public abstract class JSONReader implements Closeable {
         return false;
     }
 
+    public boolean isIgnoreNoneSerializable() {
+        return (context.features & Feature.IgnoreNoneSerializable.mask) != 0;
+    }
+
     public ObjectReader checkAutoType(Class expectClass, long expectClassHash, long features) {
         return null;
     }
@@ -2008,14 +2012,16 @@ public abstract class JSONReader implements Closeable {
 
     public enum Feature {
         FieldBased                      (1),
-        SupportArrayToBean              (1 << 1),
-        InitStringFieldAsEmpty          (1 << 2),
-        SupportAutoType                 (1 << 3),
-        SupportSmartMatch               (1 << 4),
-        UseNativeObject                 (1 << 5),
-        SupportClassForName             (1 << 6),
-        IgnoreSetNullValue              (1 << 7),
-        UseDefaultConstructorAsPossible (1 << 8),
+        IgnoreNoneSerializable          (1 << 1),
+        SupportArrayToBean              (1 << 2),
+        InitStringFieldAsEmpty          (1 << 3),
+        SupportAutoType                 (1 << 4),
+        SupportSmartMatch               (1 << 5),
+        UseNativeObject                 (1 << 6),
+        SupportClassForName             (1 << 7),
+        IgnoreSetNullValue              (1 << 8),
+        UseDefaultConstructorAsPossible (1 << 9),
+
         ;
 
         public final long mask;

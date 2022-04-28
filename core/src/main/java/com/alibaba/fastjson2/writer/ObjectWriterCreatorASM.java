@@ -1402,6 +1402,12 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         Label null_ = new Label(), notNull_ = new Label();
         mw.visitJumpInsn(Opcodes.IFNULL, null_);
 
+        if (!fieldWriter.isFieldClassSerializable()) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isIgnoreNoneSerializable", "()Z", false);
+            mw.visitJumpInsn(Opcodes.IFNE, notNull_);
+        }
+
         // writeFieldName(w);
         gwFieldName(mwc, i);
 
@@ -1759,6 +1765,12 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
 
         mw.visitJumpInsn(Opcodes.IFNULL, endIfNull_);
+
+        if (!fieldWriter.isFieldClassSerializable()) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isIgnoreNoneSerializable", "()Z", false);
+            mw.visitJumpInsn(Opcodes.IFNE, endIfNull_);
+        }
 
         /**
          * boolean refDetect = jsonWriter.isRefDetect();

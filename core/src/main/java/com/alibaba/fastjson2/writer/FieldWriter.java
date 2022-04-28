@@ -21,6 +21,10 @@ public interface FieldWriter<T> extends Comparable {
 
     Class getFieldClass();
 
+    default boolean isFieldClassSerializable() {
+        return false;
+    }
+
     Type getFieldType();
 
     default Type getItemType() {

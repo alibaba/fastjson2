@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.Fnv;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 
 abstract class FieldWriterImpl<T> implements FieldWriter<T> {
@@ -18,6 +19,7 @@ abstract class FieldWriterImpl<T> implements FieldWriter<T> {
     final long features;
     final Type fieldType;
     final Class fieldClass;
+    final boolean fieldClassSerializable;
 
     FieldWriterImpl(String name, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
         this.name = name;
@@ -27,6 +29,8 @@ abstract class FieldWriterImpl<T> implements FieldWriter<T> {
         this.features = features;
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
+        this.fieldClassSerializable = fieldClass != null && Serializable.class.isAssignableFrom(fieldClass);
+
         int nameLength = name.length();
         int utflen = nameLength + 3;
         for (int i = 0; i < nameLength; ++i) {
@@ -67,6 +71,10 @@ abstract class FieldWriterImpl<T> implements FieldWriter<T> {
         name.getChars(0, name.length(), nameWithColonUTF16, 1);
         nameWithColonUTF16[nameWithColonUTF16.length - 2] = '"';
         nameWithColonUTF16[nameWithColonUTF16.length - 1] = ':';
+    }
+
+    public boolean isFieldClassSerializable() {
+        return fieldClassSerializable;
     }
 
     @Override
