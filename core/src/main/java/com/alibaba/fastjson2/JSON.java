@@ -292,6 +292,23 @@ public interface JSON {
     }
 
     /**
+     * Parse JSON {@link String} into {@link JSONArray}
+     *
+     * @param text the JSON {@link String} to be parsed
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static JSONArray parseArray(String text, JSONReader.Feature... features) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
+        JSONReader reader = JSONReader.of(text);
+        reader.context.config(features);
+        ObjectReader<JSONArray> objectReader = reader.getObjectReader(JSONArray.class);
+        return objectReader.readObject(reader, 0);
+    }
+
+    /**
      * Parse JSON {@link String} into {@link List}
      *
      * @param text the JSON {@link String} to be parsed
