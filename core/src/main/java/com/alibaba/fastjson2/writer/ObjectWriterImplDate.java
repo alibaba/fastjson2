@@ -54,7 +54,7 @@ final class ObjectWriterImplDate extends ObjectWriterBaseModule.PrimitiveImpl {
         Date date = (Date) object;
         long millis = date.getTime();
 
-        if (formatMillis || ctx.isDateFormatMillis()) {
+        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
             jsonWriter.writeInt64(millis);
             return;
         }

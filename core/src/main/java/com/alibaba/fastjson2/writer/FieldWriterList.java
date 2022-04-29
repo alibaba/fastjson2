@@ -159,7 +159,7 @@ abstract class FieldWriterList<T> extends FieldWriterImpl<T> {
                 previousObjectWriter = itemObjectWriter;
             }
 
-            itemObjectWriter.write(jsonWriter, item);
+            itemObjectWriter.write(jsonWriter, item, null, itemType, features);
         }
         jsonWriter.endArray();
     }
