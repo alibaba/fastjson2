@@ -7,14 +7,16 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import okhttp3.internal.http.RealResponseBody;
 import okio.Buffer;
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Retrofit2ConverterFactoryTest {
 
     @Test
     public void test_for_coverage() throws Exception {
-        Assert.assertThrows(NullPointerException.class, () -> Retrofit2ConverterFactory.create(null));
+        assertThrows(NullPointerException.class, () -> Retrofit2ConverterFactory.create(null));
 
         Retrofit2ConverterFactory f = new Retrofit2ConverterFactory();
         f.getFastJsonConfig();
@@ -31,15 +33,15 @@ public class Retrofit2ConverterFactoryTest {
                 .requestBodyConverter(Model.class, null, null, null)
                 .convert(model);
 
-        Assert.assertNotEquals(requestBody.contentLength(), 0);
+        assertNotEquals(requestBody.contentLength(), 0);
 
         Model mode2 = (Model) Retrofit2ConverterFactory.create()
                 .responseBodyConverter(Model.class, null, null)
                 .convert(body);
 
-        Assert.assertEquals(JSON.toJSONString(mode2), json);
+        assertEquals(JSON.toJSONString(mode2), json);
 
-        Assert.assertThrows(NullPointerException.class, () -> Retrofit2ConverterFactory.create()
+        assertThrows(NullPointerException.class, () -> Retrofit2ConverterFactory.create()
                 .responseBodyConverter(null, null, null)
                 .convert(null));
 
