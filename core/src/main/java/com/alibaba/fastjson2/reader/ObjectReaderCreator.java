@@ -728,6 +728,7 @@ public class ObjectReaderCreator {
             Class objectClass,
             Type objectType,
             String namingStrategy,
+            String[] orders,
             FieldInfo fieldInfo,
             Method method,
             Map<String, FieldReader> fieldReaders,
@@ -749,6 +750,22 @@ public class ObjectReaderCreator {
             fieldName = BeanUtils.setterName(method.getName(), namingStrategy);
         } else {
             fieldName = fieldInfo.fieldName;
+        }
+
+        if (orders != null && orders.length > 0) {
+            boolean match = false;
+            for (int i = 0; i < orders.length; i++) {
+                if (fieldName.equals(orders[i])) {
+                    fieldInfo.ordinal = i;
+                    match = true;
+                    break;
+                }
+            }
+            if (!match) {
+                if (fieldInfo.ordinal == 0) {
+                    fieldInfo.ordinal = orders.length;
+                }
+            }
         }
 
         if (method.getParameterCount() == 0) {
@@ -825,6 +842,7 @@ public class ObjectReaderCreator {
         Map<String, FieldReader> fieldReaders = new LinkedHashMap<>();
 
         final FieldInfo fieldInfo = new FieldInfo();
+        final String[] orders = beanInfo.orders;
         if (fieldBased) {
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
@@ -839,7 +857,7 @@ public class ObjectReaderCreator {
 
             BeanUtils.setters(objectClass, method -> {
                 fieldInfo.init();
-                createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, method, fieldReaders, modules);
+                createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, modules);
             });
         }
 
@@ -988,66 +1006,66 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == boolean.class) {
-            return new FieldReaderBoolValueMethod(fieldName, fieldType, method);
+            return new FieldReaderBoolValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
         if (fieldType == Boolean.class) {
-            return new FieldReaderBoolMethod(fieldName, fieldType, method);
+            return new FieldReaderBoolMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == byte.class) {
-            return new FieldReaderInt8ValueMethod(fieldName, fieldType, method);
+            return new FieldReaderInt8ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == short.class) {
-            return new FieldReaderInt16ValueMethod(fieldName, fieldType, method);
+            return new FieldReaderInt16ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == int.class) {
-            return new FieldReaderInt32ValueMethod(fieldName, fieldType, method);
+            return new FieldReaderInt32ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == long.class) {
-            return new FieldReaderInt64ValueMethod(fieldName, fieldType, method);
+            return new FieldReaderInt64ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == float.class) {
-            return new FieldReaderFloatValueMethod(fieldName, fieldType, method);
+            return new FieldReaderFloatValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == double.class) {
-            return new FieldReaderDoubleValueMethod(fieldName, fieldType, method);
+            return new FieldReaderDoubleValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == Byte.class) {
-            return new FieldReaderInt8Method(fieldName, fieldType, method);
+            return new FieldReaderInt8Method(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == Short.class) {
-            return new FieldReaderInt16Method(fieldName, fieldType, method);
+            return new FieldReaderInt16Method(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == Integer.class) {
-            return new FieldReaderInt32Method(fieldName, fieldType, method);
+            return new FieldReaderInt32Method(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == Long.class) {
-            return new FieldReaderInt64Method(fieldName, fieldType, method);
+            return new FieldReaderInt64Method(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == Float.class) {
-            return new FieldReaderFloatMethod(fieldName, fieldType, method);
+            return new FieldReaderFloatMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == Double.class) {
-            return new FieldReaderDoubleMethod(fieldName, fieldType, method);
+            return new FieldReaderDoubleMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalMethod(fieldName, fieldType, method);
+            return new FieldReaderBigDecimalMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerMethod(fieldName, fieldType, method);
+            return new FieldReaderBigIntegerMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldType == String.class) {

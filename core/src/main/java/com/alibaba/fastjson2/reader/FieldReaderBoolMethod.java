@@ -7,8 +7,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 final class FieldReaderBoolMethod<T> extends FieldReaderObjectMethod<T> {
-    FieldReaderBoolMethod(String fieldName, Type fieldType, Method setter) {
-        super(fieldName, fieldType, setter);
+    FieldReaderBoolMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method setter) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, setter);
     }
 
     @Override

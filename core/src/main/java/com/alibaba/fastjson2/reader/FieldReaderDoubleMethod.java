@@ -8,8 +8,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 final class FieldReaderDoubleMethod<T> extends FieldReaderObjectMethod<T> {
-    FieldReaderDoubleMethod(String fieldName, Type fieldType, Method setter) {
-        super(fieldName, fieldType, setter);
+    FieldReaderDoubleMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method setter) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, setter);
     }
 
     @Override

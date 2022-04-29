@@ -9,8 +9,8 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 
 final class FieldReaderBigDecimalMethod<T> extends FieldReaderObjectMethod<T> {
-    FieldReaderBigDecimalMethod(String fieldName, Type fieldType, Method method) {
-        super(fieldName, fieldType, method);
+    FieldReaderBigDecimalMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method method) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, method);
     }
 
     @Override
