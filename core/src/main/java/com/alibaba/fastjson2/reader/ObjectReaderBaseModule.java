@@ -2093,6 +2093,38 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
+    static class Base64Impl extends PrimitiveImpl {
+        static final Base64Impl INSTANCE = new Base64Impl();
+
+        @Override
+        public Object readObject(JSONReader jsonReader, long features) {
+            if (jsonReader.readIfNull()) {
+                return null;
+            }
+
+            if (jsonReader.isString()) {
+                String str = jsonReader.readString();
+                return Base64.getDecoder().decode(str);
+            }
+
+            throw new JSONException("TODO");
+        }
+
+        @Override
+        public Object readJSONBObject(JSONReader jsonReader, long features) {
+            if (jsonReader.readIfNull()) {
+                return null;
+            }
+
+
+            if (jsonReader.isString()) {
+                String str = jsonReader.readString();
+                return Base64.getDecoder().decode(str);
+            }
+
+            throw new JSONException("TODO");
+        }
+    }
 
     static class Inte16ValueArrayImpl extends PrimitiveImpl {
         static final Inte16ValueArrayImpl INSTANCE = new Inte16ValueArrayImpl();

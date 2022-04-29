@@ -48,6 +48,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
             return reader = ObjectReaderImplList.of(fieldType, fieldClass, features);
         }
 
+        if (byte[].class == fieldClass && "base64".equals(format)) {
+            return reader = ObjectReaderBaseModule.Base64Impl.INSTANCE;
+        }
+
         return reader = jsonReader.getObjectReader(fieldType);
     }
 

@@ -2506,7 +2506,11 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
                 } catch (NoSuchMethodException ignored) {
                 }
             }
-            return new FieldWriterObjectArrayField(fieldName, itemClass, 0, 0, null, fieldType, fieldClass, field);
+
+            boolean base64 = fieldClass == byte[].class && "base64".equals(format);
+            if (!base64) {
+                return new FieldWriterObjectArrayField(fieldName, itemClass, 0, 0, format, fieldType, fieldClass, field);
+            }
         }
 
         return new FieldWriterObjectFieldUF(fieldName, ordinal, features, format, field.getGenericType(), fieldClass, field);
