@@ -8,8 +8,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 final class FieldReaderInt16ValueMethod<T> extends FieldReaderObjectMethod<T> {
-    FieldReaderInt16ValueMethod(String fieldName, Type fieldType, Method setter) {
-        super(fieldName, fieldType, setter);
+    FieldReaderInt16ValueMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method setter) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, setter);
     }
 
     @Override

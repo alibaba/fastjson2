@@ -28,4 +28,6 @@ public @interface JSONType {
     String[] ignores() default {};
 
     String[] includes() default {};
+
+    String[] orders() default {};
 }

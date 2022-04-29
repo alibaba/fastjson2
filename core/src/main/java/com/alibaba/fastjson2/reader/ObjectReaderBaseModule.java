@@ -262,6 +262,13 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                             beanInfo.ignores = (String[]) result;
                             break;
                         }
+                        case "orders": {
+                            String[] fields = (String[]) result;
+                            if (fields.length != 0) {
+                                beanInfo.orders = fields;
+                            }
+                            break;
+                        }
                         case "parseFeatures": {
                             Enum[] features = (Enum[]) result;
                             for (Enum feature : features) {
