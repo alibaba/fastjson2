@@ -1098,7 +1098,7 @@ public class ObjectReaderCreator {
             }
 
             if (Collection.class.isAssignableFrom(fieldClass)) {
-                return new FieldReaderCollectionMethodReadOnly(fieldName, fieldType, method);
+                return new FieldReaderCollectionMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, features, format, method);
             }
 
             return null;
@@ -1120,17 +1120,17 @@ public class ObjectReaderCreator {
                     Class itemClass = TypeUtils.getMapping(itemType);
 
                     if (itemClass == String.class) {
-                        return new FieldReaderListStrMethod(fieldName, fieldTypeResolved, method);
+                        return new FieldReaderListStrMethod(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, method);
                     }
 
                     return new FieldReaderListMethod(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, itemType, method);
                 }
             }
-            return new FieldReaderListMethod(fieldName, fieldType, method);
+            return new FieldReaderListMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDateMethod(fieldName, format, fieldClass, method);
+            return new FieldReaderDateMethod(fieldName, fieldClass, ordinal, features, format, method);
         }
 
         if (fieldClass == StackTraceElement[].class && method.getDeclaringClass() == Throwable.class) {

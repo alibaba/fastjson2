@@ -15,8 +15,8 @@ class FieldReaderCollectionMethodReadOnly<T> extends FieldReaderObjectMethod<T> 
     private final Type itemType;
     private ObjectReader itemReader;
 
-    FieldReaderCollectionMethodReadOnly(String fieldName, Type fieldType, Method setter) {
-        super(fieldName, fieldType, setter);
+    FieldReaderCollectionMethodReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method setter) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, setter);
         Type itemType = null;
         if (fieldType instanceof ParameterizedType) {
             Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();

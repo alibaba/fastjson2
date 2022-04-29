@@ -9,16 +9,14 @@ import java.text.SimpleDateFormat;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
-    final String format;
     volatile SimpleDateFormat formatter;
     static final AtomicReferenceFieldUpdater<FieldReaderDateMethod, SimpleDateFormat> FORMATTER_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(FieldReaderDateMethod.class, SimpleDateFormat.class, "formatter");
 
     ObjectReader dateReader;
 
-    FieldReaderDateMethod(String fieldName, String format, Class fieldClass, Method method) {
-        super(fieldName, fieldClass, method);
-        this.format = format;
+    FieldReaderDateMethod(String fieldName, Class fieldClass, int ordinal, long features, String format, Method method) {
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, method);
     }
 
     @Override
