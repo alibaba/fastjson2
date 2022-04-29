@@ -13,11 +13,6 @@ class FieldReaderObjectMethod<T>
     final Method method;
     ObjectReader fieldObjectReader;
 
-    FieldReaderObjectMethod(String fieldName, Type fieldType, Method method) {
-        super(fieldName, fieldType);
-        this.method = method;
-    }
-
     FieldReaderObjectMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method method) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format);
         this.method = method;

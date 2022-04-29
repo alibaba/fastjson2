@@ -8,8 +8,8 @@ final class FieldReaderListMethod<T> extends FieldReaderObjectMethod<T>
         implements FieldReaderList<T, Object> {
     final Type itemType;
 
-    FieldReaderListMethod(String fieldName, Type fieldType, Method method) {
-        super(fieldName, fieldType, method);
+    FieldReaderListMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method method) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         if (fieldType instanceof ParameterizedType) {
             itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
         } else {

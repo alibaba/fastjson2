@@ -15,8 +15,8 @@ final class FieldReaderListStrMethod<T>
         implements FieldReaderList<T, Object> {
     final long fieldClassHash;
 
-    FieldReaderListStrMethod(String fieldName, Type fieldType, Method method) {
-        super(fieldName, fieldType, method);
+    FieldReaderListStrMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method method) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, method);
         this.fieldClassHash = Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
     }
 
