@@ -1291,6 +1291,15 @@ public abstract class JSONReader implements Closeable {
                             decimal + "E" + exponent);
                     return Double.valueOf(doubleValue);
                 }
+
+                if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
+                    return decimal.floatValue();
+                }
+
+                if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
+                    return decimal.doubleValue();
+                }
+
                 return decimal;
             }
             case JSON_TYPE_BOOL:
@@ -2031,7 +2040,8 @@ public abstract class JSONReader implements Closeable {
         SupportClassForName             (1 << 7),
         IgnoreSetNullValue              (1 << 8),
         UseDefaultConstructorAsPossible (1 << 9),
-
+        UseBigDecimalForFloats          (1 << 10),
+        UseBigDecimalForDoubles         (1 << 11),
         ;
 
         public final long mask;
