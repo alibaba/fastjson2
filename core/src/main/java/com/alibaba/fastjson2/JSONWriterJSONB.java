@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.trove.map.hash.TLongIntHashMap;
+import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
 
 import java.io.IOException;
 import java.io.OutputStream;

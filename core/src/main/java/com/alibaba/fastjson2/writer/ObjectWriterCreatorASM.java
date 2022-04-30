@@ -1,17 +1,17 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.asm.*;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.internal.asm.*;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.*;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.asm.ClassWriter;
-import com.alibaba.fastjson2.asm.Label;
-import com.alibaba.fastjson2.asm.MethodWriter;
+import com.alibaba.fastjson2.internal.asm.ClassWriter;
+import com.alibaba.fastjson2.internal.asm.Label;
+import com.alibaba.fastjson2.internal.asm.MethodWriter;
 
 import java.lang.reflect.*;
 import java.lang.reflect.Type;
