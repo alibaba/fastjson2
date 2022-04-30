@@ -2,12 +2,14 @@ package com.alibaba.json.bvt.issue_3200;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.annotation.JSONType;
+import com.alibaba.fastjson.parser.Feature;
 import junit.framework.TestCase;
 
 public class Issue3279 extends TestCase {
     public void test_for_issue() throws Exception {
         V0 v = JSON.parseObject("{\"id\":\" 1001 \"}", V0.class);
-        assertEquals("1001", v.id);
+        assertEquals(" 1001 ", v.id);
 
         v = JSON.parseObject("{\"id\":\" 1001 \"}", V0.class);
         assertEquals(" 1001 ", v.id);
@@ -32,7 +34,7 @@ public class Issue3279 extends TestCase {
         public String id;
     }
 
-//    @JSONType(parseFeatures = Feature.TrimStringFieldValue)
+    @JSONType(parseFeatures = Feature.TrimStringFieldValue)
     public static class V2 {
         public String id;
     }

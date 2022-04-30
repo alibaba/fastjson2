@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.v1issues.issue_1600;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson.annotation.JSONType;
-import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,7 +11,7 @@ public class Issue1683C {
     @Test
     public void test_for_issue() throws Exception {
         String line = "[2, \"浪漫奇侠\", \"雨天不打伞\", 4536]";
-        BookDO book = JSON.parseObject(line, BookDO.class, Feature.SupportArrayToBean);
+        BookDO book = JSON.parseObject(line, BookDO.class, JSONReader.Feature.SupportArrayToBean);
         assertEquals(2L, book.bookId.longValue());
         assertEquals("浪漫奇侠", book.bookName);
         assertEquals("雨天不打伞", book.authorName);

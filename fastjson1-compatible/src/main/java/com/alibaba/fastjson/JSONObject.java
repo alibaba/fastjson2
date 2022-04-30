@@ -85,7 +85,17 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
     @Override
     public boolean containsKey(Object key) {
-        return map.containsKey(key);
+        boolean result = map.containsKey(key);
+        if (!result) {
+            if (key instanceof Number
+                    || key instanceof Character
+                    || key instanceof Boolean
+                    || key instanceof UUID
+            ) {
+                result = map.containsKey(key.toString());
+            }
+        }
+        return result;
     }
 
     @Override
@@ -97,7 +107,8 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
     public Object get(Object key) {
         Object val = map.get(key);
 
-        if (val == null && key instanceof Number) {
+        if (val == null
+                && (key instanceof Number || key instanceof Boolean || key instanceof Character)) {
             val = map.get(key.toString());
         }
 

@@ -464,6 +464,15 @@ public class JodaSupport {
 
         @Override
         public Object readObject(JSONReader jsonReader, long features) {
+            if (jsonReader.isString()) {
+                LocalDateTime ldt = jsonReader.readLocalDateTime();
+                try {
+                    return constructor7.newInstance(ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth(), ldt.getHour(), ldt.getMinute(), ldt.getSecond(), ldt.getNano() / 1000_000);
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    throw new JSONException("read org.joda.time.LocalDate error", e);
+                }
+            }
+
             throw new JSONException("not support");
         }
 
@@ -650,8 +659,9 @@ public class JodaSupport {
                 }
 
                 if (chronology == UTC || chronology == null) {
+                    int nanoOfSecond = millis * 1000_000;
                     jsonWriter.writeLocalDateTime(
-                            LocalDateTime.of(year, monthOfYear, dayOfMonth, hour, minute, second, millis * 1000_1000));
+                            LocalDateTime.of(year, monthOfYear, dayOfMonth, hour, minute, second, nanoOfSecond));
                     return;
                 }
 

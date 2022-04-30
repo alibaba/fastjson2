@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.codec;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.Test;
 
 import static junit.framework.TestCase.assertEquals;

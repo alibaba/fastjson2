@@ -1,21 +1,22 @@
-package com.alibaba.json.bvt.issue_3300;
+package com.alibaba.fastjson2.v1issues.issue_3300;
 
-import com.alibaba.fastjson.JSONObject;
-import junit.framework.TestCase;
+import com.alibaba.fastjson2.JSONObject;
+import org.junit.jupiter.api.Test;
 
-import java.util.Map;
 import java.util.UUID;
 
-public class Issue3352 extends TestCase {
-    public void test_for_issue() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class Issue3352 {
+    @Test
+    public void test_for_issue() {
         UUID uuid = UUID.randomUUID();
 
         JSONObject object = new JSONObject();
-        Map map = object.getInnerMap();
-        map.put("1", "1");
-        map.put("A", "A");
-        map.put("true", "true");
-        map.put(uuid.toString(), uuid);
+        object.put("1", "1");
+        object.put("A", "A");
+        object.put("true", "true");
+        object.put(uuid.toString(), uuid);
 
         assertTrue(object.containsKey(1));
         assertTrue(object.containsKey("1"));

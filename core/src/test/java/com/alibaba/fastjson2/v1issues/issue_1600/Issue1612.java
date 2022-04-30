@@ -1,8 +1,10 @@
 package com.alibaba.fastjson2.v1issues.issue_1600;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * <p>Title: Issue1612</p>
@@ -16,12 +18,9 @@ public class Issue1612 {
 
     @Test
     public void test() {
-
         RegResponse<User> userRegResponse = testFastJson(User.class);
-
         User user = userRegResponse.getResult();
-        System.out.println(user);
-
+        assertNotNull(user);
     }
 
     public static <T> RegResponse<T> testFastJson(Class<T> clasz) {

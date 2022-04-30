@@ -13,7 +13,7 @@ final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
     static final AtomicReferenceFieldUpdater<FieldReaderDateMethod, SimpleDateFormat> FORMATTER_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(FieldReaderDateMethod.class, SimpleDateFormat.class, "formatter");
 
-    ObjectReader dateReader;
+    ObjectReaderBaseModule.UtilDateImpl dateReader;
 
     FieldReaderDateMethod(String fieldName, Class fieldClass, int ordinal, long features, String format, Method method) {
         super(fieldName, fieldClass, fieldClass, ordinal, features, format, method);
@@ -32,6 +32,24 @@ final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
     @Override
     public void accept(T object, Object value) {
         try {
+            if (value instanceof String) {
+                String str = (String) value;
+
+                if (format != null) {
+                    SimpleDateFormat formatter = FORMATTER_UPDATER.getAndSet(this, null);
+                    if (formatter == null) {
+                        formatter = new SimpleDateFormat(format);
+                    }
+                    try {
+                        value = formatter.parse(str);
+                    } catch (ParseException e) {
+                        throw new JSONException("parse date error, fieldName : " + fieldName, e);
+                    } finally {
+                        FORMATTER_UPDATER.set(this, formatter);
+                    }
+                }
+            }
+
             method.invoke(object, value);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);

@@ -122,7 +122,7 @@ public final class ObjectReaderImplListStr implements ObjectReader {
         }
 
         if (jsonReader.current() != '[') {
-            throw new JSONException("format error : " + jsonReader.current());
+            throw new JSONException("offset " + jsonReader.getOffset() + ", char : " + jsonReader.current());
         }
         jsonReader.next();
 

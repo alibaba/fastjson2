@@ -1,8 +1,8 @@
 package com.alibaba.json.bvt.issue_3200
 
 import com.alibaba.fastjson.JSON
-import junit.framework.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import java.util.*
 
 class TestFJ {
