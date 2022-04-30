@@ -1,13 +1,17 @@
-package com.alibaba.json.bvt.issue_2300;
+package com.alibaba.fastjson.issue_2300;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-public class Issue2355 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2355 {
+    @Test
     public void test_for_issue() throws Exception {
         VO vo = new VO();
         BigDecimal num = new BigDecimal("0.00000001");

@@ -15,6 +15,7 @@ final class ObjectWriterImplBigDecimal extends ObjectWriterBaseModule.PrimitiveI
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        jsonWriter.writeDecimal((BigDecimal) object);
+        BigDecimal decimal = (BigDecimal) object;
+        jsonWriter.writeDecimal(decimal, features);
     }
 }
