@@ -30,6 +30,10 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
                 || fieldClass == AtomicIntegerArray.class;
     }
 
+    public boolean unwrapped() {
+        return unwrapped;
+    }
+
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
@@ -161,6 +165,7 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
                     }
 
                     jsonWriter.writeName(entryKey);
+                    jsonWriter.writeColon();
                     if (entryValue == null) {
                         jsonWriter.writeNull();
                     } else {
@@ -172,6 +177,15 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
 
                 if (refDetect) {
                     jsonWriter.popPath(value);
+                }
+                return true;
+            }
+
+            if (valueWriter instanceof ObjectWriterAdapter) {
+                ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) valueWriter;
+                List<FieldWriter> fieldWriters = writerAdapter.getFieldWriters();
+                for (FieldWriter fieldWriter : fieldWriters) {
+                    fieldWriter.write(jsonWriter, value);
                 }
                 return true;
             }
