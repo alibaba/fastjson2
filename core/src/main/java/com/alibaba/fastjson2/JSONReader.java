@@ -687,7 +687,15 @@ public abstract class JSONReader implements Closeable {
             default:
                 break;
         }
-        throw new JSONException("TODO : " + len + ", " + readString());
+
+        String strVal = readString();
+        if (IOUtils.isNumber(strVal)) {
+            long millis = Long.parseLong(strVal);
+            Instant instant = Instant.ofEpochMilli(millis);
+            return LocalDateTime.ofInstant(instant, context.getZoneId());
+        }
+
+        throw new JSONException("TODO : " + len + ", " + strVal);
     }
 
     public ZonedDateTime readZonedDateTime() {
