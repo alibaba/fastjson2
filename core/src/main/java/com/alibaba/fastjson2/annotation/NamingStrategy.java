@@ -7,5 +7,6 @@ public enum NamingStrategy {
     CamelCase,
     PascalCase,
     SnakeCase,
+    UpperCase,
     KebabCase;
 }
