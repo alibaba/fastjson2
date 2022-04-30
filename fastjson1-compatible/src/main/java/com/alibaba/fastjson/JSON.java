@@ -310,7 +310,18 @@ public class JSON {
             writer.setRootObject(object);
 
             ctx.setZoneId(defaultTimeZone.toZoneId());
-            ctx.setDateFormat("millis");
+
+            boolean formatMillis = true;
+            for (SerializerFeature feature : features) {
+                if (feature == SerializerFeature.UseISO8601DateFormat || feature == SerializerFeature.UseISO8601DateFormat) {
+                    formatMillis = false;
+                    break;
+                }
+            }
+            if (formatMillis) {
+                ctx.setDateFormat("millis");
+            }
+
             ctx.config(JSONWriter.Feature.ReferenceDetection);
             config(ctx, features);
 
