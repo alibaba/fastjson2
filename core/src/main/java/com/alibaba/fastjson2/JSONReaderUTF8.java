@@ -827,6 +827,8 @@ class JSONReaderUTF8 extends JSONReader {
             return null;
         }
 
+        final char quote = ch;
+
         this.nameAscii = true;
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
@@ -851,7 +853,7 @@ class JSONReaderUTF8 extends JSONReader {
                 continue;
             }
 
-            if (c == '"') {
+            if (c == quote) {
                 this.nameLength = i;
                 this.nameEnd = offset;
                 offset++;

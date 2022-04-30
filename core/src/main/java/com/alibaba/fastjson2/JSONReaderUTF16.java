@@ -509,6 +509,8 @@ final class JSONReaderUTF16 extends JSONReader {
             return null;
         }
 
+        final char quote= ch;
+
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
         for (int i = 0; ; ++i) {
@@ -533,7 +535,7 @@ final class JSONReaderUTF16 extends JSONReader {
                 continue;
             }
 
-            if (c == '"') {
+            if (c == quote) {
                 this.nameLength = i;
                 this.nameEnd = offset;
                 offset++;
