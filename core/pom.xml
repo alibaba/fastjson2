@@ -189,16 +189,10 @@
             <plugin>
                 <groupId>org.moditect</groupId>
                 <artifactId>moditect-maven-plugin</artifactId>
-                <version>1.0.0.RC2</version>
                 <executions>
                     <execution>
                         <id>add-module-infos</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>add-module-info</goal>
-                        </goals>
                         <configuration>
-                            <jvmVersion>9</jvmVersion>
                             <module>
                                 <moduleInfoSource>
                                     module com.alibaba.fastjson2 {
@@ -237,7 +231,6 @@
                                     }
                                 </moduleInfoSource>
                             </module>
-                            <overwriteExistingFiles>true</overwriteExistingFiles>
                         </configuration>
                     </execution>
                 </executions>
