@@ -1,20 +1,20 @@
-package com.alibaba.json.bvt.issue_2000;
+package com.alibaba.fastjson.issue_2000;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2012 extends TestCase {
-    public void test_for_issue() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2012 {
+    @Test
+    public void test_for_issue() {
         Model foo = new Model();
         foo.bytes = new byte[0];
         String str = JSON.toJSONString(foo, SerializerFeature.WriteClassName);
-        assertEquals("{\"@type\":\"com.alibaba.json.bvt.issue_2000.Issue2012$Model\",\"bytes\":x''}", str);
+        assertEquals("{\"@type\":\"com.alibaba.fastjson.issue_2000.Issue2012$Model\",\"bytes\":[]}", str);
 
-        ParserConfig config = new ParserConfig();
-//        config.setAutoTypeSupport(true);
         foo = JSON.parseObject(str, Object.class, Feature.SupportAutoType);
         assertEquals(0, foo.bytes.length);
     }

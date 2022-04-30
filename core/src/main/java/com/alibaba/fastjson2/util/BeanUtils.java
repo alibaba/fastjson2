@@ -329,6 +329,7 @@ public abstract class BeanUtils {
                 switch (annotationType.getName()) {
                     case "com.alibaba.fastjson.annotation.JSONField":
                     case "com.alibaba.fastjson2.annotation.JSONField":
+                    case "com.fasterxml.jackson.annotation.JsonValue":
                         member = method;
                         break;
                     default:

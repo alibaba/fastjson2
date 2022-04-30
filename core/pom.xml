@@ -166,6 +166,11 @@
             <artifactId>odps-sdk-udf</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.gitlab4j</groupId>
+            <artifactId>gitlab4j-api</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
