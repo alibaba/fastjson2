@@ -157,6 +157,8 @@ public class JSON {
                     break;
                 case ErrorOnEnumNotMatch:
                     context.config(JSONReader.Feature.ErrorOnEnumNotMatch);
+                case SupportNonPublicField:
+                    context.config(JSONReader.Feature.FieldBased);
                 default:
                     break;
             }

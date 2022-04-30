@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class JdbcSupport {
@@ -51,8 +52,12 @@ public class JdbcSupport {
         return new TimeWriter(null);
     }
 
-    public static ObjectWriter createTimestampWriter() {
-        return TimestampWriter.INSTANCE;
+    public static ObjectWriter createTimestampWriter(String format) {
+        if (format == null) {
+            return TimestampWriter.INSTANCE;
+        }
+
+        return new TimestampWriter(format);
     }
 
     static class TimeReader extends ObjectReaderBaseModule.UtilDateImpl {
@@ -135,8 +140,12 @@ public class JdbcSupport {
         }
     }
 
-    static class TimestampWriter implements ObjectWriter {
-        static final TimestampWriter INSTANCE = new TimestampWriter();
+    static class TimestampWriter extends DateTimeCodec implements ObjectWriter {
+        static final TimestampWriter INSTANCE = new TimestampWriter(null);
+
+        public TimestampWriter(String format) {
+            super(format);
+        }
 
         @Override
         public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -178,7 +187,7 @@ public class JdbcSupport {
             ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
             int offsetSeconds = zdt.getOffset().getTotalSeconds();
 
-            if (ctx.isDateFormatISO8601()) {
+            if (formatISO8601 || ctx.isDateFormatISO8601()) {
                 int year = zdt.getYear();
                 int month = zdt.getMonthValue();
                 int dayOfMonth = zdt.getDayOfMonth();
@@ -190,8 +199,12 @@ public class JdbcSupport {
                 return;
             }
 
-            String dateFormat = ctx.getDateFormat();
-            if (dateFormat == null) {
+            DateTimeFormatter dateFormatter = getDateFormatter();
+            if (dateFormatter == null) {
+                dateFormatter = ctx.getDateFormatter();
+            }
+
+            if (dateFormatter == null) {
                 int year = zdt.getYear();
                 int month = zdt.getMonthValue();
                 int dayOfMonth = zdt.getDayOfMonth();
@@ -206,7 +219,7 @@ public class JdbcSupport {
                     jsonWriter.writeLocalDateTime(zdt.toLocalDateTime());
                 }
             } else {
-                String str = ctx.getDateFormatter().format(zdt);
+                String str = dateFormatter.format(zdt);
                 jsonWriter.writeString(str);
             }
         }
@@ -254,22 +267,20 @@ public class JdbcSupport {
                 return new java.sql.Timestamp(millis);
             }
 
-            SimpleDateFormat formatter = FORMATTER_UPDATER.getAndSet(this, null);
-            if (formatter == null) {
-                formatter = new SimpleDateFormat(format);
+            String str = jsonReader.readString();
+
+            DateTimeFormatter dateFormatter = getDateFormatter();
+            LocalDateTime ldt = LocalDateTime.parse(str, dateFormatter);
+            Instant instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
+            long millis = instant.toEpochMilli();
+            Timestamp timestamp = new Timestamp(millis);
+
+            int nanos = instant.getNano();
+            if (nanos != 0) {
+                timestamp.setNanos(nanos);
             }
 
-            String str = null;
-            try {
-                str = jsonReader.readString();
-                java.util.Date utilDate = formatter.parse(str);
-                long millis = utilDate.getTime();
-                return new java.sql.Timestamp(millis);
-            } catch (ParseException e) {
-                throw new JSONException("parse date error, format " + format + ", input " + str, e);
-            } finally {
-                FORMATTER_UPDATER.set(this, formatter);
-            }
+            return timestamp;
         }
     }
 
