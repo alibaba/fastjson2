@@ -103,7 +103,6 @@
             <groupId>com.aliyun.odps</groupId>
             <artifactId>odps-sdk-udf</artifactId>
             <scope>provided</scope>
-            <optional>true</optional>
             <exclusions>
                 <exclusion>
                     <groupId>javax.validation</groupId>
@@ -141,11 +140,6 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.trove4j</groupId>
-            <artifactId>trove4j</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
