@@ -1,11 +1,15 @@
-package com.alibaba.json.bvt.issue_2400;
+package com.alibaba.fastjson.issue_2400;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.ArrayListMultimap;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2430 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2430 {
+    @Test
 	public void testForIssue() {
 		ArrayListMultimap<String, String> multimap = ArrayListMultimap.create();
 		multimap.put("a", "1");
@@ -21,6 +25,7 @@ public class Issue2430 extends TestCase {
 				JSON.toJSONString(vo, SerializerFeature.MapSortField));
 	}
 
+    @Test
 	public void testForIssue2() {
 		String jsonString = "{\"map\":{\"a\":[\"1\",\"2\",\"3\"],\"b\":[\"1\"]},\"name\":\"zhangsan\"}";
 		VO vo = JSON.parseObject(jsonString, VO.class);
