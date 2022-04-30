@@ -180,7 +180,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
                     }
                 });
 
-                BeanUtils.getters(objectClass.getMethods(), method -> {
+                BeanUtils.getters(objectClass, method -> {
                     fieldInfo.init();
                     fieldInfo.features |= writerFeatures;
                     for (ObjectWriterModule module : modules) {

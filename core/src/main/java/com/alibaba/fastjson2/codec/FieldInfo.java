@@ -9,6 +9,7 @@ public class FieldInfo {
     public String[] alternateNames;
     public Class<?> writeUsing;
     public boolean fieldClassMixIn;
+    public boolean isTransient;
 
     public void init() {
         fieldName = null;
@@ -19,5 +20,6 @@ public class FieldInfo {
         alternateNames = null;
         writeUsing = null;
         fieldClassMixIn = false;
+        isTransient = false;
     }
 }

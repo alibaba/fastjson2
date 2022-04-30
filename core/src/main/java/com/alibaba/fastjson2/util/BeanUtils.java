@@ -397,6 +397,24 @@ public abstract class BeanUtils {
         return false;
     }
 
+    public static void getters(Class objectClass, Consumer<Method> methodConsumer) {
+        if (Proxy.isProxyClass(objectClass)) {
+            Class[] interfaces = objectClass.getInterfaces();
+            if (interfaces.length == 1) {
+                getters(interfaces[0], methodConsumer);
+                return;
+            }
+        }
+
+        Method[] methods = methodCache.get(objectClass);
+        if (methods == null) {
+            methods = objectClass.getMethods();
+            methodCache.putIfAbsent(objectClass, methods);
+        }
+
+        getters(methods, methodConsumer);
+    }
+
     public static void getters(Method[] methods, Consumer<Method> methodConsumer) {
         for (Method method : methods) {
             int paramType = method.getParameterCount();
