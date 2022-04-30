@@ -701,6 +701,13 @@ public abstract class JSONReader implements Closeable {
     public ZonedDateTime readZonedDateTime() {
         if (ch == '"') {
             int len = getStringLength();
+            if (len == 10) {
+                LocalDateTime ldt = readLocalDate10();
+                if (ldt != null) {
+                    return ZonedDateTime.of(ldt, context.getZoneId());
+                }
+            }
+
             ZonedDateTime zdt = readZonedDateTimeX(len);
             if (zdt != null) {
                 return zdt;
