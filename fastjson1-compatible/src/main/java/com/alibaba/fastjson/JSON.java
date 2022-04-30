@@ -17,6 +17,7 @@ import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.support.AwtRederModule;
 import com.alibaba.fastjson2.support.AwtWriterModule;
+import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
@@ -440,8 +441,13 @@ public class JSON {
         }
     }
 
-    public static <T> List<T> parseArray(String text, Class<T> clazz) {
-        throw new JSONException("TODO");
+    public static <T> List<T> parseArray(String text, Class<T> type) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
+        ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
+        JSONReader reader = JSONReader.of(text);
+        return reader.read(paramType);
     }
 
     public static boolean isValid(String str) {
