@@ -1,24 +1,36 @@
-package com.alibaba.json.bvt.issue_2900;
+package com.alibaba.fastjson.issue_2900;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.*;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class Issue2962 extends TestCase {
-    private TimeZone original = TimeZone.getDefault();
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    @Override
+public class Issue2962 {
+    private TimeZone original;
+
+    @BeforeEach
+    public void setUp() {
+        original = TimeZone.getDefault();
+    }
+
+    @AfterEach
     public void tearDown () {
         TimeZone.setDefault(original);
         JSON.defaultTimeZone = original;
     }
 
+    @Test
     public void test_dates_different_timeZones() {
-        for (String id : TimeZone.getAvailableIDs()) {
+        String[] availableIDs = TimeZone.getAvailableIDs();
+        for (int i = 0; i < availableIDs.length; i++) {
+            String id = availableIDs[i];
+
             TimeZone timeZone = TimeZone.getTimeZone(id);
             TimeZone.setDefault(timeZone);
             JSON.defaultTimeZone = timeZone;
@@ -35,9 +47,10 @@ public class Issue2962 extends TestCase {
 
             // with iso-format
             json = JSON.toJSONString(vo, SerializerFeature.UseISO8601DateFormat);
-            System.out.println(id + " " + json);
+//            System.out.println(i + "\t" + id + " " + json);
             result = JSON.parseObject(json, VO.class);
-            assertEquals(JSON.toJSONString(vo.date), JSON.toJSONString(result.date));
+            assertEquals(vo.date.getTime(), result.date.getTime(), "timeZone " + id);
+            assertEquals(JSON.toJSONString(vo.date), JSON.toJSONString(result.date), "timeZone " + id);
         }
     }
 

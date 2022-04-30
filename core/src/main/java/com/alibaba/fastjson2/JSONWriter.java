@@ -1127,10 +1127,13 @@ public abstract class JSONWriter implements Closeable {
                 chars[20 + millislen] = '-';
             }
             chars[20 + millislen + 1] = '0';
-            IOUtils.getChars(offsetAbs, 20 + millislen + offsetlen + 2, chars);
+            IOUtils.getChars(offsetAbs, 20 + millislen + 3, chars);
             chars[20 + millislen + 3] = ':';
             chars[20 + millislen + 4] = '0';
             int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
+            if (offsetMinutes < 0) {
+                offsetMinutes = -offsetMinutes;
+            }
             IOUtils.getChars(offsetMinutes, 20 + millislen + zonelen, chars);
         }
         chars[chars.length - 1] = '"';

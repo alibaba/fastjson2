@@ -4,10 +4,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -3190,6 +3187,8 @@ final class JSONReaderUTF16 extends JSONReader {
 
         char first = chars[this.offset + zoneIdBegin];
 
+        LocalDateTime ldt = getLocalDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8);
+
         ZoneId zoneId;
         if (isTimeZone) {
             String tzStr = new String(chars, this.offset + zoneIdBegin, len - zoneIdBegin);
@@ -3211,21 +3210,11 @@ final class JSONReaderUTF16 extends JSONReader {
                         zoneIdStr = null;
                     }
                 }
-                if (zoneIdStr != null) {
-                    if ("000".equals(zoneIdStr)) {
-                        zoneId = UTC;
-                    } else if ("+08:00[Asia/Shanghai]".equals(zoneIdStr) || "Asia/Shanghai".equals(zoneIdStr)) {
-                        zoneId = SHANGHAI;
-                    } else {
-                        zoneId = ZoneId.of(zoneIdStr);
-                    }
-                } else {
-                    zoneId = context.getZoneId();
-                }
+                zoneId = getZoneId(ldt, zoneIdStr);
             }
         }
 
-        ZonedDateTime zdt = getZonedDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8, zoneId);
+        ZonedDateTime zdt = ldt.atZone(zoneId);
         if (zdt == null) {
             return null;
         }
@@ -3541,113 +3530,7 @@ final class JSONReaderUTF16 extends JSONReader {
         return ldt;
     }
 
-    static LocalDateTime getLocalDateTime(
-            char y0,
-            char y1,
-            char y2,
-            char y3,
-            char m0,
-            char m1,
-            char d0,
-            char d1,
-            char h0,
-            char h1,
-            char i0,
-            char i1,
-            char s0,
-            char s1,
-            char S0,
-            char S1,
-            char S2,
-            char S3,
-            char S4,
-            char S5,
-            char S6,
-            char S7,
-            char S8) {
 
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int nanos;
-        if (S0 >= '0' && S0 <= '9'
-                && S1 >= '0' && S1 <= '9'
-                && S2 >= '0' && S2 <= '9'
-                && S3 >= '0' && S3 <= '9'
-                && S4 >= '0' && S4 <= '9'
-                && S5 >= '0' && S5 <= '9'
-                && S6 >= '0' && S6 <= '9'
-                && S7 >= '0' && S7 <= '9'
-                && S8 >= '0' && S8 <= '9'
-        ) {
-            nanos = (S0 - '0') * 1000_000_00
-                    + (S1 - '0') * 1000_000_0
-                    + (S2 - '0') * 1000_000
-                    + (S3 - '0') * 1000_00
-                    + (S4 - '0') * 1000_0
-                    + (S5 - '0') * 1000
-                    + (S6 - '0') * 100
-                    + (S7 - '0') * 10
-                    + (S8 - '0');
-        } else {
-            return null;
-        }
-
-        return LocalDateTime.of(year, month, dom, hour, minute, second, nanos);
-    }
 
     @Override
     protected LocalTime readLocalTime10() {
