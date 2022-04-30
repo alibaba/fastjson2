@@ -372,7 +372,9 @@
                     <plugin>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
-                            <excludePackageNames>*.internal:*.internal.*:com.alibaba.fastjson.asm</excludePackageNames>
+                            <excludePackageNames>
+                                ${javadoc.default.exclude.packages}:com.alibaba.fastjson.asm
+                            </excludePackageNames>
                         </configuration>
                     </plugin>
                 </plugins>
