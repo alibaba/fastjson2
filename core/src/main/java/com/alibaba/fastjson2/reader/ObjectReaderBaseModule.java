@@ -1997,7 +1997,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 }
 
                 Instant instant = Instant.ofEpochMilli(millis);
-                return LocalDateTime.ofInstant(instant, jsonReader.getContext().getZoneId());
+                ZoneId zoneId = jsonReader.getContext().getZoneId();
+                return LocalDateTime.ofInstant(instant, zoneId);
             }
 
             if (jsonReader.readIfNull()) {

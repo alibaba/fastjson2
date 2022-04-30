@@ -24,7 +24,7 @@ public class Issue2784 {
                 + "}", str);
 
         Model m1 = JSON.parseObject(str, Model.class);
-        assertEquals(m.time, m1.time);
+        assertEquals(m.time.atZone(zoneId).toInstant().toEpochMilli(), m1.time.atZone(zoneId).toInstant().toEpochMilli());
     }
 
     @Test
