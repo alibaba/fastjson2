@@ -1,13 +1,15 @@
-package com.alibaba.json.bvt.issue_2300;
+package com.alibaba.fastjson.issue_2300;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2387 extends TestCase
-{
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2387 {
+    @Test
     public void test_for_issue() throws Exception {
-        String jsonStr = "{id:\"ss\",ddd:\"sdfsd\",name:\"hh\"}";
+        String jsonStr = "{\"id\":\"ss\",'ddd':\"sdfsd\",'name':\"hh\"}";
         TestEntity news = JSON.parseObject(jsonStr, TestEntity.class, Feature.InitStringFieldAsEmpty);
         assertEquals("{\"ddd\":\"sdfsd\",\"id\":\"ss\",\"name\":\"hh\"}", JSON.toJSONString(news));
     }
@@ -17,33 +19,27 @@ public class Issue2387 extends TestCase
         private String ddd;
         private String name;
 
-        public String getId()
-        {
+        public String getId() {
             return id;
         }
 
-        public void setId(String id)
-        {
+        public void setId(String id) {
             this.id = id;
         }
 
-        public String getDdd()
-        {
+        public String getDdd() {
             return ddd;
         }
 
-        public void setDdd(String ddd)
-        {
+        public void setDdd(String ddd) {
             this.ddd = ddd;
         }
 
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
-        public void setName(String name)
-        {
+        public void setName(String name) {
             this.name = name;
         }
     }
