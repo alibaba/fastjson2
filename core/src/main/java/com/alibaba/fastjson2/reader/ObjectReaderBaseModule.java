@@ -1961,8 +1961,13 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class LocalDateTimeImpl extends PrimitiveImpl {
-        static final LocalDateTimeImpl INSTANCE = new LocalDateTimeImpl();
+    static class LocalDateTimeImpl extends DateTimeCodec implements ObjectReader {
+        static final LocalDateTimeImpl INSTANCE = new LocalDateTimeImpl(null);
+        static final LocalDateTimeImpl INSTANCE_UNIXTIME = new LocalDateTimeImpl("unixtime");
+
+        public LocalDateTimeImpl(String format) {
+            super(format);
+        }
 
         @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
@@ -1972,8 +1977,20 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         @Override
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
+                DateTimeFormatter formatter = getDateFormatter();
+                if (formatter != null) {
+                    String str = jsonReader.readString();
+                    return LocalDateTime.parse(str, formatter);
+                }
+
                 long millis = jsonReader.readInt64Value();
-                return new Date(millis);
+
+                if (formatUnixTime) {
+                    millis *= 1000;
+                }
+
+                Instant instant = Instant.ofEpochMilli(millis);
+                return LocalDateTime.ofInstant(instant, jsonReader.getContext().getZoneId());
             }
 
             if (jsonReader.readIfNull()) {

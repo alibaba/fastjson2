@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -69,6 +70,20 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
                         }
                     }
                 }
+
+                if (LocalDateTime.class.isAssignableFrom(valueClass)) {
+                    if (format == null || format.isEmpty()) {
+                        return initObjectWriter = ObjectWriterImplLocalDateTime.INSTANCE;
+                    } else {
+                        switch (format) {
+                            case "unixtime":
+                                return initObjectWriter = ObjectWriterImplLocalDateTime.INSTANCE_UNIXTIME;
+                            default:
+                                return initObjectWriter = new ObjectWriterImplLocalDateTime(format);
+                        }
+                    }
+                }
+
                 return initObjectWriter = jsonWriter.getObjectWriter(valueClass);
             }
         } else {

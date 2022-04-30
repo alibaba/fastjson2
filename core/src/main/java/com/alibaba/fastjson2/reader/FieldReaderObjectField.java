@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -76,6 +77,19 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
                     return reader = ObjectReaderBaseModule.ZonedDateTimeImpl.INSTANCE_UNIXTIME;
                 default:
                     return reader = new ObjectReaderBaseModule.ZonedDateTimeImpl(format);
+            }
+        }
+
+        if (fieldClass == LocalDateTime.class) {
+            if (format == null) {
+                return reader = ObjectReaderBaseModule.LocalDateTimeImpl.INSTANCE;
+            }
+
+            switch (format) {
+                case "unixtime":
+                    return reader = ObjectReaderBaseModule.LocalDateTimeImpl.INSTANCE_UNIXTIME;
+                default:
+                    return reader = new ObjectReaderBaseModule.LocalDateTimeImpl(format);
             }
         }
 

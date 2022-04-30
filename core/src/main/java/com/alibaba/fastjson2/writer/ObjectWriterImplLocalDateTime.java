@@ -1,13 +1,19 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.codec.DateTimeCodec;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-final class ObjectWriterImplLocalDateTime extends ObjectWriterBaseModule.PrimitiveImpl {
-    static final ObjectWriterImplLocalDateTime INSTANCE = new ObjectWriterImplLocalDateTime();
+final class ObjectWriterImplLocalDateTime extends DateTimeCodec implements ObjectWriter {
+    static final ObjectWriterImplLocalDateTime INSTANCE = new ObjectWriterImplLocalDateTime(null);
+    static final ObjectWriterImplLocalDateTime INSTANCE_UNIXTIME = new ObjectWriterImplLocalDateTime("unixtime");
+
+    public ObjectWriterImplLocalDateTime(String format) {
+        super(format);
+    }
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -24,6 +30,22 @@ final class ObjectWriterImplLocalDateTime extends ObjectWriterBaseModule.Primiti
         JSONWriter.Context ctx = jsonWriter.getContext();
 
         LocalDateTime dateTime = (LocalDateTime) object;
+
+        if (formatUnixTime || ctx.isDateFormatUnixTime()) {
+            long millis = dateTime.atZone(ctx.getZoneId())
+                    .toInstant()
+                    .toEpochMilli();
+            jsonWriter.writeInt64(millis / 1000);
+            return;
+        }
+
+        if (formatMillis || ctx.isDateFormatMillis()) {
+            long millis = dateTime.atZone(ctx.getZoneId())
+                    .toInstant()
+                    .toEpochMilli();
+            jsonWriter.writeInt64(millis);
+            return;
+        }
 
         String dateFormat = ctx.getDateFormat();
         if (dateFormat == null) {
