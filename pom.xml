@@ -502,6 +502,11 @@
                     <value>true</value>
                 </property>
             </activation>
+            <properties>
+                <javadoc.default.exclude.packages>
+                    *.internal:*.internal.*:*.internal.*.*:*.internal.*.*.*
+                </javadoc.default.exclude.packages>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -520,7 +525,7 @@
                             <encoding>UTF-8</encoding>
                             <docencoding>UTF-8</docencoding>
                             <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/examples/exclude-package-names.html -->
-                            <excludePackageNames>*.internal:*.internal.*</excludePackageNames>
+                            <excludePackageNames>${javadoc.default.exclude.packages}</excludePackageNames>
                             <doclint>all,-missing</doclint>
                             <links>
                                 <link>https://docs.oracle.com/javase/8/docs/api</link>

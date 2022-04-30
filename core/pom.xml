@@ -260,7 +260,7 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
                             <excludePackageNames>
-                                *.internal:*.internal.*:com.alibaba.fastjson2.trove.*::com.alibaba.fastjson2.trove.*.*
+                                ${javadoc.default.exclude.packages}:com.alibaba.fastjson2.trove:com.alibaba.fastjson2.trove.*:com.alibaba.fastjson2.trove.*.*
                             </excludePackageNames>
                         </configuration>
                     </plugin>
