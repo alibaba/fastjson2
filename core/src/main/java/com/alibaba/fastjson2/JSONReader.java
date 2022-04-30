@@ -2050,6 +2050,7 @@ public abstract class JSONReader implements Closeable {
         UseDefaultConstructorAsPossible (1 << 9),
         UseBigDecimalForFloats          (1 << 10),
         UseBigDecimalForDoubles         (1 << 11),
+        ErrorOnEnumNotMatch             (1 << 12)
         ;
 
         public final long mask;

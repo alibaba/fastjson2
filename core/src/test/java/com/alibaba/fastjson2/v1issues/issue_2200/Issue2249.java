@@ -1,12 +1,15 @@
-package com.alibaba.json.bvt.issue_2200;
+package com.alibaba.fastjson2.v1issues.issue_2200;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.parser.Feature;
-import junit.framework.TestCase;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONReader;
+import org.junit.jupiter.api.Test;
 
-public class Issue2249 extends TestCase {
-    public void test_for_issue() throws Exception {
+import static org.junit.jupiter.api.Assertions.*;
+
+public class Issue2249 {
+    @Test
+    public void test_for_issue() {
         assertSame(Type.Big, JSON.parseObject("\"big\"", Type.class));
         assertSame(Type.Big, JSON.parseObject("\"Big\"", Type.class));
         assertSame(Type.Big, JSON.parseObject("\"BIG\"", Type.class));
@@ -20,7 +23,8 @@ public class Issue2249 extends TestCase {
         assertNull(JSON.parseObject("\"\"", Type.class));
     }
 
-    public void test_for_issue_1() throws Exception {
+    @Test
+    public void test_for_issue_1() {
         assertSame(Type.Big, JSON.parseObject("{\"type\":\"bIG\"}", Model.class).type);
         assertSame(Type.Big, JSON.parseObject("{\"type\":\"big\"}", Model.class).type);
         assertSame(Type.Big, JSON.parseObject("{\"type\":\"Big\"}", Model.class).type);
@@ -38,30 +42,33 @@ public class Issue2249 extends TestCase {
 
     }
 
-    public void test_for_issue_null() throws Exception {
+    @Test
+    public void test_for_issue_null() {
         assertNull(JSON.parseObject("{\"type\":\"\"}", Model.class).type);
     }
 
-    public void test_for_issue_null_2() throws Exception {
-        Model model = JSON.parseObject("{\"type\":\"\"}", Model.class, Feature.ErrorOnEnumNotMatch);
+    @Test
+    public void test_for_issue_null_2() {
+        Model model = JSON.parseObject("{\"type\":\"\"}", Model.class, JSONReader.Feature.ErrorOnEnumNotMatch);
         assertNull(model.type);
     }
 
-
-    public void test_for_issue_error() throws Exception {
+    @Test
+    public void test_for_issue_error() {
         Exception error = null;
         try {
-            JSON.parseObject("\"xxx\"", Type.class, Feature.ErrorOnEnumNotMatch);
+            JSON.parseObject("\"xxx\"", Type.class, JSONReader.Feature.ErrorOnEnumNotMatch);
         } catch (JSONException e) {
             error = e;
         }
         assertNotNull(error);
     }
 
-    public void test_for_issue_error_1() throws Exception {
+    @Test
+    public void test_for_issue_error_1() {
         Exception error = null;
         try {
-            JSON.parseObject("{\"type\":\"xxx\"}", Model.class, Feature.ErrorOnEnumNotMatch);
+            JSON.parseObject("{\"type\":\"xxx\"}", Model.class, JSONReader.Feature.ErrorOnEnumNotMatch);
         } catch (JSONException e) {
             error = e;
         }
