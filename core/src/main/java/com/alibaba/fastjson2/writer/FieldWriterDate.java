@@ -32,19 +32,20 @@ abstract class FieldWriterDate<T> extends FieldWriterImpl<T> {
         super(fieldName, ordinal, features, format, fieldType, fieldClass);
 
         boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false;
-        switch (format) {
-            case "millis":
-                formatMillis = true;
-                break;
-            case "iso8601":
-                formatISO8601 = true;
-                break;
-            case "unixtime":
-                formatUnixTime = true;
-            default:
-                break;
+        if (format != null) {
+            switch (format) {
+                case "millis":
+                    formatMillis = true;
+                    break;
+                case "iso8601":
+                    formatISO8601 = true;
+                    break;
+                case "unixtime":
+                    formatUnixTime = true;
+                default:
+                    break;
+            }
         }
-
 
         this.formatMillis = formatMillis;
         this.formatISO8601 = formatISO8601;
