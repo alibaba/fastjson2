@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
@@ -15,6 +16,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Date;
 
 public class JdbcSupport {
     public static ObjectReader createTimeReader(String format) {
@@ -41,8 +43,12 @@ public class JdbcSupport {
         return new DateReader(format);
     }
 
-    public static ObjectWriter createTimeWriter() {
-        return new TimeWriter();
+    public static ObjectWriter createTimeWriter(String format) {
+        if (format == null) {
+            return TimeWriter.INSTANCE;
+        }
+
+        return new TimeWriter(null);
     }
 
     public static ObjectWriter createTimestampWriter() {
@@ -98,11 +104,30 @@ public class JdbcSupport {
         }
     }
 
-    static class TimeWriter implements ObjectWriter {
+    static class TimeWriter extends DateTimeCodec implements ObjectWriter {
+        public static TimeWriter INSTANCE = new TimeWriter(null);
+
+        public TimeWriter(String format) {
+            super(format);
+        }
+
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             if (object == null) {
                 jsonWriter.writeNull();
+                return;
+            }
+
+            JSONWriter.Context context = jsonWriter.getContext();
+            if (context.isDateFormatUnixTime()) {
+                long millis = ((Date) object).getTime();
+                jsonWriter.writeInt64(millis / 1000);
+                return;
+            }
+
+            if (context.isDateFormatMillis()) {
+                long millis = ((Date) object).getTime();
+                jsonWriter.writeInt64(millis);
                 return;
             }
 

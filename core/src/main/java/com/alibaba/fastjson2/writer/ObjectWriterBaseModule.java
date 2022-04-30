@@ -551,7 +551,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
     ObjectWriter getExternalObjectWriter(String className, Class objectClass) {
         switch (className) {
             case "java.sql.Time":
-                return JdbcSupport.createTimeWriter();
+                return JdbcSupport.createTimeWriter(null);
             case "java.sql.Timestamp":
                 return JdbcSupport.createTimestampWriter();
             case "org.joda.time.chrono.GregorianChronology":
