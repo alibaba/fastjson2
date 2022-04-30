@@ -276,6 +276,8 @@ public abstract class JSONReader implements Closeable {
             case '\\': // 92
             case '#': //
             case '&': //
+            case '[': //
+            case ']': //
                 return (char) c;
             default:
                 throw new JSONException("unclosed.str.lit " + (char) c);
