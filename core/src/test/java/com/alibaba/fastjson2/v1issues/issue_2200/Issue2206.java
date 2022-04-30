@@ -1,11 +1,12 @@
-package com.alibaba.json.bvt.issue_2200;
+package com.alibaba.fastjson2.v1issues.issue_2200;
 
-import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
+import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
-public class Issue2206 extends TestCase {
+public class Issue2206 {
+    @Test
     public void test_for_issue() throws Exception {
         JSON.parseObject("{\"date\":\"20181229162849\"}", Model.class);
     }
