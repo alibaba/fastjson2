@@ -517,7 +517,7 @@
             </activation>
             <properties>
                 <javadoc.default.exclude.packages>
-                    *.internal:*.internal.*:*.internal.*.*:*.internal.*.*.*
+                    *.internal:*.internal.*:*.internal.*.*:*.internal.*.*.*:*.internal.*.*.*.*
                 </javadoc.default.exclude.packages>
             </properties>
             <build>
