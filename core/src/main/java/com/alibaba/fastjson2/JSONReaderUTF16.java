@@ -2699,7 +2699,7 @@ final class JSONReaderUTF16 extends JSONReader {
             throw new JSONException("date only support string input");
         }
 
-        if (len < 20) {
+        if (len < 19) {
             throw new JSONException("illeal localdatetime string : " + readString());
         }
 
@@ -2722,10 +2722,13 @@ final class JSONReaderUTF16 extends JSONReader {
         char c16 = chars[offset + 16];
         char c17 = chars[offset + 17];
         char c18 = chars[offset + 18];
-        char c19 = chars[offset + 19];
+        char c19 = len == 19 ? ' ' : chars[offset + 19];
 
         char c20, c21 = '0', c22 = '0', c23 = '0', c24 = '0', c25 = '0', c26 = '0', c27 = '0', c28 = '0', c29 = '\0';
         switch (len) {
+            case 19:
+                c20 = '\0';
+                break;
             case 20:
                 c20 = '\0';
                 break;
