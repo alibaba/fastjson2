@@ -340,8 +340,8 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     case "IgnoreErrorGetter":
                         fieldInfo.features |= JSONWriter.Feature.IgnoreErrorGetter.mask;
                         break;
-                    case "SkipTransientField":
-//                        fieldInfo.features |= JSONWriter.Feature.IgnoreTransient.mask;
+                    case "WriteBigDecimalAsPlain":
+                        fieldInfo.features |= JSONWriter.Feature.WriteBigDecimalAsPlain.mask;
                         break;
                     default:
                         break;

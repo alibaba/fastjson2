@@ -200,6 +200,10 @@ public abstract class JSONWriter implements Closeable {
         return context.features;
     }
 
+    public long getFeatures(long features) {
+        return context.features | features;
+    }
+
     public boolean isIgnoreErrorGetter() {
         return (context.features & Feature.IgnoreErrorGetter.mask) != 0;
     }
@@ -705,9 +709,15 @@ public abstract class JSONWriter implements Closeable {
             return;
         }
 
-        String str = value.toString();
-
         features |= context.features;
+
+        if ((features & Feature.WriteBigDecimalAsPlain.mask) != 0) {
+            String str = value.toPlainString();
+            writeRaw(str);
+            return;
+        }
+
+        String str = value.toString();
 
         if ((features & Feature.BrowserCompatible.mask) != 0
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0)) {
@@ -1431,6 +1441,7 @@ public abstract class JSONWriter implements Closeable {
         PrettyFormat(1 << 15),
         ReferenceDetection(1 << 16),
         WriteNameAsSymbol(1 << 17),
+        WriteBigDecimalAsPlain(1 << 18),
         ;
 
         public final long mask;
