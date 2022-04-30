@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.codec.BeanInfo;
+import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
@@ -26,6 +27,8 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
@@ -1666,12 +1669,55 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     }
 
     static class CalendarImpl extends PrimitiveImpl {
-        static final CalendarImpl INSTANCE = new CalendarImpl();
+        static final CalendarImpl INSTANCE = new CalendarImpl(null);
+        static final CalendarImpl INSTANCE_UNIXTIME = new CalendarImpl("unixtime");
+
+        protected final String format;
+        protected final boolean formatUnixTime;
+        protected final boolean formatMillis;
+        protected final boolean formatISO8601;
+        DateTimeFormatter dateFormatter;
+
+        public CalendarImpl(String format) {
+            this.format = format;
+
+            boolean formatUnixTime = false, formatMillis = false, formatISO8601 = false;
+            if (format != null) {
+                switch (format) {
+                    case "unixtime":
+                        formatUnixTime = true;
+                        break;
+                    case "millis":
+                        formatMillis = true;
+                        break;
+                    case "iso8601":
+                        formatISO8601 = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            this.formatUnixTime = formatUnixTime;
+            this.formatMillis = formatMillis;
+            this.formatISO8601 = formatISO8601;
+        }
+
+        public DateTimeFormatter getDateFormatter() {
+            if (dateFormatter == null && format != null && !formatMillis && !formatISO8601 && !formatUnixTime) {
+                dateFormatter = DateTimeFormatter.ofPattern(format);
+            }
+            return dateFormatter;
+        }
 
         @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
+
+                if (formatUnixTime) {
+                    millis *= 1000;
+                }
+
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(millis);
                 return calendar;
@@ -1682,6 +1728,10 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             }
 
             long millis = jsonReader.readMillisFromString();
+            if (formatUnixTime) {
+                millis *= 1000;
+            }
+
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(millis);
             return calendar;
@@ -1690,7 +1740,25 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         @Override
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.current() == '"') {
+                if (format != null) {
+                    DateTimeFormatter formatter = getDateFormatter();
+                    if (formatter != null) {
+                        String str = jsonReader.readString();
+                        LocalDateTime ldt = LocalDateTime.parse(str, formatter);
+                        ZonedDateTime zdt = ZonedDateTime.of(ldt, jsonReader.getContext().getZoneId());
+
+                        long millis = zdt.toInstant().toEpochMilli();
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTimeInMillis(millis);
+                        return calendar;
+                    }
+                }
+
                 long millis = jsonReader.readMillisFromString();
+                if (formatUnixTime) {
+                    millis *= 1000;
+                }
+
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(millis);
                 return calendar;
@@ -1701,6 +1769,10 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             }
 
             long millis = jsonReader.readInt64Value();
+            if (formatUnixTime) {
+                millis *= 1000;
+            }
+
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(millis);
             return calendar;
@@ -1711,18 +1783,34 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         static final UtilDateImpl INSTANCE = new UtilDateImpl(null);
 
         protected final String format;
+        protected final boolean formatUnixTime;
         protected volatile SimpleDateFormat formatter;
         protected static final AtomicReferenceFieldUpdater<UtilDateImpl, SimpleDateFormat> FORMATTER_UPDATER
                 = AtomicReferenceFieldUpdater.newUpdater(UtilDateImpl.class, SimpleDateFormat.class, "formatter");
 
         public UtilDateImpl(String format) {
             this.format = format;
+
+            boolean formatUnixTime = false;
+            if (format != null) {
+                switch (format) {
+                    case "unixtime":
+                        formatUnixTime = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            this.formatUnixTime = formatUnixTime;
         }
 
         @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
+                if (formatUnixTime) {
+                    millis *= 1000;
+                }
                 return new Date(millis);
             }
 
@@ -1737,6 +1825,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
+                if (formatUnixTime) {
+                    millis *= 1000;
+                }
                 return new Date(millis);
             }
 
@@ -1766,6 +1857,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 }
             } else {
                 long millis = jsonReader.readMillisFromString();
+                if (formatUnixTime) {
+                    millis *= 1000;
+                }
                 date = new Date(millis);
             }
 
@@ -1801,8 +1895,13 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class ZonedDateTimeImpl extends PrimitiveImpl {
-        static final ZonedDateTimeImpl INSTANCE = new ZonedDateTimeImpl();
+    static class ZonedDateTimeImpl extends DateTimeCodec implements ObjectReader {
+        static final ZonedDateTimeImpl INSTANCE = new ZonedDateTimeImpl(null);
+        static final ZonedDateTimeImpl INSTANCE_UNIXTIME = new ZonedDateTimeImpl("unixtime");
+
+        public ZonedDateTimeImpl(String format) {
+            super(format);
+        }
 
         @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
@@ -1813,7 +1912,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
-                return new Date(millis);
+                if (formatUnixTime) {
+                    millis *= 1000;
+                }
+
+                Instant instant = Instant.ofEpochMilli(millis);
+                return ZonedDateTime.ofInstant(instant, jsonReader.getContext().getZoneId());
             }
 
             if (jsonReader.readIfNull()) {

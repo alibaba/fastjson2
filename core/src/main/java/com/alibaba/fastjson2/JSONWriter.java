@@ -1237,6 +1237,7 @@ public abstract class JSONWriter implements Closeable {
         String dateFormat;
         boolean dateFormatMillis;
         boolean dateFormatISO8601;
+        boolean dateFormatUnixTime;
         String numberFormat;
         long features;
         ZoneId zoneId;
@@ -1336,12 +1337,16 @@ public abstract class JSONWriter implements Closeable {
             return dateFormatMillis;
         }
 
+        public boolean isDateFormatUnixTime() {
+            return dateFormatUnixTime;
+        }
+
         public boolean isDateFormatISO8601() {
             return dateFormatISO8601;
         }
 
         public DateTimeFormatter getDateFormatter() {
-            if (dateFormatter == null && dateFormat != null && !dateFormatMillis && !dateFormatISO8601) {
+            if (dateFormatter == null && dateFormat != null && !dateFormatMillis && !dateFormatISO8601 && !dateFormatUnixTime) {
                 dateFormatter = DateTimeFormatter.ofPattern(dateFormat);
             }
             return dateFormatter;
@@ -1351,8 +1356,23 @@ public abstract class JSONWriter implements Closeable {
             if (dateFormat == null || !dateFormat.equals(this.dateFormat)) {
                 dateFormatter = null;
             }
-            this.dateFormatMillis = "millis".equals(dateFormat);
-            this.dateFormatISO8601 = "iso8601".equalsIgnoreCase(dateFormat);
+
+            if (dateFormat != null) {
+                switch (dateFormat) {
+                    case "millis":
+                        dateFormatMillis = true;
+                        break;
+                    case "iso8601":
+                        dateFormatISO8601 = true;
+                        break;
+                    case "unixtime":
+                        dateFormatUnixTime = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             this.dateFormat = dateFormat;
         }
 

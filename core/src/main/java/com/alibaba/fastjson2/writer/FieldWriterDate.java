@@ -26,11 +26,29 @@ abstract class FieldWriterDate<T> extends FieldWriterImpl<T> {
     protected DateTimeFormatter formatter;
     boolean formatMillis;
     boolean formatISO8601;
+    boolean formatUnixTime;
 
     protected FieldWriterDate(String fieldName, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
         super(fieldName, ordinal, features, format, fieldType, fieldClass);
-        this.formatMillis = "millis".equals(format);
-        this.formatISO8601 = "iso8601".equalsIgnoreCase(format);
+
+        boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false;
+        switch (format) {
+            case "millis":
+                formatMillis = true;
+                break;
+            case "iso8601":
+                formatISO8601 = true;
+                break;
+            case "unixtime":
+                formatUnixTime = true;
+            default:
+                break;
+        }
+
+
+        this.formatMillis = formatMillis;
+        this.formatISO8601 = formatISO8601;
+        this.formatUnixTime = formatUnixTime;
     }
 
     @Override
@@ -44,7 +62,12 @@ abstract class FieldWriterDate<T> extends FieldWriterImpl<T> {
     }
 
     public DateTimeFormatter getFormatter() {
-        if (formatter == null && format != null && !formatMillis && !formatISO8601) {
+        if (formatter == null
+                && format != null
+                && !formatMillis
+                && !formatISO8601
+                && !formatUnixTime
+        ) {
             formatter = DateTimeFormatter.ofPattern(format);
         }
 
@@ -65,6 +88,12 @@ abstract class FieldWriterDate<T> extends FieldWriterImpl<T> {
         if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
             writeFieldName(jsonWriter);
             jsonWriter.writeInt64(timeMillis);
+            return;
+        }
+
+        if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
+            writeFieldName(jsonWriter);
+            jsonWriter.writeInt64(timeMillis/1000);
             return;
         }
 

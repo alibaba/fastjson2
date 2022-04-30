@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
@@ -50,6 +51,32 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
         if (byte[].class == fieldClass && "base64".equals(format)) {
             return reader = ObjectReaderBaseModule.Base64Impl.INSTANCE;
+        }
+
+        if (fieldClass == Calendar.class) {
+            if (format == null) {
+                return reader = ObjectReaderBaseModule.CalendarImpl.INSTANCE;
+            }
+
+            switch (format) {
+                case "unixtime":
+                    return reader = ObjectReaderBaseModule.CalendarImpl.INSTANCE_UNIXTIME;
+                default:
+                    return reader = new ObjectReaderBaseModule.CalendarImpl(format);
+            }
+        }
+
+        if (fieldClass == ZonedDateTime.class) {
+            if (format == null) {
+                return reader = ObjectReaderBaseModule.ZonedDateTimeImpl.INSTANCE;
+            }
+
+            switch (format) {
+                case "unixtime":
+                    return reader = ObjectReaderBaseModule.ZonedDateTimeImpl.INSTANCE_UNIXTIME;
+                default:
+                    return reader = new ObjectReaderBaseModule.ZonedDateTimeImpl(format);
+            }
         }
 
         return reader = jsonReader.getObjectReader(fieldType);
