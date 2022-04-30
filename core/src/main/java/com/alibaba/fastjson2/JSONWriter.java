@@ -1356,14 +1356,6 @@ public abstract class JSONWriter implements Closeable {
             this.dateFormat = dateFormat;
         }
 
-        public String getNumberFormat() {
-            return numberFormat;
-        }
-
-        public void setNumberFormat(String numberFormat) {
-            this.numberFormat = numberFormat;
-        }
-
         public PropertyPreFilter getPropertyPreFilter() {
             return propertyPreFilter;
         }
