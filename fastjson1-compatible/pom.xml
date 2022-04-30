@@ -265,11 +265,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.diffblue</groupId>
-            <artifactId>deeptestutils</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.gitlab4j</groupId>
             <artifactId>gitlab4j-api</artifactId>
             <scope>test</scope>

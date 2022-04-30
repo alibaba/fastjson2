@@ -300,11 +300,6 @@
                 <version>5.2.10.Final</version>
             </dependency>
             <dependency>
-                <groupId>com.diffblue</groupId>
-                <artifactId>deeptestutils</artifactId>
-                <version>1.9.0</version>
-            </dependency>
-            <dependency>
                 <groupId>org.gitlab4j</groupId>
                 <artifactId>gitlab4j-api</artifactId>
                 <version>5.0.1</version>
