@@ -1,20 +1,24 @@
-package com.alibaba.json.bvt.issue_1900;
+package com.alibaba.fastjson2.v1issues.issue_1900;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class Issue1909 extends TestCase {
-    public void test_for_issue() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class Issue1909 {
+    @Test
+    public void test_for_issue() {
         JSONArray params = new JSONArray();
         params.add("val1");
         params.add(2);
         ParamRequest pr = new ParamRequest("methodName", "stringID", params);
-        System.out.println(JSON.toJSONString(pr));
-        Request paramRequest = JSON.parseObject(JSON.toJSONString(pr), ParamRequest.class);
+        String str = JSON.toJSONString(pr);
+        Request paramRequest = JSON.parseObject(str, ParamRequest.class);
+        assertNotNull(paramRequest);
     }
 
     public static class ParamRequest extends Request {
