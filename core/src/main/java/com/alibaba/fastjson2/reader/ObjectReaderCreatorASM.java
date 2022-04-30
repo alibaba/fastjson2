@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.asm.*;
+import com.alibaba.fastjson2.internal.asm.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
@@ -9,9 +9,6 @@ import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.JSONReader;
 
-import com.alibaba.fastjson2.asm.ClassWriter;
-import com.alibaba.fastjson2.asm.Label;
-import com.alibaba.fastjson2.asm.MethodWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.lang.reflect.*;
