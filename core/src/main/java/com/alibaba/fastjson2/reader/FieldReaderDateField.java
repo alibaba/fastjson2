@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
-    private ObjectReader dateReader;
+    private ObjectReaderBaseModule.UtilDateImpl dateReader;
     volatile SimpleDateFormat formatter;
     static final AtomicReferenceFieldUpdater<FieldReaderDateField, SimpleDateFormat> FORMATTER_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(FieldReaderDateField.class, SimpleDateFormat.class, "formatter");
@@ -75,6 +75,12 @@ final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
                     JSON.toJSONString(value));
             value = getObjectReader(jsonReader)
                     .readObject(jsonReader);
+        } else if (value instanceof Integer) {
+            long millis = ((Integer) value).intValue();
+            if (dateReader.formatUnixTime) {
+                millis *= 1000;
+            }
+            value = new Date(millis);
         }
 
         try {

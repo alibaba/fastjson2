@@ -1746,29 +1746,15 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    public static class UtilDateImpl extends PrimitiveImpl {
+    public static class UtilDateImpl extends DateTimeCodec implements ObjectReader {
         static final UtilDateImpl INSTANCE = new UtilDateImpl(null);
 
-        protected final String format;
-        protected final boolean formatUnixTime;
         protected volatile SimpleDateFormat formatter;
         protected static final AtomicReferenceFieldUpdater<UtilDateImpl, SimpleDateFormat> FORMATTER_UPDATER
                 = AtomicReferenceFieldUpdater.newUpdater(UtilDateImpl.class, SimpleDateFormat.class, "formatter");
 
         public UtilDateImpl(String format) {
-            this.format = format;
-
-            boolean formatUnixTime = false;
-            if (format != null) {
-                switch (format) {
-                    case "unixtime":
-                        formatUnixTime = true;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            this.formatUnixTime = formatUnixTime;
+            super (format);
         }
 
         @Override
