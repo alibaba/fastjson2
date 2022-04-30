@@ -1,12 +1,15 @@
-package com.alibaba.json.bvt.issue_2300;
+package com.alibaba.fastjson2.v1issues.issue_2300;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPath;
-import junit.framework.TestCase;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONPath;
+import org.junit.jupiter.api.Test;
 
-public class Issue2334 extends TestCase {
-    public void test_for_issue() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2334 {
+    @Test
+    public void test_for_issue() {
         String json = "{\n" +
                 "\"EXTINFO\":{\n" +
                 "\"bct_loan_account_status[15]\":\"aaa\",\n" +
