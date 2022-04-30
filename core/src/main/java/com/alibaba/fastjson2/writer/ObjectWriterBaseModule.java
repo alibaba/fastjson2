@@ -553,7 +553,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             case "java.sql.Time":
                 return JdbcSupport.createTimeWriter(null);
             case "java.sql.Timestamp":
-                return JdbcSupport.createTimestampWriter();
+                return JdbcSupport.createTimestampWriter(null);
             case "org.joda.time.chrono.GregorianChronology":
                 return JodaSupport.createGregorianChronologyWriter(objectClass);
             case "org.joda.time.chrono.ISOChronology":
