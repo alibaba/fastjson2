@@ -1357,18 +1357,21 @@ public abstract class JSONWriter implements Closeable {
                 dateFormatter = null;
             }
 
-            if (dateFormat != null) {
+            if (dateFormat != null && !dateFormat.isEmpty()) {
                 switch (dateFormat) {
                     case "millis":
                         dateFormatMillis = true;
                         break;
                     case "iso8601":
+                        dateFormatMillis = false;
                         dateFormatISO8601 = true;
                         break;
                     case "unixtime":
+                        dateFormatMillis = false;
                         dateFormatUnixTime = true;
                         break;
                     default:
+                        dateFormatMillis = false;
                         break;
                 }
             }
