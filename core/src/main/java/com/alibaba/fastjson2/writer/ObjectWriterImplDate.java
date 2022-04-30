@@ -46,6 +46,11 @@ final class ObjectWriterImplDate extends DateTimeCodec implements ObjectWriter {
             return;
         }
 
+        if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
+            jsonWriter.writeInt64(millis / 1000);
+            return;
+        }
+
         ZoneId zoneId = ctx.getZoneId();
         Instant instant = Instant.ofEpochMilli(millis);
         ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
