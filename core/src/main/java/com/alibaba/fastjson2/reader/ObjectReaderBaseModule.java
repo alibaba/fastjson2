@@ -32,6 +32,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.reader.TypeConverts.*;
 
@@ -139,6 +140,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         {
             provider.registerTypeConvert(String.class, boolean.class, STRING_TO_BOOLEAN_VALUE);
             provider.registerTypeConvert(Boolean.class, boolean.class, o -> o);
+        }
+        {
+            Function function = o -> o == null || "null".equals(o) || o.equals(0L)
+                    ? null
+                    : LocalDateTime.ofInstant(Instant.ofEpochMilli((Long) o), ZoneId.systemDefault());
+            provider.registerTypeConvert(Long.class, LocalDateTime.class, function);
         }
     }
 
