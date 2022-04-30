@@ -1,18 +1,22 @@
-package com.alibaba.json.bvt.issue_3000;
+package com.alibaba.fastjson2.v1issues.issue_3000;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
-import junit.framework.TestCase;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.util.AbstractMap;
 import java.util.HashSet;
 import java.util.Map;
 
-public class Issue3082 extends TestCase {
-    public void test_for_issue_entry() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3082 {
+    @Test
+    public void test_for_issue_entry() {
         String str = "{\"k\":{\"k\":\"v\"}}";
-        Map.Entry<String, Map.Entry<String, String>> entry = JSON.parseObject(str, new TypeReference<Map.Entry<String, Map.Entry<String, String>>>() {});
+        Map.Entry<String, Map.Entry<String, String>> entry = JSON.parseObject(str
+                , new TypeReference<Map.Entry<String, Map.Entry<String, String>>>() {});
         assertEquals("v", entry.getValue().getValue());
     }
 
