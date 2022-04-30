@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.asm.ASMUtils;
+import com.alibaba.fastjson2.internal.asm.ASMUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
