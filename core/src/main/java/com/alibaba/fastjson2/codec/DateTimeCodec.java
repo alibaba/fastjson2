@@ -4,10 +4,10 @@ package com.alibaba.fastjson2.codec;
 import java.time.format.DateTimeFormatter;
 
 public abstract class DateTimeCodec {
-    protected final String format;
-    protected final boolean formatUnixTime;
-    protected final boolean formatMillis;
-    protected final boolean formatISO8601;
+    public final String format;
+    public final boolean formatUnixTime;
+    public final boolean formatMillis;
+    public final boolean formatISO8601;
 
     DateTimeFormatter dateFormatter;
 
