@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.codec.DateTimeCodec;
 
 import java.lang.reflect.Type;
 import java.time.Instant;
@@ -9,46 +10,12 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 
-final class ObjectWriterImplCalendar extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplCalendar extends DateTimeCodec implements ObjectWriter {
     static final ObjectWriterImplCalendar INSTANCE = new ObjectWriterImplCalendar(null);
     static final ObjectWriterImplCalendar INSTANCE_UNIXTIME = new ObjectWriterImplCalendar("unixtime");
 
-    protected final String format;
-    protected final boolean formatUnixTime;
-    protected final boolean formatMillis;
-    protected final boolean formatISO8601;
-
-    DateTimeFormatter dateFormatter;
-
     public ObjectWriterImplCalendar(String format) {
-        this.format = format;
-
-        boolean formatUnixTime = false, formatISO8601 = false, formatMillis = false;
-        if (format != null) {
-            switch (format) {
-                case "unixtime":
-                    formatUnixTime = true;
-                    break;
-                case "iso8601":
-                    formatISO8601 = true;
-                    break;
-                case "millis":
-                    formatMillis = true;
-                    break;
-                default:
-                    break;
-            }
-        }
-        this.formatUnixTime = formatUnixTime;
-        this.formatMillis = formatMillis;
-        this.formatISO8601 = formatISO8601;
-    }
-
-    public DateTimeFormatter getDateFormatter() {
-        if (dateFormatter == null && format != null && !formatMillis && !formatISO8601 && !formatUnixTime) {
-            dateFormatter = DateTimeFormatter.ofPattern(format);
-        }
-        return dateFormatter;
+        super (format);
     }
 
     @Override
