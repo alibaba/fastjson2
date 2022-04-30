@@ -154,6 +154,8 @@ public class JSON {
                 case SupportAutoType:
                     context.config(JSONReader.Feature.SupportAutoType);
                     break;
+                case ErrorOnEnumNotMatch:
+                    context.config(JSONReader.Feature.ErrorOnEnumNotMatch);
                 default:
                     break;
             }

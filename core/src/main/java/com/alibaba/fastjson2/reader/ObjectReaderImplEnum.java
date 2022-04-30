@@ -135,13 +135,21 @@ final class ObjectReaderImplEnum implements ObjectReader {
                 }
             }
         } else {
-            fieldValue = getEnumByHashCode(
-                    jsonReader.readValueHashCode()
-            );
+            long hashCode = jsonReader.readValueHashCode();
+            fieldValue = getEnumByHashCode(hashCode);
+            if (hashCode == Fnv.MAGIC_HASH_CODE) {
+                return null;
+            }
+
             if (fieldValue == null) {
                 fieldValue = getEnumByHashCode(
                         jsonReader.getNameHashCodeLCase()
                 );
+            }
+
+            if (fieldValue == null && jsonReader.getContext().isEnable(JSONReader.Feature.ErrorOnEnumNotMatch)) {
+                String strVal = jsonReader.getString();
+                throw new JSONException("parse enum error, class " + enumClass.getName() + ", value " + strVal);
             }
         }
         return fieldValue;
