@@ -500,6 +500,18 @@ public abstract class BeanUtils {
             case "SnakeCase": {
                 return snakeCase(methodName, 3);
             }
+            case "UpperCase": {
+                char[] chars = new char[methodNameLength - 3];
+                methodName.getChars(3, methodNameLength, chars, 0);
+                char c0 = chars[0];
+                for (int i = 0; i < chars.length; i++) {
+                    char ch = chars[i];
+                    if (ch >= 'a' && c0 <= 'z') {
+                        chars[i] = (char) (ch - 32);
+                    }
+                }
+                return new String(chars);
+            }
             default:
                 throw new JSONException("TODO : " + namingStrategy);
         }
