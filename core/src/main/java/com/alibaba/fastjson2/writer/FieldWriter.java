@@ -25,6 +25,10 @@ public interface FieldWriter<T> extends Comparable {
         return false;
     }
 
+    default boolean unwrapped() {
+        return false;
+    }
+
     Type getFieldType();
 
     default Type getItemType() {

@@ -59,6 +59,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
     static final String METHOD_DESC_WRITE_CArray = "(" + DESC_JSON_WRITER + "[C)V";
     static final String METHOD_DESC_WRITE_ENUM = "(" + DESC_JSON_WRITER + "Ljava/lang/Enum;)V";
     static final String METHOD_DESC_WRITE_LIST = "(" + DESC_JSON_WRITER + "ZLjava/util/List;)V";
+    static final String METHOD_DESC_FIELD_WRITE_OBJECT = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;)Z";
     static final String METHOD_DESC_GET_OBJECT_WRITER = "(" + DESC_JSON_WRITER + "Ljava/lang/Class;)" + DESC_OBJECT_WRITER;
     static final String METHOD_DESC_GET_ITEM_WRITER = "(" + DESC_JSON_WRITER + "Ljava/lang/reflect/Type;)" + DESC_OBJECT_WRITER;
     static final String METHOD_DESC_WRITE_TYPE_INFO = "(" + DESC_JSON_WRITER + ")Z";
@@ -1393,13 +1394,26 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         long features = fieldWriter.getFeatures() | mwc.objectFeatures;
         MethodWriter mw = mwc.mw;
 
+        Label null_ = new Label(), notNull_ = new Label();
+
+        if (fieldWriter.unwrapped()) {
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitFieldInsn(Opcodes.GETFIELD, mwc.classNameType, fieldWriter(i), DESC_FIELD_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_FIELD_WRITER
+                    , "write", METHOD_DESC_FIELD_WRITE_OBJECT, true);
+            mw.visitInsn(Opcodes.POP);
+            mw.visitJumpInsn(Opcodes.GOTO, notNull_);
+        }
+
         int FIELD_VALUE = mwc.var(fieldClass);
 
         genGetObject(mwc, fieldWriter, OBJECT);
         mw.visitInsn(Opcodes.DUP);
         mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
 
-        Label null_ = new Label(), notNull_ = new Label();
+
         mw.visitJumpInsn(Opcodes.IFNULL, null_);
 
         if (!fieldWriter.isFieldClassSerializable()) {
