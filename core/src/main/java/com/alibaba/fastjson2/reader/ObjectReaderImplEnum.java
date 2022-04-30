@@ -63,6 +63,9 @@ final class ObjectReaderImplEnum implements ObjectReader {
     }
 
     public Enum getEnumByOrdinal(int ordinal) {
+        if (ordinal < 0 || ordinal >= ordinalEnums.length) {
+            throw new JSONException("No enum ordinal " + enumClass.getCanonicalName() + "." + ordinal);
+        }
         return ordinalEnums[ordinal];
     }
 
