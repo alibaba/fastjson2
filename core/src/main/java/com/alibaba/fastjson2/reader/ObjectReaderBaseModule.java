@@ -1668,45 +1668,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class CalendarImpl extends PrimitiveImpl {
+    static class CalendarImpl extends DateTimeCodec implements ObjectReader {
         static final CalendarImpl INSTANCE = new CalendarImpl(null);
         static final CalendarImpl INSTANCE_UNIXTIME = new CalendarImpl("unixtime");
 
-        protected final String format;
-        protected final boolean formatUnixTime;
-        protected final boolean formatMillis;
-        protected final boolean formatISO8601;
-        DateTimeFormatter dateFormatter;
-
         public CalendarImpl(String format) {
-            this.format = format;
-
-            boolean formatUnixTime = false, formatMillis = false, formatISO8601 = false;
-            if (format != null) {
-                switch (format) {
-                    case "unixtime":
-                        formatUnixTime = true;
-                        break;
-                    case "millis":
-                        formatMillis = true;
-                        break;
-                    case "iso8601":
-                        formatISO8601 = true;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            this.formatUnixTime = formatUnixTime;
-            this.formatMillis = formatMillis;
-            this.formatISO8601 = formatISO8601;
-        }
-
-        public DateTimeFormatter getDateFormatter() {
-            if (dateFormatter == null && format != null && !formatMillis && !formatISO8601 && !formatUnixTime) {
-                dateFormatter = DateTimeFormatter.ofPattern(format);
-            }
-            return dateFormatter;
+            super (format);
         }
 
         @Override

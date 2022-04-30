@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.codec.DateTimeCodec;
 
 import java.lang.reflect.Type;
 import java.time.Instant;
@@ -9,26 +10,12 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-final class ObjectWriterImplDate extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplDate extends DateTimeCodec implements ObjectWriter {
     static final ObjectWriterImplDate INSTANCE = new ObjectWriterImplDate(null);
-
-    final String format;
-    final boolean formatMillis;
-    final boolean formatISO8601;
-
-    DateTimeFormatter dateFormatter;
+    static final ObjectWriterImplDate INSTANCE_UNIXTIME = new ObjectWriterImplDate("unixtime");
 
     public ObjectWriterImplDate(String format) {
-        this.format = format;
-        this.formatMillis = "millis".equals(format);
-        this.formatISO8601 = "iso8601".equalsIgnoreCase(format);
-    }
-
-    public DateTimeFormatter getFormatter() {
-        if (dateFormatter == null && format != null && !formatMillis && !formatISO8601) {
-            dateFormatter = DateTimeFormatter.ofPattern(format);
-        }
-        return dateFormatter;
+        super (format);
     }
 
     @Override
@@ -99,7 +86,7 @@ final class ObjectWriterImplDate extends ObjectWriterBaseModule.PrimitiveImpl {
 
         DateTimeFormatter formatter;
         if (this.format != null) {
-            formatter = getFormatter();
+            formatter = getDateFormatter();
         } else {
             formatter = ctx.getDateFormatter();
         }

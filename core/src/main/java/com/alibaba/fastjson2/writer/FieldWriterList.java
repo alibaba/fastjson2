@@ -34,7 +34,13 @@ abstract class FieldWriterList<T> extends FieldWriterImpl<T> {
 
         if (format != null) {
             if (itemClass == Date.class) {
-                itemObjectWriter = new ObjectWriterImplDate(format);
+                switch (format) {
+                    case "unixtime":
+                        itemObjectWriter = ObjectWriterImplDate.INSTANCE_UNIXTIME;
+                    default:
+                        itemObjectWriter = new ObjectWriterImplDate(format);
+                        break;
+                }
             }
         }
     }
