@@ -2758,7 +2758,17 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             jsonReader.nextIfMatch('{');
             Object key = jsonReader.readAny();
             jsonReader.nextIfMatch(':');
-            Object value = jsonReader.readAny();
+
+            Object value;
+            if (valueType == null) {
+                value = jsonReader.readAny();
+            } else {
+                if (valueReader == null) {
+                    valueReader = jsonReader.getObjectReader(valueType);
+                }
+                value = valueReader.readObject(jsonReader, features);
+            }
+
             jsonReader.nextIfMatch('}');
             jsonReader.nextIfMatch(',');
             return new AbstractMap.SimpleEntry(key, value);
