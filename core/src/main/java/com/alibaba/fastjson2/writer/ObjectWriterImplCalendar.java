@@ -6,10 +6,50 @@ import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 
 final class ObjectWriterImplCalendar extends ObjectWriterBaseModule.PrimitiveImpl {
-    static final ObjectWriterImplCalendar INSTANCE = new ObjectWriterImplCalendar();
+    static final ObjectWriterImplCalendar INSTANCE = new ObjectWriterImplCalendar(null);
+    static final ObjectWriterImplCalendar INSTANCE_UNIXTIME = new ObjectWriterImplCalendar("unixtime");
+
+    protected final String format;
+    protected final boolean formatUnixTime;
+    protected final boolean formatMillis;
+    protected final boolean formatISO8601;
+
+    DateTimeFormatter dateFormatter;
+
+    public ObjectWriterImplCalendar(String format) {
+        this.format = format;
+
+        boolean formatUnixTime = false, formatISO8601 = false, formatMillis = false;
+        if (format != null) {
+            switch (format) {
+                case "unixtime":
+                    formatUnixTime = true;
+                    break;
+                case "iso8601":
+                    formatISO8601 = true;
+                    break;
+                case "millis":
+                    formatMillis = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+        this.formatUnixTime = formatUnixTime;
+        this.formatMillis = formatMillis;
+        this.formatISO8601 = formatISO8601;
+    }
+
+    public DateTimeFormatter getDateFormatter() {
+        if (dateFormatter == null && format != null && !formatMillis && !formatISO8601 && !formatUnixTime) {
+            dateFormatter = DateTimeFormatter.ofPattern(format);
+        }
+        return dateFormatter;
+    }
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -18,8 +58,8 @@ final class ObjectWriterImplCalendar extends ObjectWriterBaseModule.PrimitiveImp
             return;
         }
 
-        jsonWriter.writeMillis(
-                ((Calendar) object).getTimeInMillis());
+        long millis = ((Calendar) object).getTimeInMillis();
+        jsonWriter.writeMillis(millis);
     }
 
     @Override
@@ -34,7 +74,13 @@ final class ObjectWriterImplCalendar extends ObjectWriterBaseModule.PrimitiveImp
         Calendar date = (Calendar) object;
         long millis = date.getTimeInMillis();
 
-        if (ctx.isDateFormatMillis()) {
+
+        if (formatUnixTime || ctx.isDateFormatUnixTime()) {
+            jsonWriter.writeInt64(millis / 1000L);
+            return;
+        }
+
+        if (format == null && ctx.isDateFormatMillis()) {
             jsonWriter.writeInt64(millis);
             return;
         }
@@ -44,7 +90,7 @@ final class ObjectWriterImplCalendar extends ObjectWriterBaseModule.PrimitiveImp
         ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
         int offsetSeconds = zdt.getOffset().getTotalSeconds();
 
-        if (ctx.isDateFormatISO8601()) {
+        if (format == null && ctx.isDateFormatISO8601()) {
             int year = zdt.getYear();
             int month = zdt.getMonthValue();
             int dayOfMonth = zdt.getDayOfMonth();
@@ -56,7 +102,7 @@ final class ObjectWriterImplCalendar extends ObjectWriterBaseModule.PrimitiveImp
             return;
         }
 
-        String dateFormat = ctx.getDateFormat();
+        String dateFormat = format == null ? ctx.getDateFormat() : format;
         if (dateFormat == null) {
             int year = zdt.getYear();
             int month = zdt.getMonthValue();
@@ -72,7 +118,13 @@ final class ObjectWriterImplCalendar extends ObjectWriterBaseModule.PrimitiveImp
                 jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano / 1000_000, offsetSeconds);
             }
         } else {
-            String str = ctx.getDateFormatter().format(zdt);
+            DateTimeFormatter dateFormatter;
+            if (format != null) {
+                dateFormatter = getDateFormatter();
+            } else {
+                dateFormatter = ctx.getDateFormatter();
+            }
+            String str = dateFormatter.format(zdt);
             jsonWriter.writeString(str);
         }
     }

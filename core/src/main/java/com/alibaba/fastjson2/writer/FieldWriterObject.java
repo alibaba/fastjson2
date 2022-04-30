@@ -4,10 +4,8 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Currency;
-import java.util.Iterator;
-import java.util.Map;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
 
@@ -43,6 +41,30 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
                     return initObjectWriter = ObjectWriterImplMap.of(valueClass);
                 }
             } else {
+                if (Calendar.class.isAssignableFrom(valueClass)) {
+                    if (format == null || format.isEmpty()) {
+                        return initObjectWriter = ObjectWriterImplCalendar.INSTANCE;
+                    }
+                    switch (format) {
+                        case "unixtime":
+                            return initObjectWriter = ObjectWriterImplCalendar.INSTANCE_UNIXTIME;
+                        default:
+                            return initObjectWriter = new ObjectWriterImplCalendar(format);
+                    }
+                }
+
+                if (ZonedDateTime.class.isAssignableFrom(valueClass)) {
+                    if (format == null || format.isEmpty()) {
+                        return initObjectWriter = ObjectWriterImplZonedDateTime.INSTANCE;
+                    } else {
+                        switch (format) {
+                            case "unixtime":
+                                return initObjectWriter = ObjectWriterImplZonedDateTime.INSTANCE_UNIXTIME;
+                            default:
+                                return initObjectWriter = new ObjectWriterImplZonedDateTime(format);
+                        }
+                    }
+                }
                 return initObjectWriter = jsonWriter.getObjectWriter(valueClass);
             }
         } else {
