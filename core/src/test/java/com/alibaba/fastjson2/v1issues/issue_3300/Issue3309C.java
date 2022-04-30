@@ -1,9 +1,9 @@
-package com.alibaba.json.bvt.issue_3300;
+package com.alibaba.fastjson2.v1issues.issue_3300;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
@@ -11,8 +11,9 @@ import java.util.Date;
  * @Author ：Nanqi
  * @Date ：Created in 16:27 2020/6/29
  */
-public class Issue3309 extends TestCase {
-    public void test_for_issue() throws Exception {
+public class Issue3309C {
+    @Test
+    public void test_for_issue() {
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("formatDate","20200623 15:20:01");
         DateFormatTest dateFormatTest = jsonObj.toJavaObject(DateFormatTest.class);

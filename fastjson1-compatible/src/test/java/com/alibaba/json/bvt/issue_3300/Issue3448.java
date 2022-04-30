@@ -12,10 +12,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * @author yumin.pym
  */
-public class Issue3448 extends TestCase {
+public class Issue3448 {
     public static class SelfTypeReference<T> {
 
     }
@@ -25,7 +27,7 @@ public class Issue3448 extends TestCase {
         List<Map<String, List<String>>> list = new ArrayList(4);
         list.add(Collections.singletonMap("key1", Collections.singletonList("item")));
         String text = JSON.toJSONString(list);
-        System.out.println("text = " + text);
+        assertEquals("[{\"key1\":[\"item\"]}]", text);
 
         List<Map<String, List<String>>> result = parseObject(text,
             new SelfTypeReference<Map<String, List<String>>>() {});

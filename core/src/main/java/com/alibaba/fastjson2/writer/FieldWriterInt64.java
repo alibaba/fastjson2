@@ -17,7 +17,9 @@ abstract class FieldWriterInt64<T> extends FieldWriterImpl<T> {
 
     @Override
     public void writeInt64(JSONWriter jsonWriter, long value) {
-        if (jsonWriter.isUTF8()) {
+        boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
+        if (jsonWriter.isUTF8() && !writeNonStringValueAsString) {
             if (value >= -1 && value < 1039) {
                 byte[] bytes = null;
                 if (utf8ValueCache == null) {
@@ -36,7 +38,7 @@ abstract class FieldWriterInt64<T> extends FieldWriterImpl<T> {
                 jsonWriter.writeNameRaw(bytes);
                 return;
             }
-        } else if (jsonWriter.isUTF16()) {
+        } else if (jsonWriter.isUTF16() && !writeNonStringValueAsString) {
             if (value >= -1 && value < 1039) {
                 char[] chars = null;
                 if (utf16ValueCache == null) {

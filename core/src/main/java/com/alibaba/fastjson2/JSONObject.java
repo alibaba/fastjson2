@@ -12,10 +12,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public class JSONObject extends LinkedHashMap<String, Object> implements InvocationHandler {
@@ -98,6 +95,21 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
         }
 
         return super.get(key);
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+        boolean result = super.containsKey(key);
+        if (!result) {
+            if (key instanceof Number
+                    || key instanceof Character
+                    || key instanceof Boolean
+                    || key instanceof UUID
+            ) {
+                result = super.containsKey(key.toString());
+            }
+        }
+        return result;
     }
 
     /**

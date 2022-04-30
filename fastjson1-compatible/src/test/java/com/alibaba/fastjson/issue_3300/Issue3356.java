@@ -1,12 +1,15 @@
-package com.alibaba.json.bvt.issue_3300;
+package com.alibaba.fastjson.issue_3300;
 
 import com.alibaba.fastjson.JSONObject;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-public class Issue3356 extends TestCase {
-    public void test_for_issue() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3356 {
+    @Test
+    public void test_for_issue() {
         UUID uuid = UUID.randomUUID();
 
         JSONObject object = new JSONObject();

@@ -292,6 +292,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                                     case "InitStringFieldAsEmpty":
                                         beanInfo.readerFeatures |= JSONReader.Feature.InitStringFieldAsEmpty.mask;
                                         break;
+                                    case "TrimStringFieldValue":
+//                                        beanInfo.readerFeatures |= JSONReader.Feature.TrimStringFieldValue.mask;
+                                        break;
                                     default:
                                         break;
                                 }

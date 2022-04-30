@@ -155,7 +155,8 @@ public interface JSON {
             return null;
         }
         JSONReader reader = JSONReader.of(text);
-        ObjectReader<T> objectReader = reader.context.provider.getObjectReader(typeReference.getType());
+        Type type = typeReference.getType();
+        ObjectReader<T> objectReader = reader.context.provider.getObjectReader(type);
         return objectReader.readObject(reader, 0);
     }
 
