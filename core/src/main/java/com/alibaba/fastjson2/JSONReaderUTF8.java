@@ -2779,7 +2779,7 @@ class JSONReaderUTF8 extends JSONReader {
         }
         final char quote = ch;
 
-        if (len < 20) {
+        if (len < 19) {
             throw new JSONException("illeal localdatetime string : " + readString());
         }
 
@@ -2802,10 +2802,11 @@ class JSONReaderUTF8 extends JSONReader {
         char c16 = (char) bytes[offset + 16];
         char c17 = (char) bytes[offset + 17];
         char c18 = (char) bytes[offset + 18];
-        char c19 = (char) bytes[offset + 19];
+        char c19 = len == 19 ? ' ' : (char) bytes[offset + 19];
 
         char c20, c21 = '0', c22 = '0', c23 = '0', c24 = '0', c25 = '0', c26 = '0', c27 = '0', c28 = '0', c29 = '\0';
         switch (len) {
+            case 19:
             case 20:
                 c20 = '\0';
                 break;
