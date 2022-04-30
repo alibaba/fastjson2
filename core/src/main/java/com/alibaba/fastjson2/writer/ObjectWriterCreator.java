@@ -177,7 +177,7 @@ public class ObjectWriterCreator {
                     }
                 });
 
-                BeanUtils.getters(objectClass.getMethods(), method -> {
+                BeanUtils.getters(objectClass, method -> {
                     fieldInfo.init();
                     fieldInfo.features = writerFeatures;
                     for (ObjectWriterModule module : modules) {
@@ -217,7 +217,11 @@ public class ObjectWriterCreator {
                             , writeUsingWriter
                     );
 
-                    fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
+                    FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
+
+                    if (origin != null && origin.compareTo(fieldWriter) > 0) {
+                        fieldWriterMap.put(fieldName, fieldWriter);
+                    }
                 });
 
                 fieldWriters = new ArrayList<>(fieldWriterMap.values());

@@ -340,6 +340,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     case "IgnoreErrorGetter":
                         fieldInfo.features |= JSONWriter.Feature.IgnoreErrorGetter.mask;
                         break;
+                    case "SkipTransientField":
+//                        fieldInfo.features |= JSONWriter.Feature.IgnoreTransient.mask;
+                        break;
                     default:
                         break;
                 }
@@ -386,6 +389,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
+                        break;
+                    case "java.beans.Transient":
+                        fieldInfo.isTransient = true;
                         break;
                     default:
                         break;

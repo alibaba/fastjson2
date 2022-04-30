@@ -1,10 +1,9 @@
-package com.alibaba.json.bvt.issue_1900;
+package com.alibaba.fastjson2.v1issues.issue_1900;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.beans.Transient;
 import java.lang.reflect.InvocationHandler;
@@ -13,37 +12,37 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Issue1903 extends TestCase {
-    public void test_issue() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1903C {
+    @Test
+    public void test_issue() {
         MapHandler mh = new MapHandler();
         mh.add("name", "test");
         mh.add("age", 20);
 
         Issues1903 issues = (Issues1903) Proxy.newProxyInstance(mh.getClass().getClassLoader(), new Class[]{Issues1903.class}, mh);
-        System.out.println(issues.getName());
-        System.out.println(issues.getAge());
+        assertEquals("test", issues.getName());
+        assertEquals(20, issues.getAge().intValue());
 
-//        System.out.println(JSON.toJSON(issues).toString()); //正确结果: {"age":20}
-        System.out.println(JSON.toJSONString(issues));  //正确结果: {"age":20}
-//        Assert.assertEquals("{\"age\":20}", JSON.toJSON(issues).toString());
-        Assert.assertEquals("{\"age\":20}", JSON.toJSONString(issues));
+        assertEquals("{\"age\":20}", JSON.toJSONString(issues));
     }
 
     interface Issues1903{
         @Transient
         @JSONField(serialzeFeatures = { SerializerFeature.SkipTransientField })
-        public String getName();
-        public void setName(String name);
+        String getName();
+        void setName(String name);
 
-        public Integer getAge();
-        public void setAge(Integer age);
+        Integer getAge();
+        void setAge(Integer age);
     }
 
 
     class MapHandler implements InvocationHandler {
         Map<String, Object> map = new HashMap<String, Object>();
 
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        public Object invoke(Object proxy, Method method, Object[] args) {
             String name = method.getName().substring(3);
             String first = String.valueOf(name.charAt(0));
             name = name.replaceFirst(first, first.toLowerCase());
