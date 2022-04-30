@@ -447,7 +447,15 @@ public class JSON {
         }
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
         JSONReader reader = JSONReader.of(text);
-        return reader.read(paramType);
+        try {
+            return reader.read(paramType);
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
     }
 
     public static boolean isValid(String str) {
