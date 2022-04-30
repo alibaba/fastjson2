@@ -12,10 +12,7 @@ import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -270,8 +267,17 @@ public class JdbcSupport {
             String str = jsonReader.readString();
 
             DateTimeFormatter dateFormatter = getDateFormatter();
-            LocalDateTime ldt = LocalDateTime.parse(str, dateFormatter);
-            Instant instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
+
+            Instant instant;
+            if (format.indexOf("HH") == -1) {
+                LocalDate localDate = LocalDate.parse(str, dateFormatter);
+                LocalDateTime ldt = LocalDateTime.of(localDate, LocalTime.MIN);
+                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
+            } else {
+                LocalDateTime ldt = LocalDateTime.parse(str, dateFormatter);
+                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
+            }
+
             long millis = instant.toEpochMilli();
             Timestamp timestamp = new Timestamp(millis);
 
