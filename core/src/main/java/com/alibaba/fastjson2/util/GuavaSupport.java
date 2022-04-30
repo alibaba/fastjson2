@@ -1,12 +1,15 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -65,6 +68,45 @@ public class GuavaSupport {
             }
 
             return ImmutableList.copyOf(list);
+        }
+    }
+
+    public static ObjectWriter createAsMapWriter(Class objectClass) {
+        return new AsMapWriter(objectClass);
+    }
+
+    static class AsMapWriter implements ObjectWriter {
+        private final Class objectClass;
+        private Method method;
+
+        public AsMapWriter(Class objectClass) {
+            this.objectClass = objectClass;
+            try {
+                method = objectClass.getMethod("asMap");
+                method.setAccessible(true);
+            } catch (NoSuchMethodException e) {
+                throw new JSONException("create Guava AsMapWriter error", e);
+            }
+        }
+
+        @Override
+        public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+            try {
+                Map map = (Map) method.invoke(object);
+                jsonWriter.write(map);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                throw new JSONException("create Guava AsMapWriter error", e);
+            }
+        }
+
+        @Override
+        public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+            try {
+                Map map = (Map) method.invoke(object);
+                jsonWriter.write(map);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                throw new JSONException("create Guava AsMapWriter error", e);
+            }
         }
     }
 

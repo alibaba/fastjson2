@@ -1,11 +1,14 @@
-package com.alibaba.json.bvt.issue_2100;
+package com.alibaba.fastjson.issue_2100;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.LinkedHashMultimap;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2129 extends TestCase {
-    public void test_for_issue() throws Exception {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2129 {
+    @Test
+    public void test_for_issue() {
         LinkedHashMultimap<String, String> map = LinkedHashMultimap.create();
         map.put("a", "1");
         map.put("a", "b");

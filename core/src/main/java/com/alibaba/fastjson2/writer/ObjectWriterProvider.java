@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
@@ -106,12 +107,22 @@ public class ObjectWriterProvider {
             }
         }
 
-        if (objectWriter == null
-                && objectClass != null
-                && objectClass.getName().equals("com.alibaba.fastjson.JSONObject")
-                && !fieldBased
-        ) {
-            objectWriter = ObjectWriterImplMap.of(objectClass);
+        if (objectWriter == null && objectClass != null && !fieldBased) {
+            String className = objectClass.getName();
+            switch (className) {
+                case "com.google.common.collect.HashMultimap":
+                case "com.google.common.collect.LinkedListMultimap":
+                case "com.google.common.collect.LinkedHashMultimap":
+                case "com.google.common.collect.ArrayListMultimap":
+                case "com.google.common.collect.TreeMultimap":
+                    objectWriter = GuavaSupport.createAsMapWriter(objectClass);
+                    break;
+                case "com.alibaba.fastjson.JSONObject":
+                    objectWriter = ObjectWriterImplMap.of(objectClass);
+                    break;
+                default:
+                    break;
+            }
         }
 
         if (objectWriter == null) {

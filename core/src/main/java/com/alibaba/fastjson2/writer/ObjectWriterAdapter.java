@@ -188,6 +188,19 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
             return;
         }
 
+        if (typeName != null) {
+            switch (typeName) {
+                case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
+                case "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet": {
+                    Collection collection = (Collection) object;
+                    ObjectWriterImplCollection.INSTANCE.write(jsonWriter, collection, fieldName, fieldType, features);
+                    return;
+                }
+                default:
+                    break;
+            }
+        }
+
         if (jsonWriter
                 .isBeanToArray(
                         getFeatures())) {

@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2.autoType;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.JSONBDump;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class AutoTypeTest42_guava {
     @Test
@@ -45,6 +48,16 @@ public class AutoTypeTest42_guava {
         assertEquals(value.get(0), value2.get(0));
         assertEquals(value.get(1), value2.get(1));
         assertEquals(value.get(2), value2.get(2));
+    }
+
+    @Test
+    public void test_0_json() {
+        ArrayListMultimap map = ArrayListMultimap.create();
+        map.putAll("a", Arrays.asList(101, 102, 101));
+        List value = map.get("a");
+
+        String str = JSON.toJSONString(value);
+        Assertions.assertEquals("[101,102,101]", str);
     }
 
     @Test
