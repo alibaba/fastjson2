@@ -103,6 +103,45 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
             }
         }
 
+        Method thisMethod = getMethod();
+        Method otherMethod = o.getMethod();
+        if (thisMethod != null && otherMethod != null) {
+            Class<?> thisFieldDeclaringClass = thisMethod.getDeclaringClass();
+            Class<?> otherFieldDeclaringClass = otherMethod.getDeclaringClass();
+
+            for (Class superClass = thisFieldDeclaringClass.getSuperclass();
+                 superClass != null && superClass != Object.class;
+                 superClass = superClass.getSuperclass()) {
+
+                if (superClass == otherFieldDeclaringClass) {
+                    return 1;
+                }
+            }
+
+            for (Class superClass = otherFieldDeclaringClass.getSuperclass();
+                 superClass != null && superClass != Object.class;
+                 superClass = superClass.getSuperclass()) {
+
+                if (superClass == thisFieldDeclaringClass) {
+                    return -1;
+                }
+            }
+
+            if (thisMethod.getParameterCount() == 1 && otherMethod.getParameterCount() == 1) {
+                Class<?> thisParamType = thisMethod.getParameterTypes()[0];
+                Class<?> otherParamType = otherMethod.getParameterTypes()[0];
+
+                if (thisParamType.isAssignableFrom(otherParamType)) {
+                    return 1;
+                }
+
+                if (otherParamType.isAssignableFrom(thisParamType)) {
+                    return -1;
+                }
+            }
+
+        }
+
         return cmp;
     }
 
