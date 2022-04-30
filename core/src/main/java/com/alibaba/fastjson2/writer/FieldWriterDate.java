@@ -28,6 +28,8 @@ abstract class FieldWriterDate<T> extends FieldWriterImpl<T> {
     boolean formatISO8601;
     boolean formatUnixTime;
 
+    protected ObjectWriter dateWriter;
+
     protected FieldWriterDate(String fieldName, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
         super(fieldName, ordinal, features, format, fieldType, fieldClass);
 
@@ -73,6 +75,21 @@ abstract class FieldWriterDate<T> extends FieldWriterImpl<T> {
         }
 
         return formatter;
+    }
+
+    public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+        if (valueClass == fieldClass) {
+            if (dateWriter == null) {
+                if (format == null) {
+                    return dateWriter = ObjectWriterImplDate.INSTANCE;
+                }
+                return dateWriter = new ObjectWriterImplDate(format);
+            }
+
+            return dateWriter;
+        }
+
+        return jsonWriter.getObjectWriter(valueClass);
     }
 
     @Override

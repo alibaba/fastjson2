@@ -403,7 +403,7 @@ final class JSONReaderUTF16 extends JSONReader {
     public long getNameHashCodeLCase() {
         long hashCode = Fnv.MAGIC_HASH_CODE;
         int offset = nameBegin;
-        for (; ; ) {
+        for (; offset < end; ) {
             char c = chars[offset];
 
             if (c == '\\') {
