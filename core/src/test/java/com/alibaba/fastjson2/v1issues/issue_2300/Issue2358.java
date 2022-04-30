@@ -1,13 +1,18 @@
-package com.alibaba.json.bvt.issue_2300;
+package com.alibaba.fastjson2.v1issues.issue_2300;
 
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class Issue2358 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+public class Issue2358 {
+
+    @Test
     public void test_for_issue() throws Exception {
         String str = "[{\n" +
                 "  \"test1\":\"1\",\n" +
@@ -18,14 +23,10 @@ public class Issue2358 extends TestCase {
                 "   \"test2\":\"2\"\n" +
                 " }]";
 
-        Exception error = null;
-        try {
-            List<TestJson2> testJsons = JSONObject.parseArray(str, TestJson2.class);
-        } catch (JSONException ex) {
-            error = ex;
-        }
-        assertNotNull(error);
-        assertEquals("can't create non-static inner class instance.", error.getMessage());
+        List<TestJson2> testJsons = JSON.parseArray(str, TestJson2.class);
+        assertNotNull(testJsons);
+        assertEquals(2, testJsons.size());
+        assertEquals("1", testJsons.get(0).test1);
     }
 
     class TestJson {
