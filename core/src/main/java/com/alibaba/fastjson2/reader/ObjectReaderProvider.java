@@ -631,8 +631,21 @@ public class ObjectReaderProvider {
 
         Class<?> objectClass = TypeUtils.getMapping(objectType);
 
-        objectReader = getCreator()
-                .createObjectReader(objectClass, objectType, fieldBased, modules);
+        String className = objectClass.getName();
+        if (objectReader == null && !fieldBased) {
+            switch (className) {
+                case "com.google.common.collect.ArrayListMultimap":
+                    objectReader = ObjectReaderImplMap.of(null, objectClass, 0);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (objectReader == null) {
+            objectReader = getCreator()
+                    .createObjectReader(objectClass, objectType, fieldBased, modules);
+        }
 
         ObjectReader previous = fieldBased
                 ? cacheFieldBased.putIfAbsent(objectType, objectReader)

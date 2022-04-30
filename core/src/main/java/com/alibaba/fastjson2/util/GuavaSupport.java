@@ -10,15 +10,22 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 public class GuavaSupport {
     static Class CLASS_IMMUTABLE_MAP = null;
+    static Class CLASS_ARRAYLIST_MULTI_MAP = null;
+
     static Method METHOD_IMMUTABLE_MAP_OF_0 = null;
     static Method METHOD_IMMUTABLE_MAP_OF_1 = null;
     static Method METHOD_IMMUTABLE_MAP_COPY_OF = null;
+
+    static Method METHOD_ARRAYLIST_MULTI_MAP_CREATE = null;
+    static Method METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL = null;
+    static volatile  boolean METHOD_ARRAYLIST_MULTI_MAP_ERROR = false;
 
     static Constructor CONSTRUCTOR_SINGLETON_IMMUTABLE_BIMAP = null;
 
@@ -54,7 +61,6 @@ public class GuavaSupport {
         }
     }
 
-
     static class ImmutableListConvertFunction implements Function {
         @Override
         public Object apply(Object object) {
@@ -76,11 +82,9 @@ public class GuavaSupport {
     }
 
     static class AsMapWriter implements ObjectWriter {
-        private final Class objectClass;
         private Method method;
 
         public AsMapWriter(Class objectClass) {
-            this.objectClass = objectClass;
             try {
                 method = objectClass.getMethod("asMap");
                 method.setAccessible(true);
@@ -107,6 +111,74 @@ public class GuavaSupport {
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw new JSONException("create Guava AsMapWriter error", e);
             }
+        }
+    }
+
+    public static Function createConvertFunction(Class objectClass) {
+        String instanceTypeName = objectClass.getName();
+        switch (instanceTypeName) {
+            case "com.google.common.collect.ArrayListMultimap":
+                if (CLASS_ARRAYLIST_MULTI_MAP == null) {
+                    CLASS_ARRAYLIST_MULTI_MAP = objectClass;
+                }
+
+                if (!METHOD_ARRAYLIST_MULTI_MAP_ERROR && METHOD_ARRAYLIST_MULTI_MAP_CREATE == null) {
+                    try {
+                        METHOD_ARRAYLIST_MULTI_MAP_CREATE = CLASS_ARRAYLIST_MULTI_MAP.getMethod("create");
+                    } catch (Throwable ignored) {
+                        METHOD_ARRAYLIST_MULTI_MAP_ERROR = true;
+                    }
+                }
+
+                if (!METHOD_ARRAYLIST_MULTI_MAP_ERROR && METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL == null) {
+                    try {
+                        METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL = CLASS_ARRAYLIST_MULTI_MAP.getMethod("putAll", Object.class, Iterable.class);
+                    } catch (Throwable ignored) {
+                        METHOD_ARRAYLIST_MULTI_MAP_ERROR = true;
+                    }
+                }
+
+                if (METHOD_ARRAYLIST_MULTI_MAP_CREATE != null && METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL != null) {
+                    return new ArrayListMultimapConvertFunction(METHOD_ARRAYLIST_MULTI_MAP_CREATE, METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL);
+                }
+        }
+
+        throw new JSONException("create map error : " + objectClass);
+    }
+
+    static class ArrayListMultimapConvertFunction implements Function {
+        final Method method;
+        final Method putAllMethod;
+
+        public ArrayListMultimapConvertFunction(Method method, Method putAllMethod) {
+            this.method = method;
+            this.putAllMethod = putAllMethod;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            Map map = (Map) o;
+
+            Object multiMap;
+            try {
+                multiMap = method.invoke(null);
+            } catch (Throwable e) {
+                throw new JSONException("create ArrayListMultimap error", e);
+            }
+
+            for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
+                Map.Entry entry = it.next();
+                Object key = entry.getKey();
+                Iterable item = (Iterable) entry.getValue();
+
+                try {
+                    putAllMethod.invoke(multiMap, key, item);
+                } catch (Throwable e) {
+                    throw new JSONException("putAll ArrayListMultimap error", e);
+                }
+            }
+
+            return multiMap;
         }
     }
 

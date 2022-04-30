@@ -82,33 +82,45 @@ public final class ObjectReaderImplMap implements ObjectReader {
 
         Function builder;
         String instanceTypeName = instanceType.getName();
-        if (instanceTypeName.equals("com.alibaba.fastjson.JSONObject")) {
-            builder = Fastjson1xSupport.createObjectSupplier(instanceType);
-            instanceType = HashMap.class;
-        } else if (instanceTypeName.equals("com.google.common.collect.RegularImmutableMap")) {
-            builder = GuavaSupport.immutableMapConverter();
-            instanceType = HashMap.class;
-        } else if (instanceTypeName.equals("com.google.common.collect.SingletonImmutableBiMap")) {
-            builder = GuavaSupport.singletonBiMapConverter();
-            instanceType = HashMap.class;
-        } else if (instanceType == JSONObject1O.class) {
-            Class objectClass = TypeUtils.loadClass("com.alibaba.fastjson.JSONObject");
-            builder = Fastjson1xSupport.createObjectSupplier(objectClass);
-            instanceType = LinkedHashMap.class;
-        } else if (mapType == CLASS_UNMODIFIABLE_MAP) {
-            builder = (Function<Map, Map>) Collections::unmodifiableMap;
-        } else if (mapType == CLASS_UNMODIFIABLE_SORTED_MAP) {
-            builder = (Function<SortedMap, SortedMap>) Collections::unmodifiableSortedMap;
-        } else if (mapType == CLASS_UNMODIFIABLE_NAVIGABLE_MAP) {
-            builder = (Function<NavigableMap, NavigableMap>) Collections::unmodifiableNavigableMap;
-        } else if (mapType == CLASS_SINGLETON_MAP) {
-            builder = (Function<Map, Map>) (Map map) -> {
-                Map.Entry entry = (Map.Entry) map.entrySet().iterator().next();
-                return Collections.singletonMap(entry.getKey(), entry.getValue());
-            };
-        } else {
-            builder = null;
+        switch (instanceTypeName) {
+            case "com.alibaba.fastjson.JSONObject":
+                builder = Fastjson1xSupport.createObjectSupplier(instanceType);
+                instanceType = HashMap.class;
+                break;
+            case "com.google.common.collect.RegularImmutableMap":
+                builder = GuavaSupport.immutableMapConverter();
+                instanceType = HashMap.class;
+                break;
+            case "com.google.common.collect.SingletonImmutableBiMap":
+                builder = GuavaSupport.singletonBiMapConverter();
+                instanceType = HashMap.class;
+                break;
+            case "com.google.common.collect.ArrayListMultimap":
+                builder = GuavaSupport.createConvertFunction(instanceType);
+                instanceType = HashMap.class;
+                break;
+            default:
+                if (instanceType == JSONObject1O.class) {
+                    Class objectClass = TypeUtils.loadClass("com.alibaba.fastjson.JSONObject");
+                    builder = Fastjson1xSupport.createObjectSupplier(objectClass);
+                    instanceType = LinkedHashMap.class;
+                } else if (mapType == CLASS_UNMODIFIABLE_MAP) {
+                    builder = (Function<Map, Map>) Collections::unmodifiableMap;
+                } else if (mapType == CLASS_UNMODIFIABLE_SORTED_MAP) {
+                    builder = (Function<SortedMap, SortedMap>) Collections::unmodifiableSortedMap;
+                } else if (mapType == CLASS_UNMODIFIABLE_NAVIGABLE_MAP) {
+                    builder = (Function<NavigableMap, NavigableMap>) Collections::unmodifiableNavigableMap;
+                } else if (mapType == CLASS_SINGLETON_MAP) {
+                    builder = (Function<Map, Map>) (Map map) -> {
+                        Map.Entry entry = (Map.Entry) map.entrySet().iterator().next();
+                        return Collections.singletonMap(entry.getKey(), entry.getValue());
+                    };
+                } else {
+                    builder = null;
+                }
+                break;
         }
+
 
         return new ObjectReaderImplMap(fieldType, mapType, instanceType, features, builder);
     }
@@ -157,18 +169,16 @@ public final class ObjectReaderImplMap implements ObjectReader {
         }
 
         if (JDKUtils.UNSAFE_SUPPORT) {
-            switch (instanceType.getName()) {
+            String instanceTypeName = instanceType.getName();
+            switch (instanceTypeName) {
                 case "com.ali.com.google.common.collect.EmptyImmutableBiMap":
-                    return new Supplier() {
-                        @Override
-                        public Object get() {
-                            try {
-                                return UnsafeUtils.UNSAFE.allocateInstance(instanceType);
-                            } catch (InstantiationException e) {
-                                throw new JSONException("create map error : " + instanceType);
-                            }
+                    return ((Supplier) () -> {
+                        try {
+                            return UnsafeUtils.UNSAFE.allocateInstance(instanceType);
+                        } catch (InstantiationException e) {
+                            throw new JSONException("create map error : " + instanceType);
                         }
-                    }.get();
+                    }).get();
                 default:
                     break;
             }

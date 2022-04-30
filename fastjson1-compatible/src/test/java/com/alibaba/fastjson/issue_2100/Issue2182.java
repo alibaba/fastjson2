@@ -1,11 +1,15 @@
-package com.alibaba.json.bvt.issue_2100;
+package com.alibaba.fastjson.issue_2100;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2182 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2182 {
+    @Test
     public void test_for_issue() throws Exception {
         Multimap<String, String> multimap = ArrayListMultimap.create();
         multimap.put("admin", "admin.create");
