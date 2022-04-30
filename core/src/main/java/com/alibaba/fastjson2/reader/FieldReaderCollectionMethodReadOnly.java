@@ -55,6 +55,10 @@ class FieldReaderCollectionMethodReadOnly<T> extends FieldReaderObjectMethod<T> 
             return;
         }
 
+        if (value == collection) {
+            return;
+        }
+
         Type itemType = getItemType();
         Collection values = (Collection) value;
         for (Object item : values) {
