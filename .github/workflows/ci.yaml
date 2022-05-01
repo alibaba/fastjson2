@@ -1,21 +1,25 @@
 ---
 name: Java CI
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04]
-        java: [8, 11, 13, 15, 17]
+        os: [ ubuntu-18.04 ]
+        java: [ 8, 11, 13, 15, 17 ]
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 8
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v2
+        with:
+          # https://github.com/marketplace/actions/checkout-submodules
+          submodules: recursive
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
@@ -31,11 +35,11 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}
       - name: Build with Maven
-        run: ./mvnw -Pgen-javadoc clean package -B
+        run: scripts/integration_test
       - name: Generate code coverage
-        run: ./mvnw -Pgen-code-cov clean test
+        run: ./mvnw -B -Pgen-code-cov clean test
       # https://github.com/marketplace/actions/codecov
-      - uses: codecov/codecov-action@v2
+      - name: codecov-umbrella
+        uses: codecov/codecov-action@v2
         with:
-          name: codecov-umbrella
           token: ${{ secrets.CODECOV_TOKEN }}

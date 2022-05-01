@@ -1,0 +1,65 @@
+#!/bin/bash
+set -eEuo pipefail
+cd "$(dirname "$(readlink -f "$0")")"
+
+source bash-buddy/lib/trap_error_info.sh
+source bash-buddy/lib/common_utils.sh
+
+################################################################################
+# prepare
+################################################################################
+
+source bash-buddy/lib/java_build_utils.sh
+
+# here use `install` and `-D performRelease` intended
+#   to check release operations.
+#
+# De-activate a maven profile from command line
+#   https://stackoverflow.com/questions/25201430
+#
+# shellcheck disable=SC2034
+JVB_MVN_OPTS=(
+  "${JVB_DEFAULT_MVN_OPTS[@]}"
+  -B
+  -DperformRelease
+  -P'!gen-sign'
+)
+
+################################################################################
+# ci build logic
+################################################################################
+
+cd ..
+
+cu::head_line_echo "build and test with Java: $JAVA_HOME"
+jvb::mvn_cmd clean install
+
+########################################
+# test multi-options
+# shellcheck disable=SC2154
+########################################
+
+# -Dfastjson2.creator
+readonly FASTJSON2_CREATORS=(
+  asm
+  lambda
+  reflect
+)
+
+# FIXME remove later
+jvb::mvn_cmd surefire:test
+
+for creator in "${FASTJSON2_CREATORS[@]}"; do
+  creator_option="-Dfastjson2.creator=$creator"
+
+  cu::head_line_echo "test with option: $creator_option"
+  # just test without build
+  jvb::mvn_cmd "$creator_option" surefire:test
+done
+
+################################################################################
+# cleanup
+################################################################################
+
+# remove self maven install
+rm -rf $HOME/.m2/repository/com/alibaba/fastjson2
