@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BooleanValueArrayTest {
     @Test
@@ -37,7 +37,7 @@ public class BooleanValueArrayTest {
 
     @Test
     public void test_parse_jsonb() {
-        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Object[] {1, 0, null, true, false}));
+        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Object[]{1, 0, null, true, false}));
         boolean[] array = JSONB.parseObject(jsonbBytes, boolean[].class);
         assertEquals(true, array[0]);
         assertEquals(false, array[1]);

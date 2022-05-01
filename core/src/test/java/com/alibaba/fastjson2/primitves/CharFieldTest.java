@@ -6,12 +6,12 @@ import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.CharField1;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CharFieldTest {
     @Test
     public void test_arrayMapping() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
+        ObjectWriterCreator[] creators = new ObjectWriterCreator[]{
                 ObjectWriterCreator.INSTANCE,
 //                ObjectWriterCreatorLambda.INSTANCE,
 //                ObjectWriterCreatorASM.INSTANCE

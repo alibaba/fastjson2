@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.net.URL;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class URLTest {
     URL uri;
@@ -87,7 +87,7 @@ public class URLTest {
 
     @Test
     public void test_jsonb() {
-        URL[] values = new URL[] {
+        URL[] values = new URL[]{
                 uri, null
         };
 

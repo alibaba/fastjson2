@@ -14,7 +14,7 @@ public class JSONPathSetTest {
     public void test_for_issue() throws Exception {
         String text = "{\"models\":[{\"x\":\"y\"},{\"x\":\"y\"}]}";
         Root root = JSONObject.parseObject(text, Root.class);
-        System.out.println(JSON.toJSONString(root));
+        //System.out.println(JSON.toJSONString(root));
         String jsonpath = "$..x";
         String value="y2";
         JSONPath.set(root, jsonpath, value);

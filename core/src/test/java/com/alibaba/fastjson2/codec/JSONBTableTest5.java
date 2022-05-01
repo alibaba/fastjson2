@@ -4,8 +4,8 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JSONBTableTest5 {
     @Test

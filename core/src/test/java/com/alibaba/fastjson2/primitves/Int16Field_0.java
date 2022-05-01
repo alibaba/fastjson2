@@ -9,7 +9,7 @@ import com.alibaba.fastjson2.writer.ObjectWriters;
 import org.junit.jupiter.api.Test;
 
 import static com.alibaba.fastjson2.writer.ObjectWriters.fieldWriter;
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Int16Field_0 {
     @Test

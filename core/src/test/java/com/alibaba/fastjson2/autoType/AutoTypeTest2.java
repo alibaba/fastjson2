@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class AutoTypeTest2 {
     @Test
@@ -35,6 +35,7 @@ public class AutoTypeTest2 {
 
     public static class C extends B {
         public int id;
+
         public C() {
 
         }

@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2_vo.Int1;
 import com.alibaba.fastjson2_vo.IntField1;
 import com.alibaba.fastjson2_vo.Integer1;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -12,14 +11,14 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
-import static junit.framework.TestCase.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PathTest3 {
     @Test
     public void test_0() {
-        Integer[] values = new Integer[] {1, 2, 3};
+        Integer[] values = new Integer[]{1, 2, 3};
 
-        TestCase.assertEquals(values[0], JSONPath.of("$[0]").eval(values));
+        assertEquals(values[0], JSONPath.of("$[0]").eval(values));
         assertEquals("[1,2]"
                 , JSONPath
                         .of("$[0,1]")
@@ -49,8 +48,8 @@ public class PathTest3 {
     @Test
     public void test_isRef() {
         assertFalse(JSONPath
-                        .of("$.length()")
-                        .isRef());
+                .of("$.length()")
+                .isRef());
         assertTrue(JSONPath
                 .of("$.a.b")
                 .isRef());
@@ -106,7 +105,7 @@ public class PathTest3 {
 
     @Test
     public void test_1() {
-        Integer[] values = new Integer[] {1, 2, 3};
+        Integer[] values = new Integer[]{1, 2, 3};
         byte[] jsonbBytes = JSONB.toBytes(values);
 
         assertEquals(values[0], JSONPath.of("$[0]").extract(JSONReader.ofJSONB(jsonbBytes)));
@@ -124,7 +123,7 @@ public class PathTest3 {
 
     @Test
     public void test_2() {
-        Integer[] values = new Integer[] {1, 2, 3};
+        Integer[] values = new Integer[]{1, 2, 3};
         String jsonString = JSON.toJSONString(values);
 
         assertEquals(values[0], JSONPath.of("$[0]").extract(JSONReader.of(jsonString)));
@@ -339,7 +338,7 @@ public class PathTest3 {
         assertFalse(
                 JSONPath.of("$[0].v0000")
                         .contains(
-                                new Object[] {Arrays.asList(new Integer1())}
+                                new Object[]{Arrays.asList(new Integer1())}
                         )
         );
         assertFalse(
@@ -366,7 +365,7 @@ public class PathTest3 {
         assertTrue(
                 JSONPath.of("$[0].v0000")
                         .contains(
-                                Arrays.asList(new Object[] {vo})
+                                Arrays.asList(new Object[]{vo})
                         )
         );
         assertTrue(
@@ -395,7 +394,7 @@ public class PathTest3 {
                 JSONPath.of("$[0][0]")
                         .contains(
                                 new JSONArray()
-                                        .fluentAdd(new int[] {123})
+                                        .fluentAdd(new int[]{123})
                         )
         );
     }
@@ -476,7 +475,7 @@ public class PathTest3 {
 
     @Test
     public void test_set_2() {
-        Object[] root = new Object[] {123};
+        Object[] root = new Object[]{123};
         JSONPath.of("$[0]")
                 .setInt(root, 101);
         assertEquals(101, root[0]);
@@ -490,7 +489,7 @@ public class PathTest3 {
 
     @Test
     public void test_set_3() {
-        int[] root = new int[] {123};
+        int[] root = new int[]{123};
         JSONPath.of("$[0]")
                 .setInt(root, 101);
         assertEquals(101, root[0]);
@@ -507,7 +506,7 @@ public class PathTest3 {
 
     @Test
     public void test_set_4() {
-        long[] root = new long[] {123};
+        long[] root = new long[]{123};
         JSONPath.of("$[0]")
                 .setInt(root, 101);
         assertEquals(101L, root[0]);
@@ -524,7 +523,7 @@ public class PathTest3 {
 
     @Test
     public void test_set_5() {
-        long[] root = new long[] {123};
+        long[] root = new long[]{123};
         JSONPath.of("$[0]")
                 .setLong(root, 101);
         assertEquals(101L, root[0]);
@@ -541,7 +540,7 @@ public class PathTest3 {
 
     @Test
     public void test_set_6() {
-        int[] root = new int[] {123};
+        int[] root = new int[]{123};
         JSONPath.of("$[0]")
                 .setLong(root, 101);
         assertEquals(101, root[0]);

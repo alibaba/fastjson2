@@ -8,7 +8,7 @@ import java.time.ZoneId;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import static junit.framework.TestCase.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONReaderTest {
     @Test
@@ -222,6 +222,7 @@ public class JSONReaderTest {
             assertEquals(ch, reader.current());
         }
     }
+
     @Test
     public void test_next_2() {
         char ch = '®';
@@ -307,6 +308,7 @@ public class JSONReaderTest {
         }
 
     }
+
     @Test
     public void test_readString_str_2() {
         String str = "\"\\x29\\u4e2dabcdef\",1";

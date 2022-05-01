@@ -6,19 +6,19 @@ import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1580 {
     @Test
     public void test_for_issue() throws Exception {
         SimplePropertyPreFilter classAFilter = new SimplePropertyPreFilter(Model.class, "code");
-        Filter[] filters =new Filter[]{classAFilter};
+        Filter[] filters = new Filter[]{classAFilter};
 
         Model model = new Model();
         model.code = 1001;
         model.name = "N1";
 
-        String json = JSON.toJSONString(model, filters, JSONWriter.Feature.BeanToArray );
+        String json = JSON.toJSONString(model, filters, JSONWriter.Feature.BeanToArray);
         assertEquals("[1001,null]", json);
     }
 

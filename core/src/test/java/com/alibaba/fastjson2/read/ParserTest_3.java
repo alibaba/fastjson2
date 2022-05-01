@@ -8,7 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ParserTest_3 {
     String str = " { \"Object\\u0020Id\" : -123 , \"Full \\\" Name\": \"Steve \\\" Jobs\" } ";

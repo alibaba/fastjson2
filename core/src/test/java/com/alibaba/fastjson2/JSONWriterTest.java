@@ -2,7 +2,7 @@ package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONWriterTest {
     @Test
@@ -21,11 +21,12 @@ public class JSONWriterTest {
         final int COUNT = 2000;
         JSONWriter jsonWriter = JSONWriter.of();
         for (int i = 0; i < COUNT; ++i) {
-            jsonWriter.writeComma();;
+            jsonWriter.writeComma();
+            ;
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals(',', str.charAt(i));
         }
     }
@@ -35,11 +36,12 @@ public class JSONWriterTest {
         final int COUNT = 2000;
         JSONWriter jsonWriter = JSONWriter.ofUTF8();
         for (int i = 0; i < COUNT; ++i) {
-            jsonWriter.writeComma();;
+            jsonWriter.writeComma();
+            ;
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals(',', str.charAt(i));
         }
     }
@@ -53,7 +55,7 @@ public class JSONWriterTest {
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals('[', str.charAt(i));
         }
     }
@@ -67,7 +69,7 @@ public class JSONWriterTest {
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals('[', str.charAt(i));
         }
     }
@@ -81,7 +83,7 @@ public class JSONWriterTest {
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals('{', str.charAt(i));
         }
     }
@@ -95,7 +97,7 @@ public class JSONWriterTest {
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals('{', str.charAt(i));
         }
     }
@@ -109,7 +111,7 @@ public class JSONWriterTest {
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals('}', str.charAt(i));
         }
     }
@@ -123,7 +125,7 @@ public class JSONWriterTest {
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals('}', str.charAt(i));
         }
     }
@@ -137,7 +139,7 @@ public class JSONWriterTest {
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals(']', str.charAt(i));
         }
     }
@@ -151,7 +153,7 @@ public class JSONWriterTest {
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals(']', str.charAt(i));
         }
     }
@@ -165,7 +167,7 @@ public class JSONWriterTest {
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals('0', str.charAt(i));
         }
     }
@@ -179,7 +181,7 @@ public class JSONWriterTest {
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals('0', str.charAt(i));
         }
     }
@@ -193,7 +195,7 @@ public class JSONWriterTest {
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals('0', str.charAt(i));
         }
     }
@@ -207,7 +209,7 @@ public class JSONWriterTest {
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
-        for (int i = 0; i < COUNT;++i) {
+        for (int i = 0; i < COUNT; ++i) {
             assertEquals('0', str.charAt(i));
         }
     }
@@ -215,7 +217,7 @@ public class JSONWriterTest {
     @Test
     public void test_utf8_writeDoubleArray() {
         JSONWriter jsonWriter = JSONWriter.ofUTF8();
-        jsonWriter.writeDouble(new double[] {0D, 1D});
+        jsonWriter.writeDouble(new double[]{0D, 1D});
         assertEquals("[0.0,1.0]", jsonWriter.toString());
     }
 }

@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Base64;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AutoTypeTest35_Exception {
     @Test

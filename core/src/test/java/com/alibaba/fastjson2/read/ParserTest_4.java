@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ParserTest_4 {
     String str = " { \"ab®cd\" : 123 , \"¼½¾\": \"123µ45\" } ";

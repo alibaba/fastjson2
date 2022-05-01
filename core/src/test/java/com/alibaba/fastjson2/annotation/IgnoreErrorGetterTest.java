@@ -5,12 +5,13 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 import com.alibaba.fastjson2_vo.Integer1;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IgnoreErrorGetterTest {
 
@@ -18,7 +19,7 @@ public class IgnoreErrorGetterTest {
     public void test_feature() throws Exception {
         Model model = new Model();
         String text = JSON.toJSONString(model, JSONWriter.Feature.IgnoreErrorGetter);
-        Assert.assertEquals("{}", text);
+        assertEquals("{}", text);
     }
 
     @Test
@@ -27,7 +28,7 @@ public class IgnoreErrorGetterTest {
         ObjectWriter objectWriter = ObjectWriterCreatorLambda.INSTANCE.createObjectWriter(Model.class);
         JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.IgnoreErrorGetter);
         objectWriter.write(jsonWriter, model, null, null, 0);
-        Assert.assertEquals("{}", jsonWriter.toString());
+        assertEquals("{}", jsonWriter.toString());
     }
 
     public static class Model {

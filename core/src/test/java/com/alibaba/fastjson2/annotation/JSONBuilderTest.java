@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONBuilderTest {
     @Test
@@ -51,7 +51,7 @@ public class JSONBuilderTest {
         assertEquals("ljw", vo.getName());
     }
 
-    @JSONType(builder=VOBuilder.class)
+    @JSONType(builder = VOBuilder.class)
     public static class VO {
         private int id;
         private String name;
@@ -65,7 +65,7 @@ public class JSONBuilderTest {
         }
     }
 
-    @JSONBuilder(buildMethod="xxx")
+    @JSONBuilder(buildMethod = "xxx")
     public static class VOBuilder {
 
         private VO vo = new VO();

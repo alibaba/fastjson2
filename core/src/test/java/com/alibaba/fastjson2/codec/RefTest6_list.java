@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.TestCase.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class RefTest6_list {
     @Test
