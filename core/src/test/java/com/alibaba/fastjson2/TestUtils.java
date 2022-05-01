@@ -43,6 +43,6 @@ public class TestUtils {
     }
 
     public static <T> ObjectReader<T> of(Class<T> objectType) {
-        return ObjectReaderCreatorASM.INSTANCE.createObjectReader(objectType);
+        return READER_CREATOR.createObjectReader(objectType);
     }
 }
