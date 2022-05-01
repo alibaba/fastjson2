@@ -461,9 +461,11 @@ final class JSONReaderStr extends JSONReader {
             return null;
         }
 
+        final char quote = ch;
+
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
-        for (int i = 0; ; ++i) {
+        for (int i = 0; offset < end ; ++i) {
             int c = str.charAt(offset);
             if (c == '\\') {
                 nameEscape = true;
@@ -485,7 +487,7 @@ final class JSONReaderStr extends JSONReader {
                 continue;
             }
 
-            if (c == '"') {
+            if (c == quote) {
                 this.nameLength = i;
                 this.nameEnd = offset;
                 offset++;
@@ -972,7 +974,7 @@ final class JSONReaderStr extends JSONReader {
         _for:
         for (; ; ) {
             if (ch == '\\') {
-                ch = str.charAt(++offset);
+                ch = str.charAt(offset++);
                 char1(ch);
                 continue;
             }
@@ -1368,7 +1370,7 @@ final class JSONReaderStr extends JSONReader {
             case 't':
             case 'f':
             case 'n':
-                for (; ; ) {
+                for (; offset < end; ) {
                     ch = str.charAt(offset++);
                     if (ch == '}' || ch == ']') {
                         break;
@@ -2655,7 +2657,7 @@ final class JSONReaderStr extends JSONReader {
             throw new JSONException("date only support string input");
         }
 
-        if (len < 20) {
+        if (len < 19) {
             throw new JSONException("illeal localdatetime string : " + readString());
         }
 
@@ -2678,10 +2680,11 @@ final class JSONReaderStr extends JSONReader {
         char c16 = str.charAt(offset + 16);
         char c17 = str.charAt(offset + 17);
         char c18 = str.charAt(offset + 18);
-        char c19 = str.charAt(offset + 19);
+        char c19 = len == 19 ? ' ' : str.charAt(offset + 19);
 
         char c20, c21 = '0', c22 = '0', c23 = '0', c24 = '0', c25 = '0', c26 = '0', c27 = '0', c28 = '0', c29 = '\0';
         switch (len) {
+            case 19:
             case 20:
                 c20 = '\0';
                 break;
