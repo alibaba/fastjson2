@@ -15,7 +15,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 
-public class JSONObject extends LinkedHashMap<String, Object> implements InvocationHandler {
+public class JSONObject extends LinkedHashMap implements InvocationHandler {
 
     private static final long serialVersionUID = 1L;
 
