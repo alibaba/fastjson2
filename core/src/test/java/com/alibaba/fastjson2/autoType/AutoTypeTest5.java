@@ -17,13 +17,8 @@ public class AutoTypeTest5 {
         String json = JSON.toJSONString(a, JSONWriter.Feature.NotWriteRootClassName, JSONWriter.Feature.WriteClassName);
         assertEquals("{\"value\":{\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest5$C\",\"id\":1001}}", json);
 
-        Throwable error = null;
-        try {
-            JSON.parseObject(json, A.class);
-        } catch (JSONException ex) {
-            error = ex;
-        }
-        assertNotNull(error);
+        A a1 = JSON.parseObject(json, A.class);
+        assertEquals(A.class, a1.getClass());
     }
 
     public static class A {

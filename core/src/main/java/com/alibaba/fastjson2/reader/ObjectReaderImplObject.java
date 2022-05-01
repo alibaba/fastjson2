@@ -1,8 +1,11 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
@@ -19,34 +22,54 @@ final class ObjectReaderImplObject extends ObjectReaderBaseModule.PrimitiveImpl 
         JSONReader.Context context = jsonReader.getContext();
 
         if (jsonReader.isObject()) {
-            boolean supportAutoType = context.isEnable(JSONReader.Feature.SupportAutoType);
-
-            if (!supportAutoType) {
-                return ObjectReaderImplMap.INSTANCE_OBJECT.readObject(jsonReader, features);
-            }
-
             jsonReader.next();
 
             long hash = jsonReader.readFieldNameHashCode();
 
-            if (hash == HASH_TYPE && supportAutoType) {
-                long typeHash = jsonReader.readTypeHashCode();
-                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
-                if (autoTypeObjectReader == null) {
-                    String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
+            if (hash == HASH_TYPE) {
+                boolean supportAutoType = context.isEnable(JSONReader.Feature.SupportAutoType);
+
+                ObjectReader autoTypeObjectReader;
+
+                if (supportAutoType) {
+                    long typeHash = jsonReader.readTypeHashCode();
+                    autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
 
                     if (autoTypeObjectReader == null) {
-                        throw new JSONException("auotype not support : " + typeName);
+                        String typeName = jsonReader.getString();
+                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
                     }
+                } else {
+                    String typeName = jsonReader.readString();
+                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
                 }
 
-                jsonReader.setTypeRedirect(true);
+                if (autoTypeObjectReader != null) {
+                    jsonReader.setTypeRedirect(true);
 
-                return autoTypeObjectReader.readObject(jsonReader, features);
+                    return autoTypeObjectReader.readObject(jsonReader, features);
+                }
             }
 
-            Map object = (Map) ObjectReaderImplMap.INSTANCE_OBJECT.createInstance(jsonReader.features(features));
+            Map object;
+            Class objectClass = context.getObjectClass();
+            if (objectClass != null) {
+                try {
+                    if (objectClass == JSONObject.class) {
+                        object = new JSONObject();
+                    } else if (objectClass == HashMap.class) {
+                        object = new HashMap();
+                    } else if (objectClass == LinkedHashMap.class) {
+                        object = new LinkedHashMap();
+                    } else {
+                        object = (Map) objectClass.newInstance();
+                    }
+                } catch (Throwable e) {
+                    throw new JSONException("createObject error", e);
+                }
+            } else {
+                object = (Map) ObjectReaderImplMap.INSTANCE_OBJECT.createInstance(jsonReader.features(features));
+            }
 
             for (int i = 0; ; ++i) {
                 if (jsonReader.nextIfMatch('}')) {
@@ -106,6 +129,8 @@ final class ObjectReaderImplObject extends ObjectReaderBaseModule.PrimitiveImpl 
                 }
                 object.put(name, value);
             }
+
+            jsonReader.nextIfMatch(',');
 
             return object;
         }
