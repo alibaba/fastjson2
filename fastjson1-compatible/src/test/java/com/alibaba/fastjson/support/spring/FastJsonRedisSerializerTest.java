@@ -1,9 +1,8 @@
-package com.alibaba.fastjson.suppert.spring;
+package com.alibaba.fastjson.support.spring;
 
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
-import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import com.google.common.base.Objects;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNull;
