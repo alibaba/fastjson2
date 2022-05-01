@@ -125,6 +125,10 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
+        if (!fieldClassSerializable && (jsonWriter.getFeatures(features) & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
+            return false;
+        }
+
         Object value;
         try {
             value = getFieldValue(object);
@@ -170,7 +174,12 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
         }
 
         Class<?> valueClass = value.getClass();
-        ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueClass);
+        if (valueClass == byte[].class) {
+            writeBinary(jsonWriter, (byte[]) value);
+            return true;
+        }
+
+        ObjectWriter valueWriter = getObjectWriter(jsonWriter, valueClass);
         if (valueWriter == null) {
             throw new JSONException("get objectWriter error : " + valueClass);
         }

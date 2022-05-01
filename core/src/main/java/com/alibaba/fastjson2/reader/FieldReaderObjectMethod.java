@@ -59,7 +59,8 @@ class FieldReaderObjectMethod<T>
         if (this.fieldObjectReader != null) {
             objectReader = this.fieldObjectReader;
         } else {
-            objectReader = this.fieldObjectReader = jsonReader.getContext().getObjectReader(fieldType);
+            objectReader = this.fieldObjectReader = jsonReader.getContext()
+                    .getObjectReader(fieldType);
         }
 
         if (jsonReader.isReference()) {
