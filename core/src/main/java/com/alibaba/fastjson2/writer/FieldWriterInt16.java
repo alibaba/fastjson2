@@ -16,6 +16,12 @@ abstract class FieldWriterInt16<T> extends FieldWriterImpl<T> {
     }
 
     protected void writeInt16(JSONWriter jsonWriter, short value) {
+        boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        if (writeNonStringValueAsString) {
+            writeFieldName(jsonWriter);
+            jsonWriter.writeString(Short.toString(value));
+            return;
+        }
 
         if (jsonWriter.isUTF8()) {
             if (value >= -1 && value < 1039) {

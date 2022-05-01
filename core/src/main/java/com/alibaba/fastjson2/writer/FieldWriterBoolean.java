@@ -27,6 +27,13 @@ abstract class FieldWriterBoolean extends FieldWriterImpl {
 
     @Override
     public void writeBool(JSONWriter jsonWriter, boolean value) {
+        boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        if (writeNonStringValueAsString) {
+            writeFieldName(jsonWriter);
+            jsonWriter.writeString(value ? "true" : "false");
+            return;
+        }
+
         if (jsonWriter.isUTF8()) {
             if (value) {
                 if (utf8ValueTrue == null) {

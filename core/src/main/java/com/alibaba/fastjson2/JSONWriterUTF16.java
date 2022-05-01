@@ -791,9 +791,24 @@ class JSONWriterUTF16 extends JSONWriter {
 
     @Override
     public void writeFloat(float value) {
-        ensureCapacity(off + 15);
+        boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int minCapacity = off + 15;
+        if (writeNonStringValueAsString) {
+            minCapacity += 2;
+        }
+
+        ensureCapacity(minCapacity);
+        if (writeNonStringValueAsString) {
+            chars[off++] = '"';
+        }
+
         int len = RyuFloat.toString(value, chars, off);
         off += len;
+
+        if (writeNonStringValueAsString) {
+            chars[off++] = '"';
+        }
     }
 
     @Override
@@ -830,9 +845,24 @@ class JSONWriterUTF16 extends JSONWriter {
 
     @Override
     public void writeDouble(double value) {
-        ensureCapacity(off + 24);
+        boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int minCapacity = off + 24;
+        if (writeNonStringValueAsString) {
+            minCapacity += 2;
+        }
+
+        ensureCapacity(minCapacity);
+        if (writeNonStringValueAsString) {
+            chars[off++] = '"';
+        }
+
         int len = RyuDouble.toString(value, chars, off);
         off += len;
+
+        if (writeNonStringValueAsString) {
+            chars[off++] = '"';
+        }
     }
 
     @Override
