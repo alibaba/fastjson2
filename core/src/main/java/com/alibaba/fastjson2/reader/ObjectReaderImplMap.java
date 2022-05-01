@@ -35,6 +35,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
     volatile boolean instanceError = false;
 
     public static ObjectReader of(Type fieldType, Class mapType, long features) {
+        Function builder = null;
         Class instanceType = mapType;
         if (mapType == Map.class
                 || mapType == AbstractMap.class
@@ -52,6 +53,20 @@ public final class ObjectReaderImplMap implements ObjectReader {
             instanceType = ConcurrentHashMap.class;
         } else if (mapType == ConcurrentNavigableMap.class) {
             instanceType = ConcurrentSkipListMap.class;
+        } else {
+            switch (mapType.getTypeName()) {
+                case "com.google.common.collect.ImmutableMap":
+                case "com.google.common.collect.RegularImmutableMap":
+                    instanceType = HashMap.class;
+                    builder = GuavaSupport.immutableMapConverter();
+                    break;
+                case "com.google.common.collect.SingletonImmutableBiMap":
+                    instanceType = HashMap.class;
+                    builder = GuavaSupport.singletonBiMapConverter();
+                    break;
+                default:
+                    break;
+            }
         }
 
         if (fieldType instanceof ParameterizedType) {
@@ -62,11 +77,11 @@ public final class ObjectReaderImplMap implements ObjectReader {
                 Type keyType = actualTypeArguments[0];
                 Type valueType = actualTypeArguments[1];
 
-                if (valueType == String.class) {
+                if (valueType == String.class && builder == null) {
                     return new ObjectReaderImplMapString(mapType, instanceType, features);
                 }
 
-                return new ObjectReaderImplMapTyped(mapType, instanceType, keyType, valueType, 0, null);
+                return new ObjectReaderImplMapTyped(mapType, instanceType, keyType, valueType, 0, builder);
             }
         }
 
@@ -80,7 +95,6 @@ public final class ObjectReaderImplMap implements ObjectReader {
             }
         }
 
-        Function builder;
         String instanceTypeName = instanceType.getName();
         switch (instanceTypeName) {
             case "com.alibaba.fastjson.JSONObject":
@@ -115,8 +129,6 @@ public final class ObjectReaderImplMap implements ObjectReader {
                         Map.Entry entry = (Map.Entry) map.entrySet().iterator().next();
                         return Collections.singletonMap(entry.getKey(), entry.getValue());
                     };
-                } else {
-                    builder = null;
                 }
                 break;
         }

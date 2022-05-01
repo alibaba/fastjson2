@@ -225,7 +225,11 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
         jsonReader.nextIfMatch(',');
 
         if (buildFunction != null) {
-            return (T) buildFunction.apply(object);
+            try {
+                return (T) buildFunction.apply(object);
+            } catch (IllegalStateException e) {
+                throw new JSONException("build object error", e);
+            }
         }
 
         return (T) object;
