@@ -6,8 +6,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class AutoTypeTest3 {
     @Test
@@ -33,6 +33,7 @@ public class AutoTypeTest3 {
 
     public static class C extends B {
         public int id;
+
         public C() {
 
         }

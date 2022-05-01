@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.OptionalLong;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OptinalLongTest {
     @Test

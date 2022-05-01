@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 
-import static junit.framework.TestCase.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class RefTest6 {
     @Test

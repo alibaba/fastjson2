@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import static junit.framework.TestCase.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FilterTest {
     @Test

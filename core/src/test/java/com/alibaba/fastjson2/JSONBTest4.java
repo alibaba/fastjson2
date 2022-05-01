@@ -7,12 +7,13 @@ import org.junit.jupiter.api.Test;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONBTest4 {
     String str1;
     String str2;
     String str3;
+
     public JSONBTest4() throws Exception {
         {
             InputStream is = Int2Test.class.getClassLoader().getResourceAsStream("data/path_01.json");
@@ -649,16 +650,16 @@ public class JSONBTest4 {
         );
 
         assertEquals("[\"iPhone\"]",
-            JSONPath
-                    .of("$.phoneNumbers[:1].type")
-                    .extract(
-                            JSONReader
-                                    .ofJSONB(
-                                            JSONB.fromJSONBytes(
-                                                    str3.getBytes(StandardCharsets.UTF_8)
-                                            )
-                                    )
-                    ).toString()
+                JSONPath
+                        .of("$.phoneNumbers[:1].type")
+                        .extract(
+                                JSONReader
+                                        .ofJSONB(
+                                                JSONB.fromJSONBytes(
+                                                        str3.getBytes(StandardCharsets.UTF_8)
+                                                )
+                                        )
+                        ).toString()
         );
     }
 
@@ -865,21 +866,21 @@ public class JSONBTest4 {
 
         assertEquals(expected,
                 JSON.toJSONString(
-                    path.extract(
-                            JSONReader.of(str3)
-                    )
+                        path.extract(
+                                JSONReader.of(str3)
+                        )
                 )
         );
 
         assertEquals(expected,
                 JSON.toJSONString(
-                    path.extract(
-                            JSONReader.ofJSONB(
-                                    JSONB.fromJSONBytes(
-                                            str3.getBytes(StandardCharsets.UTF_8)
-                                    )
-                            )
-                    )
+                        path.extract(
+                                JSONReader.ofJSONB(
+                                        JSONB.fromJSONBytes(
+                                                str3.getBytes(StandardCharsets.UTF_8)
+                                        )
+                                )
+                        )
                 )
         );
 

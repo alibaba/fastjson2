@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Timestamp;
 
-import static junit.framework.TestCase.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Created by wenshao on 04/08/2017.

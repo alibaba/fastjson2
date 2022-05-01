@@ -8,7 +8,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2_vo.Int100;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Int100Test {
 
@@ -44,7 +44,7 @@ public class Int100Test {
             }
 
             Int100 vo2 = new Int100();
-            Object[] array = new Object[] {vo2};
+            Object[] array = new Object[]{vo2};
             {
                 JSONPath jsonPath = JSONPath
                         .of("$[0].v0000")

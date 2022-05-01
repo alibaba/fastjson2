@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GenericTypeMethodMapDecimalTest {
     @Test

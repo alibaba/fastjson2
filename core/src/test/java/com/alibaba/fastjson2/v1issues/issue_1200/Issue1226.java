@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1226 {
     @Test
@@ -26,7 +26,7 @@ public class Issue1226 {
         assertEquals('c', tb22.getC().charValue());
     }
 
-    static class TestBean{
+    static class TestBean {
         char c;
 
         public char getC() {
@@ -38,7 +38,7 @@ public class Issue1226 {
         }
     }
 
-    static class TestBean2{
+    static class TestBean2 {
         Character c;
 
         public Character getC() {

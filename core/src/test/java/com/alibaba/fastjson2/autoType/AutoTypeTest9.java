@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AutoTypeTest9 {
     @Test
@@ -19,7 +19,7 @@ public class AutoTypeTest9 {
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         JSONBDump.dump(bytes);
 
-        Bean bean2 = (Bean) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);;
+        Bean bean2 = (Bean) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertEquals(bean.values.getClass(), bean2.values.getClass());
     }
 
@@ -36,7 +36,7 @@ public class AutoTypeTest9 {
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         JSONBDump.dump(bytes);
 
-        Bean2 bean2 = (Bean2) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);;
+        Bean2 bean2 = (Bean2) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertEquals(bean.values.getClass(), bean2.values.getClass());
     }
 
@@ -54,7 +54,7 @@ public class AutoTypeTest9 {
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         JSONBDump.dump(bytes);
 
-        Bean3 bean2 = (Bean3) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);;
+        Bean3 bean2 = (Bean3) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertEquals(bean.values.getClass(), bean2.values.getClass());
         assertEquals(bean.values.get("set").getClass(), bean2.values.get("set").getClass());
     }
@@ -72,7 +72,7 @@ public class AutoTypeTest9 {
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         JSONBDump.dump(bytes);
 
-        Bean4 bean2 = (Bean4) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);;
+        Bean4 bean2 = (Bean4) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertEquals(bean.values.getClass(), bean2.values.getClass());
         assertEquals(bean.values.get(0).getClass(), bean2.values.get(0).getClass());
     }
@@ -86,7 +86,7 @@ public class AutoTypeTest9 {
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         JSONBDump.dump(bytes);
 
-        Bean4 bean2 = (Bean4) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);;
+        Bean4 bean2 = (Bean4) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertEquals(bean.values.getClass(), bean2.values.getClass());
         assertEquals(bean.values.get(0).getClass(), bean2.values.get(0).getClass());
     }
@@ -107,7 +107,7 @@ public class AutoTypeTest9 {
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         JSONBDump.dump(bytes);
 
-        Bean5 bean2 = (Bean5) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);;
+        Bean5 bean2 = (Bean5) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertEquals(bean.values.getClass(), bean2.values.getClass());
         assertEquals(bean.values.get("data").getClass(), bean2.values.get("data").getClass());
         assertEquals(

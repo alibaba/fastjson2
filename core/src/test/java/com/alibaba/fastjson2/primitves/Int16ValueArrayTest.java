@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Int16ValueArrayTest {
     @Test
@@ -42,7 +42,7 @@ public class Int16ValueArrayTest {
     @Test
     public void test_1() {
         VO vo = new VO();
-        vo.values = new short[] {1, 2, 3};
+        vo.values = new short[]{1, 2, 3};
         assertEquals("{\"values\":[1,2,3]}"
                 , JSON.toJSONString(vo));
 
@@ -55,7 +55,7 @@ public class Int16ValueArrayTest {
     @Test
     public void test_1_setter() {
         VO2 vo = new VO2();
-        vo.values = new short[] {1, 2, 3};
+        vo.values = new short[]{1, 2, 3};
         assertEquals("{\"values\":[1,2,3]}"
                 , JSON.toJSONString(vo));
 

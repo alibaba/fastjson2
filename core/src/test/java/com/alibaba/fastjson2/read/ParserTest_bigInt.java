@@ -12,9 +12,8 @@ import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class ParserTest_bigInt {
     String str = " { \n" +
@@ -67,7 +66,7 @@ public class ParserTest_bigInt {
         Class<?> clazz = Class.forName("com.alibaba.fastjson2.JSONReaderStr");
         Constructor<?> constructor = clazz.getDeclaredConstructor(JSONReader.Context.class, String.class, int.class, int.class);
         constructor.setAccessible(true);
-        JSONReader lexer =  (JSONReader) constructor.newInstance(ctx, str, 0, str.length());
+        JSONReader lexer = (JSONReader) constructor.newInstance(ctx, str, 0, str.length());
         lexerTest(lexer);
     }
 

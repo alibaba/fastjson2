@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static junit.framework.TestCase.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AutoTypeTest0 {
     @Test
@@ -87,7 +87,7 @@ public class AutoTypeTest0 {
 
     @Test
     public void test_jsonb_5() throws Exception {
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable("@type", "java.util.TreeMap","v0000");
+        JSONB.SymbolTable symbolTable = JSONB.symbolTable("@type", "java.util.TreeMap", "v0000");
 
         Map map = new LinkedHashMap<>();
         map.put("@type", "java.util.TreeMap");
@@ -103,7 +103,7 @@ public class AutoTypeTest0 {
 
     @Test
     public void test_jsonb_6() throws Exception {
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable("@type", "java.util.TreeMap","v0000");
+        JSONB.SymbolTable symbolTable = JSONB.symbolTable("@type", "java.util.TreeMap", "v0000");
 
         Map map = new LinkedHashMap<>();
         map.put("@type", "java.util.TreeMap");

@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class LongValueArrayTest {
     @Test
@@ -32,7 +32,7 @@ public class LongValueArrayTest {
 
     @Test
     public void test_parse_jsonb() {
-        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Integer[] {101, 102}));
+        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Integer[]{101, 102}));
         long[] array = JSONB.parseObject(jsonbBytes, long[].class);
         assertEquals(2, array.length);
         assertEquals(101, array[0]);

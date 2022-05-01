@@ -12,7 +12,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PathTest2 {
     private String str;
