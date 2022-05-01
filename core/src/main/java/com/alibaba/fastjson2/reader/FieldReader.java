@@ -59,21 +59,24 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
 
     @Override
     default int compareTo(FieldReader o) {
-        int ordinal0 = this.ordinal();
-        int ordinal1 = o.ordinal();
-        if (ordinal0 < ordinal1) {
-            return -1;
-        }
-        if (ordinal0 > ordinal1) {
-            return 1;
+        String thisFieldName = this.getFieldName();
+        String otherFieldName = o.getFieldName();
+
+        int nameCompare = thisFieldName.compareTo(otherFieldName);
+        if (nameCompare != 0) {
+            int thisOrdinal = this.ordinal();
+            int otherOrdinal = o.ordinal();
+            if (thisOrdinal < otherOrdinal) {
+                return -1;
+            }
+            if (thisOrdinal > otherOrdinal) {
+                return 1;
+            }
+
+            return nameCompare;
         }
 
-        int cmp = this.getFieldName().compareTo(o.getFieldName());
-        if (cmp != 0) {
-            return cmp;
-        }
-
-        cmp = (isReadOnly() == o.isReadOnly()) ? 0 : (isReadOnly() ? 1 : -1);
+        int cmp = (isReadOnly() == o.isReadOnly()) ? 0 : (isReadOnly() ? 1 : -1);
         if (cmp != 0) {
             return cmp;
         }
