@@ -4561,13 +4561,17 @@ public abstract class JSONPath {
     static final class MultiNameSegment extends Segment {
         final String[] names;
         final long[] nameHashCodes;
+        final Set<String> nameSet;
 
         public MultiNameSegment(String[] names) {
             this.names = names;
             this.nameHashCodes = new long[names.length];
+            this.nameSet = new HashSet<>();
             for (int i = 0; i < names.length; i++) {
                 nameHashCodes[i] = Fnv.hashCode64(names[i]);
+                nameSet.add(names[i]);
             }
+
         }
 
         @Override
@@ -4577,7 +4581,13 @@ public abstract class JSONPath {
                     : context.parent.value;
 
             if (object instanceof Map) {
-                context.value = new JSONArray(((Map<?, ?>) object).values());
+                Map map = (Map) object;
+                JSONArray array = new JSONArray(names.length);
+                for (String name : names) {
+                    Object value = map.get(name);
+                    array.add(value);
+                }
+                context.value = array;
                 return;
             }
 
@@ -4603,8 +4613,48 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
+        public void accept(JSONReader jsonReader, Context context) {
+            if (context.parent != null
+                    && (context.parent.eval
+                    || context.parent.current instanceof FilterSegment
+                    || context.parent.current instanceof MultiIndexSegment)
+            ) {
+                eval(context);
+                return;
+            }
 
+            Object object = jsonReader.readAny();
+            if (object instanceof Map) {
+                Map map = (Map) object;
+                JSONArray array = new JSONArray(names.length);
+                for (String name : names) {
+                    Object value = map.get(name);
+                    array.add(value);
+                }
+                context.value = array;
+                return;
+            }
+
+            if (object instanceof Collection) {
+                // skip
+                context.value = object;
+                return;
+            }
+
+            ObjectWriterProvider provider = context.path.getWriterContext().getProvider();
+            ObjectWriter objectWriter = provider.getObjectWriter(object.getClass());
+
+            JSONArray array = new JSONArray(names.length);
+            for (int i = 0; i < names.length; i++) {
+                FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCodes[i]);
+                Object fieldValue = null;
+                if (fieldWriter != null) {
+                    fieldValue = fieldWriter.getFieldValue(object);
+                }
+                array.add(fieldValue);
+            }
+            context.value = array;
+            return;
         }
     }
 
