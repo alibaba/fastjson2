@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.v1issues.issue_1500;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
@@ -24,9 +25,13 @@ public class Issue1500 {
         C c = new C();
         c.setE(aa);
         String jsonC = JSON.toJSONString(c, JSONWriter.Feature.WriteClassName);
-        C c2 = JSON.parseObject(jsonC, C.class);
-        assertEquals("Aa", c2.getE().getClass().getSimpleName());
-        assertEquals("aa", ((Aa) c2.getE()).getName());
+
+        C c1 = JSON.parseObject(jsonC, C.class);
+
+        C c2 = JSON.parseObject(jsonC, C.class, JSONReader.Feature.SupportAutoType);
+
+        assertEquals("Aa",c2.getE().getClass().getSimpleName());
+        assertEquals("aa",((Aa)c2.getE()).getName());
     }
 
     public static class Aa extends Exception {
