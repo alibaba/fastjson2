@@ -1,8 +1,7 @@
-package com.alibaba.fastjson.suppert.retrofit;
+package com.alibaba.fastjson.support.retrofit;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
-import com.alibaba.fastjson.support.retrofit.Retrofit2ConverterFactory;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import okhttp3.internal.http.RealResponseBody;
