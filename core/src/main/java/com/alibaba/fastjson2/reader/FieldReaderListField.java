@@ -162,7 +162,7 @@ class FieldReaderListField<T>
             JSONReader.Context ctx = context;
             ObjectReader itemObjectReader = getItemObjectReader(ctx);
 
-            List list = createList();
+            Collection list = (Collection) this.fieldObjectReader.createInstance(jsonReader.getContext().getFeatures() | features);
             jsonReader.next();
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {

@@ -221,7 +221,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
                 }
 
-                fieldInfo.format = jsonFieldFormat;
+                if (!jsonFieldFormat.isEmpty()) {
+                    fieldInfo.format = jsonFieldFormat;
+                }
             }
 
             if (!fieldInfo.ignore) {
@@ -272,7 +274,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                                     format = format.replaceAll("T", "'T'");
                                 }
 
-                                fieldInfo.format = format;
+                                if (!format.isEmpty()) {
+                                    fieldInfo.format = format;
+                                }
                             }
                             break;
                         }
@@ -414,7 +418,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
                     }
 
-                    fieldInfo.format = jsonFieldFormat;
+                    if (!jsonFieldFormat.isEmpty()) {
+                        fieldInfo.format = jsonFieldFormat;
+                    }
                 }
 
                 if (!fieldInfo.ignore) {
