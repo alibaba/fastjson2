@@ -3146,6 +3146,8 @@ final class JSONReaderStr extends JSONReader {
 
         char first = str.charAt(this.offset + zoneIdBegin);
 
+        LocalDateTime ldt = getLocalDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8);
+
         ZoneId zoneId;
         if (isTimeZone) {
             String tzStr = this.str.substring(this.offset + zoneIdBegin, this.offset + len);
@@ -3162,7 +3164,7 @@ final class JSONReaderStr extends JSONReader {
                     ;
 //                    zoneIdStr = new String(chars, this.offset + zoneIdBegin, len - zoneIdBegin);
                 } else if (first == ' ') {
-                    zoneIdStr = this.str.substring(this.offset + zoneIdBegin + 1, this.offset + len - 1);
+                    zoneIdStr = this.str.substring(this.offset + zoneIdBegin + 1, this.offset + len);
                 } else { // '[
                     if (zoneIdBegin < len) {
                         zoneIdStr = this.str.substring(this.offset + zoneIdBegin + 1, this.offset + len - 1);
@@ -3170,21 +3172,11 @@ final class JSONReaderStr extends JSONReader {
                         zoneIdStr = null;
                     }
                 }
-                if (zoneIdStr != null) {
-                    if (zoneIdStr.equals("000")) {
-                        zoneId = UTC;
-                    } else if (zoneIdStr.equals("+08:00[Asia/Shanghai]") || zoneIdStr.equals("Asia/Shanghai")) {
-                        zoneId = SHANGHAI;
-                    } else {
-                        zoneId = ZoneId.of(zoneIdStr);
-                    }
-                } else {
-                    zoneId = context.getZoneId();
-                }
+                zoneId = getZoneId(ldt, zoneIdStr);
             }
         }
 
-        ZonedDateTime zdt = getZonedDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8, zoneId);
+        ZonedDateTime zdt = ldt.atZone(zoneId);
         if (zdt == null) {
             return null;
         }
