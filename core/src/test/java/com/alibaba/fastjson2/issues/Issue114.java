@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Issue114 {
     @Test
@@ -21,5 +22,19 @@ public class Issue114 {
 
         String col = (String)colPath.extract(JSONReader.of(seatString));
         assertEquals("C", col);
+    }
+
+    @Test
+    public void test2() {
+        String seatString = "{\n" +
+                "\t\"flightId\":\"MH8633\",\n" +
+                "\t\"column\":\"C\",\n" +
+                "\t\"row\":\"19\"\n" +
+                "}";
+        JSONPath path = JSONPath.of("$['row','column']");
+        Object result = path.extract(
+                JSONReader.of(seatString));
+        assertNotNull(result);
+        assertEquals("[\"19\",\"C\"]", result.toString());
     }
 }
