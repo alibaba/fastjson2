@@ -442,7 +442,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             }
 
             if (!objectClass.getName().startsWith("java.lang")) {
-                String fieldName = BeanUtils.setterName(methodName, null);
+                String fieldName = BeanUtils.getterName(methodName, null);
 
                 BeanUtils.declaredFields(objectClass, field -> {
                     if (field.getName().equalsIgnoreCase(fieldName)) {
