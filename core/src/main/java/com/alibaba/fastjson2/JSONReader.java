@@ -1031,7 +1031,7 @@ public abstract class JSONReader implements Closeable {
                     val = null;
                     break;
                 default:
-                    throw new JSONException("TODO : " + ch);
+                    throw new JSONException("illegal input offset " + offset + ", char " + ch);
             }
             object.put(name, val);
         }
