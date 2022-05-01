@@ -4755,8 +4755,25 @@ public abstract class JSONPath {
                 return;
             }
 
-            if (jsonReader.ch == '[' && ctx.next != null) {
+            if (jsonReader.ch == '[') {
                 // skip
+                if (ctx.next != null) {
+                    return;
+                }
+
+                jsonReader.next();;
+                for (; ; ) {
+                    if (jsonReader.ch == ']') {
+                        jsonReader.next();
+                        break;
+                    }
+                    Object value = jsonReader.readAny();
+                    values.add(value);
+                    if (jsonReader.ch == ',') {
+                        jsonReader.next();
+                    }
+                }
+                ctx.value = values;
                 return;
             }
 
