@@ -61,7 +61,7 @@ public @interface JSONField {
     Class writeUsing() default Void.class;
 
     /**
-     * Specify {@link JSONWriter.Feature}s to use features when deserializing
+     * Specify {@link JSONReader.Feature}s to use features when deserializing
      */
     JSONReader.Feature[] serializeFeatures() default {};
 
