@@ -38,10 +38,7 @@ public class DateFieldTest5 {
         V0 v = new V0();
         v.setValue(new Date());
 
-        SerializeConfig mapping = new SerializeConfig();
-        mapping.setAsmEnable(true);
-
-        String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue);
+        String text = JSON.toJSONString(v, SerializerFeature.WriteMapNullValue);
         Assert.assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
     }
 
