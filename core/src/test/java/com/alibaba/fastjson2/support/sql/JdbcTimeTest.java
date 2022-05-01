@@ -13,14 +13,14 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.TimeZone;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JdbcTimeTest {
     private TimeZone defaultTimeZone;
 
     @BeforeEach
     public void before() {
-        defaultTimeZone  = TimeZone.getDefault();
+        defaultTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 

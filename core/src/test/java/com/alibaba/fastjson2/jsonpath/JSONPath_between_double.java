@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.JSONPath;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class JSONPath_between_double {
     @Test
@@ -15,8 +17,8 @@ public class JSONPath_between_double {
         list.add(new Entity(102, "ljw2083"));
         list.add(new Entity(103, "ljw2083"));
         List<Object> result = (List<Object>) JSONPath.eval(list, "$[?(@.id between 101 and 101)]");
-        Assert.assertEquals(1, result.size());
-        Assert.assertSame(list.get(0), result.get(0));
+        assertEquals(1, result.size());
+        assertSame(list.get(0), result.get(0));
     }
 
     @Test
@@ -26,9 +28,9 @@ public class JSONPath_between_double {
         list.add(new Entity(102, "ljw2083"));
         list.add(new Entity(103, "ljw2083"));
         List<Object> result = (List<Object>) JSONPath.eval(list, "$[?(@.id between 101 and 102)]");
-        Assert.assertEquals(2, result.size());
-        Assert.assertSame(list.get(0), result.get(0));
-        Assert.assertSame(list.get(1), result.get(1));
+        assertEquals(2, result.size());
+        assertSame(list.get(0), result.get(0));
+        assertSame(list.get(1), result.get(1));
     }
 
     @Test
@@ -38,16 +40,16 @@ public class JSONPath_between_double {
         list.add(new Entity(102, "ljw2083"));
         list.add(new Entity(103, "ljw2083"));
         List<Object> result = (List<Object>) JSONPath.eval(list, "$[?(@.id not between 101 and 102)]");
-        Assert.assertEquals(1, result.size());
-        Assert.assertSame(list.get(2), result.get(0));
+        assertEquals(1, result.size());
+        assertSame(list.get(2), result.get(0));
     }
 
     public static class Entity {
 
         private Double id;
-        private String  name;
+        private String name;
 
-        public Entity(int id, String name){
+        public Entity(int id, String name) {
             this.id = Double.valueOf(id);
             this.name = name;
         }

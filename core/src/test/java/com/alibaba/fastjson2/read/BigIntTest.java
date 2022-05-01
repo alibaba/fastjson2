@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BigIntTest {
     /**
@@ -25,7 +25,7 @@ public class BigIntTest {
     public void test_json_bigint_0() throws Exception {
         String str = "{\"id\":123}";
         Object id = JSONReader.of(str
-                        .toCharArray())
+                .toCharArray())
                 .readObject()
                 .get("id");
 
@@ -39,7 +39,7 @@ public class BigIntTest {
         bigInt.longValue();
         String json = "{\"id\":" + str + "}";
         Object id = JSONReader.of(json
-                        .toCharArray())
+                .toCharArray())
                 .readObject()
                 .get("id");
 
@@ -53,7 +53,7 @@ public class BigIntTest {
         bigInt.longValue();
         String json = "{\"id\":" + str + "}";
         Object id = JSONReader.of(json
-                        .toCharArray())
+                .toCharArray())
                 .readObject()
                 .get("id");
 
@@ -67,7 +67,7 @@ public class BigIntTest {
         bigInt.longValue();
         String json = "{\"id\":" + str + "}";
         Object id = JSONReader.of(json
-                        .toCharArray())
+                .toCharArray())
                 .readObject()
                 .get("id");
 
@@ -83,7 +83,7 @@ public class BigIntTest {
         byte[] bytes = bigInt.toByteArray();
         String json = "{\"id\":" + str + "}";
         Object id = JSONReader.of(json
-                        .toCharArray())
+                .toCharArray())
                 .readObject()
                 .get("id");
 
@@ -260,19 +260,19 @@ public class BigIntTest {
                 switch (i) {
                     case 0:
                         product = ylong * (mag0 & LONG_MASK) + carry;
-                        mag0 = (int)product;
+                        mag0 = (int) product;
                         break;
                     case 1:
                         product = ylong * (mag1 & LONG_MASK) + carry;
-                        mag1 = (int)product;
+                        mag1 = (int) product;
                         break;
                     case 2:
                         product = ylong * (mag2 & LONG_MASK) + carry;
-                        mag2 = (int)product;
+                        mag2 = (int) product;
                         break;
                     case 3:
                         product = ylong * (mag3 & LONG_MASK) + carry;
-                        mag3 = (int)product;
+                        mag3 = (int) product;
                         break;
                     default:
                         throw new ArithmeticException("BigInteger would overflow supported range");
@@ -289,19 +289,19 @@ public class BigIntTest {
                 switch (i) {
                     case 0:
                         sum = (mag0 & LONG_MASK) + carry;
-                        mag0 = (int)sum;
+                        mag0 = (int) sum;
                         break;
                     case 1:
                         sum = (mag1 & LONG_MASK) + carry;
-                        mag1 = (int)sum;
+                        mag1 = (int) sum;
                         break;
                     case 2:
                         sum = (mag2 & LONG_MASK) + carry;
-                        mag2 = (int)sum;
+                        mag2 = (int) sum;
                         break;
                     case 3:
                         sum = (mag3 & LONG_MASK) + carry;
-                        mag3 = (int)sum;
+                        mag3 = (int) sum;
                         break;
                     default:
                         throw new ArithmeticException("BigInteger would overflow supported range");
@@ -314,7 +314,7 @@ public class BigIntTest {
 
     //int[] mag = new int[] {mag0, mag1, mag2, mag3};
     private int firstNonzeroIntNum(int[] mag) {
-        for (int i = mag.length - 1, j = 0; i >= 0; i--, j++)  {
+        for (int i = mag.length - 1, j = 0; i >= 0; i--, j++) {
             if (mag[i] != 0) {
                 return j;
             }

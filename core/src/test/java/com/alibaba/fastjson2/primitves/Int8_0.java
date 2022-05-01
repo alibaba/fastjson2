@@ -9,7 +9,7 @@ import com.alibaba.fastjson2.writer.ObjectWriters;
 import com.alibaba.fastjson2_vo.Byte1;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Int8_0 {
     @Test

@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ImmutableMapTest {
     @Test

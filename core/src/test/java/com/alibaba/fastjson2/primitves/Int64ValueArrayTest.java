@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Int64ValueArrayTest {
     @Test
@@ -52,7 +52,7 @@ public class Int64ValueArrayTest {
     @Test
     public void test_1() {
         VO vo = new VO();
-        vo.values = new long[] {1, 2, 3};
+        vo.values = new long[]{1, 2, 3};
         assertEquals("{\"values\":[1,2,3]}"
                 , JSON.toJSONString(vo));
 
@@ -65,7 +65,7 @@ public class Int64ValueArrayTest {
     @Test
     public void test_1_setter() {
         VO2 vo = new VO2();
-        vo.values = new long[] {1, 2, 3,123,1234,12345,123456,1234567,12345678,123456789,1234567890,12345678901L,123456789012L};
+        vo.values = new long[]{1, 2, 3, 123, 1234, 12345, 123456, 1234567, 12345678, 123456789, 1234567890, 12345678901L, 123456789012L};
         assertEquals("{\"values\":[1,2,3,123,1234,12345,123456,1234567,12345678,123456789,1234567890,12345678901,123456789012]}"
                 , JSON.toJSONString(vo));
 

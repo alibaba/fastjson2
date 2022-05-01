@@ -3,7 +3,7 @@ package com.alibaba.fastjson2.jsonb;
 import com.alibaba.fastjson2.JSONB;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONBStrTest {
     @Test

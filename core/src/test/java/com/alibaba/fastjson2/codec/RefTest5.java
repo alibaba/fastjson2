@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class RefTest5 {
     @Test

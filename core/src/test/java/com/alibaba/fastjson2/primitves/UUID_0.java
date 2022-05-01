@@ -11,10 +11,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UUID_0 {
     UUID uuid = UUID.randomUUID();
+
     @Test
     public void test_reflect() throws Exception {
         ObjectWriter<VO> ow = ObjectWriters.ofReflect(VO.class);

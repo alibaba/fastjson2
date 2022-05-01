@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JSONBTableTest4 {
     @Test
@@ -64,7 +64,7 @@ public class JSONBTableTest4 {
 
         byte[] bytes = JSONB.toBytes(object);
 
-        System.out.println(Arrays.toString(bytes));
+        //System.out.println(Arrays.toString(bytes));
 
         B a1 = JSONB.parseObject(bytes, B.class, JSONReader.Feature.SupportAutoType);
         assertEquals(2, a1.items.size());
@@ -83,7 +83,7 @@ public class JSONBTableTest4 {
 
         byte[] bytes = JSONB.toBytes(object);
 
-        System.out.println(Arrays.toString(bytes));
+        //System.out.println(Arrays.toString(bytes));
 
         D a1 = JSONB.parseObject(bytes, D.class, JSONReader.Feature.SupportAutoType);
         assertEquals(2, a1.items.size());
@@ -133,7 +133,7 @@ public class JSONBTableTest4 {
 
         byte[] bytes = JSONB.toBytes(a, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteClassName);
 
-        System.out.println(Arrays.toString(bytes));
+        //System.out.println(Arrays.toString(bytes));
 
         C a1 = JSONB.parseObject(bytes, C.class, JSONReader.Feature.SupportAutoType);
         assertEquals(JSON.toJSONString(a), JSON.toJSONString(a1));

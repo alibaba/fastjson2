@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONPathValueConsumerTest2 {
     @Test
@@ -138,16 +138,16 @@ public class JSONPathValueConsumerTest2 {
         path.extractScalar(
                 JSONReader
                         .of("{\"id\":\"123\"}".getBytes(StandardCharsets.UTF_8)), new ValueConsumer() {
-            @Override
-            public void accept(String val) {
-                ref.set(val);
-            }
+                    @Override
+                    public void accept(String val) {
+                        ref.set(val);
+                    }
 
-            @Override
-            public void accept(byte[] bytes, int off, int len) {
-                ref.set(new String(bytes, off, len));
-            }
-        });
+                    @Override
+                    public void accept(byte[] bytes, int off, int len) {
+                        ref.set(new String(bytes, off, len));
+                    }
+                });
         assertEquals("123", ref.get());
     }
 

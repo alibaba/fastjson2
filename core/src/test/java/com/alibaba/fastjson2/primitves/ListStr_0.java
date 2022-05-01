@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ListStr_0 {
     Type[] types = Type.class.getEnumConstants();
@@ -34,6 +34,7 @@ public class ListStr_0 {
 //            assertEquals(vo.value, o.value);
         }
     }
+
     @Test
     public void test_jsonb() throws Exception {
         ObjectWriter<VO> ow = TestUtils.WRITER_CREATOR.createObjectWriter(VO.class);

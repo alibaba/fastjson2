@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.annotation.NamingStrategy;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1555 {
     @Test
@@ -25,6 +25,7 @@ public class Issue1555 {
 
     /**
      * 当某个字段有JSONField注解，JSONField中name属性不存在，json属性名也要用类上的属性名转换策略
+     *
      * @throws Exception
      */
     public void test_when_JSONField_have_not_name_attr() throws Exception {

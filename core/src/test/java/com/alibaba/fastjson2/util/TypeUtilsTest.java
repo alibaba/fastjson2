@@ -10,7 +10,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.util.Date;
 
-import static junit.framework.TestCase.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TypeUtilsTest {
     @Test
@@ -30,7 +30,6 @@ public class TypeUtilsTest {
         assertEquals(0, TypeUtils.toByteValue((byte) 0));
         assertEquals(Byte.valueOf((byte) 0), TypeUtils.toByte((short) 0));
         assertEquals(Byte.valueOf((byte) 0), TypeUtils.toByte((byte) 0));
-
 
 
         assertNull(TypeUtils.toDouble(null));

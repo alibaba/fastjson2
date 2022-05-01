@@ -9,7 +9,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.TestCase.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class RefTest4 {
     @Test

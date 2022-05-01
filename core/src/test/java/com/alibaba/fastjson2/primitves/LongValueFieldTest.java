@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LongValueFieldTest {
     @Test
@@ -62,7 +62,7 @@ public class LongValueFieldTest {
 
     @Test
     public void test_jsonb_0() {
-        long[] values = new long[] {
+        long[] values = new long[]{
                 -16, 16
         };
 
@@ -79,7 +79,7 @@ public class LongValueFieldTest {
 
     @Test
     public void test_jsonb_0_map() {
-        long[] values = new long[] {
+        long[] values = new long[]{
                 100, 200, 500, 1000, 2000, 5000, 10_000, 20_000, 50_000, 100_000, 200_000, 500_000
         };
 

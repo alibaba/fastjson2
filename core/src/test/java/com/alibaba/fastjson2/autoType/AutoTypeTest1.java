@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class AutoTypeTest1 {
     @Test
@@ -29,12 +29,13 @@ public class AutoTypeTest1 {
         public List<B> list = new ArrayList<B>();
     }
 
-    public static  interface B {
+    public static interface B {
 
     }
 
-    public static  class C implements B {
+    public static class C implements B {
         public int id;
+
         public C() {
 
         }

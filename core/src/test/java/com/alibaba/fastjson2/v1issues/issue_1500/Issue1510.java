@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1510 {
     @Test

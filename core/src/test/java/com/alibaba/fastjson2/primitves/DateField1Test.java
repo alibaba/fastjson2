@@ -16,14 +16,14 @@ import org.junit.jupiter.api.Test;
 import java.util.Date;
 import java.util.TimeZone;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateField1Test {
     private TimeZone defaultTimeZone;
 
     @BeforeEach
     public void before() {
-        defaultTimeZone  = TimeZone.getDefault();
+        defaultTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 

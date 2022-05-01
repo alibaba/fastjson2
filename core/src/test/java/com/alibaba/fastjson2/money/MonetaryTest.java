@@ -8,7 +8,7 @@ import javax.money.CurrencyUnit;
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MonetaryTest {
     @Test
@@ -37,7 +37,7 @@ public class MonetaryTest {
     public void test_money() {
         Money oneEuro = Money.of(1, "EUR");
         String str = JSON.toJSONString(oneEuro);
-        System.out.println(str);
+        //System.out.println(str);
         Money money = JSON.parseObject(str, Money.class);
         assertEquals(oneEuro, money);
     }

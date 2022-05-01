@@ -11,8 +11,8 @@ import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
 
-import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ParserTest_int {
     String str = " { \n" +
@@ -66,7 +66,7 @@ public class ParserTest_int {
         Class<?> clazz = Class.forName("com.alibaba.fastjson2.JSONReaderStr");
         Constructor<?> constructor = clazz.getDeclaredConstructor(JSONReader.Context.class, String.class, int.class, int.class);
         constructor.setAccessible(true);
-        JSONReader lexer =  (JSONReader) constructor.newInstance(ctx, str, 0, str.length());
+        JSONReader lexer = (JSONReader) constructor.newInstance(ctx, str, 0, str.length());
         lexerTest(lexer);
     }
 

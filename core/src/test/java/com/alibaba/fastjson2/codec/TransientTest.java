@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.beans.Transient;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TransientTest {
     @Test

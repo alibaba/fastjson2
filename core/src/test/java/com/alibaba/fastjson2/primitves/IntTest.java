@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IntTest {
     private int[] values = new int[100];
@@ -85,7 +85,7 @@ public class IntTest {
 
     @Test
     public void test_jsonb_value_cast() {
-        Number[] values = new Number[] {
+        Number[] values = new Number[]{
                 0,
                 Byte.MIN_VALUE, Byte.MAX_VALUE,
                 Short.MIN_VALUE, Short.MAX_VALUE,
@@ -108,7 +108,7 @@ public class IntTest {
 
     @Test
     public void test_jsonb_value_cast_str() {
-        Number[] values = new Number[] {
+        Number[] values = new Number[]{
                 0,
                 Byte.MIN_VALUE, Byte.MAX_VALUE,
                 Short.MIN_VALUE, Short.MAX_VALUE,
@@ -224,7 +224,7 @@ public class IntTest {
             }
 
             Int1 vo2 = new Int1();
-            Object[] array = new Object[] {vo2};
+            Object[] array = new Object[]{vo2};
             {
                 JSONPath jsonPath = JSONPath
                         .of("$[0].v0000")

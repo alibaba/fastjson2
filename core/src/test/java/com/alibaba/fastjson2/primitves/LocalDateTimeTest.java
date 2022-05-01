@@ -8,32 +8,32 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LocalDateTimeTest {
-    static LocalDateTime[] dateTimes = new LocalDateTime[] {
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 1),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 10),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 100),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 1000),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 1000_0),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 1000_00),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 1000_000),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 1000_000_0),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 1000_000_00),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 9),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 99),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 999),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 999_9),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 999_99),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 999_999),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 999_999_9),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 999_999_99),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 999_999_999),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 121_000_000),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 140__000_000),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 200__000_000),
-            LocalDateTime.of(2021, 10, 20, 16, 22,15, 0)
+    static LocalDateTime[] dateTimes = new LocalDateTime[]{
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 1),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 10),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 100),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 1000),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 1000_0),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 1000_00),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 1000_000),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 1000_000_0),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 1000_000_00),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 9),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 99),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 999),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 999_9),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 999_99),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 999_999),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_9),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_99),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_999),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 121_000_000),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 140__000_000),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 200__000_000),
+            LocalDateTime.of(2021, 10, 20, 16, 22, 15, 0)
     };
 
     @Test

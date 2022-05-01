@@ -11,8 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ParserTest_media {
     String str = "{\"images\":\n" +
@@ -82,7 +82,7 @@ public class ParserTest_media {
         Class<?> clazz = Class.forName("com.alibaba.fastjson2.JSONReaderStr");
         Constructor<?> constructor = clazz.getDeclaredConstructor(JSONReader.Context.class, String.class, int.class, int.class);
         constructor.setAccessible(true);
-        JSONReader lexer =  (JSONReader) constructor.newInstance(ctx, str, 0, str.length());
+        JSONReader lexer = (JSONReader) constructor.newInstance(ctx, str, 0, str.length());
         lexerTest(lexer);
     }
 

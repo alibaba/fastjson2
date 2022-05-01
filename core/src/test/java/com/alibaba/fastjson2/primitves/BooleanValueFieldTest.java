@@ -11,7 +11,7 @@ import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.BooleanValueField1;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BooleanValueFieldTest {
     @Test
@@ -103,7 +103,7 @@ public class BooleanValueFieldTest {
         boolean value;
     }
 
-    static class B extends  A {
+    static class B extends A {
 
     }
 }

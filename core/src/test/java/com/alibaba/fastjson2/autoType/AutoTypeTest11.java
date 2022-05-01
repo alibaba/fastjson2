@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class AutoTypeTest11 {
     @Test
@@ -24,7 +24,7 @@ public class AutoTypeTest11 {
         byte[] bytes = JSONB.toBytes(object, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased, JSONWriter.Feature.ReferenceDetection);
 
         com.alibaba.fastjson.JSONObject object2 = (com.alibaba.fastjson.JSONObject) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
-        System.out.println(object2);
+        //System.out.println(object2);
 
         Differ.diff(object, object2);
     }
