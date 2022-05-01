@@ -65,7 +65,7 @@ public class BeanToArrayTest2 {
     }
 
     public static class Parent {
-        @JSONField(serializeFeatures = JSONReader.Feature.SupportArrayToBean, deserializeFeatures = JSONWriter.Feature.BeanToArray)
+        @JSONField(deserializeFeatures = JSONReader.Feature.SupportArrayToBean, serializeFeatures = JSONWriter.Feature.BeanToArray)
         public VO value;
     }
 }

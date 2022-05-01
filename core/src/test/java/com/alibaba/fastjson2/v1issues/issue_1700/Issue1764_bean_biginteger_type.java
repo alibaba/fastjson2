@@ -39,7 +39,7 @@ public class Issue1764_bean_biginteger_type {
 
 
 
-    @JSONType(deserializeFeatures = JSONWriter.Feature.BrowserCompatible)
+    @JSONType(serializeFeatures1 = JSONWriter.Feature.BrowserCompatible)
     public static class Model {
         public BigInteger value;
 

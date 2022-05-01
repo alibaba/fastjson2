@@ -38,12 +38,12 @@ public class Issue1764 {
     }
 
     public static class Model {
-        @JSONField(deserializeFeatures = JSONWriter.Feature.BrowserCompatible)
+        @JSONField(serializeFeatures = JSONWriter.Feature.BrowserCompatible)
         public long value;
     }
 
     public static class Model1 {
-        @JSONField(deserializeFeatures = JSONWriter.Feature.BrowserCompatible)
+        @JSONField(serializeFeatures = JSONWriter.Feature.BrowserCompatible)
         private long value;
 
         public long getValue() {
@@ -55,7 +55,7 @@ public class Issue1764 {
         }
     }
 
-    @JSONType(deserializeFeatures = JSONWriter.Feature.BrowserCompatible)
+    @JSONType(serializeFeatures1 = JSONWriter.Feature.BrowserCompatible)
     public static class Model2 {
         private long value;
 
