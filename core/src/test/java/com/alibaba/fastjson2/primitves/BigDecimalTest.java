@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.writer.*;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.writer.FieldWriter;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.BigDecimal1;
 import org.junit.jupiter.api.Test;
 

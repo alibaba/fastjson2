@@ -7,7 +7,8 @@ import com.alibaba.fastjson2.util.JSONBDump;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class AutoTypeTest46_Pair {
     @Test

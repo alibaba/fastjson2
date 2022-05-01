@@ -2,8 +2,8 @@ package com.alibaba.fastjson_perf;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
 import com.alibaba.fastjson2.reader.ObjectReaders;
 import com.alibaba.fastjson2_vo.Int20;
 import org.apache.commons.io.IOUtils;
@@ -90,7 +90,7 @@ public class Int20Test {
 
     @Test
     public void test_asm_parse() throws Throwable {
-        ObjectReader<Int20> objectConsumer = ObjectReaderCreatorASM.of(Int20.class);
+        ObjectReader<Int20> objectConsumer = TestUtils.of(Int20.class);
 
         for (int i = 0; i < 10; ++i) {
             long start = System.currentTimeMillis();

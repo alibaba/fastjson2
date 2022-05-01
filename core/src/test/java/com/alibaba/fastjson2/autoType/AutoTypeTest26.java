@@ -7,7 +7,9 @@ import com.alibaba.fastjson2.util.JSONBDump;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static org.junit.Assert.*;
 

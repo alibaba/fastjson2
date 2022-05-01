@@ -2,11 +2,7 @@ package com.alibaba.fastjson2.hsf;
 
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * 复杂对象

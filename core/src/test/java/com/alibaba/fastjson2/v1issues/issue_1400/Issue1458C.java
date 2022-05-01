@@ -1,10 +1,9 @@
 package com.alibaba.fastjson2.v1issues.issue_1400;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson.annotation.JSONCreator;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.ImmutableMap;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;

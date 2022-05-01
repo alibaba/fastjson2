@@ -2,7 +2,7 @@ package com.alibaba.fastjson_perf;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaders;
 import com.alibaba.fastjson2_vo.Integer20;
@@ -98,7 +98,7 @@ public class Integer20CompactTest {
 
     @Test
     public void test_asm_parse() throws Throwable {
-        ObjectReader<Integer20> objectConsumer = ObjectReaderCreatorASM.of(Integer20.class);
+        ObjectReader<Integer20> objectConsumer = TestUtils.of(Integer20.class);
 
         for (int i = 0; i < 10; ++i) {
             long start = System.currentTimeMillis();
@@ -133,7 +133,7 @@ public class Integer20CompactTest {
 
     @Test
     public void test_asm_parse_utf8_bytes() throws Throwable {
-        ObjectReader<Integer20> objectConsumer = ObjectReaderCreatorASM.of(Integer20.class);
+        ObjectReader<Integer20> objectConsumer = TestUtils.of(Integer20.class);
 
         byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
         for (int i = 0; i < 10; ++i) {
@@ -154,7 +154,7 @@ public class Integer20CompactTest {
 
     @Test
     public void test_asm_parse_ascii_bytes() throws Throwable {
-        ObjectReader<Integer20> objectConsumer = ObjectReaderCreatorASM.of(Integer20.class);
+        ObjectReader<Integer20> objectConsumer = TestUtils.of(Integer20.class);
 
         byte[] bytes = str.getBytes(StandardCharsets.US_ASCII);
         for (int i = 0; i < 10; ++i) {

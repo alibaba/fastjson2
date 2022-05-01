@@ -1,23 +1,22 @@
 package com.alibaba.fastjson2.eishay;
 
-import com.alibaba.fastjson2.eishay.vo.Image;
-import com.alibaba.fastjson2.eishay.vo.Media;
-import com.alibaba.fastjson2.eishay.vo.MediaContent;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.eishay.vo.Image;
+import com.alibaba.fastjson2.eishay.vo.Media;
+import com.alibaba.fastjson2.eishay.vo.MediaContent;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaders;
-
-import static com.alibaba.fastjson2.reader.ObjectReaders.*;
-import static junit.framework.TestCase.assertEquals;
-
 import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+
+import static com.alibaba.fastjson2.reader.ObjectReaders.*;
+import static junit.framework.TestCase.assertEquals;
 
 public class ParserTest {
     ObjectReader<MediaContent> mediaContentConsumer;

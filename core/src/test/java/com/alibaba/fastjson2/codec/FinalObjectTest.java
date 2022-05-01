@@ -2,7 +2,9 @@ package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
-import com.alibaba.fastjson2.writer.*;
+import com.alibaba.fastjson2.writer.FieldWriter;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import org.junit.jupiter.api.Test;
 
 import static junit.framework.TestCase.assertEquals;

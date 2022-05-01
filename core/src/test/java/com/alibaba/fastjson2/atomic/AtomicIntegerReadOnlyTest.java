@@ -1,12 +1,9 @@
 package com.alibaba.fastjson2.atomic;
 
 import com.alibaba.fastjson2.JSON;
-import junit.framework.TestCase;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

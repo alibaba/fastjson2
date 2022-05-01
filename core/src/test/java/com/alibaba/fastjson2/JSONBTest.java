@@ -17,7 +17,6 @@ import java.util.concurrent.*;
 
 import static junit.framework.TestCase.*;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNotEquals;
 
 public class JSONBTest {
     public static final int INT24_MAX = 256 * 256 * 128 - 1;

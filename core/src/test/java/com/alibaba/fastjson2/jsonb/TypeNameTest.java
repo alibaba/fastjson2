@@ -2,9 +2,8 @@ package com.alibaba.fastjson2.jsonb;
 
 import org.junit.jupiter.api.Test;
 
-import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-
+import static com.alibaba.fastjson2.JSONB.typeName;
 import static org.junit.Assert.assertEquals;
 
 public class TypeNameTest {

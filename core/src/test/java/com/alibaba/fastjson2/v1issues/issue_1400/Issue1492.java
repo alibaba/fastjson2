@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.v1issues.issue_1400;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;

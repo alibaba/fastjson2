@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.writer.*;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.writer.FieldWriter;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.BigInteger1;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertArrayEquals;
 
 public class BigIntegerTest {
     static BigInteger[] values = new BigInteger[] {

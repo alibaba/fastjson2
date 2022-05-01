@@ -4,8 +4,6 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 import com.alibaba.fastjson2_vo.ShortValueField1;
 import org.junit.jupiter.api.Test;
 

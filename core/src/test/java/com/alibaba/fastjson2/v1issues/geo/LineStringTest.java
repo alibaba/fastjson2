@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.v1issues.geo;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson.support.geo.Geometry;
 import com.alibaba.fastjson.support.geo.LineString;
+import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

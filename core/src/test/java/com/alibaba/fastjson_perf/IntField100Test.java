@@ -2,7 +2,7 @@ package com.alibaba.fastjson_perf;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaders;
 import com.alibaba.fastjson2_vo.Int100Field;
@@ -93,7 +93,7 @@ public class IntField100Test {
 
     @Test
     public void test_asm_parse() throws Throwable {
-        ObjectReader<Int100Field> objectConsumer = ObjectReaderCreatorASM.of(Int100Field.class);
+        ObjectReader<Int100Field> objectConsumer = TestUtils.of(Int100Field.class);
 
         for (int i = 0; i < 10; ++i) {
             long start = System.currentTimeMillis();

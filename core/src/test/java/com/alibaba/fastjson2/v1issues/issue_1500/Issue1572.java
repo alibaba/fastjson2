@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.v1issues.issue_1500;
 
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 public class Issue1572 {

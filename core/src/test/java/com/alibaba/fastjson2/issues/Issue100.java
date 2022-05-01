@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.primitves.Int64Field_1;
 import com.alibaba.fastjson2_vo.Long1;
 import org.junit.jupiter.api.Test;
 

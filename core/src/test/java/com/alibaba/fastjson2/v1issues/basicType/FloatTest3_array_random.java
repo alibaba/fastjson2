@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.v1issues.basicType;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader.Feature;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 

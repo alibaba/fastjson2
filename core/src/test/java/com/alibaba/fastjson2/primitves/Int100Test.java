@@ -3,7 +3,8 @@ package com.alibaba.fastjson2.primitves;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TestUtils;
-import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2_vo.Int100;
 import org.junit.jupiter.api.Test;
 

@@ -10,7 +10,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class AutoTypeTest31_array {
     @Test

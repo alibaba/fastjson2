@@ -2,15 +2,13 @@ package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
-import com.alibaba.fastjson2.TypeReference;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
+import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
 

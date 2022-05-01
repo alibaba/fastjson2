@@ -2,16 +2,15 @@ package com.alibaba.fastjson2.autoType;
 
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.reader.*;
-import com.alibaba.fastjson2.util.JSONBDump;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 import com.alibaba.fastjson2_vo.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static junit.framework.TestCase.*;
 
