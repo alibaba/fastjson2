@@ -98,6 +98,16 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     }
 
     @Override
+    public Set<Map.Entry<String, Object>> entrySet() {
+        return super.entrySet();
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return super.keySet();
+    }
+
+    @Override
     public boolean containsKey(Object key) {
         boolean result = super.containsKey(key);
         if (!result) {
