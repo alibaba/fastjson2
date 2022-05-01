@@ -28,7 +28,8 @@ public class Issue2040 {
                 "    }";
 
         Permissions permissions = JSON.parseObject(json, Permissions.class, JSONReader.Feature.SupportSmartMatch);
-        assertEquals("{\"groupAccess\":{\"accessLevel\":50,\"notificationLevel\":3}}", JSON.toJSONString(permissions));
+        String json2 = JSON.toJSONString(permissions);
+        assertEquals("{\"groupAccess\":{\"accessLevel\":50,\"notificationLevel\":3}}", json2);
     }
 
     public static class Model {

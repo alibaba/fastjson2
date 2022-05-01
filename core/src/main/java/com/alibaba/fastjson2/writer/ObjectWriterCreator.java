@@ -65,6 +65,7 @@ public class ObjectWriterCreator {
             Class objectClass
             , long writerFeatures
             , List<ObjectWriterModule> modules
+            , BeanInfo beanInfo
             , FieldInfo fieldInfo
             , Field field
     ) {
@@ -86,6 +87,21 @@ public class ObjectWriterCreator {
             fieldName = field.getName();
         } else {
             fieldName = fieldInfo.fieldName;
+        }
+
+        if (beanInfo.orders != null) {
+            boolean match = false;
+            for (int i = 0; i < beanInfo.orders.length; i++) {
+                if (fieldName.equals(beanInfo.orders[i])) {
+                    fieldInfo.ordinal = i;
+                    match = true;
+                }
+            }
+            if (!match) {
+                if (fieldInfo.ordinal == 0) {
+                    fieldInfo.ordinal = beanInfo.orders.length;
+                }
+            }
         }
 
         ObjectWriter writeUsingWriter = null;
@@ -146,7 +162,7 @@ public class ObjectWriterCreator {
                     return;
                 }
 
-                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, Collections.emptyList(), fieldInfo, field);
+                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, Collections.emptyList(), beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
                     fieldWriterMap.put(fieldWriter.getFieldName(), fieldWriter);
                 }
@@ -171,7 +187,7 @@ public class ObjectWriterCreator {
                     }
 
                     fieldInfo.init();
-                    FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, fieldInfo, field);
+                    FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
                     if (fieldWriter != null) {
                         fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
                     }
@@ -198,6 +214,34 @@ public class ObjectWriterCreator {
                         fieldName = fieldInfo.fieldName;
                     }
 
+                    if (beanInfo.includes != null && beanInfo.includes.length > 0) {
+                        boolean match = false;
+                        for (String include : beanInfo.includes) {
+                            if (include.equals(fieldName)) {
+                                match = true;
+                                break;
+                            }
+                        }
+                        if (!match) {
+                            return;
+                        }
+                    }
+
+                    if (beanInfo.orders != null) {
+                        boolean match = false;
+                        for (int i = 0; i < beanInfo.orders.length; i++) {
+                            if (fieldName.equals(beanInfo.orders[i])) {
+                                fieldInfo.ordinal = i;
+                                match = true;
+                            }
+                        }
+                        if (!match) {
+                            if (fieldInfo.ordinal == 0) {
+                                fieldInfo.ordinal = beanInfo.orders.length;
+                            }
+                        }
+                    }
+
                     ObjectWriter writeUsingWriter = null;
                     if (fieldInfo.writeUsing != null) {
                         try {
@@ -205,6 +249,10 @@ public class ObjectWriterCreator {
                         } catch (InstantiationException | IllegalAccessException e) {
                             throw new JSONException("create writeUsing Writer error", e);
                         }
+                    }
+
+                    if (writeUsingWriter == null && fieldInfo.fieldClassMixIn) {
+                        writeUsingWriter = ObjectWriterBaseModule.VoidObjectWriter.INSTANCE;
                     }
 
                     FieldWriter fieldWriter
@@ -359,7 +407,7 @@ public class ObjectWriterCreator {
             return new FieldWriterStringField(fieldName, ordinal, format, features, field);
         }
 
-        if (fieldClass.isEnum()) {
+        if (fieldClass.isEnum() && BeanUtils.getEnumValueField(fieldClass) == null) {
             return new FIeldWriterEnumField(fieldName, ordinal, format, features, fieldClass, field);
         }
 
@@ -459,7 +507,7 @@ public class ObjectWriterCreator {
             return new FieldWriterCharMethod(fieldName, ordinal, method, fieldClass);
         }
 
-        if (fieldClass.isEnum()) {
+        if (fieldClass.isEnum() && (BeanUtils.getEnumValueField(fieldClass) == null && initObjectWriter == null)) {
             return new FieldWriterEnumMethod(fieldName, ordinal, features, fieldClass, method);
         }
 
@@ -475,7 +523,7 @@ public class ObjectWriterCreator {
             if ("unwrapped".equals(format)) {
                 format = null;
             }
-            return new FieldWriterDateFieldMethod(fieldName, ordinal, features, format, fieldClass, method);
+            return new FieldWriterDateMethod(fieldName, ordinal, features, format, fieldClass, method);
         }
 
         if (fieldClass == String.class) {
@@ -588,7 +636,7 @@ public class ObjectWriterCreator {
             return new FieldWriterCalendarFunc(fieldName, ordinal, features, format, method, function);
         }
 
-        if (fieldClass.isEnum()) {
+        if (fieldClass.isEnum() && BeanUtils.getEnumValueField(fieldClass) == null) {
             return new FieldWriterEnumFunc(fieldName, ordinal, features, fieldType, fieldClass, method, function);
         }
 

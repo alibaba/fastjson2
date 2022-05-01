@@ -145,7 +145,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
                     return;
                 }
 
-                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, Collections.emptyList(), fieldInfo, field);
+                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, Collections.emptyList(), beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
                     fieldWriterMap.put(fieldWriter.getFieldName(), fieldWriter);
                 }
@@ -175,7 +175,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
 
                 BeanUtils.fields(objectClass, field -> {
                     fieldInfo.init();
-                    FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, fieldInfo, field);
+                    FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
                     if (fieldWriter != null) {
                         fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
                     }

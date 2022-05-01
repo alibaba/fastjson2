@@ -548,6 +548,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                         case "format": {
                             String format = (String) result;
                             if (!format.isEmpty()) {
+                                format = format.trim();
+
                                 if (format.indexOf('T') != -1 && !format.contains("'T'")) {
                                     format = format.replaceAll("T", "'T'");
                                 }
@@ -628,6 +630,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
             String jsonFieldFormat = jsonField.format();
             if (!jsonFieldFormat.isEmpty()) {
+                jsonFieldFormat = jsonFieldFormat.trim();
                 if (jsonFieldFormat.indexOf('T') != -1 && !jsonFieldFormat.contains("'T'")) {
                     jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
                 }

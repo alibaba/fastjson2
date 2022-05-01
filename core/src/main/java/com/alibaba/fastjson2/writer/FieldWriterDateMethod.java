@@ -7,10 +7,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 
-final class FieldWriterDateFieldMethod<T> extends FieldWriterDate<T> {
+final class FieldWriterDateMethod<T> extends FieldWriterDate<T> {
     final Method method;
 
-    protected FieldWriterDateFieldMethod(
+    protected FieldWriterDateMethod(
             String fieldName
             , int ordinal
             , long features
