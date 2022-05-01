@@ -44,8 +44,9 @@ public abstract class JSONPath {
     }
 
     public static Object extract(String json, String path) {
-        return JSONPath.of(path)
-                .extract(JSONReader.of(json));
+        JSONReader jsonReader = JSONReader.of(json);
+        JSONPath jsonPath = JSONPath.of(path);
+        return jsonPath.extract(jsonReader);
     }
 
     public static Object eval(Object rootObject, String path) {
@@ -3252,7 +3253,8 @@ public abstract class JSONPath {
         public void accept(JSONReader jsonReader, Context ctx) {
             if (ctx.parent != null
                     && (ctx.parent.eval
-                    || ctx.parent.current instanceof FilterSegment)
+                    || ctx.parent.current instanceof FilterSegment
+                    || ctx.parent.current instanceof MultiIndexSegment)
             ) {
                 eval(ctx);
                 return;
