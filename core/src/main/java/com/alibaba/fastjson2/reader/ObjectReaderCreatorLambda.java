@@ -247,7 +247,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
         }
 
         BiConsumer function = (BiConsumer) lambdaFunction(objectClass, fieldClass, method);
-        return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, 0, features, format, method, function);
+        return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, method, function);
     }
 
     private static Object lambdaFunction(Class objectType, Class fieldClass, Method method) {
@@ -280,6 +280,10 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
 
     @Override
     public <T, R> Function<T, R> createBuildFunction(Method builderMethod) {
+        if (!Modifier.isPublic(builderMethod.getDeclaringClass().getModifiers())) {
+            return super.createBuildFunction(builderMethod);
+        }
+
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         MethodType invokedType = METHODTYPE_Function;
         try {

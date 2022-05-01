@@ -35,6 +35,12 @@ final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
         Date fieldValue;
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();
+
+            getObjectReader(jsonReader);
+            if (dateReader.formatUnixTime) {
+                millis *= 1000;
+            }
+
             fieldValue = new Date(millis);
         } else if (jsonReader.isNull()) {
             jsonReader.readNull();

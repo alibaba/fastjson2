@@ -13,14 +13,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TransientTest {
     @Test
     public void test_for_transient() throws Exception {
-        Bean test = new Bean();
-        byte[] bytes = JSONB.toBytes(test, Feature.WriteClassName,
+        Bean bean = new Bean();
+        bean.atomicBoolean.set(true);
+
+        byte[] bytes = JSONB.toBytes(bean, Feature.WriteClassName,
                 Feature.FieldBased,
                 Feature.ReferenceDetection,
                 Feature.WriteNulls,
@@ -36,7 +37,7 @@ public class TransientTest {
                 JSONReader.Feature.FieldBased
         );
 
-        assertNull(target.getAtomicBoolean());
+        assertTrue(target.getAtomicBoolean() == null || !target.getAtomicBoolean().get());
 
         Bean target2 = (Bean)JSONB.parseObject(
                 bytes,

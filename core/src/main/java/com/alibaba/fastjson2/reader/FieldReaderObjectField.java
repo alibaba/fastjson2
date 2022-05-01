@@ -98,8 +98,13 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
+        if (!fieldClassSerializable && (jsonReader.getContext().getFeatures() & JSONReader.Feature.IgnoreNoneSerializable.mask) != 0) {
+            jsonReader.skipValue();
+            return;
+        }
+
         if (fieldObjectReader == null) {
-            fieldObjectReader = jsonReader.getContext().getObjectReader(fieldType);
+            fieldObjectReader = getObjectReader(jsonReader);
         }
 
         if (jsonReader.isReference()) {
