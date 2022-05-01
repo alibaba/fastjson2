@@ -3615,8 +3615,6 @@ public abstract class JSONPath {
 
                         return;
                     }
-
-                    values.add(value);
                 }
             }
         }
