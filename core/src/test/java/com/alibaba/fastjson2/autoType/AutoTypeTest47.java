@@ -7,7 +7,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import com.mchange.v2.c3p0.impl.PoolBackedDataSourceBase;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class AutoTypeTest47 {
     @Test

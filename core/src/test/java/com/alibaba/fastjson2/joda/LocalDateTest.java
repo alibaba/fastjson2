@@ -9,7 +9,7 @@ import org.joda.time.chrono.GregorianChronology;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LocalDateTest {
     @Test

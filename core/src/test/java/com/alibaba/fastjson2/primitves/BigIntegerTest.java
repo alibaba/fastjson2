@@ -14,7 +14,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BigIntegerTest {
     static BigInteger[] values = new BigInteger[] {

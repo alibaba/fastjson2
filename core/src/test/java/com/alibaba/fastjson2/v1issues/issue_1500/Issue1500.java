@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1500 {
 
@@ -18,20 +18,20 @@ public class Issue1500 {
 //        System.out.println(jsonAa);
 
         Aa aa1 = JSON.parseObject(jsonAa, Aa.class);
-        assertEquals("aa",aa1.getName());
+        assertEquals("aa", aa1.getName());
 
         // test C
         C c = new C();
         c.setE(aa);
         String jsonC = JSON.toJSONString(c, JSONWriter.Feature.WriteClassName);
         C c2 = JSON.parseObject(jsonC, C.class);
-        assertEquals("Aa",c2.getE().getClass().getSimpleName());
-        assertEquals("aa",((Aa)c2.getE()).getName());
+        assertEquals("Aa", c2.getE().getClass().getSimpleName());
+        assertEquals("aa", ((Aa) c2.getE()).getName());
     }
 
     public static class Aa extends Exception {
 
-        public Aa(){
+        public Aa() {
         }
 
         private String name;
@@ -44,6 +44,7 @@ public class Issue1500 {
             this.name = name;
         }
     }
+
     public static class C {
 
         private Exception e;

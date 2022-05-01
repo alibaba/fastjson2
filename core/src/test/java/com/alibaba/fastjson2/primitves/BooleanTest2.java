@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BooleanTest2 {
-    private Boolean[] values = new Boolean[] {
+    private Boolean[] values = new Boolean[]{
             null, true, false
     };
 
@@ -54,6 +54,7 @@ public class BooleanTest2 {
         Boolean1 v1 = JSONB.parseObject(jsonbBooleans, Boolean1.class);
         assertEquals(Boolean.FALSE, v1.getV0000());
     }
+
     @Test
     public void test_jsonb_str_1() {
         byte[] jsonbBooleans = JSONB.toBytes(Collections.singletonMap("v0000", "1"));
@@ -67,6 +68,7 @@ public class BooleanTest2 {
         Boolean1 v1 = JSONB.parseObject(jsonbBooleans, Boolean1.class);
         assertEquals(Boolean.FALSE, v1.getV0000());
     }
+
     @Test
     public void test_jsonb_str_Y() {
         byte[] jsonbBooleans = JSONB.toBytes(Collections.singletonMap("v0000", "Y"));

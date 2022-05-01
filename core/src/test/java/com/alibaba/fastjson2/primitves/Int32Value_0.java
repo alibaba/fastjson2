@@ -9,11 +9,12 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriters;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Int32Value_0 {
     public int MIN_VALUE = Short.MIN_VALUE;
     public int MAX_VALUE = Short.MAX_VALUE;
+
     @Test
     public void test_reflect() throws Exception {
         ObjectWriter<VO> ow = ObjectWriters.ofReflect(VO.class);

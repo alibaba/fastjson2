@@ -1,8 +1,9 @@
 package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.JSONPath;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONPath_enum {
 
@@ -11,7 +12,7 @@ public class JSONPath_enum {
         Model model = new Model();
         model.size = Size.Small;
 
-        Assert.assertEquals(Size.Small.name(), JSONPath.eval(model, "$.size.name"));
+        assertEquals(Size.Small.name(), JSONPath.eval(model, "$.size.name"));
     }
 
     @Test
@@ -19,7 +20,7 @@ public class JSONPath_enum {
         Model model = new Model();
         model.size = Size.Small;
 
-        Assert.assertEquals(Size.Small.ordinal(), JSONPath.eval(model, "$.size.ordinal"));
+        assertEquals(Size.Small.ordinal(), JSONPath.eval(model, "$.size.ordinal"));
     }
 
     public static class Model {

@@ -5,8 +5,9 @@ import com.alibaba.fastjson2.JSONWriter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue3655 {
     private static final String jsonStr =
@@ -17,7 +18,7 @@ public class Issue3655 {
         issue3655_b b = new issue3655_b(null, null, null, null, null, null, null, null, null);
         String result = JSON.toJSONString(b, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.NullAsDefaultValue);
         System.out.println(result);
-        Assert.assertEquals(jsonStr, result);
+        assertEquals(jsonStr, result);
     }
 
     @Test
@@ -25,7 +26,7 @@ public class Issue3655 {
         issue3655_c c = new issue3655_c(null, null, null, null, null, null, null, null, null);
         String result = JSON.toJSONString(c, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.NullAsDefaultValue);
         System.out.println(result);
-        Assert.assertEquals(jsonStr, result);
+        assertEquals(jsonStr, result);
     }
 
     public static class issue3655_b extends issue3655_a {

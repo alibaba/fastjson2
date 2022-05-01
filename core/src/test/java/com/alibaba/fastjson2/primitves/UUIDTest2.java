@@ -9,12 +9,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UUIDTest2 {
-    static UUID[] values = new UUID[] {
+    static UUID[] values = new UUID[]{
             UUID.randomUUID(),
     };
+
     @Test
     public void test_jsonb() {
         for (UUID dateTime : values) {

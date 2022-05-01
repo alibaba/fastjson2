@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import static com.alibaba.fastjson2.reader.ObjectReaders.*;
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ParserTest {
     ObjectReader<MediaContent> mediaContentConsumer;

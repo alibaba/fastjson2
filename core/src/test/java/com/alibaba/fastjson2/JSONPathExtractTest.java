@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class JSONPathExtractTest {
     @Test
@@ -132,8 +132,8 @@ public class JSONPathExtractTest {
         String json = "[\"0\",1,null,false,true,[],{}]";
         assertEquals(Boolean.TRUE
                 , JSONPath.of("$[4]")
-                .extract(
-                JSONReader.of(json)));
+                        .extract(
+                                JSONReader.of(json)));
         assertEquals(Boolean.FALSE
                 , JSONPath.of("$[3]")
                         .extract(
@@ -155,7 +155,7 @@ public class JSONPathExtractTest {
                         JSONPath
                                 .of("$[5]")
                                 .extract(
-                                JSONReader.of(json))
+                                        JSONReader.of(json))
                 )
         );
         assertEquals("{}"

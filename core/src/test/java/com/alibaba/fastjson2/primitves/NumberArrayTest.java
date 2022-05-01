@@ -13,8 +13,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class NumberArrayTest {
     @Test
@@ -39,7 +39,7 @@ public class NumberArrayTest {
 
     @Test
     public void test_parse_jsonb() {
-        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Integer[] {0, 1, null, 102, 1001}));
+        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Integer[]{0, 1, null, 102, 1001}));
         Number[] array = JSONB.parseObject(jsonbBytes, Number[].class);
         assertEquals(5, array.length);
         assertEquals(0, array[0]);
@@ -51,7 +51,7 @@ public class NumberArrayTest {
 
     @Test
     public void test_1_jsonb() {
-        Number[] values = new Number[] {
+        Number[] values = new Number[]{
                 Long.MIN_VALUE
                 , Integer.MIN_VALUE
                 , Short.MAX_VALUE

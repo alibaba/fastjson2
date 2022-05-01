@@ -9,8 +9,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CharValueArrayTest {
     @Test
@@ -27,7 +27,7 @@ public class CharValueArrayTest {
 
     @Test
     public void test_parse_jsonb() {
-        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Integer[] {101, 102}));
+        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Integer[]{101, 102}));
         char[] chars = JSONB.parseObject(jsonbBytes, char[].class);
         assertEquals(2, chars.length);
         assertEquals(101, chars[0]);

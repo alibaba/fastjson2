@@ -10,7 +10,7 @@ import java.time.*;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateTest {
     @Test
@@ -24,16 +24,16 @@ public class DateTest {
         assertEquals("{\"date\":\"1970-01-01 00:00:00\"}", jw.toString());
     }
 
-   @Test
+    @Test
     public void testDateJSONB() throws Exception {
         Date1 date = new Date1();
         date.setDate(new java.util.Date(1642003200000L));
 
-       byte[] bytes = JSONB.toBytes(date);
-       JSONBDump.dump(bytes);
+        byte[] bytes = JSONB.toBytes(date);
+        JSONBDump.dump(bytes);
 
-       Date1 bean2 = JSONB.parseObject(bytes, Date1.class);
-       assertEquals(date.getDate(), bean2.getDate());
+        Date1 bean2 = JSONB.parseObject(bytes, Date1.class);
+        assertEquals(date.getDate(), bean2.getDate());
     }
 
     @Test
@@ -64,7 +64,7 @@ public class DateTest {
         jw.getContext().setZoneId(ZoneId.of("UTC+0"));
 
         jw.writeAny(
-                OffsetDateTime.of(1970, 1,1, 0,0,0, 0, ZoneOffset.ofHours(0)));
+                OffsetDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.ofHours(0)));
         assertEquals("\"1970-01-01 00:00:00\"", jw.toString());
     }
 
@@ -74,7 +74,7 @@ public class DateTest {
         jw.getContext().setZoneId(ZoneId.of("UTC+0"));
 
         jw.writeAny(
-                LocalDateTime.of(1970, 1,1, 0,0,0));
+                LocalDateTime.of(1970, 1, 1, 0, 0, 0));
         assertEquals("\"1970-01-01T00:00:00\"", jw.toString());
     }
 
@@ -82,7 +82,7 @@ public class DateTest {
     public void testLocalDate() throws Exception {
         JSONWriter jw = JSONWriter.of();
         jw.writeAny(
-                LocalDate.of(1970, 1,1));
+                LocalDate.of(1970, 1, 1));
         assertEquals("\"1970-01-01\"", jw.toString());
     }
 
@@ -90,7 +90,7 @@ public class DateTest {
     public void testLocalTime() throws Exception {
         JSONWriter jw = JSONWriter.of();
         jw.writeAny(
-                LocalTime.of(12, 13,14));
+                LocalTime.of(12, 13, 14));
         assertEquals("\"12:13:14\"", jw.toString());
     }
 
@@ -98,7 +98,7 @@ public class DateTest {
     public void testOffsetTime() throws Exception {
         JSONWriter jw = JSONWriter.of();
         jw.writeAny(
-                OffsetTime.of(12, 13,14, 0, ZoneOffset.ofHours(0)));
+                OffsetTime.of(12, 13, 14, 0, ZoneOffset.ofHours(0)));
         assertEquals("\"12:13:14\"", jw.toString());
     }
 

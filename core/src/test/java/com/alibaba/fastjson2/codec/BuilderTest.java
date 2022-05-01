@@ -15,9 +15,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 public class BuilderTest {
 
     @Test

@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BigDecimalTest {
     static BigDecimal[] values = new BigDecimal[] {

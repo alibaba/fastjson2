@@ -6,12 +6,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONBReadAnyTest {
     @Test
     public void test_jsonb_float_0() {
-        Object[] values = new Object[] {
+        Object[] values = new Object[]{
                 1.1F, 1.1D, 2, 3D
                 , new BigInteger("1234567890123")
                 , new BigDecimal("1234567890123")

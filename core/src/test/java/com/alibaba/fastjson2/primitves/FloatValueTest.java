@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FloatValueTest {
     private float[] values = new float[100];
@@ -136,7 +136,7 @@ public class FloatValueTest {
 
     @Test
     public void test_jsonb_value_cast() {
-        Number[] values = new Number[] {
+        Number[] values = new Number[]{
                 0,
                 Byte.MIN_VALUE, Byte.MAX_VALUE,
                 Short.MIN_VALUE, Short.MAX_VALUE,
@@ -159,7 +159,7 @@ public class FloatValueTest {
 
     @Test
     public void test_jsonb_value_cast_str() {
-        Number[] values = new Number[] {
+        Number[] values = new Number[]{
                 0,
                 Byte.MIN_VALUE, Byte.MAX_VALUE,
                 Short.MIN_VALUE, Short.MAX_VALUE,

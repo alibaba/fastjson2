@@ -13,8 +13,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ListStrTest {
     @Test
@@ -98,7 +98,8 @@ public class ListStrTest {
     @Test
     public void test_0() {
         String str = "[1,2,3]";
-        Type type = new TypeReference<List<String>>() {}.getType();
+        Type type = new TypeReference<List<String>>() {
+        }.getType();
         List<String> array = JSON.parseObject(str, type);
         assertEquals("1", array.get(0));
 

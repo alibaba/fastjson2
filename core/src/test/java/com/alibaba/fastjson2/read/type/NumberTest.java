@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NumberTest {
     @Test
@@ -24,7 +24,7 @@ public class NumberTest {
                 String str = new String(chars, 0, i + 1);
                 String json = "{\"v\":" + str + "}";
 
-                System.out.println(json);
+                //System.out.println(json);
 
                 Number num = (Number) JSONReader.of(json)
                         .readObject()
@@ -52,7 +52,7 @@ public class NumberTest {
                 String str = new String(chars, 0, i + 2);
                 String json = "{\"v\":" + str + "}";
 
-                System.out.println(json);
+                //System.out.println(json);
 
                 Number num = (Number) JSONReader.of(json)
                         .readObject()

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Int128Field_1 {
     private BigInteger[] values = new BigInteger[1000];

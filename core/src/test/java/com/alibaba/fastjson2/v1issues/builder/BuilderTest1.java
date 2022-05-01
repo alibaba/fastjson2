@@ -2,8 +2,9 @@ package com.alibaba.fastjson2.v1issues.builder;
 
 import com.alibaba.fastjson.annotation.JSONType;
 import com.alibaba.fastjson2.JSON;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BuilderTest1 {
 
@@ -11,11 +12,11 @@ public class BuilderTest1 {
     public void test_create() throws Exception {
         VO vo = JSON.parseObject("{\"id\":12304,\"name\":\"ljw\"}", VO.class);
 
-        Assert.assertEquals(12304, vo.getId());
-        Assert.assertEquals("ljw", vo.getName());
+        assertEquals(12304, vo.getId());
+        assertEquals("ljw", vo.getName());
     }
 
-    @JSONType(builder=VOBuilder.class)
+    @JSONType(builder = VOBuilder.class)
     public static class VO {
         private int id;
         private String name;

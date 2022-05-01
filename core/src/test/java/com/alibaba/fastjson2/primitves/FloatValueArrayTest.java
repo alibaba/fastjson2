@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class FloatValueArrayTest {
     @Test
@@ -34,7 +34,7 @@ public class FloatValueArrayTest {
 
     @Test
     public void test_parse_jsonb() {
-        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Integer[] {101, 102}));
+        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Integer[]{101, 102}));
         float[] array = JSONB.parseObject(jsonbBytes, float[].class);
         assertEquals(2, array.length);
         assertEquals(101F, array[0]);

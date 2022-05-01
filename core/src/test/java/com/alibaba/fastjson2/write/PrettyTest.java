@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PrettyTest {
     @Test
@@ -23,8 +23,8 @@ public class PrettyTest {
 
         System.out.println(jw);
         assertEquals("{\n" +
-                "\t\"v0000\":100\n" +
-                "}"
+                        "\t\"v0000\":100\n" +
+                        "}"
                 , jw.toString());
     }
 

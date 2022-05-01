@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Created by wenshao on 26/07/2017.

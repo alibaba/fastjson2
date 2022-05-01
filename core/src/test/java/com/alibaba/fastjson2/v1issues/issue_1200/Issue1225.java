@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 30/05/2017.
@@ -24,7 +24,8 @@ public class Issue1225 {
 
     @Test
     public void test_parseObject_1() {
-        Type type = new TypeReference<ExtendGenericType<String>>() {}.getType();
+        Type type = new TypeReference<ExtendGenericType<String>>() {
+        }.getType();
         ExtendGenericType<String> o = JSON.parseObject("{\"data\":[\"1\",\"2\",\"3\"]}", type);
         assertEquals("2", o.data.get(1));
     }
