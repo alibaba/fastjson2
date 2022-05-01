@@ -108,6 +108,24 @@ public interface JSON {
     }
 
     /**
+     * Parse UTF8 encoded JSON byte array into {@link JSONObject}
+     *
+     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param features features to be enabled in parsing
+     * @return JSONObject
+     */
+    @SuppressWarnings("unchecked")
+    static JSONObject parseObject(byte[] bytes, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+        JSONReader reader = JSONReader.of(bytes);
+        reader.context.config(features);
+        ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
+        return objectReader.readObject(reader, 0);
+    }
+
+    /**
      * Parse JSON {@link String} into Java Object
      *
      * @param text  the JSON {@link String} to be parsed
