@@ -343,7 +343,19 @@ public class ObjectReaderProvider {
     }
 
     public ObjectReaderProvider() {
-        this.creator = ObjectReaderCreatorASM.INSTANCE;
+        switch (JSONFactory.CREATOR) {
+            case "reflect":
+                this.creator = ObjectReaderCreator.INSTANCE;
+                break;
+            case "lambda":
+                this.creator = ObjectReaderCreatorLambda.INSTANCE;
+                break;
+            case "asm":
+            default:
+                this.creator = ObjectReaderCreatorASM.INSTANCE;
+                break;
+        }
+
         modules.add(new ObjectReaderBaseModule(this));
         init();
     }
