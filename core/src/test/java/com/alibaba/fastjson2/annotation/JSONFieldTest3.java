@@ -53,7 +53,7 @@ public class JSONFieldTest3 {
     }
 
     public static class VO {
-        @JSONField(deserializeFeatures = JSONWriter.Feature.BrowserCompatible)
+        @JSONField(serializeFeatures = JSONWriter.Feature.BrowserCompatible)
         public BigDecimal value;
     }
 

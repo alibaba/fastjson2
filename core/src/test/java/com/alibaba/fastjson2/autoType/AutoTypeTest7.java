@@ -69,7 +69,7 @@ public class AutoTypeTest7 {
     }
 
     public static class A {
-        @JSONField(serializeFeatures = JSONReader.Feature.SupportAutoType)
+        @JSONField(deserializeFeatures = JSONReader.Feature.SupportAutoType)
         public B value;
     }
 
@@ -80,7 +80,7 @@ public class AutoTypeTest7 {
             return value;
         }
 
-        @JSONField(serializeFeatures = JSONReader.Feature.SupportAutoType)
+        @JSONField(deserializeFeatures = JSONReader.Feature.SupportAutoType)
         public void setValue(B value) {
             this.value = value;
         }

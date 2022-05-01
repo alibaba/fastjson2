@@ -18,8 +18,15 @@ public @interface JSONType {
 
     Class<?>[] seeAlso() default{};
 
-    JSONReader.Feature[] serializeFeatures() default {};
-    JSONWriter.Feature[] deserializeFeatures() default {};
+    /**
+     * Specify {@link JSONReader.Feature}s to use features when deserializing
+     */
+    JSONReader.Feature[] deserializeFeatures() default {};
+
+    /**
+     * Specify {@link JSONWriter.Feature}s to use features when serializing output
+     */
+    JSONWriter.Feature[] serializeFeatures1() default {};
 
     NamingStrategy naming() default NamingStrategy.CamelCase;
 

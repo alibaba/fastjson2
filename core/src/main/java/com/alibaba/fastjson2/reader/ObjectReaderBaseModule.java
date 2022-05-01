@@ -373,7 +373,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             beanInfo.namingStrategy =
                     jsonType.naming().name();
 
-            for (JSONReader.Feature feature : jsonType.serializeFeatures()) {
+            for (JSONReader.Feature feature : jsonType.deserializeFeatures()) {
                 beanInfo.readerFeatures |= feature.mask;
             }
 
@@ -657,7 +657,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 fieldInfo.ignore = !jsonField.deserialize();
             }
 
-            for (JSONReader.Feature feature : jsonField.serializeFeatures()) {
+            for (JSONReader.Feature feature : jsonField.deserializeFeatures()) {
                 fieldInfo.features |= feature.mask;
             }
 
