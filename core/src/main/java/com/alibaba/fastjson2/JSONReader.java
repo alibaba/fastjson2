@@ -1573,7 +1573,7 @@ public abstract class JSONReader implements Closeable {
             throw new JSONException("read error", ioe);
         }
 
-        if (charset == StandardCharsets.UTF_8) {
+        if (charset == StandardCharsets.UTF_8 || charset == null) {
             return new JSONReaderUTF8(ctx, bytes, 0, off);
         }
 
