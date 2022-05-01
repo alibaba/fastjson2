@@ -77,6 +77,7 @@ abstract class FieldWriterDate<T> extends FieldWriterImpl<T> {
         return formatter;
     }
 
+    @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (valueClass == fieldClass) {
             if (dateWriter == null) {

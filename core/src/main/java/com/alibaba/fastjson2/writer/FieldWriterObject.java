@@ -32,6 +32,7 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
                 || fieldClass == AtomicIntegerArray.class;
     }
 
+    @Override
     public boolean unwrapped() {
         return unwrapped;
     }

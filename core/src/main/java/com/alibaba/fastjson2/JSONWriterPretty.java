@@ -186,6 +186,7 @@ final class JSONWriterPretty extends JSONWriter {
         jsonWriter.writeRaw(str);
     }
 
+    @Override
     public byte[] getBytes() {
         return jsonWriter.getBytes();
     }
