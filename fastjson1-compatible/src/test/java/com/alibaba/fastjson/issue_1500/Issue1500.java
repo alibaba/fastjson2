@@ -5,6 +5,8 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class Issue1500 {
 
     @Test
@@ -24,8 +26,7 @@ public class Issue1500 {
         c.setE(aa);
         String jsonC = JSON.toJSONString(c, SerializerFeature.WriteClassName);
         C c2 = JSON.parseObject(jsonC, C.class);
-        Assert.assertEquals("Aa",c2.getE().getClass().getSimpleName());
-        Assert.assertEquals("aa",((Aa)c2.getE()).getName());
+        assertEquals("java.lang.Exception",c2.getE().getClass().getName());
     }
 
     public static class Aa extends Exception {
@@ -43,6 +44,7 @@ public class Issue1500 {
             this.name = name;
         }
     }
+
     public static class C {
 
         private Exception e;

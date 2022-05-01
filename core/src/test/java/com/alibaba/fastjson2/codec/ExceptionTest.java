@@ -2,14 +2,18 @@ package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.JSONBDump;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ExceptionTest {
     @Test
@@ -21,9 +25,23 @@ public class ExceptionTest {
         Object jsonObject = JSON.parseObject(str, Object.class);
         assertTrue(jsonObject instanceof Map);
 
+//        Throwable obj = JSON.parseObject(str, Throwable.class);
+        Throwable e = new Throwable();
+        String str1 = JSON.toJSONString(e);
+        JSON.parseObject(str1, Throwable.class);
+
+        Throwable throwable = JSON.parseObject(str, Throwable.class);
+        assertEquals(Throwable.class, throwable.getClass());
+
         IllegalStateException error = (IllegalStateException)
-                JSON.parseObject(str, Throwable.class);
+                JSON.parseObject(str, Throwable.class, JSONReader.Feature.SupportAutoType);
         assertNotNull(error);
+
+        IllegalStateException error2 = JSON.parseObject(str, IllegalStateException.class);
+        assertNotNull(error2);
+
+        Throwable throwable2 = JSON.parseObject(str, Throwable.class);
+        assertEquals(Throwable.class, throwable2.getClass());
     }
 
     @Test

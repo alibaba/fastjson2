@@ -21,7 +21,8 @@ public class AutoTypeTest0 {
         IntField1 model = (IntField1) JSON.parseObject(text, Object.class, JSONReader.Feature.SupportAutoType);
         assertEquals(123, model.v0000);
 
-        assertTrue(JSON.parse(text) instanceof java.util.Map);
+        Object parse = JSON.parse(text);
+        assertTrue(parse instanceof java.util.Map);
         IntField1 model2 = (IntField1) JSON.parse(text, JSONReader.Feature.SupportAutoType);
         assertEquals(123, model2.v0000);
     }

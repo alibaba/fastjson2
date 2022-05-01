@@ -204,20 +204,34 @@ class ObjectReaderNoneDefaultConstrutor<T>
                     continue;
                 }
 
+                boolean supportAutoType = jsonReader.getContext().isEnable(JSONReader.Feature.SupportAutoType);
+
                 JSONReader.Context context = jsonReader.getContext();
-                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+                ObjectReader autoTypeObjectReader = null;
+
+                if (supportAutoType) {
+                    autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+
+                    if (autoTypeObjectReader == null) {
+                        String typeName = jsonReader.getString();
+                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
+                    }
+                } else {
+                    String typeName = jsonReader.getString();
+                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
+                }
+
                 if (autoTypeObjectReader == null) {
                     String typeName = jsonReader.getString();
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass, this.features | features | context.getFeatures());
-
-                    if (autoTypeObjectReader == null) {
-                        throw new JSONException("auotype not support : " + typeName);
-                    }
                 }
 
-                Object object = (T) autoTypeObjectReader.readObject(jsonReader, 0);
-                jsonReader.nextIfMatch(',');
-                return (T) object;
+                if (autoTypeObjectReader != null) {
+                    Object object = (T) autoTypeObjectReader.readObject(jsonReader, 0);
+                    jsonReader.nextIfMatch(',');
+                    return (T) object;
+                }
+                continue;
             }
 
             FieldReader fieldReader = getFieldReader(hashCode);

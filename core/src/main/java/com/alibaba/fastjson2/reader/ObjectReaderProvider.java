@@ -328,6 +328,19 @@ public class ObjectReaderProvider {
         hashCache.putIfAbsent(hashCode, objectReader);
     }
 
+    public void addAutoTypeAccept(String name) {
+        if (name != null && name.length() != 0) {
+            long hash = Fnv.hashCode64(name);
+            if (Arrays.binarySearch(this.acceptHashCodes, hash) < 0) {
+                long[] hashCodes = new long[this.acceptHashCodes.length + 1];
+                hashCodes[hashCodes.length - 1] = hash;
+                System.arraycopy(this.acceptHashCodes, 0, hashCodes, 0, this.acceptHashCodes.length);
+                Arrays.sort(hashCodes);
+                this.acceptHashCodes = hashCodes;
+            }
+        }
+    }
+
     public Consumer<Class> getAutoTypeHandler() {
         return autoTypeHandler;
     }
@@ -500,23 +513,6 @@ public class ObjectReaderProvider {
             }
         }
 
-        clazz = TypeUtils.getMapping(typeName);
-
-        if (clazz != null) {
-            if (expectClass != null
-                    && expectClass != Object.class
-                    && clazz != java.util.HashMap.class
-                    && !expectClass.isAssignableFrom(clazz)
-            ) {
-                throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
-            }
-
-            if (autoTypeHandler != null) {
-                autoTypeHandler.accept(expectClass);
-            }
-            return clazz;
-        }
-
         if (!autoTypeSupport) {
             long hash = BASIC;
             for (int i = 0; i < typeNameLength; ++i) {
@@ -544,9 +540,28 @@ public class ObjectReaderProvider {
             }
         }
 
-        if (autoTypeSupport) {
-            clazz = loadClass(typeName);
+        if (!autoTypeSupport) {
+            return null;
         }
+
+        clazz = TypeUtils.getMapping(typeName);
+
+        if (clazz != null) {
+            if (expectClass != null
+                    && expectClass != Object.class
+                    && clazz != java.util.HashMap.class
+                    && !expectClass.isAssignableFrom(clazz)
+            ) {
+                throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
+            }
+
+            if (autoTypeHandler != null) {
+                autoTypeHandler.accept(expectClass);
+            }
+            return clazz;
+        }
+
+        clazz = loadClass(typeName);
 
         if (clazz != null) {
             if (ClassLoader.class.isAssignableFrom(clazz) || JDKUtils.isSQLDataSourceOrRowSet(clazz)) {
@@ -566,7 +581,7 @@ public class ObjectReaderProvider {
         }
 
         if (!autoTypeSupport) {
-            throw new JSONException("autoType is not support. " + typeName);
+            return null;
         }
 
         if (autoTypeHandler != null) {
