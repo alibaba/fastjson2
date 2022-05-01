@@ -71,18 +71,35 @@ public interface FieldWriter<T> extends Comparable {
     default int compareTo(Object o) {
         FieldWriter otherFieldWriter = (FieldWriter) o;
 
-        int ordinal0 = this.ordinal();
-        int ordinal1 = otherFieldWriter.ordinal();
-        if (ordinal0 < ordinal1) {
-            return -1;
-        }
-        if (ordinal0 > ordinal1) {
-            return 1;
+        String thisName = this.getFieldName();
+        String otherName = otherFieldWriter.getFieldName();
+
+        int nameCompare = thisName.compareTo(otherName);
+
+        if (nameCompare != 0) {
+            int thisOrdinal = this.ordinal();
+            int otherOrdinal = otherFieldWriter.ordinal();
+            if (thisOrdinal < otherOrdinal) {
+                return -1;
+            }
+            if (thisOrdinal > otherOrdinal) {
+                return 1;
+            }
+        } else {
+            Member thisMember = this.getFieldOrMethod();
+            Member otherMember = otherFieldWriter.getFieldOrMethod();
+
+            if (thisMember instanceof Field && otherMember instanceof Method) {
+                return -1;
+            }
+
+            if (thisMember instanceof Method && otherMember instanceof Field) {
+                return 1;
+            }
         }
 
-        int cmp = this.getFieldName().compareTo(otherFieldWriter.getFieldName());
-        if (cmp != 0) {
-            return cmp;
+        if (nameCompare != 0) {
+            return nameCompare;
         }
 
         Class otherFieldClass = otherFieldWriter.getFieldClass();
@@ -95,7 +112,7 @@ public interface FieldWriter<T> extends Comparable {
             }
         }
 
-        return cmp;
+        return nameCompare;
     }
 
     void writeFieldName(JSONWriter jsonWriter);

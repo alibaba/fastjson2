@@ -426,12 +426,12 @@ public class ObjectWriterCreator {
             if (field.getDeclaringClass() == Throwable.class && "stackTrace".equals(fieldName)) {
                 try {
                     Method method = Throwable.class.getMethod("getStackTrace");
-                    return new FieldWriterObjectArrayMethod(fieldName, itemClass, 0, 0, null, field.getGenericType(), fieldClass, method);
+                    return new FieldWriterObjectArrayMethod(fieldName, itemClass, ordinal, features, format, field.getGenericType(), fieldClass, method);
                 } catch (NoSuchMethodException ignored) {
                 }
             }
 
-            return new FieldWriterObjectArrayField(fieldName, itemClass, 0, 0, format, itemClass, fieldClass, field);
+            return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, itemClass, fieldClass, field);
         }
 
         return new FieldWriterObjectField(fieldName, ordinal, features, format, field.getGenericType(), fieldClass, field);
