@@ -52,4 +52,31 @@ public class Issue126 {
         @JSONField(ordinal = 1)
         public float height;
     }
+
+    @Test
+    public void reservation() {
+        Res reservation = new Res();
+        reservation.setReservationId("1520799011718696960");
+        reservation.setCheckedBaggageNum(0);
+        reservation.setHandBaggageNum(1);
+        reservation.setMealsAvailable(true);
+        String s = JSON.toJSONString(reservation);
+        System.out.println(s);
+    }
+
+    @Data
+    public static class Res {
+        @JSONField(ordinal = 1)
+        private String reservationId;
+
+        @JSONField(ordinal = 2)
+        private boolean mealsAvailable;
+
+        @JSONField(ordinal = 3)
+        private int handBaggageNum;
+
+        @JSONField(ordinal = 4)
+        private int checkedBaggageNum;
+
+    }
 }
