@@ -39,6 +39,13 @@ final class FieldReaderObjectFunc<T, V> extends FieldReaderImpl<T> implements Fi
         } else if (fieldType == Double.class) {
             value = TypeUtils.toDouble(value);
         }
+
+        if (value == null) {
+            if (fieldClass == StackTraceElement[].class) {
+                return;
+            }
+        }
+
         function.accept(object, (V) value);
     }
 
