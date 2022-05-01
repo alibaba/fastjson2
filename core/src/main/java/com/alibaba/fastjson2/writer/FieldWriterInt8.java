@@ -14,6 +14,13 @@ abstract class FieldWriterInt8<T> extends FieldWriterImpl<T> {
     }
 
     protected void writeInt8(JSONWriter jsonWriter, byte value) {
+        boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        if (writeNonStringValueAsString) {
+            writeFieldName(jsonWriter);
+            jsonWriter.writeString(Byte.toString(value));
+            return;
+        }
+
         if (jsonWriter.isUTF8()) {
             byte[] bytes = utf8ValueCache[value + 128];
             if (bytes == null) {
