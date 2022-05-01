@@ -118,7 +118,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     beanInfo.typeName = typeName;
                 }
 
-                for (JSONWriter.Feature feature : jsonType.writeFeatures()) {
+                for (JSONWriter.Feature feature : jsonType.deserializeFeatures()) {
                     beanInfo.writerFeatures |= feature.mask;
                 }
 
@@ -234,7 +234,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 fieldInfo.format = "unwrapped";
             }
 
-            for (JSONWriter.Feature feature : jsonField.writeFeatures()) {
+            for (JSONWriter.Feature feature : jsonField.deserializeFeatures()) {
                 fieldInfo.features |= feature.mask;
             }
 
@@ -431,7 +431,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     fieldInfo.format = "unwrapped";
                 }
 
-                for (JSONWriter.Feature feature : jsonField.writeFeatures()) {
+                for (JSONWriter.Feature feature : jsonField.deserializeFeatures()) {
                     fieldInfo.features |= feature.mask;
                 }
 
