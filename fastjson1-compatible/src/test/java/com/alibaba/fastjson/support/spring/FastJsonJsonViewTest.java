@@ -1,9 +1,8 @@
-package com.alibaba.fastjson.suppert.spring;
+package com.alibaba.fastjson.support.spring;
 
 import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
-import com.alibaba.fastjson.support.spring.FastJsonJsonView;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;

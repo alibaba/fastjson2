@@ -1,6 +1,5 @@
-package com.alibaba.fastjson.suppert.spring;
+package com.alibaba.fastjson.support.spring;
 
-import com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializer;
 import com.alibaba.fastjson.util.IOUtils;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
@@ -77,7 +76,7 @@ public class GenericFastJsonRedisSerializerTest {
         Assert.assertEquals(baseResult2.getData().size(), 3);
 
         String json = "{\n" +
-                "\"@type\": \"com.alibaba.fastjson.suppert.spring.GenericFastJsonRedisSerializerTest$BaseResult\",\n" +
+                "\"@type\": \"com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializerTest$BaseResult\",\n" +
                 "\"code\": \"1000\",\n" +
                 "\"data\": [\n" +
                 "\"按手动控制按钮\",\n" +
