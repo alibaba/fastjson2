@@ -19,6 +19,8 @@ import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 public final class JSONFactory {
+    public static final String CREATOR;
+
     public static final String PROPERTY_DENY_PROPERTY = "fastjson2.parser.deny";
     public static final String PROPERTY_AUTO_TYPE_ACCEPT = "fastjson2.autoTypeAccept";
     public static final String PROPERTY_AUTO_TYPE_SUPPORT = "fastjson2.autoTypeSupport";
@@ -123,6 +125,14 @@ public final class JSONFactory {
         }
         for (int i = 'A'; i <= 'F'; ++i) {
             DIGITS2[i] = (i - 'A') + 10;
+        }
+
+        {
+            String property = System.getProperty("fastjson2.creator");
+            if (property != null) {
+                property = property.trim();
+            }
+            CREATOR = property == null ? "asm" : "reflect";
         }
     }
 
