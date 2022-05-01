@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -288,6 +289,37 @@ public interface JSON {
             return null;
         }
         JSONReader reader = JSONReader.of(bytes);
+        reader.getContext().config(features);
+        ObjectReader<T> objectReader = reader.getObjectReader(type);
+        return objectReader.readObject(reader, 0);
+    }
+
+    /**
+     * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param input
+     * @param type     specify the {@link Type} to be converted
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(InputStream input, Type type, JSONReader.Feature... features) {
+        JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8);
+        reader.getContext().config(features);
+        ObjectReader<T> objectReader = reader.getObjectReader(type);
+        return objectReader.readObject(reader, 0);
+    }
+
+    /**
+     * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param input
+     * @param charset  inputStream charset
+     * @param type     specify the {@link Type} to be converted
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(InputStream input, Charset charset, Type type, JSONReader.Feature... features) {
+        JSONReader reader = JSONReader.of(input, charset);
         reader.getContext().config(features);
         ObjectReader<T> objectReader = reader.getObjectReader(type);
         return objectReader.readObject(reader, 0);
@@ -802,7 +834,11 @@ public interface JSON {
         return JSONFactory.defaultObjectWriterProvider.register(type, objectReader);
     }
 
-    static void parseObject(InputStream input, Charset charset, char delimiter, Type type, Consumer consumer) {
+    static void parseObject(InputStream input, Type type, Consumer consumer, JSONReader.Feature... features) {
+        parseObject(input, StandardCharsets.UTF_8, '\n', type, consumer, features);
+    }
+
+    static void parseObject(InputStream input, Charset charset, char delimiter, Type type, Consumer consumer, JSONReader.Feature... features) {
         ObjectReader objectReader = null;
 
         int identityHashCode = System.identityHashCode(Thread.currentThread());
@@ -841,6 +877,7 @@ public interface JSON {
                         end = j;
 
                         JSONReader jsonReader = JSONReader.of(bytes, start, end - start, charset);
+                        jsonReader.context.config(features);
                         if (objectReader == null) {
                             objectReader = jsonReader.getObjectReader(type);
                         }

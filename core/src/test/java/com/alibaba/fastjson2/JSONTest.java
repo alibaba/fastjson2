@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import com.alibaba.fastjson2_vo.IntField1;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.Serializable;
@@ -53,6 +54,32 @@ public class JSONTest {
     public void test_parseObject_1() {
         IntField1 vo = JSON.parseObject("{\"v0000\":101}".getBytes(StandardCharsets.UTF_8)
                 , (Type) IntField1.class, JSONReader.Feature.SupportSmartMatch);
+        assertEquals(101, vo.v0000);
+    }
+
+    @Test
+    public void test_parseObject_inputStream() {
+        byte[] bytes = "{\"v0000\":101}".getBytes(StandardCharsets.UTF_8);
+        IntField1 vo = JSON.parseObject(new ByteArrayInputStream(bytes)
+                , IntField1.class, JSONReader.Feature.SupportSmartMatch);
+        assertEquals(101, vo.v0000);
+    }
+
+    @Test
+    public void test_parseObject_inputStream_charset() {
+        byte[] bytes = "{\"v0000\":101}".getBytes(StandardCharsets.UTF_8);
+        IntField1 vo = JSON.parseObject(new ByteArrayInputStream(bytes)
+                , StandardCharsets.UTF_8
+                , IntField1.class, JSONReader.Feature.SupportSmartMatch);
+        assertEquals(101, vo.v0000);
+    }
+
+    @Test
+    public void test_parseObject_inputStream_charset1() {
+        byte[] bytes = "{\"v0000\":101}".getBytes(StandardCharsets.UTF_8);
+        IntField1 vo = JSON.parseObject(new ByteArrayInputStream(bytes)
+                , null
+                , IntField1.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(101, vo.v0000);
     }
 
