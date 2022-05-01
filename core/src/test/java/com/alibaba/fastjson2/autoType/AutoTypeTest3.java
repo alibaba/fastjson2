@@ -26,7 +26,7 @@ public class AutoTypeTest3 {
         public B value;
     }
 
-    @JSONType(readFeatures = JSONReader.Feature.SupportAutoType)
+    @JSONType(serializeFeatures = JSONReader.Feature.SupportAutoType)
     public static class B {
 
     }

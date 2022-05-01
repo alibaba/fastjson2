@@ -18,8 +18,8 @@ public @interface JSONType {
 
     Class<?>[] seeAlso() default{};
 
-    JSONReader.Feature[] readFeatures() default {};
-    JSONWriter.Feature[] writeFeatures() default {};
+    JSONReader.Feature[] serializeFeatures() default {};
+    JSONWriter.Feature[] deserializeFeatures() default {};
 
     NamingStrategy naming() default NamingStrategy.CamelCase;
 

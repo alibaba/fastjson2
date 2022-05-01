@@ -34,7 +34,7 @@ public class Issue1764_bean {
 
 
 
-    @JSONType(writeFeatures = JSONWriter.Feature.BrowserCompatible)
+    @JSONType(deserializeFeatures = JSONWriter.Feature.BrowserCompatible)
     public static class Model {
         public long value;
 

@@ -22,7 +22,7 @@ public class Issue2355 {
 
     static class VO {
 
-        @JSONField(writeFeatures = {JSONWriter.Feature.WriteBigDecimalAsPlain})
+        @JSONField(deserializeFeatures = {JSONWriter.Feature.WriteBigDecimalAsPlain})
         private BigDecimal num;
 
         public BigDecimal getNum() {

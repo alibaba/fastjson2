@@ -63,10 +63,10 @@ public @interface JSONField {
     /**
      * Specify {@link JSONWriter.Feature}s to use features when deserializing
      */
-    JSONReader.Feature[] readeFeatures() default {};
+    JSONReader.Feature[] serializeFeatures() default {};
 
     /**
      * Specify {@link JSONWriter.Feature}s to use features when serializing output
      */
-    JSONWriter.Feature[] writeFeatures() default {};
+    JSONWriter.Feature[] deserializeFeatures() default {};
 }

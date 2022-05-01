@@ -28,7 +28,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
@@ -374,7 +373,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             beanInfo.namingStrategy =
                     jsonType.naming().name();
 
-            for (JSONReader.Feature feature : jsonType.readFeatures()) {
+            for (JSONReader.Feature feature : jsonType.serializeFeatures()) {
                 beanInfo.readerFeatures |= feature.mask;
             }
 
@@ -658,7 +657,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 fieldInfo.ignore = !jsonField.deserialize();
             }
 
-            for (JSONReader.Feature feature : jsonField.readeFeatures()) {
+            for (JSONReader.Feature feature : jsonField.serializeFeatures()) {
                 fieldInfo.features |= feature.mask;
             }
 

@@ -54,7 +54,7 @@ public class BeanToArrayTest {
         }
     }
 
-    @JSONType(readFeatures = JSONReader.Feature.SupportArrayToBean, writeFeatures = JSONWriter.Feature.BeanToArray)
+    @JSONType(serializeFeatures = JSONReader.Feature.SupportArrayToBean, deserializeFeatures = JSONWriter.Feature.BeanToArray)
     public static class VO {
         public int id;
         public String name;
