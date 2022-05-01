@@ -20,11 +20,7 @@ import static junit.framework.TestCase.assertNotNull;
 public class ListStrTest {
     @Test
     public void test_arrayMapping() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter<ListStr1> objectWriter = creator.createObjectWriter(ListStr1.class);
@@ -114,7 +110,7 @@ public class ListStrTest {
         objectWriter.write(jsonWriter, array);
         assertEquals("[\"1\",\"2\",\"3\"]", jsonWriter.toString());
     }
-    
+
     @Test
     public void test_list() {
         ObjectReaderCreator[] creators = TestUtils.readerCreators();

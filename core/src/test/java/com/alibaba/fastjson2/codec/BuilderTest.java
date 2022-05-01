@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.*;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,7 @@ public class BuilderTest {
 
     @Test
     public void test_build() throws Exception {
-        ObjectReaderCreator creator = ObjectReaderCreatorASM.INSTANCE;
+        ObjectReaderCreator creator = TestUtils.READER_CREATOR;
         Supplier instanceSupplier = creator.createInstanceSupplier(VOBuilder.class);
         FieldReader fieldReader = ObjectReaders.fieldReaderInt("id", VOBuilder::withId);
         Function<Object, Object> buildFunction = creator.createBuildFunction(VOBuilder.class.getMethod("build"));
@@ -42,7 +43,7 @@ public class BuilderTest {
 
     @Test
     public void test_build_2() throws Exception {
-        ObjectReaderCreator creator = ObjectReaderCreatorASM.INSTANCE;
+        ObjectReaderCreator creator = TestUtils.READER_CREATOR;
         Supplier instanceSupplier = creator.createInstanceSupplier(VOBuilder.class);
 
         FieldReader fieldReader1 = ObjectReaders.fieldReaderInt("id", VOBuilder::withId);

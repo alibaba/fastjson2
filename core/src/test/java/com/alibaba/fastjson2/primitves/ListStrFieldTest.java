@@ -42,11 +42,7 @@ public class ListStrFieldTest {
 
     @Test
     public void test_0_readOnly() throws Exception {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[]{
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             Field field = ListStrFinalField1.class.getField("v0000");

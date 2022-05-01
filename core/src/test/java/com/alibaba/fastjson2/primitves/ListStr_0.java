@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.util.List;
 
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -20,8 +21,8 @@ public class ListStr_0 {
 
     @Test
     public void test_asm() throws Exception {
-        ObjectWriter<VO> ow = ObjectWriterCreatorASM.INSTANCE.createObjectWriter(VO.class);
-        ObjectReader<VO> oc = ObjectReaderCreator.INSTANCE.createObjectReader(VO.class);
+        ObjectWriter<VO> ow = TestUtils.WRITER_CREATOR.createObjectWriter(VO.class);
+        ObjectReader<VO> oc = TestUtils.READER_CREATOR.createObjectReader(VO.class);
 
         for (Type type : types) {
             VO vo = new VO();
@@ -38,7 +39,7 @@ public class ListStr_0 {
     }
     @Test
     public void test_jsonb() throws Exception {
-        ObjectWriter<VO> ow = ObjectWriterCreatorASM.INSTANCE.createObjectWriter(VO.class);
+        ObjectWriter<VO> ow = TestUtils.WRITER_CREATOR.createObjectWriter(VO.class);
         ObjectReader<VO> oc = ObjectReaderCreator.INSTANCE.createObjectReader(VO.class);
 
         for (Type type : types) {

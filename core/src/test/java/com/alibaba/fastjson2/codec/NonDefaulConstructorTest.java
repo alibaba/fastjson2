@@ -15,7 +15,7 @@ import static junit.framework.TestCase.assertNotNull;
 public class NonDefaulConstructorTest {
     @Test
     public void testBuild() throws Exception {
-        ObjectReaderCreator creator = ObjectReaderCreatorASM.INSTANCE;
+        ObjectReaderCreator creator = TestUtils.READER_CREATOR;
         ObjectReader<VO> objectReader = creator.createObjectReaderNoneDefaultConstrutor(
                 VO.class.getConstructor(int.class, String.class), "id", "name"
         );

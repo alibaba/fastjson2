@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
@@ -47,18 +48,9 @@ public class AutoTypeTest7 {
         A1 a = new A1();
         a.value = new C(1001);
 
-        ObjectReaderCreator[] readerCreators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE,
-//                ObjectReaderCreatorDynamicCompile.INSTANCE,
-        };
+        ObjectReaderCreator[] readerCreators = TestUtils.readerCreators();
 
-        ObjectWriterCreator[] writerCreators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE,
-        };
+        ObjectWriterCreator[] writerCreators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator writerCreator : writerCreators) {
             ObjectWriter objectWriter = writerCreator.createObjectWriter(A1.class);

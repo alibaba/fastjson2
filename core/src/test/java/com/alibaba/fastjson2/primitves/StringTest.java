@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.primitves;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.*;
@@ -18,11 +15,7 @@ import static junit.framework.TestCase.assertEquals;
 public class StringTest {
     @Test
     public void test_field_null_default_features_str() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         long features = JSONWriter.Feature.WriteNulls.mask;
         for (ObjectWriterCreator creator : creators) {
@@ -132,11 +125,7 @@ public class StringTest {
 
     @Test
     public void test_null() throws Exception {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             FieldWriter fieldWriter = creator.createFieldWriter(String1.class, "id", 0, 0, null, String1.class.getMethod("getId"));

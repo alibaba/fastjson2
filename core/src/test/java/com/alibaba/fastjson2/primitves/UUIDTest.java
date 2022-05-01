@@ -100,11 +100,7 @@ public class UUIDTest {
 
     @Test
     public void test_creators() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter objectWriter = creator.createObjectWriter(UUIDFIeld2.class);

@@ -31,11 +31,7 @@ public class BeanToArrayTest {
     public void test1() {
         ObjectReaderCreator[] readerCreators = TestUtils.readerCreators();
 
-        ObjectWriterCreator[] writerCreators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE,
-        };
+        ObjectWriterCreator[] writerCreators = TestUtils.writerCreators();
 
         VO vo = new VO();
         vo.id = 1001;

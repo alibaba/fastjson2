@@ -18,11 +18,7 @@ public class JSONFieldTest4 {
     public void test_2() {
         ObjectReaderCreator[] readerCreators = TestUtils.readerCreators();
 
-        ObjectWriterCreator[] writerCreators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE,
-        };
+        ObjectWriterCreator[] writerCreators = TestUtils.writerCreators();
 
         V2 o = new V2();
         o.v1 = 1001;

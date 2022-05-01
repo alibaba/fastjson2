@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.codec;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2_vo.Long2;
 import org.junit.jupiter.api.Test;
@@ -15,11 +16,7 @@ import static junit.framework.TestCase.assertEquals;
 public class ObjectReader2Test {
     @Test
     public void test_array() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<Long2> objectReader = creator.createObjectReader(Long2.class);
@@ -34,11 +31,7 @@ public class ObjectReader2Test {
 
     @Test
     public void test_array_jsonb() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators2();
 
         byte[] jsonbBytes = JSONB.toBytes(new Object[]{101, 102L});
 
@@ -55,11 +48,7 @@ public class ObjectReader2Test {
 
     @Test
     public void test_rest() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators2();
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<Long2> objectReader = creator.createObjectReader(Long2.class);
@@ -72,11 +61,7 @@ public class ObjectReader2Test {
 
     @Test
     public void test_lower_rest() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators2();
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<Long2> objectReader = creator.createObjectReader(Long2.class);
@@ -90,11 +75,7 @@ public class ObjectReader2Test {
 
     @Test
     public void test_jsonb_rest() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators2();
 
         Map map = new HashMap<>();
         map.put("v0000", 101);
@@ -137,11 +118,7 @@ public class ObjectReader2Test {
 
     @Test
     public void test_jsonpath() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             Long2 vo = new Long2();

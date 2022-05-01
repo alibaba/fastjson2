@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.primitves;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
 import com.alibaba.fastjson2.reader.ObjectReaders;
@@ -19,11 +16,7 @@ public class Enum_0 {
 
     @Test
     public void test_arrayMapping() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter<VO> objectWriter
@@ -63,11 +56,7 @@ public class Enum_0 {
 
     @Test
     public void test_feature() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter<VO> objectWriter
@@ -149,11 +138,7 @@ public class Enum_0 {
 
     @Test
     public void test_null() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             FieldWriter fieldWriter = creator.createFieldWriter("date", 0, null, Type.class, VO::getValue);
@@ -188,11 +173,7 @@ public class Enum_0 {
 
     @Test
     public void test_null_field() throws Exception {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             FieldWriter fieldWriter = creator.createFieldWriter("date", 0, 0, null, V1.class.getField("value"));
@@ -227,11 +208,7 @@ public class Enum_0 {
 
     @Test
     public void test_null_2() throws Exception {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             FieldWriter fieldWriter = creator.createFieldWriter(VO.class, "date", 0, 0, null, VO.class.getMethod("getValue"));
@@ -282,8 +259,8 @@ public class Enum_0 {
 
     @Test
     public void test_asm() throws Exception {
-        ObjectWriter<VO> ow = ObjectWriterCreatorASM.INSTANCE.createObjectWriter(VO.class);
-        ObjectReader<VO> oc = ObjectReaderCreatorASM.INSTANCE.createObjectReader(VO.class);
+        ObjectWriter<VO> ow = TestUtils.WRITER_CREATOR.createObjectWriter(VO.class);
+        ObjectReader<VO> oc = TestUtils.READER_CREATOR.createObjectReader(VO.class);
 
         testV0(ow, oc);
     }
@@ -334,16 +311,16 @@ public class Enum_0 {
 
     @Test
     public void test_field_asm() throws Exception {
-        ObjectWriter<V1> ow = ObjectWriterCreatorASM.INSTANCE.createObjectWriter(V1.class);
-        ObjectReader<V1> oc = ObjectReaderCreatorASM.INSTANCE.createObjectReader(V1.class);
+        ObjectWriter<V1> ow = TestUtils.WRITER_CREATOR.createObjectWriter(V1.class);
+        ObjectReader<V1> oc = TestUtils.READER_CREATOR.createObjectReader(V1.class);
 
         testV1(ow, oc);
     }
 
     @Test
     public void test_field_jsonb() throws Exception {
-        ObjectWriter<V1> ow = ObjectWriterCreatorASM.INSTANCE.createObjectWriter(V1.class);
-        ObjectReader<V1> oc = ObjectReaderCreatorASM.INSTANCE.createObjectReader(V1.class);
+        ObjectWriter<V1> ow = TestUtils.WRITER_CREATOR.createObjectWriter(V1.class);
+        ObjectReader<V1> oc = TestUtils.READER_CREATOR.createObjectReader(V1.class);
 
         for (Type type : types) {
             V1 vo = new V1();

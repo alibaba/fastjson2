@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
@@ -13,7 +14,7 @@ public class OverrideTest {
 
     @Test
     public void test_override() throws Exception {
-        ObjectReaderCreator creator = ObjectReaderCreatorASM.INSTANCE;
+        ObjectReaderCreator creator = TestUtils.READER_CREATOR;
         ObjectReader<Cat> objectReader = creator.createObjectReader(Cat.class);
         Cat cat = objectReader.readObject(JSONReader.of("{\"id\":1001}"), 0);
         assertEquals(0, cat.id);

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.write;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
@@ -35,7 +36,7 @@ public class PublicFieldTest {
         VO vo = new VO();
         vo.id = 100;
         JSONWriter jsonWriter = JSONWriter.ofUTF8();
-        ObjectWriter objectWriter = ObjectWriterCreatorASM.INSTANCE.createObjectWriter(VO.class);
+        ObjectWriter objectWriter = TestUtils.WRITER_CREATOR.createObjectWriter(VO.class);
         objectWriter.writeArrayMapping(jsonWriter, vo, null, null, 0);
         assertEquals("[100]", jsonWriter.toString());
     }

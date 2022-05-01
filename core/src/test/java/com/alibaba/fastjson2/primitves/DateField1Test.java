@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
@@ -33,11 +34,7 @@ public class DateField1Test {
 
     @Test
     public void test_arrayMapping() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter<DateField1> objectWriter
@@ -67,11 +64,7 @@ public class DateField1Test {
 
     @Test
     public void test_read_0() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<DateField1> objectReader
@@ -94,11 +87,7 @@ public class DateField1Test {
 
     @Test
     public void test_null() throws Exception {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             FieldWriter fieldWriter = creator.createFieldWriter("date", "millis", DateField1.class.getField("date"));
@@ -133,11 +122,7 @@ public class DateField1Test {
 
     @Test
     public void test_millis() throws Exception {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             FieldWriter fieldWriter = creator.createFieldWriter("date", "millis", DateField1.class.getField("date"));

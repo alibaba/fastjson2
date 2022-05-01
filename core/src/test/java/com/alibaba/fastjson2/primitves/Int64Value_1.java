@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.primitves;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.writer.*;
 import org.junit.jupiter.api.Test;
@@ -185,16 +186,8 @@ public class Int64Value_1 {
 
     @Test
     public void test_jsonpath() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
-        ObjectWriterCreator[] writerCreators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators2();
+        ObjectWriterCreator[] writerCreators = TestUtils.writerCreators();
 
         for (int i = 0; i < creators.length; i++) {
             ObjectReaderCreator creator = creators[i];

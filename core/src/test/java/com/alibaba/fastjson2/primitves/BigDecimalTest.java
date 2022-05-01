@@ -53,11 +53,7 @@ public class BigDecimalTest {
 
     @Test
     public void test_null() throws Exception {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             FieldWriter fieldWriter = creator.createFieldWriter(BigDecimal1.class, "id", 0, 0, null, BigDecimal1.class.getMethod("getId"));
@@ -231,11 +227,7 @@ public class BigDecimalTest {
 
     @Test
     public void test_jsonpath() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             BigDecimal1 vo = new BigDecimal1();

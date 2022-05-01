@@ -37,11 +37,7 @@ public class BigIntegerTest {
 
     @Test
     public void test_null() throws Exception {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             FieldWriter fieldWriter = creator.createFieldWriter(BigInteger1.class, "id", 0, 0, null, BigInteger1.class.getMethod("getId"));
@@ -219,11 +215,7 @@ public class BigIntegerTest {
 
     @Test
     public void test_jsonpath() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             BigInteger1 vo = new BigInteger1();

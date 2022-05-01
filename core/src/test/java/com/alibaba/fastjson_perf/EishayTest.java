@@ -1,10 +1,7 @@
 package com.alibaba.fastjson_perf;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.eishay.vo.*;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.JSONBDump;
@@ -752,7 +749,7 @@ public class EishayTest {
 
     @Test
     public void test_read_gen_asm() throws Exception {
-        ObjectReaderCreator creator = ObjectReaderCreatorASM.INSTANCE;
+        ObjectReaderCreator creator = TestUtils.READER_CREATOR;
 
         for (int i = 0; i < 5; ++i) {
             long start = System.currentTimeMillis();
