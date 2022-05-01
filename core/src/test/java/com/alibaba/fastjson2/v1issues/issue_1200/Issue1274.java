@@ -1,8 +1,7 @@
 package com.alibaba.fastjson2.v1issues.issue_1200;
 
-import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.JSON;
-import junit.framework.TestCase;
+import com.alibaba.fastjson2.filter.NameFilter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.v1issues.issue_3600;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson.PropertyNamingStrategy;
 import com.alibaba.fastjson.annotation.JSONType;
+import com.alibaba.fastjson2.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.junit.jupiter.api.Test;

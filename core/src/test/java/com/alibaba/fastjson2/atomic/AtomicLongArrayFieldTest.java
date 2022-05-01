@@ -2,8 +2,6 @@ package com.alibaba.fastjson2.atomic;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
-import junit.framework.TestCase;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicLongArray;

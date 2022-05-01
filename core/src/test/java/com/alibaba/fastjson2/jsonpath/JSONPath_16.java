@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.*;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

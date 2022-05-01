@@ -1,18 +1,18 @@
 package com.alibaba.fastjson2.primitves;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.util.JSONBDump;
-import com.alibaba.fastjson2.writer.*;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.UUID1;
 import com.alibaba.fastjson2_vo.UUIDFIeld2;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.UUID;
 
 import static junit.framework.TestCase.assertEquals;
 

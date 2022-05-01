@@ -1,12 +1,15 @@
 package com.alibaba.fastjson2.primitves;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.writer.*;
+import com.alibaba.fastjson2.writer.FieldWriter;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.String1;
 import org.junit.jupiter.api.Test;
-
 
 import java.nio.charset.StandardCharsets;
 

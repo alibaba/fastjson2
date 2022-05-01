@@ -3,12 +3,10 @@ package com.alibaba.fastjson2.codec;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import org.junit.jupiter.api.Test;
-import com.alibaba.fastjson2.TypeReference;
 
 import java.lang.reflect.Type;
 

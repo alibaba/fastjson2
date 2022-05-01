@@ -3,11 +3,10 @@ package com.alibaba.fastjson2.annotation;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
-import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 import org.junit.jupiter.api.Test;
 
 import static junit.framework.TestCase.assertEquals;

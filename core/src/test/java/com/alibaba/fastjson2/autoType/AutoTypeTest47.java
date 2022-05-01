@@ -3,13 +3,11 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2_vo.IntField1;
 import com.mchange.v2.c3p0.impl.PoolBackedDataSourceBase;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.*;
+import static junit.framework.TestCase.assertNotNull;
 
 public class AutoTypeTest47 {
     @Test

@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.codec;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;

@@ -1,13 +1,12 @@
 package com.alibaba.fastjson2.jsonpath;
 
-import com.alibaba.fastjson2.*;
-import junit.framework.TestCase;
+import com.alibaba.fastjson2.JSONPath;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

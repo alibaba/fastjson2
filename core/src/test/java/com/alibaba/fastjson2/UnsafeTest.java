@@ -2,8 +2,6 @@ package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-
 public class UnsafeTest {
     @Test
     public void test_0() throws Exception {

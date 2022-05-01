@@ -1,18 +1,17 @@
 package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 import com.alibaba.fastjson2_vo.ListStr1;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;

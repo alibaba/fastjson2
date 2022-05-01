@@ -8,8 +8,9 @@ import com.alibaba.fastjson2_vo.Integer1;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 public class IgnoreErrorGetterTest {
 

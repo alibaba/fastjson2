@@ -1,8 +1,7 @@
 package com.alibaba.fastjson2.v1issues.issue_1300;
 
-import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.JSON;
-import junit.framework.TestCase;
+import com.alibaba.fastjson2.annotation.JSONCreator;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

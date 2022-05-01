@@ -2,9 +2,7 @@ package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
-import junit.framework.TestCase;
+import com.alibaba.fastjson2.TestUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +19,7 @@ public class TestExternal {
         Method method = clazz.getMethod("setName", new Class[] {String.class});
         Object obj = clazz.newInstance();
         method.invoke(obj, "jobs");
-        
+
         String text = JSON.toJSONString(obj);
         System.out.println(text);
         JSON.parseObject(text, clazz);
@@ -31,8 +29,8 @@ public class TestExternal {
     public void test_1 () throws Exception {
         ExtClassLoader classLoader = new ExtClassLoader();
         try {
-            JSONFactory.setContextReaderCreator(new ObjectReaderCreatorASM(classLoader));
-            JSONFactory.setContextWriterCreator(new ObjectWriterCreatorASM(classLoader));
+            JSONFactory.setContextReaderCreator(TestUtils.readerCreator(classLoader));
+            JSONFactory.setContextWriterCreator(TestUtils.writerCreator(classLoader));
 
             Class<?> clazz = classLoader.loadClass("external.VO");
             Method method = clazz.getMethod("setName", new Class[]{String.class});
@@ -47,16 +45,16 @@ public class TestExternal {
             JSONFactory.setContextWriterCreator(null);
         }
     }
-    
+
     public static class ExtClassLoader extends ClassLoader {
         public ExtClassLoader() throws IOException{
             super(Thread.currentThread().getContextClassLoader());
-            
+
             byte[] bytes;
             InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("external/VO.clazz");
             bytes = IOUtils.toByteArray(is);
             is.close();
-            
+
             super.defineClass("external.VO", bytes, 0, bytes.length);
         }
     }

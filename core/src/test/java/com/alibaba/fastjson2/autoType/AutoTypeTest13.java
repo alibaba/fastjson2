@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Currency;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 
 public class AutoTypeTest13 {
     @Test

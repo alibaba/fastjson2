@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.v1issues.issue_3300;
 
 import com.alibaba.fastjson2.JSONObject;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,7 @@ public class Issue3344 {
     public void after() {
         TimeZone.setDefault(defaultTimeZone);
     }
-    
+
     @Test
     public void test_for_issue_timeZone() throws Exception {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT+1"));

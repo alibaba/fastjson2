@@ -7,7 +7,10 @@ import com.alibaba.fastjson2.util.Differ;
 import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

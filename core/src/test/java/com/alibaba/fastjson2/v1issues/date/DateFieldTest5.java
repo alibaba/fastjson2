@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.v1issues.date;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializeConfig;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 

@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static junit.framework.TestCase.*;
 
@@ -124,7 +123,7 @@ public class JSONBTableTest2 {
 
     public static class Item {
         public int id;
-        
+
         public static Item of(int id) {
             Item b = new Item();
             b.id = id;

@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.v1issues.basicType;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson.annotation.JSONType;
+import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

@@ -4,8 +4,14 @@ import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
-import com.alibaba.fastjson2.reader.*;
-import com.alibaba.fastjson2.writer.*;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.reader.ObjectReaders;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import com.alibaba.fastjson2.writer.ObjectWriters;
 import org.junit.jupiter.api.Test;
 
 import static junit.framework.TestCase.assertEquals;

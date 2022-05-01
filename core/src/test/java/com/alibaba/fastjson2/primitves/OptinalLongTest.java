@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.OptionalLong;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertArrayEquals;
 
 public class OptinalLongTest {
     @Test
