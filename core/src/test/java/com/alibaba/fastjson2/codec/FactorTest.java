@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
@@ -16,7 +17,7 @@ import static junit.framework.TestCase.assertEquals;
 public class FactorTest {
     @Test
     public void testBuild() throws Exception {
-        ObjectReaderCreator creator = ObjectReaderCreatorASM.INSTANCE;
+        ObjectReaderCreator creator = TestUtils.READER_CREATOR;
         ObjectReader<VO> objectReader = creator.createObjectReaderFactoryMethod(
                 VO.class.getMethod("of", int.class, String.class), "id", "name"
         );

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
 import com.alibaba.fastjson2.reader.ObjectReaders;
@@ -71,8 +72,8 @@ public class Int32Value_0 {
 
     @Test
     public void test_asm() throws Exception {
-        ObjectWriter<VO> ow = ObjectWriterCreatorASM.INSTANCE.createObjectWriter(VO.class);
-        ObjectReader<VO> oc = ObjectReaderCreatorASM.INSTANCE.createObjectReader(VO.class);
+        ObjectWriter<VO> ow = TestUtils.WRITER_CREATOR.createObjectWriter(VO.class);
+        ObjectReader<VO> oc = TestUtils.READER_CREATOR.createObjectReader(VO.class);
 
         for (int i = MIN_VALUE; i <= MAX_VALUE; ++i) {
             VO vo = new VO();

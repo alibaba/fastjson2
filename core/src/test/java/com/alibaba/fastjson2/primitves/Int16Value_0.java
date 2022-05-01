@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.primitves;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaders;
 import com.alibaba.fastjson2.writer.*;
@@ -15,11 +16,7 @@ import static junit.framework.TestCase.assertEquals;
 public class Int16Value_0 {
     @Test
     public void test_arrayMapping() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter<Short1> objectWriter = creator.createObjectWriter(Short1.class);
@@ -111,11 +108,7 @@ public class Int16Value_0 {
 
     @Test
     public void test_arrayMapping_2000() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter<Short1> objectWriter = creator.createObjectWriter(Short1.class);
@@ -172,7 +165,7 @@ public class Int16Value_0 {
             }
         }
     }
-    
+
     @Test
     public void test_reflect() throws Exception {
         ObjectWriter<VO> ow = ObjectWriters.ofReflect(VO.class);

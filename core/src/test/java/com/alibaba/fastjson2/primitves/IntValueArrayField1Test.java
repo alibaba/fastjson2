@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2_vo.IntValueArrayField1;
 import com.alibaba.fastjson2_vo.IntValueArrayFinalField1;
@@ -13,11 +14,7 @@ import static junit.framework.TestCase.assertEquals;
 public class IntValueArrayField1Test {
     @Test
     public void test_0() throws Exception {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[]{
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             Field field = IntValueArrayField1.class.getField("values");
@@ -47,11 +44,7 @@ public class IntValueArrayField1Test {
 
     @Test
     public void test_final_0() throws Exception {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[]{
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             Field field = IntValueArrayFinalField1.class.getField("values");

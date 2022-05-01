@@ -16,11 +16,7 @@ import static junit.framework.TestCase.assertEquals;
 public class FloatValueFieldTest {
     @Test
     public void test_arrayMapping() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter<FloatValueField1> objectWriter = creator.createObjectWriter(FloatValueField1.class);

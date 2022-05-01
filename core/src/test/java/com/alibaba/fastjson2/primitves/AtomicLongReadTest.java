@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2_vo.AtomicLongReadOnly1;
 import org.junit.jupiter.api.Test;
@@ -12,11 +13,7 @@ import static junit.framework.TestCase.assertEquals;
 public class AtomicLongReadTest {
     @Test
     public void test_readOnly() throws Exception {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[]{
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             FieldReader fieldWriter = creator.createFieldReader(

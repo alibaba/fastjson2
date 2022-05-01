@@ -164,11 +164,7 @@ public class AutoTypeTest0 {
     public void test_f1() {
         ObjectReaderCreator[] readerCreators = TestUtils.readerCreators();
 
-        ObjectWriterCreator[] writerCreators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE,
-        };
+        ObjectWriterCreator[] writerCreators = TestUtils.writerCreators();
 
         IntField1 a = new IntField1();
         a.v0000 = 123;
@@ -196,11 +192,7 @@ public class AutoTypeTest0 {
     public void test_f2() {
         ObjectReaderCreator[] readerCreators = TestUtils.readerCreators();
 
-        ObjectWriterCreator[] writerCreators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE,
-        };
+        ObjectWriterCreator[] writerCreators = TestUtils.writerCreators();
 
         IntField2 a = new IntField2();
         a.v0000 = 101;
@@ -230,11 +222,7 @@ public class AutoTypeTest0 {
     public void test_f3() {
         ObjectReaderCreator[] readerCreators = TestUtils.readerCreators();
 
-        ObjectWriterCreator[] writerCreators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE,
-        };
+        ObjectWriterCreator[] writerCreators = TestUtils.writerCreators();
 
         IntField3 a = new IntField3();
         a.v0000 = 101;
@@ -266,11 +254,7 @@ public class AutoTypeTest0 {
     public void test_f4() {
         ObjectReaderCreator[] readerCreators = TestUtils.readerCreators();
 
-        ObjectWriterCreator[] writerCreators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE,
-        };
+        ObjectWriterCreator[] writerCreators = TestUtils.writerCreators();
 
         IntField4 a = new IntField4();
         a.v0000 = 101;
@@ -304,11 +288,7 @@ public class AutoTypeTest0 {
     public void test_f5() {
         ObjectReaderCreator[] readerCreators = TestUtils.readerCreators();
 
-        ObjectWriterCreator[] writerCreators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE,
-        };
+        ObjectWriterCreator[] writerCreators = TestUtils.writerCreators();
 
         IntField5 a = new IntField5();
         a.v0000 = 101;
@@ -344,11 +324,7 @@ public class AutoTypeTest0 {
     public void test_f6() {
         ObjectReaderCreator[] readerCreators = TestUtils.readerCreators();
 
-        ObjectWriterCreator[] writerCreators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE,
-        };
+        ObjectWriterCreator[] writerCreators = TestUtils.writerCreators();
 
         IntField6 a = new IntField6();
         a.v0000 = 101;

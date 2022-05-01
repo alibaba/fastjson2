@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
@@ -18,11 +19,7 @@ import static junit.framework.TestCase.assertEquals;
 public class GenericTypeMethodListMapDecimalTest {
     @Test
     public void testRead_0() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<P0> objectReader = creator.createObjectReader(P0.class);
@@ -35,11 +32,7 @@ public class GenericTypeMethodListMapDecimalTest {
 
     @Test
     public void testRead1() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<P1> objectReader = creator.createObjectReader(P1.class);
@@ -52,11 +45,7 @@ public class GenericTypeMethodListMapDecimalTest {
 
     @Test
     public void testRead2() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<P2> objectReader = creator.createObjectReader(P2.class);
@@ -69,11 +58,7 @@ public class GenericTypeMethodListMapDecimalTest {
 
     @Test
     public void testRead21() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<P21> objectReader = creator.createObjectReader(P21.class);
@@ -86,11 +71,7 @@ public class GenericTypeMethodListMapDecimalTest {
 
     @Test
     public void testRead311() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<P311> objectReader = creator.createObjectReader(P311.class);
@@ -103,11 +84,7 @@ public class GenericTypeMethodListMapDecimalTest {
 
     @Test
     public void testRead31() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             Type objectType = new TypeReference<P31<BigDecimal>>() {}.getType();

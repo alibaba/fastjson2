@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.annotation;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
@@ -18,11 +15,7 @@ public class JSONFieldTest3 {
 
     @Test
     public void test_deciaml_BrowserCompatible() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[]{
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         BigDecimal[] values = new BigDecimal[] {null, BigDecimal.TEN, new BigDecimal("90071992547409910")};
         VO vo = new VO();

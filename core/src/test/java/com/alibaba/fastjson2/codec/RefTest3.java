@@ -29,11 +29,7 @@ public class RefTest3 {
 
     @Test
     public void test_ref_0_creators() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-            ObjectReaderCreator.INSTANCE,
-            ObjectReaderCreatorLambda.INSTANCE,
-            ObjectReaderCreatorASM.INSTANCE,
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators2();
 
         for (ObjectReaderCreator creator : creators) {
             JSONObject a = new JSONObject();

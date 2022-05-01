@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
@@ -15,11 +16,7 @@ import static junit.framework.TestCase.assertEquals;
 public class JSONFieldTest {
     @Test
     public void test_format_iso8601() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[]{
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         VO vo = new VO();
         vo.date = 0;
@@ -42,11 +39,7 @@ public class JSONFieldTest {
 
     @Test
     public void test_format_iso8601_method() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[]{
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         VO_Method vo = new VO_Method();
         vo.date = 0;

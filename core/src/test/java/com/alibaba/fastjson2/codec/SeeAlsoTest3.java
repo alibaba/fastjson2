@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.codec;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
@@ -18,11 +19,7 @@ import static junit.framework.TestCase.assertEquals;
 public class SeeAlsoTest3 {
     @Test
     public void test_seeAlso() throws Exception {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators2();
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<Animal> objectReader = creator.createObjectReader(Animal.class);

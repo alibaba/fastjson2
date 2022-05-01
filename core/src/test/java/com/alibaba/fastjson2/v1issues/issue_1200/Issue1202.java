@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.v1issues.issue_1200;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
@@ -27,12 +28,7 @@ public class Issue1202 {
 
     @Test
     public void test_for_issue_0_creators() throws Exception {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE,
-//                ObjectReaderCreatorDynamicCompile.INSTANCE // TODO: ObjectReaderCreatorDynamicCompile
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators2();
 
         String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
 
@@ -54,12 +50,7 @@ public class Issue1202 {
     public void test_for_issue_2_creators() throws Exception {
         String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
 
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE,
-//                ObjectReaderCreatorDynamicCompile.INSTANCE // TODO: ObjectReaderCreatorDynamicCompile
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<Model2> objectReader = creator.createObjectReader(Model2.class);
@@ -79,12 +70,7 @@ public class Issue1202 {
     public void test_for_issue_3_creators() throws Exception {
         String text = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
 
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE,
-//                ObjectReaderCreatorDynamicCompile.INSTANCE // TODO: ObjectReaderCreatorDynamicCompile
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators2();
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<Model3> objectReader = creator.createObjectReader(Model3.class);

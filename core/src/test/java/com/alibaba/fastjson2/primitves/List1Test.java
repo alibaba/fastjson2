@@ -22,11 +22,7 @@ import static junit.framework.TestCase.assertNotNull;
 public class List1Test {
     @Test
     public void test_arrayMapping() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE
-        };
+        ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter<List1> objectWriter = creator.createObjectWriter(List1.class);
@@ -102,7 +98,7 @@ public class List1Test {
             }
         }
     }
-    
+
     @Test
     public void test_list() {
         ObjectReaderCreator[] creators = TestUtils.readerCreators();

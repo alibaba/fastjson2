@@ -34,12 +34,7 @@ public class BeanToArrayTest2 {
     @Test
     public void test1() {
         ObjectReaderCreator[] readerCreators = TestUtils.readerCreators();
-
-        ObjectWriterCreator[] writerCreators = new ObjectWriterCreator[] {
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE,
-        };
+        ObjectWriterCreator[] writerCreators = TestUtils.writerCreators();
 
         Parent p = new Parent();
         VO vo = new VO();

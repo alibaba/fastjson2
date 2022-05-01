@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2_vo.LongValueArrayField1;
 import com.alibaba.fastjson2_vo.LongValueArrayFinalField1;
@@ -13,11 +14,7 @@ import static junit.framework.TestCase.assertEquals;
 public class LongValueArrayField1Test {
     @Test
     public void test_0() throws Exception {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[]{
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             Field field = LongValueArrayField1.class.getField("values");
@@ -47,11 +44,7 @@ public class LongValueArrayField1Test {
 
     @Test
     public void test_final_0() throws Exception {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[]{
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE
-        };
+        ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
             Field field = LongValueArrayFinalField1.class.getField("values");
