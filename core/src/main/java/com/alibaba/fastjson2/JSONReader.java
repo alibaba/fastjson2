@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.ReferenceKey;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import sun.util.resources.LocaleData;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -636,6 +637,13 @@ public abstract class JSONReader implements Closeable {
     public abstract UUID readUUID();
 
     public LocalDate readLocalDate() {
+        if (isInt()) {
+            long millis = readInt64Value();
+            Instant instant = Instant.ofEpochMilli(millis);
+            ZonedDateTime zdt = instant.atZone(context.getZoneId());
+            return zdt.toLocalDate();
+        }
+
         int len = getStringLength();
         switch (len) {
             case 8:
@@ -654,10 +662,26 @@ public abstract class JSONReader implements Closeable {
             default:
                 break;
         }
-        throw new JSONException("TODO : " + len + ", " + readString());
+
+        String str = readString();
+        if (IOUtils.isNumber(str)) {
+            long millis = Long.parseLong(str);
+            Instant instant = Instant.ofEpochMilli(millis);
+            ZonedDateTime zdt = instant.atZone(context.getZoneId());
+            return zdt.toLocalDate();
+        }
+
+        throw new JSONException("not support input : " + str);
     }
 
     public LocalDateTime readLocalDateTime() {
+        if (isInt()) {
+            long millis = readInt64Value();
+            Instant instant = Instant.ofEpochMilli(millis);
+            ZonedDateTime zdt = instant.atZone(context.getZoneId());
+            return zdt.toLocalDateTime();
+        }
+
         int len = getStringLength();
         switch (len) {
             case 8:
@@ -701,6 +725,12 @@ public abstract class JSONReader implements Closeable {
     }
 
     public ZonedDateTime readZonedDateTime() {
+        if (isInt()) {
+            long millis = readInt64Value();
+            Instant instant = Instant.ofEpochMilli(millis);
+            return instant.atZone(context.getZoneId());
+        }
+
         if (ch == '"') {
             int len = getStringLength();
             if (len == 10) {
@@ -716,12 +746,25 @@ public abstract class JSONReader implements Closeable {
             }
 
             String str = readString();
+            if (IOUtils.isNumber(str)) {
+                long millis = Long.parseLong(str);
+                Instant instant = Instant.ofEpochMilli(millis);
+                return instant.atZone(context.getZoneId());
+            }
+
             throw new JSONException("TODO : " + str + ", len : " + len);
         }
         throw new JSONException("TODO : " + ch);
     }
 
     public LocalTime readLocalTime() {
+        if (isInt()) {
+            long millis = readInt64Value();
+            Instant instant = Instant.ofEpochMilli(millis);
+            ZonedDateTime zdt = instant.atZone(context.getZoneId());
+            return zdt.toLocalTime();
+        }
+
         int len = getStringLength();
         switch (len) {
             case 8:
@@ -737,6 +780,15 @@ public abstract class JSONReader implements Closeable {
             default:
                 break;
         }
+
+        String str = readString();
+        if (IOUtils.isNumber(str)) {
+            long millis = Long.parseLong(str);
+            Instant instant = Instant.ofEpochMilli(millis);
+            ZonedDateTime zdt = instant.atZone(context.getZoneId());
+            return zdt.toLocalTime();
+        }
+
         throw new JSONException("not support len : " + len);
     }
 
@@ -746,8 +798,15 @@ public abstract class JSONReader implements Closeable {
         if (isString()) {
             int len = getStringLength();
             ZonedDateTime zdt = readZonedDateTimeX(len);
+
             if (zdt == null) {
                 String str = readString();
+
+                if (IOUtils.isNumber(str)) {
+                    long millis = Long.parseLong(str);
+                    return Instant.ofEpochMilli(millis);
+                }
+
                 throw new JSONException("TODO : " + str + ", len : " + len);
             }
 

@@ -132,7 +132,8 @@ public final class JSONFactory {
             if (property != null) {
                 property = property.trim();
             }
-            CREATOR = property == null ? "asm" : "reflect";
+
+            CREATOR = property == null ? "asm" : property;
         }
     }
 

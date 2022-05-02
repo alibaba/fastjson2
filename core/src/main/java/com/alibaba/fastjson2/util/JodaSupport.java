@@ -281,7 +281,16 @@ public class JodaSupport {
 
         @Override
         public Object readObject(JSONReader jsonReader, long features) {
-            throw new JSONException("not support");
+            if (jsonReader.nextIfNull()) {
+                return null;
+            }
+
+            LocalDate localDate = jsonReader.readLocalDate();
+            try {
+                return Constructor4.newInstance(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), null);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new JSONException("read org.joda.time.LocalDate error", e);
+            }
         }
 
         @Override
@@ -464,7 +473,7 @@ public class JodaSupport {
 
         @Override
         public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.isString()) {
+            if (jsonReader.isString() || jsonReader.isInt()) {
                 LocalDateTime ldt = jsonReader.readLocalDateTime();
                 try {
                     return constructor7.newInstance(ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth(), ldt.getHour(), ldt.getMinute(), ldt.getSecond(), ldt.getNano() / 1000_000);
