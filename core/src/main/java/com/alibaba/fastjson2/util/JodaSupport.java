@@ -71,6 +71,7 @@ public class JodaSupport {
             }
         }
 
+        @Override
         public Object createInstance(Map map) {
             Number millis = (Long) map.get("millis");
             if (millis != null) {
