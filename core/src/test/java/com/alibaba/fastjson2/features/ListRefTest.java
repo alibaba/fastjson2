@@ -17,9 +17,10 @@ public class ListRefTest {
 
         Item item = new Item();
         bean.items.add(item);
+        bean.items.add(null);
         bean.items.add(item);
 
-        assertEquals("{\"items\":[{},{\"$ref\":\"$[0]\"}]}",
+        assertEquals("{\"items\":[{},null,{\"$ref\":\"$[0]\"}]}",
                 JSON.toJSONString(bean, JSONWriter.Feature.ReferenceDetection)
         );
     }
