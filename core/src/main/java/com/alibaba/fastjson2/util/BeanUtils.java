@@ -567,6 +567,9 @@ public abstract class BeanUtils {
             case "SnakeCase": {
                 return snakeCase(methodName, prefixLength);
             }
+            case "UpperCase": {
+                return methodName.substring(prefixLength).toUpperCase();
+            }
             case "KebabCase": {
                 StringBuilder buf = new StringBuilder();
                 final int firstIndex;
@@ -582,6 +585,68 @@ public abstract class BeanUtils {
                     if (ch >= 'A' && ch <= 'Z') {
                         char ch_ucase = (char) (ch + 32);
                         if (i > firstIndex) {
+                            buf.append('-');
+                        }
+                        buf.append(ch_ucase);
+                    } else {
+                        buf.append(ch);
+                    }
+                }
+                return buf.toString();
+            }
+            default:
+                throw new JSONException("TODO : " + namingStrategy);
+        }
+    }
+
+    public static String fieldName(String methodName, String namingStrategy) {
+        if (namingStrategy == null) {
+            namingStrategy = "CamelCase";
+        }
+
+        final int methodNameLength = methodName.length();
+
+        switch (namingStrategy) {
+            case "NeverUseThisValueExceptDefaultValue":
+            case "CamelCase": {
+                char c0 = methodName.charAt(0);
+                char c1;
+                if (c0 >= 'A' && c0 <= 'Z'
+                        && methodName.length() > 1
+                        && (c1 = methodName.charAt(1)) >= 'A'
+                        && c1 <= 'Z') {
+                    char[] chars = methodName.toCharArray();
+                    chars[0] = (char) (c0 + 32);
+                    return new String(chars);
+                }
+                return methodName;
+            }
+            case "PascalCase": {
+                char c0 = methodName.charAt(0);
+                char c1;
+                if (c0 >= 'a' && c0 <= 'z'
+                        && methodName.length() > 1
+                        && (c1 = methodName.charAt(1)) >= 'a'
+                        && c1 <= 'z') {
+                    char[] chars = methodName.toCharArray();
+                    chars[0] = (char) (c0 - 32);
+                    return new String(chars);
+                }
+                return methodName;
+            }
+            case "SnakeCase": {
+                return snakeCase(methodName, 0);
+            }
+            case "UpperCase": {
+                return methodName.toUpperCase();
+            }
+            case "KebabCase": {
+                StringBuilder buf = new StringBuilder();
+                for (int i = 0; i < methodName.length(); ++i) {
+                    char ch = methodName.charAt(i);
+                    if (ch >= 'A' && ch <= 'Z') {
+                        char ch_ucase = (char) (ch + 32);
+                        if (i > 0) {
                             buf.append('-');
                         }
                         buf.append(ch_ucase);
