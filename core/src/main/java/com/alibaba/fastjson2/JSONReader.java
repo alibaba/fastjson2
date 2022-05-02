@@ -7,7 +7,6 @@ import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.ReferenceKey;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import sun.util.resources.LocaleData;
 
 import java.io.Closeable;
 import java.io.IOException;
