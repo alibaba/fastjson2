@@ -7,12 +7,12 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static junit.framework.TestCase.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JSONArrayTest {
     @Test
@@ -981,7 +981,7 @@ public class JSONArrayTest {
         JSONArray array = JSONArray.of().fluentAdd("1").fluentAdd(null);
         assertEquals(2, array.size());
         assertEquals("1", array.get(0));
-        assertNull(null, array.get(1));
+        assertNull(array.get(1));
         assertNull(array.getObject(1, String.class));
         array.set(1, "");
         assertEquals(0D, array.getDoubleValue(1));
@@ -1005,5 +1005,64 @@ public class JSONArrayTest {
         assertEquals(array2.get(2), 3);
         assertEquals(array2.get(3), 4);
         assertEquals(array2.get(4), "5");
+    }
+
+    @Test
+    public void test_getJSONArray2() {
+        assertNotNull(
+                JSONArray
+                        .of(new ArrayList<>())
+                        .getJSONArray(0)
+        );
+        assertNotNull(
+                JSONArray
+                        .of(new HashMap<>())
+                        .getJSONObject(0)
+        );
+    }
+
+    @Test
+    public void test_toJavaList() {
+        assertThrows(JSONException.class,
+                () -> JSONArray.of(1, 2).toJavaList(Bean.class)
+        );
+    }
+
+    @Test
+    public void test_getObject() {
+        {
+            UUID uuid = UUID.randomUUID();
+
+            JSONArray object = JSONArray.of(uuid.toString());
+            UUID uuid2 = object.getObject(0, UUID.class);
+
+            assertEquals(uuid, uuid2);
+        }
+
+        assertNull(
+                JSONArray
+                        .of("")
+                        .getObject(0, UUID.class)
+        );
+
+        assertNull(
+                JSONArray
+                        .of("null")
+                        .getObject(0, UUID.class)
+        );
+
+        assertEquals(Integer.valueOf(101),
+                JSONArray
+                        .of(101)
+                        .getObject(0, Number.class)
+        );
+
+        assertThrows(JSONException.class,
+                () -> JSONArray.of(1).getObject(0, Bean.class)
+        );
+    }
+
+    public static class Bean {
+
     }
 }
