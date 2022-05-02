@@ -165,7 +165,20 @@ abstract class FieldWriterList<T> extends FieldWriterImpl<T> {
                 previousObjectWriter = itemObjectWriter;
             }
 
+            if (refDetect) {
+                String refPath = jsonWriter.setPath(i, item);
+                if (refPath != null) {
+                    jsonWriter.writeReference(refPath);
+                    jsonWriter.popPath(item);
+                    continue;
+                }
+            }
+
             itemObjectWriter.write(jsonWriter, item, null, itemType, features);
+
+            if (refDetect) {
+                jsonWriter.popPath(item);
+            }
         }
         jsonWriter.endArray();
     }
