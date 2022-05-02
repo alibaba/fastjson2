@@ -239,6 +239,7 @@ public class JSONArray extends JSON implements List {
         return com.alibaba.fastjson2.JSON.toJavaObject(this, clazz);
     }
 
+    @Override
     public String toString() {
         return toJSONString(this);
     }
