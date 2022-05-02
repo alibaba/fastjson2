@@ -146,6 +146,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                     : LocalDateTime.ofInstant(Instant.ofEpochMilli((Long) o), ZoneId.systemDefault());
             provider.registerTypeConvert(Long.class, LocalDateTime.class, function);
         }
+        {
+            Function function = o -> o == null || "null".equals(o) || o.equals("")
+                    ? null
+                    : UUID.fromString((String) o);
+            provider.registerTypeConvert(String.class, UUID.class, function);
+        }
     }
 
     class ReaderAnnotationProcessor implements ObjectReaderAnnotationProcessor {

@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2_vo.Integer1;
 import org.junit.jupiter.api.Test;
 
@@ -9,10 +10,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -1032,7 +1030,168 @@ public class JSONObjectTest {
         assertEquals("kraity", proxy.getName());
     }
 
+    @Test
+    public void test_init() {
+        {
+            JSONObject object = new JSONObject(1, 0.75f);
+            object.put("id", 101);
+            assertTrue(object.containsKey("id"));
+            assertEquals(101, object.get("id"));
+        }
+        {
+            JSONObject object2 = new JSONObject(1, 0.75f, false);
+            object2.put("id", 101);
+            assertTrue(object2.containsKey("id"));
+            assertEquals(101, object2.get("id"));
+
+            assertEquals(123, object2.getOrDefault("xx", 123));
+            assertEquals(123, object2.getOrDefault(new Object(), 123));
+        }
+    }
+
+    @Test
+    public void test_getJSONArray2() {
+        JSONObject object = new JSONObject().fluentPut("values", new ArrayList<>());
+        JSONArray array = object.getJSONArray("values");
+        assertEquals(0, array.size());
+    }
+
+    @Test
+    public void test_getJSONObject2() {
+        JSONObject object = new JSONObject().fluentPut("values", new HashMap<>());
+        HashMap map = object.getJSONObject("values");
+        assertEquals(0, map.size());
+    }
+
+    @Test
+    public void test_getObject() {
+        {
+            UUID uuid = UUID.randomUUID();
+
+            JSONObject object = new JSONObject().fluentPut("id", uuid.toString());
+            UUID uuid2 = object.getObject("id", UUID.class);
+
+            assertEquals(uuid, uuid2);
+        }
+
+        assertNull(
+                JSONObject
+                        .of("id", "")
+                        .getObject("id", UUID.class)
+        );
+
+        assertNull(
+                JSONObject
+                        .of("id", "null")
+                        .getObject("id", UUID.class)
+        );
+
+        assertEquals(Integer.valueOf(101),
+                JSONObject
+                        .of("id", 101)
+                        .getObject("id", Number.class)
+        );
+
+        assertEquals(2,
+                JSONObject
+                        .of("id", 101, "name", "DataWorks")
+                        .size()
+        );
+    }
+
     public interface User {
         String getName();
+    }
+
+    @Test
+    public void test_invoke2() {
+        JSONObject object = new JSONObject(3);
+        InvokeInterface proxy = (InvokeInterface) Proxy.newProxyInstance(
+                InvokeInterface.class.getClassLoader(),
+                new Class<?>[]{InvokeInterface.class, Map.class}, object
+        );
+
+        assertThrows(JSONException.class
+                , () -> proxy.f(1)
+        );
+        assertThrows(JSONException.class
+                , () -> proxy.f1(1)
+        );
+
+        assertTrue(proxy.equals(object));
+
+        proxy.setId(101);
+        assertEquals(101, object.get("id"));
+        assertEquals(101, proxy.getId());
+
+        assertThrows(JSONException.class
+                , () -> proxy.set(101)
+        );
+        assertThrows(JSONException.class
+                , () -> proxy.get()
+        );
+        assertThrows(JSONException.class
+                , () -> proxy.getX()
+        );
+        assertThrows(JSONException.class
+                , () -> proxy.is()
+        );
+        assertThrows(JSONException.class
+                , () -> proxy.x0()
+        );
+        assertThrows(JSONException.class
+                , () -> proxy.x(0)
+        );
+        assertThrows(UnsupportedOperationException.class
+                , () -> proxy.xx(0, 1)
+        );
+
+        assertNull(proxy.getName());
+        assertFalse(proxy.isName());
+
+        object.put("small", "true");
+        assertTrue(proxy.isSmall());
+
+        object.put("y", "Y");
+        assertEquals("Y", proxy.y());
+        assertNull(proxy.y1());
+
+        assertEquals(object.toString(), proxy.toString());
+        assertEquals(object.hashCode(), proxy.hashCode());
+    }
+
+    public interface InvokeInterface {
+        void f(int p);
+        Object f1(int p);
+
+        @JSONField
+        void setId(int value);
+
+        void set(int value);
+
+        @JSONField
+        int getId();
+
+        int get();
+
+        void getX();
+
+        String getName();
+
+        boolean is();
+
+        boolean isName();
+
+        boolean isSmall();
+
+        @JSONField(name = "y")
+        Object y();
+
+        @JSONField(name = "y1")
+        Object y1();
+
+        void xx(int x1, int x2);
+        void x(int z1);
+        Object x0();
     }
 }
