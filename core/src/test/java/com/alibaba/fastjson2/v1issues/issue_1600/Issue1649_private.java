@@ -15,7 +15,7 @@ public class Issue1649_private {
         assertEquals("{\"color\":\"\",\"productCity\":\"\",\"size\":0}", json);
     }
 
-    @JSONType(serializeFeatures1 = {JSONWriter.Feature.NullAsDefaultValue})
+    @JSONType(serializeFeatures = {JSONWriter.Feature.NullAsDefaultValue})
     private static class Apple {
 
         // @JSONField(serialzeFeatures = {SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteMapNullValue})

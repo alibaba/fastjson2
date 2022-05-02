@@ -118,7 +118,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     beanInfo.typeName = typeName;
                 }
 
-                for (JSONWriter.Feature feature : jsonType.serializeFeatures1()) {
+                for (JSONWriter.Feature feature : jsonType.serializeFeatures()) {
                     beanInfo.writerFeatures |= feature.mask;
                 }
 

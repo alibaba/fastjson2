@@ -26,7 +26,7 @@ public @interface JSONType {
     /**
      * Specify {@link JSONWriter.Feature}s to use features when serializing output
      */
-    JSONWriter.Feature[] serializeFeatures1() default {};
+    JSONWriter.Feature[] serializeFeatures() default {};
 
     NamingStrategy naming() default NamingStrategy.CamelCase;
 
