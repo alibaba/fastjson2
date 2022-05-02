@@ -13,6 +13,8 @@ import org.springframework.data.redis.serializer.SerializationException;
 
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 public class FastJsonRedisSerializerTest {
     private FastJsonRedisSerializer<User> serializer;
@@ -50,7 +52,7 @@ public class FastJsonRedisSerializerTest {
         User user = new User(1, "土豆", 25);
         byte[] serializedValue = serializer.serialize(user);
         Arrays.sort(serializedValue); // corrupt serialization result
-        Assert.assertThrows(SerializationException.class, () -> serializer.deserialize(serializedValue));
+        assertThrows(SerializationException.class, () -> serializer.deserialize(serializedValue));
     }
 
     /**

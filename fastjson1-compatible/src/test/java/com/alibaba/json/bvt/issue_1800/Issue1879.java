@@ -3,12 +3,13 @@ package com.alibaba.json.bvt.issue_1800;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONCreator;
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Issue1879 extends TestCase {
+public class Issue1879 {
+//    @Test
 //    public void test_for_issue() throws Exception {
 //        String json = "{\n" +
 //                "   \"ids\" : \"1,2,3\"\n" +
@@ -16,6 +17,7 @@ public class Issue1879 extends TestCase {
 //        M1 m = JSON.parseObject(json, M1.class);
 //    }
 
+    @Test
     public void test_for_issue_2() throws Exception {
         String json = "{\n" +
                 "   \"ids\" : \"1,2,3\"\n" +

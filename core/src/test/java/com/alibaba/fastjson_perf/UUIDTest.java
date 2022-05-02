@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertEquals;
-
 public class UUIDTest {
     UUID1 date1 = new UUID1();
 

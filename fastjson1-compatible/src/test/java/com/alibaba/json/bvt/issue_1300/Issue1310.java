@@ -2,12 +2,15 @@ package com.alibaba.json.bvt.issue_1300;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 29/07/2017.
  */
-public class Issue1310 extends TestCase {
+public class Issue1310 {
+    @Test
     public void test_trim() throws Exception {
         Model model = new Model();
         model.value = " a ";

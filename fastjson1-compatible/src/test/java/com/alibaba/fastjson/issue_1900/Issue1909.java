@@ -3,7 +3,6 @@ package com.alibaba.fastjson.issue_1900;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

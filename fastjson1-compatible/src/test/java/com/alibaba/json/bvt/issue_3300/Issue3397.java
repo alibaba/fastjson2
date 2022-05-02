@@ -3,7 +3,8 @@ package com.alibaba.json.bvt.issue_3300;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -14,13 +15,14 @@ import java.util.TimeZone;
  * @Author ：Nanqi
  * @Date ：Created in 16:32 2020/8/16
  */
-public class Issue3397 extends TestCase {
-    @Override
+public class Issue3397 {
+    @BeforeEach
     public void setUp() throws Exception {
         JSON.defaultTimeZone = TimeZone.getDefault();
         JSON.defaultLocale = Locale.CHINA;
     }
 
+    @Test
     public void test_for_issue() throws Exception {
         String text = "{\"date\":\"2020-08-16 16:35:18.188\"}";
         VO vo = JSON.parseObject(text, VO.class);

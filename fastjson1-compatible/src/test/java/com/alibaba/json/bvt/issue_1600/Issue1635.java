@@ -5,11 +5,13 @@ import com.alibaba.fastjson.serializer.PascalNameFilter;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class Issue1635 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1635 {
     public static class Foo {
         public String name;
         public Integer BarCount;
@@ -22,6 +24,7 @@ public class Issue1635 extends TestCase {
         }
     }
 
+    @Test
     public void test_issue() throws Exception {
         SerializeConfig config = new SerializeConfig();
         config.setAsmEnable(false);
@@ -36,6 +39,7 @@ public class Issue1635 extends TestCase {
         assertEquals("{\"BarCount\":0,\"Flag\":false,\"List\":[],\"Name\":\"\"}", json);
     }
 
+    @Test
     public void test_issue_1() throws Exception {
         SerializeConfig config = new SerializeConfig();
         config.setAsmEnable(false);

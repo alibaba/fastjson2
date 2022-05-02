@@ -1,11 +1,14 @@
 package com.alibaba.json.bvt.issue_3600;
 
 import com.alibaba.fastjson.JSONPath;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class Issue3629 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3629 {
+    @Test
     public void test_for_issue() throws Exception {
         String text1 = "[\n" +
                 "    {\n" +

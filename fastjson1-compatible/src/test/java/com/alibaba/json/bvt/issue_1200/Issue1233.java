@@ -3,14 +3,18 @@ package com.alibaba.json.bvt.issue_1200;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONType;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Created by wenshao on 30/05/2017.
  */
-public class Issue1233 extends TestCase {
+public class Issue1233 {
+    @Test
     public void test_for_issue() throws Exception {
         JSONObject jsonObject = JSON.parseObject("{\"type\":\"floorV2\",\"templateId\":\"x123\"}");
 

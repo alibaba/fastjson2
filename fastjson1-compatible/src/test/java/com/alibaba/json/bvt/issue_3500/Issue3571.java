@@ -3,9 +3,12 @@ package com.alibaba.json.bvt.issue_3500;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONType;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue3571 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3571 {
+    @Test
     public void test_for_issue() throws Exception {
         Bean1 bean = new Bean1();
         bean.id1 = 101;
@@ -15,6 +18,7 @@ public class Issue3571 extends TestCase {
         assertEquals("{\"id1\":101,\"id2\":102,\"id3\":103}", JSON.toJSON(bean).toString());
     }
 
+    @Test
     public void test_for_issue_2() throws Exception {
         Bean2 bean = new Bean2();
         bean.id1 = 101;

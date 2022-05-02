@@ -1,12 +1,15 @@
 package com.alibaba.json.bvt.issue_2100;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Issue2132 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2132 {
+    @Test
     public void test_for_issue() throws Exception {
         Cpu cpu = new Cpu("intel", 3.3);
         Screen screen = new Screen(16, 9, "samsung");

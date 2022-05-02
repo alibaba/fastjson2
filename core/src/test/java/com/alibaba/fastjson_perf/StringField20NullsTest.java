@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import static junit.framework.TestCase.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class StringField20NullsTest {
     private String str;

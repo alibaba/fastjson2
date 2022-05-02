@@ -3,11 +3,14 @@ package com.alibaba.json.bvt.issue_2300;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONPOJOBuilder;
 import com.alibaba.fastjson.annotation.JSONType;
-import junit.framework.TestCase;
 import lombok.Builder;
 import lombok.Getter;
+import org.junit.jupiter.api.Test;
 
-public class Issue2346 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2346 {
+    @Test
     public void test_for_issue() throws Exception {
         String jsonStr = "{\"age\":1,\"name\":\"aa\"}";
         TestEntity testEntity = JSON.parseObject(jsonStr, TestEntity.class);

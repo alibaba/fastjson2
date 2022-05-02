@@ -3,12 +3,15 @@ package com.alibaba.json.bvt.issue_1100;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 01/04/2017.
  */
-public class Issue1121 extends TestCase {
+public class Issue1121 {
+    @Test
     public void test_for_issue() throws Exception {
         JSONObject userObject = new JSONObject();
         userObject.put("name","jack");

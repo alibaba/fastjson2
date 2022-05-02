@@ -8,15 +8,18 @@ import com.alibaba.fastjson.parser.JSONToken;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.parser.deserializer.MapDeserializer;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.Map;
 
-public class Issue2617 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2617 {
 
 	// 场景：通过@JSONField(deserializeUsing = MyDateDeserializer.class)来自定义解析
+    @Test
 	public void test_for_issue() throws Exception {
 		String str = "{ \"a\": { \"date\": 6, \"day\": 2, \"hours\": 18, \"minutes\": 37, \"month\": 7, \"seconds\": 1, \"time\": 1565087821607, \"timezoneOffset\": -480, \"year\": 119 } }";
 		Date date = JSON.parseObject(str, A.class).getA();
@@ -34,6 +37,7 @@ public class Issue2617 extends TestCase {
 	}
 
 	// 场景：通过ParserConfig的putDeserializer自定义解析
+    @Test
 	public void test_for_issue_2() throws Exception {
 		String str = "{ \"a\": { \"date\": 6, \"day\": 2, \"hours\": 18, \"minutes\": 37, \"month\": 7, \"seconds\": 1, \"time\": 1565087821607, \"timezoneOffset\": -480, \"year\": 119 } }";
 
@@ -54,6 +58,7 @@ public class Issue2617 extends TestCase {
 	}
 
 	// 场景：还原楼主提出的报错场景
+    @Test
 	public void test_for_issue_3() throws Exception {
 		String str = "{ \"a\": { \"date\": 6, \"day\": 2, \"hours\": 18, \"minutes\": 37, \"month\": 7, \"seconds\": 1, \"time\": 1565087821607, \"timezoneOffset\": -480, \"year\": 119 } }";
 		try {

@@ -3,12 +3,15 @@ package com.alibaba.json.bvt.issue_1200;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by wenshao on 30/05/2017.
  */
-public class Issue1231 extends TestCase {
+public class Issue1231 {
+    @Test
     public void test_for_issue() throws Exception {
         Model model = new Model();
         model.self = model;

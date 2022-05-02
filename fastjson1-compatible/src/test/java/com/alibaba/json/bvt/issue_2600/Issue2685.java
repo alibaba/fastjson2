@@ -10,12 +10,15 @@ import com.zx.sms.codec.cmpp.msg.CmppSubmitResponseMessage;
 import com.zx.sms.codec.smgp.msg.SMGPSubmitMessage;
 import com.zx.sms.common.util.CMPPCommonUtil;
 import com.zx.sms.common.util.MsgId;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 import org.marre.sms.SmsMessage;
 
 import java.lang.reflect.Type;
 
-public class Issue2685 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2685 {
+    @Test
     public void test_field() throws Exception {
         SMGPSubmitMessage smgpSubmitMessage = new SMGPSubmitMessage();
         smgpSubmitMessage.setSequenceNo(1);

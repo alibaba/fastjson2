@@ -9,47 +9,52 @@ import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.*;
 import com.alibaba.fastjson.spi.Module;
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 
-public class Issue2179 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2179 {
 
 	// 场景：序列化
+    @Test
 	public void test_for_issue() throws Exception {
 		Model1 model = new Model1(ProductType1.Phone, ProductType1.Computer);
 		String out = "{\"l_k_assbalv4\":{\"code\":1,\"prompt\":\"手机\"},\"type1\":{\"code\":2,\"prompt\":\"电脑\"}}";
-		Assert.assertEquals(out, JSON.toJSONString(model));
+		assertEquals(out, JSON.toJSONString(model));
 	}
 
 	// 场景：使用@JSONType的deserializer = EnumAwareSerializer1.class测试自定义反序列化器
+    @Test
 	public void test_for_issue2() {
 		String str = "{\"l_k_assbalv4\":{\"code\":1,\"prompt\":\"手机\"},\"type1\":{\"code\":2,\"prompt\":\"电脑\"}}";
 		Model1 model = JSON.parseObject(str, Model1.class);
 		String out = "{\"l_k_assbalv4\":{\"code\":1,\"prompt\":\"手机\"},\"type1\":{\"code\":2,\"prompt\":\"电脑\"}}";
-		Assert.assertEquals(out, JSON.toJSONString(model));
+		assertEquals(out, JSON.toJSONString(model));
 	}
 
 	// 场景：使用@JSONField的deserializeUsing = EnumAwareSerializer2.class测试自定义测试自定义反序化器
+    @Test
 	public void test_for_issue3() {
 		// l_k_assbalv4对应Model2中的Type走自定义，type1走默认枚举反序列化
 		String str = "{\"l_k_assbalv4\":{\"code\":1,\"prompt\":\"手机\"},\"type1\":\"Computer\"}";
 		Model2 model = JSON.parseObject(str, Model2.class);
 		String out = "{\"l_k_assbalv4\":{\"code\":1,\"prompt\":\"手机\"},\"type1\":{\"code\":2,\"prompt\":\"电脑\"}}";
-		Assert.assertEquals(out, JSON.toJSONString(model));
+		assertEquals(out, JSON.toJSONString(model));
 	}
 
 	// 场景：使用Module
+    @Test
 	public void test_for_issue4() {
 		ParserConfig config = new ParserConfig();
 
 		String str = "{\"type\":\"Phone\",\"type1\":\"Computer\"}";
 		Model3 model = JSON.parseObject(str, Model3.class);
 		String out = "{\"type\":{\"code\":2,\"prompt\":\"电脑\"},\"type1\":{\"code\":1,\"prompt\":\"手机\"}}";
-		Assert.assertEquals(out, JSON.toJSONString(model));
+		assertEquals(out, JSON.toJSONString(model));
 	}
 
 	interface EnumAware {

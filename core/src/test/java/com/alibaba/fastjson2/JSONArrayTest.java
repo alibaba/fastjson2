@@ -9,10 +9,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
 
-import static junit.framework.TestCase.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONArrayTest {
     @Test

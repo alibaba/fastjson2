@@ -7,8 +7,7 @@ import com.alibaba.fastjson2_vo.Int10;
 import org.junit.jupiter.api.Test;
 
 import static com.alibaba.fastjson2.writer.ObjectWriters.*;
-
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WriterInt20Test_0 {
     Int10 vo = new Int10();

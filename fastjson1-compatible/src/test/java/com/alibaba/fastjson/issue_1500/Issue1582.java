@@ -5,8 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
-import static junit.framework.TestCase.assertNull;
-import static junit.framework.TestCase.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class Issue1582 {
     @Test

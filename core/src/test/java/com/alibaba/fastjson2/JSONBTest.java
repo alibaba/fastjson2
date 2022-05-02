@@ -15,8 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 
-import static junit.framework.TestCase.*;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONBTest {
     public static final int INT24_MAX = 256 * 256 * 128 - 1;
@@ -49,7 +48,7 @@ public class JSONBTest {
         byte[] jsonbBytes = JSONB.toBytes(new HashMap());
         for (Type type : types) {
             Map object = JSONB.parseObject(jsonbBytes, type);
-            assertNotNull(type.getTypeName(), object);
+            assertNotNull(object, type.getTypeName());
             assertTrue(object.isEmpty());
         }
     }

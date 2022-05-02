@@ -6,10 +6,14 @@ import com.alibaba.json.bvt.issue_2200.issue2224_2.PersonGroupedCollection;
 import com.alibaba.json.bvt.issue_2200.issue2224_3.ArrayPersonGroupedCollection;
 import com.alibaba.json.bvt.issue_2200.issue2224_4.MAPersonGroupedCollection;
 import com.alibaba.json.bvt.issue_2200.issue2224_5.MA2PersonGroupedCollection;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2224 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class Issue2224 {
     //support inherit with other parameterized type
+    @Test
     public void test_for_issue() {
         String json = "[{\"idNo\":\"123456\",\"name\":\"tom\"},{\"idNo\":\"123457\",\"name\":\"jack\"}]";
         PersonCollection personCollection = JSON.parseObject(json, PersonCollection.class);
@@ -22,6 +26,7 @@ public class Issue2224 extends TestCase {
     }
 
     //support inherit with other parameterized type and item type is generic
+    @Test
     public void test_for_issue_2() {
         String json = "[[{\"idNo\":\"123\",\"name\":\"张三\"},{\"idNo\":\"124\",\"name\":\"张三\"}],[{\"idNo\":\"223\",\"name\":\"李四\"},{\"idNo\":\"224\",\"name\":\"李四\"}]]";
         PersonGroupedCollection personCollection = JSON.parseObject(json, PersonGroupedCollection.class);
@@ -42,6 +47,7 @@ public class Issue2224 extends TestCase {
     }
 
     //support inherit with other parameterized type and item type is bean array
+    @Test
     public void test_for_issue_3() {
         String json = "[[{\"idNo\":\"123\",\"name\":\"张三\"},{\"idNo\":\"124\",\"name\":\"张三\"}],[{\"idNo\":\"223\",\"name\":\"李四\"},{\"idNo\":\"224\",\"name\":\"李四\"}]]";
         ArrayPersonGroupedCollection personCollection = JSON.parseObject(json, ArrayPersonGroupedCollection.class);
@@ -62,6 +68,7 @@ public class Issue2224 extends TestCase {
     }
 
     //support inherit with other parameterized type and item type is generic array
+    @Test
     public void test_for_issue_4() {
         String json = "[[{\"idNo\":\"123\",\"name\":\"张三\"},{\"idNo\":\"124\",\"name\":\"张三\"}],[{\"idNo\":\"223\",\"name\":\"李四\"},{\"idNo\":\"224\",\"name\":\"李四\"}]]";
         MAPersonGroupedCollection personCollection = JSON.parseObject(json, MAPersonGroupedCollection.class);
@@ -82,6 +89,7 @@ public class Issue2224 extends TestCase {
     }
 
     //support inherit with other parameterized type and item type is generic array contains array
+    @Test
     public void test_for_issue_5() {
         String json = "[[{\"idNo\":[\"123\",\"123x\"],\"name\":[\"张三\",\"张三一\"]},{\"idNo\":[\"124\",\"124x\"],\"name\":[\"张三\",\"张三一\"]}],[{\"idNo\":[\"223\",\"223y\"],\"name\":[\"李四\",\"李小四\"]},{\"idNo\":[\"224\",\"224y\"],\"name\":[\"李四\",\"李小四\"]}]]";
         MA2PersonGroupedCollection personCollection = JSON.parseObject(json, MA2PersonGroupedCollection.class);

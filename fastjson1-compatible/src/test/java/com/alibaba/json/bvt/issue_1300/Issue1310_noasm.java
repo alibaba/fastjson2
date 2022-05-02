@@ -3,12 +3,15 @@ package com.alibaba.json.bvt.issue_1300;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONCreator;
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 29/07/2017.
  */
-public class Issue1310_noasm extends TestCase {
+public class Issue1310_noasm {
+    @Test
     public void test_trim() throws Exception {
         Model model = new Model();
         model.value = " a ";
@@ -19,6 +22,7 @@ public class Issue1310_noasm extends TestCase {
         assertEquals("a", model2.value);
     }
 
+    @Test
     public void test_trim_1() throws Exception {
         Model1 model = new Model1();
         model.value = " a ";
@@ -29,6 +33,7 @@ public class Issue1310_noasm extends TestCase {
         assertEquals("a", model2.value);
     }
 
+    @Test
     public void test_trim_2() throws Exception {
         Model2 model = new Model2(1);
         model.value = " a ";
