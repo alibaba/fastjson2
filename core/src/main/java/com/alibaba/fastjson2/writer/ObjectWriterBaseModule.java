@@ -134,6 +134,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 if (includes.length > 0) {
                     beanInfo.includes = includes;
                 }
+
+                String[] orders = jsonType.orders();
+                if (orders.length > 0) {
+                    beanInfo.orders = orders;
+                }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
                 BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> processJSONType1x(beanInfo, annotation, method));
