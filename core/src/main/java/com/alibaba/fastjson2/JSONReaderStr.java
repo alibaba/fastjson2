@@ -2658,7 +2658,7 @@ final class JSONReaderStr extends JSONReader {
         }
 
         if (len < 19) {
-            throw new JSONException("illeal localdatetime string : " + readString());
+            return null;
         }
 
         char c0 = str.charAt(offset + 0);
