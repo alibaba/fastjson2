@@ -128,7 +128,11 @@ public class ObjectWriterCreator {
             }
         }
 
-        field.setAccessible(true);
+        try {
+            field.setAccessible(true);
+        } catch (Throwable ignored) {
+            // ignored
+        }
 
         if (writeUsingWriter == null && fieldInfo.fieldClassMixIn) {
             writeUsingWriter = ObjectWriterBaseModule.VoidObjectWriter.INSTANCE;
