@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.support;
+package com.alibaba.fastjson2.jackson_support;
 
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonIgnore;
