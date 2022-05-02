@@ -21,7 +21,6 @@ public class Issue1272 {
             exception = ex;
         }
         assertNotNull(exception);
-        exception.printStackTrace();
         assertEquals(NullPointerException.class, exception.getCause().getClass());
     }
 

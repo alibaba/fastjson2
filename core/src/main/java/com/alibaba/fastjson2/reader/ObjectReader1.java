@@ -195,7 +195,7 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
 
                     if (autoTypeObjectReader == null) {
-                        throw new JSONException("auotype not support : " + typeName);
+                        continue;
                     }
                 }
 
