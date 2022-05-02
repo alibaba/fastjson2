@@ -2782,7 +2782,7 @@ class JSONReaderUTF8 extends JSONReader {
         final char quote = ch;
 
         if (len < 19) {
-            throw new JSONException("illeal localdatetime string : " + readString());
+            return null;
         }
 
         char c0 = (char) bytes[offset + 0];
