@@ -6,8 +6,10 @@ import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import okhttp3.internal.http.RealResponseBody;
 import okio.Buffer;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class Retrofit2ConverterFactoryTest {
 
@@ -28,13 +30,13 @@ public class Retrofit2ConverterFactoryTest {
                 .requestBodyConverter(Model.class, null, null, null)
                 .convert(model);
 
-        Assert.assertNotEquals(requestBody.contentLength(), 0);
+        assertNotEquals(requestBody.contentLength(), 0);
 
         Model mode2 = (Model) Retrofit2ConverterFactory.create()
                 .responseBodyConverter(Model.class, null, null)
                 .convert(body);
 
-        Assert.assertEquals(JSON.toJSONString(mode2), json);
+        assertEquals(JSON.toJSONString(mode2), json);
     }
 
     public static class Model {

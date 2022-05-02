@@ -5,9 +5,12 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2952 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2952 {
+    @Test
     public void test_for_issue() throws Exception {
         String expected = "{\"l\":null,\"s\":null,\"b\":null,\"i\":null,\"o\":null}";
         SerializerFeature[] serializerFeatures = {

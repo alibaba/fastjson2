@@ -4,9 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
 import com.alibaba.fastjson.parser.Feature;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue3279 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3279 {
+    @Test
     public void test_for_issue() throws Exception {
         V0 v = JSON.parseObject("{\"id\":\" 1001 \"}", V0.class);
         assertEquals(" 1001 ", v.id);
@@ -15,11 +18,13 @@ public class Issue3279 extends TestCase {
         assertEquals(" 1001 ", v.id);
     }
 
+    @Test
     public void test_for_issue_1() throws Exception {
         V1 v = JSON.parseObject("{\"id\":\" 1001 \"}", V1.class);
         assertEquals("1001", v.id);
     }
 
+    @Test
     public void test_for_issue_2() throws Exception {
         V2 v = JSON.parseObject("{\"id\":\" 1001 \"}", V2.class);
         assertEquals("1001", v.id);

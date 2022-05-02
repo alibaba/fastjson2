@@ -1,9 +1,12 @@
 package com.alibaba.json.bvt.issue_2200;
 
 import com.alibaba.fastjson.serializer.JSONSerializer;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2289 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2289 {
+    @Test
     public void test_for_issue() throws Exception {
         B b = new B();
         b.id = 123;

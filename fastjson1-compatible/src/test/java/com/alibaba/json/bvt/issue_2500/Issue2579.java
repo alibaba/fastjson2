@@ -4,21 +4,24 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.annotation.JSONType;
 import com.alibaba.fastjson.parser.Feature;
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 import java.util.List;
 import java.util.*;
 
-public class Issue2579 extends TestCase {
+import static org.junit.jupiter.api.Assertions.*;
+
+public class Issue2579 {
 
 	// 场景：走ASM
+    @Test
 	public void test_for_issue1() throws Exception {
 		run_test("MyPoint1");
 	}
 
 	// 场景：不走ASM,通过JSONType（asm=false），关闭了ASM
+    @Test
 	public void test_for_issue2() throws Exception {
 		run_test("MyPoint2");
 	}
@@ -34,14 +37,14 @@ public class Issue2579 extends TestCase {
 			try {
 				Object obj = JSON.parse(jsonString, Feature.SupportAutoType);
 				if ("MyPoint1".equals(className)) {
-					Assert.assertEquals(i, ((MyPoint1) obj).getBatchNumber());
+					assertEquals(i, ((MyPoint1) obj).getBatchNumber());
 				} else {
-					Assert.assertEquals(i, ((MyPoint2) obj).getBatchNumber());
+					assertEquals(i, ((MyPoint2) obj).getBatchNumber());
 				}
 			} catch (JSONException e) {
 				System.out.println(jsonString);
 				e.printStackTrace();
-				Assert.assertTrue(false);
+				fail();
 			}
 		}
 	}

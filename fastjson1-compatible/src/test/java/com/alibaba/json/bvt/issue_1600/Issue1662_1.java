@@ -6,17 +6,19 @@ import com.alibaba.fastjson.parser.DefaultJSONParser;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.ObjectSerializer;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-public class Issue1662_1 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue1662_1 {
+    @Test
     public void test_for_issue() throws Exception {
         String json = "{\"value\":123}";
         Model model = JSON.parseObject(json, Model.class);
         assertEquals("{\"value\":\"12300元\"}",JSON.toJSONString(model));
-
     }
 
     public static class Model {

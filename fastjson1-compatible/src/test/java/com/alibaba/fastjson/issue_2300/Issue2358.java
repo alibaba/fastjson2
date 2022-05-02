@@ -1,7 +1,6 @@
 package com.alibaba.fastjson.issue_2300;
 
 import com.alibaba.fastjson.JSONObject;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

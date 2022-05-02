@@ -2,14 +2,11 @@ package com.alibaba.fastjson.issue_2200;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

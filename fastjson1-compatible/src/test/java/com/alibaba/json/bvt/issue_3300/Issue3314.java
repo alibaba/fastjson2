@@ -1,7 +1,9 @@
 package com.alibaba.json.bvt.issue_3300;
 
 import com.alibaba.fastjson.JSONArray;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,8 +11,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 
-public class Issue3314 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3314 {
     private Field field;
+
+    @BeforeEach
     protected void setUp() throws Exception {
         Class clazz = Class.forName("com.alibaba.fastjson.JSONObject$SecureObjectInputStream");
         field = clazz.getDeclaredField("fields_error");
@@ -18,10 +24,12 @@ public class Issue3314 extends TestCase {
         field.set(null, true);
     }
 
+    @AfterEach
     protected void tearDown() throws Exception {
         field.set(null, false);
     }
 
+    @Test
     public void test_for_issue() throws Exception {
         JSONArray array = new JSONArray();
         array.add(1);

@@ -3,9 +3,12 @@ package com.alibaba.json.bvt.issue_2600;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2678 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2678 {
+    @Test
     public void test_field() throws Exception {
         Person person = new Person();
         person.setName("Ariston");
@@ -14,6 +17,7 @@ public class Issue2678 extends TestCase {
         assertEquals("{\"age\":23,'name':'Ariston'}", json);
     }
 
+    @Test
     public void test_getter() throws Exception {
         Person2 person = new Person2();
         person.setName("Ariston");

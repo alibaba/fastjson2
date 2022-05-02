@@ -8,13 +8,16 @@ import com.alibaba.fastjson.serializer.ObjectSerializer;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.spi.Module;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-public class Issue1780_Module extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+public class Issue1780_Module {
+
+    @Test
 	public void test_for_issue() {
 		org.json.JSONObject req = new org.json.JSONObject();
 

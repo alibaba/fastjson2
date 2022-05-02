@@ -2,19 +2,24 @@ package com.alibaba.json.bvt.date;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class DateTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class DateTest {
+    @BeforeEach
     protected void setUp() throws Exception {
         JSON.defaultTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
         JSON.defaultLocale = Locale.CHINA;
     }
 
+    @Test
     public void test_date() throws Exception {
         long millis = 1324138987429L;
         Date date = new Date(millis);
@@ -31,6 +36,7 @@ public class DateTest extends TestCase {
                                                             SerializerFeature.UseSingleQuotes));
     }
 
+    @Test
     public void test_parse() throws Exception {
         Date date = JSON.parseObject("\"2018-10-12 09:48:22 +0800\"", Date.class);
         assertEquals(1539308902000L, date.getTime());

@@ -2,14 +2,17 @@ package com.alibaba.json.bvt.issue_3600;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.zip.GZIPOutputStream;
 
-public class Issue3614 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3614 {
+    @Test
     public void test_for_issue() throws Exception {
         byte[] gzipBytes = gzip(JSON.toJSONString(Collections.singletonMap("key", "value")).getBytes());
 

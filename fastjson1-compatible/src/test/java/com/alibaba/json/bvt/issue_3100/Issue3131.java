@@ -1,13 +1,14 @@
 package com.alibaba.json.bvt.issue_3100;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Issue3131 extends TestCase {
+public class Issue3131 {
+    @Test
     public void test_for_issue() throws Exception {
         List orgs = new ArrayList();
         UserOrg org = new UserOrg("111","222" );

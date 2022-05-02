@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson_perf.Int2Test;
-import junit.framework.TestCase;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
@@ -103,7 +102,7 @@ public class PathTest {
         Object result = path.extract(parser);
         assertEquals(Arrays.asList("Mozilla/5.0", "Windows NT 6.1", "1024x4069"), result);
 
-        TestCase.assertEquals(new JSONArray("Mozilla/5.0", "Windows NT 6.1", "1024x4069")
+        assertEquals(new JSONArray("Mozilla/5.0", "Windows NT 6.1", "1024x4069")
                 , path.eval(rootObject));
     }
 

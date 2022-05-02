@@ -3,7 +3,6 @@ package com.alibaba.fastjson.issue_2400;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.ArrayListMultimap;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

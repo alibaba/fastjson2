@@ -1,9 +1,12 @@
 package com.alibaba.json.bvt.issue_3300;
 
 import com.alibaba.fastjson.serializer.*;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue3443 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue3443 {
+    @Test
     public void testCustomJsonSerializerAndAfterFilter() throws Exception {
         SerializeWriter serializeWriter = new SerializeWriter();
         try {

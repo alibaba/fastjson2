@@ -7,12 +7,16 @@ import com.alibaba.fastjson.parser.DefaultJSONParser;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.ObjectSerializer;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 
-public class Issue3693 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+public class Issue3693 {
+
+    @Test
     public void test_for_issue() throws Exception {
         Model<ModelProperties> model = new Model<ModelProperties>("hello 世界", new ModelProperties("红色", 66));
         String json = JSON.toJSONString(model);

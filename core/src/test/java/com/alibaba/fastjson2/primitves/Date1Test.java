@@ -16,8 +16,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.TimeZone;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class Date1Test {
     private TimeZone defaultTimeZone;
@@ -329,7 +329,7 @@ public class Date1Test {
             Date id = dates[i];
             String str = JSON.toJSONString(id);
             Date id2 = JSON.parseObject(str, Date.class);
-            assertEquals(str, id, id2);
+            assertEquals(id, id2, str);
         }
     }
 

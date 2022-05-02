@@ -1,13 +1,16 @@
 package com.alibaba.json.bvt.issue_3300;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @Author ：Nanqi
  * @Date ：Created in 01:25 2020/8/2
  */
-public class Issue3376 extends TestCase {
+public class Issue3376 {
+    @Test
     public void test_for_issue() throws Exception {
         Model model = new Model(1, 1);
         String modelString = JSON.toJSONString(model);

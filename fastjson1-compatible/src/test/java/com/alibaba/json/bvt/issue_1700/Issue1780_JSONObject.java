@@ -2,10 +2,13 @@ package com.alibaba.json.bvt.issue_1700;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue1780_JSONObject extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+public class Issue1780_JSONObject {
+
+    @Test
 	public void test_for_issue() {
 		org.json.JSONObject req = new org.json.JSONObject();
 		req.put("id", 1111);

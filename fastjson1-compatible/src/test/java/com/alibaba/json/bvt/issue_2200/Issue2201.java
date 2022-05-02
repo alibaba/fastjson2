@@ -1,9 +1,12 @@
 package com.alibaba.json.bvt.issue_2200;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2201 extends TestCase  {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2201 {
+    @Test
     public void test_for_issue() throws Exception {
 //        ParserConfig.getGlobalInstance().register("M2001", Model.class);
 

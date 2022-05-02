@@ -2,7 +2,6 @@ package com.alibaba.json.bvt.issue_3300;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import junit.framework.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.ParameterizedType;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author yumin.pym
@@ -32,8 +32,8 @@ public class Issue3448 {
         List<Map<String, List<String>>> result = parseObject(text,
             new SelfTypeReference<Map<String, List<String>>>() {});
         System.out.println("result = " + result);
-        TestCase.assertTrue(result.get(0) instanceof Map);
-        TestCase.assertTrue(result.get(0).get("key1").get(0) instanceof String);
+        assertTrue(result.get(0) instanceof Map);
+        assertTrue(result.get(0).get("key1").get(0) instanceof String);
     }
 
     public <T> List<T> parseObject(String text, SelfTypeReference<T> selfTypeReference) {

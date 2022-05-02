@@ -1,9 +1,12 @@
 package com.alibaba.json.bvt.issue_2400;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class Issue2464 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class Issue2464 {
+    @Test
     public void test1() throws Exception {
         String json = "[\"Mjg4NDd8MXxjb20uY2Fpbmlhby5pc2ltdS5xLndvcmtmbG93LmNvbGxlY3Quc2NoZWR1bGUuaW1wbC5UYXNrU3RvcENvbGxlY3RDYWxsQmFja0hhbmRsZXJJbXBsfDB8\",1]";
         Object result =  JSON.parseArray(json,new Class[]{byte[].class,Integer.class});
@@ -13,6 +16,7 @@ public class Issue2464 extends TestCase {
         assertEquals(json, JSON.toJSONString(result));
     }
 
+    @Test
     public void test2() throws Exception {
         String json = "[1,\"Mjg4NDd8MXxjb20uY2Fpbmlhby5pc2ltdS5xLndvcmtmbG93LmNvbGxlY3Quc2NoZWR1bGUuaW1wbC5UYXNrU3RvcENvbGxlY3RDYWxsQmFja0hhbmRsZXJJbXBsfDB8\"]";
         Object result =  JSON.parseArray(json,new Class[]{Integer.class,byte[].class});
@@ -22,12 +26,14 @@ public class Issue2464 extends TestCase {
         assertEquals(json, JSON.toJSONString(result));
     }
 
+    @Test
     public void test3() throws Exception {
         String json = "[1,\"aaa\",\"bbb\",\"ccc\"]";
         Object result = JSON.parseArray(json, new Class[]{Integer.class, String[].class});
         assertEquals("[1,[\"aaa\",\"bbb\",\"ccc\"]]", JSON.toJSONString(result));
     }
 
+    @Test
     public void test4() throws Exception {
         String json = "[1,97,98,99]";
         Object result = JSON.parseArray(json, new Class[]{Integer.class, byte[].class});

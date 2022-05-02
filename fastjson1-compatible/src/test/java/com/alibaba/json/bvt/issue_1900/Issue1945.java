@@ -1,7 +1,7 @@
 package com.alibaba.json.bvt.issue_1900;
 
 import com.alibaba.fastjson.JSON;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -9,7 +9,8 @@ import java.util.Map;
 
 import static com.alibaba.fastjson.serializer.SerializerFeature.WriteClassName;
 
-public class Issue1945 extends TestCase {
+public class Issue1945 {
+    @Test
     public void test_0() throws Exception {
         B b = new B();
         b.clazz = new Class[]{String.class};
