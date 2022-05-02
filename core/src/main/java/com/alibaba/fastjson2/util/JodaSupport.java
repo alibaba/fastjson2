@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.util;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
@@ -11,8 +8,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_LOCAL_DATE;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_LOCAL_DATETIME;
@@ -47,12 +46,83 @@ public class JodaSupport {
         return new LocalDateTimeReader(objectClass);
     }
 
+    public static ObjectReader createInstantReader(Class objectClass) {
+        return new InstantReader(objectClass);
+    }
+
     public static ObjectWriter createGregorianChronologyWriter(Class objectClass) {
         return new GregorianChronologyWriter(objectClass);
     }
 
     public static ObjectWriter createISOChronologyWriter(Class objectClass) {
         return new ISOChronologyWriter(objectClass);
+    }
+
+    static class InstantReader implements ObjectReader {
+        final Class objectClass;
+        final Constructor constructor;
+
+        InstantReader(Class objectClass) {
+            this.objectClass = objectClass;
+            try {
+                constructor = objectClass.getConstructor(long.class);
+            } catch (NoSuchMethodException e) {
+                throw new JSONException("create joda instant reader error", e);
+            }
+        }
+
+        public Object createInstance(Map map) {
+            Number millis = (Long) map.get("millis");
+            if (millis != null) {
+                return createInstanceFromMillis(millis.longValue());
+            }
+
+            Number epochSecond = (Number) map.get("epochSecond");
+            if (epochSecond != null) {
+                long epochMillis = epochSecond.longValue() * 1000L;
+                return createInstanceFromMillis(epochMillis);
+            }
+
+            throw new JSONException("create joda instant error");
+        }
+
+        public Object createInstanceFromMillis(long millis) {
+            try {
+                return constructor.newInstance(millis);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new JSONException("create joda instant error", e);
+            }
+        }
+
+        @Override
+        public Object readObject(JSONReader jsonReader, long features) {
+            if (jsonReader.nextIfNull()) {
+                return null;
+            }
+
+            if (jsonReader.isInt()) {
+                long millis = jsonReader.readInt64Value();
+                return createInstanceFromMillis(millis);
+            }
+
+            if (jsonReader.isString()) {
+                Instant jdkInstant = jsonReader.readInstant();
+                long millis = jdkInstant.toEpochMilli();
+                return createInstanceFromMillis(millis);
+            }
+
+            if (jsonReader.isObject()) {
+                Map object = jsonReader.readObject();
+                return createInstance(object);
+            }
+
+            throw new JSONException("not support");
+        }
+
+        @Override
+        public Object readJSONBObject(JSONReader jsonReader, long features) {
+            return readObject(jsonReader, features);
+        }
     }
 
     static class ChronologyReader implements ObjectReader {

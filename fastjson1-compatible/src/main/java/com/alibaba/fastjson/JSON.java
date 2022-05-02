@@ -229,6 +229,12 @@ public class JSON {
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause();
+            if (cause == null) {
+                cause = ex;
+            }
+            throw new JSONException("toJSONString error", cause);
         } catch (RuntimeException ex) {
             throw new JSONException("toJSONString error", ex);
         }

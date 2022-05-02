@@ -190,7 +190,7 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
                         autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
 
                         if (autoTypeObjectReader == null) {
-                            throw new JSONException("auotype not support : " + typeName);
+                            continue;
                         }
                     }
 

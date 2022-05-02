@@ -1356,6 +1356,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 return JodaSupport.createLocalDateReader((Class) type);
             case "org.joda.time.LocalDateTime":
                 return JodaSupport.createLocalDateTimeReader((Class) type);
+            case "org.joda.time.Instant":
+                return JodaSupport.createInstantReader((Class) type);
             case "javax.money.CurrencyUnit":
                 return MoneySupport.createCurrencyUnitReader();
             case "javax.money.MonetaryAmount":
