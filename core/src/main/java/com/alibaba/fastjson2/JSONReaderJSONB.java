@@ -397,10 +397,7 @@ final class JSONReaderJSONB extends JSONReader {
                 return str;
             }
             case BC_STR_GB18030: {
-                int strlen = readLength();
-                String str = new String(bytes, offset, strlen, IOUtils.GB18030);
-                offset += strlen;
-                return str;
+                throw new JSONException("GB18030 not support");
             }
             case BC_DECIMAL: {
                 int scale = readInt32Value();
@@ -1675,9 +1672,7 @@ final class JSONReaderJSONB extends JSONReader {
 
             charset = StandardCharsets.UTF_16BE;
         } else if (strtype == BC_STR_GB18030) {
-            strlen = readLength();
-            strBegin = offset;
-            charset = IOUtils.GB18030;
+            throw new JSONException("GB18030 not support");
         } else if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
             return Byte.toString(strtype);
         } else if (strtype >= BC_INT32_BYTE_MIN && strtype <= BC_INT32_BYTE_MAX) {

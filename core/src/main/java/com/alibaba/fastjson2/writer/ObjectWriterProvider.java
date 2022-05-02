@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
 import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -34,11 +33,8 @@ public class ObjectWriterProvider {
                 this.creator = ObjectWriterCreator.INSTANCE;
                 break;
             case "lambda":
-                this.creator = ObjectWriterCreatorLambda.INSTANCE;
-                break;
-            case "asm":
             default:
-                this.creator = ObjectWriterCreatorASM.INSTANCE;
+                this.creator = ObjectWriterCreatorLambda.INSTANCE;
                 break;
         }
 

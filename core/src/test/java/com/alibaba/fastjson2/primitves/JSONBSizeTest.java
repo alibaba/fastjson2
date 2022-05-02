@@ -628,18 +628,4 @@ public class JSONBSizeTest {
             assertEquals(JSON.toJSONString(val), JSONB.toJSONString(bytes));
         }
     }
-
-    @Test
-    public void test_str_GB18030() throws Exception {
-        char[] chars = new char[1024];
-        for (int i = 0; i < chars.length; i++) {
-            chars[i] = (char) ('０' + (i % 9));
-            String val = new String(chars, 0, i);
-            byte[] bytes = JSONB.toBytes(val, IOUtils.GB18030);
-            assertEquals(val, JSONB.parse(bytes));
-            assertEquals(val, JSONB.parseObject(bytes, String.class));
-            assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
-            assertEquals(JSON.toJSONString(val), JSONB.toJSONString(bytes));
-        }
-    }
 }
