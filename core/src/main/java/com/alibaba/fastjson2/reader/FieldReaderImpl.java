@@ -25,14 +25,7 @@ abstract class FieldReaderImpl<T>
     volatile JSONPath referenceCache;
 
     public FieldReaderImpl(String fieldName, Type fieldType) {
-        this.fieldName = fieldName;
-        this.fieldType = fieldType;
-        this.fieldClass = TypeUtils.getMapping(fieldType);
-        this.fieldClassSerializable = fieldClass != null && Serializable.class.isAssignableFrom(fieldClass);
-        this.fieldNameHash = Fnv.hashCode64(fieldName);
-        this.features = 0;
-        this.ordinal = 0;
-        this.format = null;
+        this (fieldName, fieldType, TypeUtils.getClass(fieldType), 0, 0L, null);
     }
 
     public FieldReaderImpl(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format) {
