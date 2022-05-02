@@ -21,10 +21,6 @@ public class ObjectReaderCreatorDynamicCompile extends ObjectReaderCreator {
     public static final ObjectReaderCreatorDynamicCompile INSTANCE = new ObjectReaderCreatorDynamicCompile();
 
     public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, List<ObjectReaderModule> modules) {
-        if (JDKUtils.JVM_VERSION >= 17 && !JDKUtils.JAVAC_UNNAMED) {
-            return super.createObjectReader(objectType);
-        }
-
         BeanInfo beanInfo = new BeanInfo();
 
         for (ObjectReaderModule module : modules) {
