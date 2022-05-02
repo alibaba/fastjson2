@@ -3,8 +3,6 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
-import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -28,16 +26,7 @@ public class ObjectWriterProvider {
     public ObjectWriterProvider() {
         init();
 
-        switch (JSONFactory.CREATOR) {
-            case "reflect":
-                this.creator = ObjectWriterCreator.INSTANCE;
-                break;
-            case "lambda":
-            default:
-                this.creator = ObjectWriterCreatorLambda.INSTANCE;
-                break;
-        }
-
+        this.creator = ObjectWriterCreator.INSTANCE;
     }
 
     public ObjectWriterProvider(ObjectWriterCreator creator) {
