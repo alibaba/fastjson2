@@ -139,6 +139,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 if (orders.length > 0) {
                     beanInfo.orders = orders;
                 }
+
+                Class<?> serializer = jsonType.serializer();
+                if (ObjectWriter.class.isAssignableFrom(serializer)) {
+                    beanInfo.serializer = serializer;
+                }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
                 BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> processJSONType1x(beanInfo, annotation, method));

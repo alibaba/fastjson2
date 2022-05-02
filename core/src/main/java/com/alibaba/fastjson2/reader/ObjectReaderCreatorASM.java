@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.JSONReader;
 
+import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.lang.reflect.*;
@@ -208,6 +209,14 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor != null) {
                 annotationProcessor.getBeanInfo(beanInfo, objectClass);
+            }
+        }
+
+        if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
+            try {
+                return (ObjectReader<T>) beanInfo.deserializer.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new JSONException("create deserializer error", e);
             }
         }
 

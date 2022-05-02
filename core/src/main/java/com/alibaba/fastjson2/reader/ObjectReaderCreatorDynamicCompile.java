@@ -1,13 +1,17 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codegen.ObjectReaderGen;
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
+import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.util.DynamicClassLoader;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import javax.tools.*;
 import java.io.*;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -16,16 +20,32 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ObjectReaderCreatorDynamicCompile extends ObjectReaderCreator {
     public static final ObjectReaderCreatorDynamicCompile INSTANCE = new ObjectReaderCreatorDynamicCompile();
 
-    @Override
-    public <T> ObjectReader<T> createObjectReader(Class<T> objectType) {
+    public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, List<ObjectReaderModule> modules) {
         if (JDKUtils.JVM_VERSION >= 17 && !JDKUtils.JAVAC_UNNAMED) {
             return super.createObjectReader(objectType);
         }
 
-        FieldReader[] fieldReaderArray = createFieldReaders(objectType, objectType);
+        BeanInfo beanInfo = new BeanInfo();
+
+        for (ObjectReaderModule module : modules) {
+            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+            if (annotationProcessor != null) {
+                annotationProcessor.getBeanInfo(beanInfo, objectClass);
+            }
+        }
+
+        if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
+            try {
+                return (ObjectReader<T>) beanInfo.deserializer.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new JSONException("create deserializer error", e);
+            }
+        }
+
+        FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType);
 
         StringBuilder out = new StringBuilder();
-        ObjectReaderGen gen = new ObjectReaderGen(objectType, out);
+        ObjectReaderGen gen = new ObjectReaderGen(objectClass, out);
         gen.gen();
 
         String sourceCode = out.toString();

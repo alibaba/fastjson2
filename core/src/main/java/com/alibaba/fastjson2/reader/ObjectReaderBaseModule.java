@@ -14,6 +14,7 @@ import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.Closeable;
 import java.io.Serializable;
@@ -396,6 +397,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                         beanInfo.builderWithPrefix = withPrefix;
                     }
                 }
+            }
+
+            Class<?> deserializer = jsonType.deserializer();
+            if (ObjectReader.class.isAssignableFrom(deserializer)) {
+                beanInfo.deserializer = deserializer;
             }
 
             String[] ignores = jsonType.ignores();

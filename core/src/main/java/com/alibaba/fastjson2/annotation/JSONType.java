@@ -37,4 +37,8 @@ public @interface JSONType {
     String[] includes() default {};
 
     String[] orders() default {};
+
+    Class<?> serializer() default Void.class;
+
+    Class<?> deserializer() default Void.class;
 }
