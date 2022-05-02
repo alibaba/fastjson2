@@ -19,29 +19,7 @@ final class JSONWriterUTF8JDK9 extends JSONWriterUTF8 {
             return;
         }
 
-        byte[] value = null;
-
-        if (JDKUtils.STRING_BYTES_INTERNAL_API) {
-            if (CODER_FUNCTION == null && !CODER_FUNCTION_ERROR) {
-                try {
-                    CODER_FUNCTION = JDKUtils.getStringCode11();
-                    VALUE_FUNCTION = JDKUtils.getStringValue11();
-                } catch (Throwable ignored) {
-                    CODER_FUNCTION_ERROR = true;
-                }
-            }
-        }
-
-        if (CODER_FUNCTION != null && VALUE_FUNCTION != null) {
-            int coder = CODER_FUNCTION.applyAsInt(str);
-            if (coder == 0) {
-                value = VALUE_FUNCTION.apply(str);
-            }
-        }
-
-        if (value == null) {
-            value = str.getBytes(StandardCharsets.UTF_8);
-        }
+        byte[] value = str.getBytes(StandardCharsets.UTF_8);
         {
             int minCapacity = off
                     + value.length * 3 // utf8 3 bytes

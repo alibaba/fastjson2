@@ -1765,36 +1765,12 @@ public abstract class JSONWriter implements Closeable {
             }
 
             if (ascii) {
-                if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                    byte[] bytes;
-                    if (off == buf.length) {
-                        bytes = buf;
-                    } else {
-                        bytes = new byte[off];
-                        System.arraycopy(buf, 0, bytes, 0, off);
-                    }
-                    return fullPath = JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
-                }
-
                 if (JDKUtils.JVM_VERSION == 8) {
-                    if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
-                        try {
-                            STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                        } catch (Throwable e) {
-                            STRING_CREATOR_ERROR = true;
-                        }
-                    }
-
                     char[] chars = new char[off];
                     for (int i = 0; i < off; i++) {
                         chars[i] = (char) buf[i];
                     }
-                    if (STRING_CREATOR_JDK8 == null) {
-                        fullPath = new String(chars);
-                    } else {
-                        fullPath = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                    }
-
+                    fullPath = new String(chars);
                     return fullPath;
                 }
             }

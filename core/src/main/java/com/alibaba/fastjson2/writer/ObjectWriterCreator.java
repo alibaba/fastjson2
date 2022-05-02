@@ -144,9 +144,7 @@ public class ObjectWriterCreator {
             fieldBased = false;
         }
 
-        if (fieldBased && JDKUtils.JVM_VERSION >= 11
-                && !JDKUtils.LANG_UNNAMED
-                && Throwable.class.isAssignableFrom(objectClass)) {
+        if (Throwable.class.isAssignableFrom(objectClass)) {
             fieldBased = false;
         }
 
