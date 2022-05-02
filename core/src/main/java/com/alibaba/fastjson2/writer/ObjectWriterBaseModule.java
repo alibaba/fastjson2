@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.JSONWriter;
@@ -143,6 +144,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 Class<?> serializer = jsonType.serializer();
                 if (ObjectWriter.class.isAssignableFrom(serializer)) {
                     beanInfo.serializer = serializer;
+                }
+
+                Class<? extends Filter>[] serializeFilters = jsonType.serializeFilters();
+                if (serializeFilters.length != 0) {
+                    beanInfo.serializeFilters = serializeFilters;
                 }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;

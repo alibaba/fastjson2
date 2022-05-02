@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.function.ToByteFunction;
 import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.function.ToShortFunction;
@@ -311,7 +312,38 @@ public class ObjectWriterCreator {
 
         Collections.sort(fieldWriters);
 
-        return new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+        ObjectWriterAdapter writerAdapter = new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+
+        if (beanInfo.serializeFilters != null) {
+            for (Class<? extends Filter> filterClass : beanInfo.serializeFilters) {
+                if (!Filter.class.isAssignableFrom(filterClass)) {
+                    continue;
+                }
+
+                try {
+                    Filter filter = filterClass.newInstance();
+                    if (filter instanceof PropertyFilter) {
+                        writerAdapter.setPropertyFilter((PropertyFilter) filter);
+                    }
+
+                    if (filter instanceof ValueFilter) {
+                        writerAdapter.setValueFilter((ValueFilter) filter);
+                    }
+
+                    if (filter instanceof NameFilter) {
+                        writerAdapter.setNameFilter((NameFilter) filter);
+                    }
+                    if (filter instanceof PropertyPreFilter) {
+                        writerAdapter.setPropertyPreFilter((PropertyPreFilter) filter);
+                    }
+                } catch (InstantiationException | IllegalAccessException ignored) {
+
+                }
+            }
+            // return super.createObjectWriter(objectClass, features, modules);
+        }
+
+        return writerAdapter;
     }
 
     protected void handleIgnores(BeanInfo beanInfo, List<FieldWriter> fieldWriters) {

@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.codec;
 
+import com.alibaba.fastjson2.filter.Filter;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
@@ -29,4 +31,5 @@ public class BeanInfo {
 
     public Class serializer;
     public Class deserializer;
+    public Class<? extends Filter>[] serializeFilters;
 }

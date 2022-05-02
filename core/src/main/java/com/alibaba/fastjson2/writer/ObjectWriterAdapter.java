@@ -154,6 +154,17 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
         this.propertyFilter = propertyFilter;
     }
 
+    public void setValueFilter(ValueFilter valueFilter) {
+        this.valueFilter = valueFilter;
+    }
+
+    public void setNameFilter(NameFilter nameFilter) {
+        this.nameFilter = nameFilter;
+    }
+
+    public void setPropertyPreFilter(PropertyPreFilter propertyPreFilter) {
+        this.propertyPreFilter = propertyPreFilter;
+    }
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
