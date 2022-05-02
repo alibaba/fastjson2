@@ -23,8 +23,6 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
     final long[] hashCodesLCase;
     final short[] mappingLCase;
 
-    volatile byte[] jsonbHeader;
-
     final Constructor constructor;
     volatile boolean instantiationError;
 
