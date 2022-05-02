@@ -104,6 +104,19 @@ public class ObjectWriterCreator {
             }
         }
 
+        if (beanInfo.includes != null && beanInfo.includes.length > 0) {
+            boolean match = false;
+            for (String include : beanInfo.includes) {
+                if (include.equals(fieldName)) {
+                    match = true;
+                    break;
+                }
+            }
+            if (!match) {
+                return null;
+            }
+        }
+
         ObjectWriter writeUsingWriter = null;
         if (fieldInfo.writeUsing != null) {
             try {
