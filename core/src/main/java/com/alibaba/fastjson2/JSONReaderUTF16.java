@@ -1806,7 +1806,7 @@ final class JSONReaderUTF16 extends JSONReader {
     @Override
     public int getStringLength() {
         if (ch != '"' && ch != '\'') {
-            throw new JSONException("date only support string input");
+            throw new JSONException("date only support string input : " + ch);
         }
 
         final char quote = ch;
@@ -2699,7 +2699,7 @@ final class JSONReaderUTF16 extends JSONReader {
         }
 
         if (len < 19) {
-            throw new JSONException("illeal localdatetime string : " + readString());
+            return null;
         }
 
         char c0 = chars[offset];
