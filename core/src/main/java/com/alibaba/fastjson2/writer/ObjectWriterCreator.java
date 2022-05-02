@@ -85,6 +85,8 @@ public class ObjectWriterCreator {
         String fieldName;
         if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
             fieldName = field.getName();
+
+            fieldName = BeanUtils.fieldName(fieldName, beanInfo.namingStrategy);
         } else {
             fieldName = fieldInfo.fieldName;
         }
