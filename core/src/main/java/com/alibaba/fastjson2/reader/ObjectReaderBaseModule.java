@@ -496,6 +496,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonProperty":
+                        processJacksonJsonProperty(fieldInfo, annotation);
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonAlias":
+                        processJacksonJsonAlias(fieldInfo, annotation);
+                        break;
                     default:
                         break;
                 }
@@ -534,12 +540,71 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonProperty":
+                        processJacksonJsonProperty(fieldInfo, annotation);
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonAlias":
+                        processJacksonJsonAlias(fieldInfo, annotation);
+                        break;
                     default:
                         break;
                 }
             }
 
             getFieldInfo(fieldInfo, jsonField);
+        }
+
+        private void processJacksonJsonProperty(FieldInfo fieldInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "value": {
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                fieldInfo.fieldName = value;
+                            }
+                            break;
+                        }
+                        case "access": {
+                            String access = ((Enum) result).name();
+                            switch (access) {
+                                case "WRITE_ONLY":
+                                    fieldInfo.ignore = true;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {}
+            });
+        }
+
+        private void processJacksonJsonAlias(FieldInfo fieldInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "value": {
+                            String[] values = (String[]) result;
+                            if (values.length != 0) {
+                                fieldInfo.alternateNames = values;
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {}
+            });
         }
 
         private void processJSONField1x(FieldInfo fieldInfo, Annotation annotation) {
@@ -623,9 +688,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                         default:
                             break;
                     }
-                } catch (Throwable ignored) {
-
-                }
+                } catch (Throwable ignored) {}
             });
         }
 
