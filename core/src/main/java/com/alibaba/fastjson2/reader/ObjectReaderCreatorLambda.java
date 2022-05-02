@@ -51,6 +51,14 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
             }
         }
 
+        if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
+            try {
+                return (ObjectReader<T>) beanInfo.deserializer.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new JSONException("create deserializer error", e);
+            }
+        }
+
         if (Enum.class.isAssignableFrom(objectClass)) {
             return createEnumReader(objectClass, beanInfo.createMethod, modules);
         }

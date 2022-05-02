@@ -126,6 +126,14 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             annotationProcessor.getBeanInfo(beanInfo, objectClass);
         }
 
+        if (beanInfo.serializer != null && ObjectWriter.class.isAssignableFrom(beanInfo.serializer)) {
+            try {
+                return (ObjectWriter) beanInfo.serializer.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new JSONException("create serializer error", e);
+            }
+        }
+
         long writerFeatures = features | beanInfo.writerFeatures;
         boolean fieldBased = (writerFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
         if (fieldBased && (objectClass.isInterface() || objectClass.isInterface())) {

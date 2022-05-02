@@ -468,6 +468,14 @@ public class ObjectReaderCreator {
             }
         }
 
+        if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
+            try {
+                return (ObjectReader<T>) beanInfo.deserializer.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new JSONException("create deserializer error", e);
+            }
+        }
+
         if (fieldBased) {
             beanInfo.readerFeatures |= JSONReader.Feature.FieldBased.mask;
         }

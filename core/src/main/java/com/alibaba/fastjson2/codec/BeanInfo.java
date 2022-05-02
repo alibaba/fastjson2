@@ -26,4 +26,7 @@ public class BeanInfo {
     public String[] includes;
 
     public boolean mixIn;
+
+    public Class serializer;
+    public Class deserializer;
 }
