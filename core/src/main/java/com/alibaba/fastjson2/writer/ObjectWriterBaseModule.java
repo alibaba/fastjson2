@@ -216,6 +216,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonProperty":
+                        processJacksonJsonProperty(fieldInfo, annotation);
+                        break;
                     default:
                         break;
                 }
@@ -266,6 +269,37 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             ) {
                 fieldInfo.writeUsing = writeUsing;
             }
+        }
+
+        private void processJacksonJsonProperty(FieldInfo fieldInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "value":
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                fieldInfo.fieldName = value;
+                            }
+                            break;
+                        case "access": {
+                            String access = ((Enum) result).name();
+                            switch (access) {
+                                case "READ_ONLY":
+                                    fieldInfo.ignore = true;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {}
+            });
         }
 
         private void processJSONField1x(FieldInfo fieldInfo, Annotation annotation) {
@@ -325,9 +359,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         default:
                             break;
                     }
-                } catch (Throwable ignored) {
-
-                }
+                } catch (Throwable ignored) {}
             });
         }
 
@@ -415,6 +447,10 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     case "java.beans.Transient":
                         fieldInfo.isTransient = true;
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonProperty": {
+                        processJacksonJsonProperty(fieldInfo, annotation);
+                        break;
+                    }
                     default:
                         break;
                 }
