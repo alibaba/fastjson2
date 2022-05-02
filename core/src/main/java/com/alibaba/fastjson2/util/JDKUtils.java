@@ -97,6 +97,7 @@ public class JDKUtils {
             }
             default:
                 STRING_BYTES_INTERNAL_API = false;
+                break;
         }
 
         LANG_UNNAMED = !vmVendor.contains("GraalVM") && !vmName.contains("Substrate")
