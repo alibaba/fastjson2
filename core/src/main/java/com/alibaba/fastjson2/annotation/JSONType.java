@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.filter.Filter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -41,4 +42,6 @@ public @interface JSONType {
     Class<?> serializer() default Void.class;
 
     Class<?> deserializer() default Void.class;
+
+    Class<? extends Filter>[] serializeFilters() default {};
 }
