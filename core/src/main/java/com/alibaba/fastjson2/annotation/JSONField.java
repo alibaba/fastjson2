@@ -69,4 +69,6 @@ public @interface JSONField {
      * Specify {@link JSONWriter.Feature}s to use features when serializing output
      */
     JSONWriter.Feature[] serializeFeatures() default {};
+
+    boolean value() default false;
 }

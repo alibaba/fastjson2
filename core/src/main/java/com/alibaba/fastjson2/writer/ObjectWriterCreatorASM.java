@@ -302,6 +302,10 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             }
         }
 
+        if (fieldWriters.size() == 1 && fieldWriters.get(0).isValue()) {
+            match = false;
+        }
+
         if (!match) {
             return super.createObjectWriter(objectClass, writerFeatures, modules);
         }

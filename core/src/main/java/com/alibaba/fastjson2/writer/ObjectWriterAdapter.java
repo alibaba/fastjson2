@@ -42,6 +42,8 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
     final long[] hashCodes;
     final short[] mapping;
 
+    final boolean hasValueField;
+
     public ObjectWriterAdapter(Class<T> objectType, List<FieldWriter> fieldWriters) {
         this(objectType, null, null, 0, fieldWriters);
     }
@@ -70,6 +72,8 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
 
         this.fieldWriterArray = new FieldWriter[fieldWriters.size()];
         fieldWriters.toArray(fieldWriterArray);
+
+        this.hasValueField = fieldWriterArray.length == 1 && fieldWriterArray[0].isValue();
 
         long[] hashCodes = new long[fieldWriterArray.length];
         for (int i = 0; i < fieldWriterArray.length; i++) {
@@ -100,6 +104,7 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
         this.fieldWriters = Arrays.asList(fieldWriters);
         this.fieldWriterArray = fieldWriters;
         this.features = features;
+        this.hasValueField = fieldWriterArray.length == 1 && fieldWriterArray[0].isValue();
 
         String typeName = null;
         if (objectType != null) {
@@ -189,6 +194,12 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        if (hasValueField) {
+            FieldWriter fieldWriter = fieldWriterArray[0];
+            fieldWriter.writeValue(jsonWriter, object);
+            return;
+        }
+
         if (jsonWriter.isJSONB()) {
             if (jsonWriter.isBeanToArray()) {
                 writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
