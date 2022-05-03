@@ -755,7 +755,12 @@ public class ObjectReaderCreator {
 
         String fieldName;
         if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
-            fieldName = BeanUtils.setterName(method.getName(), namingStrategy);
+            String methodName = method.getName();
+            if (methodName.startsWith("set")) {
+                fieldName = BeanUtils.setterName(methodName, namingStrategy);
+            } else {
+                fieldName = BeanUtils.getterName(methodName, namingStrategy);
+            }
         } else {
             fieldName = fieldInfo.fieldName;
         }

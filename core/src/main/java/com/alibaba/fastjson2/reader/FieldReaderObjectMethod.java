@@ -73,9 +73,15 @@ class FieldReaderObjectMethod<T>
             return;
         }
 
-        Object value = jsonReader.isJSONB()
-                ? objectReader.readJSONBObject(jsonReader, features)
-                : objectReader.readObject(jsonReader, features);
+        Object value;
+        try {
+            value = jsonReader.isJSONB()
+                    ? objectReader.readJSONBObject(jsonReader, features)
+                    : objectReader.readObject(jsonReader, features);
+        } catch (JSONException ex) {
+            throw new JSONException("read field error : " + fieldName, ex);
+        }
+
         accept(object, value);
     }
 

@@ -469,10 +469,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         @Override
         public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method) {
             Class mixInSource = provider.mixInCache.get(objectClass);
+            String methodName = method.getName();
             if (mixInSource != null && mixInSource != objectClass) {
                 Method mixInMethod = null;
                 try {
-                    mixInMethod = mixInSource.getDeclaredMethod(method.getName(), method.getParameterTypes());
+                    mixInMethod = mixInSource.getDeclaredMethod(methodName, method.getParameterTypes());
                 } catch (Exception ignored) {
                 }
 
@@ -509,20 +510,21 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
             getFieldInfo(fieldInfo, jsonField);
 
-            String fieldName = BeanUtils.getterName(method.getName(), null);
-            Field declaredField = null;
-            try {
-                declaredField = objectClass.getDeclaredField(fieldName);
-            } catch (Throwable ignored) {
-                // skip
+            String fieldName;
+            if (methodName.startsWith("set")) {
+                fieldName = BeanUtils.setterName(methodName, null);
+            } else {
+                fieldName = BeanUtils.getterName(methodName, null); // readOnlyProperty
             }
 
-            if (declaredField != null) {
-                int modifiers = declaredField.getModifiers();
-                if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
-                    getFieldInfo(fieldInfo, objectClass, declaredField);
+            BeanUtils.declaredFields(objectClass, field -> {
+                if (field.getName().equals(fieldName)) {
+                    int modifiers = field.getModifiers();
+                    if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
+                        getFieldInfo(fieldInfo, objectClass, field);
+                    }
                 }
-            }
+            });
         }
 
         private void processAnnotation(FieldInfo fieldInfo, Annotation[] annotations) {

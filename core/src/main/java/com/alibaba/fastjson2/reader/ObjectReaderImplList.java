@@ -416,11 +416,11 @@ public final class ObjectReaderImplList implements ObjectReader {
                 list.add(converted);
                 return list;
             }
-            throw new JSONException("format error");
+            throw new JSONException("illegal input, offset " + jsonReader.getOffset() + ", " + str);
         }
 
         if (ch != '[') {
-            throw new JSONException("format error : " + ch);
+            throw new JSONException("illegal input, offset " + jsonReader.getOffset() + ", char " + ch);
         }
         jsonReader.next();
 

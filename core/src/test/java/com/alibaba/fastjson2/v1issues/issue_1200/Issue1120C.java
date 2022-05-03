@@ -20,14 +20,14 @@ public class Issue1120C {
 
     public static class Model {
         @JSONField(name="REQ_NO")
-        private String ReqNo;
+        private String reqNo;
 
         public String getReqNo() {
-            return ReqNo;
+            return reqNo;
         }
 
         public void setReqNo(String reqNo) {
-            ReqNo = reqNo;
+            this.reqNo = reqNo;
         }
     }
 }

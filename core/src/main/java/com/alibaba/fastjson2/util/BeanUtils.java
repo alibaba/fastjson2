@@ -559,23 +559,26 @@ public abstract class BeanUtils {
             return methodName;
         }
 
+        int prefixLength = methodName.startsWith("set") ? 3: 0;
+
         switch (namingStrategy) {
             case "NeverUseThisValueExceptDefaultValue":
             case "CamelCase": {
-                char[] chars = new char[methodNameLength - 3];
-                methodName.getChars(3, methodNameLength, chars, 0);
+                char[] chars = new char[methodNameLength - prefixLength];
+                methodName.getChars(prefixLength, methodNameLength, chars, 0);
                 char c0 = chars[0];
-                if (c0 >= 'A' && c0 <= 'Z') {
+                boolean c1UCase = chars.length > 1 && chars[1] >= 'A' && chars[1] <= 'Z';
+                if (c0 >= 'A' && c0 <= 'Z' && !c1UCase) {
                     chars[0] = (char) (c0 + 32);
                 }
                 return new String(chars);
             }
             case "SnakeCase": {
-                return snakeCase(methodName, 3);
+                return snakeCase(methodName, prefixLength);
             }
             case "UpperCase": {
-                char[] chars = new char[methodNameLength - 3];
-                methodName.getChars(3, methodNameLength, chars, 0);
+                char[] chars = new char[methodNameLength - prefixLength];
+                methodName.getChars(prefixLength, methodNameLength, chars, 0);
                 char c0 = chars[0];
                 for (int i = 0; i < chars.length; i++) {
                     char ch = chars[i];
@@ -609,13 +612,22 @@ public abstract class BeanUtils {
 
         final int methodNameLength = methodName.length();
         boolean is = methodName.startsWith("is");
-        int prefixLength = is ? 2 : 3;
+        boolean get = methodName.startsWith("get");
+
+        final int prefixLength;
+        if (is) {
+            prefixLength = 2;
+        } else if (get) {
+            prefixLength = 3;
+        } else {
+            prefixLength = 0;
+        }
 
         switch (namingStrategy) {
             case "NeverUseThisValueExceptDefaultValue":
             case "CamelCase": {
                 char[] chars = new char[methodNameLength - prefixLength];
-                methodName.getChars(is ? 2 : 3, methodNameLength, chars, 0);
+                methodName.getChars(prefixLength, methodNameLength, chars, 0);
                 char c0 = chars[0];
                 boolean c1UCase = chars.length > 1 && chars[1] >= 'A' && chars[1] <= 'Z';
                 if (c0 >= 'A' && c0 <= 'Z' && !c1UCase) {
@@ -625,7 +637,7 @@ public abstract class BeanUtils {
             }
             case "PascalCase": {
                 char[] chars = new char[methodNameLength - prefixLength];
-                methodName.getChars(is ? 2 : 3, methodNameLength, chars, 0);
+                methodName.getChars(prefixLength, methodNameLength, chars, 0);
                 char c0 = chars[0];
                 boolean c1UCase = chars.length > 1 && chars[1] >= 'a' && chars[1] <= 'z';
                 if (c0 >= 'a' && c0 <= 'z' && !c1UCase) {
@@ -642,13 +654,14 @@ public abstract class BeanUtils {
             case "KebabCase": {
                 StringBuilder buf = new StringBuilder();
                 final int firstIndex;
-                if (methodName.startsWith("is")) {
+                if (is) {
                     firstIndex = 2;
-                } else if (methodName.startsWith("get")) {
+                } else if (get) {
                     firstIndex = 3;
                 } else {
                     firstIndex = 0;
                 }
+
                 for (int i = firstIndex; i < methodName.length(); ++i) {
                     char ch = methodName.charAt(i);
                     if (ch >= 'A' && ch <= 'Z') {
@@ -672,8 +685,6 @@ public abstract class BeanUtils {
         if (namingStrategy == null) {
             namingStrategy = "CamelCase";
         }
-
-        final int methodNameLength = methodName.length();
 
         switch (namingStrategy) {
             case "NeverUseThisValueExceptDefaultValue":
