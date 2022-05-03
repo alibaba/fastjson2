@@ -170,7 +170,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
         @Override
         public void getFieldInfo(FieldInfo fieldInfo, Class objectType, Field field) {
             Class mixInSource = provider.mixInCache.get(objectType);
-            if (objectType == null) {
+            if (objectType != null) {
                 String typeName = objectType.getName();
                 switch (typeName) {
                     case "org.apache.commons.lang3.tuple.ImmutablePair":

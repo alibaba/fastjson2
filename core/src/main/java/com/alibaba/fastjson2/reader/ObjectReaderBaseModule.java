@@ -14,7 +14,6 @@ import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
-import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.Closeable;
 import java.io.Serializable;
@@ -2925,7 +2924,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
     static class GenericArrayImpl implements ObjectReader {
         final Type itemType;
-        final Class componentClass;
+        final Class<?> componentClass;
         ObjectReader itemObjectReader = null;
 
         public GenericArrayImpl(Type itemType) {
@@ -2988,7 +2987,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 throw new JSONException("format error");
             }
 
-            ArrayList list = new ArrayList();
+            List<Object> list = new ArrayList<>();
             if (ch != '[') {
                 throw new JSONException("format error : " + ch);
             }
