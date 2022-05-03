@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ObjectReaderCreatorDynamicCompile extends ObjectReaderCreator {
     public static final ObjectReaderCreatorDynamicCompile INSTANCE = new ObjectReaderCreatorDynamicCompile();
 
+    @Override
     public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, List<ObjectReaderModule> modules) {
         BeanInfo beanInfo = new BeanInfo();
 
