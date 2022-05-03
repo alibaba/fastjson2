@@ -148,8 +148,10 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             return super.createObjectWriter(objectClass, features, modules);
         }
 
+        boolean record = BeanUtils.isRecord(objectClass);
+
         List<FieldWriter> fieldWriters;
-        if (fieldBased) {
+        if (fieldBased && !record) {
             Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
             final FieldInfo fieldInfo = new FieldInfo();
             BeanUtils.declaredFields(objectClass, field -> {
@@ -185,13 +187,15 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             } else {
                 final FieldInfo fieldInfo = new FieldInfo();
 
-                BeanUtils.fields(objectClass, field -> {
-                    fieldInfo.init();
-                    FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
-                    if (fieldWriter != null) {
-                        fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
-                    }
-                });
+                if (!record) {
+                    BeanUtils.fields(objectClass, field -> {
+                        fieldInfo.init();
+                        FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
+                        if (fieldWriter != null) {
+                            fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
+                        }
+                    });
+                }
 
                 BeanUtils.getters(objectClass, method -> {
                     fieldInfo.init();
@@ -209,7 +213,11 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
 
                     String fieldName;
                     if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
-                        fieldName = BeanUtils.getterName(method.getName(), beanInfo.namingStrategy);
+                        if (record) {
+                            fieldName = method.getName();
+                        } else {
+                            fieldName = BeanUtils.getterName(method.getName(), beanInfo.namingStrategy);
+                        }
                     } else {
                         fieldName = fieldInfo.fieldName;
                     }
