@@ -36,55 +36,48 @@ package com.alibaba.fastjson.internal.asm;
 public class MethodWriter implements MethodVisitor {
 
     /**
-     * Next method writer (see {@link com.alibaba.fastjson.internal.asm.ClassWriter#firstMethod firstMethod}).
-     */
-    MethodWriter       next;
-
-    /**
      * The class writer to which this method must be added.
      */
     final com.alibaba.fastjson.internal.asm.ClassWriter cw;
-
-    /**
-     * Access flags of this method.
-     */
-    private int        access;
-
     /**
      * The index of the constant pool item that contains the name of this method.
      */
-    private final int  name;
-
+    private final int name;
     /**
      * The index of the constant pool item that contains the descriptor of this method.
      */
-    private final int  desc;
-
+    private final int desc;
+    /**
+     * Next method writer (see {@link com.alibaba.fastjson.internal.asm.ClassWriter#firstMethod firstMethod}).
+     */
+    MethodWriter next;
     /**
      * Number of exceptions that can be thrown by this method.
      */
-    int                exceptionCount;
-
+    int exceptionCount;
     /**
      * The exceptions that can be thrown by this method. More precisely, this array contains the indexes of the constant
      * pool items that contain the internal names of these exception classes.
      */
-    int[]              exceptions;
-
+    int[] exceptions;
+    /**
+     * Access flags of this method.
+     */
+    private final int access;
     /**
      * The bytecode of this method.
      */
-    private com.alibaba.fastjson.internal.asm.ByteVector code                                    = new com.alibaba.fastjson.internal.asm.ByteVector();
+    private final com.alibaba.fastjson.internal.asm.ByteVector code = new com.alibaba.fastjson.internal.asm.ByteVector();
 
     /**
      * Maximum stack size of this method.
      */
-    private int        maxStack;
+    private int maxStack;
 
     /**
      * Maximum number of local variables for this method.
      */
-    private int        maxLocals;
+    private int maxLocals;
 
     // ------------------------------------------------------------------------
 
@@ -99,7 +92,7 @@ public class MethodWriter implements MethodVisitor {
     // Constructor
     // ------------------------------------------------------------------------
 
-    public MethodWriter(final ClassWriter cw, final int access, final String name, final String desc, final String signature, final String[] exceptions){
+    public MethodWriter(final ClassWriter cw, final int access, final String name, final String desc, final String signature, final String[] exceptions) {
         if (cw.firstMethod == null) {
             cw.firstMethod = this;
         } else {
@@ -202,7 +195,7 @@ public class MethodWriter implements MethodVisitor {
     public void visitJumpInsn(final int opcode, final com.alibaba.fastjson.internal.asm.Label label) {
         // Label currentBlock = this.currentBlock;
         // adds the instruction to the bytecode of the method
-        if ((label.status & 2 /* Label.RESOLVED */ ) != 0 && label.position - code.length < Short.MIN_VALUE) {
+        if ((label.status & 2 /* Label.RESOLVED */) != 0 && label.position - code.length < Short.MIN_VALUE) {
             throw new UnsupportedOperationException();
         } else {
             /*
@@ -242,7 +235,7 @@ public class MethodWriter implements MethodVisitor {
 //        if ((var > 255) || (increment > 127) || (increment < -128)) {
 //            code.putByte(196 /* WIDE */).put12(Opcodes.IINC, var).putShort(increment);
 //        } else {
-            code.putByte(132 /* Opcodes.IINC*/ ).put11(var, increment);
+        code.putByte(132 /* Opcodes.IINC*/).put11(var, increment);
 //        }
     }
 
