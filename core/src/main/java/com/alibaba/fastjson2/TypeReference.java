@@ -2,7 +2,6 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
-import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -62,35 +61,16 @@ public abstract class TypeReference<T> {
         this.rawType = (Class<? super T>) BeanUtils.getRawType(type);
     }
 
-    protected TypeReference(Type... actualTypeArguments){
-        Class<?> thisClass = this.getClass();
-        Type superClass = thisClass.getGenericSuperclass();
-
-        ParameterizedType argType = (ParameterizedType) ((ParameterizedType) superClass).getActualTypeArguments()[0];
-        Type rawType = argType.getRawType();
-        Type[] argTypes = argType.getActualTypeArguments();
-
-        int actualIndex = 0;
-        for (int i = 0; i < argTypes.length; ++i) {
-            if (argTypes[i] instanceof TypeVariable &&
-                    actualIndex < actualTypeArguments.length) {
-                argTypes[i] = actualTypeArguments[actualIndex++];
-            }
-            // fix for openjdk and android env
-            if (argTypes[i] instanceof GenericArrayType) {
-                argTypes[i] = checkPrimitiveArray(
-                        (GenericArrayType) argTypes[i]);
-            }
-
-            // 如果有多层泛型且该泛型已经注明实现的情况下，判断该泛型下一层是否还有泛型
-            if(argTypes[i] instanceof ParameterizedType) {
-                argTypes[i] = handlerParameterizedType((ParameterizedType) argTypes[i], actualTypeArguments, actualIndex);
-            }
-        }
-
-        this.type = new ParameterizedTypeImpl(argTypes, thisClass, rawType);
-        this.rawType = (Class<? super T>) BeanUtils.getRawType(type);
-    }
+    private static final Map<Class<?>, String> primitiveTypeMap = new HashMap<Class<?>, String>(8) {{
+        put(boolean.class, "Z");
+        put(char.class, "C");
+        put(byte.class, "B");
+        put(short.class, "S");
+        put(int.class, "I");
+        put(long.class, "J");
+        put(float.class, "F");
+        put(double.class, "D");
+    }};
 
     /**
      * Get the {@link Type}
@@ -169,16 +149,35 @@ public abstract class TypeReference<T> {
         };
     }
 
-    private static final Map primitiveTypeMap = new HashMap<Class, String>(8) {{
-        put(boolean.class, "Z");
-        put(char.class, "C");
-        put(byte.class, "B");
-        put(short.class, "S");
-        put(int.class, "I");
-        put(long.class, "J");
-        put(float.class, "F");
-        put(double.class, "D");
-    }};
+    protected TypeReference(Type... actualTypeArguments) {
+        Class<?> thisClass = this.getClass();
+        Type superClass = thisClass.getGenericSuperclass();
+
+        ParameterizedType argType = (ParameterizedType) ((ParameterizedType) superClass).getActualTypeArguments()[0];
+        Type rawType = argType.getRawType();
+        Type[] argTypes = argType.getActualTypeArguments();
+
+        int actualIndex = 0;
+        for (int i = 0; i < argTypes.length; ++i) {
+            if (argTypes[i] instanceof TypeVariable &&
+                    actualIndex < actualTypeArguments.length) {
+                argTypes[i] = actualTypeArguments[actualIndex++];
+            }
+            // fix for openjdk and android env
+            if (argTypes[i] instanceof GenericArrayType) {
+                argTypes[i] = checkPrimitiveArray(
+                        (GenericArrayType) argTypes[i]);
+            }
+
+            // 如果有多层泛型且该泛型已经注明实现的情况下，判断该泛型下一层是否还有泛型
+            if (argTypes[i] instanceof ParameterizedType) {
+                argTypes[i] = handlerParameterizedType((ParameterizedType) argTypes[i], actualTypeArguments, actualIndex);
+            }
+        }
+
+        this.type = new ParameterizedTypeImpl(argTypes, thisClass, rawType);
+        this.rawType = (Class<? super T>) BeanUtils.getRawType(type);
+    }
 
     static Type checkPrimitiveArray(GenericArrayType genericArrayType) {
         Type clz = genericArrayType;
@@ -195,7 +194,7 @@ public abstract class TypeReference<T> {
             Class<?> ck = (Class<?>) genericComponentType;
             if (ck.isPrimitive()) {
                 try {
-                    String postfix = (String) primitiveTypeMap.get(ck);
+                    String postfix = primitiveTypeMap.get(ck);
                     if (postfix != null) {
                         clz = Class.forName(prefix + postfix);
                     }
@@ -212,7 +211,7 @@ public abstract class TypeReference<T> {
         Type rawType = type.getRawType();
         Type[] argTypes = type.getActualTypeArguments();
 
-        for(int i = 0; i < argTypes.length; ++i) {
+        for (int i = 0; i < argTypes.length; ++i) {
             if (argTypes[i] instanceof TypeVariable && actualIndex < actualTypeArguments.length) {
                 argTypes[i] = actualTypeArguments[actualIndex++];
             }
@@ -224,12 +223,11 @@ public abstract class TypeReference<T> {
             }
 
             // 如果有多层泛型且该泛型已经注明实现的情况下，判断该泛型下一层是否还有泛型
-            if(argTypes[i] instanceof ParameterizedType) {
+            if (argTypes[i] instanceof ParameterizedType) {
                 argTypes[i] = handlerParameterizedType((ParameterizedType) argTypes[i], actualTypeArguments, actualIndex);
             }
         }
 
-        Type key = new ParameterizedTypeImpl(argTypes, thisClass, rawType);
-        return key;
+        return new ParameterizedTypeImpl(argTypes, thisClass, rawType);
     }
 }
