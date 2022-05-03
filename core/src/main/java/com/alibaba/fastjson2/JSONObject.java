@@ -88,6 +88,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (key instanceof Number
                 || key instanceof Character
                 || key instanceof Boolean
+                || key instanceof UUID
         ) {
             return super.get(
                     key.toString()
@@ -97,35 +98,56 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         return super.get(key);
     }
 
+    /**
+     * Returns a set view of the mappings contained in this map
+     */
     @Override
+    @SuppressWarnings("unchecked")
     public Set<Map.Entry<String, Object>> entrySet() {
         return super.entrySet();
     }
 
+    /**
+     * Returns a set view of the keys contained in this map
+     */
     @Override
+    @SuppressWarnings("unchecked")
     public Set<String> keySet() {
         return super.keySet();
     }
 
+    /**
+     * Returns true if this map contains a mapping for the specified key
+     *
+     * @param key the key whose presence in this map is to be tested
+     */
+    public boolean containsKey(String key) {
+        return super.containsKey(key);
+    }
+
+    /**
+     * Returns true if this map contains a mapping for the specified key
+     *
+     * @param key the key whose presence in this map is to be tested
+     */
     @Override
     public boolean containsKey(Object key) {
-        boolean result = super.containsKey(key);
-        if (!result) {
-            if (key instanceof Number
-                    || key instanceof Character
-                    || key instanceof Boolean
-                    || key instanceof UUID
-            ) {
-                result = super.containsKey(key.toString());
-            }
+        if (key instanceof Number
+                || key instanceof Character
+                || key instanceof Boolean
+                || key instanceof UUID
+        ) {
+            return super.containsKey(key.toString());
         }
-        return result;
+
+        return super.containsKey(key);
     }
 
     /**
      * @param key          the key whose associated value is to be returned
      * @param defaultValue the default mapping of the key
      */
+    @SuppressWarnings("unchecked")
     public Object getOrDefault(String key, Object defaultValue) {
         return super.getOrDefault(
                 key, defaultValue
@@ -138,10 +160,12 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
      * @since 2.0.2
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Object getOrDefault(Object key, Object defaultValue) {
         if (key instanceof Number
                 || key instanceof Character
                 || key instanceof Boolean
+                || key instanceof UUID
         ) {
             return super.getOrDefault(
                     key.toString(), defaultValue
