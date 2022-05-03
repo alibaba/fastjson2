@@ -1,18 +1,19 @@
-package com.alibaba.fastjson2.features;
+package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.annotation.NamingStrategy;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JSONTypeIncludes {
+public class JSONTypeNamingUpper {
     @Test
     public void test0() {
         Bean bean = new Bean();
         bean.id = 101;
         bean.name = "DataWorks";
-        assertEquals("{\"id\":101}", JSON.toJSONString(bean));
+        assertEquals("{\"ID\":101,\"NAME\":\"DataWorks\"}", JSON.toJSONString(bean));
     }
 
     @Test
@@ -20,16 +21,16 @@ public class JSONTypeIncludes {
         Bean1 bean = new Bean1();
         bean.id = 101;
         bean.name = "DataWorks";
-        assertEquals("{\"id\":101}", JSON.toJSONString(bean));
+        assertEquals("{\"ID\":101,\"NAME\":\"DataWorks\"}", JSON.toJSONString(bean));
     }
 
-    @JSONType(includes = "id")
+    @JSONType(naming = NamingStrategy.UpperCase)
     public static class Bean {
         public int id;
         public String name;
     }
 
-    @JSONType(includes = "id")
+    @JSONType(naming = NamingStrategy.UpperCase)
     public static class Bean1 {
         private int id;
         private String name;
