@@ -223,19 +223,12 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
     public boolean getBooleanValue(String key) {
         Object value = get(key);
-
-        Boolean booleanVal = castToBoolean(value);
+        Boolean booleanVal =  com.alibaba.fastjson2.util.TypeUtils.cast(value, Boolean.class);
         if (booleanVal == null) {
             return false;
         }
 
         return booleanVal.booleanValue();
-    }
-
-    public Byte getByte(String key) {
-        Object value = get(key);
-
-        return castToByte(value);
     }
 
     public byte getByteValue(String key) {
