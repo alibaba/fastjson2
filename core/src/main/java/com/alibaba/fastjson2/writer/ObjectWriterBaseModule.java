@@ -658,9 +658,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             case "org.joda.time.chrono.ISOChronology":
                 return JodaSupport.createISOChronologyWriter(objectClass);
             case "org.joda.time.LocalDate":
-                return JodaSupport.createLocalDateWriter(objectClass);
+                return JodaSupport.createLocalDateWriter(objectClass, null);
             case "org.joda.time.LocalDateTime":
-                return JodaSupport.createLocalDateTimeWriter(objectClass);
+                return JodaSupport.createLocalDateTimeWriter(objectClass, null);
 //            case "com.alibaba.fastjson.JSONObject":
 //                return Fastjson1xSupport.createObjectReader();
             default:

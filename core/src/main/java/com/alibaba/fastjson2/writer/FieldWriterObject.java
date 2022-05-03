@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.JdbcSupport;
+import com.alibaba.fastjson2.util.JodaSupport;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
@@ -92,6 +93,10 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
                         return JdbcSupport.createTimeWriter(format);
                     case "java.sql.Timestamp":
                         return JdbcSupport.createTimestampWriter(format);
+                    case "org.joda.time.LocalDate":
+                        return JodaSupport.createLocalDateWriter(valueClass, format);
+                    case "org.joda.time.LocalDateTime":
+                        return JodaSupport.createLocalDateTimeWriter(valueClass, format);
                     default:
                         return initObjectWriter = jsonWriter.getObjectWriter(valueClass);
                 }
