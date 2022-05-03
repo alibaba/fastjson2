@@ -458,6 +458,7 @@ public interface JSON {
      * @param type     specify the {@link Type} to be converted
      * @param consumer the consumer of the parsing result object
      * @param features features to be enabled in parsing
+     * @throws JSONException IO exception occurred in reading
      */
     static <T> void parseObject(InputStream input, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
         parseObject(input, StandardCharsets.UTF_8, '\n', type, consumer, features);
@@ -476,10 +477,9 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> void parseObject(InputStream input, Charset charset, char delimiter, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
-        ObjectReader<? extends T> objectReader = null;
-
         int identityHashCode = System.identityHashCode(Thread.currentThread());
         final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> byteUpdater;
+
         switch (identityHashCode & 3) {
             case 0:
                 byteUpdater = JSONFactory.BYTES0_UPDATER;
@@ -501,6 +501,8 @@ public interface JSON {
         }
 
         int limit = 0, start = 0, end;
+        ObjectReader<? extends T> objectReader = null;
+
         try {
             while (true) {
                 int n = input.read(bytes, limit, bytes.length - limit);
@@ -547,13 +549,14 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> void parseObject(Reader input, char delimiter, Type type, Consumer<T> consumer) {
-        ObjectReader<? extends T> objectReader = null;
         char[] chars = JSONFactory.CHARS_UPDATER.getAndSet(JSONFactory.CACHE, null);
         if (chars == null) {
             chars = new char[8192];
         }
 
         int limit = 0, start = 0, end;
+        ObjectReader<? extends T> objectReader = null;
+
         try {
             while (true) {
                 int n = input.read(chars, limit, chars.length - limit);
