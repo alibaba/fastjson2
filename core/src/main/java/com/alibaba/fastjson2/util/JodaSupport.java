@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
@@ -11,6 +12,7 @@ import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_LOCAL_DATE;
@@ -26,12 +28,12 @@ public class JodaSupport {
     static final long HASH_MILLIS = Fnv.hashCode64("millis");
     static final long HASH_CHRONOLOGY = Fnv.hashCode64("chronology");
 
-    public static ObjectWriter createLocalDateTimeWriter(Class objectClass) {
-        return new LocalDateTimeWriter(objectClass);
+    public static ObjectWriter createLocalDateTimeWriter(Class objectClass, String format) {
+        return new LocalDateTimeWriter(objectClass, format);
     }
 
-    public static ObjectWriter createLocalDateWriter(Class objectClass) {
-        return new LocalDateWriter(objectClass);
+    public static ObjectWriter createLocalDateWriter(Class objectClass, String format) {
+        return new LocalDateWriter(objectClass, format);
     }
 
     public static ObjectReader createChronologyReader(Class objectClass) {
@@ -410,7 +412,7 @@ public class JodaSupport {
         }
     }
 
-    static class LocalDateWriter implements ObjectWriter {
+    static class LocalDateWriter extends DateTimeCodec implements ObjectWriter {
         final Class objectClass;
         final Method getYear;
         final Method getMonthOfYear;
@@ -420,7 +422,9 @@ public class JodaSupport {
         final Class isoChronology;
         final Object UTC;
 
-        LocalDateWriter(Class objectClass) {
+        LocalDateWriter(Class objectClass, String format) {
+            super(format);
+
             this.objectClass = objectClass;
             try {
                 ClassLoader classLoader = objectClass.getClassLoader();
@@ -487,7 +491,20 @@ public class JodaSupport {
                 Object chronology = getChronology.invoke(object);
 
                 if (chronology == UTC || chronology == null) {
-                    jsonWriter.writeLocalDate(LocalDate.of(year, monthOfYear, dayOfMonth));
+                    LocalDate localDate = LocalDate.of(year, monthOfYear, dayOfMonth);
+
+                    DateTimeFormatter formatter = this.getDateFormatter();
+                    if (formatter == null) {
+                        formatter = jsonWriter.getContext().getDateFormatter();
+                    }
+
+                    if (formatter == null) {
+                        jsonWriter.writeLocalDate(localDate);
+                        return;
+                    }
+
+                    String str = formatter.format(localDate);
+                    jsonWriter.writeString(str);
                     return;
                 }
 
@@ -619,7 +636,7 @@ public class JodaSupport {
         }
     }
 
-    static class LocalDateTimeWriter implements ObjectWriter {
+    static class LocalDateTimeWriter extends DateTimeCodec implements ObjectWriter {
         final Class objectClass;
 
         final Method getYear;
@@ -636,7 +653,9 @@ public class JodaSupport {
         final Class isoChronology;
         final Object UTC;
 
-        LocalDateTimeWriter(Class objectClass) {
+        LocalDateTimeWriter(Class objectClass, String fromat) {
+            super(fromat);
+
             this.objectClass = objectClass;
             try {
                 ClassLoader classLoader = objectClass.getClassLoader();
@@ -740,8 +759,20 @@ public class JodaSupport {
 
                 if (chronology == UTC || chronology == null) {
                     int nanoOfSecond = millis * 1000_000;
-                    jsonWriter.writeLocalDateTime(
-                            LocalDateTime.of(year, monthOfYear, dayOfMonth, hour, minute, second, nanoOfSecond));
+                    LocalDateTime ldt = LocalDateTime.of(year, monthOfYear, dayOfMonth, hour, minute, second, nanoOfSecond);
+
+                    DateTimeFormatter formatter = this.getDateFormatter();
+                    if (formatter == null) {
+                        formatter = jsonWriter.getContext().getDateFormatter();
+                    }
+
+                    if (formatter == null) {
+                        jsonWriter.writeLocalDateTime(ldt);
+                        return;
+                    }
+
+                    String str = formatter.format(ldt);
+                    jsonWriter.writeString(str);
                     return;
                 }
 
