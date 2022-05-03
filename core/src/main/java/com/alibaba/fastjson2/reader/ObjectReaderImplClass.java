@@ -36,7 +36,7 @@ final class ObjectReaderImplClass extends ObjectReaderBaseModule.PrimitiveImpl {
         }
 
         ObjectReaderProvider provider = context.getProvider();
-        Class resolvedClass = provider.checkAutoType(className, null, JSONReader.Feature.SupportAutoType.mask);
+        Class<?> resolvedClass = provider.checkAutoType(className, null, JSONReader.Feature.SupportAutoType.mask);
         if (resolvedClass == null) {
             throw new JSONException("class not found " + className);
         }
