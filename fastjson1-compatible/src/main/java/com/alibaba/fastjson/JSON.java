@@ -241,6 +241,12 @@ public class JSON {
             }
 
             return writer.toString();
+
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("toJSONString error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("toJSONString error", ex);
         }
     }
 
@@ -270,6 +276,12 @@ public class JSON {
             }
 
             return writer.getBytes();
+
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("toJSONBytes error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("toJSONBytes error", ex);
         }
     }
 
@@ -414,6 +426,11 @@ public class JSON {
             byte[] bytes = writer.getBytes();
             os.write(bytes);
             return bytes.length;
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("writeJSONString error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("writeJSONString error", ex);
         }
     }
 
