@@ -47,16 +47,16 @@ final class ObjectWriterImplLocalDateTime extends DateTimeCodec implements Objec
             return;
         }
 
-        String dateFormat = ctx.getDateFormat();
-        if (dateFormat == null) {
-            jsonWriter.writeLocalDateTime(dateTime);
-            return;
+        DateTimeFormatter formatter = this.getDateFormatter();
+        if (formatter == null) {
+            formatter = ctx.getDateFormatter();
         }
-        DateTimeFormatter formatter = ctx.getDateFormatter();
+
         if (formatter == null) {
             jsonWriter.writeLocalDateTime(dateTime);
             return;
         }
+
         String str = formatter.format(dateTime);
         jsonWriter.writeString(str);
     }
