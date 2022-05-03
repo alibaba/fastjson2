@@ -38,27 +38,28 @@ package com.alibaba.fastjson.internal.asm;
  * @author Eric Bruneton
  */
 public class Label {
-    int status;
+    int              status;
 
     /**
      * The position of this label in the code, if known.
      */
-    int position;
+    int              position;
+
     /**
-     * Start of the output stack relatively to the input stack. The exact semantics of this field depends on the
-     * algorithm that is used. When only the maximum stack size is computed, this field is the number of elements in the
-     * input stack. When the stack map frames are completely computed, this field is the offset of the first output
-     * stack element relatively to the top of the input stack. This offset is always negative or null. A null offset
-     * means that the output stack must be appended to the input stack. A -n offset means that the first n output stack
-     * elements must replace the top n input stack elements, and that the other elements must be appended to the input
-     * stack.
+     * Number of forward references to this label, times two.
      */
-    int inputStackTop;
+    private int      referenceCount;
+
     /**
-     * Maximum height reached by the output stack, relatively to the top of the input stack. This maximum is always
-     * positive or null.
+     * Informations about forward references. Each forward reference is described by two consecutive integers in this
+     * array: the first one is the position of the first byte of the bytecode instruction that contains the forward
+     * reference, while the second is the position of the first byte of the forward reference itself. In fact the sign
+     * of the first integer indicates if this reference uses 2 or 4 bytes, and its absolute value gives the position of
+     * the bytecode instruction. This array is also used as a bitset to store the subroutines to which a basic block
+     * belongs. This information is needed in MethodWriter#visitMaxs, after all forward references have been
+     * resolved. Hence the same array can be used for both purposes without problems.
      */
-    int outputStackMax;
+    private int[]    srcAndRefPositions;
 
     // ------------------------------------------------------------------------
 
@@ -78,13 +79,32 @@ public class Label {
      * and absolute input stack heights, while the algorithm used to compute stack map frames computes relative output
      * frames and absolute input frames.
      */
+
+    /**
+     * Start of the output stack relatively to the input stack. The exact semantics of this field depends on the
+     * algorithm that is used. When only the maximum stack size is computed, this field is the number of elements in the
+     * input stack. When the stack map frames are completely computed, this field is the offset of the first output
+     * stack element relatively to the top of the input stack. This offset is always negative or null. A null offset
+     * means that the output stack must be appended to the input stack. A -n offset means that the first n output stack
+     * elements must replace the top n input stack elements, and that the other elements must be appended to the input
+     * stack.
+     */
+    int              inputStackTop;
+
+    /**
+     * Maximum height reached by the output stack, relatively to the top of the input stack. This maximum is always
+     * positive or null.
+     */
+    int              outputStackMax;
+
     /**
      * The successor of this label, in the order they are visited. This linked list does not include labels used for
      * debug info only. If ClassWriter#COMPUTE_FRAMES option is used then, in addition, it does not contain
      * successive labels that denote the same bytecode position (in this case only the first label appears in this
      * list).
      */
-    Label successor;
+    Label            successor;
+
     /**
      * The next basic block in the basic block stack. This stack is used in the main loop of the fix point algorithm
      * used in the second step of the control flow analysis algorithms. It is also used in {@link #visitSubroutine} to
@@ -92,21 +112,7 @@ public class Label {
      *
      * @see MethodWriter#visitMaxs
      */
-    Label next;
-    /**
-     * Number of forward references to this label, times two.
-     */
-    private int referenceCount;
-    /**
-     * Informations about forward references. Each forward reference is described by two consecutive integers in this
-     * array: the first one is the position of the first byte of the bytecode instruction that contains the forward
-     * reference, while the second is the position of the first byte of the forward reference itself. In fact the sign
-     * of the first integer indicates if this reference uses 2 or 4 bytes, and its absolute value gives the position of
-     * the bytecode instruction. This array is also used as a bitset to store the subroutines to which a basic block
-     * belongs. This information is needed in MethodWriter#visitMaxs, after all forward references have been
-     * resolved. Hence the same array can be used for both purposes without problems.
-     */
-    private int[] srcAndRefPositions;
+    Label            next;
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -115,7 +121,7 @@ public class Label {
     /**
      * Constructs a new label.
      */
-    public Label() {
+    public Label(){
     }
 
     // ------------------------------------------------------------------------
@@ -127,15 +133,15 @@ public class Label {
      * computed and written directly. Otherwise, a null offset is written and a new forward reference is declared for
      * this label.
      *
-     * @param owner      the code writer that calls this method.
-     * @param out        the bytecode of the method.
-     * @param source     the position of first byte of the bytecode instruction that contains this label.
+     * @param owner the code writer that calls this method.
+     * @param out the bytecode of the method.
+     * @param source the position of first byte of the bytecode instruction that contains this label.
      * @param wideOffset <tt>true</tt> if the reference must be stored in 4 bytes, or <tt>false</tt> if it must be
-     *                   stored with 2 bytes.
+     * stored with 2 bytes.
      * @throws IllegalArgumentException if this label has not been created by the given code writer.
      */
     void put(final MethodWriter owner, final ByteVector out, final int source) {
-        if ((status & 2 /* RESOLVED */) == 0) {
+        if ((status & 2 /* RESOLVED */ ) == 0) {
             addReference(source, out.length);
             out.putShort(-1);
         } else {
@@ -148,8 +154,8 @@ public class Label {
      * if this label is not resolved yet. For backward references, the offset of the reference can be, and must be,
      * computed and stored directly.
      *
-     * @param sourcePosition    the position of the referencing instruction. This position will be used to compute the
-     *                          offset of this forward reference.
+     * @param sourcePosition the position of the referencing instruction. This position will be used to compute the
+     * offset of this forward reference.
      * @param referencePosition the position where the offset for this forward reference must be stored.
      */
     private void addReference(final int sourcePosition, final int referencePosition) {
@@ -170,18 +176,18 @@ public class Label {
      * bytecode of the method, i.e. when its position becomes known. This method fills in the blanks that where left in
      * the bytecode by each forward reference previously added to this label.
      *
-     * @param owner    the code writer that calls this method.
+     * @param owner the code writer that calls this method.
      * @param position the position of this label in the bytecode.
-     * @param data     the bytecode of the method.
+     * @param data the bytecode of the method.
      * @return <tt>true</tt> if a blank that was left for this label was to small to store the offset. In such a case
      * the corresponding jump instruction is replaced with a pseudo instruction (using unused opcodes) using an unsigned
      * two bytes offset. These pseudo instructions will need to be replaced with true instructions with wider offsets (4
      * bytes instead of 2). This is done in {@link MethodWriter#resizeInstructions}.
      * @throws IllegalArgumentException if this label has already been resolved, or if it has not been created by the
-     *                                  given code writer.
+     * given code writer.
      */
     void resolve(final MethodWriter owner, final int position, final byte[] data) {
-        this.status |= 2 /* RESOLVED */;
+        this.status |= 2 /* RESOLVED */ ;
         this.position = position;
         int i = 0;
         while (i < referenceCount) {

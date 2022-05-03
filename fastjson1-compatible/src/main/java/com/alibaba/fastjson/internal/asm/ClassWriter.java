@@ -34,37 +34,45 @@ package com.alibaba.fastjson.internal.asm;
  */
 public class ClassWriter {
     /**
-     * The constant pool of this class.
-     */
-    final ByteVector pool;
-    /**
-     * A reusable key used to look for items in the {@link #items} hash table.
-     */
-    final Item key;
-    /**
-     * A reusable key used to look for items in the {@link #items} hash table.
-     */
-    final Item key2;
-    /**
-     * A reusable key used to look for items in the {@link #items} hash table.
-     */
-    final Item key3;
-    /**
      * Minor and major version numbers of the class to be generated.
      */
-    int version;
+    int                     version;
+
     /**
      * Index of the next item to be added in the constant pool.
      */
-    int index;
+    int                     index;
+
+    /**
+     * The constant pool of this class.
+     */
+    final ByteVector        pool;
+
     /**
      * The constant pool's hash table data.
      */
-    Item[] items;
+    Item[]                  items;
+
     /**
      * The threshold of the constant pool's hash table.
      */
-    int threshold;
+    int                     threshold;
+
+    /**
+     * A reusable key used to look for items in the {@link #items} hash table.
+     */
+    final Item              key;
+
+    /**
+     * A reusable key used to look for items in the {@link #items} hash table.
+     */
+    final Item              key2;
+
+    /**
+     * A reusable key used to look for items in the {@link #items} hash table.
+     */
+    final Item              key3;
+
     /**
      * A type table used to temporarily store internal names that will not necessarily be stored in the constant pool.
      * This type table is used by the control flow and data flow analysis algorithm used to compute stack map frames
@@ -73,62 +81,72 @@ public class ClassWriter {
      * from its index or, conversely, to get the index of an Item from its value. Each Item stores an internal name in
      * its {@link Item#strVal1} field.
      */
-    Item[] typeTable;
-    /**
-     * The internal name of this class.
-     */
-    String thisName;
-    /**
-     * The fields of this class. These fields are stored in a linked list of {@link FieldWriter} objects, linked to each
-     * other by their {@link FieldWriter#next} field. This field stores the first element of this list.
-     */
-    FieldWriter firstField;
-    /**
-     * The fields of this class. These fields are stored in a linked list of {@link FieldWriter} objects, linked to each
-     * other by their {@link FieldWriter#next} field. This field stores the last element of this list.
-     */
-    FieldWriter lastField;
-    /**
-     * The methods of this class. These methods are stored in a linked list of {@link MethodWriter} objects, linked to
-     * each other by their {@link MethodWriter#next} field. This field stores the first element of this list.
-     */
-    MethodWriter firstMethod;
-    /**
-     * The methods of this class. These methods are stored in a linked list of {@link MethodWriter} objects, linked to
-     * each other by their {@link MethodWriter#next} field. This field stores the last element of this list.
-     */
-    MethodWriter lastMethod;
+    Item[]                  typeTable;
+
     /**
      * The access flags of this class.
      */
-    private int access;
+    private int             access;
+
     /**
      * The constant pool item that contains the internal name of this class.
      */
-    private int name;
+    private int             name;
+
+    /**
+     * The internal name of this class.
+     */
+    String                  thisName;
+
     /**
      * The constant pool item that contains the internal name of the super class of this class.
      */
-    private int superName;
+    private int             superName;
+
     /**
      * Number of interfaces implemented or extended by this class or interface.
      */
-    private int interfaceCount;
+    private int             interfaceCount;
+
     /**
      * The interfaces implemented or extended by this class or interface. More precisely, this array contains the
      * indexes of the constant pool items that contain the internal names of these interfaces.
      */
-    private int[] interfaces;
+    private int[]           interfaces;
+
+    /**
+     * The fields of this class. These fields are stored in a linked list of {@link FieldWriter} objects, linked to each
+     * other by their {@link FieldWriter#next} field. This field stores the first element of this list.
+     */
+    FieldWriter             firstField;
+
+    /**
+     * The fields of this class. These fields are stored in a linked list of {@link FieldWriter} objects, linked to each
+     * other by their {@link FieldWriter#next} field. This field stores the last element of this list.
+     */
+    FieldWriter             lastField;
+
+    /**
+     * The methods of this class. These methods are stored in a linked list of {@link MethodWriter} objects, linked to
+     * each other by their {@link MethodWriter#next} field. This field stores the first element of this list.
+     */
+    MethodWriter            firstMethod;
+
+    /**
+     * The methods of this class. These methods are stored in a linked list of {@link MethodWriter} objects, linked to
+     * each other by their {@link MethodWriter#next} field. This field stores the last element of this list.
+     */
+    MethodWriter            lastMethod;
 
     // ------------------------------------------------------------------------
     // Constructor
     // ------------------------------------------------------------------------
 
-    public ClassWriter() {
+    public ClassWriter(){
         this(0);
     }
 
-    private ClassWriter(final int flags) {
+    private ClassWriter(final int flags){
         index = 1;
         pool = new ByteVector();
         items = new Item[256];
@@ -221,7 +239,7 @@ public class ClassWriter {
      * already contains a similar item.
      *
      * @param cst the value of the constant to be added to the constant pool. This parameter must be an {@link Integer},
-     *            a {@link Float}, a {@link Long}, a {@link Double}, a {@link String} or a {@link Type}.
+     * a {@link Float}, a {@link Long}, a {@link Double}, a {@link String} or a {@link Type}.
      * @return a new or already existing constant item with the given value.
      */
     Item newConstItem(final Object cst) {
@@ -231,7 +249,7 @@ public class ClassWriter {
             key.set(val);
             Item result = get(key);
             if (result == null) {
-                pool.putByte(3 /* INT */).putInt(val);
+                pool.putByte(3 /* INT */ ).putInt(val);
                 result = new Item(index++, key);
                 put(result);
             }
@@ -273,8 +291,8 @@ public class ClassWriter {
      * contains a similar item.
      *
      * @param owner the internal name of the field's owner class.
-     * @param name  the field's name.
-     * @param desc  the field's descriptor.
+     * @param name the field's name.
+     * @param desc the field's descriptor.
      * @return a new or already existing field reference item.
      */
     Item newFieldItem(final String owner, final String name, final String desc) {
@@ -295,9 +313,9 @@ public class ClassWriter {
      * contains a similar item.
      *
      * @param owner the internal name of the method's owner class.
-     * @param name  the method's name.
-     * @param desc  the method's descriptor.
-     * @param itf   <tt>true</tt> if <tt>owner</tt> is an interface.
+     * @param name the method's name.
+     * @param desc the method's descriptor.
+     * @param itf <tt>true</tt> if <tt>owner</tt> is an interface.
      * @return a new or already existing method reference item.
      */
     Item newMethodItem(final String owner, final String name, final String desc, final boolean itf) {

@@ -7,27 +7,34 @@ import java.lang.reflect.*;
 
 public class FieldInfo implements Comparable<FieldInfo> {
 
-    public final String name;
-    public final Method method;
-    public final Field field;
-    public final Class<?> fieldClass;
-    public final Type fieldType;
-    public final Class<?> declaringClass;
-    public final boolean getOnly;
-    public final int serialzeFeatures;
-    public final int parserFeatures;
-    public final String label;
-    public final boolean fieldAccess;
-    public final boolean fieldTransient;
-    public final char[] name_chars;
-    public final boolean isEnum;
-    public final boolean jsonDirect;
-    public final boolean unwrapped;
-    public final String format;
-    public final String[] alternateNames;
+    public final String     name;
+    public final Method     method;
+    public final Field      field;
+
+    private int             ordinal = 0;
+    public final Class<?>   fieldClass;
+    public final Type       fieldType;
+    public final Class<?>   declaringClass;
+    public final boolean    getOnly;
+    public final int        serialzeFeatures;
+    public final int        parserFeatures;
+    public final String     label;
+
     private final JSONField fieldAnnotation;
     private final JSONField methodAnnotation;
-    private int ordinal = 0;
+
+    public final boolean    fieldAccess;
+    public final boolean    fieldTransient;
+
+    public final char[]     name_chars;
+
+    public final boolean    isEnum;
+    public final boolean    jsonDirect;
+    public final boolean    unwrapped;
+
+    public final String     format;
+
+    public final String[]  alternateNames;
 
     public FieldInfo(String name, //
                      Class<?> declaringClass, //
@@ -36,7 +43,7 @@ public class FieldInfo implements Comparable<FieldInfo> {
                      Field field, //
                      int ordinal, //
                      int serialzeFeatures, //
-                     int parserFeatures) {
+                     int parserFeatures){
         if (ordinal < 0) {
             ordinal = 0;
         }
@@ -88,7 +95,7 @@ public class FieldInfo implements Comparable<FieldInfo> {
                      int parserFeatures, //
                      JSONField fieldAnnotation, //
                      JSONField methodAnnotation, //
-                     String label) {
+                     String label){
         if (field != null) {
             String fieldName = field.getName();
             if (fieldName.equals(name)) {
@@ -159,7 +166,7 @@ public class FieldInfo implements Comparable<FieldInfo> {
         Type fieldType;
         Class<?> fieldClass;
         if (method != null) {
-            Class<?>[] types;
+        	Class<?>[] types;
             if ((types = method.getParameterTypes()).length == 1) {
                 fieldClass = types[0];
                 fieldType = method.getGenericParameterTypes()[0];
@@ -212,6 +219,38 @@ public class FieldInfo implements Comparable<FieldInfo> {
         isEnum = fieldClass.isEnum();
     }
 
+    public int ordinal() {
+        return ordinal;
+    }
+
+    protected char[] genFieldNameChars() {
+        int nameLen = this.name.length();
+        char[] name_chars = new char[nameLen + 3];
+        this.name.getChars(0, this.name.length(), name_chars, 1);
+        name_chars[0] = '"';
+        name_chars[nameLen + 1] = '"';
+        name_chars[nameLen + 2] = ':';
+        return name_chars;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Annotation> T getAnnation(Class<T> annotationClass) {
+        if (annotationClass == JSONField.class) {
+            return (T) getAnnotation();
+        }
+
+        T annotatition = null;
+        if (method != null) {
+            annotatition = method.getAnnotation(annotationClass);
+        }
+
+        if (annotatition == null && field != null) {
+            annotatition = field.getAnnotation(annotationClass);
+        }
+
+        return annotatition;
+    }
+
     public static Type getFieldType(final Class<?> clazz, final Type type, Type fieldType) {
         if (clazz == null || type == null) {
             return fieldType;
@@ -256,7 +295,7 @@ public class FieldInfo implements Comparable<FieldInfo> {
             if (type instanceof ParameterizedType) {
                 paramType = (ParameterizedType) type;
                 typeVariables = clazz.getTypeParameters();
-            } else if (clazz.getGenericSuperclass() instanceof ParameterizedType) {
+            } else if(clazz.getGenericSuperclass() instanceof ParameterizedType) {
                 paramType = (ParameterizedType) clazz.getGenericSuperclass();
                 typeVariables = clazz.getSuperclass().getTypeParameters();
             } else {
@@ -267,7 +306,7 @@ public class FieldInfo implements Comparable<FieldInfo> {
             boolean changed = getArgument(arguments, typeVariables, paramType.getActualTypeArguments());
             if (changed) {
                 fieldType = new ParameterizedTypeImpl(arguments, parameterizedFieldType.getOwnerType(),
-                        parameterizedFieldType.getRawType());
+                                                      parameterizedFieldType.getRawType());
                 return fieldType;
             }
         }
@@ -345,38 +384,6 @@ public class FieldInfo implements Comparable<FieldInfo> {
         }
 
         return actualType;
-    }
-
-    public int ordinal() {
-        return ordinal;
-    }
-
-    protected char[] genFieldNameChars() {
-        int nameLen = this.name.length();
-        char[] name_chars = new char[nameLen + 3];
-        this.name.getChars(0, this.name.length(), name_chars, 1);
-        name_chars[0] = '"';
-        name_chars[nameLen + 1] = '"';
-        name_chars[nameLen + 2] = ':';
-        return name_chars;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends Annotation> T getAnnation(Class<T> annotationClass) {
-        if (annotationClass == JSONField.class) {
-            return (T) getAnnotation();
-        }
-
-        T annotatition = null;
-        if (method != null) {
-            annotatition = method.getAnnotation(annotationClass);
-        }
-
-        if (annotatition == null && field != null) {
-            annotatition = field.getAnnotation(annotationClass);
-        }
-
-        return annotatition;
     }
 
     @Override
@@ -483,7 +490,7 @@ public class FieldInfo implements Comparable<FieldInfo> {
 
     public void set(Object javaObject, Object value) throws IllegalAccessException, InvocationTargetException {
         if (method != null) {
-            method.invoke(javaObject, value);
+            method.invoke(javaObject, new Object[] { value });
             return;
         }
 

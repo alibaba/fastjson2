@@ -9,14 +9,15 @@ import java.lang.reflect.Type;
 
 /**
  * @since 1.2.9
+ *
  */
 public final class BeanContext {
 
-    private final Class<?> beanClass;
+    private final Class<?>  beanClass;
     private final FieldInfo fieldInfo;
     private final String format;
 
-    public BeanContext(Class<?> beanClass, FieldInfo fieldInfo) {
+    public BeanContext(Class<?> beanClass, FieldInfo fieldInfo){
         this.beanClass = beanClass;
         this.fieldInfo = fieldInfo;
         this.format = fieldInfo.getFormat();
@@ -33,27 +34,27 @@ public final class BeanContext {
     public Field getField() {
         return fieldInfo.field;
     }
-
+    
     public String getName() {
         return fieldInfo.name;
     }
-
+    
     public String getLabel() {
         return fieldInfo.label;
     }
-
+    
     public Class<?> getFieldClass() {
         return fieldInfo.fieldClass;
     }
-
+    
     public Type getFieldType() {
         return fieldInfo.fieldType;
     }
-
+    
     public int getFeatures() {
         return fieldInfo.serialzeFeatures;
     }
-
+    
     public boolean isJsonDirect() {
         return this.fieldInfo.jsonDirect;
     }
@@ -61,7 +62,7 @@ public final class BeanContext {
     public <T extends Annotation> T getAnnation(Class<T> annotationClass) {
         return fieldInfo.getAnnation(annotationClass);
     }
-
+    
     public String getFormat() {
         return format;
     }

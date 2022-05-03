@@ -10,13 +10,13 @@ import java.util.TimeZone;
 
 public class JSONReader implements Closeable {
     private final Reader input;
-    private final com.alibaba.fastjson2.JSONReader raw;
+    private com.alibaba.fastjson2.JSONReader raw;
 
-    public JSONReader(Reader reader) {
+    public JSONReader(Reader reader){
         this(reader, new Feature[0]);
     }
 
-    public JSONReader(Reader input, Feature... features) {
+    public JSONReader(Reader input, Feature... features){
         this.raw = com.alibaba.fastjson2.JSONReader.of(input);
         this.input = input;
         com.alibaba.fastjson2.JSONReader.Context context = raw.getContext();

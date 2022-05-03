@@ -10,6 +10,14 @@ public class JSONPath {
         return jsonPath.eval(rootObject);
     }
 
+    public boolean set(Object rootObject, Object value) {
+        return set(rootObject, value, true);
+    }
+
+    public boolean set(Object rootObject, Object value, boolean p) {
+        throw new JSONException("TODO"); // TODO : JSONPath.set
+    }
+
     public static boolean set(Object rootObject, String path, Object value) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         jsonPath.set(rootObject, value);
@@ -19,6 +27,10 @@ public class JSONPath {
     public static Map<String, Object> paths(Object javaObject) {
         return com.alibaba.fastjson2.JSONPath.paths(javaObject);
     }
+//
+//    public boolean contains(Object rootObject) {
+//        throw new JSONException("TODO");
+//    }
 
     public static void arrayAdd(Object rootObject, String path, Object... values) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
@@ -31,10 +43,6 @@ public class JSONPath {
                 .extract(
                         JSONReader.of(json));
     }
-//
-//    public boolean contains(Object rootObject) {
-//        throw new JSONException("TODO");
-//    }
 
     public static boolean remove(Object root, String path) {
         return com.alibaba.fastjson2.JSONPath
@@ -45,13 +53,5 @@ public class JSONPath {
     public static boolean contains(Object rootObject, String path) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         return jsonPath.contains(rootObject);
-    }
-
-    public boolean set(Object rootObject, Object value) {
-        return set(rootObject, value, true);
-    }
-
-    public boolean set(Object rootObject, Object value, boolean p) {
-        throw new JSONException("TODO"); // TODO : JSONPath.set
     }
 }

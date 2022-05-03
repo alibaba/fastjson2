@@ -5,7 +5,6 @@ import java.util.Map;
 
 public class ParserConfig {
     public static ParserConfig global = new ParserConfig();
-
     public static ParserConfig getGlobalInstance() {
         return global;
     }
@@ -48,7 +47,7 @@ public class ParserConfig {
         return field;
     }
 
-    public static void parserAllFieldToCache(Class<?> clazz, Map</**fieldName*/String, Field> fieldCacheMap) {
+    public static void  parserAllFieldToCache(Class<?> clazz,Map</**fieldName*/String , Field> fieldCacheMap){
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             String fieldName = field.getName();
