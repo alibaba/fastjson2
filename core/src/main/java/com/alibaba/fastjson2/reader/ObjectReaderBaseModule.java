@@ -425,7 +425,14 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 }
             }
 
-            processAnnotation(fieldInfo, parameter.getAnnotations());
+            Annotation[] annotations = null;
+            try {
+                annotations = parameter.getAnnotations();
+            } catch (ArrayIndexOutOfBoundsException ignored) {}
+
+            if (annotations != null) {
+                processAnnotation(fieldInfo, annotations);
+            }
         }
 
         @Override
@@ -801,6 +808,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
                         }
                     });
+                    break;
+                case "com.fasterxml.jackson.annotation.JsonCreator":
+                    creatorMethod = true;
                     break;
                 default:
                     break;
