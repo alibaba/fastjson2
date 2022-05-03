@@ -27,10 +27,11 @@ import java.lang.annotation.Target;
  * @author wenshao[szujobs@hotmail.com]
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 public @interface JSONField {
     /**
      * config encode/decode ordinal
+     *
      * @since 1.1.42
      */
     int ordinal() default 0;
@@ -69,8 +70,8 @@ public @interface JSONField {
     Class<?> deserializeUsing() default Void.class;
 
     /**
-     * @since 1.2.21
      * @return the alternative names of the field when it is deserialized
+     * @since 1.2.21
      */
     String[] alternateNames() default {};
 

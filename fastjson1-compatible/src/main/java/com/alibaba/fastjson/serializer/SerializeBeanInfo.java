@@ -5,15 +5,13 @@ import com.alibaba.fastjson.util.FieldInfo;
 
 public class SerializeBeanInfo {
 
-    protected final Class<?> beanType;
-    protected final String   typeName;
-    protected final String   typeKey;
-    protected final JSONType jsonType;
-
     public final FieldInfo[] fields;
     public final FieldInfo[] sortedFields;
-    
-    protected int               features;
+    protected final Class<?> beanType;
+    protected final String typeName;
+    protected final String typeKey;
+    protected final JSONType jsonType;
+    protected int features;
 
     public SerializeBeanInfo(Class<?> beanType, //
                              JSONType jsonType, //
@@ -22,7 +20,7 @@ public class SerializeBeanInfo {
                              int features,
                              FieldInfo[] fields, //
                              FieldInfo[] sortedFields
-                             ){
+    ) {
         this.beanType = beanType;
         this.jsonType = jsonType;
         this.typeName = typeName;
