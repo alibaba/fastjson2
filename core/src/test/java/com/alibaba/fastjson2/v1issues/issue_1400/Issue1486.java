@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.v1issues.issue_1400;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,7 @@ public class Issue1486 {
 
         String json = "[{\"song_list\":[{\"val\":1,\"v_al\":2},{\"val\":2,\"v_al\":2},{\"val\":3,\"v_al\":2}],\"songlist\":\"v_al\"}]";
         List<Value> parseObject = JSON.parseObject(json, new TypeReference<List<Value>>() {
-        }.getType());
+        }.getType(), JSONReader.Feature.IgnoreNoneSerializable);
         for (Value value : parseObject) {
             System.out.println(value.songList + "  " );
         }

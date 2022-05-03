@@ -497,7 +497,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 String fieldName = BeanUtils.getterName(methodName, null);
 
                 BeanUtils.declaredFields(objectClass, field -> {
-                    if (field.getName().equalsIgnoreCase(fieldName)) {
+                    if (field.getName().equals(fieldName)) {
                         int modifiers = field.getModifiers();
                         if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                             getFieldInfo(fieldInfo, objectClass, field);
