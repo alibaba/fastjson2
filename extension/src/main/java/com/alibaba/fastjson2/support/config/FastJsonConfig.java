@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.Filter;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Configuration for FastJson.
@@ -51,7 +52,7 @@ public class FastJsonConfig {
      * init param.
      */
     public FastJsonConfig() {
-        this.charset = Charset.forName("UTF-8");
+        this.charset = StandardCharsets.UTF_8;
         this.readerFeatures = new JSONReader.Feature[0];
         this.writerFeatures = new JSONWriter.Feature[0];
         this.writerFilters = new Filter[0];

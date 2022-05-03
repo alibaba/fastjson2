@@ -79,7 +79,8 @@ public class Retrofit2ConverterFactory extends Converter.Factory {
         @Override
         public T convert(ResponseBody value) throws IOException {
             try {
-                return JSON.parseObject(value.bytes(), type, fastJsonConfig.getReaderFeatures());
+                return JSON.parseObject(value.bytes(), type,
+                        fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
             } catch (Exception e) {
                 throw new IOException("JSON parse error: " + e.getMessage(), e);
             } finally {
@@ -95,7 +96,7 @@ public class Retrofit2ConverterFactory extends Converter.Factory {
         @Override
         public RequestBody convert(T value) throws IOException {
             try {
-                byte[] content = JSON.toJSONBytes(value,
+                byte[] content = JSON.toJSONBytes(value, fastJsonConfig.getDateFormat(),
                         fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
                 return RequestBody.create(MEDIA_TYPE, content);
             } catch (Exception e) {

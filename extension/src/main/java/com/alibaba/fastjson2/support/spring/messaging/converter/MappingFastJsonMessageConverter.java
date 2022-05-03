@@ -63,9 +63,9 @@ public class MappingFastJsonMessageConverter extends AbstractMessageConverter {
         Object payload = message.getPayload();
         Object obj = null;
         if (payload instanceof byte[]) {
-            obj = JSON.parseObject((byte[]) payload, targetClass, fastJsonConfig.getReaderFeatures());
+            obj = JSON.parseObject((byte[]) payload, targetClass, fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
         } else if (payload instanceof String) {
-            obj = JSON.parseObject((String) payload, targetClass, fastJsonConfig.getReaderFeatures());
+            obj = JSON.parseObject((String) payload, targetClass, fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
         }
 
         return obj;
@@ -79,13 +79,13 @@ public class MappingFastJsonMessageConverter extends AbstractMessageConverter {
             if (payload instanceof String && JSON.isValid((String) payload)) {
                 obj = ((String) payload).getBytes(fastJsonConfig.getCharset());
             } else {
-                obj = JSON.toJSONBytes(payload, fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
+                obj = JSON.toJSONBytes(payload, fastJsonConfig.getDateFormat(), fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
             }
         } else {
             if (payload instanceof String && JSON.isValid((String) payload)) {
                 obj = payload;
             } else {
-                obj = JSON.toJSONString(payload, fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
+                obj = JSON.toJSONString(payload, fastJsonConfig.getDateFormat(), fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
             }
         }
 
