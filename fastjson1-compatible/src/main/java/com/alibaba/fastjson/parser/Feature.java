@@ -21,28 +21,28 @@ package com.alibaba.fastjson.parser;
  */
 public enum Feature {
     /**
-	 *
-	 */
+     *
+     */
     AutoCloseSource,
     /**
-	 *
-	 */
+     *
+     */
     AllowComment,
     /**
-	 *
-	 */
+     *
+     */
     AllowUnQuotedFieldNames,
     /**
-	 *
-	 */
+     *
+     */
     AllowSingleQuotes,
     /**
-	 *
-	 */
+     *
+     */
     InternFieldNames,
     /**
-	 *
-	 */
+     *
+     */
     AllowISO8601DateFormat,
 
     /**
@@ -82,19 +82,16 @@ public enum Feature {
 
     /**
      * @since 1.1.35
-     *
      */
     SupportArrayToBean,
 
     /**
      * @since 1.2.3
-     *
      */
     OrderedField,
 
     /**
      * @since 1.2.5
-     *
      */
     DisableSpecialKeyDetect,
 
@@ -110,14 +107,14 @@ public enum Feature {
 
     /**
      * @since 1.2.29
-     *
+     * <p>
      * disable autotype key '@type'
      */
     IgnoreAutoType,
 
     /**
      * @since 1.2.30
-     *
+     * <p>
      * disable field smart match, improve performance in some scenarios.
      */
     DisableFieldSmartMatch,
@@ -145,14 +142,10 @@ public enum Feature {
     TrimStringFieldValue,
     ;
 
-    Feature(){
-        mask = (1 << ordinal());
-    }
-
     public final int mask;
 
-    public final int getMask() {
-        return mask;
+    Feature() {
+        mask = (1 << ordinal());
     }
 
     public static boolean isEnabled(int features, Feature feature) {
@@ -176,10 +169,14 @@ public enum Feature {
 
         int value = 0;
 
-        for (Feature feature: features) {
+        for (Feature feature : features) {
             value |= feature.mask;
         }
 
         return value;
+    }
+
+    public final int getMask() {
+        return mask;
     }
 }

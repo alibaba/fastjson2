@@ -8,6 +8,7 @@ import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.util.MimeType;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Fastjson for Spring Messaging Json Converter.
@@ -26,6 +27,10 @@ public class MappingFastJsonMessageConverter extends AbstractMessageConverter {
      */
     private FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
+    public MappingFastJsonMessageConverter() {
+        super(new MimeType("application", "json", StandardCharsets.UTF_8));
+    }
+
     /**
      * @return the fastJsonConfig.
      */
@@ -38,10 +43,6 @@ public class MappingFastJsonMessageConverter extends AbstractMessageConverter {
      */
     public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
         this.fastJsonConfig = fastJsonConfig;
-    }
-
-    public MappingFastJsonMessageConverter() {
-        super(new MimeType("application", "json", Charset.forName("UTF-8")));
     }
 
     @Override

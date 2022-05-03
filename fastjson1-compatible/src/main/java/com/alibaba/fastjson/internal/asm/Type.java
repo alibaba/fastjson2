@@ -39,7 +39,7 @@ public class Type {
     /**
      * The <tt>void</tt> type.
      */
-    public static final Type VOID_TYPE    = new Type(0, null, ('V' << 24) | (5 << 16) | (0 << 8) | 0, 1);
+    public static final Type VOID_TYPE = new Type(0, null, ('V' << 24) | (5 << 16) | (0 << 8) | 0, 1);
 
     /**
      * The <tt>boolean</tt> type.
@@ -49,37 +49,37 @@ public class Type {
     /**
      * The <tt>char</tt> type.
      */
-    public static final Type CHAR_TYPE    = new Type(2, null, ('C' << 24) | (0 << 16) | (6 << 8) | 1, 1);
+    public static final Type CHAR_TYPE = new Type(2, null, ('C' << 24) | (0 << 16) | (6 << 8) | 1, 1);
 
     /**
      * The <tt>byte</tt> type.
      */
-    public static final Type BYTE_TYPE    = new Type(3, null, ('B' << 24) | (0 << 16) | (5 << 8) | 1, 1);
+    public static final Type BYTE_TYPE = new Type(3, null, ('B' << 24) | (0 << 16) | (5 << 8) | 1, 1);
 
     /**
      * The <tt>short</tt> type.
      */
-    public static final Type SHORT_TYPE   = new Type(4, null, ('S' << 24) | (0 << 16) | (7 << 8) | 1, 1);
+    public static final Type SHORT_TYPE = new Type(4, null, ('S' << 24) | (0 << 16) | (7 << 8) | 1, 1);
 
     /**
      * The <tt>int</tt> type.
      */
-    public static final Type INT_TYPE     = new Type(5, null, ('I' << 24) | (0 << 16) | (0 << 8) | 1, 1);
+    public static final Type INT_TYPE = new Type(5, null, ('I' << 24) | (0 << 16) | (0 << 8) | 1, 1);
 
     /**
      * The <tt>float</tt> type.
      */
-    public static final Type FLOAT_TYPE   = new Type(6, null, ('F' << 24) | (2 << 16) | (2 << 8) | 1, 1);
+    public static final Type FLOAT_TYPE = new Type(6, null, ('F' << 24) | (2 << 16) | (2 << 8) | 1, 1);
 
     /**
      * The <tt>long</tt> type.
      */
-    public static final Type LONG_TYPE    = new Type(7, null, ('J' << 24) | (1 << 16) | (1 << 8) | 2, 1);
+    public static final Type LONG_TYPE = new Type(7, null, ('J' << 24) | (1 << 16) | (1 << 8) | 2, 1);
 
     /**
      * The <tt>double</tt> type.
      */
-    public static final Type DOUBLE_TYPE  = new Type(8, null, ('D' << 24) | (3 << 16) | (3 << 8) | 2, 1);
+    public static final Type DOUBLE_TYPE = new Type(8, null, ('D' << 24) | (3 << 16) | (3 << 8) | 2, 1);
 
     // ------------------------------------------------------------------------
     // Fields
@@ -88,30 +88,30 @@ public class Type {
     /**
      * The sort of this Java type.
      */
-    protected final int        sort;
+    protected final int sort;
 
     /**
      * A buffer containing the internal name of this Java type. This field is only used for reference types.
      */
-    private final char[]     buf;
+    private final char[] buf;
 
     /**
      * The offset of the internal name of this Java type in {@link #buf buf} or, for primitive types, the size,
      * descriptor and getOpcode offsets for this type (byte 0 contains the size, byte 1 the descriptor, byte 2 the
      * offset for IALOAD or IASTORE, byte 3 the offset for all other instructions).
      */
-    private final int        off;
+    private final int off;
 
     /**
      * The length of the internal name of this Java type.
      */
-    private final int        len;
+    private final int len;
 
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
 
-    private Type(final int sort, final char[] buf, final int off, final int len){
+    private Type(final int sort, final char[] buf, final int off, final int len) {
         this.sort = sort;
         this.buf = buf;
         this.off = off;
@@ -195,7 +195,7 @@ public class Type {
                     }
                 }
                 return new Type(9 /*ARRAY*/, buf, off, len + 1);
-                // case 'L':
+            // case 'L':
             default:
                 len = 1;
                 while (buf[off + len] != ';') {
@@ -205,36 +205,11 @@ public class Type {
         }
     }
 
-    public String getInternalName() {
-        return new String(buf, off, len);
-    }
-
-    // ------------------------------------------------------------------------
-    // Conversion to type descriptors
-    // ------------------------------------------------------------------------
-
-    /**
-     * Returns the descriptor corresponding to this Java type.
-     *
-     * @return the descriptor corresponding to this Java type.
-     */
-    String getDescriptor() {
-        return new String(this.buf, off, len);
-    }
-
-    private int getDimensions() {
-        int i = 1;
-        while (buf[off + i] == '[') {
-            ++i;
-        }
-        return i;
-    }
-
     static Type[] getArgumentTypes(final String methodDescriptor) {
         char[] buf = methodDescriptor.toCharArray();
         int off = 1;
         int size = 0;
-        for (;;) {
+        for (; ; ) {
             char car = buf[off++];
             if (car == ')') {
                 break;
@@ -256,6 +231,31 @@ public class Type {
             size += 1;
         }
         return args;
+    }
+
+    // ------------------------------------------------------------------------
+    // Conversion to type descriptors
+    // ------------------------------------------------------------------------
+
+    public String getInternalName() {
+        return new String(buf, off, len);
+    }
+
+    /**
+     * Returns the descriptor corresponding to this Java type.
+     *
+     * @return the descriptor corresponding to this Java type.
+     */
+    String getDescriptor() {
+        return new String(this.buf, off, len);
+    }
+
+    private int getDimensions() {
+        int i = 1;
+        while (buf[off + i] == '[') {
+            ++i;
+        }
+        return i;
     }
 
     protected String getClassName() {
