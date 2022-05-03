@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.codec.DateTimeCodec;
 
 import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 final class ObjectWriterImplZonedDateTime extends DateTimeCodec implements ObjectWriter {
     static final ObjectWriterImplZonedDateTime INSTANCE = new ObjectWriterImplZonedDateTime(null);
@@ -44,11 +45,29 @@ final class ObjectWriterImplZonedDateTime extends DateTimeCodec implements Objec
             return;
         }
 
-        String dateFormat = ctx.getDateFormat();
-        if (dateFormat == null) {
+        if (formatISO8601 || ctx.isDateFormatISO8601()) {
+            jsonWriter.writeDateTimeISO8601(
+                    zdt.getYear(),
+                    zdt.getMonthValue(),
+                    zdt.getDayOfMonth(),
+                    zdt.getHour(),
+                    zdt.getMinute(),
+                    zdt.getSecond(),
+                    zdt.getNano() / 1000_000,
+                    zdt.getOffset().getTotalSeconds()
+            );
+            return;
+        }
+
+        DateTimeFormatter formatter = this.getDateFormatter();
+        if (formatter == null) {
+            formatter = ctx.getDateFormatter();
+        }
+
+        if (formatter == null) {
             jsonWriter.writeZonedDateTime(zdt);
         } else {
-            String str = ctx.getDateFormatter().format(zdt);
+            String str = formatter.format(zdt);
             jsonWriter.writeString(str);
         }
     }
