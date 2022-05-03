@@ -9,9 +9,6 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -20,6 +17,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
 
 public class ObjectReaderProvider {
     static final boolean SAFE_MODE;
@@ -111,7 +111,7 @@ public class ObjectReaderProvider {
                 property = property.trim();
             }
 
-            SAFE_MODE = property != null && property.equals("true");
+            SAFE_MODE = "true".equals(property);
         }
     }
 
@@ -124,9 +124,9 @@ public class ObjectReaderProvider {
     private ConcurrentMap<Type, Map<Type, Function>> typeConverts = new ConcurrentHashMap<>();
 
     final ObjectReaderCreator creator;
-    final List<ObjectReaderModule> modules = new ArrayList();
+    final List<ObjectReaderModule> modules = new ArrayList<>();
 
-    private long[] denyHashCodes;
+    private final long[] denyHashCodes;
     private long[] acceptHashCodes;
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
@@ -439,7 +439,7 @@ public class ObjectReaderProvider {
     }
 
     public ObjectReader getObjectReader(String typeName, Class<?> expectClass, long features) {
-        Class autoTypeClass = checkAutoType(typeName, expectClass, features);
+        Class<?> autoTypeClass = checkAutoType(typeName, expectClass, features);
         if (autoTypeClass == null) {
             return null;
         }
@@ -450,7 +450,7 @@ public class ObjectReaderProvider {
         return objectReader;
     }
 
-    public Class checkAutoType(String typeName, Class<?> expectClass, long features) {
+    public Class<?> checkAutoType(String typeName, Class<?> expectClass, long features) {
         if (typeName == null || typeName.isEmpty()) {
             return null;
         }
@@ -580,10 +580,6 @@ public class ObjectReaderProvider {
             }
         }
 
-        if (!autoTypeSupport) {
-            return null;
-        }
-
         if (autoTypeHandler != null) {
             autoTypeHandler.accept(expectClass);
         }
@@ -632,8 +628,7 @@ public class ObjectReaderProvider {
                 if (bound instanceof Class) {
                     ObjectReader boundObjectReader = getObjectReader(bound, fieldBased);
                     if (boundObjectReader != null) {
-                        ObjectReader previous = fieldBased ? cacheFieldBased.putIfAbsent(objectType, boundObjectReader)
-                                : cache.putIfAbsent(objectType, boundObjectReader);
+                        ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, boundObjectReader);
                         if (previous != null) {
                             boundObjectReader = previous;
                         }
@@ -660,9 +655,7 @@ public class ObjectReaderProvider {
                 if (typeArguments.length == 0 || !generic) {
                     ObjectReader rawClassReader = getObjectReader(rawClass, fieldBased);
                     if (rawClassReader != null) {
-                        ObjectReader previous = fieldBased
-                                ? cacheFieldBased.putIfAbsent(objectType, rawClassReader)
-                                : cache.putIfAbsent(objectType, rawClassReader);
+                        ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, rawClassReader);
                         if (previous != null) {
                             rawClassReader = previous;
                         }
@@ -686,18 +679,21 @@ public class ObjectReaderProvider {
         }
 
         if (objectReader == null) {
-            objectReader = getCreator()
-                    .createObjectReader(objectClass, objectType, fieldBased, modules);
+            objectReader = getCreator().createObjectReader(objectClass, objectType, fieldBased, modules);
         }
 
-        ObjectReader previous = fieldBased
-                ? cacheFieldBased.putIfAbsent(objectType, objectReader)
-                : cache.putIfAbsent(objectType, objectReader);
+        ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, objectReader);
         if (previous != null) {
             objectReader = previous;
         }
 
         return objectReader;
+    }
+
+    private ObjectReader getPreviousObjectReader(boolean fieldBased, Type objectType, ObjectReader boundObjectReader) {
+        return fieldBased
+                ? cacheFieldBased.putIfAbsent(objectType, boundObjectReader)
+                : cache.putIfAbsent(objectType, boundObjectReader);
     }
 
     public interface AutoTypeBeforeHandler {
