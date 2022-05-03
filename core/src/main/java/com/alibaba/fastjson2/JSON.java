@@ -459,6 +459,7 @@ public interface JSON {
      * @param consumer the consumer of the parsing result object
      * @param features features to be enabled in parsing
      * @throws JSONException IO exception occurred in reading
+     * @see JSON#parseObject(InputStream, Charset, char, Type, Consumer, JSONReader.Feature...)
      */
     static <T> void parseObject(InputStream input, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
         parseObject(input, StandardCharsets.UTF_8, '\n', type, consumer, features);
@@ -539,9 +540,9 @@ public interface JSON {
     }
 
     /**
-     * Parse {@link InputStream} into a Java object with specified {@link JSONReader.Feature}s enabled and consume it
+     * Parse {@link Reader} into a Java object with specified {@link JSONReader.Feature}s enabled and consume it
      *
-     * @param input     the JSON {@link InputStream} to be parsed
+     * @param input     the JSON {@link Reader} to be parsed
      * @param delimiter specify the delimiter
      * @param type      specify the {@link Type} to be converted
      * @param consumer  the consumer of the parsing result object
