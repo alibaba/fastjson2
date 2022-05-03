@@ -60,6 +60,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     case "com.alibaba.fastjson.annotation.JSONType":
                         jsonType1x = annotation;
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonIgnoreProperties":
+                        processJacksonJsonIgnoreProperties(beanInfo, annotation);
+                        break;
                     default:
                         break;
                 }
@@ -292,6 +295,27 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                                     break;
                                 default:
                                     break;
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {}
+            });
+        }
+
+        private void processJacksonJsonIgnoreProperties(BeanInfo beanInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "value": {
+                            String[] value = (String[]) result;
+                            if (value.length != 0) {
+                                beanInfo.ignores = value;
                             }
                             break;
                         }
