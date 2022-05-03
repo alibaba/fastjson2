@@ -49,6 +49,25 @@ public class FastJsonHttpMessageConverterMockTest {
                 .build();
     }
 
+    @Test
+    public void testParameterizedTypeBean() throws Exception {
+        mockMvc.perform(
+                (post("/parameterizedTypeBean").characterEncoding("UTF-8")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content("{\"t\": \"neil dong\"}")
+                )).andExpect(status().isOk()).andDo(print());
+    }
+
+    @Test
+    public void testTypeVariableBean() throws Exception {
+        mockMvc.perform(
+                (post("/typeVariableBean").characterEncoding("UTF-8")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content("{\"id\": 1}")
+                )).andExpect(status().isOk()).andDo(print());
+
+    }
+
     public static class AbstractController<ID extends Serializable, PO extends GenericEntity<ID>> {
 
         @PostMapping(path = "/typeVariableBean", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -79,26 +98,6 @@ public class FastJsonHttpMessageConverterMockTest {
             converters.add(converter);
         }
     }
-
-    @Test
-    public void testParameterizedTypeBean() throws Exception {
-        mockMvc.perform(
-                (post("/parameterizedTypeBean").characterEncoding("UTF-8")
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content("{\"t\": \"neil dong\"}")
-                )).andExpect(status().isOk()).andDo(print());
-    }
-
-    @Test
-    public void testTypeVariableBean() throws Exception {
-        mockMvc.perform(
-                (post("/typeVariableBean").characterEncoding("UTF-8")
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content("{\"id\": 1}")
-                )).andExpect(status().isOk()).andDo(print());
-
-    }
-
 
     static abstract class GenericEntity<ID extends Serializable> {
         public abstract ID getId();

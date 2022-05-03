@@ -33,7 +33,7 @@ public class JSONExtractScalarTest {
 
         Text intput = new Text(utf8Bytes);
 
-        for (int i = 0; i < 10; ++i){
+        for (int i = 0; i < 10; ++i) {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < 1000 * 1000 * 10; ++j) {
@@ -58,7 +58,7 @@ public class JSONExtractScalarTest {
 
         Text intput = new Text(utf8Bytes);
 
-        for (int i = 0; i < 10; ++i){
+        for (int i = 0; i < 10; ++i) {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < 1000 * 1000 * 10; ++j) {
@@ -82,7 +82,7 @@ public class JSONExtractScalarTest {
 
         Text intput = new Text(utf8Bytes);
 
-        for (int i = 0; i < 10; ++i){
+        for (int i = 0; i < 10; ++i) {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < 1000 * 1000 * 10; ++j) {

@@ -14,7 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 public class JSONExtract extends UDF {
+    static final byte[] BYTES_TRUE = new byte[]{'"', 't', 'r', 'u', 'e', '"'};
+    static final byte[] BYTES_FALSE = new byte[]{'"', 'f', 'a', 'l', 's', 'e', '"'};
     private static JSONWritable[] cache = new JSONWritable[512];
+
     static {
         for (int i = -1; i < 511; ++i) {
             int size = (i < 0) ? IOUtils.stringSize(-i) + 1 : IOUtils.stringSize(i);
@@ -25,9 +28,6 @@ public class JSONExtract extends UDF {
             cache[i + 1] = new JSONWritable(bytes);
         }
     }
-
-    static final byte[] BYTES_TRUE = new byte[] {'"', 't', 'r', 'u', 'e', '"'};
-    static final byte[] BYTES_FALSE = new byte[] {'"', 'f', 'a', 'l', 's', 'e', '"'};
 
     private final JSONPath path;
     private JSONWritable text = new JSONWritable();
