@@ -452,6 +452,147 @@ public interface JSON {
     }
 
     /**
+     * Parse {@link InputStream} into a Java object with specified {@link JSONReader.Feature}s enabled and consume it
+     *
+     * @param input    the JSON {@link InputStream} to be parsed
+     * @param type     specify the {@link Type} to be converted
+     * @param consumer the consumer of the parsing result object
+     * @param features features to be enabled in parsing
+     * @throws JSONException IO exception occurred in reading
+     * @see JSON#parseObject(InputStream, Charset, char, Type, Consumer, JSONReader.Feature...)
+     */
+    static <T> void parseObject(InputStream input, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
+        parseObject(input, StandardCharsets.UTF_8, '\n', type, consumer, features);
+    }
+
+    /**
+     * Parse {@link InputStream} into a Java object with specified {@link JSONReader.Feature}s enabled and consume it
+     *
+     * @param input     the JSON {@link InputStream} to be parsed
+     * @param charset   specify {@link Charset} to parse
+     * @param delimiter specify the delimiter
+     * @param type      specify the {@link Type} to be converted
+     * @param consumer  the consumer of the parsing result object
+     * @param features  features to be enabled in parsing
+     * @throws JSONException IO exception occurred in reading
+     */
+    @SuppressWarnings("unchecked")
+    static <T> void parseObject(InputStream input, Charset charset, char delimiter, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
+        int identityHashCode = System.identityHashCode(Thread.currentThread());
+        final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> byteUpdater;
+
+        switch (identityHashCode & 3) {
+            case 0:
+                byteUpdater = JSONFactory.BYTES0_UPDATER;
+                break;
+            case 1:
+                byteUpdater = JSONFactory.BYTES1_UPDATER;
+                break;
+            case 2:
+                byteUpdater = JSONFactory.BYTES2_UPDATER;
+                break;
+            default:
+                byteUpdater = JSONFactory.BYTES3_UPDATER;
+                break;
+        }
+
+        byte[] bytes = byteUpdater.getAndSet(JSONFactory.CACHE, null);
+        if (bytes == null) {
+            bytes = new byte[8192];
+        }
+
+        int limit = 0, start = 0, end;
+        ObjectReader<? extends T> objectReader = null;
+
+        try {
+            while (true) {
+                int n = input.read(bytes, limit, bytes.length - limit);
+                if (n == -1) {
+                    break;
+                }
+
+                for (int i = 0; i < n; ++i) {
+                    int j = limit + i;
+                    if (bytes[j] == delimiter) {
+                        end = j;
+
+                        JSONReader jsonReader = JSONReader.of(bytes, start, end - start, charset);
+                        jsonReader.context.config(features);
+                        if (objectReader == null) {
+                            objectReader = jsonReader.getObjectReader(type);
+                        }
+
+                        consumer.accept(
+                            objectReader.readObject(jsonReader)
+                        );
+                        start = end + 1;
+                    }
+                }
+                limit += n;
+
+                if (limit == bytes.length) {
+                    bytes = Arrays.copyOf(bytes, bytes.length + 8192);
+                }
+            }
+        } catch (IOException e) {
+            throw new JSONException("Interruption in reading", e);
+        }
+    }
+
+    /**
+     * Parse {@link Reader} into a Java object with specified {@link JSONReader.Feature}s enabled and consume it
+     *
+     * @param input     the JSON {@link Reader} to be parsed
+     * @param delimiter specify the delimiter
+     * @param type      specify the {@link Type} to be converted
+     * @param consumer  the consumer of the parsing result object
+     * @throws JSONException IO exception occurred in reading
+     */
+    @SuppressWarnings("unchecked")
+    static <T> void parseObject(Reader input, char delimiter, Type type, Consumer<T> consumer) {
+        char[] chars = JSONFactory.CHARS_UPDATER.getAndSet(JSONFactory.CACHE, null);
+        if (chars == null) {
+            chars = new char[8192];
+        }
+
+        int limit = 0, start = 0, end;
+        ObjectReader<? extends T> objectReader = null;
+
+        try {
+            while (true) {
+                int n = input.read(chars, limit, chars.length - limit);
+                if (n == -1) {
+                    break;
+                }
+
+                for (int i = 0; i < n; ++i) {
+                    int j = limit + i;
+                    if (chars[j] == delimiter) {
+                        end = j;
+
+                        JSONReader jsonReader = JSONReader.of(chars, start, end - start);
+                        if (objectReader == null) {
+                            objectReader = jsonReader.getObjectReader(type);
+                        }
+
+                        consumer.accept(
+                            objectReader.readObject(jsonReader)
+                        );
+                        start = end + 1;
+                    }
+                }
+                limit += n;
+
+                if (limit == chars.length) {
+                    chars = Arrays.copyOf(chars, chars.length + 8192);
+                }
+            }
+        } catch (IOException e) {
+            throw new JSONException("Interruption in reading", e);
+        }
+    }
+
+    /**
      * Parse JSON {@link String} into {@link JSONArray}
      *
      * @param text the JSON {@link String} to be parsed
@@ -520,7 +661,7 @@ public interface JSON {
             reader.startArray();
             for (Type itemType : types) {
                 array.add(
-                        reader.read(itemType)
+                    reader.read(itemType)
                 );
             }
             reader.endArray();
@@ -561,7 +702,7 @@ public interface JSON {
         JSONWriterUTF16 jsonWriter = JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF16(writeContext);
 
         try (JSONWriter writer = pretty ?
-                new JSONWriterPretty(jsonWriter) : jsonWriter) {
+            new JSONWriterPretty(jsonWriter) : jsonWriter) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -1048,110 +1189,5 @@ public interface JSON {
      */
     static boolean register(Type type, ObjectWriter<?> objectReader) {
         return JSONFactory.defaultObjectWriterProvider.register(type, objectReader);
-    }
-
-    static void parseObject(InputStream input, Type type, Consumer<?> consumer, JSONReader.Feature... features) {
-        parseObject(input, StandardCharsets.UTF_8, '\n', type, consumer, features);
-    }
-
-    static void parseObject(InputStream input, Charset charset, char delimiter, Type type, Consumer consumer, JSONReader.Feature... features) {
-        ObjectReader<?> objectReader = null;
-
-        int identityHashCode = System.identityHashCode(Thread.currentThread());
-        final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> byteUpdater;
-        switch (identityHashCode & 3) {
-            case 0:
-                byteUpdater = JSONFactory.BYTES0_UPDATER;
-                break;
-            case 1:
-                byteUpdater = JSONFactory.BYTES1_UPDATER;
-                break;
-            case 2:
-                byteUpdater = JSONFactory.BYTES2_UPDATER;
-                break;
-            default:
-                byteUpdater = JSONFactory.BYTES3_UPDATER;
-                break;
-        }
-
-        byte[] bytes = byteUpdater.getAndSet(JSONFactory.CACHE, null);
-        if (bytes == null) {
-            bytes = new byte[8192];
-        }
-
-        int limit = 0, start = 0, end;
-        try {
-            for (; ; ) {
-                int n = input.read(bytes, limit, bytes.length - limit);
-                if (n == -1) {
-                    break;
-                }
-
-                for (int i = 0; i < n; ++i) {
-                    int j = limit + i;
-                    if (bytes[j] == delimiter) {
-                        end = j;
-
-                        JSONReader jsonReader = JSONReader.of(bytes, start, end - start, charset);
-                        jsonReader.context.config(features);
-                        if (objectReader == null) {
-                            objectReader = jsonReader.getObjectReader(type);
-                        }
-
-                        Object object = objectReader.readObject(jsonReader);
-                        consumer.accept(object);
-                        start = end + 1;
-                    }
-                }
-                limit += n;
-
-                if (limit == bytes.length) {
-                    bytes = Arrays.copyOf(bytes, bytes.length + 8192);
-                }
-            }
-        } catch (IOException ioe) {
-            throw new JSONException("read error", ioe);
-        }
-    }
-
-    static void parseObject(Reader input, char delimiter, Type type, Consumer consumer) {
-        ObjectReader<?> objectReader = null;
-        char[] chars = JSONFactory.CHARS_UPDATER.getAndSet(JSONFactory.CACHE, null);
-        if (chars == null) {
-            chars = new char[8192];
-        }
-
-        int limit = 0, start = 0, end;
-        try {
-            for (; ; ) {
-                int n = input.read(chars, limit, chars.length - limit);
-                if (n == -1) {
-                    break;
-                }
-
-                for (int i = 0; i < n; ++i) {
-                    int j = limit + i;
-                    if (chars[j] == delimiter) {
-                        end = j;
-
-                        JSONReader jsonReader = JSONReader.of(chars, start, end - start);
-                        if (objectReader == null) {
-                            objectReader = jsonReader.getObjectReader(type);
-                        }
-
-                        Object object = objectReader.readObject(jsonReader);
-                        consumer.accept(object);
-                        start = end + 1;
-                    }
-                }
-                limit += n;
-
-                if (limit == chars.length) {
-                    chars = Arrays.copyOf(chars, chars.length + 8192);
-                }
-            }
-        } catch (IOException ioe) {
-            throw new JSONException("read error", ioe);
-        }
     }
 }
