@@ -10,6 +10,7 @@ public class FieldInfo {
     public Class<?> writeUsing;
     public boolean fieldClassMixIn;
     public boolean isTransient;
+    public boolean isValue;
 
     public void init() {
         fieldName = null;
@@ -22,4 +23,6 @@ public class FieldInfo {
         fieldClassMixIn = false;
         isTransient = false;
     }
+
+   public static final long VALUE_MASK = 1L << 32;
 }

@@ -216,6 +216,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         fieldInfo.ignore = true;
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonValue":
+                        fieldInfo.features |= FieldInfo.VALUE_MASK;
+                        break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
@@ -263,6 +266,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             int ordinal = jsonField.ordinal();
             if (ordinal != 0) {
                 fieldInfo.ordinal = ordinal;
+            }
+
+            boolean value = jsonField.value();
+            if (value) {
+                fieldInfo.features |= FieldInfo.VALUE_MASK;
             }
 
             Class writeUsing = jsonField.writeUsing();
@@ -514,6 +522,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 int ordinal = jsonField.ordinal();
                 if (ordinal != 0) {
                     fieldInfo.ordinal = ordinal;
+                }
+
+                boolean value = jsonField.value();
+                if (value) {
+                    fieldInfo.features |= FieldInfo.VALUE_MASK;
                 }
             }
 
