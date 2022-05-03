@@ -77,7 +77,7 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONObject}
      *
-     * @param text the JSON {@link String} to be parsed
+     * @param text     the JSON {@link String} to be parsed
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
@@ -111,7 +111,7 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into {@link JSONObject}
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param bytes    UTF8 encoded JSON byte array to parse
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
@@ -217,7 +217,7 @@ public interface JSON {
         JSONReader reader = JSONReader.of(text);
 
         JSONReader.Context context = reader.context;
-        if (format != null) {
+        if (format != null && !format.isEmpty()) {
             context.setUtilDateFormat(format);
         }
         context.config(features);
@@ -240,6 +240,31 @@ public interface JSON {
         }
         JSONReader reader = JSONReader.of(text);
         reader.context.config(features);
+        ObjectReader<T> objectReader = reader.getObjectReader(type);
+        return objectReader.readObject(reader, 0);
+    }
+
+    /**
+     * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param text     the JSON {@link String} to be parsed
+     * @param type     specify the {@link Type} to be converted
+     * @param format   the specified date format
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(String text, Type type, String format, JSONReader.Feature... features) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
+        JSONReader reader = JSONReader.of(text);
+
+        JSONReader.Context context = reader.context;
+        if (format != null && !format.isEmpty()) {
+            context.setUtilDateFormat(format);
+        }
+        context.config(features);
+
         ObjectReader<T> objectReader = reader.getObjectReader(type);
         return objectReader.readObject(reader, 0);
     }
@@ -295,6 +320,31 @@ public interface JSON {
     }
 
     /**
+     * Parse UTF8 encoded JSON byte array into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param bytes    UTF8 encoded JSON byte array to parse
+     * @param type     specify the {@link Type} to be converted
+     * @param format   the specified date format
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(byte[] bytes, Type type, String format, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+        JSONReader reader = JSONReader.of(bytes);
+
+        JSONReader.Context context = reader.context;
+        if (format != null && !format.isEmpty()) {
+            context.setUtilDateFormat(format);
+        }
+        context.config(features);
+
+        ObjectReader<T> objectReader = reader.getObjectReader(type);
+        return objectReader.readObject(reader, 0);
+    }
+
+    /**
      * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
      *
      * @param input
@@ -305,6 +355,28 @@ public interface JSON {
     static <T> T parseObject(InputStream input, Type type, JSONReader.Feature... features) {
         JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8);
         reader.getContext().config(features);
+        ObjectReader<T> objectReader = reader.getObjectReader(type);
+        return objectReader.readObject(reader, 0);
+    }
+
+    /**
+     * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param input
+     * @param type     specify the {@link Type} to be converted
+     * @param format   the specified date format
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(InputStream input, Type type, String format, JSONReader.Feature... features) {
+        JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8);
+
+        JSONReader.Context context = reader.context;
+        if (format != null && !format.isEmpty()) {
+            context.setUtilDateFormat(format);
+        }
+        context.config(features);
+
         ObjectReader<T> objectReader = reader.getObjectReader(type);
         return objectReader.readObject(reader, 0);
     }
@@ -363,7 +435,7 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONArray}
      *
-     * @param text the JSON {@link String} to be parsed
+     * @param text     the JSON {@link String} to be parsed
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -468,31 +540,6 @@ public interface JSON {
      * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
      *
      * @param object   Java Object to be serialized into JSON {@link String}
-     * @param filters  specifies the filter to use in serialization
-     * @param features features to be enabled in serialization
-     */
-    static String toJSONString(Object object, Filter[] filters, JSONWriter.Feature... features) {
-        try (JSONWriter writer = JSONWriter.of(features)) {
-            if (object == null) {
-                writer.writeNull();
-            } else {
-                writer.setRootObject(object);
-                if (filters != null && filters.length != 0) {
-                    writer.context.configFilter(filters);
-                }
-
-                Class<?> valueClass = object.getClass();
-                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
-            }
-            return writer.toString();
-        }
-    }
-
-    /**
-     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
-     *
-     * @param object   Java Object to be serialized into JSON {@link String}
      * @param filter   specify a filter to use in serialization
      * @param features features to be enabled in serialization
      */
@@ -518,6 +565,31 @@ public interface JSON {
      * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
      *
      * @param object   Java Object to be serialized into JSON {@link String}
+     * @param filters  specifies the filter to use in serialization
+     * @param features features to be enabled in serialization
+     */
+    static String toJSONString(Object object, Filter[] filters, JSONWriter.Feature... features) {
+        try (JSONWriter writer = JSONWriter.of(features)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.setRootObject(object);
+                if (filters != null && filters.length != 0) {
+                    writer.context.configFilter(filters);
+                }
+
+                Class<?> valueClass = object.getClass();
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+            return writer.toString();
+        }
+    }
+
+    /**
+     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param object   Java Object to be serialized into JSON {@link String}
      * @param format   the specified date format
      * @param features features to be enabled in serialization
      */
@@ -527,7 +599,38 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
-                writer.context.setDateFormat(format);
+                if (format != null && format.length() != 0) {
+                    writer.context.setDateFormat(format);
+                }
+
+                Class<?> valueClass = object.getClass();
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+            return writer.toString();
+        }
+    }
+
+    /**
+     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param object   Java Object to be serialized into JSON {@link String}
+     * @param format   the specified date format
+     * @param filters  specifies the filter to use in serialization
+     * @param features features to be enabled in serialization
+     */
+    static String toJSONString(Object object, String format, Filter[] filters, JSONWriter.Feature... features) {
+        try (JSONWriter writer = JSONWriter.of(features)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.setRootObject(object);
+                if (format != null && format.length() != 0) {
+                    writer.context.setDateFormat(format);
+                }
+                if (filters != null && filters.length != 0) {
+                    writer.context.configFilter(filters);
+                }
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
@@ -625,6 +728,35 @@ public interface JSON {
     }
 
     /**
+     * Serialize Java Object to JSON byte array with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param object   Java Object to be serialized into JSON byte array
+     * @param format   the specified date format
+     * @param filters  specifies the filter to use in serialization
+     * @param features features to be enabled in serialization
+     */
+    static byte[] toJSONBytes(Object object, String format, Filter[] filters, JSONWriter.Feature... features) {
+        try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.setRootObject(object);
+                if (format != null && format.length() != 0) {
+                    writer.context.setDateFormat(format);
+                }
+                if (filters != null && filters.length != 0) {
+                    writer.context.configFilter(filters);
+                }
+
+                Class<?> valueClass = object.getClass();
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+            return writer.getBytes();
+        }
+    }
+
+    /**
      * Serialize Java Object to JSON and write to {@link OutputStream} with specified {@link JSONReader.Feature}s enabled
      *
      * @param out      {@link OutputStream} to be written
@@ -665,6 +797,40 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
+                if (filters != null && filters.length != 0) {
+                    writer.context.configFilter(filters);
+                }
+
+                Class<?> valueClass = object.getClass();
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+
+            return writer.flushTo(out);
+        } catch (IOException e) {
+            throw new JSONException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Serialize Java Object to JSON and write to {@link OutputStream} with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param out      {@link OutputStream} to be written
+     * @param object   Java Object to be serialized into JSON
+     * @param format   the specified date format
+     * @param filters  specifies the filter to use in serialization
+     * @param features features to be enabled in serialization
+     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     */
+    static int writeTo(OutputStream out, Object object, String format, Filter[] filters, JSONWriter.Feature... features) {
+        try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.setRootObject(object);
+                if (format != null && format.length() != 0) {
+                    writer.context.setDateFormat(format);
+                }
                 if (filters != null && filters.length != 0) {
                     writer.context.configFilter(filters);
                 }

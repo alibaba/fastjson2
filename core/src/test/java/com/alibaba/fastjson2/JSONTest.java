@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderImplList;
 import com.alibaba.fastjson2.reader.ObjectReaderImplListStr;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
+import com.alibaba.fastjson2_vo.Date1;
 import com.alibaba.fastjson2_vo.IntField1;
 import org.junit.jupiter.api.Test;
 
@@ -21,12 +22,6 @@ import java.util.concurrent.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONTest {
-    @Test
-    public void test_parseObject_0() {
-        IntField1 vo = JSON.parseObject("{\"v0000\":101}"
-                , (Type) IntField1.class, JSONReader.Feature.SupportSmartMatch);
-        assertEquals(101, vo.v0000);
-    }
 
     @Test
     public void test_isValidArray_0() {
@@ -44,6 +39,17 @@ public class JSONTest {
     }
 
     @Test
+    public void test_parseObject_0() {
+        IntField1 intField1 = JSON.parseObject("{\"v0000\":101}"
+                , (Type) IntField1.class, JSONReader.Feature.SupportSmartMatch);
+        assertEquals(101, intField1.v0000);
+        Date1 date1 = JSON.parseObject("{\"date\":\"20180131022733000-0800\"}"
+                , (Type) Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
+        assertNotNull(date1.getDate());
+
+    }
+
+    @Test
     public void test_parseObject_2() {
         IntField1 vo = JSON.parseObject("{\"v0000\":101}".getBytes(StandardCharsets.UTF_8)
                 , (Type) IntField1.class);
@@ -52,17 +58,24 @@ public class JSONTest {
 
     @Test
     public void test_parseObject_1() {
-        IntField1 vo = JSON.parseObject("{\"v0000\":101}".getBytes(StandardCharsets.UTF_8)
+        IntField1 intField1 = JSON.parseObject("{\"v0000\":101}".getBytes(StandardCharsets.UTF_8)
                 , (Type) IntField1.class, JSONReader.Feature.SupportSmartMatch);
-        assertEquals(101, vo.v0000);
+        assertEquals(101, intField1.v0000);
+        Date1 date1 = JSON.parseObject("{\"date\":\"20180131022733000-0800\"}".getBytes(StandardCharsets.UTF_8)
+                , (Type) Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
+        assertNotNull(date1.getDate());
     }
 
     @Test
     public void test_parseObject_inputStream() {
-        byte[] bytes = "{\"v0000\":101}".getBytes(StandardCharsets.UTF_8);
-        IntField1 vo = JSON.parseObject(new ByteArrayInputStream(bytes)
+        byte[] intBytes = "{\"v0000\":101}".getBytes(StandardCharsets.UTF_8);
+        IntField1 intField1 = JSON.parseObject(new ByteArrayInputStream(intBytes)
                 , IntField1.class, JSONReader.Feature.SupportSmartMatch);
-        assertEquals(101, vo.v0000);
+        assertEquals(101, intField1.v0000);
+        byte[] dateBytes = "{\"date\":\"20180131022733000-0800\"}".getBytes(StandardCharsets.UTF_8);
+        Date1 date1 = JSON.parseObject(new ByteArrayInputStream(dateBytes)
+                , Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
+        assertNotNull(date1.getDate());
     }
 
     @Test
@@ -428,6 +441,21 @@ public class JSONTest {
     }
 
     @Test
+    public void test_to_json_string_with_format() {
+        java.util.Date date = JSON.parseObject("\"2017-3-17 00:00:01\"", java.util.Date.class);
+        String json = JSON.toJSONString(date, "yyyy-MM-dd", new Filter[0], JSONWriter.Feature.FieldBased);
+        assertEquals("\"2017-03-17\"", json);
+    }
+
+    @Test
+    public void test_to_json_bytes_with_format() {
+        java.util.Date date = JSON.parseObject("\"2017-3-17 00:00:01\"", java.util.Date.class);
+        byte[] bytes = JSON.toJSONBytes(date, "yyyy-MM-dd", new Filter[0], JSONWriter.Feature.FieldBased);
+        java.util.Date date1 = JSON.parseObject(bytes, java.util.Date.class);
+        assertNotNull(date1);
+    }
+
+    @Test
     public void test_null() {
         assertNull(JSON.parse("null"));
     }
@@ -475,6 +503,15 @@ public class JSONTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         JSON.writeTo(out,
                 Collections.singleton(1), Arrays.asList(new SimplePropertyPreFilter()).toArray(new Filter[0]), JSONWriter.Feature.WriteNulls);
+        assertEquals("[1]"
+                , new String(out.toByteArray()));
+    }
+
+    @Test
+    public void test_writeTo_4() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        JSON.writeTo(out,
+                Collections.singleton(1), "millis", new Filter[0], JSONWriter.Feature.WriteNulls);
         assertEquals("[1]"
                 , new String(out.toByteArray()));
     }
