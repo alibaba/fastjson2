@@ -24,6 +24,10 @@ public class MappingFastJsonMessageConverter extends AbstractMessageConverter {
      */
     private FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
+    public MappingFastJsonMessageConverter() {
+        super(new MimeType("application", "json", Charset.forName("UTF-8")));
+    }
+
     /**
      * @return the fastJsonConfig.
      */
@@ -36,10 +40,6 @@ public class MappingFastJsonMessageConverter extends AbstractMessageConverter {
      */
     public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
         this.fastJsonConfig = fastJsonConfig;
-    }
-
-    public MappingFastJsonMessageConverter() {
-        super(new MimeType("application", "json", Charset.forName("UTF-8")));
     }
 
     @Override
