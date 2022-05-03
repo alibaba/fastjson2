@@ -129,7 +129,7 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
 
             HttpHeaders headers = outputMessage.getHeaders();
 
-            int len = JSON.writeJSONString(baos, object, JSON.DEFAULT_GENERATE_FEATURE, fastJsonConfig.getSerializerFeatures());
+            int len = JSON.writeJSONString(baos, object, fastJsonConfig.getSerializeFilters(), fastJsonConfig.getSerializerFeatures());
 
             if (headers.getContentLength() < 0 && fastJsonConfig.isWriteContentLength()) {
 
