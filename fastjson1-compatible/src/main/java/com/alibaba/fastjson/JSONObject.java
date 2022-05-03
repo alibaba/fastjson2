@@ -41,40 +41,36 @@ import static com.alibaba.fastjson.util.TypeUtils.*;
  */
 public class JSONObject extends JSON implements Map<String, Object>, Cloneable, Serializable {
 
-    private static final long serialVersionUID = 1L;
-    private static final int DEFAULT_INITIAL_CAPACITY = 16;
+    private static final long         serialVersionUID         = 1L;
+    private static final int          DEFAULT_INITIAL_CAPACITY = 16;
 
     private final Map<String, Object> map;
 
-    public JSONObject() {
+    public JSONObject(){
         this(DEFAULT_INITIAL_CAPACITY, false);
     }
 
-    public JSONObject(Map<String, Object> map) {
+    public JSONObject(Map<String, Object> map){
         if (map == null) {
             throw new IllegalArgumentException("map is null.");
         }
         this.map = map;
     }
 
-    public JSONObject(boolean ordered) {
+    public JSONObject(boolean ordered){
         this(DEFAULT_INITIAL_CAPACITY, ordered);
     }
 
-    public JSONObject(int initialCapacity) {
+    public JSONObject(int initialCapacity){
         this(initialCapacity, false);
     }
 
-    public JSONObject(int initialCapacity, boolean ordered) {
+    public JSONObject(int initialCapacity, boolean ordered){
         if (ordered) {
             map = new LinkedHashMap<String, Object>(initialCapacity);
         } else {
             map = new HashMap<String, Object>(initialCapacity);
         }
-    }
-
-    public static <T> T toJavaObject(JSON json, Class<T> clazz) {
-        return com.alibaba.fastjson2.util.TypeUtils.cast(json, clazz);
     }
 
     @Override
@@ -138,6 +134,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         throw new JSONException("TODO");
     }
 
+
     public JSONArray getJSONArray(String key) {
         Object value = map.get(key);
 
@@ -156,8 +153,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 //        return (JSONArray) toJSON(value);
         throw new JSONException("TODO");
     }
-
-    //
+//
     public <T> T getObject(String key, Class<T> clazz) {
         Object obj = map.get(key);
         if (obj == null) {
@@ -187,6 +183,11 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
         return (T) objectReader.readObject(jsonReader);
     }
+
+    public <T> T getObject(String key, Type type) {
+        Object obj = map.get(key);
+        return TypeUtils.cast(obj, type, ParserConfig.getGlobalInstance());
+    }
 //
 //    public <T> T getObject(String key, TypeReference typeReference) {
 //        Object obj = map.get(key);
@@ -215,11 +216,6 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 //
 //        return castToBytes(value);
 //    }
-
-    public <T> T getObject(String key, Type type) {
-        Object obj = map.get(key);
-        return TypeUtils.cast(obj, type, ParserConfig.getGlobalInstance());
-    }
 
     public boolean getBooleanValue(String key) {
         Object value = get(key);
@@ -271,14 +267,12 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
         return castToInt(value);
     }
-
-    //
+//
     public int getIntValue(String key) {
         Object value = get(key);
         return com.alibaba.fastjson2.util.TypeUtils.toIntValue(value);
     }
-
-    //
+//
     public Long getLong(String key) {
         Object value = get(key);
 
@@ -529,6 +523,8 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         return this.map;
     }
 
+
+
     private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
         SecureObjectInputStream.ensureFields();
         if (SecureObjectInputStream.fields != null && !SecureObjectInputStream.fields_error) {
@@ -555,12 +551,89 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         }
     }
 
+    static class SecureObjectInputStream extends ObjectInputStream {
+        static Field[] fields;
+        static volatile boolean fields_error;
+
+        static void ensureFields() {
+            if (fields == null && !fields_error) {
+                try {
+                    final Field[] declaredFields = ObjectInputStream.class.getDeclaredFields();
+                    String[] fieldnames = new String[]{"bin", "passHandle", "handles", "curContext"};
+                    Field[] array = new Field[fieldnames.length];
+                    for (int i = 0; i < fieldnames.length; i++) {
+                        Field field = TypeUtils
+                                .getField(ObjectInputStream.class
+                                        , fieldnames[i]
+                                        , declaredFields
+                                );
+                        field.setAccessible(true);
+                        array[i] = field;
+                    }
+                    fields = array;
+                } catch (Throwable error) {
+                    fields_error = true;
+                }
+            }
+        }
+
+        public SecureObjectInputStream(ObjectInputStream in) throws IOException {
+            super(in);
+            try {
+                for (int i = 0; i < fields.length; i++) {
+                    final Field field = fields[i];
+                    final Object value = field.get(in);
+                    field.set(this, value);
+                }
+            } catch (IllegalAccessException e) {
+                fields_error = true;
+            }
+        }
+
+        @Override
+        protected Class<?> resolveClass(ObjectStreamClass desc)
+                throws IOException, ClassNotFoundException {
+            String name = desc.getName();
+            if (name.length() > 2) {
+                int index = name.lastIndexOf('[');
+                if (index != -1) {
+                    name = name.substring(index + 1);
+                }
+                if (name.length() > 2 && name.charAt(0) == 'L' && name.charAt(name.length() - 1) == ';') {
+                    name = name.substring(1, name.length() - 1);
+                }
+//                ParserConfig.global.checkAutoType(name, null, Feature.SupportAutoType.mask);
+            }
+            return super.resolveClass(desc);
+        }
+
+        @Override
+        protected Class<?> resolveProxyClass(String[] interfaces)
+                throws IOException, ClassNotFoundException {
+            for (String interfacename : interfaces) {
+                //检查是否处于黑名单
+//                ParserConfig.global.checkAutoType(interfacename, null);
+            }
+            return super.resolveProxyClass(interfaces);
+        }
+
+        //Hack:默认构造方法会调用这个方法，重写此方法使用反射还原部分关键属性
+        @Override
+        protected void readStreamHeader() throws IOException, StreamCorruptedException {
+
+        }
+    }
+
+    public static <T> T toJavaObject(JSON json, Class<T> clazz) {
+        return com.alibaba.fastjson2.util.TypeUtils.cast(json, clazz);
+    }
+
     public <T> T toJavaObject(Type type) {
         if (type instanceof Class) {
             return (T) JSONFactory.getDefaultObjectReaderProvider().getObjectReader(type).createInstance(this);
         }
         String str = com.alibaba.fastjson2.JSON.toJSONString(this);
-        return com.alibaba.fastjson2.JSON.parseObject(str, type);
+        return (T) com.alibaba.fastjson2.JSON.parseObject(str, type);
     }
 
     public <T> T toJavaObject(Class<T> clazz) {
@@ -604,78 +677,5 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
     public String toString(SerializerFeature... features) {
         return JSON.toJSONString(this, features);
-    }
-
-    static class SecureObjectInputStream extends ObjectInputStream {
-        static Field[] fields;
-        static volatile boolean fields_error;
-
-        public SecureObjectInputStream(ObjectInputStream in) throws IOException {
-            super(in);
-            try {
-                for (int i = 0; i < fields.length; i++) {
-                    final Field field = fields[i];
-                    final Object value = field.get(in);
-                    field.set(this, value);
-                }
-            } catch (IllegalAccessException e) {
-                fields_error = true;
-            }
-        }
-
-        static void ensureFields() {
-            if (fields == null && !fields_error) {
-                try {
-                    final Field[] declaredFields = ObjectInputStream.class.getDeclaredFields();
-                    String[] fieldnames = new String[]{"bin", "passHandle", "handles", "curContext"};
-                    Field[] array = new Field[fieldnames.length];
-                    for (int i = 0; i < fieldnames.length; i++) {
-                        Field field = TypeUtils
-                                .getField(ObjectInputStream.class
-                                        , fieldnames[i]
-                                        , declaredFields
-                                );
-                        field.setAccessible(true);
-                        array[i] = field;
-                    }
-                    fields = array;
-                } catch (Throwable error) {
-                    fields_error = true;
-                }
-            }
-        }
-
-        @Override
-        protected Class<?> resolveClass(ObjectStreamClass desc)
-                throws IOException, ClassNotFoundException {
-            String name = desc.getName();
-            if (name.length() > 2) {
-                int index = name.lastIndexOf('[');
-                if (index != -1) {
-                    name = name.substring(index + 1);
-                }
-                if (name.length() > 2 && name.charAt(0) == 'L' && name.charAt(name.length() - 1) == ';') {
-                    name = name.substring(1, name.length() - 1);
-                }
-//                ParserConfig.global.checkAutoType(name, null, Feature.SupportAutoType.mask);
-            }
-            return super.resolveClass(desc);
-        }
-
-        @Override
-        protected Class<?> resolveProxyClass(String[] interfaces)
-                throws IOException, ClassNotFoundException {
-            for (String interfacename : interfaces) {
-                //检查是否处于黑名单
-//                ParserConfig.global.checkAutoType(interfacename, null);
-            }
-            return super.resolveProxyClass(interfaces);
-        }
-
-        //Hack:默认构造方法会调用这个方法，重写此方法使用反射还原部分关键属性
-        @Override
-        protected void readStreamHeader() throws IOException {
-
-        }
     }
 }

@@ -234,7 +234,7 @@ public class JavaBeanInfo {
             , boolean compatibleWithJavaBean
             , boolean jacksonCompatible
     ) {
-        JSONType jsonType = TypeUtils.getAnnotation(clazz, JSONType.class);
+        JSONType jsonType = TypeUtils.getAnnotation(clazz,JSONType.class);
         if (jsonType != null) {
             PropertyNamingStrategy jsonTypeNaming = jsonType.naming();
             if (jsonTypeNaming != null && jsonTypeNaming != PropertyNamingStrategy.CamelCase) {
@@ -416,7 +416,7 @@ public class JavaBeanInfo {
                                     && parameterTypes[2] == Collection.class) {
                                 creatorConstructor = constructor;
                                 creatorConstructor.setAccessible(true);
-                                paramNames = new String[]{"principal", "credentials", "authorities"};
+                                paramNames = new String[] {"principal", "credentials", "authorities"};
                                 break;
                             }
                         }
@@ -425,7 +425,7 @@ public class JavaBeanInfo {
                             if (parameterTypes.length == 1
                                     && parameterTypes[0] == String.class) {
                                 creatorConstructor = constructor;
-                                paramNames = new String[]{"authority"};
+                                paramNames = new String[] {"authority"};
                                 break;
                             }
                         }
@@ -704,7 +704,7 @@ public class JavaBeanInfo {
             String propertyName;
             if (Character.isUpperCase(c3) //
                     || c3 > 512 // for unicode method name
-            ) {
+                    ) {
                 if (TypeUtils.compatibleWithJavaBean) {
                     propertyName = TypeUtils.decapitalize(methodName.substring(3));
                 } else {
@@ -780,7 +780,7 @@ public class JavaBeanInfo {
                         || AtomicBoolean.class == method.getReturnType() //
                         || AtomicInteger.class == method.getReturnType() //
                         || AtomicLong.class == method.getReturnType() //
-                ) {
+                        ) {
                     String propertyName;
 
                     JSONField annotation = method.getAnnotation(JSONField.class);

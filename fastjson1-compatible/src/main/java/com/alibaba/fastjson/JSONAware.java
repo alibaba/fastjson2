@@ -17,7 +17,7 @@ package com.alibaba.fastjson;
 
 /**
  * Beans that support customized output of JSON text shall implement this interface.
- *
+ * 
  * @author wenshao[szujobs@hotmail.com]
  */
 public interface JSONAware {

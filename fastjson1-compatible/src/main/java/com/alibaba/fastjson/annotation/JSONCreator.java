@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
+@Target({ ElementType.CONSTRUCTOR, ElementType.METHOD })
 public @interface JSONCreator {
     String[] parameterNames() default {};
 }

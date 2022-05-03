@@ -36,25 +36,28 @@ package com.alibaba.fastjson.internal.asm;
  */
 public final class FieldWriter {
 
+    FieldWriter       next;
+
     /**
      * Access flags of this field.
      */
     private final int access;
+
     /**
      * The index of the constant pool item that contains the name of this method.
      */
     private final int name;
+
     /**
      * The index of the constant pool item that contains the descriptor of this field.
      */
     private final int desc;
-    FieldWriter next;
 
     // ------------------------------------------------------------------------
     // Constructor
     // ------------------------------------------------------------------------
 
-    public FieldWriter(final ClassWriter cw, final int access, final String name, final String desc) {
+    public FieldWriter(final ClassWriter cw, final int access, final String name, final String desc){
         if (cw.firstField == null) {
             cw.firstField = this;
         } else {

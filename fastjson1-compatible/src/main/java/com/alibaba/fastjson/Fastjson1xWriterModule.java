@@ -27,7 +27,6 @@ public class Fastjson1xWriterModule implements ObjectWriterModule {
 
     static class JSONAwareWriter implements ObjectWriter {
         static final JSONAwareWriter INSTANCE = new JSONAwareWriter();
-
         @Override
         public List<FieldWriter> getFieldWriters() {
             return null;

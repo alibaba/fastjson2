@@ -1,3 +1,4 @@
+
 package com.alibaba.fastjson.support.config;
 
 import com.alibaba.fastjson.JSON;

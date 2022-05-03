@@ -5,11 +5,12 @@ import com.alibaba.fastjson.PropertyNamingStrategy;
 public class SerializeConfig {
 
     public static SerializeConfig global = new SerializeConfig();
-    public PropertyNamingStrategy propertyNamingStrategy;
 
     public static SerializeConfig getGlobalInstance() {
         return global;
     }
+
+    public PropertyNamingStrategy propertyNamingStrategy;
 //    private final ConcurrentMap<Type, ObjectSerializer> serializers;
 
     public boolean put(Object type, Object value) {
