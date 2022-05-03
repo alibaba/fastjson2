@@ -144,7 +144,6 @@ final class ObjectWriterArray extends ObjectWriterBaseModule.PrimitiveImpl {
 
             if (refDetect) {
                 jsonWriter.popPath(item);
-                ;
             }
         }
     }

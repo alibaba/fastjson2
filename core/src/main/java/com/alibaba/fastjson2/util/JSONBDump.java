@@ -839,7 +839,6 @@ public class JSONBDump {
                 strBegin = offset;
             } else {
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
-                ;
             }
 
             charset = StandardCharsets.US_ASCII;

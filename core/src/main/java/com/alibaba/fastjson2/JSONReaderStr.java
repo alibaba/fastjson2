@@ -553,7 +553,6 @@ final class JSONReaderStr extends JSONReader {
             }
 
             if (c == '"') {
-                ;
                 offset++;
                 c = str.charAt(offset);
 
@@ -3161,8 +3160,7 @@ final class JSONReaderStr extends JSONReader {
                 String zoneIdStr;
                 if (first == '+' || first == '-') {
                     zoneIdStr = this.str.substring(this.offset + zoneIdBegin, this.offset + len);
-                    ;
-//                    zoneIdStr = new String(chars, this.offset + zoneIdBegin, len - zoneIdBegin);
+                    //                    zoneIdStr = new String(chars, this.offset + zoneIdBegin, len - zoneIdBegin);
                 } else if (first == ' ') {
                     zoneIdStr = this.str.substring(this.offset + zoneIdBegin + 1, this.offset + len);
                 } else { // '[
