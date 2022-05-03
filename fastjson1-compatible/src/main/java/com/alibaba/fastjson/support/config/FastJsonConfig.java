@@ -1,6 +1,7 @@
 
 package com.alibaba.fastjson.support.config;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.parser.deserializer.ParseProcess;
@@ -189,6 +190,7 @@ public class FastJsonConfig {
      * @return the dateFormat
      */
     public String getDateFormat() {
+        dateFormat = JSON.DEFFAULT_DATE_FORMAT;
         return dateFormat;
     }
 
@@ -196,6 +198,7 @@ public class FastJsonConfig {
      * @param dateFormat the dateFormat to set
      */
     public void setDateFormat(String dateFormat) {
+        JSON.DEFFAULT_DATE_FORMAT = dateFormat;
         this.dateFormat = dateFormat;
     }
 
