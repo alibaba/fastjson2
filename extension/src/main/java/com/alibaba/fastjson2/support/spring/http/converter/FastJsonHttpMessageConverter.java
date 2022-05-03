@@ -73,10 +73,8 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     }
 
     @Override
-    public Object read(Type type, //
-                       Class<?> contextClass, //
-                       HttpInputMessage inputMessage //
-    ) throws IOException, HttpMessageNotReadableException {
+    public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+
         return readType(getType(type, contextClass), inputMessage);
     }
 
@@ -87,9 +85,8 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     }
 
     @Override
-    protected Object readInternal(Class<?> clazz, //
-                                  HttpInputMessage inputMessage //
-    ) throws IOException, HttpMessageNotReadableException {
+    protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+
         return readType(getType(clazz, null), inputMessage);
     }
 
@@ -111,7 +108,8 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
             }
             byte[] bytes = baos.toByteArray();
 
-            return JSON.parseObject(bytes, type, fastJsonConfig.getReaderFeatures());
+            return JSON.parseObject(bytes, type,
+                    fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
         } catch (JSONException ex) {
             throw new HttpMessageNotReadableException("JSON parse error: " + ex.getMessage(), ex, inputMessage);
         } catch (IOException ex) {
@@ -126,7 +124,8 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
 
             HttpHeaders headers = outputMessage.getHeaders();
 
-            int len = JSON.writeTo(baos, object, fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
+            int len = JSON.writeTo(baos, object, fastJsonConfig.getDateFormat(),
+                    fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
 
             if (headers.getContentLength() < 0 && fastJsonConfig.isWriteContentLength()) {
 
@@ -226,6 +225,5 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
             return ResolvableType.NONE;
         }
     }
-
 
 }
