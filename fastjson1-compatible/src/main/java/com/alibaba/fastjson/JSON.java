@@ -33,20 +33,13 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 public class JSON {
     public static final String VERSION = com.alibaba.fastjson2.JSON.VERSION;
-
-    static class Cache {
-        volatile char[] chars;
-    }
-
     static final Cache CACHE = new Cache();
     static final AtomicReferenceFieldUpdater<Cache, char[]> CHARS_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(Cache.class, char[].class, "chars");
-
-
+    static final SerializeFilter[] emptyFilters = new SerializeFilter[0];
     public static TimeZone defaultTimeZone = TimeZone.getDefault();
     public static Locale defaultLocale = Locale.getDefault();
     public static String DEFAULT_TYPE_KEY = "@type";
-    static final SerializeFilter[] emptyFilters = new SerializeFilter[0];
     public static String DEFFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static int DEFAULT_PARSER_FEATURE;
     public static int DEFAULT_GENERATE_FEATURE;
@@ -100,7 +93,7 @@ public class JSON {
 
         config(context, features);
         try {
-            return (T) reader.read(type);
+            return reader.read(type);
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
             if (cause == null) {
@@ -122,7 +115,7 @@ public class JSON {
 
         config(context, features);
         try {
-            return (T) reader.read(type);
+            return reader.read(type);
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
             if (cause == null) {
@@ -493,5 +486,9 @@ public class JSON {
 
     public static List<Object> parseArray(String text, Type[] types) {
         return com.alibaba.fastjson2.JSON.parseArray(text, types);
+    }
+
+    static class Cache {
+        volatile char[] chars;
     }
 }
