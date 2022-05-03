@@ -1422,7 +1422,6 @@ final class JSONReaderJSONB extends JSONReader {
                 strBegin = offset;
             } else {
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
-                ;
             }
 
             if (JDKUtils.JVM_VERSION == 8 && strlen >= 0) {
@@ -1570,7 +1569,6 @@ final class JSONReaderJSONB extends JSONReader {
                 strBegin = offset;
             } else {
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
-                ;
             }
 
             if (JDKUtils.JVM_VERSION == 8 && strlen >= 0) {
