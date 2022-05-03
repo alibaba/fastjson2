@@ -1194,7 +1194,7 @@ public abstract class JSONReader implements Closeable {
     public List readArray() {
         next();
 
-        List list = new JSONArray();
+        List<Object> list = new JSONArray();
 
         _for:
         for (; ; ) {
