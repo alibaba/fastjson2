@@ -1,11 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 
@@ -77,6 +76,7 @@ public interface ObjectReader<T> {
 
             Object fieldValue = entry.getValue();
             Class fieldClass = fieldReader.getFieldClass();
+            Type fieldType = fieldReader.getFieldType();
 
             if (fieldValue != null) {
                 Class<?> valueClass = fieldValue.getClass();
@@ -96,7 +96,23 @@ public interface ObjectReader<T> {
                 }
             }
 
-            fieldReader.accept(object, fieldValue);
+            Object typedFieldValue;
+            if (fieldValue == null || fieldType == fieldValue.getClass()) {
+                typedFieldValue = fieldValue;
+            } else {
+                if (fieldValue instanceof JSONObject) {
+                    typedFieldValue = ((JSONObject) fieldValue).toJavaObject(fieldType);
+                } else if (fieldValue instanceof JSONArray) {
+                    typedFieldValue = ((JSONArray) fieldValue).toJavaObject(fieldType);
+                } else {
+                    String fieldValueJSONString = JSON.toJSONString(fieldValue);
+                    try(JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {
+                        ObjectReader fieldObjectReader = fieldReader.getObjectReader(jsonReader);
+                        typedFieldValue = fieldObjectReader.readObject(jsonReader, 0);
+                    }
+                }
+            }
+            fieldReader.accept(object, typedFieldValue);
         }
 
         Function buildFunction = getBuildFunction();

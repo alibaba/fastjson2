@@ -30,55 +30,6 @@ final class FieldReaderListMethod<T> extends FieldReaderObjectMethod<T>
     }
 
     @Override
-    public void accept(T object, Object value) {
-        if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
-            return;
-        }
-
-        Collection collection = (Collection) value;
-
-        boolean match = true;
-        if (itemClass != null) {
-            for (Object item : collection) {
-                if (!itemClass.isInstance(item)) {
-                    match = false;
-                    break;
-                }
-            }
-        }
-
-        Collection fieldList;
-        if (match) {
-            fieldList = collection;
-        } else {
-            ObjectReader fieldReader = this.fieldObjectReader;
-            if (fieldReader == null) {
-                fieldReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(getFieldType());
-            }
-
-            fieldList = (Collection) fieldReader.createInstance(0);
-            for (Object item : collection) {
-                Object typedItem;
-                if (itemClass.isInstance(item)) {
-                    typedItem = item;
-                } else if (item instanceof JSONObject) {
-                    typedItem = ((JSONObject) item).toJavaObject(itemType);
-                } else {
-                    String itemJSONString = JSON.toJSONString(item);
-                    typedItem = JSON.parseObject(itemJSONString, itemType);
-                }
-                fieldList.add(typedItem);
-            }
-        }
-
-        try {
-            method.invoke(object, fieldList);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error, " + getClass().getName(), e);
-        }
-    }
-
-    @Override
     public Type getItemType() {
         return itemType;
     }
