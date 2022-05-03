@@ -43,13 +43,13 @@ public class JSON {
             = AtomicReferenceFieldUpdater.newUpdater(Cache.class, char[].class, "chars");
 
 
-    public static TimeZone         defaultTimeZone      = TimeZone.getDefault();
-    public static Locale           defaultLocale        = Locale.getDefault();
-    public static String           DEFAULT_TYPE_KEY     = "@type";
-    static final SerializeFilter[] emptyFilters         = new SerializeFilter[0];
-    public static String           DEFFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    public static int              DEFAULT_PARSER_FEATURE;
-    public static int              DEFAULT_GENERATE_FEATURE;
+    public static TimeZone defaultTimeZone = TimeZone.getDefault();
+    public static Locale defaultLocale = Locale.getDefault();
+    public static String DEFAULT_TYPE_KEY = "@type";
+    static final SerializeFilter[] emptyFilters = new SerializeFilter[0];
+    public static String DEFFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static int DEFAULT_PARSER_FEATURE;
+    public static int DEFAULT_GENERATE_FEATURE;
 
     static {
         List<ObjectReaderModule> readerModuels = JSONFactory
@@ -69,7 +69,7 @@ public class JSON {
     }
 
     public static JSONObject parseObject(String str) {
-       return parseObject(str, JSONObject.class);
+        return parseObject(str, JSONObject.class);
     }
 
     public static JSONObject parseObject(String text, Feature... features) {
@@ -215,31 +215,6 @@ public class JSON {
         }
     }
 
-    public static String toJSONString(Object object) {
-        try (JSONWriter writer = JSONWriter.of()) {
-            JSONWriter.Context context = writer.getContext();
-            context.setDateFormat("millis");
-            context.config(JSONWriter.Feature.ReferenceDetection);
-
-            if (object == null) {
-                writer.writeNull();
-            } else {
-                Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
-            }
-            return writer.toString();
-        } catch (com.alibaba.fastjson2.JSONException ex) {
-            Throwable cause = ex.getCause();
-            if (cause == null) {
-                cause = ex;
-            }
-            throw new JSONException("toJSONString error", cause);
-        } catch (RuntimeException ex) {
-            throw new JSONException("toJSONString error", ex);
-        }
-    }
-
     public static String toJSONString(Object object, SerializeFilter[] filters, SerializerFeature... features) {
         try (JSONWriter writer = JSONWriter.of()) {
             JSONWriter.Context context = writer.getContext();
@@ -298,61 +273,28 @@ public class JSON {
         }
     }
 
+    public static String toJSONString(Object object) {
+        return toJSONString(object, new SerializeFilter[0], new SerializerFeature[0]);
+    }
+
     public static String toJSONString(Object object, SerializeFilter... filters) {
         return toJSONString(object, filters, new SerializerFeature[0]);
     }
 
-    public static byte[] toJSONBytes(Object object, SerializeFilter... filters) {
-        return toJSONBytes(object, filters, new SerializerFeature[0]);
+    public static String toJSONString(Object object, SerializerFeature... features) {
+        return toJSONString(object, new SerializeFilter[0], features);
     }
 
     public static byte[] toJSONBytes(Object object) {
         return toJSONBytes(object, new SerializeFilter[0], new SerializerFeature[0]);
     }
 
-    public static String toJSONString(Object object, SerializerFeature... features) {
-        try (JSONWriter writer = JSONWriter.of()) {
-            JSONWriter.Context ctx = writer.getContext();
-            writer.setRootObject(object);
-
-            ctx.setZoneId(defaultTimeZone.toZoneId());
-
-            boolean formatMillis = true;
-            for (SerializerFeature feature : features) {
-                if (feature == SerializerFeature.UseISO8601DateFormat || feature == SerializerFeature.UseISO8601DateFormat) {
-                    formatMillis = false;
-                    break;
-                }
-            }
-            if (formatMillis) {
-                ctx.setDateFormat("millis");
-            }
-
-            ctx.config(JSONWriter.Feature.ReferenceDetection);
-            config(ctx, features);
-
-            Class<?> valueClass = object.getClass();
-            ObjectWriter objectWriter = ctx.getObjectWriter(valueClass, valueClass);
-            objectWriter.write(writer, object, null, null, 0);
-
-            return writer.toString();
-        }
+    public static byte[] toJSONBytes(Object object, SerializeFilter... filters) {
+        return toJSONBytes(object, filters, new SerializerFeature[0]);
     }
 
     public static byte[] toJSONBytes(Object object, SerializerFeature... features) {
-        try (JSONWriter writer = JSONWriter.ofUTF8()) {
-            JSONWriter.Context ctx = writer.getContext();
-            writer.setRootObject(object);
-            ctx.setZoneId(defaultTimeZone.toZoneId());
-            ctx.setDateFormat("millis");
-            config(ctx, features);
-
-            Class<?> valueClass = object.getClass();
-            ObjectWriter objectWriter = ctx.getObjectWriter(valueClass, valueClass);
-            objectWriter.write(writer, object, null, null, 0);
-
-            return writer.getBytes();
-        }
+        return toJSONBytes(object, new SerializeFilter[0], features);
     }
 
     private static void config(JSONWriter.Context ctx, SerializerFeature[] features) {
@@ -400,7 +342,7 @@ public class JSON {
         }
     }
 
-    public static String toJSONString(Object object, SerializeConfig config,  SerializerFeature... features) {
+    public static String toJSONString(Object object, SerializeConfig config, SerializerFeature... features) {
         return toJSONString(object, DEFAULT_GENERATE_FEATURE, features);
     }
 
@@ -435,14 +377,35 @@ public class JSON {
     public static final int writeJSONString(OutputStream os, //
                                             Object object, //
                                             SerializerFeature... features) throws IOException {
-        return writeJSONString(os, object, DEFAULT_GENERATE_FEATURE, features);
+        return writeJSONString(os, object, new SerializeFilter[0], features);
     }
 
     public static final int writeJSONString(OutputStream os, //
                                             Object object, //
-                                            int defaultFeatures, //
+                                            SerializeFilter[] filters) throws IOException {
+        return writeJSONString(os, object, filters, new SerializerFeature[0]);
+    }
+
+    public static final int writeJSONString(OutputStream os, //
+                                            Object object, //
+                                            SerializeFilter[] filters, //
                                             SerializerFeature... features) throws IOException {
         try (JSONWriter writer = JSONWriter.ofUTF8()) {
+            JSONWriter.Context context = writer.getContext();
+            context.setDateFormat("millis");
+            config(context, features);
+            for (SerializeFilter filter : filters) {
+                if (filter instanceof NameFilter) {
+                    context.setNameFilter((NameFilter) filter);
+                } else if (filter instanceof ValueFilter) {
+                    context.setValueFilter((ValueFilter) filter);
+                } else if (filter instanceof PropertyPreFilter) {
+                    context.setPropertyPreFilter((PropertyPreFilter) filter);
+                } else if (filter instanceof PropertyFilter) {
+                    context.setPropertyFilter((PropertyFilter) filter);
+                }
+            }
+
             writer.writeAny(object);
             byte[] bytes = writer.getBytes();
             os.write(bytes);

@@ -104,7 +104,7 @@ public class FastJsonJsonView extends AbstractView {
 
         ByteArrayOutputStream outnew = new ByteArrayOutputStream();
 
-        int len = JSON.writeJSONString(outnew, value, JSON.DEFAULT_GENERATE_FEATURE, fastJsonConfig.getSerializerFeatures());
+        int len = JSON.writeJSONString(outnew, value, fastJsonConfig.getSerializeFilters(), fastJsonConfig.getSerializerFeatures());
 
         if (fastJsonConfig.isWriteContentLength()) {
             // Write content length (determined via byte array).
