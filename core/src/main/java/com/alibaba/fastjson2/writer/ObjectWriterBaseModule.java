@@ -234,44 +234,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 return;
             }
 
-            String jsonFieldName = jsonField.name();
-            if (!jsonFieldName.isEmpty()) {
-                fieldInfo.fieldName = jsonFieldName;
-            }
-
-            String jsonFieldFormat = jsonField.format();
-            if (!jsonFieldFormat.isEmpty()) {
-                jsonFieldFormat = jsonFieldFormat.trim();
-                if (jsonFieldFormat.indexOf('T') != -1 && !jsonFieldFormat.contains("'T'")) {
-                    jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
-                }
-
-                if (!jsonFieldFormat.isEmpty()) {
-                    fieldInfo.format = jsonFieldFormat;
-                }
-            }
-
-            if (!fieldInfo.ignore) {
-                fieldInfo.ignore = !jsonField.serialize();
-            }
-
-            if (jsonField.unwrapped()) {
-                fieldInfo.format = "unwrapped";
-            }
-
-            for (JSONWriter.Feature feature : jsonField.serializeFeatures()) {
-                fieldInfo.features |= feature.mask;
-            }
-
-            int ordinal = jsonField.ordinal();
-            if (ordinal != 0) {
-                fieldInfo.ordinal = ordinal;
-            }
-
-            boolean value = jsonField.value();
-            if (value) {
-                fieldInfo.features |= FieldInfo.VALUE_MASK;
-            }
+            loadFieldInfo(fieldInfo, jsonField);
 
             Class writeUsing = jsonField.writeUsing();
             if (writeUsing != void.class
@@ -349,17 +312,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                             break;
                         }
                         case "format": {
-                            String format = (String) result;
-                            if (!format.isEmpty()) {
-                                format = format.trim();
-                                if (format.indexOf('T') != -1 && !format.contains("'T'")) {
-                                    format = format.replaceAll("T", "'T'");
-                                }
-
-                                if (!format.isEmpty()) {
-                                    fieldInfo.format = format;
-                                }
-                            }
+                            loadJsonFieldFormat(fieldInfo, (String) result);
                             break;
                         }
                         case "ordinal": {
@@ -489,45 +442,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             }
 
             if (jsonField != null) {
-                String jsonFieldName = jsonField.name();
-                if (!jsonFieldName.isEmpty()) {
-                    fieldInfo.fieldName = jsonFieldName;
-                }
-
-                String jsonFieldFormat = jsonField.format();
-                if (!jsonFieldFormat.isEmpty()) {
-                    jsonFieldFormat = jsonFieldFormat.trim();
-
-                    if (jsonFieldFormat.indexOf('T') != -1 && !jsonFieldFormat.contains("'T'")) {
-                        jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
-                    }
-
-                    if (!jsonFieldFormat.isEmpty()) {
-                        fieldInfo.format = jsonFieldFormat;
-                    }
-                }
-
-                if (!fieldInfo.ignore) {
-                    fieldInfo.ignore = !jsonField.serialize();
-                }
-
-                if (jsonField.unwrapped()) {
-                    fieldInfo.format = "unwrapped";
-                }
-
-                for (JSONWriter.Feature feature : jsonField.serializeFeatures()) {
-                    fieldInfo.features |= feature.mask;
-                }
-
-                int ordinal = jsonField.ordinal();
-                if (ordinal != 0) {
-                    fieldInfo.ordinal = ordinal;
-                }
-
-                boolean value = jsonField.value();
-                if (value) {
-                    fieldInfo.features |= FieldInfo.VALUE_MASK;
-                }
+                loadFieldInfo(fieldInfo, jsonField);
             }
 
             if (!objectClass.getName().startsWith("java.lang") && !BeanUtils.isRecord(objectClass)) {
@@ -541,6 +456,63 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         }
                     }
                 });
+            }
+        }
+
+        /**
+         * load {@link JSONField} into {@link FieldInfo} params
+         *
+         * @param fieldInfo Java Field Info
+         * @param jsonField {@link JSONField} JSON Field Info
+         */
+        private void loadFieldInfo(FieldInfo fieldInfo, JSONField jsonField) {
+            String jsonFieldName = jsonField.name();
+            if (!jsonFieldName.isEmpty()) {
+                fieldInfo.fieldName = jsonFieldName;
+            }
+
+            loadJsonFieldFormat(fieldInfo, jsonField.format());
+
+            if (!fieldInfo.ignore) {
+                fieldInfo.ignore = !jsonField.serialize();
+            }
+
+            if (jsonField.unwrapped()) {
+                fieldInfo.format = "unwrapped";
+            }
+
+            for (JSONWriter.Feature feature : jsonField.serializeFeatures()) {
+                fieldInfo.features |= feature.mask;
+            }
+
+            int ordinal = jsonField.ordinal();
+            if (ordinal != 0) {
+                fieldInfo.ordinal = ordinal;
+            }
+
+            boolean value = jsonField.value();
+            if (value) {
+                fieldInfo.features |= FieldInfo.VALUE_MASK;
+            }
+        }
+
+        /**
+         * load {@link JSONField} format params into FieldInfo
+         *
+         * @param fieldInfo       Java Field Info
+         * @param jsonFieldFormat {@link JSONField} format params
+         */
+        private void loadJsonFieldFormat(FieldInfo fieldInfo, String jsonFieldFormat) {
+            if (!jsonFieldFormat.isEmpty()) {
+                jsonFieldFormat = jsonFieldFormat.trim();
+
+                if (jsonFieldFormat.indexOf('T') != -1 && !jsonFieldFormat.contains("'T'")) {
+                    jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
+                }
+
+                if (!jsonFieldFormat.isEmpty()) {
+                    fieldInfo.format = jsonFieldFormat;
+                }
             }
         }
     }
@@ -754,7 +726,6 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
         }
 
         if (objectType == AtomicInteger.class) {
-
             return ObjectWriterImplAtomicInteger.INSTANCE;
         }
 
@@ -796,10 +767,6 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
 
         if (objectType == OptionalInt.class) {
             return ObjectWriterImplOptionalInt.INSTANCE;
-        }
-
-        if (objectType == OptionalLong.class) {
-            return ObjectWriterImplOptionalLong.INSTANCE;
         }
 
         if (objectType == OptionalLong.class) {
