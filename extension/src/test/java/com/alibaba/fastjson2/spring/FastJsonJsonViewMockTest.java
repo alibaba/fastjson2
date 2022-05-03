@@ -51,6 +51,15 @@ public class FastJsonJsonViewMockTest {
                 .build();
     }
 
+    @Test
+    public void test() throws Exception {
+
+        mockMvc.perform(
+                (get("/fastjson/mocktest").characterEncoding("UTF-8")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                )).andExpect(status().isOk()).andDo(print());
+    }
+
     @Controller
     @RequestMapping("fastjson")
     public static class BeanController {
@@ -79,7 +88,6 @@ public class FastJsonJsonViewMockTest {
 
     }
 
-
     @ComponentScan(basePackages = "com.alibaba.fastjson2.spring")
     @Configuration
     @Order(Ordered.LOWEST_PRECEDENCE + 1)
@@ -96,15 +104,6 @@ public class FastJsonJsonViewMockTest {
             FastJsonJsonView fastJsonJsonView = new FastJsonJsonView();
             registry.enableContentNegotiation(fastJsonJsonView);
         }
-    }
-
-    @Test
-    public void test() throws Exception {
-
-        mockMvc.perform(
-                (get("/fastjson/mocktest").characterEncoding("UTF-8")
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                )).andExpect(status().isOk()).andDo(print());
     }
 
     static class AuthIdentityRequest {

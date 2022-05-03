@@ -14,13 +14,12 @@ import static com.alibaba.fastjson2.reader.ObjectReaders.createObjectReader;
 import static com.alibaba.fastjson2.reader.ObjectReaders.fieldReader;
 
 public class AwtRederModule implements ObjectReaderModule {
-    public static AwtRederModule INSTANCE = new AwtRederModule();
-
     static final long HASH_X = Fnv.hashCode64("x");
     static final long HASH_Y = Fnv.hashCode64("y");
     static final long HASH_NAME = Fnv.hashCode64("name");
     static final long HASH_SIZE = Fnv.hashCode64("size");
     static final long HASH_STYLE = Fnv.hashCode64("style");
+    public static AwtRederModule INSTANCE = new AwtRederModule();
 
     @Override
     public ObjectReader getObjectReader(ObjectReaderProvider provider, Type type) {
