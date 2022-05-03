@@ -458,8 +458,9 @@ public interface JSON {
      * @param type     specify the {@link Type} to be converted
      * @param consumer the consumer of the parsing result object
      * @param features features to be enabled in parsing
-     * @throws JSONException IO exception occurred in reading
+     * @throws JSONException If the first byte cannot be read for any reason other than end of file, or if the input stream has been closed, or if some other I/O error occurs
      * @see JSON#parseObject(InputStream, Charset, char, Type, Consumer, JSONReader.Feature...)
+     * @since 2.0.2
      */
     static <T> void parseObject(InputStream input, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
         parseObject(input, StandardCharsets.UTF_8, '\n', type, consumer, features);
@@ -474,7 +475,8 @@ public interface JSON {
      * @param type      specify the {@link Type} to be converted
      * @param consumer  the consumer of the parsing result object
      * @param features  features to be enabled in parsing
-     * @throws JSONException IO exception occurred in reading
+     * @throws JSONException If the first byte cannot be read for any reason other than end of file, or if the input stream has been closed, or if some other I/O error occurs
+     * @since 2.0.2
      */
     @SuppressWarnings("unchecked")
     static <T> void parseObject(InputStream input, Charset charset, char delimiter, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
@@ -546,7 +548,8 @@ public interface JSON {
      * @param delimiter specify the delimiter
      * @param type      specify the {@link Type} to be converted
      * @param consumer  the consumer of the parsing result object
-     * @throws JSONException IO exception occurred in reading
+     * @throws JSONException If the first byte cannot be read for any reason other than end of file, or if the input stream has been closed, or if some other I/O error occurs
+     * @since 2.0.2
      */
     @SuppressWarnings("unchecked")
     static <T> void parseObject(Reader input, char delimiter, Type type, Consumer<T> consumer) {
@@ -1166,6 +1169,9 @@ public interface JSON {
         return TypeUtils.cast(object, clazz);
     }
 
+    /**
+     * @since 2.0.2
+     */
     static void mixIn(Class<?> target, Class<?> mixinSource) {
         JSONFactory.defaultObjectWriterProvider.mixIn(target, mixinSource);
         JSONFactory.getDefaultObjectReaderProvider().mixIn(target, mixinSource);
@@ -1176,6 +1182,7 @@ public interface JSON {
      *
      * @see JSONFactory#getDefaultObjectReaderProvider()
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader)
+     * @since 2.0.2
      */
     static boolean register(Type type, ObjectReader<?> objectReader) {
         return JSONFactory.getDefaultObjectReaderProvider().register(type, objectReader);
@@ -1186,6 +1193,7 @@ public interface JSON {
      *
      * @see JSONFactory#getDefaultObjectReaderProvider()
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
+     * @since 2.0.2
      */
     static boolean register(Type type, ObjectWriter<?> objectReader) {
         return JSONFactory.defaultObjectWriterProvider.register(type, objectReader);
