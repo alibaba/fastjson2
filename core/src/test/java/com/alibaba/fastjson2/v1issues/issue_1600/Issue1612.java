@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
@@ -23,12 +25,12 @@ public class Issue1612 {
         assertNotNull(user);
     }
 
-    public static <T> RegResponse<T> testFastJson(Class<T> clasz) {
+    public static <T> RegResponse<T> testFastJson(Class<T> clazz) {
 
         //把body解析成一个对象
         String body = "{\"retCode\":\"200\", \"result\":{\"name\":\"Zhangsan\",\"password\":\"123\"}}";
 
-        return JSON.parseObject(body, new TypeReference<RegResponse<T>>(clasz) {});
+        return JSON.parseObject(body, new TypeReference<RegResponse<T>>(new Type[]{clazz}) {});
     }
 }
 
