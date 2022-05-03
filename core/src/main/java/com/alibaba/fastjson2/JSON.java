@@ -168,7 +168,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -186,7 +186,7 @@ public interface JSON {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> T parseObject(String text, TypeReference typeReference) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -206,7 +206,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, JSONReader.Feature... features) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -230,7 +230,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, String format, JSONReader.Feature... features) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -256,7 +256,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type, JSONReader.Feature... features) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -277,7 +277,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type, String format, JSONReader.Feature... features) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -304,6 +304,7 @@ public interface JSON {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
+
         JSONReader reader = JSONReader.of(bytes);
         ObjectReader<T> objectReader = reader.getObjectReader(type);
         return objectReader.readObject(reader, 0);
@@ -422,7 +423,7 @@ public interface JSON {
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Charset charset, Type type, JSONReader.Feature... features) {
         try (JSONReader reader = JSONReader.of(input, charset)) {
-            reader.getContext().config(features);
+            reader.context.config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
             return objectReader.readObject(reader, 0);
         }
@@ -457,7 +458,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static JSONArray parseArray(String text) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -475,7 +476,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static JSONArray parseArray(String text, JSONReader.Feature... features) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -493,7 +494,7 @@ public interface JSON {
      * @param type specify the {@link Type} to be converted
      */
     static <T> List<T> parseArray(String text, Type type) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
@@ -510,7 +511,7 @@ public interface JSON {
      * @param types specify some {@link Type}s to be converted
      */
     static <T> List<T> parseArray(String text, Type[] types) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
         List<T> array = new ArrayList<>(types.length);
@@ -638,7 +639,7 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
-                if (format != null && format.length() != 0) {
+                if (format != null && !format.isEmpty()) {
                     writer.context.setDateFormat(format);
                 }
 
@@ -664,7 +665,7 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
-                if (format != null && format.length() != 0) {
+                if (format != null && !format.isEmpty()) {
                     writer.context.setDateFormat(format);
                 }
                 if (filters != null && filters.length != 0) {
@@ -780,7 +781,7 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
-                if (format != null && format.length() != 0) {
+                if (format != null && !format.isEmpty()) {
                     writer.context.setDateFormat(format);
                 }
                 if (filters != null && filters.length != 0) {
@@ -867,7 +868,7 @@ public interface JSON {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
-                if (format != null && format.length() != 0) {
+                if (format != null && !format.isEmpty()) {
                     writer.context.setDateFormat(format);
                 }
                 if (filters != null && filters.length != 0) {
@@ -892,7 +893,7 @@ public interface JSON {
      * @return {@code true} or {@code false}
      */
     static boolean isValid(String text) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return false;
         }
 
@@ -911,7 +912,7 @@ public interface JSON {
      * @return {@code true} or {@code false}
      */
     static boolean isValidArray(String text) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return false;
         }
 
@@ -1120,7 +1121,7 @@ public interface JSON {
             chars = new char[8192];
         }
 
-        int limit = 0, start = 0, end = -1;
+        int limit = 0, start = 0, end;
         try {
             for (; ; ) {
                 int n = input.read(chars, limit, chars.length - limit);
