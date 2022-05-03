@@ -18,6 +18,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -99,6 +100,29 @@ public class JSONTest {
                 , null
                 , IntField1.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(101, vo.v0000);
+    }
+
+    @Test
+    public void test_parseObject_inputStream_consumer() {
+        ByteArrayInputStream input = new ByteArrayInputStream(
+            "{\"id\":1,\"name\":\"fastjson\"}\n{\"id\":2,\"name\":\"fastjson2\"}\n".getBytes(StandardCharsets.UTF_8)
+        );
+
+        JSON.parseObject(
+            input, StandardCharsets.UTF_8,
+            '\n', User.class, (Consumer<User>) user -> {
+                assertNotNull(user);
+                switch (user.id) {
+                    case 1: {
+                        assertEquals("fastjson", user.name);
+                        break;
+                    }
+                    case 2: {
+                        assertEquals("fastjson2", user.name);
+                        break;
+                    }
+                }
+        });
     }
 
     @Test
@@ -657,6 +681,11 @@ public class JSONTest {
             error = ex;
         }
         assertNotNull(error);
+    }
+
+    public static class User {
+        public int id;
+        public String name;
     }
 
     public static class MyList<T> extends ArrayList<T> {
