@@ -50,7 +50,7 @@ public abstract class TypeReference<T> {
      * @throws NullPointerException If the {@link Type} is null
      */
     @SuppressWarnings("unchecked")
-    public TypeReference(Type type, boolean raw) {
+    public TypeReference(Type type) {
         if (type == null) {
             throw new NullPointerException();
         }
@@ -60,11 +60,23 @@ public abstract class TypeReference<T> {
     }
 
     /**
+     * For example
+     * <pre>{@code
+     * Class<T> klass = ...;
+     * TypeReference<Response<T>> ref = new TypeReference<Response<T>>(new Type[]{klass}){};
+     * }</pre>
+     *
      * @param actualTypeArguments an array of Type objects representing the actual type arguments to this type
+     * @throws NullPointerException If the {@code actualTypeArguments} is null or empty
      * @since 2.0.2
      */
     @SuppressWarnings("unchecked")
-    public TypeReference(Type... actualTypeArguments) {
+    public TypeReference(Type[] actualTypeArguments) {
+        if (actualTypeArguments == null ||
+            actualTypeArguments.length == 0) {
+            throw new NullPointerException();
+        }
+
         Class<?> thisClass = getClass();
         Type superClass = thisClass.getGenericSuperclass();
         ParameterizedType argType = (ParameterizedType) ((ParameterizedType) superClass).getActualTypeArguments()[0];
@@ -145,7 +157,7 @@ public abstract class TypeReference<T> {
      * @param type specify the {@link Type} to be converted
      */
     public static TypeReference<?> get(Type type) {
-        return new TypeReference<Object>(type, true) {
+        return new TypeReference<Object>(type) {
             // nothing
         };
     }
