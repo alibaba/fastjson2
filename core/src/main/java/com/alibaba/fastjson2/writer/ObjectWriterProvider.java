@@ -3,9 +3,6 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
-import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -87,9 +84,7 @@ public class ObjectWriterProvider {
     }
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
-        ObjectWriter objectWriter;
-
-        objectWriter = fieldBased
+        ObjectWriter objectWriter = fieldBased
                 ? cacheFieldBased.get(objectType)
                 : cache.get(objectType);
 
@@ -167,7 +162,7 @@ public class ObjectWriterProvider {
     static final int[] NOT_REFERENCES_TYPE_HASH_CODES;
 
     static {
-        Class[] classes = new Class[]{
+        Class<?>[] classes = new Class[]{
                 boolean.class,
                 Boolean.class,
                 Character.class,
