@@ -36,6 +36,14 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     private FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
     /**
+     * Can serialize/deserialize all types.
+     */
+    public FastJsonHttpMessageConverter() {
+
+        super(MediaType.ALL);
+    }
+
+    /**
      * @return the fastJsonConfig.
      */
     public FastJsonConfig getFastJsonConfig() {
@@ -47,14 +55,6 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
      */
     public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
         this.fastJsonConfig = fastJsonConfig;
-    }
-
-    /**
-     * Can serialize/deserialize all types.
-     */
-    public FastJsonHttpMessageConverter() {
-
-        super(MediaType.ALL);
     }
 
     @Override

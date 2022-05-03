@@ -130,6 +130,10 @@ public class GenericFastJsonRedisSerializerTest {
     }
 
     static class BaseResult<T> {
+        private String msg;
+        private String code;
+        private T data;
+
         public String getMsg() {
             return msg;
         }
@@ -153,9 +157,5 @@ public class GenericFastJsonRedisSerializerTest {
         public void setData(T data) {
             this.data = data;
         }
-
-        private String msg;
-        private String code;
-        private T data;
     }
 }

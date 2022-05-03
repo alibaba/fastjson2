@@ -33,8 +33,8 @@ public class SliceValueConsumer implements ValueConsumer {
     @Override
     public void accept(boolean val) {
         byte[] bytes = val
-                ? new byte[] {'t', 'r', 'u', 'e'}
-                : new byte[] {'f', 'a', 'l', 's', 'e'};
+                ? new byte[]{'t', 'r', 'u', 'e'}
+                : new byte[]{'f', 'a', 'l', 's', 'e'};
         slice = Slices.wrappedBuffer(bytes);
     }
 
@@ -83,7 +83,7 @@ public class SliceValueConsumer implements ValueConsumer {
     @Override
     public void accept(Map object) {
         if (object.isEmpty()) {
-            slice = Slices.wrappedBuffer(new byte[] {'{', '}'});
+            slice = Slices.wrappedBuffer(new byte[]{'{', '}'});
             return;
         }
 
@@ -97,7 +97,7 @@ public class SliceValueConsumer implements ValueConsumer {
     @Override
     public void accept(List array) {
         if (array.isEmpty()) {
-            slice = Slices.wrappedBuffer(new byte[] {'[', ']'});
+            slice = Slices.wrappedBuffer(new byte[]{'[', ']'});
             return;
         }
 
