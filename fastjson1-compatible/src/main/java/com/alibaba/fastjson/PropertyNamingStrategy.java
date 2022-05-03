@@ -4,10 +4,10 @@ package com.alibaba.fastjson;
  * @since 1.2.15
  */
 public enum PropertyNamingStrategy {
-                                    CamelCase, //
-                                    PascalCase, //
-                                    SnakeCase, //
-                                    KebabCase;
+    CamelCase, //
+    PascalCase, //
+    SnakeCase, //
+    KebabCase;
 
     public String translate(String propertyName) {
         switch (this) {

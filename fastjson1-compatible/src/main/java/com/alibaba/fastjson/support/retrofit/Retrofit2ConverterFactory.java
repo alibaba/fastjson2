@@ -72,7 +72,7 @@ public class Retrofit2ConverterFactory extends Converter.Factory {
     }
 
     final class ResponseBodyConverter<T> implements Converter<ResponseBody, T> {
-        private Type type;
+        private final Type type;
 
         ResponseBodyConverter(Type type) {
             this.type = type;
