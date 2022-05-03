@@ -218,7 +218,7 @@ public class JSON {
     public static String toJSONString(Object object, SerializeFilter[] filters, SerializerFeature... features) {
         try (JSONWriter writer = JSONWriter.of()) {
             JSONWriter.Context context = writer.getContext();
-            context.setDateFormat("millis");
+            writer.setRootObject(object);
             config(context, features);
             for (SerializeFilter filter : filters) {
                 if (filter instanceof NameFilter) {
@@ -247,7 +247,7 @@ public class JSON {
     public static byte[] toJSONBytes(Object object, SerializeFilter[] filters, SerializerFeature... features) {
         try (JSONWriter writer = JSONWriter.ofUTF8()) {
             JSONWriter.Context context = writer.getContext();
-            context.setDateFormat("millis");
+            writer.setRootObject(object);
             config(context, features);
             for (SerializeFilter filter : filters) {
                 if (filter instanceof NameFilter) {
@@ -298,6 +298,11 @@ public class JSON {
     }
 
     private static void config(JSONWriter.Context ctx, SerializerFeature[] features) {
+
+        ctx.setDateFormat("millis");
+        ctx.setZoneId(defaultTimeZone.toZoneId());
+        ctx.config(JSONWriter.Feature.ReferenceDetection);
+
         for (SerializerFeature feature : features) {
             switch (feature) {
                 case UseISO8601DateFormat:
@@ -350,7 +355,6 @@ public class JSON {
         try (JSONWriter writer = JSONWriter.of()) {
             JSONWriter.Context ctx = writer.getContext();
 
-            ctx.setDateFormat("millis");
             config(ctx, features);
 
             writer.writeAny(object);
@@ -392,7 +396,7 @@ public class JSON {
                                             SerializerFeature... features) throws IOException {
         try (JSONWriter writer = JSONWriter.ofUTF8()) {
             JSONWriter.Context context = writer.getContext();
-            context.setDateFormat("millis");
+            writer.setRootObject(object);
             config(context, features);
             for (SerializeFilter filter : filters) {
                 if (filter instanceof NameFilter) {
