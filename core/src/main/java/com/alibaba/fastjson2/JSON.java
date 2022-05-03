@@ -36,9 +36,11 @@ public interface JSON {
         if (text == null) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
-        ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -52,10 +54,12 @@ public interface JSON {
         if (text == null) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
-        reader.context.config(features);
-        ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            reader.context.config(features);
+            ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -69,9 +73,11 @@ public interface JSON {
         if (text == null) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
-        ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -86,10 +92,12 @@ public interface JSON {
         if (text == null) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
-        reader.context.config(features);
-        ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            reader.context.config(features);
+            ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -103,9 +111,11 @@ public interface JSON {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(bytes);
-        ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(bytes)) {
+            ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -120,10 +130,12 @@ public interface JSON {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(bytes);
-        reader.context.config(features);
-        ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(bytes)) {
+            reader.context.config(features);
+            ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -138,12 +150,14 @@ public interface JSON {
         if (text == null) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
-        JSONReader.Context context = reader.context;
 
-        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
-        ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
-        return objectReader.readObject(reader, 0);
+        try (JSONReader reader = JSONReader.of(text)) {
+            JSONReader.Context context = reader.context;
+
+            boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+            ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -157,9 +171,11 @@ public interface JSON {
         if (text == null || text.length() == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
-        ObjectReader<T> objectReader = reader.context.provider.getObjectReader(type);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            ObjectReader<T> objectReader = reader.context.provider.getObjectReader(type);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -173,10 +189,12 @@ public interface JSON {
         if (text == null || text.length() == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
-        Type type = typeReference.getType();
-        ObjectReader<T> objectReader = reader.context.provider.getObjectReader(type);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            Type type = typeReference.getType();
+            ObjectReader<T> objectReader = reader.context.provider.getObjectReader(type);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -191,14 +209,15 @@ public interface JSON {
         if (text == null || text.length() == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
 
-        JSONReader.Context context = reader.context;
-        context.config(features);
-        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+        try (JSONReader reader = JSONReader.of(text)) {
+            JSONReader.Context context = reader.context;
+            context.config(features);
+            boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
 
-        ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
-        return objectReader.readObject(reader, 0);
+            ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -214,16 +233,18 @@ public interface JSON {
         if (text == null || text.length() == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
 
-        JSONReader.Context context = reader.context;
-        if (format != null && !format.isEmpty()) {
-            context.setUtilDateFormat(format);
+        try (JSONReader reader = JSONReader.of(text)) {
+
+            JSONReader.Context context = reader.context;
+            if (format != null && !format.isEmpty()) {
+                context.setUtilDateFormat(format);
+            }
+            context.config(features);
+
+            ObjectReader<T> objectReader = context.provider.getObjectReader(clazz);
+            return objectReader.readObject(reader, 0);
         }
-        context.config(features);
-
-        ObjectReader<T> objectReader = context.provider.getObjectReader(clazz);
-        return objectReader.readObject(reader, 0);
     }
 
     /**
@@ -238,10 +259,12 @@ public interface JSON {
         if (text == null || text.length() == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
-        reader.context.config(features);
-        ObjectReader<T> objectReader = reader.getObjectReader(type);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            reader.context.config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -257,16 +280,17 @@ public interface JSON {
         if (text == null || text.length() == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
 
-        JSONReader.Context context = reader.context;
-        if (format != null && !format.isEmpty()) {
-            context.setUtilDateFormat(format);
+        try (JSONReader reader = JSONReader.of(text)) {
+            JSONReader.Context context = reader.context;
+            if (format != null && !format.isEmpty()) {
+                context.setUtilDateFormat(format);
+            }
+            context.config(features);
+
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            return objectReader.readObject(reader, 0);
         }
-        context.config(features);
-
-        ObjectReader<T> objectReader = reader.getObjectReader(type);
-        return objectReader.readObject(reader, 0);
     }
 
     /**
@@ -296,9 +320,11 @@ public interface JSON {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(bytes);
-        ObjectReader<T> objectReader = reader.getObjectReader(clazz);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(bytes)) {
+            ObjectReader<T> objectReader = reader.getObjectReader(clazz);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -313,10 +339,12 @@ public interface JSON {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(bytes);
-        reader.getContext().config(features);
-        ObjectReader<T> objectReader = reader.getObjectReader(type);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(bytes)) {
+            reader.getContext().config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -332,16 +360,17 @@ public interface JSON {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(bytes);
 
-        JSONReader.Context context = reader.context;
-        if (format != null && !format.isEmpty()) {
-            context.setUtilDateFormat(format);
+        try (JSONReader reader = JSONReader.of(bytes)) {
+            JSONReader.Context context = reader.context;
+            if (format != null && !format.isEmpty()) {
+                context.setUtilDateFormat(format);
+            }
+            context.config(features);
+
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            return objectReader.readObject(reader, 0);
         }
-        context.config(features);
-
-        ObjectReader<T> objectReader = reader.getObjectReader(type);
-        return objectReader.readObject(reader, 0);
     }
 
     /**
@@ -353,10 +382,11 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Type type, JSONReader.Feature... features) {
-        JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8);
-        reader.getContext().config(features);
-        ObjectReader<T> objectReader = reader.getObjectReader(type);
-        return objectReader.readObject(reader, 0);
+        try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8)) {
+            reader.getContext().config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -369,16 +399,16 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Type type, String format, JSONReader.Feature... features) {
-        JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8);
+        try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8)) {
+            JSONReader.Context context = reader.context;
+            if (format != null && !format.isEmpty()) {
+                context.setUtilDateFormat(format);
+            }
+            context.config(features);
 
-        JSONReader.Context context = reader.context;
-        if (format != null && !format.isEmpty()) {
-            context.setUtilDateFormat(format);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            return objectReader.readObject(reader, 0);
         }
-        context.config(features);
-
-        ObjectReader<T> objectReader = reader.getObjectReader(type);
-        return objectReader.readObject(reader, 0);
     }
 
     /**
@@ -391,10 +421,11 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Charset charset, Type type, JSONReader.Feature... features) {
-        JSONReader reader = JSONReader.of(input, charset);
-        reader.getContext().config(features);
-        ObjectReader<T> objectReader = reader.getObjectReader(type);
-        return objectReader.readObject(reader, 0);
+        try (JSONReader reader = JSONReader.of(input, charset)) {
+            reader.getContext().config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -412,9 +443,11 @@ public interface JSON {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(bytes, offset, length, charset);
-        ObjectReader<T> objectReader = reader.getObjectReader(type);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(bytes, offset, length, charset)) {
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -427,9 +460,11 @@ public interface JSON {
         if (text == null || text.length() == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
-        ObjectReader<JSONArray> objectReader = reader.getObjectReader(JSONArray.class);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            ObjectReader<JSONArray> objectReader = reader.getObjectReader(JSONArray.class);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -443,10 +478,12 @@ public interface JSON {
         if (text == null || text.length() == 0) {
             return null;
         }
-        JSONReader reader = JSONReader.of(text);
-        reader.context.config(features);
-        ObjectReader<JSONArray> objectReader = reader.getObjectReader(JSONArray.class);
-        return objectReader.readObject(reader, 0);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            reader.context.config(features);
+            ObjectReader<JSONArray> objectReader = reader.getObjectReader(JSONArray.class);
+            return objectReader.readObject(reader, 0);
+        }
     }
 
     /**
@@ -460,8 +497,10 @@ public interface JSON {
             return null;
         }
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
-        JSONReader reader = JSONReader.of(text);
-        return reader.read(paramType);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            return reader.read(paramType);
+        }
     }
 
     /**
@@ -475,17 +514,17 @@ public interface JSON {
             return null;
         }
         List<T> array = new ArrayList<>(types.length);
-        JSONReader reader = JSONReader.of(text);
 
-        reader.startArray();
-        for (Type itemType : types) {
-            array.add(
-                    reader.read(itemType)
-            );
+        try (JSONReader reader = JSONReader.of(text)) {
+            reader.startArray();
+            for (Type itemType : types) {
+                array.add(
+                        reader.read(itemType)
+                );
+            }
+            reader.endArray();
+            return array;
         }
-        reader.endArray();
-
-        return array;
     }
 
     /**
@@ -857,8 +896,7 @@ public interface JSON {
             return false;
         }
 
-        JSONReader jsonReader = JSONReader.of(text);
-        try {
+        try (JSONReader jsonReader = JSONReader.of(text)) {
             jsonReader.skipValue();
         } catch (JSONException error) {
             return false;
@@ -877,8 +915,7 @@ public interface JSON {
             return false;
         }
 
-        JSONReader jsonReader = JSONReader.of(text);
-        try {
+        try (JSONReader jsonReader = JSONReader.of(text)) {
             if (!jsonReader.isArray()) {
                 return false;
             }
@@ -899,8 +936,8 @@ public interface JSON {
         if (bytes == null || bytes.length == 0) {
             return false;
         }
-        JSONReader jsonReader = JSONReader.of(bytes);
-        try {
+
+        try (JSONReader jsonReader = JSONReader.of(bytes)) {
             jsonReader.skipValue();
         } catch (JSONException error) {
             return false;
@@ -918,8 +955,8 @@ public interface JSON {
         if (bytes == null || bytes.length == 0) {
             return false;
         }
-        JSONReader jsonReader = JSONReader.of(bytes);
-        try {
+
+        try (JSONReader jsonReader = JSONReader.of(bytes)) {
             if (!jsonReader.isArray()) {
                 return false;
             }
@@ -943,8 +980,8 @@ public interface JSON {
         if (bytes == null || bytes.length == 0) {
             return false;
         }
-        JSONReader jsonReader = JSONReader.of(bytes, offset, length, charset);
-        try {
+
+        try (JSONReader jsonReader = JSONReader.of(bytes, offset, length, charset)) {
             jsonReader.skipValue();
         } catch (JSONException error) {
             return false;
@@ -966,8 +1003,8 @@ public interface JSON {
             return object;
         }
 
-        String str = JSON.toJSONString(object);
-        return JSON.parse(str);
+        String str = toJSONString(object);
+        return parse(str);
     }
 
     /**
