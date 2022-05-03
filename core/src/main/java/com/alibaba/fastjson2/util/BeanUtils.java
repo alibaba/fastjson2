@@ -26,6 +26,41 @@ public abstract class BeanUtils {
     static ConcurrentMap<Class, Method[]> methodCache = new ConcurrentHashMap<>();
     static ConcurrentMap<Class, Constructor[]> constructorCache = new ConcurrentHashMap<>();
 
+    private static volatile Class RECORD_CLASS;
+    private static volatile Method RECORD_GET_RECORD_COMPONENTS;
+    private static volatile Method RECORD_COMPONENT_GET_NAME;
+    private static volatile Method RECORD_COMPONENT_GET_TYPE;
+
+    public static String[] getRecordFieldNames(Class<?> recordType) {
+        if (JDKUtils.JVM_VERSION < 14) {
+            return new String[0];
+        }
+
+        try {
+            if (RECORD_GET_RECORD_COMPONENTS == null) {
+                RECORD_GET_RECORD_COMPONENTS = Class.class.getMethod("getRecordComponents");
+            }
+
+            if (RECORD_COMPONENT_GET_NAME == null) {
+                Class<?> c = Class.forName("java.lang.reflect.RecordComponent");
+                RECORD_COMPONENT_GET_NAME = c.getMethod("getName");
+                RECORD_COMPONENT_GET_TYPE = c.getMethod("getType");
+            }
+
+            final Object[] components = (Object[]) RECORD_GET_RECORD_COMPONENTS.invoke(recordType);
+            final String[] names = new String[components.length];
+            for (int i = 0; i < components.length; i++) {
+                names[i] = (String) RECORD_COMPONENT_GET_NAME.invoke(components[i]);
+            }
+
+            return names;
+        } catch (Exception e) {
+            throw new RuntimeException(String.format(
+                    "Failed to access Methods needed to support `java.lang.Record`: (%s) %s",
+                    e.getClass().getName(), e.getMessage()), e);
+        }
+    }
+
     public static void fields(Class objectClass, Consumer<Field> fieldReaders) {
         Field[] fields = fieldCache.get(objectClass);
         if (fields == null) {
@@ -407,16 +442,19 @@ public abstract class BeanUtils {
             }
         }
 
+        boolean record = isRecord(objectClass);
+
+        String[] recordFieldNames = null;
+        if (record) {
+            recordFieldNames = getRecordFieldNames(objectClass);
+        }
+
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
             methods = objectClass.getMethods();
             methodCache.putIfAbsent(objectClass, methods);
         }
 
-        getters(methods, methodConsumer);
-    }
-
-    public static void getters(Method[] methods, Consumer<Method> methodConsumer) {
         for (Method method : methods) {
             int paramType = method.getParameterCount();
             if (paramType != 0) {
@@ -439,6 +477,22 @@ public abstract class BeanUtils {
             }
 
             String methodName = method.getName();
+
+            if (record) {
+                boolean match = false;
+                for (String recordFieldName : recordFieldNames) {
+                    if (methodName.equals(recordFieldName)) {
+                        match = true;
+                        break;
+                    }
+                }
+
+                if (match) {
+                    methodConsumer.accept(method);
+                    continue;
+                }
+            }
+
             final int methodNameLength = methodName.length();
 
             boolean nameMatch;
@@ -470,6 +524,25 @@ public abstract class BeanUtils {
 
             methodConsumer.accept(method);
         }
+    }
+
+    public static boolean isRecord(Class objectClass) {
+        Class superclass = objectClass.getSuperclass();
+        if (superclass == null) {
+            return false;
+        }
+
+        if (RECORD_CLASS == null) {
+            String superclassName = superclass.getName();
+            if (superclassName.equals("java.lang.Record")) {
+                RECORD_CLASS = RECORD_CLASS;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        return superclass == RECORD_CLASS;
     }
 
     public static String setterName(String methodName) {
@@ -527,10 +600,6 @@ public abstract class BeanUtils {
             chars[0] = (char) (c0 + 32);
         }
         return new String(chars);
-    }
-
-    public static String getterName(String methodName) {
-        return getterName(methodName, null);
     }
 
     public static String getterName(String methodName, String namingStrategy) {
