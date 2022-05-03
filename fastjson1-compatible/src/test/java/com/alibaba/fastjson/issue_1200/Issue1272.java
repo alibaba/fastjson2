@@ -17,11 +17,11 @@ public class Issue1272 {
 
         try {
             JSON.toJSONString(new Point());
-        }catch (Exception ex) {
+        } catch (JSONException ex) {
             exception = ex;
         }
         assertNotNull(exception);
-        assertEquals(NullPointerException.class, exception.getClass());
+        assertEquals(NullPointerException.class, exception.getCause().getClass());
     }
 
     public static class Point {
