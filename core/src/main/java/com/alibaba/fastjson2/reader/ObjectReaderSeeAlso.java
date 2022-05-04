@@ -70,6 +70,7 @@ final class ObjectReaderSeeAlso<T> extends ObjectReaderAdapter<T> {
         return provider.getObjectReader(seeAlsoClass);
     }
 
+    @Override
     public T readObject(JSONReader jsonReader, long features) {
         if (jsonReader.isString()) {
             long valueHashCode = jsonReader.readValueHashCode();
