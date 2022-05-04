@@ -185,12 +185,13 @@ public interface JSON {
      * @param typeReference specify the {@link TypeReference} to be converted
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static <T> T parseObject(String text, TypeReference typeReference) {
+    static <T> T parseObject(String text, TypeReference typeReference, JSONReader.Feature ... features) {
         if (text == null || text.isEmpty()) {
             return null;
         }
 
         try (JSONReader reader = JSONReader.of(text)) {
+            reader.context.config(features);
             Type type = typeReference.getType();
             ObjectReader<T> objectReader = reader.context.provider.getObjectReader(type);
             return objectReader.readObject(reader, 0);
@@ -636,14 +637,16 @@ public interface JSON {
      *
      * @param text the JSON {@link String} to be parsed
      * @param type specify the {@link Type} to be converted
+     * @param features features to be enabled in parsing
      */
-    static <T> List<T> parseArray(String text, Type type) {
+    static <T> List<T> parseArray(String text, Type type, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
         }
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
 
         try (JSONReader reader = JSONReader.of(text)) {
+            reader.context.config(features);
             return reader.read(paramType);
         }
     }
@@ -653,14 +656,17 @@ public interface JSON {
      *
      * @param text  the JSON {@link String} to be parsed
      * @param types specify some {@link Type}s to be converted
+     * @param features features to be enabled in parsing
      */
-    static <T> List<T> parseArray(String text, Type[] types) {
+    static <T> List<T> parseArray(String text, Type[] types, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
         }
         List<T> array = new ArrayList<>(types.length);
 
         try (JSONReader reader = JSONReader.of(text)) {
+            reader.context.config(features);
+
             reader.startArray();
             for (Type itemType : types) {
                 array.add(
