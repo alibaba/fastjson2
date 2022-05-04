@@ -500,6 +500,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         fieldInfo.ignore = true;
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonAnyGetter":
+                        fieldInfo.format = "unwrapped";
+                        break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
@@ -544,6 +547,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         fieldInfo.ignore = true;
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonAnyGetter":
+                        fieldInfo.format = "unwrapped";
                         break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
