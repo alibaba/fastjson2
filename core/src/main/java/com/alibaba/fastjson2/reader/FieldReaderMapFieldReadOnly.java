@@ -15,6 +15,7 @@ class FieldReaderMapFieldReadOnly<T> extends FieldReaderObjectField<T> implement
         super(fieldName, fieldType, fieldClass, ordinal, features, format, field);
     }
 
+    @Override
     public ObjectReader getItemObjectReader(JSONReader jsonReader) {
         if (itemReader != null) {
             return itemReader;
@@ -58,6 +59,7 @@ class FieldReaderMapFieldReadOnly<T> extends FieldReaderObjectField<T> implement
         map.putAll((Map) value);
     }
 
+    @Override
     public void processExtra(JSONReader jsonReader, Object object) {
         Map map;
         try {
