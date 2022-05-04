@@ -5,12 +5,16 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.util.Map;
+
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
 public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
     final protected Class objectClass;
     final protected String typeName;
     final protected long typeNameHash;
+
+    protected FieldReader extraFieldReader = null;
 
     protected ObjectReaderBean(Class objectClass, String typeName) {
         if (typeName == null) {
@@ -22,6 +26,15 @@ public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
         this.objectClass = objectClass;
         this.typeName = typeName;
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
+    }
+
+    protected void processExtra(JSONReader jsonReader, Object object) {
+        if (extraFieldReader == null || object == null) {
+            jsonReader.skipValue();
+            return;
+        }
+
+        extraFieldReader.processExtra(jsonReader, object);
     }
 
     public ObjectReader checkAutoType(JSONReader jsonReader, Class listClass, long features) {

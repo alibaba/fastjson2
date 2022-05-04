@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -29,6 +30,14 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
 
     default int ordinal() {
         return 0;
+    }
+
+    default boolean isUnwrapped() {
+        return (getFeatures() & FieldInfo.UNWRAPPED_MASK) != 0;
+    }
+
+    default void processExtra(JSONReader jsonReader, Object object) {
+        jsonReader.skipValue();
     }
 
     default long getFeatures() {
