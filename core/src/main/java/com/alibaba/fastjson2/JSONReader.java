@@ -1209,6 +1209,7 @@ public abstract class JSONReader implements Closeable {
                 case '{':
                     val = readObject();
                     break;
+                case '\'':
                 case '"':
                     val = readString();
                     break;
