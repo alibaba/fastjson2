@@ -10,7 +10,6 @@ public class FieldInfo {
     public Class<?> writeUsing;
     public boolean fieldClassMixIn;
     public boolean isTransient;
-    public boolean isValue;
 
     public void init() {
         fieldName = null;
