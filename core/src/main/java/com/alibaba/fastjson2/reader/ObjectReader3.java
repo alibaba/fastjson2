@@ -57,6 +57,16 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
         this.hashCode0LCase = Fnv.hashCode64LCase(fieldName0);
         this.hashCode1LCase = Fnv.hashCode64LCase(fieldName1);
         this.hashCode2LCase = Fnv.hashCode64LCase(fieldName2);
+
+        if (fieldReader0.isUnwrapped()) {
+            extraFieldReader = fieldReader0;
+        }
+        if (fieldReader1.isUnwrapped()) {
+            extraFieldReader = fieldReader1;
+        }
+        if (fieldReader2.isUnwrapped()) {
+            extraFieldReader = fieldReader2;
+        }
     }
 
     @Override
@@ -130,7 +140,7 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
                 fieldReader2.readFieldValue(jsonReader, object);
             } else {
                 if (!jsonReader.isSupportSmartMatch(features | this.features)) {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                     continue;
                 }
                 long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
@@ -141,9 +151,19 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
                 } else if (nameHashCodeLCase == hashCode2) {
                     fieldReader2.readFieldValue(jsonReader, object);
                 } else {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                 }
             }
+        }
+
+        if (fieldReader0.isUnwrapped()) {
+            extraFieldReader = fieldReader0;
+        }
+        if (fieldReader1.isUnwrapped()) {
+            extraFieldReader = fieldReader1;
+        }
+        if (fieldReader2.isUnwrapped()) {
+            extraFieldReader = fieldReader2;
         }
 
         if (buildFunction != null) {
@@ -224,7 +244,7 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
                 fieldReader2.readFieldValue(jsonReader, object);
             } else {
                 if (!jsonReader.isSupportSmartMatch(features | this.features)) {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                     continue;
                 }
 
@@ -236,7 +256,7 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
                 } else if (nameHashCodeLCase == hashCode2LCase) {
                     fieldReader2.readFieldValue(jsonReader, object);
                 } else {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                 }
             }
         }

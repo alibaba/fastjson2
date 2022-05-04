@@ -61,10 +61,14 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
         long[] hashCodes = new long[fieldReaders.length];
         long[] hashCodesLCase = new long[fieldReaders.length];
         for (int i = 0; i < fieldReaders.length; i++) {
-            FieldReader item = fieldReaders[i];
-            String fieldName = item.getFieldName();
+            FieldReader fieldReader = fieldReaders[i];
+            String fieldName = fieldReader.getFieldName();
             hashCodes[i] = Fnv.hashCode64(fieldName);
             hashCodesLCase[i] = Fnv.hashCode64LCase(fieldName);
+
+            if (fieldReader.isUnwrapped()) {
+                this.extraFieldReader = fieldReader;
+            }
         }
 
         this.hashCodes = Arrays.copyOf(hashCodes, hashCodes.length);

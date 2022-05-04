@@ -500,7 +500,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         fieldInfo.ignore = true;
                         break;
-                    case "com.fasterxml.jackson.annotation.JsonAnyGetter":
+                    case "com.fasterxml.jackson.annotation.JsonAnySetter":
                         fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
                         break;
                     case "com.alibaba.fastjson.annotation.JSONField":

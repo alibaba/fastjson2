@@ -375,13 +375,17 @@ public interface ObjectReader<T> {
                 fieldReader = getFieldReaderLCase(nameHashCodeLCase);
             }
 
-            if (fieldReader == null) {
-                jsonReader.skipValue();
-                continue;
-            }
-
             if (object == null) {
                 object = createInstance(jsonReader.getContext().getFeatures() | features);
+            }
+
+            if (fieldReader == null) {
+                if (this instanceof ObjectReaderBean) {
+                    ((ObjectReaderBean) this).processExtra(jsonReader, object);
+                } else {
+                    jsonReader.skipValue();
+                }
+                continue;
             }
 
             fieldReader.readFieldValue(jsonReader, object);

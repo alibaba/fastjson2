@@ -54,6 +54,26 @@ public class UnwrappedTest {
     }
 
     @Test
+    public void test1Public() {
+        ExtendableBean1Public bean = new ExtendableBean1Public();
+        bean.name = "My bean";
+        bean.properties.put("attr1", "val1");
+        String str = JSON.toJSONString(bean);
+        assertEquals("{\"name\":\"My bean\",\"attr1\":\"val1\"}", str);
+
+        ExtendableBean1Public bean2 = JSON.parseObject(str, ExtendableBean1Public.class);
+        assertEquals(bean.name, bean2.name);
+        assertEquals(bean.properties, bean2.properties);
+    }
+
+    public static class ExtendableBean1Public {
+        public String name;
+
+        @JSONField(unwrapped = true)
+        public final Map<String, String> properties = new HashMap<>();
+    }
+
+    @Test
     public void test2() {
         ExtendableBean2 bean = new ExtendableBean2();
         bean.name = "My bean";
@@ -98,6 +118,162 @@ public class UnwrappedTest {
         public void setName(String name) {
             this.name = name;
         }
+
+        @JSONField(unwrapped = true)
+        public void setProperty(String name, String value) {
+            properties.put(name, value);
+        }
+    }
+
+    @Test
+    public void testF1() {
+        String str = "{\"attr1\":\"val1\"}";
+
+        ExtendableBeanF1 bean = JSON.parseObject(str, ExtendableBeanF1.class);
+        assertEquals("val1", bean.properties.get("attr1"));
+    }
+
+    private static class ExtendableBeanF1 {
+        private final Map<String, String> properties = new HashMap<>();
+        @JSONField(unwrapped = true)
+        public void setProperty(String name, String value) {
+            properties.put(name, value);
+        }
+    }
+
+    @Test
+    public void testF2() {
+        String str = "{\"attr1\":\"val1\"}";
+
+        ExtendableBeanF2 bean = JSON.parseObject(str, ExtendableBeanF2.class);
+        assertEquals("val1", bean.properties.get("attr1"));
+    }
+
+    private static class ExtendableBeanF2 {
+        public int f1;
+        private final Map<String, String> properties = new HashMap<>();
+        @JSONField(unwrapped = true)
+        public void setProperty(String name, String value) {
+            properties.put(name, value);
+        }
+    }
+
+    @Test
+    public void testF3() {
+        String str = "{\"attr1\":\"val1\"}";
+
+        ExtendableBeanF3 bean = JSON.parseObject(str, ExtendableBeanF3.class);
+        assertEquals("val1", bean.properties.get("attr1"));
+    }
+
+    private static class ExtendableBeanF3 {
+        public int f1;
+        public int f2;
+        private final Map<String, String> properties = new HashMap<>();
+        @JSONField(unwrapped = true)
+        public void setProperty(String name, String value) {
+            properties.put(name, value);
+        }
+    }
+
+    @Test
+    public void testF4() {
+        String str = "{\"attr1\":\"val1\"}";
+
+        ExtendableBeanF4 bean = JSON.parseObject(str, ExtendableBeanF4.class);
+        assertEquals("val1", bean.properties.get("attr1"));
+    }
+
+    private static class ExtendableBeanF4 {
+        public int f1;
+        public int f2;
+        public int f3;
+        private final Map<String, String> properties = new HashMap<>();
+        @JSONField(unwrapped = true)
+        public void setProperty(String name, String value) {
+            properties.put(name, value);
+        }
+    }
+
+    @Test
+    public void testF5() {
+        String str = "{\"attr1\":\"val1\"}";
+
+        ExtendableBeanF5 bean = JSON.parseObject(str, ExtendableBeanF5.class);
+        assertEquals("val1", bean.properties.get("attr1"));
+    }
+
+    private static class ExtendableBeanF5 {
+        public int f1;
+        public int f2;
+        public int f3;
+        public int f4;
+        private final Map<String, String> properties = new HashMap<>();
+        @JSONField(unwrapped = true)
+        public void setProperty(String name, String value) {
+            properties.put(name, value);
+        }
+    }
+
+    @Test
+    public void testF6() {
+        String str = "{\"attr1\":\"val1\"}";
+
+        ExtendableBeanF6 bean = JSON.parseObject(str, ExtendableBeanF6.class);
+        assertEquals("val1", bean.properties.get("attr1"));
+    }
+
+    private static class ExtendableBeanF6 {
+        public int f1;
+        public int f2;
+        public int f3;
+        public int f4;
+        public int f5;
+        private final Map<String, String> properties = new HashMap<>();
+        @JSONField(unwrapped = true)
+        public void setProperty(String name, String value) {
+            properties.put(name, value);
+        }
+    }
+
+    @Test
+    public void testF7() {
+        String str = "{\"attr1\":\"val1\"}";
+
+        ExtendableBeanF7 bean = JSON.parseObject(str, ExtendableBeanF7.class);
+        assertEquals("val1", bean.properties.get("attr1"));
+    }
+
+    private static class ExtendableBeanF7 {
+        public int f1;
+        public int f2;
+        public int f3;
+        public int f4;
+        public int f5;
+        public int f6;
+        private final Map<String, String> properties = new HashMap<>();
+        @JSONField(unwrapped = true)
+        public void setProperty(String name, String value) {
+            properties.put(name, value);
+        }
+    }
+
+    @Test
+    public void testF7Public() {
+        String str = "{\"attr1\":\"val1\"}";
+
+        ExtendableBeanF7P bean = JSON.parseObject(str, ExtendableBeanF7P.class);
+        assertEquals("val1", bean.properties.get("attr1"));
+    }
+
+    public static class ExtendableBeanF7P {
+        public int f1;
+        public int f2;
+        public int f3;
+        public int f4;
+        public int f5;
+        public int f6;
+        private final Map<String, String> properties = new HashMap<>();
 
         @JSONField(unwrapped = true)
         public void setProperty(String name, String value) {
