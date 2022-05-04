@@ -24,5 +24,6 @@ public class FieldInfo {
         isTransient = false;
     }
 
-   public static final long VALUE_MASK = 1L << 32;
+   public static final long VALUE_MASK = 1L << 48;
+   public static final long UNWRAPPED_MASK = 1L << 49;
 }

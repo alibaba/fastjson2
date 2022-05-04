@@ -425,7 +425,14 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 }
             }
 
-            processAnnotation(fieldInfo, parameter.getAnnotations());
+            Annotation[] annotations = null;
+            try {
+                annotations = parameter.getAnnotations();
+            } catch (ArrayIndexOutOfBoundsException ignored) {}
+
+            if (annotations != null) {
+                processAnnotation(fieldInfo, annotations);
+            }
         }
 
         @Override
@@ -493,6 +500,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         fieldInfo.ignore = true;
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonAnyGetter":
+                        fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
@@ -537,6 +547,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         fieldInfo.ignore = true;
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonAnyGetter":
+                        fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
                         break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
@@ -801,6 +814,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
                         }
                     });
+                    break;
+                case "com.fasterxml.jackson.annotation.JsonCreator":
+                    creatorMethod = true;
                     break;
                 default:
                     break;

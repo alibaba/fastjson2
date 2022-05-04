@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Function;
 
@@ -223,19 +224,12 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
     public boolean getBooleanValue(String key) {
         Object value = get(key);
-
-        Boolean booleanVal = castToBoolean(value);
+        Boolean booleanVal =  com.alibaba.fastjson2.util.TypeUtils.cast(value, Boolean.class);
         if (booleanVal == null) {
             return false;
         }
 
         return booleanVal.booleanValue();
-    }
-
-    public Byte getByte(String key) {
-        Object value = get(key);
-
-        return castToByte(value);
     }
 
     public byte getByteValue(String key) {
@@ -354,20 +348,17 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
     public Date getDate(String key) {
         Object value = get(key);
-
-        return castToDate(value);
+        return com.alibaba.fastjson2.util.TypeUtils.cast(value, java.util.Date.class);
     }
 
     public java.sql.Date getSqlDate(String key) {
         Object value = get(key);
-
-        return castToSqlDate(value);
+        return com.alibaba.fastjson2.util.TypeUtils.cast(value, java.sql.Date.class);
     }
 
     public java.sql.Timestamp getTimestamp(String key) {
         Object value = get(key);
-
-        return castToTimestamp(value);
+        return com.alibaba.fastjson2.util.TypeUtils.cast(value, Timestamp.class);
     }
 
     @Override

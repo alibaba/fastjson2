@@ -2506,10 +2506,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
                 }
             }
 
-            if ("unwrapped".equals(format)) {
-                format = null;
-            }
-
             return new FieldWriterDateField(fieldName, ordinal, features, format, field);
         }
 

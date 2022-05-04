@@ -1,8 +1,6 @@
 package com.alibaba.fastjson.issue_1300;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.BeanContext;
-import com.alibaba.fastjson.serializer.ContextValueFilter;
 import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import org.junit.Assert;
@@ -19,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Created by kimmking on 02/07/2017.
  */
 public class Issue1307 {
-    ContextValueFilter contextValueFilter = new ContextValueFilter() {
-        public Object process(BeanContext beanContext, Object obj, String name, Object value) {
+    ValueFilter contextValueFilter = new ValueFilter() {
+        public Object process(Object object, String name, Object value) {
             return "mark-"+value;
         }
     };
