@@ -695,4 +695,78 @@ public class JSONTest {
     private static class MyList0<T> extends ArrayList<T> {
 
     }
+
+    @Test
+    public void testNulls() {
+        assertNull(JSON.parse(null));
+        assertNull(JSON.parse(null, JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseObject((String) null));
+        assertNull(JSON.parseObject((String) null, JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseObject((byte[]) null));
+        assertNull(JSON.parseObject((byte[]) null, JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseObject(new byte[0]));
+        assertNull(JSON.parseObject(new byte[0], JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseObject((byte[]) null, User.class));
+        assertNull(JSON.parseObject((byte[]) null, User.class, JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseObject((byte[]) null, (Type) User.class));
+        assertNull(JSON.parseObject((byte[]) null, (Type) User.class, JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseObject((byte[]) null, (Type) User.class, ""));
+        assertNull(JSON.parseObject((byte[]) null, (Type) User.class, "", JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseObject(new byte[0], (Type) User.class, ""));
+        assertNull(JSON.parseObject(new byte[0], (Type) User.class, "", JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseObject(new byte[0], 0, 0, StandardCharsets.UTF_8, (Type) User.class));
+
+        assertNull(JSON.parseObject((String) null, User.class));
+        assertNull(JSON.parseObject((String) null, User.class, JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseObject((String) null, (Type) User.class));
+        assertNull(JSON.parseObject((String) null, (Type) User.class, JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseObject((String) null, User.class, ""));
+        assertNull(JSON.parseObject((String) null, User.class, "", JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseObject((String) null, (Type) User.class, ""));
+        assertNull(JSON.parseObject((String) null, (Type) User.class, "", JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseObject((String) null, new TypeReference<List<User>>(){}));
+        assertNull(JSON.parseObject((String) null, new TypeReference<List<User>>(){}, JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseArray((String) null));
+        assertNull(JSON.parseArray((String) null, JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseArray(""));
+        assertNull(JSON.parseArray("", JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseArray((String) null));
+        assertNull(JSON.parseArray((String) null, JSONReader.Feature.SupportAutoType));
+
+        assertNull(JSON.parseArray("", User.class));
+        assertNull(JSON.parseArray("", User.class, JSONReader.Feature.SupportAutoType));
+        assertNull(JSON.parseArray("", new Type[] {User.class}, JSONReader.Feature.SupportAutoType));
+
+        assertEquals("null", JSON.toJSONString(null, (Filter) null));
+        assertEquals("null", JSON.toJSONString(null, (Filter[]) null));
+        assertEquals("null", JSON.toJSONString(null, ""));
+        assertEquals("null", JSON.toJSONString(null, "", (Filter[]) null));
+
+        assertEquals("null", new String(JSON.toJSONBytes(null, (Filter) null)));
+        assertEquals("null", new String(JSON.toJSONBytes(null, (Filter[]) null)));
+        assertEquals("null", new String(JSON.toJSONBytes(null, "", (Filter[]) null)));
+
+        assertFalse(JSON.isValid((String) null));
+        assertFalse(JSON.isValid(""));
+        assertFalse(JSON.isValid((byte[]) null));
+
+        assertFalse(JSON.isValidArray((String) null));
+        assertFalse(JSON.isValidArray(""));
+        assertFalse(JSON.isValidArray((byte[]) null));
+    }
 }
