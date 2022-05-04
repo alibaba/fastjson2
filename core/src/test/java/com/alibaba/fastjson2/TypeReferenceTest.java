@@ -43,6 +43,12 @@ public class TypeReferenceTest {
     public void test_toJavaObject() {
         String text = "[{\"id\":1,\"name\":\"kraity\"}]";
         JSONArray array = JSON.parseArray(text);
+        JSONObject object = array.getJSONObject(0);
+
+        User user = new TypeReference<User>() {
+        }.toJavaObject(object);
+        assertEquals(1, user.id);
+        assertEquals("kraity", user.name);
 
         List<User> users = new TypeReference<List<User>>() {
         }.toJavaObject(array);

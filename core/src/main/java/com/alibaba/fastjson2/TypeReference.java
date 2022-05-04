@@ -119,10 +119,12 @@ public abstract class TypeReference<T> {
      * <p>
      * {@code Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.parseObject(jsonObject);}
      *
-     * @param object Specify the {@link JSONObject} to convert
+     * @param object specify the {@link JSONObject} to convert
      * @since 2.0.2
+     * @deprecated since 2.0.3, please use {@link #toJavaObject(JSONObject)}
      */
-    public T toJavaObject(JSONObject object) {
+    @Deprecated
+    public T parseObject(JSONObject object) {
         return object.toJavaObject(type);
     }
 
@@ -144,13 +146,39 @@ public abstract class TypeReference<T> {
     /**
      * See {@link JSONArray#toJavaObject} for details
      * <p>
-     * {@code List<User> users = new TypeReference<ArrayList<User>>(){}.parseObject(jsonArray);}
+     * {@code List<User> users = new TypeReference<ArrayList<User>>(){}.parseArray(jsonArray);}
      *
-     * @param object Specify the {@link JSONArray} to convert
+     * @param array specify the {@link JSONArray} to convert
      * @since 2.0.2
+     * @deprecated since 2.0.3, please use {@link #toJavaObject(JSONArray)}
      */
-    public T toJavaObject(JSONArray object) {
+    @Deprecated
+    public T parseArray(JSONArray array) {
+        return array.toJavaObject(type);
+    }
+
+    /**
+     * See {@link JSONObject#toJavaObject} for details
+     * <p>
+     * {@code Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.toJavaObject(jsonObject);}
+     *
+     * @param object specify the {@link JSONObject} to convert
+     * @since 2.0.3
+     */
+    public T toJavaObject(JSONObject object) {
         return object.toJavaObject(type);
+    }
+
+    /**
+     * See {@link JSONArray#toJavaObject} for details
+     * <p>
+     * {@code List<User> users = new TypeReference<ArrayList<User>>(){}.toJavaObject(jsonArray);}
+     *
+     * @param array specify the {@link JSONArray} to convert
+     * @since 2.0.3
+     */
+    public T toJavaObject(JSONArray array) {
+        return array.toJavaObject(type);
     }
 
     /**
