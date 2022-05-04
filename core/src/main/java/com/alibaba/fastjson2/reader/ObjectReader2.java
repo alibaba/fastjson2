@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
@@ -47,6 +48,14 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
         String fieldName1 = second.getFieldName();
         this.secondHashCode = Fnv.hashCode64(fieldName1);
         this.secondHashCodeLCase = Fnv.hashCode64LCase(fieldName1);
+
+        if (first.isUnwrapped()) {
+            extraFieldReader = first;
+        }
+
+        if (second.isUnwrapped()) {
+            extraFieldReader = second;
+        }
     }
 
     @Override
@@ -217,7 +226,8 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
                             continue;
                         }
                     }
-                    jsonReader.skipValue();
+
+                    processExtra(jsonReader, object);
                 }
             }
         }

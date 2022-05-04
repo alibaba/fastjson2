@@ -754,6 +754,10 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             if (ordinal != 0) {
                 fieldInfo.ordinal = ordinal;
             }
+
+            if (jsonField.unwrapped()) {
+                fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+            }
         }
     }
 
