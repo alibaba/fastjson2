@@ -54,7 +54,13 @@ public abstract class JSONPath {
     }
 
     public static void set(Object rootObject, String path, Object value) {
-        JSONPath.of(path).set(rootObject, value);
+        JSONPath.of(path)
+                .set(rootObject, value);
+    }
+
+    public static void remove(Object rootObject, String path) {
+        JSONPath.of(path)
+                .remove(rootObject);
     }
 
     public static Map<String, Object> paths(Object javaObject) {
@@ -1183,6 +1189,25 @@ public abstract class JSONPath {
                 default:
                     throw new UnsupportedOperationException();
             }
+        }
+
+        public void set(Context context, Object value) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof List) {
+                List list = (List) object;
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
+                    if (apply(context, item)) {
+                        list.set(i, value);
+                    }
+                }
+                return;
+            }
+
+            throw new JSONException("UnsupportedOperation ");
         }
     }
 
@@ -4068,6 +4093,32 @@ public abstract class JSONPath {
         }
 
         @Override
+        public boolean remove(Context ctx) {
+            Object object = ctx.parent == null
+                    ? ctx.root
+                    : ctx.parent.value;
+
+            if (object instanceof java.util.List) {
+                List list = (List) object;
+                if (index >= 0) {
+                    if (index < list.size()) {
+                        list.remove(index);
+                        return true;
+                    }
+                } else {
+                    int itemIndex = list.size() + this.index;
+                    if (itemIndex >= 0) {
+                        list.remove(itemIndex);
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            throw new JSONException("UnsupportedOperation");
+        }
+
+        @Override
         public void setInt(Context ctx, int value) {
             Object object = ctx.parent == null
                     ? ctx.root
@@ -4472,6 +4523,58 @@ public abstract class JSONPath {
             }
             ctx.value = array;
             ctx.eval = true;
+        }
+
+        public void set(Context context, Object value) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof java.util.List) {
+                List list = (List) object;
+                for (int i = 0, size = list.size(); i < size; i++) {
+                    boolean match;
+                    if (begin >= 0) {
+                        match = i >= begin && i < end;
+                    } else {
+                        int ni = i - size;
+                        match = ni >= begin && ni < end;
+                    }
+                    if (match) {
+                        list.set(i, value);
+                    }
+                }
+                return;
+            }
+
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
+
+        public boolean remove(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof java.util.List) {
+                List list = (List) object;
+                int removeCount = 0;
+                for (int size = list.size(), i = size - 1; i >= 0; i--) {
+                    boolean match;
+                    if (begin >= 0) {
+                        match = i >= begin && i < end;
+                    } else {
+                        int ni = i - size;
+                        match = ni >= begin && ni < end;
+                    }
+                    if (match) {
+                        list.remove(i);
+                        removeCount++;
+                    }
+                }
+                return removeCount > 0;
+            }
+
+            throw new JSONException("UnsupportedOperation " + getClass());
         }
     }
 
