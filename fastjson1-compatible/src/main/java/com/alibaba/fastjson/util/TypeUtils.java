@@ -22,7 +22,6 @@ import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.reader.ObjectReader;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -645,16 +644,6 @@ public class TypeUtils {
         }
 
         return clz;
-    }
-
-    public static Class<?> getRawClass(Type type) {
-        if (type instanceof Class<?>) {
-            return (Class<?>) type;
-        } else if (type instanceof ParameterizedType) {
-            return getRawClass(((ParameterizedType) type).getRawType());
-        } else {
-            throw new JSONException("TODO");
-        }
     }
 
     public static boolean isProxy(Class<?> clazz) {
