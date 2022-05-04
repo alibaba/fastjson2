@@ -16,6 +16,7 @@ class FieldReaderMapMethodReadOnly<T> extends FieldReaderObjectMethod<T> impleme
         super(fieldName, fieldType, fieldClass, ordinal, features, format, method);
     }
 
+    @Override
     public ObjectReader getItemObjectReader(JSONReader jsonReader) {
         if (itemReader != null) {
             return itemReader;
@@ -59,6 +60,7 @@ class FieldReaderMapMethodReadOnly<T> extends FieldReaderObjectMethod<T> impleme
         map.putAll((Map) value);
     }
 
+    @Override
     public void processExtra(JSONReader jsonReader, Object object) {
         Map map;
         try {
