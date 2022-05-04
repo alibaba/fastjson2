@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -44,6 +45,8 @@ public class UnwrappedTest {
         ExtendableBean1 bean2 = JSON.parseObject(str, ExtendableBean1.class);
         assertEquals(bean.name, bean2.name);
         assertEquals(bean.properties, bean2.properties);
+
+        assertEquals(bean.properties, JSON.parseObject(str, ExtendableBean1.class, JSONReader.Feature.SupportSmartMatch).properties);
     }
 
     private static class ExtendableBean1 {
@@ -84,6 +87,8 @@ public class UnwrappedTest {
         ExtendableBean2 bean2 = JSON.parseObject(str, ExtendableBean2.class);
         assertEquals(bean.name, bean2.name);
         assertEquals(bean.properties, bean2.properties);
+
+        assertEquals(bean.properties, JSON.parseObject(str, ExtendableBean2.class, JSONReader.Feature.SupportSmartMatch).properties);
     }
 
     private static class ExtendableBean2 {
@@ -104,6 +109,9 @@ public class UnwrappedTest {
         ExtendableBean3 bean2 = JSON.parseObject(str, ExtendableBean3.class);
         assertEquals("My bean", bean2.name);
         assertEquals("val1", bean2.properties.get("attr1"));
+
+        assertEquals(bean2.properties, JSON.parseObject(str, ExtendableBean3.class, JSONReader.Feature.SupportSmartMatch).properties);
+
     }
 
     private static class ExtendableBean3 {
@@ -131,6 +139,8 @@ public class UnwrappedTest {
 
         ExtendableBeanF1 bean = JSON.parseObject(str, ExtendableBeanF1.class);
         assertEquals("val1", bean.properties.get("attr1"));
+
+        assertEquals("val1", JSON.parseObject(str, ExtendableBeanF1.class, JSONReader.Feature.SupportSmartMatch).properties.get("attr1"));
     }
 
     private static class ExtendableBeanF1 {
@@ -147,6 +157,8 @@ public class UnwrappedTest {
 
         ExtendableBeanF2 bean = JSON.parseObject(str, ExtendableBeanF2.class);
         assertEquals("val1", bean.properties.get("attr1"));
+
+        assertEquals("val1", JSON.parseObject(str, ExtendableBeanF2.class, JSONReader.Feature.SupportSmartMatch).properties.get("attr1"));
     }
 
     private static class ExtendableBeanF2 {
@@ -164,6 +176,8 @@ public class UnwrappedTest {
 
         ExtendableBeanF3 bean = JSON.parseObject(str, ExtendableBeanF3.class);
         assertEquals("val1", bean.properties.get("attr1"));
+
+        assertEquals("val1", JSON.parseObject(str, ExtendableBeanF3.class, JSONReader.Feature.SupportSmartMatch).properties.get("attr1"));
     }
 
     private static class ExtendableBeanF3 {
@@ -182,6 +196,8 @@ public class UnwrappedTest {
 
         ExtendableBeanF4 bean = JSON.parseObject(str, ExtendableBeanF4.class);
         assertEquals("val1", bean.properties.get("attr1"));
+
+        assertEquals("val1", JSON.parseObject(str, ExtendableBeanF4.class, JSONReader.Feature.SupportSmartMatch).properties.get("attr1"));
     }
 
     private static class ExtendableBeanF4 {
@@ -201,6 +217,8 @@ public class UnwrappedTest {
 
         ExtendableBeanF5 bean = JSON.parseObject(str, ExtendableBeanF5.class);
         assertEquals("val1", bean.properties.get("attr1"));
+
+        assertEquals("val1", JSON.parseObject(str, ExtendableBeanF5.class, JSONReader.Feature.SupportSmartMatch).properties.get("attr1"));
     }
 
     private static class ExtendableBeanF5 {
@@ -221,6 +239,8 @@ public class UnwrappedTest {
 
         ExtendableBeanF6 bean = JSON.parseObject(str, ExtendableBeanF6.class);
         assertEquals("val1", bean.properties.get("attr1"));
+
+        assertEquals("val1", JSON.parseObject(str, ExtendableBeanF6.class, JSONReader.Feature.SupportSmartMatch).properties.get("attr1"));
     }
 
     private static class ExtendableBeanF6 {
@@ -242,6 +262,8 @@ public class UnwrappedTest {
 
         ExtendableBeanF7 bean = JSON.parseObject(str, ExtendableBeanF7.class);
         assertEquals("val1", bean.properties.get("attr1"));
+
+        assertEquals("val1", JSON.parseObject(str, ExtendableBeanF7.class, JSONReader.Feature.SupportSmartMatch).properties.get("attr1"));
     }
 
     private static class ExtendableBeanF7 {
@@ -264,6 +286,8 @@ public class UnwrappedTest {
 
         ExtendableBeanF7P bean = JSON.parseObject(str, ExtendableBeanF7P.class);
         assertEquals("val1", bean.properties.get("attr1"));
+
+        assertEquals("val1", JSON.parseObject(str, ExtendableBeanF7P.class, JSONReader.Feature.SupportSmartMatch).properties.get("attr1"));
     }
 
     public static class ExtendableBeanF7P {

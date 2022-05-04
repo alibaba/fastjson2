@@ -264,7 +264,7 @@ final class ObjectReader4<T> extends ObjectReaderBean<T> {
                 } else if (nameHashCodeLCase == hashCode3LCase) {
                     fieldReader3.readFieldValue(jsonReader, object);
                 } else {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                 }
             }
         }
