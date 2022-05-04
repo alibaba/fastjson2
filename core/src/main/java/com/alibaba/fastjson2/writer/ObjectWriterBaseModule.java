@@ -216,6 +216,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         fieldInfo.ignore = true;
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonAnyGetter":
+                        fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        break;
                     case "com.fasterxml.jackson.annotation.JsonValue":
                         fieldInfo.features |= FieldInfo.VALUE_MASK;
                         break;
@@ -332,7 +335,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         case "unwrapped": {
                             Boolean unwrapped = (Boolean) result;
                             if (unwrapped.booleanValue()) {
-                                fieldInfo.format = "unwrapped";
+                                fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
                             }
                             break;
                         }
@@ -426,6 +429,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         fieldInfo.ignore = true;
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonAnyGetter":
+                        fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
@@ -478,7 +484,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             }
 
             if (jsonField.unwrapped()) {
-                fieldInfo.format = "unwrapped";
+                fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
             }
 
             for (JSONWriter.Feature feature : jsonField.serializeFeatures()) {

@@ -4811,7 +4811,7 @@ public abstract class JSONPath {
                     return;
                 }
 
-                jsonReader.next();;
+                jsonReader.next();
                 for (; ; ) {
                     if (jsonReader.ch == ']') {
                         jsonReader.next();

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.JdbcSupport;
 import com.alibaba.fastjson2.util.JodaSupport;
 
@@ -20,7 +21,7 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
 
     protected FieldWriterObject(String name, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
         super(name, ordinal, features, format, fieldType, fieldClass);
-        this.unwrapped = "unwrapped".equals(format);
+        this.unwrapped = (features & FieldInfo.UNWRAPPED_MASK) != 0;
 
         if (fieldClass == Currency.class) {
             this.initValueClass = fieldClass;
