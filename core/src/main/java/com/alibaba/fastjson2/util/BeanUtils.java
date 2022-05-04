@@ -1250,7 +1250,7 @@ public abstract class BeanUtils {
         private static final long serialVersionUID = 0;
     }
 
-    private static final class GenericArrayTypeImpl implements GenericArrayType, Serializable {
+    public static final class GenericArrayTypeImpl implements GenericArrayType, Serializable {
         private final Type componentType;
 
         public GenericArrayTypeImpl(Type componentType) {
