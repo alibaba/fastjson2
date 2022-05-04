@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.filter.NameFilter;
+import com.alibaba.fastjson2.filter.PascalNameFilter;
 import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
 import com.alibaba.fastjson2.reader.ObjectReaderImplList;
 import com.alibaba.fastjson2.reader.ObjectReaderImplListStr;
@@ -10,10 +12,7 @@ import com.alibaba.fastjson2_vo.Date1;
 import com.alibaba.fastjson2_vo.IntField1;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -759,14 +758,90 @@ public class JSONTest {
 
         assertEquals("null", new String(JSON.toJSONBytes(null, (Filter) null)));
         assertEquals("null", new String(JSON.toJSONBytes(null, (Filter[]) null)));
+        assertEquals("null", new String(JSON.toJSONBytes(null, (Filter[]) null, JSONWriter.Feature.WriteNulls)));
         assertEquals("null", new String(JSON.toJSONBytes(null, "", (Filter[]) null)));
 
         assertFalse(JSON.isValid((String) null));
         assertFalse(JSON.isValid(""));
         assertFalse(JSON.isValid((byte[]) null));
+        assertFalse(JSON.isValid(new byte[0]));
+        assertFalse(JSON.isValid(new byte[0], 0, 0, StandardCharsets.US_ASCII));
 
         assertFalse(JSON.isValidArray((String) null));
         assertFalse(JSON.isValidArray(""));
         assertFalse(JSON.isValidArray((byte[]) null));
+        assertFalse(JSON.isValidArray(new byte[0]));
+
+        assertNull(JSON.toJSON(null));
+        assertNull(JSON.toJavaObject(null, null));
+
+        {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            JSON.writeTo(out, null, "", (Filter[]) null);
+            assertEquals("null", new String(out.toByteArray()));
+        }
+    }
+
+    @Test
+    public void test_writeTo() {
+        {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            JSON.writeTo(out, 12, "", new Filter[0]);
+            assertEquals("12", new String(out.toByteArray()));
+        }
+        {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            JSON.writeTo(out, 12, "", new Filter[] {new PascalNameFilter()});
+            assertEquals("12", new String(out.toByteArray()));
+        }
+        {
+            ByteArrayOutputStream out = new ByteArrayOutputStream() {
+                public void write(byte b[], int off, int len) {
+                    throw new UnsupportedOperationException();
+                }
+            };
+            assertThrows(JSONException.class, () ->
+                    JSON.writeTo(out, JSONObject.of("id", 123)));
+        }
+        {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            assertThrows(JSONException.class, () ->
+            JSON.writeTo(out, JSONObject.of("id", 123), new Filter[] {new NameFilter() {
+                @Override
+                public String process(Object object, String name, Object value) {
+                    throw new UnsupportedOperationException();
+                }
+            }}));
+        }
+        {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            assertThrows(JSONException.class, () ->
+                    JSON.writeTo(out, JSONObject.of("id", 123), "", new Filter[] {new NameFilter() {
+                        @Override
+                        public String process(Object object, String name, Object value) {
+                            throw new UnsupportedOperationException();
+                        }
+                    }}));
+        }
+    }
+
+    @Test
+    public void test_toJSONBytes() {
+        JSON.toJSONBytes(123, "", new Filter[] {new PascalNameFilter()});
+    }
+
+    @Test
+    public void test_toJSON() {
+        JSONObject object = new JSONObject();
+        assertSame(object, JSON.toJSON(object));
+
+        JSONArray array = new JSONArray();
+        assertSame(array, JSON.toJSON(array));
+    }
+
+    @Test
+    public void testValid() {
+        assertTrue(JSON.isValidArray("[]".getBytes(StandardCharsets.UTF_8)));
+        assertFalse(JSON.isValidArray("{}".getBytes(StandardCharsets.UTF_8)));
     }
 }

@@ -967,7 +967,7 @@ public interface JSON {
             }
 
             return writer.flushTo(out);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new JSONException(e.getMessage(), e);
         }
     }
@@ -997,7 +997,7 @@ public interface JSON {
             }
 
             return writer.flushTo(out);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new JSONException(e.getMessage(), e);
         }
     }
@@ -1031,7 +1031,7 @@ public interface JSON {
             }
 
             return writer.flushTo(out);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new JSONException(e.getMessage(), e);
         }
     }
