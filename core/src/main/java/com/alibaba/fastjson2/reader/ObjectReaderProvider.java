@@ -470,7 +470,7 @@ public class ObjectReaderProvider {
         }
 
         if (SAFE_MODE) {
-            throw new JSONException("autoType is not support. " + typeName);
+            return null;
         }
 
         int typeNameLength = typeName.length();
