@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.util.Arrays;
+
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 final class ObjectReaderImplEnum2X4 implements ObjectReader {
@@ -44,6 +46,17 @@ final class ObjectReaderImplEnum2X4 implements ObjectReader {
         }
     }
 
+    public Enum getEnumByHashCode(long hashCode) {
+        if (hashCode == enumNameHashCode00) {
+            return enum0;
+        }
+
+        if (hashCode == enumNameHashCode01) {
+            return enum1;
+        }
+
+        return null;
+    }
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {

@@ -1,8 +1,8 @@
-package com.alibaba.json.bvt.issue_1300;
+package com.alibaba.fastjson2.v1issues.issue_1300;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.annotation.JSONType;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,7 +14,7 @@ public class Issue1319 {
     @Test
     public void test_for_issue() throws Exception {
         MyTest test = new MyTest(1, MyEnum.Test1);
-        String result = JSON.toJSONString(test, SerializerFeature.WriteClassName);
+        String result = JSON.toJSONString(test, JSONWriter.Feature.WriteClassName);
         System.out.println(result);
         test = JSON.parseObject(result, MyTest.class);
         System.out.println(JSON.toJSONString(test));

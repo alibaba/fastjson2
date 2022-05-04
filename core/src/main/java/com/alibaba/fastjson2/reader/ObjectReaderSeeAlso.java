@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
@@ -67,5 +68,33 @@ final class ObjectReaderSeeAlso<T> extends ObjectReaderAdapter<T> {
         }
 
         return provider.getObjectReader(seeAlsoClass);
+    }
+
+    public T readObject(JSONReader jsonReader, long features) {
+        if (jsonReader.isString()) {
+            long valueHashCode = jsonReader.readValueHashCode();
+
+            for (Class seeAlsoType : seeAlso) {
+                if (Enum.class.isAssignableFrom(seeAlsoType)) {
+                    ObjectReader seeAlsoTypeReader = jsonReader.getObjectReader(seeAlsoType);
+
+                    Enum e = null;
+                    if (seeAlsoTypeReader instanceof ObjectReaderImplEnum) {
+                        e = ((ObjectReaderImplEnum) seeAlsoTypeReader).getEnumByHashCode(valueHashCode);
+                    } else if (seeAlsoTypeReader instanceof ObjectReaderImplEnum2X4) {
+                        e = ((ObjectReaderImplEnum2X4) seeAlsoTypeReader).getEnumByHashCode(valueHashCode);
+                    }
+
+                    if (e != null) {
+                        return (T) e;
+                    }
+                }
+            }
+
+            String strVal = jsonReader.getString();
+            throw new JSONException("not support input " + strVal);
+        }
+
+        return super.readObject(jsonReader, features);
     }
 }
