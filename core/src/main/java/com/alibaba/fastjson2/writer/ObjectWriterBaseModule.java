@@ -216,6 +216,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         fieldInfo.ignore = true;
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonAnyGetter":
+                        fieldInfo.format = "unwrapped";
+                        break;
                     case "com.fasterxml.jackson.annotation.JsonValue":
                         fieldInfo.features |= FieldInfo.VALUE_MASK;
                         break;
@@ -425,6 +428,9 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         fieldInfo.ignore = true;
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonAnyGetter":
+                        fieldInfo.format = "unwrapped";
                         break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
