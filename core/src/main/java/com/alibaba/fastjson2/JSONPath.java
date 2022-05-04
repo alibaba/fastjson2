@@ -865,6 +865,16 @@ public abstract class JSONPath {
                     }
                     break;
                 }
+                case '[' : {
+                    JSONArray array = jsonReader.read(JSONArray.class);
+                    segment = new NameArrayOpSegment(fieldName, hashCode, function, operator, array);
+                    break;
+                }
+                case '{' : {
+                    JSONObject object = jsonReader.read(JSONObject.class);
+                    segment = new NameObjectOpSegment(fieldName, hashCode, function, operator, object);
+                    break;
+                }
                 default:
                     throw new JSONException("TODO : " + jsonReader.ch);
             }
@@ -1669,6 +1679,48 @@ public abstract class JSONPath {
                     return cmp >= 0;
                 default:
                     throw new UnsupportedOperationException();
+            }
+        }
+    }
+
+    static final class NameArrayOpSegment extends NameFilter {
+        final Operator operator;
+        final JSONArray array;
+
+        public NameArrayOpSegment(String fieldName, long fieldNameNameHash, Function function, Operator operator, JSONArray array) {
+            super(fieldName, fieldNameNameHash, function);
+            this.operator = operator;
+            this.array = array;
+        }
+
+        @Override
+        boolean apply(Object fieldValue) {
+            switch (operator) {
+                case EQ:
+                    return array.equals(fieldValue);
+                default:
+                    throw new JSONException("not support operator : " + operator);
+            }
+        }
+    }
+
+    static final class NameObjectOpSegment extends NameFilter {
+        final Operator operator;
+        final JSONObject object;
+
+        public NameObjectOpSegment(String fieldName, long fieldNameNameHash, Function function, Operator operator, JSONObject object) {
+            super(fieldName, fieldNameNameHash, function);
+            this.operator = operator;
+            this.object = object;
+        }
+
+        @Override
+        boolean apply(Object fieldValue) {
+            switch (operator) {
+                case EQ:
+                    return object.equals(fieldValue);
+                default:
+                    throw new JSONException("not support operator : " + operator);
             }
         }
     }
