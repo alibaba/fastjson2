@@ -15,6 +15,7 @@ class FieldReaderAnySetter<T> extends FieldReaderObjectMethod<T> implements Fiel
         super("$$any$$", fieldType, fieldClass, ordinal, features, format, method);
     }
 
+    @Override
     public ObjectReader getItemObjectReader(JSONReader jsonReader) {
         if (itemReader != null) {
             return itemReader;
@@ -27,6 +28,7 @@ class FieldReaderAnySetter<T> extends FieldReaderObjectMethod<T> implements Fiel
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void processExtra(JSONReader jsonReader, Object object) {
         String name = jsonReader.getFieldName();
 
