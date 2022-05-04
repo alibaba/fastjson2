@@ -107,6 +107,13 @@ public class ObjectReaderProvider {
                 property = JSONFactory.getProperty("fastjson.parser.safeMode");
             }
 
+            if (property == null || property.isEmpty()) {
+                property = System.getProperty("fastjson2.parser.safeMode");
+            }
+            if (property == null || property.isEmpty()) {
+                property = JSONFactory.getProperty("fastjson2.parser.safeMode");
+            }
+
             if (property != null) {
                 property = property.trim();
             }
