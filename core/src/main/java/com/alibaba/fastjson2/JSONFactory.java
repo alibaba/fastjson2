@@ -9,10 +9,7 @@ import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -42,64 +39,50 @@ public final class JSONFactory {
     }
 
     static final class UUIDUtils {
-        private static final byte[] NIBBLES;
+        private static final byte[] NIBBLES = new byte[]{
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            +0, +1, +2, +3, +4, +5, +6, +7, +8, +9, -1, -1, -1, -1, -1, -1,
+            -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+        };
 
-        static {
-            byte[] ns = new byte[256];
-            Arrays.fill(ns, (byte) -1);
-            ns['0'] = 0;
-            ns['1'] = 1;
-            ns['2'] = 2;
-            ns['3'] = 3;
-            ns['4'] = 4;
-            ns['5'] = 5;
-            ns['6'] = 6;
-            ns['7'] = 7;
-            ns['8'] = 8;
-            ns['9'] = 9;
-            ns['A'] = 10;
-            ns['B'] = 11;
-            ns['C'] = 12;
-            ns['D'] = 13;
-            ns['E'] = 14;
-            ns['F'] = 15;
-            ns['a'] = 10;
-            ns['b'] = 11;
-            ns['c'] = 12;
-            ns['d'] = 13;
-            ns['e'] = 14;
-            ns['f'] = 15;
-            NIBBLES = ns;
-        }
-
-        protected static long parse4Nibbles(byte[] name, int pos) {
-            byte[] ns = NIBBLES;
+        static long parse4Nibbles(byte[] name, int pos) {
             byte ch1 = name[pos];
             byte ch2 = name[pos + 1];
             byte ch3 = name[pos + 2];
             byte ch4 = name[pos + 3];
-            return (ch1 | ch2 | ch3 | ch4) > 0xff ?
-                    -1 : ns[ch1] << 12 | ns[ch2] << 8 | ns[ch3] << 4 | ns[ch4];
+            return (ch1 | ch2 | ch3 | ch4) > 0xff ? -1 :
+                NIBBLES[ch1] << 12 | NIBBLES[ch2] << 8 | NIBBLES[ch3] << 4 | NIBBLES[ch4];
         }
 
-        protected static long parse4Nibbles(char[] name, int pos) {
-            byte[] ns = NIBBLES;
+        static long parse4Nibbles(char[] name, int pos) {
             char ch1 = name[pos];
             char ch2 = name[pos + 1];
             char ch3 = name[pos + 2];
             char ch4 = name[pos + 3];
-            return (ch1 | ch2 | ch3 | ch4) > 0xff ?
-                    -1 : ns[ch1] << 12 | ns[ch2] << 8 | ns[ch3] << 4 | ns[ch4];
+            return (ch1 | ch2 | ch3 | ch4) > 0xFF ? -1 :
+                NIBBLES[ch1] << 12 | NIBBLES[ch2] << 8 | NIBBLES[ch3] << 4 | NIBBLES[ch4];
         }
 
-        protected static long parse4Nibbles(String name, int pos) {
-            byte[] ns = NIBBLES;
+        static long parse4Nibbles(String name, int pos) {
             char ch1 = name.charAt(pos);
             char ch2 = name.charAt(pos + 1);
             char ch3 = name.charAt(pos + 2);
             char ch4 = name.charAt(pos + 3);
-            return (ch1 | ch2 | ch3 | ch4) > 0xff ?
-                    -1 : ns[ch1] << 12 | ns[ch2] << 8 | ns[ch3] << 4 | ns[ch4];
+            return (ch1 | ch2 | ch3 | ch4) > 0xFF ? -1 :
+                NIBBLES[ch1] << 12 | NIBBLES[ch2] << 8 | NIBBLES[ch3] << 4 | NIBBLES[ch4];
         }
     }
 
@@ -107,34 +90,42 @@ public final class JSONFactory {
     static final BigDecimal HIGH = BigDecimal.valueOf(9007199254740991L);
     static final BigInteger LOW_BIGINT = BigInteger.valueOf(-9007199254740991L);
     static final BigInteger HIGH_BIGINT = BigInteger.valueOf(9007199254740991L);
-    static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+
+    static final char[] CA = new char[]{
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+        'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+        'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+        'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+        'w', 'x', 'y', 'z', '0', '1', '2', '3',
+        '4', '5', '6', '7', '8', '9', '+', '/'
+    };
 
     static final char[] DIGITS = {
-            '0', '1', '2', '3', '4', '5',
-            '6', '7', '8', '9', 'a', 'b',
-            'c', 'd', 'e', 'f'
+        '0', '1', '2', '3',
+        '4', '5', '6', '7',
+        '8', '9', 'a', 'b',
+        'c', 'd', 'e', 'f'
     };
-    static final int[] DIGITS2 = new int[(int) 'f' + 1];
+
+    static final int[] DIGITS2 = new int[]{
+        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+        +0, +1, +2, +3, +4, +5, +6, +7, +8, +9, +0, +0, +0, +0, +0, +0,
+        +0, 10, 11, 12, 13, 14, 15, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+        +0, 10, 11, 12, 13, 14, 15
+    };
 
     static {
-        for (int i = '0'; i <= '9'; ++i) {
-            DIGITS2[i] = i - '0';
-        }
-        for (int i = 'a'; i <= 'f'; ++i) {
-            DIGITS2[i] = (i - 'a') + 10;
-        }
-        for (int i = 'A'; i <= 'F'; ++i) {
-            DIGITS2[i] = (i - 'A') + 10;
+        String property = System.getProperty("fastjson2.creator");
+        if (property != null) {
+            property = property.trim();
         }
 
-        {
-            String property = System.getProperty("fastjson2.creator");
-            if (property != null) {
-                property = property.trim();
-            }
-
-            CREATOR = property == null ? "asm" : property;
-        }
+        CREATOR = property == null ? "asm" : property;
     }
 
     static final class Cache {
@@ -152,38 +143,33 @@ public final class JSONFactory {
 
     static final int CACHE_THREAD = 1024 * 1024;
 
-    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, char[]> CHARS_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, char[].class, "chars");
-    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> BYTES0_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, byte[].class, "bytes0");
-    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> BYTES1_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, byte[].class, "bytes1");
-    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> BYTES2_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, byte[].class, "bytes2");
-    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> BYTES3_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, byte[].class, "bytes3");
+    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, char[]> CHARS_UPDATER = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, char[].class, "chars");
+    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> BYTES0_UPDATER = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, byte[].class, "bytes0");
+    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> BYTES1_UPDATER = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, byte[].class, "bytes1");
+    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> BYTES2_UPDATER = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, byte[].class, "bytes2");
+    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> BYTES3_UPDATER = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, byte[].class, "bytes3");
 
-    static final AtomicReferenceFieldUpdater<Cache, byte[]> VALUE_BYTES_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(Cache.class, byte[].class, "valueBytes");
+    static final AtomicReferenceFieldUpdater<Cache, byte[]> VALUE_BYTES_UPDATER = AtomicReferenceFieldUpdater.newUpdater(Cache.class, byte[].class, "valueBytes");
 
     static final class SymbolTableImpl implements JSONB.SymbolTable {
         private final String[] names;
-        private final long[] hashCodesOrigin;
-        private final long[] hashCodes;
+        private final long hashCode64;
         private final short[] mapping;
 
-        private final long hashCode64;
+        private final long[] hashCodes;
+        private final long[] hashCodesOrigin;
 
         SymbolTableImpl(String... input) {
-            {
-                Set<String> nameSet = new TreeSet<>();
-                for (String name : input) {
-                    nameSet.add(name);
-                }
-                this.names = new String[nameSet.size()];
-                int i = 0;
-                for (String name : nameSet) {
-                    names[i++] = name;
+            Set<String> set = new TreeSet<>();
+            for (String name : input) {
+                set.add(name);
+            }
+            names = new String[set.size()];
+            Iterator<String> it = set.iterator();
+
+            for (int i = 0; i < names.length; i++) {
+                if (it.hasNext()) {
+                    names[i] = it.next();
                 }
             }
 
@@ -205,8 +191,8 @@ public final class JSONFactory {
             }
 
             long hashCode64 = Fnv.MAGIC_HASH_CODE;
-            for (int i = 0; i < hashCodes.length; ++i) {
-                hashCode64 ^= hashCodes[i];
+            for (long hashCode : hashCodes) {
+                hashCode64 ^= hashCode;
                 hashCode64 *= Fnv.MAGIC_PRIME;
             }
             this.hashCode64 = hashCode64;
