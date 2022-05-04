@@ -12,25 +12,14 @@ class FieldReaderAnySetter<T> extends FieldReaderObjectMethod<T> implements Fiel
     volatile ObjectReader itemReader;
 
     FieldReaderAnySetter(Type fieldType, Class fieldClass, int ordinal, long features, String format, Method method) {
-        super("$any", fieldType, fieldClass, ordinal, features, format, method);
+        super("$$any$$", fieldType, fieldClass, ordinal, features, format, method);
     }
 
     public ObjectReader getItemObjectReader(JSONReader jsonReader) {
         if (itemReader != null) {
             return itemReader;
         }
-
-        ObjectReader objectReader = getObjectReader(jsonReader);
-        if (objectReader instanceof ObjectReaderImplMap) {
-            return itemReader = ObjectReaderImplString.INSTANCE;
-        }
-
-        if (objectReader instanceof ObjectReaderImplMapTyped) {
-            Type valueType = ((ObjectReaderImplMapTyped) objectReader).valueType;
-            return itemReader = jsonReader.getObjectReader(valueType);
-        }
-
-        return ObjectReaderImplObject.INSTANCE;
+        return itemReader = jsonReader.getObjectReader(fieldType);
     }
 
     @Override
