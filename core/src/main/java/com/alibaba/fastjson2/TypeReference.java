@@ -122,7 +122,7 @@ public abstract class TypeReference<T> {
      * @param object Specify the {@link JSONObject} to convert
      * @since 2.0.2
      */
-    public T parseObject(JSONObject object) {
+    public T toJavaObject(JSONObject object) {
         return object.toJavaObject(type);
     }
 
@@ -149,7 +149,7 @@ public abstract class TypeReference<T> {
      * @param object Specify the {@link JSONArray} to convert
      * @since 2.0.2
      */
-    public T parseArray(JSONArray object) {
+    public T toJavaObject(JSONArray object) {
         return object.toJavaObject(type);
     }
 
