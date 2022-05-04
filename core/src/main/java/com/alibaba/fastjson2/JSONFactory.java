@@ -1,14 +1,18 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.BiFunction;
@@ -120,6 +124,31 @@ public final class JSONFactory {
     };
 
     static {
+        Properties properties = new Properties();
+
+        InputStream inputStream = AccessController.doPrivileged(new PrivilegedAction<InputStream>() {
+            public InputStream run() {
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+
+                final String resourceFile = "fastjson2.properties";
+
+                if (cl != null) {
+                    return cl.getResourceAsStream(resourceFile);
+                } else {
+                    return ClassLoader.getSystemResourceAsStream(resourceFile);
+                }
+            }
+        });
+        if (inputStream != null) {
+            try {
+                properties.load(inputStream);
+            } catch (java.io.IOException ignored) {
+            } finally {
+                IOUtils.close(inputStream);
+            }
+        }
+        DEFAULT_PROPERTIES = properties;
+
         String property = System.getProperty("fastjson2.creator");
         if (property != null) {
             property = property.trim();
@@ -251,7 +280,7 @@ public final class JSONFactory {
         }
     }
 
-    static final Properties DEFAULT_PROPERTIES = new Properties();
+    static final Properties DEFAULT_PROPERTIES;
 
     static ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
     static ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();

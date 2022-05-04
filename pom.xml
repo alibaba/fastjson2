@@ -78,6 +78,7 @@
         <module>core</module>
         <module>extension</module>
         <module>fastjson1-compatible</module>
+        <module>safemode-test</module>
     </modules>
 
     <properties>
