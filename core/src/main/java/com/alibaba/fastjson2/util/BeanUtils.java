@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.TypeReference;
+import com.alibaba.fastjson2.annotation.JSONField;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -219,10 +220,10 @@ public abstract class BeanUtils {
         }
 
         for (Method method : methods) {
-            int paramType = method.getParameterCount();
+            int paramCount = method.getParameterCount();
 
             // read only getter
-            if (paramType == 0) {
+            if (paramCount == 0) {
                 String methodName = method.getName();
                 if (methodName.length() <= 3 || !methodName.startsWith("get")) {
                     continue;
@@ -236,13 +237,46 @@ public abstract class BeanUtils {
                         || returnType == AtomicLongArray.class
                         || returnType == AtomicReference.class
                         || Collection.class.isAssignableFrom(returnType)
+                        || Map.class.isAssignableFrom(returnType)
                 ) {
                     methodConsumer.accept(method);
                     continue;
                 }
             }
 
-            if (paramType != 1) {
+            if (paramCount == 2
+                    && method.getReturnType() == Void.TYPE
+                    && method.getParameterTypes()[0] == String.class
+            ) {
+                Annotation[] annotations = method.getAnnotations();
+
+                boolean unwrapped = false;
+                for (Annotation annotation : annotations) {
+                    Class<? extends Annotation> annotationType = annotation.annotationType();
+                    if (annotationType == JSONField.class) {
+                        if (((JSONField) annotation).unwrapped()) {
+                            unwrapped = true;
+                            break;
+                        }
+                        continue;
+                    }
+
+                    switch (annotationType.getName()) {
+                        case "com.fasterxml.jackson.annotation.JsonAnySetter":
+                            unwrapped = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                if (unwrapped) {
+                    methodConsumer.accept(method);
+                }
+                continue;
+            }
+
+            if (paramCount != 1) {
                 continue;
             }
 

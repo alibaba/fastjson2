@@ -178,11 +178,17 @@ public class ObjectReaderCreator {
             }
 
             if (method.getParameterCount() == 0) {
-                FieldReader fieldReader = createFieldReader(builderClass
-                        , fieldName
-                        , method.getGenericReturnType()
-                        , method.getReturnType()
-                        , method);
+                FieldReader fieldReader = createFieldReaderMethod(
+                        builderClass,
+                        builderClass,
+                        fieldName,
+                        fieldInfo.ordinal,
+                        fieldInfo.features,
+                        fieldInfo.format,
+                        method.getGenericReturnType(),
+                        method.getReturnType(),
+                        method
+                );
                 FieldReader origin = fieldReaders.putIfAbsent(fieldName,
                         fieldReader
                 );
@@ -781,18 +787,34 @@ public class ObjectReaderCreator {
             }
         }
 
-        if (method.getParameterCount() == 0) {
-            FieldReader fieldReader = createFieldReader(objectClass
-                    , fieldName
-                    , method.getGenericReturnType()
-                    , method.getReturnType()
-                    , method);
+        int parameterCount = method.getParameterCount();
+        if (parameterCount == 0) {
+            FieldReader fieldReader = createFieldReaderMethod(
+                    objectClass,
+                    objectType,
+                    fieldName,
+                    fieldInfo.ordinal,
+                    fieldInfo.features,
+                    fieldInfo.format,
+                    method.getGenericReturnType(),
+                    method.getReturnType(),
+                    method
+            );
             FieldReader origin = fieldReaders.putIfAbsent(fieldName,
                     fieldReader
             );
             if (origin != null && origin.compareTo(fieldReader) > 0) {
                 fieldReaders.put(fieldName, fieldReader);
             }
+            return;
+        }
+
+        if (parameterCount == 2) {
+            Class<?> fieldClass = method.getParameterTypes()[1];
+            Type fieldType = method.getGenericParameterTypes()[1];
+            method.setAccessible(true);
+            FieldReaderAnySetter anySetter = new FieldReaderAnySetter(fieldType, fieldClass, fieldInfo.ordinal, fieldInfo.features, fieldInfo.format, method);
+            fieldReaders.put(anySetter.fieldName, anySetter);
             return;
         }
 
@@ -1112,6 +1134,10 @@ public class ObjectReaderCreator {
 
             if (Collection.class.isAssignableFrom(fieldClass)) {
                 return new FieldReaderCollectionMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            }
+
+            if (Map.class.isAssignableFrom(fieldClass)) {
+                return new FieldReaderMapMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, features, format, method);
             }
 
             return null;
