@@ -579,9 +579,6 @@ public class ObjectWriterCreator {
                 }
             }
 
-            if ("unwrapped".equals(format)) {
-                format = null;
-            }
             return new FieldWriterDateMethod(fieldName, ordinal, features, format, fieldClass, method);
         }
 
