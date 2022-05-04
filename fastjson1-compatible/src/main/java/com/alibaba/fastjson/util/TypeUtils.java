@@ -24,6 +24,7 @@ import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.util.BeanUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -1165,7 +1166,13 @@ public class TypeUtils {
         } else if (typeParameter instanceof ParameterizedType) {
             return makeParameterizedType(getRawClass(typeParameter), ((ParameterizedType) typeParameter).getActualTypeArguments(), actualTypeMap);
         } else if (typeParameter instanceof GenericArrayType) {
-            return new GenericArrayTypeImpl(getActualType(((GenericArrayType) typeParameter).getGenericComponentType(), actualTypeMap));
+            return new BeanUtils.GenericArrayTypeImpl(
+                    getActualType(
+                            ((GenericArrayType) typeParameter)
+                                    .getGenericComponentType(),
+                            actualTypeMap
+                    )
+            );
         }
         return typeParameter;
     }
