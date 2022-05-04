@@ -53,9 +53,27 @@ public abstract class JSONPath {
         return JSONPath.of(path).eval(rootObject);
     }
 
-    public static void set(Object rootObject, String path, Object value) {
+    public static String set(String json, String path, Object value) {
+        Object object = JSON.parse(json);
+        JSONPath.of(path)
+                .set(object, value);
+        return JSON.toJSONString(object);
+    }
+
+    public static Object set(Object rootObject, String path, Object value) {
         JSONPath.of(path)
                 .set(rootObject, value);
+
+        return rootObject;
+    }
+
+    public static String remove(String json, String path) {
+        Object object = JSON.parse(json);
+
+        JSONPath.of(path)
+                .remove(object);
+
+        return JSON.toJSONString(object);
     }
 
     public static void remove(Object rootObject, String path) {
@@ -4858,6 +4876,24 @@ public abstract class JSONPath {
             }
             context.value = array;
             context.eval = true;
+        }
+
+        public boolean remove(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof Map) {
+                ((Map<?, ?>) object).clear();
+                return true;
+            }
+
+            if (object instanceof Collection) {
+                ((Collection<?>) object).clear();
+                return true;
+            }
+
+            throw new JSONException("UnsupportedOperation " + getClass());
         }
 
         @Override
