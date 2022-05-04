@@ -263,7 +263,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
                     break;
                 }
 
-                if (fieldReader instanceof FieldReaderReadOnly) {
+                if (fieldReader instanceof FieldReaderReadOnly || fieldReader.isUnwrapped()) {
                     match = false;
                     break;
                 }

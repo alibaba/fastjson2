@@ -31,6 +31,10 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
         this.fieldReader = fieldReader;
         this.hashCode = Fnv.hashCode64(fieldReader.getFieldName());
         this.hashCodeLCase = Fnv.hashCode64LCase(fieldReader.getFieldName());
+
+        if (fieldReader.isUnwrapped()) {
+            extraFieldReader = fieldReader;
+        }
     }
 
     @Override
@@ -134,7 +138,7 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
                         && jsonReader.getNameHashCodeLCase() == this.hashCodeLCase) {
                     fieldReader.readFieldValue(jsonReader, object);
                 } else {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                 }
             }
         }
@@ -214,7 +218,7 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
                         && jsonReader.getNameHashCodeLCase() == this.hashCodeLCase) {
                     fieldReader.readFieldValue(jsonReader, object);
                 } else {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                 }
             }
         }

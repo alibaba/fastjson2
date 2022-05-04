@@ -52,7 +52,6 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
         if (first.isUnwrapped()) {
             extraFieldReader = first;
         }
-
         if (second.isUnwrapped()) {
             extraFieldReader = second;
         }
@@ -140,7 +139,7 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
                     }
                 }
 
-                jsonReader.skipValue();
+                processExtra(jsonReader, object);
             }
         }
 

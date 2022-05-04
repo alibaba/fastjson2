@@ -64,6 +64,19 @@ final class ObjectReader4<T> extends ObjectReaderBean<T> {
         this.hashCode1LCase = Fnv.hashCode64LCase(fieldName1);
         this.hashCode2LCase = Fnv.hashCode64LCase(fieldName2);
         this.hashCode3LCase = Fnv.hashCode64LCase(fieldName3);
+
+        if (fieldReader0.isUnwrapped()) {
+            extraFieldReader = fieldReader0;
+        }
+        if (fieldReader1.isUnwrapped()) {
+            extraFieldReader = fieldReader1;
+        }
+        if (fieldReader2.isUnwrapped()) {
+            extraFieldReader = fieldReader2;
+        }
+        if (fieldReader3.isUnwrapped()) {
+            extraFieldReader = fieldReader3;
+        }
     }
 
     @Override
@@ -140,7 +153,7 @@ final class ObjectReader4<T> extends ObjectReaderBean<T> {
                 fieldReader3.readFieldValue(jsonReader, object);
             } else {
                 if (!jsonReader.isSupportSmartMatch(features | this.features)) {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                     continue;
                 }
 
@@ -154,7 +167,7 @@ final class ObjectReader4<T> extends ObjectReaderBean<T> {
                 } else if (nameHashCodeLCase == hashCode3LCase) {
                     fieldReader3.readFieldValue(jsonReader, object);
                 } else {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                 }
             }
         }
@@ -237,7 +250,7 @@ final class ObjectReader4<T> extends ObjectReaderBean<T> {
                 fieldReader3.readFieldValue(jsonReader, object);
             } else {
                 if (!jsonReader.isSupportSmartMatch(features | this.features)) {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                     continue;
                 }
 

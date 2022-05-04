@@ -72,6 +72,22 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
         this.hashCode2LCase = Fnv.hashCode64LCase(fieldName2);
         this.hashCode3LCase = Fnv.hashCode64LCase(fieldName3);
         this.hashCode4LCase = Fnv.hashCode64LCase(fieldName4);
+
+        if (fieldReader0.isUnwrapped()) {
+            extraFieldReader = fieldReader0;
+        }
+        if (fieldReader1.isUnwrapped()) {
+            extraFieldReader = fieldReader1;
+        }
+        if (fieldReader2.isUnwrapped()) {
+            extraFieldReader = fieldReader2;
+        }
+        if (fieldReader3.isUnwrapped()) {
+            extraFieldReader = fieldReader3;
+        }
+        if (fieldReader4.isUnwrapped()) {
+            extraFieldReader = fieldReader4;
+        }
     }
 
     @Override
@@ -146,7 +162,7 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
                 fieldReader4.readFieldValue(jsonReader, object);
             } else {
                 if (!jsonReader.isSupportSmartMatch(features | this.features)) {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                     continue;
                 }
 
@@ -162,7 +178,7 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
                 } else if (nameHashCodeLCase == hashCode4LCase) {
                     fieldReader4.readFieldValue(jsonReader, object);
                 } else {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                 }
             }
         }
@@ -252,7 +268,7 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
                 fieldReader4.readFieldValue(jsonReader, object);
             } else {
                 if (!jsonReader.isSupportSmartMatch(features | this.features)) {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                     continue;
                 }
 
@@ -268,7 +284,7 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
                 } else if (nameHashCodeLCase == hashCode4LCase) {
                     fieldReader4.readFieldValue(jsonReader, object);
                 } else {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, object);
                 }
             }
         }
