@@ -1264,6 +1264,10 @@ public abstract class JSONReader implements Closeable {
     }
 
     public BigDecimal getBigDecimal() {
+        if (wasNull) {
+            return null;
+        }
+
         switch (valueType) {
             case JSON_TYPE_INT: {
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
@@ -1317,6 +1321,10 @@ public abstract class JSONReader implements Closeable {
     }
 
     public Number getNumber() {
+        if (wasNull) {
+            return null;
+        }
+
         switch (valueType) {
             case JSON_TYPE_INT: {
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
