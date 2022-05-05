@@ -740,6 +740,16 @@ final class JSONReaderUTF16 extends JSONReader {
         if (ch == '"' || ch == '\'') {
             quote = ch;
             ch = chars[offset++];
+
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+                nextIfMatch(',');
+                return null;
+            }
         }
 
         if (ch == '-') {
@@ -790,7 +800,11 @@ final class JSONReaderUTF16 extends JSONReader {
         }
 
         if (quote != 0) {
-            ch = chars[offset++];
+            if (offset == end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -930,6 +944,15 @@ final class JSONReaderUTF16 extends JSONReader {
         if (ch == '"' || ch == '\'') {
             quote = ch;
             ch = chars[offset++];
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+                nextIfMatch(',');
+                return null;
+            }
         }
 
         if (ch == '-') {
@@ -977,7 +1000,11 @@ final class JSONReaderUTF16 extends JSONReader {
         }
 
         if (quote != 0) {
-            ch = chars[offset++];
+            if (offset == end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -1476,6 +1503,17 @@ final class JSONReaderUTF16 extends JSONReader {
         if (ch == '"' || ch == '\'') {
             quote = ch;
             ch = chars[offset++];
+
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+                nextIfMatch(',');
+                wasNull = true;
+                return;
+            }
         }
         final int start = offset;
 
@@ -1647,7 +1685,12 @@ final class JSONReaderUTF16 extends JSONReader {
                 valueType = JSON_TYPE_STRING;
                 return;
             }
-            ch = chars[offset++];
+
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {

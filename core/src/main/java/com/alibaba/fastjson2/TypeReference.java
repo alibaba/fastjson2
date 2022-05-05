@@ -115,6 +115,21 @@ public abstract class TypeReference<T> {
     }
 
     /**
+     * See {@link JSON#parseObject} for details
+     *
+     * <pre>{@code String utf8Bytes = "{\"id\":1,\"name\":\"kraity\"}".getBytes(StandardCharsets.UTF_8);
+     *
+     * User user = new TypeReference<User>(){}.parseObject(utf8Bytes);
+     * }</pre>
+     *
+     * @param utf8Bytes the JSON {@link String} to be parsed
+     * @since 2.0.2
+     */
+    public T parseObject(byte[] utf8Bytes) {
+        return JSON.parseObject(utf8Bytes, type);
+    }
+
+    /**
      * See {@link JSONObject#toJavaObject} for details
      * <p>
      * {@code Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.parseObject(jsonObject);}
