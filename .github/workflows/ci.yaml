@@ -15,27 +15,24 @@ jobs:
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
+          distribution: 'zulu'
           java-version: ${{ matrix.java }}
-      - uses: actions/cache@v2
-        env:
-          cache-name: cache-maven-modules
+      - uses: actions/cache@v3
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}
+            ${{ runner.os }}-maven-
       - name: Build with Maven
         run: ./mvnw -Pgen-javadoc clean package -B
       - name: Generate code coverage
         run: ./mvnw -Pgen-code-cov clean test
       # https://github.com/marketplace/actions/codecov
-      - uses: codecov/codecov-action@v2
+      - uses: codecov/codecov-action@v3
         with:
           name: codecov-umbrella
           token: ${{ secrets.CODECOV_TOKEN }}
