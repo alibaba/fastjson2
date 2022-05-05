@@ -3,6 +3,7 @@ package com.alibaba.fastjson.date;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,8 +26,7 @@ public class DateFieldTest12_t {
         String text = JSON.toJSONString(object);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", JSON.defaultLocale);
         format.setTimeZone(JSON.defaultTimeZone);
-        Assert.assertEquals("{\"value\":\"" + format.format(object.getValue()) + "\"}",
-                            text);
+        Assertions.assertEquals("{\"value\":\"" + format.format(object.getValue()) + "\"}", text);
 
         Entity object2 = JSON.parseObject(text, Entity.class);
     }

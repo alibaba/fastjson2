@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.jsonpath;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class JSONPath_4 {
@@ -13,6 +14,6 @@ public class JSONPath_4 {
         Object x = JSON.parse(a);
         JSONPath.set(x, "$.test", "abc");
         Object o = JSONPath.eval(x, "$.10\\.0\\.1\\.1");
-        Assert.assertEquals("haha", o);
+        Assertions.assertEquals("haha", o);
     }
 }

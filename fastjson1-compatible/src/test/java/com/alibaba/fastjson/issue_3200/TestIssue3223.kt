@@ -8,6 +8,7 @@ import org.junit.Assert
 import org.junit.jupiter.api.Test
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.properties.Delegates
+import org.junit.jupiter.api.Assertions
 
 /**
  * kotlin集合测试
@@ -40,7 +41,7 @@ class TestIssue3223 {
         n.json = JSON.parseObject(JSON.toJSONString(mapOf("a" to "b")))
         val raw = JSON.toJSONString(n, SerializerFeature.WriteClassName)
         val d = JSON.parseObject(raw, NullableKotlin::class.java)
-        Assert.assertTrue(n == d)
+        Assertions.assertTrue(n == d)
 
     }
 

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -24,7 +25,7 @@ public class FastJsonHttpMessageConverterTest {
 
         converter.setSupportedMediaTypes(Arrays
                 .asList(new MediaType[]{MediaType.APPLICATION_JSON_UTF8}));
-        Assert.assertEquals(1, converter.getSupportedMediaTypes().size());
+        Assertions.assertEquals(1, converter.getSupportedMediaTypes().size());
 
         Method method = FastJsonHttpMessageConverter.class.getDeclaredMethod(
                 "supports", Class.class);
@@ -45,7 +46,7 @@ public class FastJsonHttpMessageConverterTest {
 
         };
         VO vo = (VO) converter.read(VO.class, input);
-        Assert.assertEquals(123, vo.getId());
+        Assertions.assertEquals(123, vo.getId());
 
         final ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         HttpOutputMessage out = new HttpOutputMessage() {
@@ -61,7 +62,7 @@ public class FastJsonHttpMessageConverterTest {
         converter.write(vo, MediaType.TEXT_PLAIN, out);
 
         byte[] bytes = byteOut.toByteArray();
-        Assert.assertEquals("{\"id\":123}", new String(bytes, "UTF-8"));
+        Assertions.assertEquals("{\"id\":123}", new String(bytes, "UTF-8"));
     }
 
     @Test
@@ -69,7 +70,7 @@ public class FastJsonHttpMessageConverterTest {
 
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
 
-        Assert.assertNotNull(converter.getFastJsonConfig());
+        Assertions.assertNotNull(converter.getFastJsonConfig());
         converter.setFastJsonConfig(new FastJsonConfig());
 
         converter.canRead(VO.class, MediaType.APPLICATION_JSON_UTF8);
@@ -91,7 +92,7 @@ public class FastJsonHttpMessageConverterTest {
 
         };
         VO vo = (VO) converter.read(VO.class, VO.class, input);
-        Assert.assertEquals(123, vo.getId());
+        Assertions.assertEquals(123, vo.getId());
 
         final ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         HttpOutputMessage out = new HttpOutputMessage() {
@@ -107,7 +108,7 @@ public class FastJsonHttpMessageConverterTest {
         converter.write(vo, VO.class, MediaType.TEXT_PLAIN, out);
 
         byte[] bytes = byteOut.toByteArray();
-        Assert.assertEquals("{\"id\":123}", new String(bytes, "UTF-8"));
+        Assertions.assertEquals("{\"id\":123}", new String(bytes, "UTF-8"));
 
         converter.setSupportedMediaTypes(Collections
                 .singletonList(MediaType.APPLICATION_JSON));
