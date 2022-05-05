@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class Issue3655 {
@@ -17,7 +18,7 @@ public class Issue3655 {
         issue3655_b b = new issue3655_b(null, null, null, null, null, null, null, null, null);
         String result = JSON.toJSONString(b, SerializerFeature.WriteNullStringAsEmpty);
         System.out.println(result);
-        Assert.assertEquals(jsonStr, result);
+        Assertions.assertEquals(jsonStr, result);
     }
 
     @Test
@@ -25,7 +26,7 @@ public class Issue3655 {
         issue3655_c c = new issue3655_c(null, null, null, null, null, null, null, null, null);
         String result = JSON.toJSONString(c, SerializerFeature.WriteNullStringAsEmpty);
         System.out.println(result);
-        Assert.assertEquals(jsonStr, result);
+        Assertions.assertEquals(jsonStr, result);
     }
 
     public static class issue3655_b extends issue3655_a {

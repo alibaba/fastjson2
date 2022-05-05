@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.v1issues.issue_1300;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.filter.ValueFilter;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -51,11 +50,9 @@ public class Issue1307 {
         data.put("name", "ace");
         params.add(data);
         //success
-        Assert.assertEquals("[{\"name\":\"ace\"}]"
-                , JSON.toJSONString(params,
-                        new Filter[]{
-                                valueFilter
-                        })
-        );
+        assertEquals("[{\"name\":\"ace\"}]", JSON.toJSONString(params,
+                new Filter[]{
+                        valueFilter
+                }));
     }
 }

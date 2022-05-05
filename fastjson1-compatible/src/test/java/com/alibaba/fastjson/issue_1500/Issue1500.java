@@ -19,7 +19,7 @@ public class Issue1500 {
         System.out.println(jsonAa);
 
         Aa aa1 = JSON.parseObject(jsonAa, Aa.class);
-        Assert.assertEquals("aa",aa1.getName());
+        assertEquals("aa", aa1.getName());
 
         // test C
         C c = new C();

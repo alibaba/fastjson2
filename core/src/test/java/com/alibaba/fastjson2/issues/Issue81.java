@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -14,9 +15,9 @@ public class Issue81 {
         String value = "1111";
         assertTrue(JSON.isValid(jsonArrayStr));
         assertTrue(JSON.isValid(jsonObjectStr));
-        assertFalse(JSON.isValidArray(jsonObjectStr));
+        Assertions.assertFalse(JSON.isValidArray(jsonObjectStr));
         assertTrue(JSON.isValidArray(jsonArrayStr));
         assertTrue(JSON.isValid(value));
-        assertFalse(JSON.isValidArray(value));
+        Assertions.assertFalse(JSON.isValidArray(value));
     }
 }

@@ -3,6 +3,7 @@ package com.alibaba.fastjson.date;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -14,7 +15,7 @@ public class DateTest_dotnet_5 {
         String text = "{\"date\":\"/Date(1461081600321)/\"}";
 
         JSONObject model = JSON.parseObject(text);
-        Assert.assertEquals(1461081600321L, ((Date) model.getObject("date", Date.class)).getTime());
+        Assertions.assertEquals(1461081600321L, ((Date) model.getObject("date", Date.class)).getTime());
     }
 
     private static class Model {

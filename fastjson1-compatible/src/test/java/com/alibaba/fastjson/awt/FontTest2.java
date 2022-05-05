@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
@@ -18,7 +19,7 @@ public class FontTest2 {
 
             Font font2 = (Font) JSON.parse(text, Feature.SupportAutoType);
 
-            Assert.assertEquals(font, font2);
+            Assertions.assertEquals(font, font2);
         }
     }
 }

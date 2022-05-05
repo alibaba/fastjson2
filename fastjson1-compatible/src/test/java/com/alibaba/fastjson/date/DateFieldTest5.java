@@ -5,6 +5,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -18,7 +19,7 @@ public class DateFieldTest5 {
 
         String text = JSON.toJSONString(v);
 
-        Assert.assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
+        Assertions.assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
     }
 
     @Test
@@ -30,7 +31,7 @@ public class DateFieldTest5 {
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue);
-        Assert.assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
+        Assertions.assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
     }
 
     @Test
@@ -39,7 +40,7 @@ public class DateFieldTest5 {
         v.setValue(new Date());
 
         String text = JSON.toJSONString(v, SerializerFeature.WriteMapNullValue);
-        Assert.assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
+        Assertions.assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
     }
 
     @Test
@@ -50,11 +51,11 @@ public class DateFieldTest5 {
         mapping.setAsmEnable(true);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue);
-        Assert.assertEquals("{\"value\":null}", text);
+        Assertions.assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue(), v.getValue());
+        Assertions.assertEquals(v1.getValue(), v.getValue());
     }
 
     @Test
@@ -65,11 +66,11 @@ public class DateFieldTest5 {
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullNumberAsZero);
-        Assert.assertEquals("{\"value\":null}", text);
+        Assertions.assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(null, v1.getValue());
+        Assertions.assertEquals(null, v1.getValue());
     }
 
     public static class V0 {

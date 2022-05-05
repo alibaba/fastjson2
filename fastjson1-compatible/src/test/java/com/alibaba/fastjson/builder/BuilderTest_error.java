@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.annotation.JSONType;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class BuilderTest_error {
@@ -16,7 +17,7 @@ public class BuilderTest_error {
         } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        Assertions.assertNotNull(error);
     }
 
     @JSONType(builder = VOBuilder.class)

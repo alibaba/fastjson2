@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.annotation.NamingStrategy;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -32,9 +32,9 @@ public class Issue1565 {
 
         String actualStr = JSON.toJSONString(expectedBean);
         JSONObject actualBean = JSON.parseObject(actualStr);
-        Assert.assertEquals(expectedStr, actualStr);
-        Assert.assertEquals(expectedBean.getId(), actualBean.getString("id"));
-        Assert.assertEquals(expectedBean.getNetValueDate(), actualBean.getInteger("net_value_date"));
+        Assertions.assertEquals(expectedStr, actualStr);
+        Assertions.assertEquals(expectedBean.getId(), actualBean.getString("id"));
+        Assertions.assertEquals(expectedBean.getNetValueDate(), actualBean.getInteger("net_value_date"));
 
 
 
