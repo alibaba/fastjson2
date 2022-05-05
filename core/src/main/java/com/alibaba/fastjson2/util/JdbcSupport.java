@@ -46,7 +46,7 @@ public class JdbcSupport {
             return TimeWriter.INSTANCE;
         }
 
-        return new TimeWriter(null);
+        return new TimeWriter(format);
     }
 
     public static ObjectWriter createTimestampWriter(String format) {
@@ -73,11 +73,25 @@ public class JdbcSupport {
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
+
+                if (formatUnixTime) {
+                    millis *= 1000;
+                }
                 return new java.sql.Time(millis);
             }
 
             if (jsonReader.readIfNull()) {
                 return null;
+            }
+
+            if (formatISO8601 || formatMillis) {
+                long millis = jsonReader.readMillisFromString();
+                return new java.sql.Time(millis);
+            }
+
+            if (formatUnixTime) {
+                long seconds = jsonReader.readInt64();
+                return new java.sql.Time(seconds * 1000L);
             }
 
             long millis;
@@ -121,19 +135,62 @@ public class JdbcSupport {
             }
 
             JSONWriter.Context context = jsonWriter.getContext();
-            if (context.isDateFormatUnixTime()) {
+            if (formatUnixTime || context.isDateFormatUnixTime()) {
                 long millis = ((Date) object).getTime();
-                jsonWriter.writeInt64(millis / 1000);
+                long seconds = millis / 1000;
+                jsonWriter.writeInt64(seconds);
                 return;
             }
 
-            if (context.isDateFormatMillis()) {
+            if (formatMillis || context.isDateFormatMillis()) {
                 long millis = ((Date) object).getTime();
                 jsonWriter.writeInt64(millis);
                 return;
             }
 
-            jsonWriter.writeString(object.toString());
+            if (formatISO8601 || context.isDateFormatISO8601()) {
+                ZoneId zoneId = context.getZoneId();
+                long millis = ((java.sql.Time) object).getTime();
+                Instant instant = Instant.ofEpochMilli(millis);
+                ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
+                int offsetSeconds = zdt.getOffset().getTotalSeconds();
+
+                int year = zdt.getYear();
+                int month = zdt.getMonthValue();
+                int dayOfMonth = zdt.getDayOfMonth();
+                int hour = zdt.getHour();
+                int minute = zdt.getMinute();
+                int second = zdt.getSecond();
+                int nano = 0;
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds);
+                return;
+            }
+
+            DateTimeFormatter dateFormatter = null;
+            if (format != null && !format.contains("dd")) {
+                dateFormatter = getDateFormatter();
+            }
+
+            if (dateFormatter == null) {
+                String format = context.getDateFormat();
+                if (format != null && !format.contains("dd")) {
+                    dateFormatter = context.getDateFormatter();
+                }
+            }
+
+            if (dateFormatter == null) {
+                jsonWriter.writeString(object.toString());
+                return;
+            }
+
+            java.sql.Time time = (java.sql.Time) object;
+
+            ZoneId zoneId = context.getZoneId();
+            Instant instant = Instant.ofEpochMilli(time.getTime());
+            ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
+
+            String str = dateFormatter.format(zdt);
+            jsonWriter.writeString(str);
         }
     }
 
