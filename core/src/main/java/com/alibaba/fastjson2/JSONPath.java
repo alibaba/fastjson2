@@ -557,8 +557,8 @@ public abstract class JSONPath {
                             String fieldName = jsonReader.readFieldNameUnquote();
                             if (fieldName.equals("randomIndex")) {
                                 if (!jsonReader.nextIfMatch('(')
-                                        || !jsonReader.nextIfMatch(')')
-                                        || !jsonReader.nextIfMatch(']')) {
+                                    || !jsonReader.nextIfMatch(')')
+                                    || !(jsonReader.ch == (']'))) {
                                     throw new JSONException("not support : " + fieldName);
                                 }
                                 segments.add(RandomIndexSegment.INSTANCE);
@@ -4337,7 +4337,86 @@ public abstract class JSONPath {
 
         @Override
         public void accept(JSONReader jsonReader, Context ctx) {
-            throw new JSONException("not support");
+            if (ctx.parent != null
+                && (ctx.parent.eval
+                || (ctx.parent.current instanceof CycleNameSegment && ctx.next == null)
+            )
+            ) {
+                eval(ctx);
+                return;
+            }
+
+            if (jsonReader.isJSONB()) {
+                JSONArray array = new JSONArray();
+
+                {
+                    int itemCnt = jsonReader.startArray();
+                    for (int i = 0; i < itemCnt; i++) {
+                        array.add(jsonReader.readAny());
+                    }
+                }
+
+                int index = Math.abs(random.nextInt()) % array.size();
+                ctx.value = array.get(index);
+                ctx.eval = true;
+                return;
+            }
+
+            JSONArray array = new JSONArray();
+            jsonReader.next();
+            for (int i = 0; jsonReader.ch != JSONReader.EOI; ++i) {
+                if (jsonReader.ch == ']') {
+                    jsonReader.next();
+                    break;
+                }
+
+                Object val;
+                switch (jsonReader.ch) {
+                    case '-':
+                    case '+':
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                    case '.':
+                        jsonReader.readNumber0();
+                        val = jsonReader.getNumber();
+                        break;
+                    case '[':
+                        val = jsonReader.readArray();
+                        break;
+                    case '{':
+                        val = jsonReader.readObject();
+                        break;
+                    case '"':
+                    case '\'':
+                        val = jsonReader.readString();
+                        break;
+                    case 't':
+                    case 'f':
+                        val = jsonReader.readBoolValue();
+                        break;
+                    case 'n':
+                        jsonReader.readNull();
+                        val = null;
+                        break;
+                    default:
+                        throw new JSONException("TODO : " + jsonReader.ch);
+                }
+
+                array.add(val);
+            }
+
+            int index = Math.abs(random.nextInt()) % array.size();
+            ctx.value = array.get(index);
+            ctx.eval = true;
+
         }
 
         @Override
