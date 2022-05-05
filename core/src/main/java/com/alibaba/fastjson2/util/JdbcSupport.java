@@ -179,12 +179,6 @@ public class JdbcSupport {
                 return;
             }
 
-            if (formatMillis || ctx.isDateFormatMillis()) {
-                long millis = date.getTime();
-                jsonWriter.writeInt64(millis);
-                return;
-            }
-
             ZoneId zoneId = ctx.getZoneId();
             Instant instant = date.toInstant();
             ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
@@ -208,6 +202,12 @@ public class JdbcSupport {
             }
 
             if (dateFormatter == null) {
+                if (formatMillis || ctx.isDateFormatMillis()) {
+                    long millis = date.getTime();
+                    jsonWriter.writeInt64(millis);
+                    return;
+                }
+
                 int nanos = date.getNanos();
 
                 if (nanos == 0) {
