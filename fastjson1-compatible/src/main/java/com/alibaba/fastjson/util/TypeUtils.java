@@ -33,8 +33,6 @@ import java.util.concurrent.ConcurrentMap;
  * @author wenshao[szujobs@hotmail.com]
  */
 public class TypeUtils {
-
-    private static final ConcurrentMap<String, Class<?>> mappings = new ConcurrentHashMap<String, Class<?>>(256, 0.75f, 1);
     public static boolean compatibleWithJavaBean = false;
     /**
      * 根据field name的大小写输出输入数据
