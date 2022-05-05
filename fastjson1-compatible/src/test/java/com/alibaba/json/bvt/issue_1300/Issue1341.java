@@ -13,6 +13,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.*;
@@ -164,8 +165,8 @@ public class Issue1341 extends JerseyTest {
 
         final String reponse = target("book1341").path("123").request().accept("application/javascript").get(String.class);
         System.out.println(reponse);
-        Assert.assertTrue(reponse.indexOf("Python源码剖析") > 0);
-        Assert.assertTrue(reponse.indexOf("电子工业出版社") > 0);
+        Assertions.assertTrue(reponse.indexOf("Python源码剖析") > 0);
+        Assertions.assertTrue(reponse.indexOf("电子工业出版社") > 0);
     }
 
 }

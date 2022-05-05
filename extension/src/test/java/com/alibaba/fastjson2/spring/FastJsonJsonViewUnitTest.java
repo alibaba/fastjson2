@@ -43,6 +43,7 @@ public class FastJsonJsonViewUnitTest {
 
     }
 
+    @Test
     public void test_1() throws Exception {
 
         FastJsonJsonView view = new FastJsonJsonView();
@@ -62,7 +63,7 @@ public class FastJsonJsonViewUnitTest {
         view.render(model, request, response);
 
         view.setExtractValueFromSingleKeyModel(true);
-        assertEquals(true, view.isExtractValueFromSingleKeyModel());
+        assertTrue(view.isExtractValueFromSingleKeyModel());
 
         view.setDisableCaching(true);
         view.render(Collections.singletonMap("abc", "cde"), request, response);
@@ -83,7 +84,7 @@ public class FastJsonJsonViewUnitTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
 
 
-        assertEquals(true, view.isExtractValueFromSingleKeyModel());
+        assertTrue(view.isExtractValueFromSingleKeyModel());
 
 
         view.render(Collections.singletonMap("abc", "cde中文"), request, response);
@@ -106,7 +107,7 @@ public class FastJsonJsonViewUnitTest {
         request.addParameter("callback", "-methodName");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        assertEquals(true, view.isExtractValueFromSingleKeyModel());
+        assertTrue(view.isExtractValueFromSingleKeyModel());
 
         view.render(Collections.singletonMap("doesn't matter", Collections.singletonMap("abc", "cde中文")), request, response);
         String contentAsString = response.getContentAsString();

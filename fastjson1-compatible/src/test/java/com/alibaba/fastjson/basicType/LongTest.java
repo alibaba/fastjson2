@@ -3,6 +3,7 @@ package com.alibaba.fastjson.basicType;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -14,9 +15,9 @@ public class LongTest {
         long[] values = new long[] {Long.MIN_VALUE, -1, 0, 1, Long.MAX_VALUE};
         String text = JSON.toJSONString(values);
         long[] values_2 = JSON.parseObject(text, long[].class);
-        Assert.assertEquals(values_2.length, values.length);
+        Assertions.assertEquals(values_2.length, values.length);
         for (int i = 0; i < values.length; ++i) {
-            Assert.assertEquals(values[i], values_2[i]);
+            Assertions.assertEquals(values[i], values_2[i]);
         }
     }
 
@@ -31,7 +32,7 @@ public class LongTest {
         String text = JSON.toJSONString(map);
         JSONObject obj = JSON.parseObject(text);
         for (int i = 0; i < values.length; ++i) {
-            Assert.assertEquals(values[i], ((Number) obj.get(Long.toString(i))).longValue());
+            Assertions.assertEquals(values[i], ((Number) obj.get(Long.toString(i))).longValue());
         }
     }
 }

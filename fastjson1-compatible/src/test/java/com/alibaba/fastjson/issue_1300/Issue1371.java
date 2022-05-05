@@ -3,6 +3,7 @@ package com.alibaba.fastjson.issue_1300;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -24,8 +25,7 @@ public class Issue1371 {
         enumMap.put(Rooms.C, Rooms.D);
         enumMap.put(Rooms.E, Rooms.A);
 
-        Assert.assertEquals(JSON.toJSONString(enumMap, SerializerFeature.WriteNonStringKeyAsString),
-                "{\"C\":\"D\",\"E\":\"A\"}");
+        Assertions.assertEquals(JSON.toJSONString(enumMap, SerializerFeature.WriteNonStringKeyAsString), "{\"C\":\"D\",\"E\":\"A\"}");
 
     }
 

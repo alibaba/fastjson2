@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
@@ -17,12 +18,12 @@ public class ColorTest2 {
         System.out.println(text);
 
         Color color2 = (Color) JSON.parse(text, Feature.SupportAutoType);
-        Assert.assertEquals(color, color2);
+        Assertions.assertEquals(color, color2);
 
         Color color3 = (Color) JSON.parse(text, Feature.SupportAutoType);
-        Assert.assertEquals(color, color3);
+        Assertions.assertEquals(color, color3);
 
         Color color4 = (Color) JSON.parseObject(text, Color.class, Feature.SupportAutoType);
-        Assert.assertEquals(color, color4);
+        Assertions.assertEquals(color, color4);
     }
 }

@@ -4,10 +4,10 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.util.TypeUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Created by wenshao on 01/07/2017.
@@ -28,8 +28,8 @@ public class Issue1300 {
     @Test
     public void testEmptyJSON() {
         City object = TypeUtils.cast(new JSONObject(), City.class);
-        Assert.assertEquals(null, object.name);
-        Assert.assertEquals(0, object.code);
+        assertNull(object.name);
+        assertEquals(0, object.code);
     }
 
 

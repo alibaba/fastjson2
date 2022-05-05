@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.v1issues.issue_1400;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -17,12 +17,12 @@ public class Issue1400 {
         TypeReference tr = new TypeReference<Resource<ArrayList<App>>>(){};
         Bean test = new Bean(tr);
         Resource resource = test.resource;
-        Assert.assertEquals(1,resource.ret);
-        Assert.assertEquals("ok",resource.message);
+        Assertions.assertEquals(1, resource.ret);
+        Assertions.assertEquals("ok", resource.message);
         List<App> data =(List<App>) resource.data;
-        Assert.assertEquals(2,data.size());
+        Assertions.assertEquals(2, data.size());
         App app1 = data.get(0);
-        Assert.assertEquals("11c53f541dee4f5bbc4f75f99002278c",app1.appId);
+        Assertions.assertEquals("11c53f541dee4f5bbc4f75f99002278c", app1.appId);
     }
 
     public static class Resource<T> {

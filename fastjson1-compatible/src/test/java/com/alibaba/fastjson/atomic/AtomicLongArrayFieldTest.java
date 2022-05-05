@@ -3,7 +3,7 @@ package com.alibaba.fastjson.atomic;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicLongArray;
@@ -18,11 +18,11 @@ public class AtomicLongArrayFieldTest {
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue);
-        Assert.assertEquals("{\"value\":null}", text);
+        Assertions.assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue(), v.getValue());
+        Assertions.assertEquals(v1.getValue(), v.getValue());
     }
 
     @Test
@@ -33,7 +33,7 @@ public class AtomicLongArrayFieldTest {
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullListAsEmpty);
-        Assert.assertEquals("{\"value\":[]}", text);
+        Assertions.assertEquals("{\"value\":[]}", text);
     }
 
     @Test
@@ -44,7 +44,7 @@ public class AtomicLongArrayFieldTest {
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullListAsEmpty);
-        Assert.assertEquals("{\"value\":[1,2]}", text);
+        Assertions.assertEquals("{\"value\":[1,2]}", text);
     }
 
     public static class V0 {

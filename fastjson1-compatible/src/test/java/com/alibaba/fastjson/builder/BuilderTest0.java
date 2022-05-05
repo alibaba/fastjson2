@@ -2,7 +2,7 @@ package com.alibaba.fastjson.builder;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONType;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class BuilderTest0 {
@@ -10,8 +10,8 @@ public class BuilderTest0 {
     public void test_0() throws Exception {
         VO vo = JSON.parseObject("{\"id\":12304,\"name\":\"ljw\"}", VO.class);
 
-        Assert.assertEquals(12304, vo.getId());
-        Assert.assertEquals("ljw", vo.getName());
+        Assertions.assertEquals(12304, vo.getId());
+        Assertions.assertEquals("ljw", vo.getName());
     }
 
     @JSONType(builder=VOBuilder.class)

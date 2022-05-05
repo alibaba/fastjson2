@@ -4,9 +4,11 @@ import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.google.common.base.Objects;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNull;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.serializer.SerializationException;
@@ -27,24 +29,24 @@ public class FastJsonRedisSerializerTest {
     @Test
     public void test_1() {
         User user = serializer.deserialize(serializer.serialize(new User(1, "土豆", 25)));
-        Assert.assertTrue(Objects.equal(user.getId(), 1));
-        Assert.assertTrue(Objects.equal(user.getName(), "土豆"));
-        Assert.assertTrue(Objects.equal(user.getAge(), 25));
+        Assertions.assertTrue(Objects.equal(user.getId(), 1));
+        Assertions.assertTrue(Objects.equal(user.getName(), "土豆"));
+        Assertions.assertTrue(Objects.equal(user.getAge(), 25));
     }
 
     @Test
     public void test_2() {
-        Assert.assertThat(serializer.serialize(null), Is.is(new byte[0]));
+        MatcherAssert.assertThat(serializer.serialize(null), Is.is(new byte[0]));
     }
 
     @Test
     public void test_3() {
-        Assert.assertThat(serializer.deserialize(new byte[0]), IsNull.nullValue());
+        MatcherAssert.assertThat(serializer.deserialize(new byte[0]), IsNull.nullValue());
     }
 
     @Test
     public void test_4() {
-        Assert.assertThat(serializer.deserialize(null), IsNull.nullValue());
+        MatcherAssert.assertThat(serializer.deserialize(null), IsNull.nullValue());
     }
 
     @Test
@@ -68,7 +70,7 @@ public class FastJsonRedisSerializerTest {
         fastJsonConfig.setFeatures(Feature.SupportAutoType);
 
         FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(Object.class);
-        Assert.assertNotNull(fastJsonRedisSerializer.getFastJsonConfig());
+        Assertions.assertNotNull(fastJsonRedisSerializer.getFastJsonConfig());
         fastJsonRedisSerializer.setFastJsonConfig(fastJsonConfig);
 
         User userSer = new User(1, "土豆", 25);
@@ -76,7 +78,7 @@ public class FastJsonRedisSerializerTest {
         byte[] serializedValue = fastJsonRedisSerializer.serialize(userSer);
         User userDes = (User) fastJsonRedisSerializer.deserialize(serializedValue);
 
-        Assert.assertEquals(userDes.getName(), "土豆");
+        Assertions.assertEquals(userDes.getName(), "土豆");
     }
 
     static class User {

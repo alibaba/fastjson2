@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -43,8 +44,8 @@ public class RefTest7 {
         assertNotNull(bean2);
         assertNotNull(bean2.values);
 
-        Assert.assertSame(bean.values.getClass(), bean2.values.getClass());
-        Assert.assertSame(bean2.values1.entrySet().iterator().next().getValue(), bean2.values.entrySet().iterator().next().getValue());
+        Assertions.assertSame(bean.values.getClass(), bean2.values.getClass());
+        Assertions.assertSame(bean2.values1.entrySet().iterator().next().getValue(), bean2.values.entrySet().iterator().next().getValue());
     }
 
     public static class Bean {

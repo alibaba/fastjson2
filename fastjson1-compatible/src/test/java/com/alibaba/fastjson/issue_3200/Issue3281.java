@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -23,8 +24,8 @@ public class Issue3281 {
                 "\"modelName\":\"test\",\"modelScores\":{\"Test1-1000\":{\"max\":1.0997832999999515,\"min\":0.0," +
                 "\"recording\":false}},\"modelVersion\":\"1\",\"pit\":1592470429399,\"useCaseName\":\"test\"," +
                 "\"variableName\":\"v2\"}", ModelState.class);
-        Assert.assertNotNull(modelBack.getCounterMap());
-        Assert.assertNotNull(modelBack.getModelScores());
+        Assertions.assertNotNull(modelBack.getCounterMap());
+        Assertions.assertNotNull(modelBack.getModelScores());
     }
 
     @Builder

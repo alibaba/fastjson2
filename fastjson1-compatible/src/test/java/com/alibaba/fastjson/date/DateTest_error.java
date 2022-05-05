@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -22,7 +23,7 @@ public class DateTest_error {
         } catch (JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        Assertions.assertNotNull(error);
     }
 
     @Test
@@ -35,7 +36,7 @@ public class DateTest_error {
         } catch (JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        Assertions.assertNotNull(error);
     }
 
     @Test
@@ -48,7 +49,7 @@ public class DateTest_error {
         } catch (JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        Assertions.assertNotNull(error);
     }
 
     @Test
@@ -79,6 +80,6 @@ public class DateTest_error {
         } catch (JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        Assertions.assertNotNull(error);
     }
 }
