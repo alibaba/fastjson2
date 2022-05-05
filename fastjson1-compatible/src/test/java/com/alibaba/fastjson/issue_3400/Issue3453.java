@@ -2,6 +2,7 @@ package com.alibaba.fastjson.issue_3400;
 
 import com.alibaba.fastjson.JSONValidator;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -59,9 +60,9 @@ public class Issue3453 {
                 " }\n" +
                 "]";
         JSONValidator validator = JSONValidator.from(str);
-        Assert.assertTrue(validator.validate());
+        Assertions.assertTrue(validator.validate());
         JSONValidator.Type type = validator.getType();
-        Assert.assertEquals("Array",type.name());
+        Assertions.assertEquals("Array", type.name());
     }
 
 }

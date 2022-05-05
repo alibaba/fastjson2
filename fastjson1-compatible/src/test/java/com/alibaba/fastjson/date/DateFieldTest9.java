@@ -2,6 +2,7 @@ package com.alibaba.fastjson.date;
 
 import com.alibaba.fastjson.JSON;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,13 +25,13 @@ public class DateFieldTest9 {
 
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.setTime(vo.date);
-        Assert.assertEquals(2016, calendar.get(Calendar.YEAR));
-        Assert.assertEquals(4, calendar.get(Calendar.MONTH));
-        Assert.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
-        Assert.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
-        Assert.assertEquals(0, calendar.get(Calendar.MINUTE));
-        Assert.assertEquals(0, calendar.get(Calendar.SECOND));
-        Assert.assertEquals(0, calendar.get(Calendar.MILLISECOND));
+        Assertions.assertEquals(2016, calendar.get(Calendar.YEAR));
+        Assertions.assertEquals(4, calendar.get(Calendar.MONTH));
+        Assertions.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
+        Assertions.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
+        Assertions.assertEquals(0, calendar.get(Calendar.MINUTE));
+        Assertions.assertEquals(0, calendar.get(Calendar.SECOND));
+        Assertions.assertEquals(0, calendar.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -39,13 +40,13 @@ public class DateFieldTest9 {
 
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.setTime(vo.date);
-        Assert.assertEquals(2016, calendar.get(Calendar.YEAR));
-        Assert.assertEquals(4, calendar.get(Calendar.MONTH));
-        Assert.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
-        Assert.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
-        Assert.assertEquals(0, calendar.get(Calendar.MINUTE));
-        Assert.assertEquals(0, calendar.get(Calendar.SECOND));
-        Assert.assertEquals(0, calendar.get(Calendar.MILLISECOND));
+        Assertions.assertEquals(2016, calendar.get(Calendar.YEAR));
+        Assertions.assertEquals(4, calendar.get(Calendar.MONTH));
+        Assertions.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
+        Assertions.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
+        Assertions.assertEquals(0, calendar.get(Calendar.MINUTE));
+        Assertions.assertEquals(0, calendar.get(Calendar.SECOND));
+        Assertions.assertEquals(0, calendar.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -54,13 +55,13 @@ public class DateFieldTest9 {
 
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.setTime(vo.date);
-        Assert.assertEquals(2016, calendar.get(Calendar.YEAR));
-        Assert.assertEquals(4, calendar.get(Calendar.MONTH));
-        Assert.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
-        Assert.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
-        Assert.assertEquals(0, calendar.get(Calendar.MINUTE));
-        Assert.assertEquals(0, calendar.get(Calendar.SECOND));
-        Assert.assertEquals(0, calendar.get(Calendar.MILLISECOND));
+        Assertions.assertEquals(2016, calendar.get(Calendar.YEAR));
+        Assertions.assertEquals(4, calendar.get(Calendar.MONTH));
+        Assertions.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
+        Assertions.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
+        Assertions.assertEquals(0, calendar.get(Calendar.MINUTE));
+        Assertions.assertEquals(0, calendar.get(Calendar.SECOND));
+        Assertions.assertEquals(0, calendar.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -69,13 +70,13 @@ public class DateFieldTest9 {
 
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.setTime(vo.date);
-        Assert.assertEquals(2016, calendar.get(Calendar.YEAR));
-        Assert.assertEquals(4, calendar.get(Calendar.MONTH));
-        Assert.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
-        Assert.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
-        Assert.assertEquals(0, calendar.get(Calendar.MINUTE));
-        Assert.assertEquals(0, calendar.get(Calendar.SECOND));
-        Assert.assertEquals(0, calendar.get(Calendar.MILLISECOND));
+        Assertions.assertEquals(2016, calendar.get(Calendar.YEAR));
+        Assertions.assertEquals(4, calendar.get(Calendar.MONTH));
+        Assertions.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
+        Assertions.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
+        Assertions.assertEquals(0, calendar.get(Calendar.MINUTE));
+        Assertions.assertEquals(0, calendar.get(Calendar.SECOND));
+        Assertions.assertEquals(0, calendar.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -84,13 +85,13 @@ public class DateFieldTest9 {
 
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.setTime(vo.date);
-        Assert.assertEquals(2016, calendar.get(Calendar.YEAR));
-        Assert.assertEquals(4, calendar.get(Calendar.MONTH));
-        Assert.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
-        Assert.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
-        Assert.assertEquals(0, calendar.get(Calendar.MINUTE));
-        Assert.assertEquals(0, calendar.get(Calendar.SECOND));
-        Assert.assertEquals(0, calendar.get(Calendar.MILLISECOND));
+        Assertions.assertEquals(2016, calendar.get(Calendar.YEAR));
+        Assertions.assertEquals(4, calendar.get(Calendar.MONTH));
+        Assertions.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
+        Assertions.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
+        Assertions.assertEquals(0, calendar.get(Calendar.MINUTE));
+        Assertions.assertEquals(0, calendar.get(Calendar.SECOND));
+        Assertions.assertEquals(0, calendar.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -99,13 +100,13 @@ public class DateFieldTest9 {
 
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.setTime(vo.date);
-        Assert.assertEquals(2016, calendar.get(Calendar.YEAR));
-        Assert.assertEquals(4, calendar.get(Calendar.MONTH));
-        Assert.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
-        Assert.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
-        Assert.assertEquals(0, calendar.get(Calendar.MINUTE));
-        Assert.assertEquals(0, calendar.get(Calendar.SECOND));
-        Assert.assertEquals(0, calendar.get(Calendar.MILLISECOND));
+        Assertions.assertEquals(2016, calendar.get(Calendar.YEAR));
+        Assertions.assertEquals(4, calendar.get(Calendar.MONTH));
+        Assertions.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
+        Assertions.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
+        Assertions.assertEquals(0, calendar.get(Calendar.MINUTE));
+        Assertions.assertEquals(0, calendar.get(Calendar.SECOND));
+        Assertions.assertEquals(0, calendar.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -114,13 +115,13 @@ public class DateFieldTest9 {
 
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.setTime(vo.date);
-        Assert.assertEquals(2016, calendar.get(Calendar.YEAR));
-        Assert.assertEquals(4, calendar.get(Calendar.MONTH));
-        Assert.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
-        Assert.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
-        Assert.assertEquals(0, calendar.get(Calendar.MINUTE));
-        Assert.assertEquals(0, calendar.get(Calendar.SECOND));
-        Assert.assertEquals(0, calendar.get(Calendar.MILLISECOND));
+        Assertions.assertEquals(2016, calendar.get(Calendar.YEAR));
+        Assertions.assertEquals(4, calendar.get(Calendar.MONTH));
+        Assertions.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
+        Assertions.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
+        Assertions.assertEquals(0, calendar.get(Calendar.MINUTE));
+        Assertions.assertEquals(0, calendar.get(Calendar.SECOND));
+        Assertions.assertEquals(0, calendar.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -129,13 +130,13 @@ public class DateFieldTest9 {
 
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.setTime(vo.date);
-        Assert.assertEquals(2016, calendar.get(Calendar.YEAR));
-        Assert.assertEquals(4, calendar.get(Calendar.MONTH));
-        Assert.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
-        Assert.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
-        Assert.assertEquals(0, calendar.get(Calendar.MINUTE));
-        Assert.assertEquals(0, calendar.get(Calendar.SECOND));
-        Assert.assertEquals(0, calendar.get(Calendar.MILLISECOND));
+        Assertions.assertEquals(2016, calendar.get(Calendar.YEAR));
+        Assertions.assertEquals(4, calendar.get(Calendar.MONTH));
+        Assertions.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
+        Assertions.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
+        Assertions.assertEquals(0, calendar.get(Calendar.MINUTE));
+        Assertions.assertEquals(0, calendar.get(Calendar.SECOND));
+        Assertions.assertEquals(0, calendar.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -144,13 +145,13 @@ public class DateFieldTest9 {
 
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.setTime(vo.date);
-        Assert.assertEquals(2016, calendar.get(Calendar.YEAR));
-        Assert.assertEquals(4, calendar.get(Calendar.MONTH));
-        Assert.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
-        Assert.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
-        Assert.assertEquals(0, calendar.get(Calendar.MINUTE));
-        Assert.assertEquals(0, calendar.get(Calendar.SECOND));
-        Assert.assertEquals(0, calendar.get(Calendar.MILLISECOND));
+        Assertions.assertEquals(2016, calendar.get(Calendar.YEAR));
+        Assertions.assertEquals(4, calendar.get(Calendar.MONTH));
+        Assertions.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
+        Assertions.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
+        Assertions.assertEquals(0, calendar.get(Calendar.MINUTE));
+        Assertions.assertEquals(0, calendar.get(Calendar.SECOND));
+        Assertions.assertEquals(0, calendar.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -159,13 +160,13 @@ public class DateFieldTest9 {
 
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.setTime(vo.date);
-        Assert.assertEquals(2016, calendar.get(Calendar.YEAR));
-        Assert.assertEquals(4, calendar.get(Calendar.MONTH));
-        Assert.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
-        Assert.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
-        Assert.assertEquals(0, calendar.get(Calendar.MINUTE));
-        Assert.assertEquals(0, calendar.get(Calendar.SECOND));
-        Assert.assertEquals(0, calendar.get(Calendar.MILLISECOND));
+        Assertions.assertEquals(2016, calendar.get(Calendar.YEAR));
+        Assertions.assertEquals(4, calendar.get(Calendar.MONTH));
+        Assertions.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
+        Assertions.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
+        Assertions.assertEquals(0, calendar.get(Calendar.MINUTE));
+        Assertions.assertEquals(0, calendar.get(Calendar.SECOND));
+        Assertions.assertEquals(0, calendar.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -174,13 +175,13 @@ public class DateFieldTest9 {
 
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.setTime(vo.date);
-        Assert.assertEquals(2016, calendar.get(Calendar.YEAR));
-        Assert.assertEquals(4, calendar.get(Calendar.MONTH));
-        Assert.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
-        Assert.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
-        Assert.assertEquals(0, calendar.get(Calendar.MINUTE));
-        Assert.assertEquals(0, calendar.get(Calendar.SECOND));
-        Assert.assertEquals(0, calendar.get(Calendar.MILLISECOND));
+        Assertions.assertEquals(2016, calendar.get(Calendar.YEAR));
+        Assertions.assertEquals(4, calendar.get(Calendar.MONTH));
+        Assertions.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
+        Assertions.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
+        Assertions.assertEquals(0, calendar.get(Calendar.MINUTE));
+        Assertions.assertEquals(0, calendar.get(Calendar.SECOND));
+        Assertions.assertEquals(0, calendar.get(Calendar.MILLISECOND));
     }
 
     @Test
@@ -189,13 +190,13 @@ public class DateFieldTest9 {
 
         Calendar calendar = Calendar.getInstance(JSON.defaultTimeZone, JSON.defaultLocale);
         calendar.setTime(vo.date);
-        Assert.assertEquals(2016, calendar.get(Calendar.YEAR));
-        Assert.assertEquals(4, calendar.get(Calendar.MONTH));
-        Assert.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
-        Assert.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
-        Assert.assertEquals(0, calendar.get(Calendar.MINUTE));
-        Assert.assertEquals(0, calendar.get(Calendar.SECOND));
-        Assert.assertEquals(0, calendar.get(Calendar.MILLISECOND));
+        Assertions.assertEquals(2016, calendar.get(Calendar.YEAR));
+        Assertions.assertEquals(4, calendar.get(Calendar.MONTH));
+        Assertions.assertEquals(6, calendar.get(Calendar.DAY_OF_MONTH));
+        Assertions.assertEquals(0, calendar.get(Calendar.HOUR_OF_DAY));
+        Assertions.assertEquals(0, calendar.get(Calendar.MINUTE));
+        Assertions.assertEquals(0, calendar.get(Calendar.SECOND));
+        Assertions.assertEquals(0, calendar.get(Calendar.MILLISECOND));
     }
 
     public static class Entity {

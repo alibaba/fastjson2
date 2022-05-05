@@ -3,6 +3,7 @@ package com.alibaba.fastjson.issue_1400;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,7 @@ public class Issue1493 {
         String t1 = JSON.toJSONString(time1, SerializerFeature.WriteDateUseDateFormat);
 
         String json = JSON.toJSONString(test, SerializerFeature.WriteDateUseDateFormat);
-        Assert.assertEquals("{\"time1\":"+t1+",\"time2\":\"2017-09-22 15:08:56\"}",json);
+        Assertions.assertEquals("{\"time1\":"+t1+",\"time2\":\"2017-09-22 15:08:56\"}", json);
 
 
         //String default_format = JSON.DEFFAULT_LOCAL_DATE_TIME_FORMAT;
@@ -41,14 +42,14 @@ public class Issue1493 {
         //String stime1 = DateTimeFormatter.ofPattern(JSON.DEFFAULT_LOCAL_DATE_TIME_FORMAT, Locale.CHINA).format(time1);
 
         json = JSON.toJSONString(test, SerializerFeature.WriteDateUseDateFormat);
-        Assert.assertEquals("{\"time1\":"+ JSON.toJSONString(time1, SerializerFeature.WriteDateUseDateFormat) +",\"time2\":\"2017-09-22 15:08:56\"}",json);
+        Assertions.assertEquals("{\"time1\":"+ JSON.toJSONString(time1, SerializerFeature.WriteDateUseDateFormat) +",\"time2\":\"2017-09-22 15:08:56\"}", json);
 
 
         String pattern = "yyyy-MM-dd'T'HH:mm:ss";
         String stime1 = DateTimeFormatter.ofPattern(pattern, Locale.CHINA).format(time1);
 
         json = JSON.toJSONStringWithDateFormat(test, "yyyy-MM-dd'T'HH:mm:ss", SerializerFeature.WriteDateUseDateFormat);
-        Assert.assertEquals("{\"time1\":\""+stime1+"\",\"time2\":\""+stime2+"\"}",json);
+        Assertions.assertEquals("{\"time1\":\""+stime1+"\",\"time2\":\""+stime2+"\"}", json);
 
         //JSON.DEFFAULT_LOCAL_DATE_TIME_FORMAT = default_format;
     }

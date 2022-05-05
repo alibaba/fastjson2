@@ -3,6 +3,7 @@ package com.alibaba.fastjson.date;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONReader;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,15 +27,15 @@ public class DateTest_tz {
         reader.setTimzeZone(TimeZone.getTimeZone("Asia/Shanghai"));
 
         Model model = reader.readObject(Model.class);
-        Assert.assertNotNull(model.value);
+        Assertions.assertNotNull(model.value);
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
         format.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
         Date date = format.parse("2016-04-29");
-        Assert.assertEquals(date.getTime(), model.value.getTime());
+        Assertions.assertEquals(date.getTime(), model.value.getTime());
 
-        Assert.assertEquals(TimeZone.getTimeZone("Asia/Shanghai"), reader.getTimeZone());
-        Assert.assertEquals(Locale.CHINA, reader.getLocal());
+        Assertions.assertEquals(TimeZone.getTimeZone("Asia/Shanghai"), reader.getTimeZone());
+        Assertions.assertEquals(Locale.CHINA, reader.getLocal());
 
         reader.close();
     }

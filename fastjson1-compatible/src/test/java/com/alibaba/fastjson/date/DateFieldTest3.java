@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +29,7 @@ public class DateFieldTest3 {
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", JSON.defaultLocale);
         format.setTimeZone(JSON.defaultTimeZone);
-        Assert.assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
+        Assertions.assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
     }
 
     @Test
@@ -39,7 +40,7 @@ public class DateFieldTest3 {
         String text = JSON.toJSONStringWithDateFormat(v, "yyyy-MM-dd", SerializerFeature.WriteMapNullValue);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", JSON.defaultLocale);
         format.setTimeZone(JSON.defaultTimeZone);
-        Assert.assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
+        Assertions.assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
     }
 
     @Test
@@ -50,7 +51,7 @@ public class DateFieldTest3 {
         String text = JSON.toJSONStringWithDateFormat(v, "yyyy-MM-dd", SerializerFeature.WriteMapNullValue);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", JSON.defaultLocale);
         format.setTimeZone(JSON.defaultTimeZone);
-        Assert.assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
+        Assertions.assertEquals("{\"value\":" + JSON.toJSONString(format.format(v.getValue())) + "}", text);
     }
 
     @Test
@@ -62,11 +63,11 @@ public class DateFieldTest3 {
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue);
 //        mapping.put(Date.class, new SimpleDateFormatSerializer("yyyy-MM-dd"));
-        Assert.assertEquals("{\"value\":null}", text);
+        Assertions.assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue(), v.getValue());
+        Assertions.assertEquals(v1.getValue(), v.getValue());
     }
 
     @Test
@@ -78,11 +79,11 @@ public class DateFieldTest3 {
 //        mapping.setAsmEnable(false);
 
         String text = JSON.toJSONStringWithDateFormat(v, "yyyy-MM-dd", SerializerFeature.WriteMapNullValue);
-        Assert.assertEquals("{\"value\":null}", text);
+        Assertions.assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue(), v.getValue());
+        Assertions.assertEquals(v1.getValue(), v.getValue());
     }
 
     @Test
@@ -93,11 +94,11 @@ public class DateFieldTest3 {
 //        mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullNumberAsZero);
-        Assert.assertEquals("{\"value\":null}", text);
+        Assertions.assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(null, v1.getValue());
+        Assertions.assertEquals(null, v1.getValue());
     }
 
     public static class V0 {

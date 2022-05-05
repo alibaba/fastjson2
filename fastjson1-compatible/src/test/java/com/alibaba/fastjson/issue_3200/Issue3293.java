@@ -2,6 +2,7 @@ package com.alibaba.fastjson.issue_3200;
 
 import com.alibaba.fastjson.JSONValidator;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -12,17 +13,17 @@ public class Issue3293 {
     @Test
     public void test_for_issue() throws Exception {
         JSONValidator jv = JSONValidator.from("{\"a\"}");
-        Assert.assertFalse(jv.validate());
+        Assertions.assertFalse(jv.validate());
 
         jv = JSONValidator.from("113{}[]");
         jv.setSupportMultiValue(false);
-        Assert.assertFalse(jv.validate());
-        Assert.assertEquals(JSONValidator.Type.Value, jv.getType());
+        Assertions.assertFalse(jv.validate());
+        Assertions.assertEquals(JSONValidator.Type.Value, jv.getType());
 
         jv = JSONValidator.from("{\"a\":\"12333\"}");
-        Assert.assertTrue(jv.validate());
+        Assertions.assertTrue(jv.validate());
 
         jv = JSONValidator.from("{}");
-        Assert.assertTrue(jv.validate());
+        Assertions.assertTrue(jv.validate());
     }
 }
