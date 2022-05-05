@@ -12,6 +12,7 @@ import java.util.OptionalLong;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class OptionalTest {
+
     @Test
     public void testOptionalInt() {
         assertEquals(123, JSON.parseObject("123", OptionalInt.class).getAsInt());
@@ -127,6 +128,40 @@ public class OptionalTest {
                 .parseObject("''".getBytes(StandardCharsets.UTF_8))
                 .isPresent()
         );
+    }
+
+    @Test
+    public void testOptional_Integer_ascii() {
+        {
+            byte[] asciiBytes = "\"123\"".getBytes(StandardCharsets.UTF_8);
+            Optional<Integer> optional = JSON.parseObject(asciiBytes, 0, asciiBytes.length, StandardCharsets.US_ASCII, new TypeReference<Optional<Integer>>() {
+            }.getType());
+            assertEquals(Integer.valueOf(123), optional.get());
+        }
+        {
+            byte[] asciiBytes = "'123'".getBytes(StandardCharsets.UTF_8);
+            Optional<Integer> optional = JSON.parseObject(asciiBytes, 0, asciiBytes.length, StandardCharsets.US_ASCII, new TypeReference<Optional<Integer>>() {
+            }.getType());
+            assertEquals(Integer.valueOf(123), optional.get());
+        }
+        {
+            byte[] asciiBytes = "123".getBytes(StandardCharsets.UTF_8);
+            Optional<Integer> optional = JSON.parseObject(asciiBytes, 0, asciiBytes.length, StandardCharsets.US_ASCII, new TypeReference<Optional<Integer>>() {
+            }.getType());
+            assertEquals(Integer.valueOf(123), optional.get());
+        }
+        {
+            byte[] asciiBytes = "''".getBytes(StandardCharsets.UTF_8);
+            Optional<Integer> optional = JSON.parseObject(asciiBytes, 0, asciiBytes.length, StandardCharsets.US_ASCII, new TypeReference<Optional<Integer>>() {
+            }.getType());
+            assertFalse(optional.isPresent());
+        }
+        {
+            byte[] asciiBytes = "\"\"".getBytes(StandardCharsets.UTF_8);
+            Optional<Integer> optional = JSON.parseObject(asciiBytes, 0, asciiBytes.length, StandardCharsets.US_ASCII, new TypeReference<Optional<Integer>>() {
+            }.getType());
+            assertFalse(optional.isPresent());
+        }
     }
 
     @Test
@@ -466,7 +501,7 @@ public class OptionalTest {
     }
 
     @Test
-    public void testOptional_Integer_Field() {
+    public void testOptional_Integer_Field_utf8() {
         assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":\"123\"}}".getBytes(StandardCharsets.UTF_8), Bean_Integer.class).value.get());
         assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":'123'}}".getBytes(StandardCharsets.UTF_8), Bean_Integer.class).value.get());
         assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":123}}".getBytes(StandardCharsets.UTF_8), Bean_Integer.class).value.get());
@@ -478,7 +513,7 @@ public class OptionalTest {
     }
 
     @Test
-    public void testOptional_Integer_Field_utf8() {
+    public void testOptional_Integer_Field() {
         assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":\"123\"}}", Bean_Integer.class).value.get());
         assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":'123'}}", Bean_Integer.class).value.get());
         assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":123}}", Bean_Integer.class).value.get());
@@ -494,7 +529,7 @@ public class OptionalTest {
     }
 
     @Test
-    public void testOptional_Long_Field() {
+    public void testOptional_Long_Field_utf8() {
         assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":\"123\"}}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
         assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":'123'}}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
         assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123}}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
@@ -506,7 +541,7 @@ public class OptionalTest {
     }
 
     @Test
-    public void testOptional_Long_Field_utf8() {
+    public void testOptional_Long_Field() {
         assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":\"123\"}}", Bean_Long.class).value.get());
         assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":'123'}}", Bean_Long.class).value.get());
         assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123}}", Bean_Long.class).value.get());
