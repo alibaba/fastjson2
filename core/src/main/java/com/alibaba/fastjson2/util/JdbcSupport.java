@@ -329,6 +329,11 @@ public class JdbcSupport {
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
+
+                if (formatUnixTime) {
+                    millis *= 1000L;
+                }
+
                 return new java.sql.Date(millis);
             }
 
@@ -336,28 +341,39 @@ public class JdbcSupport {
                 return null;
             }
 
-            long millis;
-            if (format != null) {
-                SimpleDateFormat formatter = FORMATTER_UPDATER.getAndSet(this, null);
-                if (formatter == null) {
-                    formatter = new SimpleDateFormat(format);
+            if (format == null || formatISO8601 || formatMillis) {
+                LocalDateTime localDateTime = jsonReader.readLocalDateTime();
+                if (localDateTime != null) {
+                    return java.sql.Date.valueOf(localDateTime.toLocalDate());
                 }
 
-                String str = null;
-                try {
-                    str = jsonReader.readString();
-                    java.util.Date utilDate = formatter.parse(str);
-                    millis = utilDate.getTime();
-                } catch (ParseException e) {
-                    throw new JSONException("parse date error, format " + format + ", input " + str, e);
-                } finally {
-                    FORMATTER_UPDATER.set(this, formatter);
-                }
-            } else {
-                millis = jsonReader.readMillisFromString();
+                long millis = jsonReader.readMillisFromString();
+                return new java.sql.Date(millis);
             }
 
-            return new java.sql.Date(millis);
+            if (formatUnixTime) {
+                long millis = jsonReader.readMillisFromString();
+                millis /= 1000;
+                return new java.sql.Date(millis);
+            }
+
+            String str = jsonReader.readString();
+
+            DateTimeFormatter dateFormatter = getDateFormatter();
+
+            Instant instant;
+            if (format != null && format.indexOf("HH") == -1) {
+                LocalDate localDate = LocalDate.parse(str, dateFormatter);
+                LocalDateTime ldt = LocalDateTime.of(localDate, LocalTime.MIN);
+                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
+            } else {
+                LocalDateTime ldt = LocalDateTime.parse(str, dateFormatter);
+                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
+            }
+
+            return new java.sql.Date(
+                    instant.toEpochMilli()
+            );
         }
     }
 }
