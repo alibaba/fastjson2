@@ -172,10 +172,16 @@ public class JdbcSupport {
             JSONWriter.Context ctx = jsonWriter.getContext();
 
             Timestamp date = (Timestamp) object;
-            int nanos = date.getNanos();
 
-            if (nanos == 0) {
-                jsonWriter.writeInt64(date.getTime());
+            if (formatUnixTime || ctx.isDateFormatUnixTime()) {
+                long millis = date.getTime();
+                jsonWriter.writeInt64(millis / 1000L);
+                return;
+            }
+
+            if (formatMillis || ctx.isDateFormatMillis()) {
+                long millis = date.getTime();
+                jsonWriter.writeInt64(millis);
                 return;
             }
 
@@ -202,6 +208,13 @@ public class JdbcSupport {
             }
 
             if (dateFormatter == null) {
+                int nanos = date.getNanos();
+
+                if (nanos == 0) {
+                    jsonWriter.writeInt64(date.getTime());
+                    return;
+                }
+
                 int year = zdt.getYear();
                 int month = zdt.getMonthValue();
                 int dayOfMonth = zdt.getDayOfMonth();
@@ -233,6 +246,11 @@ public class JdbcSupport {
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
+
+                if (formatUnixTime) {
+                    millis *= 1000;
+                }
+
                 return new Timestamp(millis);
             }
 
@@ -247,6 +265,11 @@ public class JdbcSupport {
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
+
+                if (formatUnixTime) {
+                    millis *= 1000L;
+                }
+
                 return new java.sql.Timestamp(millis);
             }
 
@@ -254,7 +277,7 @@ public class JdbcSupport {
                 return null;
             }
 
-            if (format == null) {
+            if (format == null || formatISO8601 || formatMillis) {
                 LocalDateTime localDateTime = jsonReader.readLocalDateTime();
                 if (localDateTime != null) {
                     return java.sql.Timestamp.valueOf(localDateTime);
