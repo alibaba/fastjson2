@@ -398,6 +398,15 @@ public class JdbcSupport {
                 return null;
             }
 
+            if (formatUnixTime) {
+                if (jsonReader.isString()) {
+                    String str = jsonReader.readString();
+                    long millis = Long.parseLong(str);
+                    millis *= 1000L;
+                    return new java.sql.Date(millis);
+                }
+            }
+
             if (format == null || formatISO8601 || formatMillis) {
                 LocalDateTime localDateTime = jsonReader.readLocalDateTime();
                 if (localDateTime != null) {
@@ -405,12 +414,6 @@ public class JdbcSupport {
                 }
 
                 long millis = jsonReader.readMillisFromString();
-                return new java.sql.Date(millis);
-            }
-
-            if (formatUnixTime) {
-                long millis = jsonReader.readMillisFromString();
-                millis /= 1000;
                 return new java.sql.Date(millis);
             }
 

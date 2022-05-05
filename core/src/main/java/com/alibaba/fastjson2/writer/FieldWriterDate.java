@@ -104,15 +104,16 @@ abstract class FieldWriterDate<T> extends FieldWriterImpl<T> {
         final int SECONDS_PER_DAY = 60 * 60 * 24;
 
         JSONWriter.Context ctx = jsonWriter.getContext();
-        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
-            writeFieldName(jsonWriter);
-            jsonWriter.writeInt64(timeMillis);
-            return;
-        }
 
         if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
             writeFieldName(jsonWriter);
             jsonWriter.writeInt64(timeMillis/1000);
+            return;
+        }
+
+        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
+            writeFieldName(jsonWriter);
+            jsonWriter.writeInt64(timeMillis);
             return;
         }
 

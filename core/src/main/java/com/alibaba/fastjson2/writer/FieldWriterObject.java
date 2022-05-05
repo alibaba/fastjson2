@@ -91,13 +91,13 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
                 String className = valueClass.getName();
                 switch (className) {
                     case "java.sql.Time":
-                        return JdbcSupport.createTimeWriter(format);
+                        return initObjectWriter = JdbcSupport.createTimeWriter(format);
                     case "java.sql.Date":
-                        return new ObjectWriterImplDate(format);
+                        return initObjectWriter = new ObjectWriterImplDate(format);
                     case "java.sql.Timestamp":
-                        return JdbcSupport.createTimestampWriter(format);
+                        return initObjectWriter = JdbcSupport.createTimestampWriter(format);
                     case "org.joda.time.LocalDate":
-                        return JodaSupport.createLocalDateWriter(valueClass, format);
+                        return initObjectWriter = JodaSupport.createLocalDateWriter(valueClass, format);
                     case "org.joda.time.LocalDateTime":
                         return JodaSupport.createLocalDateTimeWriter(valueClass, format);
                     default:
