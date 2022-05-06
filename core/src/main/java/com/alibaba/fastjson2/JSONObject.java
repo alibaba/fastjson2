@@ -1111,6 +1111,21 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     }
 
     /**
+     * addition of elements
+     *
+     * <pre>
+     * JSONObject object = new JSONObject();
+     * object.put("a", 1);
+     * </pre>
+     *
+     * @param key   key with which the specified value is to be associated
+     * @param value value to be associated with the specified key
+     */
+    public Object put(String key, Object value) {
+        return super.put(key, value);
+    }
+
+    /**
      * Chained addition of elements
      *
      * <pre>
