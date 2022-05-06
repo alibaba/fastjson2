@@ -15,8 +15,7 @@ import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
-import java.io.Closeable;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
@@ -32,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.Function;
+import java.util.zip.GZIPInputStream;
 
 import static com.alibaba.fastjson2.reader.TypeConverts.*;
 
@@ -2284,39 +2284,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class Base64Impl extends PrimitiveImpl {
-        static final Base64Impl INSTANCE = new Base64Impl();
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (jsonReader.isString()) {
-                String str = jsonReader.readString();
-                return Base64.getDecoder().decode(str);
-            }
-
-            throw new JSONException("TODO");
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-
-            if (jsonReader.isString()) {
-                String str = jsonReader.readString();
-                return Base64.getDecoder().decode(str);
-            }
-
-            throw new JSONException("TODO");
-        }
-    }
-
     static class Inte16ValueArrayImpl extends PrimitiveImpl {
         static final Inte16ValueArrayImpl INSTANCE = new Inte16ValueArrayImpl();
 
@@ -2371,7 +2338,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     }
 
     static class Inte8ArrayImpl extends PrimitiveImpl {
-        static final Inte8ArrayImpl INSTANCE = new Inte8ArrayImpl();
+        static final Inte8ArrayImpl INSTANCE = new Inte8ArrayImpl(null);
+
+        final String format;
+        public Inte8ArrayImpl(String format) {
+            this.format = format;
+        }
 
         @Override
         public Object readObject(JSONReader jsonReader, long features) {
@@ -2404,6 +2376,38 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 jsonReader.nextIfMatch(',');
 
                 return Arrays.copyOf(values, size);
+            }
+
+            if (jsonReader.isString()) {
+                String strVal = jsonReader.readString();
+                if ("base64".equals(format)) {
+                    return Base64.getDecoder().decode(strVal);
+                }
+
+                if ("gzip,base64".equals(format)) {
+                    byte[] bytes = Base64.getDecoder().decode(strVal);
+
+                    GZIPInputStream gzipIn = null;
+                    try {
+                        gzipIn = new GZIPInputStream(new ByteArrayInputStream(bytes));
+
+                        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+                        for (;;) {
+                            byte[] buf = new byte[1024];
+                            int len = gzipIn.read(buf);
+                            if (len == -1) {
+                                break;
+                            }
+                            if (len > 0) {
+                                byteOut.write(buf, 0, len);
+                            }
+                        }
+                        return byteOut.toByteArray();
+
+                    } catch (IOException ex) {
+                        throw new JSONException("unzip bytes error.", ex);
+                    }
+                }
             }
 
             throw new JSONException("TODO");
