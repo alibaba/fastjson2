@@ -824,7 +824,8 @@ public abstract class JSONReader implements Closeable {
         if (isObject()) {
             return (Instant) getObjectReader(Instant.class)
                     .createInstance(
-                            readObject()
+                            readObject(),
+                            0L
                     );
         }
 

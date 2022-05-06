@@ -836,7 +836,7 @@ public class JSONArray extends ArrayList<Object> {
         for (Object item : this) {
             T classItem;
             if (item instanceof Map) {
-                classItem = (T) objectReader.createInstance((Map) item);
+                classItem = (T) objectReader.createInstance((Map) item, 0L);
             } else {
                 throw new JSONException(
                         (item == null ? "null" : item.getClass()) + " cannot be converted to " + clazz
@@ -877,7 +877,7 @@ public class JSONArray extends ArrayList<Object> {
 
         if (value instanceof Map) {
             ObjectReader<T> objectReader = provider.getObjectReader(type);
-            return objectReader.createInstance((Map) value);
+            return objectReader.createInstance((Map) value, 0L);
         }
 
         if (value instanceof Collection) {

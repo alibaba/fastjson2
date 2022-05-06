@@ -10,7 +10,7 @@ public final class ObjectReaderImplInstant implements ObjectReader {
     public static final ObjectReaderImplInstant INSTANCE = new ObjectReaderImplInstant();
 
     @Override
-    public Object createInstance(Map map) {
+    public Object createInstance(Map map, long features) {
         Number nano = (Number) map.get("nano");
         Number epochSecond = (Number) map.get("epochSecond");
 

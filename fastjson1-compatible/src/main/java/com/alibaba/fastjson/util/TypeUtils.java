@@ -576,7 +576,7 @@ public class TypeUtils {
             }
 
             ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(clazz);
-            return (T) objectReader.createInstance(map);
+            return (T) objectReader.createInstance(map, 0L);
         } catch (Exception e) {
             throw new JSONException(e.getMessage(), e);
         }
