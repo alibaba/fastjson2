@@ -327,7 +327,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Boolean) {
-            return ((Boolean) value).booleanValue() ? 1 : 0;
+            return (Boolean) value ? 1 : 0;
         }
         if (value instanceof Map) {
             Map map = (Map) value;
@@ -383,9 +383,7 @@ public class TypeUtils {
                 List listObj = (List) obj;
                 List arrayList = new ArrayList(listObj.size());
 
-                for (int i = 0; i < listObj.size(); i++) {
-                    Object item = listObj.get(i);
-
+                for (Object item : listObj) {
                     Object itemValue;
                     if (itemType instanceof Class) {
                         if (item != null && item.getClass() == JSONObject.class) {
@@ -418,9 +416,7 @@ public class TypeUtils {
                 } else {
                     collection = new ArrayList();
                 }
-                for (Iterator it = ((Iterable) obj).iterator(); it.hasNext(); ) {
-                    Object item = it.next();
-
+                for (Object item : (Iterable) obj) {
                     Object itemValue;
                     if (itemType instanceof Class) {
                         if (item != null && item.getClass() == JSONObject.class) {

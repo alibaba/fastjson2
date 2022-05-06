@@ -392,8 +392,8 @@ public abstract class JSONWriter implements Closeable {
     public static JSONWriter of(Feature... features) {
         Context writeContext = JSONFactory.createWriteContext(features);
         JSONWriterUTF16 jsonWriter = JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF16(writeContext);
-        for (int i = 0; i < features.length; i++) {
-            if (features[i] == Feature.PrettyFormat) {
+        for (Feature feature : features) {
+            if (feature == Feature.PrettyFormat) {
                 return new JSONWriterPretty(jsonWriter);
             }
         }
@@ -780,8 +780,8 @@ public abstract class JSONWriter implements Closeable {
 
         write0('"');
         boolean special = false;
-        for (int i = 0; i < str.length; ++i) {
-            if (str[i] == '\\' || str[i] == '"') {
+        for (char c : str) {
+            if (c == '\\' || c == '"') {
                 special = true;
                 break;
             }
@@ -790,8 +790,7 @@ public abstract class JSONWriter implements Closeable {
         if (!special) {
             writeRaw(str);
         } else {
-            for (int i = 0; i < str.length; ++i) {
-                char ch = str[i];
+            for (char ch : str) {
                 if (ch == '\\' || ch == '"') {
                     write0('\\');
                 }
@@ -1189,12 +1188,12 @@ public abstract class JSONWriter implements Closeable {
     public void write(Map map) {
         write0('{');
         boolean first = true;
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
+        for (Map.Entry o : (Iterable<Map.Entry>) map.entrySet()) {
             if (!first) {
                 write0(',');
             }
 
-            Map.Entry next = it.next();
+            Map.Entry next = o;
             writeAny(
                     next.getKey());
             write0(':');
@@ -1275,8 +1274,8 @@ public abstract class JSONWriter implements Closeable {
 
             this.provider = provider;
 
-            for (int i = 0; i < features.length; i++) {
-                this.features |= features[i].mask;
+            for (Feature feature : features) {
+                this.features |= feature.mask;
             }
         }
 
@@ -1289,8 +1288,8 @@ public abstract class JSONWriter implements Closeable {
         }
 
         public void config(Feature... features) {
-            for (int i = 0; i < features.length; i++) {
-                this.features |= features[i].mask;
+            for (Feature feature : features) {
+                this.features |= feature.mask;
             }
         }
 
@@ -1543,8 +1542,7 @@ public abstract class JSONWriter implements Closeable {
 
                     if (JDKUtils.JVM_VERSION == 8) {
                         char[] chars = JDKUtils.getCharArray(name);
-                        for (int j = 0; j < chars.length; j++) {
-                            char ch = chars[j];
+                        for (char ch : chars) {
                             switch (ch) {
                                 case '/':
                                 case ':':

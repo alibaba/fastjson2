@@ -101,8 +101,7 @@ public class ObjectWriterProvider {
         }
 
         if (useModules) {
-            for (int i = 0; i < modules.size(); i++) {
-                ObjectWriterModule module = modules.get(i);
+            for (ObjectWriterModule module : modules) {
                 objectWriter = module.getObjectWriter(objectType, objectClass);
                 if (objectWriter != null) {
                     ObjectWriter previous = fieldBased

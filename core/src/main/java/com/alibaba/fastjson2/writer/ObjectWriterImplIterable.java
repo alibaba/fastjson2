@@ -81,12 +81,12 @@ class ObjectWriterImplIterable extends ObjectWriterBaseModule.PrimitiveImpl {
         ObjectWriter previousObjectWriter = null;
         jsonWriter.startArray();
         int i = 0;
-        for (Iterator it = iterable.iterator(); it.hasNext(); ) {
+        for (Object o : iterable) {
             if (i != 0) {
                 jsonWriter.writeComma();
             }
 
-            Object item = it.next();
+            Object item = o;
             if (item == null) {
                 jsonWriter.writeNull();
                 continue;

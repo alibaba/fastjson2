@@ -1041,7 +1041,7 @@ public abstract class BeanUtils {
 
     public static Type resolve(Type context, Class<?> contextRawType, Type toResolve) {
 
-        return resolve(context, contextRawType, toResolve, new HashMap<TypeVariable<?>, Type>());
+        return resolve(context, contextRawType, toResolve, new HashMap<>());
     }
 
     private static Type resolve(Type context, Class<?> contextRawType, Type toResolve,

@@ -545,8 +545,8 @@ public interface JSONB {
             int strlen = chars.length;
             if (strlen <= STR_ASCII_FIX_LEN) {
                 boolean ascii = true;
-                for (int i = 0; i < strlen; ++i) {
-                    if (chars[i] > 0x007F) {
+                for (char aChar : chars) {
+                    if (aChar > 0x007F) {
                         ascii = false;
                         break;
                     }

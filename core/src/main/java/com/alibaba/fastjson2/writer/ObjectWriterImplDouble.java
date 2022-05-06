@@ -13,7 +13,7 @@ final class ObjectWriterImplDouble extends ObjectWriterBaseModule.PrimitiveImpl 
             jsonWriter.writeNull();
             return;
         }
-        jsonWriter.writeDouble(((Double) object).doubleValue());
+        jsonWriter.writeDouble((Double) object);
     }
 
     @Override
@@ -22,6 +22,6 @@ final class ObjectWriterImplDouble extends ObjectWriterBaseModule.PrimitiveImpl 
             jsonWriter.writeNull();
             return;
         }
-        jsonWriter.writeDouble(((Double) object).doubleValue());
+        jsonWriter.writeDouble((Double) object);
     }
 }

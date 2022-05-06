@@ -412,8 +412,7 @@ class JSONWriterUTF8 extends JSONWriter {
                 this.bytes = Arrays.copyOf(this.bytes, newCapacity);
             }
         }
-        for (int i = 0; i < chars.length; ++i) {
-            char c = chars[i];
+        for (char c : chars) {
             if (c == '"') {
                 bytes[off++] = (byte) '\\';
             }

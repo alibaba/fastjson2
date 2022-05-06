@@ -55,8 +55,7 @@ final class ObjectWriterImplStringArray extends ObjectWriterBaseModule.Primitive
         String[] list = (String[]) object;
 
         jsonWriter.startArray(list.length);
-        for (int i = 0; i < list.length; i++) {
-            String item = list[i];
+        for (String item : list) {
             if (item == null) {
                 if (jsonWriter.isEnabled(JSONWriter.Feature.NullAsDefaultValue)) {
                     jsonWriter.writeString("");

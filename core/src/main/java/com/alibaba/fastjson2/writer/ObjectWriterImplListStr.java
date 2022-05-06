@@ -80,8 +80,8 @@ final class ObjectWriterImplListStr extends ObjectWriterBaseModule.PrimitiveImpl
 
         final int size = list.size();
         jsonWriter.startArray(size);
-        for (int i = 0; i < size; i++) {
-            String item = (String) list.get(i);
+        for (Object o : list) {
+            String item = (String) o;
             if (item == null) {
                 jsonWriter.writeNull();
                 continue;

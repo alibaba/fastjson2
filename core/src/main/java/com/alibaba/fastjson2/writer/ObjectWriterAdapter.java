@@ -241,8 +241,7 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
             writeTypeInfo(jsonWriter);
         }
 
-        for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
-            FieldWriter fieldWriter = fieldWriters.get(i);
+        for (FieldWriter fieldWriter : fieldWriters) {
             fieldWriter.write(jsonWriter, object);
         }
 
@@ -251,8 +250,7 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
 
     public Map<String, Object> toMap(Object object) {
         JSONObject map = new JSONObject(fieldWriters.size());
-        for (int i = 0; i < fieldWriters.size(); i++) {
-            FieldWriter fieldWriter = fieldWriters.get(i);
+        for (FieldWriter fieldWriter : fieldWriters) {
             map.put(
                     fieldWriter.getFieldName()
                     , fieldWriter.getFieldValue(object)
@@ -333,9 +331,7 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
         PropertyFilter propertyFilter = ctx.getPropertyFilter();
 
         List<FieldWriter> fieldWriters = getFieldWriters();
-        for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
-            FieldWriter fieldWriter = fieldWriters.get(i);
-
+        for (FieldWriter fieldWriter : fieldWriters) {
             // pre property filter
             String fieldWriterFieldName = fieldWriter.getFieldName();
             if (propertyPreFilter != null

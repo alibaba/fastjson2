@@ -13,7 +13,7 @@ class ObjectWriterImplBoolean extends ObjectWriterBaseModule.PrimitiveImpl {
             jsonWriter.writeBooleanNull();
             return;
         }
-        jsonWriter.writeBool(((Boolean) object).booleanValue());
+        jsonWriter.writeBool((Boolean) object);
     }
 
     @Override
@@ -22,6 +22,6 @@ class ObjectWriterImplBoolean extends ObjectWriterBaseModule.PrimitiveImpl {
             jsonWriter.writeBooleanNull();
             return;
         }
-        jsonWriter.writeBool(((Boolean) object).booleanValue());
+        jsonWriter.writeBool((Boolean) object);
     }
 }

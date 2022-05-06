@@ -98,8 +98,7 @@ final class ObjectWriterImplMap extends ObjectWriterBaseModule.PrimitiveImpl {
 
         jsonWriter.startObject();
         boolean writeNulls = jsonWriter.isWriteNulls();
-        for (Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<String, Object> entry = it.next();
+        for (Map.Entry<String, Object> entry : (Iterable<Map.Entry<String, Object>>) map.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (value == null) {
@@ -328,8 +327,7 @@ final class ObjectWriterImplMap extends ObjectWriterBaseModule.PrimitiveImpl {
         jsonWriter.startObject();
         Map map = (Map) object;
 
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = it.next();
+        for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             Object value = entry.getValue();
             Object key = entry.getKey();
             String strKey = key == null ? "null" : key.toString();
@@ -399,8 +397,7 @@ final class ObjectWriterImplMap extends ObjectWriterBaseModule.PrimitiveImpl {
         ValueFilter valueFilter = ctx.getValueFilter();
         PropertyFilter propertyFilter = ctx.getPropertyFilter();
 
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = it.next();
+        for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             Object value = entry.getValue();
             if (value == null) {
                 continue;

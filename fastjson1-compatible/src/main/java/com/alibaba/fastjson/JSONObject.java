@@ -68,9 +68,9 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
     public JSONObject(int initialCapacity, boolean ordered) {
         if (ordered) {
-            map = new LinkedHashMap<String, Object>(initialCapacity);
+            map = new LinkedHashMap<>(initialCapacity);
         } else {
-            map = new HashMap<String, Object>(initialCapacity);
+            map = new HashMap<>(initialCapacity);
         }
     }
 
@@ -229,7 +229,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return false;
         }
 
-        return booleanVal.booleanValue();
+        return booleanVal;
     }
 
     public byte getByteValue(String key) {
@@ -240,7 +240,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return 0;
         }
 
-        return byteVal.byteValue();
+        return byteVal;
     }
 
     public Short getShort(String key) {
@@ -257,7 +257,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return 0;
         }
 
-        return shortVal.shortValue();
+        return shortVal;
     }
 
     public Integer getInteger(String key) {
@@ -287,7 +287,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return 0L;
         }
 
-        return longVal.longValue();
+        return longVal;
     }
 
     public Float getFloat(String key) {
@@ -304,7 +304,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return 0F;
         }
 
-        return floatValue.floatValue();
+        return floatValue;
     }
 
     public Double getDouble(String key) {
@@ -321,7 +321,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return 0D;
         }
 
-        return doubleValue.doubleValue();
+        return doubleValue;
     }
 
     public BigDecimal getBigDecimal(String key) {
@@ -419,8 +419,8 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
     @Override
     public Object clone() {
         return new JSONObject(map instanceof LinkedHashMap //
-                ? new LinkedHashMap<String, Object>(map) //
-                : new HashMap<String, Object>(map)
+                ? new LinkedHashMap<>(map) //
+                : new HashMap<>(map)
         );
     }
 
@@ -604,8 +604,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         public SecureObjectInputStream(ObjectInputStream in) throws IOException {
             super(in);
             try {
-                for (int i = 0; i < fields.length; i++) {
-                    final Field field = fields[i];
+                for (final Field field : fields) {
                     final Object value = field.get(in);
                     field.set(this, value);
                 }

@@ -138,8 +138,7 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
         jsonReader.nextIfMatch('[');
         Object object = creator.get();
 
-        for (int i = 0; i < fieldReaders.length; i++) {
-            FieldReader fieldReader = fieldReaders[i];
+        for (FieldReader fieldReader : fieldReaders) {
             fieldReader.readFieldValue(jsonReader, object);
         }
 
@@ -160,8 +159,7 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
         int entryCnt = jsonReader.startArray();
         Object object = creator.get();
 
-        for (int i = 0; i < fieldReaders.length; i++) {
-            FieldReader fieldReader = fieldReaders[i];
+        for (FieldReader fieldReader : fieldReaders) {
             fieldReader.readFieldValue(jsonReader, object);
         }
 

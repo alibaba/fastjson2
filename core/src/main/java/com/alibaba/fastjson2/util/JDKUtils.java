@@ -123,7 +123,7 @@ public class JDKUtils {
         }
         BIG_ENDIAN = bigEndian == null
                 ? -1
-                : bigEndian.booleanValue() ? (byte) 1 : (byte) 0;
+                : bigEndian ? (byte) 1 : (byte) 0;
 
         if (JVM_VERSION == 8) {
             Field field = null;
@@ -157,8 +157,8 @@ public class JDKUtils {
         Function<byte[], String> utf16Creator = null, asciiCreator = null;
         if (unsafeSupport) {
             try {
-                utf16Creator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorUTF16()).get();
-                asciiCreator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorASCII()).get();
+                utf16Creator = ((Supplier<Function<byte[], String>>) UnsafeUtils::getStringCreatorUTF16).get();
+                asciiCreator = ((Supplier<Function<byte[], String>>) UnsafeUtils::getStringCreatorASCII).get();
             } catch (Throwable ignored) {
 
             }

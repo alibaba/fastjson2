@@ -280,8 +280,8 @@ final class JSONWriterJSONB extends JSONWriter {
 
         final int strlen = str.length;
         boolean ascii = true;
-        for (int i = 0; i < strlen; ++i) {
-            if (str[i] > 0x007F) {
+        for (char value : str) {
+            if (value > 0x007F) {
                 ascii = false;
                 break;
             }
@@ -294,8 +294,8 @@ final class JSONWriterJSONB extends JSONWriter {
                 bytes[off++] = BC_STR_ASCII;
                 writeInt32(strlen);
             }
-            for (int i = 0; i < strlen; ++i) {
-                bytes[off++] = (byte) str[i];
+            for (char c : str) {
+                bytes[off++] = (byte) c;
             }
             return;
         }
@@ -584,8 +584,8 @@ final class JSONWriterJSONB extends JSONWriter {
         char[] chars = JDKUtils.getCharArray(str);
 
         boolean ascii = true;
-        for (int i = 0; i < chars.length; ++i) {
-            if (chars[i] > 0x007F) {
+        for (char c : chars) {
+            if (c > 0x007F) {
                 ascii = false;
                 break;
             }
@@ -618,8 +618,8 @@ final class JSONWriterJSONB extends JSONWriter {
                 bytes[off++] = BC_STR_ASCII;
                 writeInt32(strlen);
             }
-            for (int i = 0; i < chars.length; i++) {
-                bytes[off++] = (byte) chars[i];
+            for (char aChar : chars) {
+                bytes[off++] = (byte) aChar;
             }
         } else {
             int maxSize = chars.length * 3;
@@ -888,8 +888,7 @@ final class JSONWriterJSONB extends JSONWriter {
             writeInt32(size);
         }
 
-        for (int i = 0; i < value.length; i++) {
-            long val = value[i];
+        for (long val : value) {
             if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
                 // inline ensureCapacity(off + 1);
                 if (off == bytes.length) {
@@ -1012,8 +1011,8 @@ final class JSONWriterJSONB extends JSONWriter {
             return;
         }
         startArray(value.length);
-        for (int i = 0; i < value.length; i++) {
-            writeFloat(value[i]);
+        for (float v : value) {
+            writeFloat(v);
         }
         endArray();
     }
@@ -1062,8 +1061,8 @@ final class JSONWriterJSONB extends JSONWriter {
             return;
         }
         startArray(value.length);
-        for (int i = 0; i < value.length; i++) {
-            writeDouble(value[i]);
+        for (double v : value) {
+            writeDouble(v);
         }
         endArray();
     }
@@ -1075,8 +1074,8 @@ final class JSONWriterJSONB extends JSONWriter {
             return;
         }
         startArray(value.length);
-        for (int i = 0; i < value.length; i++) {
-            writeInt32(value[i]);
+        for (short item : value) {
+            writeInt32(item);
         }
         endArray();
     }
@@ -1113,9 +1112,7 @@ final class JSONWriterJSONB extends JSONWriter {
             writeInt32(size);
         }
 
-        for (int i = 0; i < values.length; i++) {
-            int val = values[i];
-
+        for (int val : values) {
             if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
                 if (off == bytes.length) {
                     int minCapacity = off + 1;
@@ -1728,8 +1725,8 @@ final class JSONWriterJSONB extends JSONWriter {
         }
 
         startArray(value.length);
-        for (int i = 0; i < value.length; i++) {
-            writeBool(value[i]);
+        for (boolean b : value) {
+            writeBool(b);
         }
         endArray();
     }

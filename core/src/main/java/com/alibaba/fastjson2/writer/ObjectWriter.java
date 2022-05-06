@@ -38,8 +38,7 @@ public interface ObjectWriter<T> {
         List<FieldWriter> fieldWriters = getFieldWriters();
         int size = fieldWriters.size();
         jsonWriter.startArray(size);
-        for (int i = 0; i < size; ++i) {
-            FieldWriter fieldWriter = fieldWriters.get(i);
+        for (FieldWriter fieldWriter : fieldWriters) {
             fieldWriter.writeValue(jsonWriter, object);
         }
     }

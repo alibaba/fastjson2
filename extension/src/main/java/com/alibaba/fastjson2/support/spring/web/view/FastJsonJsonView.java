@@ -160,7 +160,7 @@ public class FastJsonJsonView extends AbstractView {
      * @return the object to be rendered
      */
     protected Object filterModel(Map<String, Object> model) {
-        Map<String, Object> result = new HashMap<String, Object>(model.size());
+        Map<String, Object> result = new HashMap<>(model.size());
         Set<String> renderedAttributes = !CollectionUtils.isEmpty(this.renderedAttributes) ? //
                 this.renderedAttributes //
                 : model.keySet();

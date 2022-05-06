@@ -19,8 +19,8 @@ final class ObjectWriterImplInt16ValueArray extends ObjectWriterBaseModule.Primi
 
         short[] bytes = (short[]) object;
         jsonWriter.startArray(bytes.length);
-        for (int i = 0; i < bytes.length; i++) {
-            jsonWriter.writeInt32(bytes[i]);
+        for (short aByte : bytes) {
+            jsonWriter.writeInt32(aByte);
         }
     }
 

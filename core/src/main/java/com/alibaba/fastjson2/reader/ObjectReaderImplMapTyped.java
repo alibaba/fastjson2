@@ -44,8 +44,7 @@ class ObjectReaderImplMapTyped implements ObjectReader {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
         Map<String, Object> object = (Map<String, Object>) createInstance();
-        for (Iterator<Map.Entry> it = input.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = it.next();
+        for (Map.Entry entry : (Iterable<Map.Entry>) input.entrySet()) {
             String fieldName = entry.getKey().toString();
             Object fieldValue = entry.getValue();
 

@@ -340,7 +340,7 @@ public final class ObjectReaderImplList implements ObjectReader {
             builder = (Function<Collection, Collection>) ((Collection items) -> Collections.singletonList(items.iterator().next()));
         } else if (listType == CLASS_UNMODIFIABLE_LIST) {
             list = new ArrayList();
-            builder = (Function<List, List>) ((List items) -> Collections.unmodifiableList(items));
+            builder = (Function<List, List>) (Collections::unmodifiableList);
         } else if (listType != null && listType != this.listType) {
             try {
                 list = (Collection) listType.newInstance();

@@ -301,7 +301,7 @@ public abstract class JSONPath {
             throw new JSONException("can not convert to long : " + object);
         }
         Object converted = typeConvert.apply(object);
-        return ((Long) converted).longValue();
+        return (Long) converted;
     }
 
     public Integer extractInt32(JSONReader jsonReader) {
@@ -326,7 +326,7 @@ public abstract class JSONPath {
             throw new JSONException("can not convert to int : " + object);
         }
         Object converted = typeConvert.apply(object);
-        return ((Integer) converted).intValue();
+        return (Integer) converted;
     }
 
     public static JSONPath of(String path) {
@@ -1182,11 +1182,11 @@ public abstract class JSONPath {
             } else if (fieldValue instanceof Float) {
                 cmp = ((Float) fieldValue)
                         .compareTo(
-                                Float.valueOf(value));
+                                (float) value);
             } else if (fieldValue instanceof Double) {
                 cmp = ((Double) fieldValue)
                         .compareTo(
-                                Double.valueOf(value));
+                                (double) value);
             } else {
                 throw new UnsupportedOperationException();
             }
@@ -1334,8 +1334,7 @@ public abstract class JSONPath {
             if (object instanceof List) {
                 List list = (List) object;
                 JSONArray array = new JSONArray(list.size());
-                for (int i = 0, l = list.size(); i < l; i++) {
-                    Object item = list.get(i);
+                for (Object item : list) {
                     boolean match = and;
                     for (FilterSegment filter : filters) {
                         boolean result = filter.apply(ctx, item);
@@ -1610,8 +1609,7 @@ public abstract class JSONPath {
             if (object instanceof List) {
                 List list = (List) object;
                 JSONArray array = new JSONArray(list.size());
-                for (int i = 0, l = list.size(); i < l; i++) {
-                    Object item = list.get(i);
+                for (Object item : list) {
                     if (apply(ctx, item)) {
                         array.add(item);
                     }
@@ -1887,8 +1885,7 @@ public abstract class JSONPath {
             JSONArray array = new JSONArray();
             if (object instanceof List) {
                 List list = (List) object;
-                for (int i = 0, l = list.size(); i < l; i++) {
-                    Object item = list.get(i);
+                for (Object item : list) {
                     if (item instanceof Map) {
                         if (((Map) item).containsKey(name)) {
                             array.add(item);
@@ -2611,8 +2608,7 @@ public abstract class JSONPath {
             this.segments = segments;
 
             boolean ref = true;
-            for (int i = 0, l = segments.size(); i < l; i++) {
-                Segment segment = segments.get(i);
+            for (Segment segment : segments) {
                 if (segment instanceof IndexSegment || segment instanceof NameSegment) {
                     continue;
                 }
@@ -2842,11 +2838,11 @@ public abstract class JSONPath {
         }
 
         public void setInt(Context context, int value) {
-            set(context, Integer.valueOf(value));
+            set(context, value);
         }
 
         public void setLong(Context context, long value) {
-            set(context, Long.valueOf(value));
+            set(context, value);
         }
     }
 
@@ -4029,7 +4025,7 @@ public abstract class JSONPath {
                             Object entryKey = entry.getKey();
                             Object entryValue = entry.getValue();
                             if (entryKey instanceof Long) {
-                                if (entryKey.equals(Long.valueOf(index))) {
+                                if (entryKey.equals((long) index)) {
                                     value = entryValue;
                                     break;
                                 }
@@ -4045,7 +4041,7 @@ public abstract class JSONPath {
                             Object entryKey = entry.getKey();
                             Object entryValue = entry.getValue();
                             if (entryKey instanceof Long) {
-                                if (entryKey.equals(Long.valueOf(index))) {
+                                if (entryKey.equals((long) index)) {
                                     value = entryValue;
                                     break;
                                 }
@@ -4949,8 +4945,8 @@ public abstract class JSONPath {
             List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
             int size = fieldWriters.size();
             JSONArray array = new JSONArray(size);
-            for (int i = 0; i < size; i++) {
-                Object fieldValue = fieldWriters.get(i).getFieldValue(object);
+            for (FieldWriter fieldWriter : fieldWriters) {
+                Object fieldValue = fieldWriter.getFieldValue(object);
                 array.add(fieldValue);
             }
             context.value = array;

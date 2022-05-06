@@ -68,8 +68,7 @@ final class FieldWriterListFunc<T> extends FieldWriterList<T> {
             int size = list.size();
             jsonWriter.startArray(size);
 
-            for (int i = 0; i < size; i++) {
-                Object item = list.get(i);
+            for (Object item : list) {
                 if (item == null) {
                     jsonWriter.writeNull();
                     continue;
@@ -132,8 +131,7 @@ final class FieldWriterListFunc<T> extends FieldWriterList<T> {
             int size = list.size();
             jsonWriter.startArray(size);
 
-            for (int i = 0; i < size; i++) {
-                Object item = list.get(i);
+            for (Object item : list) {
                 if (item == null) {
                     jsonWriter.writeNull();
                     continue;

@@ -20,7 +20,7 @@ final class ObjectWriterImplInt64 extends ObjectWriterBaseModule.PrimitiveImpl {
             return;
         }
 
-        long longValue = ((Long) object).longValue();
+        long longValue = (Long) object;
         jsonWriter.writeInt64(longValue);
     }
 

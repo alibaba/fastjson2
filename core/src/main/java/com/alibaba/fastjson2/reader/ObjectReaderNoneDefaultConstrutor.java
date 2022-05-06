@@ -171,12 +171,12 @@ class ObjectReaderNoneDefaultConstrutor<T>
         if (jsonReader.isArray() && jsonReader.isSupportBeanArray()) {
             jsonReader.next();
             LinkedHashMap<Long, Object> valueMap = null;
-            for (int i = 0; i < fieldReaders.length; i++) {
-                Object fieldValue = fieldReaders[i].readFieldValue(jsonReader);
+            for (FieldReader fieldReader : fieldReaders) {
+                Object fieldValue = fieldReader.readFieldValue(jsonReader);
                 if (valueMap == null) {
                     valueMap = new LinkedHashMap<>();
                 }
-                long hash = fieldReaders[i].getFieldNameHash();
+                long hash = fieldReader.getFieldNameHash();
                 valueMap.put(hash, fieldValue);
             }
             return createInstanceNoneDefaultConstructor(
@@ -253,8 +253,7 @@ class ObjectReaderNoneDefaultConstrutor<T>
                         : valueMap);
 
         if (setterFieldReaders != null) {
-            for (int i = 0; i < setterFieldReaders.length; i++) {
-                FieldReader fieldReader = setterFieldReaders[i];
+            for (FieldReader fieldReader : setterFieldReaders) {
                 Object fieldValue = valueMap.get(fieldReader.getFieldNameHash());
                 if (fieldValue != null) {
                     fieldReader.accept(object, fieldValue);
@@ -273,8 +272,7 @@ class ObjectReaderNoneDefaultConstrutor<T>
 
         LinkedHashMap<Long, Object> valueMap = null;
 
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = it.next();
+        for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             String fieldName = entry.getKey().toString();
             Object fieldValue = entry.getValue();
 

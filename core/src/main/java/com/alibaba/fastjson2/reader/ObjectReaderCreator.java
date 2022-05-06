@@ -547,9 +547,7 @@ public class ObjectReaderCreator {
 
 
         final List<Constructor> alternateConstructors = new ArrayList<>();
-        BeanUtils.constructor(objectClass, constructor -> {
-            alternateConstructors.add(constructor);
-        });
+        BeanUtils.constructor(objectClass, alternateConstructors::add);
 
         Constructor defaultConstructor = null;
 
@@ -586,9 +584,9 @@ public class ObjectReaderCreator {
 
             int matchCount = 0;
             if (defaultConstructor != null) {
-                for (int i = 0; i < parameterNames.length; i++) {
-                    for (int j = 0; j < fieldReaderArray.length; j++) {
-                        if (parameterNames[i].equals(fieldReaderArray[j].getFieldName())) {
+                for (String parameterName : parameterNames) {
+                    for (FieldReader fieldReader : fieldReaderArray) {
+                        if (parameterName.equals(fieldReader.getFieldName())) {
                             matchCount++;
                             break;
                         }
@@ -1523,8 +1521,7 @@ public class ObjectReaderCreator {
         Enum[] ordinalEnums = (Enum[]) objectClass.getEnumConstants();
 
         Map<Long, Enum> enumMap = new HashMap();
-        for (int i = 0; i < ordinalEnums.length; ++i) {
-            Enum e = ordinalEnums[i];
+        for (Enum e : ordinalEnums) {
             String name = e.name();
             long hash = Fnv.hashCode64(name);
             enumMap.put(hash, e);
@@ -1557,8 +1554,7 @@ public class ObjectReaderCreator {
             }
         }
 
-        for (int i = 0; i < ordinalEnums.length; ++i) {
-            Enum e = ordinalEnums[i];
+        for (Enum e : ordinalEnums) {
             String name = e.name();
             long hashLCase = Fnv.hashCode64LCase(name);
             enumMap.putIfAbsent(hashLCase, e);
@@ -1609,8 +1605,8 @@ public class ObjectReaderCreator {
                 Enum first = ordinalEnums[0];
 
                 int matchCount = 0;
-                for (int i = 0; i < enums.length; i++) {
-                    if (enums[i] == first) {
+                for (Enum anEnum : enums) {
+                    if (anEnum == first) {
                         matchCount++;
                     }
                 }

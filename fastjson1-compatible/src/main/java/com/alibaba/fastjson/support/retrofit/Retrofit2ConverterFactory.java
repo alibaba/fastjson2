@@ -51,7 +51,7 @@ public class Retrofit2ConverterFactory extends Converter.Factory {
     public Converter<ResponseBody, Object> responseBodyConverter(Type type, //
                                                                  Annotation[] annotations, //
                                                                  Retrofit retrofit) {
-        return new ResponseBodyConverter<Object>(type);
+        return new ResponseBodyConverter<>(type);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class Retrofit2ConverterFactory extends Converter.Factory {
                                                                Annotation[] parameterAnnotations, //
                                                                Annotation[] methodAnnotations, //
                                                                Retrofit retrofit) {
-        return new RequestBodyConverter<Object>();
+        return new RequestBodyConverter<>();
     }
 
     public FastJsonConfig getFastJsonConfig() {

@@ -7,8 +7,8 @@ import java.util.Set;
 
 public class SimplePropertyPreFilter implements PropertyPreFilter {
     private final Class<?> clazz;
-    private final Set<String> includes = new HashSet<String>();
-    private final Set<String> excludes = new HashSet<String>();
+    private final Set<String> includes = new HashSet<>();
+    private final Set<String> excludes = new HashSet<>();
     private int maxLevel = 0;
 
     public SimplePropertyPreFilter(String... properties) {

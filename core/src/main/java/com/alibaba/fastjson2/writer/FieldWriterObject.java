@@ -195,8 +195,7 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
 
         if (unwrapped) {
             if (value instanceof Map) {
-                for (Iterator<Map.Entry> it = ((Map) value).entrySet().iterator(); it.hasNext(); ) {
-                    Map.Entry entry = it.next();
+                for (Map.Entry entry : (Iterable<Map.Entry>) ((Map) value).entrySet()) {
                     String entryKey = entry.getKey().toString();
                     Object entryValue = entry.getValue();
                     if (entryValue == null) {

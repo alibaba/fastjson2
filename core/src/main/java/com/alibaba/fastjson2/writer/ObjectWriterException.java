@@ -18,8 +18,7 @@ public class ObjectWriterException extends ObjectWriterAdapter {
         List<FieldWriter> fieldWriters = getFieldWriters();
         int size = fieldWriters.size();
         jsonWriter.startObject();
-        for (int i = 0; i < size; ++i) {
-            FieldWriter fw = fieldWriters.get(i);
+        for (FieldWriter fw : fieldWriters) {
             fw.write(jsonWriter, object);
         }
         jsonWriter.endObject();
@@ -43,8 +42,7 @@ public class ObjectWriterException extends ObjectWriterAdapter {
 
         writeTypeInfo(jsonWriter);
 
-        for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
-            FieldWriter fieldWriter = fieldWriters.get(i);
+        for (FieldWriter fieldWriter : fieldWriters) {
             fieldWriter.write(jsonWriter, object);
         }
 

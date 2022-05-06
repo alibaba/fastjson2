@@ -99,8 +99,7 @@ final class JSONWriterUTF8JDK9 extends JSONWriterUTF8 {
             System.arraycopy(value, 0, bytes, off, value.length);
             off += value.length;
         } else {
-            for (int i = 0; i < value.length; ++i) {
-                byte ch = value[i];
+            for (byte ch : value) {
                 if (ch == '"') {
                     bytes[off++] = '\\';
                     bytes[off++] = '"';

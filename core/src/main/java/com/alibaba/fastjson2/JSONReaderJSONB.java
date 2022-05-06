@@ -270,7 +270,7 @@ final class JSONReaderJSONB extends JSONReader {
                                 ((bytes[offset + 1] & 0xFF) << 16) +
                                 ((bytes[offset]) << 24);
                 offset += 4;
-                return new Integer(int32Value);
+                return int32Value;
             }
             case BC_INT64_INT: {
                 int int32Value =
@@ -279,7 +279,7 @@ final class JSONReaderJSONB extends JSONReader {
                                 ((bytes[offset + 1] & 0xFF) << 16) +
                                 ((bytes[offset]) << 24);
                 offset += 4;
-                return new Long(int32Value);
+                return (long) int32Value;
             }
             case BC_INT64: {
                 long int64Value =
@@ -292,7 +292,7 @@ final class JSONReaderJSONB extends JSONReader {
                                 ((bytes[offset + 1] & 0xFFL) << 48) +
                                 ((long) (bytes[offset]) << 56);
                 offset += 8;
-                return Long.valueOf(int64Value);
+                return int64Value;
             }
             case BC_BIGINT: {
                 int len = readInt32Value();

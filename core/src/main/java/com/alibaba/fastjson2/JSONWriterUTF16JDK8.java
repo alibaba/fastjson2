@@ -90,8 +90,7 @@ final class JSONWriterUTF16JDK8 extends JSONWriterUTF16 {
 
         ensureCapacity(off + strlen * 2 + 2);
         chars[off++] = '"';
-        for (int i = 0; i < strlen; ++i) {
-            char ch = value[i];
+        for (char ch : value) {
             switch (ch) {
                 case '"':
                 case '\\':

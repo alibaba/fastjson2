@@ -275,7 +275,8 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         default:
                             break;
                     }
-                } catch (Throwable ignored) {}
+                } catch (Throwable ignored) {
+                }
             });
         }
 
@@ -296,7 +297,8 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         default:
                             break;
                     }
-                } catch (Throwable ignored) {}
+                } catch (Throwable ignored) {
+                }
             });
         }
 
@@ -320,21 +322,21 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         }
                         case "ordinal": {
                             Integer ordinal = (Integer) result;
-                            if (ordinal.intValue() != 0) {
+                            if (ordinal != 0) {
                                 fieldInfo.ordinal = ordinal;
                             }
                             break;
                         }
                         case "serialize": {
                             Boolean serialize = (Boolean) result;
-                            if (!serialize.booleanValue()) {
+                            if (!serialize) {
                                 fieldInfo.ignore = true;
                             }
                             break;
                         }
                         case "unwrapped": {
                             Boolean unwrapped = (Boolean) result;
-                            if (unwrapped.booleanValue()) {
+                            if (unwrapped) {
                                 fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
                             }
                             break;
@@ -347,7 +349,8 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         default:
                             break;
                     }
-                } catch (Throwable ignored) {}
+                } catch (Throwable ignored) {
+                }
             });
         }
 
@@ -620,8 +623,8 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 default:
                     break;
             }
-        } catch (Throwable ignored) {
-            ignored.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
     }
 

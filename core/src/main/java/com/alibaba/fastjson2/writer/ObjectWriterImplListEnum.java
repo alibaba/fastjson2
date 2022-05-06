@@ -38,8 +38,8 @@ final class ObjectWriterImplListEnum extends ObjectWriterBaseModule.PrimitiveImp
         jsonWriter.startArray(size);
 
         boolean writeEnumUsingToString = jsonWriter.isEnabled(JSONWriter.Feature.WriteEnumUsingToString);
-        for (int i = 0; i < size; i++) {
-            Enum e = (Enum) list.get(i);
+        for (Object o : list) {
+            Enum e = (Enum) o;
             String str;
             if (writeEnumUsingToString) {
                 str = e.toString();

@@ -82,7 +82,7 @@ final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
             value = getObjectReader(jsonReader)
                     .readObject(jsonReader);
         } else if (value instanceof Integer) {
-            long millis = ((Integer) value).intValue();
+            long millis = (Integer) value;
             if (dateReader.formatUnixTime) {
                 millis *= 1000;
             }

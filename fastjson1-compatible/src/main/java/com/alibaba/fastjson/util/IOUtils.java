@@ -17,12 +17,14 @@ package com.alibaba.fastjson.util;
 
 import com.alibaba.fastjson.JSONException;
 
-import java.io.Closeable;
 import java.io.InputStream;
-import java.io.Reader;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.*;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
@@ -190,15 +192,12 @@ public class IOUtils {
     }
 
     public static void loadPropertiesFromFile() {
-        InputStream inputStream = AccessController.doPrivileged(new PrivilegedAction<InputStream>() {
-            @Override
-            public InputStream run() {
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                if (cl != null) {
-                    return cl.getResourceAsStream(FASTJSON_PROPERTIES);
-                } else {
-                    return ClassLoader.getSystemResourceAsStream(FASTJSON_PROPERTIES);
-                }
+        InputStream inputStream = AccessController.doPrivileged((PrivilegedAction<InputStream>) () -> {
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            if (cl != null) {
+                return cl.getResourceAsStream(FASTJSON_PROPERTIES);
+            } else {
+                return ClassLoader.getSystemResourceAsStream(FASTJSON_PROPERTIES);
             }
         });
 

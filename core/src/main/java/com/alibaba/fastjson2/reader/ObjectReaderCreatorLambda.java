@@ -68,9 +68,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
         }
 
         AtomicReference<Constructor> constructorRef = new AtomicReference();
-        BeanUtils.constructor(objectClass, constructor -> {
-            constructorRef.set(constructor);
-        });
+        BeanUtils.constructor(objectClass, constructorRef::set);
 
         int classModifiers = objectClass.getModifiers();
 

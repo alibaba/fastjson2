@@ -126,17 +126,15 @@ public final class JSONFactory {
     static {
         Properties properties = new Properties();
 
-        InputStream inputStream = AccessController.doPrivileged(new PrivilegedAction<InputStream>() {
-            public InputStream run() {
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        InputStream inputStream = AccessController.doPrivileged((PrivilegedAction<InputStream>) () -> {
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
-                final String resourceFile = "fastjson2.properties";
+            final String resourceFile = "fastjson2.properties";
 
-                if (cl != null) {
-                    return cl.getResourceAsStream(resourceFile);
-                } else {
-                    return ClassLoader.getSystemResourceAsStream(resourceFile);
-                }
+            if (cl != null) {
+                return cl.getResourceAsStream(resourceFile);
+            } else {
+                return ClassLoader.getSystemResourceAsStream(resourceFile);
             }
         });
         if (inputStream != null) {

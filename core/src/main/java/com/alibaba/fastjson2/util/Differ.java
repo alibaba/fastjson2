@@ -294,8 +294,8 @@ public class Differ {
             }
 
             Iterator rightIt = rightMap.entrySet().iterator();
-            for (Iterator leftIt = leftMap.entrySet().iterator(); leftIt.hasNext(); ) {
-                Map.Entry leftEntry = (Map.Entry) leftIt.next();
+            for (Object o : leftMap.entrySet()) {
+                Map.Entry leftEntry = (Map.Entry) o;
                 Map.Entry rightEntry = (Map.Entry) rightIt.next();
                 Object key = leftEntry.getKey();
 
@@ -473,8 +473,8 @@ public class Differ {
     boolean diffMap(Map leftMap, Map rightMap, JSONWriter.Path path, boolean match, Class leftClass) {
         Map rightMapClone = new HashMap(rightMap);
 
-        for (Iterator leftIt = leftMap.entrySet().iterator(); leftIt.hasNext(); ) {
-            Map.Entry leftEntry = (Map.Entry) leftIt.next();
+        for (Object o : leftMap.entrySet()) {
+            Map.Entry leftEntry = (Map.Entry) o;
             Object leftKey = leftEntry.getKey();
 
             Object leftValue = leftEntry.getValue();
@@ -546,8 +546,8 @@ public class Differ {
                     }
                 }
 
-            } catch (Throwable ignored) {
-                ignored.printStackTrace();
+            } catch (Throwable e) {
+                e.printStackTrace();
             }
         }
 

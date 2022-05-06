@@ -81,7 +81,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                     , int.class, o -> o == null || "null".equals(o) || "".equals(o)
                             ? 0 : Integer.parseInt((String) o));
             provider.registerTypeConvert(BigDecimal.class, int.class, o -> o == null ? 0 : ((BigDecimal) o).intValueExact());
-            provider.registerTypeConvert(Boolean.class, int.class, o -> o == null ? 0 : ((Boolean) o).booleanValue() ? 1 : 0);
+            provider.registerTypeConvert(Boolean.class, int.class, o -> o == null ? 0 : (Boolean) o ? 1 : 0);
         }
 
         {
@@ -93,7 +93,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             provider.registerTypeConvert(Integer.class, Long.class, NUMBER_TO_LONG);
             provider.registerTypeConvert(String.class, long.class, STRING_TO_LONG_VALUE);
             provider.registerTypeConvert(BigDecimal.class, long.class, o -> o == null ? 0 : ((BigDecimal) o).longValue());
-            provider.registerTypeConvert(Boolean.class, long.class, o -> o == null ? 0 : ((Boolean) o).booleanValue() ? 1L : 0L);
+            provider.registerTypeConvert(Boolean.class, long.class, o -> o == null ? 0 : (Boolean) o ? 1L : 0L);
         }
         {
             // cast to Long
@@ -103,8 +103,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         {
             // cast to BigInteger
             provider.registerTypeConvert(String.class, BigInteger.class, o -> o == null || "null".equals(o) ? null : new BigInteger((String) o));
-            provider.registerTypeConvert(Long.class, BigInteger.class, o -> o == null ? null : BigInteger.valueOf(((Long) o).longValue()));
-            provider.registerTypeConvert(Integer.class, BigInteger.class, o -> o == null ? null : BigInteger.valueOf(((Integer) o).intValue()));
+            provider.registerTypeConvert(Long.class, BigInteger.class, o -> o == null ? null : BigInteger.valueOf((Long) o));
+            provider.registerTypeConvert(Integer.class, BigInteger.class, o -> o == null ? null : BigInteger.valueOf((Integer) o));
         }
 
 
@@ -668,14 +668,14 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                         }
                         case "ordinal": {
                             Integer ordinal = (Integer) result;
-                            if (ordinal.intValue() != 0) {
+                            if (ordinal != 0) {
                                 fieldInfo.ordinal = ordinal;
                             }
                             break;
                         }
                         case "deserialize": {
                             Boolean serialize = (Boolean) result;
-                            if (!serialize.booleanValue()) {
+                            if (!serialize) {
                                 fieldInfo.ignore = true;
                             }
                             break;
@@ -1549,7 +1549,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             if (integer == null) {
                 return OptionalLong.empty();
             }
-            return OptionalLong.of(integer.longValue());
+            return OptionalLong.of(integer);
         }
 
         @Override
@@ -1558,7 +1558,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             if (integer == null) {
                 return OptionalLong.empty();
             }
-            return OptionalLong.of(integer.longValue());
+            return OptionalLong.of(integer);
         }
     }
 
@@ -1571,7 +1571,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             if (value == null) {
                 return OptionalDouble.empty();
             }
-            return OptionalDouble.of(value.doubleValue());
+            return OptionalDouble.of(value);
         }
 
         @Override
@@ -1580,7 +1580,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             if (value == null) {
                 return OptionalDouble.empty();
             }
-            return OptionalDouble.of(value.doubleValue());
+            return OptionalDouble.of(value);
         }
     }
 

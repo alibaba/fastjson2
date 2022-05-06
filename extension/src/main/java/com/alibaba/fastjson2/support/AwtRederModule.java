@@ -68,7 +68,7 @@ public class AwtRederModule implements ObjectReaderModule {
         public Color apply(Map<Long, Object> values) {
             Integer rgb = (Integer) values.get(HASH_RGB);
             if (rgb != null) {
-                return new Color(rgb.intValue());
+                return new Color(rgb);
             }
 
             Integer r = (Integer) values.get(HASH_R);

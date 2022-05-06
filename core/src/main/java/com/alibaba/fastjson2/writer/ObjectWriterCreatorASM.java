@@ -2710,8 +2710,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
 
                 int hashCode32 = hashCode32Keys[i];
                 List<Long> hashCode64Array = map.get(hashCode32);
-                for (int j = 0; j < hashCode64Array.size(); ++j) {
-                    long hashCode64 = hashCode64Array.get(j);
+                for (long hashCode64 : hashCode64Array) {
                     mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE_64);
                     mw.visitLdcInsn(hashCode64);
                     mw.visitInsn(Opcodes.LCMP);

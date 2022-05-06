@@ -10,7 +10,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -166,8 +165,7 @@ public class GuavaSupport {
                 throw new JSONException("create ArrayListMultimap error", e);
             }
 
-            for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
-                Map.Entry entry = it.next();
+            for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
                 Object key = entry.getKey();
                 Iterable item = (Iterable) entry.getValue();
 

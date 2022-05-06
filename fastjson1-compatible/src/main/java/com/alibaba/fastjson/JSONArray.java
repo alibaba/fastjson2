@@ -212,7 +212,7 @@ public class JSONArray extends JSON implements List {
     }
 
     public <T> List<T> toJavaList(Class<T> clazz) {
-        List<T> list = new ArrayList<T>(this.size());
+        List<T> list = new ArrayList<>(this.size());
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader objectReader = provider.getObjectReader(clazz);

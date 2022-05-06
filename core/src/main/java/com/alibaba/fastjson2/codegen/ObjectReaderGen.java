@@ -84,8 +84,7 @@ public class ObjectReaderGen {
             mapping[index] = (short) i;
         }
 
-        for (int i = 0; i < this.hashCodes.length; i++) {
-            long hashCode64 = this.hashCodes[i];
+        for (long hashCode64 : this.hashCodes) {
             int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
             List<Long> hashCode64List = this.map.get(hashCode32);
             if (hashCode64List == null) {
