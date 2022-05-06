@@ -5,7 +5,9 @@ import com.alibaba.fastjson2.util.JDKUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
+import static com.alibaba.fastjson2.JSONFactory.Utils.CODER_FUNCTION;
+import static com.alibaba.fastjson2.JSONFactory.Utils.CODER_FUNCTION_ERROR;
+import static com.alibaba.fastjson2.JSONFactory.Utils.VALUE_FUNCTION;
 
 final class JSONWriterUTF8JDK9 extends JSONWriterUTF8 {
     JSONWriterUTF8JDK9(Context ctx) {

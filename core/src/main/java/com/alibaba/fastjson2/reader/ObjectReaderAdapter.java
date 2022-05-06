@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Supplier;
 

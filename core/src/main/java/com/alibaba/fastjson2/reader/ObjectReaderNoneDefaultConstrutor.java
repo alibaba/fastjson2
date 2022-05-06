@@ -1,9 +1,17 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;

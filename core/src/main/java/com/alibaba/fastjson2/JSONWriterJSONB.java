@@ -11,15 +11,19 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-import static com.alibaba.fastjson2.JSONB.Constants.*;
-
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
-import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONFactory.CACHE_THREAD;
+import static com.alibaba.fastjson2.JSONFactory.Utils.CODER_FUNCTION;
+import static com.alibaba.fastjson2.JSONFactory.Utils.CODER_FUNCTION_ERROR;
+import static com.alibaba.fastjson2.JSONFactory.Utils.VALUE_FUNCTION;
 
 final class JSONWriterJSONB extends JSONWriter {
     static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
@@ -124,7 +128,7 @@ final class JSONWriterJSONB extends JSONWriter {
             // minCapacity is usually close to size, so this is a win:
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
-        bytes[off++] = BC_OBJECT;
+        bytes[off++] = JSONB.Constants.BC_OBJECT;
     }
 
     @Override
@@ -144,7 +148,7 @@ final class JSONWriterJSONB extends JSONWriter {
             // minCapacity is usually close to size, so this is a win:
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
-        bytes[off++] = BC_OBJECT_END;
+        bytes[off++] = JSONB.Constants.BC_OBJECT_END;
     }
 
     @Override
@@ -174,10 +178,10 @@ final class JSONWriterJSONB extends JSONWriter {
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
 
-        if (size <= ARRAY_FIX_LEN) {
-            bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
+        if (size <= JSONB.Constants.ARRAY_FIX_LEN) {
+            bytes[off++] = (byte) (JSONB.Constants.BC_ARRAY_FIX_MIN + size);
         } else {
-            bytes[off++] = BC_ARRAY;
+            bytes[off++] = JSONB.Constants.BC_ARRAY;
             writeInt32(size);
         }
     }
@@ -200,10 +204,10 @@ final class JSONWriterJSONB extends JSONWriter {
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
 
-        if (size <= ARRAY_FIX_LEN) {
-            bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
+        if (size <= JSONB.Constants.ARRAY_FIX_LEN) {
+            bytes[off++] = (byte) (JSONB.Constants.BC_ARRAY_FIX_MIN + size);
         } else {
-            bytes[off++] = BC_ARRAY;
+            bytes[off++] = JSONB.Constants.BC_ARRAY;
             writeInt32(size);
         }
     }
@@ -248,7 +252,7 @@ final class JSONWriterJSONB extends JSONWriter {
             // minCapacity is usually close to size, so this is a win:
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
-        bytes[off++] = BC_NULL;
+        bytes[off++] = JSONB.Constants.BC_NULL;
     }
 
     @Override
@@ -288,10 +292,10 @@ final class JSONWriterJSONB extends JSONWriter {
         }
 
         if (ascii) {
-            if (strlen <= STR_ASCII_FIX_LEN) {
-                bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            if (strlen <= JSONB.Constants.STR_ASCII_FIX_LEN) {
+                bytes[off++] = (byte) (strlen + JSONB.Constants.BC_STR_ASCII_FIX_MIN);
             } else {
-                bytes[off++] = BC_STR_ASCII;
+                bytes[off++] = JSONB.Constants.BC_STR_ASCII;
                 writeInt32(strlen);
             }
             for (char c : str) {
@@ -313,7 +317,7 @@ final class JSONWriterJSONB extends JSONWriter {
         if (symbolTable != null) {
             int ordinal = symbolTable.getOrdinal(str);
             if (ordinal >= 0) {
-                writeRaw(BC_STR_ASCII);
+                writeRaw(JSONB.Constants.BC_STR_ASCII);
                 writeInt32(-ordinal);
                 return;
             }
@@ -338,7 +342,7 @@ final class JSONWriterJSONB extends JSONWriter {
             // minCapacity is usually close to size, so this is a win:
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
-        this.bytes[off++] = BC_TYPED_ANY;
+        this.bytes[off++] = JSONB.Constants.BC_TYPED_ANY;
 
         long hash = Fnv.hashCode64(typeName);
 
@@ -401,7 +405,7 @@ final class JSONWriterJSONB extends JSONWriter {
                     bytes = Arrays.copyOf(bytes, newCapacity);
                 }
 
-                this.bytes[off++] = BC_TYPED_ANY;
+                this.bytes[off++] = JSONB.Constants.BC_TYPED_ANY;
                 writeInt32(-symbol);
                 return false;
             }
@@ -428,7 +432,7 @@ final class JSONWriterJSONB extends JSONWriter {
                 bytes = Arrays.copyOf(bytes, newCapacity);
             }
 
-            this.bytes[off++] = BC_TYPED_ANY;
+            this.bytes[off++] = JSONB.Constants.BC_TYPED_ANY;
             writeInt32(symbol);
             return false;
         }
@@ -453,7 +457,7 @@ final class JSONWriterJSONB extends JSONWriter {
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
 
-        this.bytes[off++] = BC_TYPED_ANY;
+        this.bytes[off++] = JSONB.Constants.BC_TYPED_ANY;
         System.arraycopy(typeName, 0, this.bytes, off, typeName.length);
         off += typeName.length;
         writeInt32(symbol);
@@ -462,15 +466,15 @@ final class JSONWriterJSONB extends JSONWriter {
     }
 
     static int sizeOfInt(int i) {
-        if (i >= BC_INT32_NUM_MIN && i <= BC_INT32_NUM_MAX) {
+        if (i >= JSONB.Constants.BC_INT32_NUM_MIN && i <= JSONB.Constants.BC_INT32_NUM_MAX) {
             return 1;
         }
 
-        if (i >= INT32_BYTE_MIN && i <= INT32_BYTE_MAX) {
+        if (i >= JSONB.Constants.INT32_BYTE_MIN && i <= JSONB.Constants.INT32_BYTE_MAX) {
             return 2;
         }
 
-        if (i >= INT32_SHORT_MIN && i <= INT32_SHORT_MAX) {
+        if (i >= JSONB.Constants.INT32_SHORT_MIN && i <= JSONB.Constants.INT32_SHORT_MAX) {
             return 3;
         }
 
@@ -520,10 +524,10 @@ final class JSONWriterJSONB extends JSONWriter {
                 }
 
                 int strlen = value.length;
-                if (strlen <= STR_ASCII_FIX_LEN) {
-                    bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+                if (strlen <= JSONB.Constants.STR_ASCII_FIX_LEN) {
+                    bytes[off++] = (byte) (strlen + JSONB.Constants.BC_STR_ASCII_FIX_MIN);
                 } else {
-                    bytes[off++] = BC_STR_ASCII;
+                    bytes[off++] = JSONB.Constants.BC_STR_ASCII;
                     writeInt32(strlen);
                 }
                 System.arraycopy(value, 0, bytes, off, strlen);
@@ -563,7 +567,7 @@ final class JSONWriterJSONB extends JSONWriter {
                         if (lenByteCnt != utf8lenByteCnt) {
                             System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
                         }
-                        bytes[off++] = BC_STR_UTF8;
+                        bytes[off++] = JSONB.Constants.BC_STR_UTF8;
                         writeInt32(utf8len);
                         off += utf8len;
                         return;
@@ -572,7 +576,7 @@ final class JSONWriterJSONB extends JSONWriter {
 
                 if (utf16 && (JDKUtils.BIG_ENDIAN == 1 || JDKUtils.BIG_ENDIAN == 0)) {
                     ensureCapacity(off + 5 + value.length);
-                    bytes[off++] = JDKUtils.BIG_ENDIAN == 1 ? BC_STR_UTF16BE : BC_STR_UTF16LE;
+                    bytes[off++] = JDKUtils.BIG_ENDIAN == 1 ? JSONB.Constants.BC_STR_UTF16BE : JSONB.Constants.BC_STR_UTF16LE;
                     writeInt32(value.length);
                     System.arraycopy(value, 0, bytes, off, value.length);
                     off += value.length;
@@ -612,10 +616,10 @@ final class JSONWriterJSONB extends JSONWriter {
         }
 
         if (ascii) {
-            if (strlen <= STR_ASCII_FIX_LEN) {
-                bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            if (strlen <= JSONB.Constants.STR_ASCII_FIX_LEN) {
+                bytes[off++] = (byte) (strlen + JSONB.Constants.BC_STR_ASCII_FIX_MIN);
             } else {
-                bytes[off++] = BC_STR_ASCII;
+                bytes[off++] = JSONB.Constants.BC_STR_ASCII;
                 writeInt32(strlen);
             }
             for (char aChar : chars) {
@@ -632,7 +636,7 @@ final class JSONWriterJSONB extends JSONWriter {
             if (lenByteCnt != utf8lenByteCnt) {
                 System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
             }
-            bytes[off++] = BC_STR_UTF8;
+            bytes[off++] = JSONB.Constants.BC_STR_UTF8;
             writeInt32(utf8len);
             off += utf8len;
         }
@@ -676,7 +680,7 @@ final class JSONWriterJSONB extends JSONWriter {
                     bytes = Arrays.copyOf(bytes, newCapacity);
                 }
 
-                bytes[off++] = BC_TIMESTAMP_SECONDS;
+                bytes[off++] = JSONB.Constants.BC_TIMESTAMP_SECONDS;
                 bytes[off++] = (byte) (secondsInt >>> 24);
                 bytes[off++] = (byte) (secondsInt >>> 16);
                 bytes[off++] = (byte) (secondsInt >>> 8);
@@ -704,7 +708,7 @@ final class JSONWriterJSONB extends JSONWriter {
                         bytes = Arrays.copyOf(bytes, newCapacity);
                     }
 
-                    bytes[off++] = BC_TIMESTAMP_MINUTES;
+                    bytes[off++] = JSONB.Constants.BC_TIMESTAMP_MINUTES;
                     bytes[off++] = (byte) (minutesInt >>> 24);
                     bytes[off++] = (byte) (minutesInt >>> 16);
                     bytes[off++] = (byte) (minutesInt >>> 8);
@@ -729,7 +733,7 @@ final class JSONWriterJSONB extends JSONWriter {
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
 
-        bytes[off++] = BC_TIMESTAMP_MILLIS;
+        bytes[off++] = JSONB.Constants.BC_TIMESTAMP_MILLIS;
         bytes[off++] = (byte) (millis >>> 56);
         bytes[off++] = (byte) (millis >>> 48);
         bytes[off++] = (byte) (millis >>> 40);
@@ -742,7 +746,7 @@ final class JSONWriterJSONB extends JSONWriter {
 
     @Override
     public void writeInt64(long val) {
-        if (val >= INT64_NUM_LOW_VALUE && val <= INT64_NUM_HIGH_VALUE) {
+        if (val >= JSONB.Constants.INT64_NUM_LOW_VALUE && val <= JSONB.Constants.INT64_NUM_HIGH_VALUE) {
             // inline ensureCapacity(off + 1);
             if (off == bytes.length) {
                 int minCapacity = off + 1;
@@ -760,11 +764,11 @@ final class JSONWriterJSONB extends JSONWriter {
                 bytes = Arrays.copyOf(bytes, newCapacity);
             }
 
-            bytes[off++] = (byte) (BC_INT64_NUM_MIN + (val - INT64_NUM_LOW_VALUE));
+            bytes[off++] = (byte) (JSONB.Constants.BC_INT64_NUM_MIN + (val - JSONB.Constants.INT64_NUM_LOW_VALUE));
             return;
         }
 
-        if (val >= INT64_BYTE_MIN && val <= INT64_BYTE_MAX) {
+        if (val >= JSONB.Constants.INT64_BYTE_MIN && val <= JSONB.Constants.INT64_BYTE_MAX) {
             int minCapacity = off + 2;
             if (minCapacity - bytes.length > 0) {
                 int oldCapacity = bytes.length;
@@ -780,12 +784,12 @@ final class JSONWriterJSONB extends JSONWriter {
                 bytes = Arrays.copyOf(bytes, newCapacity);
             }
 
-            bytes[off++] = (byte) (BC_INT64_BYTE_ZERO + (val >> 8));
+            bytes[off++] = (byte) (JSONB.Constants.BC_INT64_BYTE_ZERO + (val >> 8));
             bytes[off++] = (byte) (val);
             return;
         }
 
-        if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
+        if (val >= JSONB.Constants.INT64_SHORT_MIN && val <= JSONB.Constants.INT64_SHORT_MAX) {
             int minCapacity = off + 3;
             if (minCapacity - bytes.length > 0) {
                 int oldCapacity = bytes.length;
@@ -801,7 +805,7 @@ final class JSONWriterJSONB extends JSONWriter {
                 bytes = Arrays.copyOf(bytes, newCapacity);
             }
 
-            bytes[off++] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
+            bytes[off++] = (byte) (JSONB.Constants.BC_INT64_SHORT_ZERO + (val >> 16));
             bytes[off++] = (byte) (val >> 8);
             bytes[off++] = (byte) (val);
             return;
@@ -823,7 +827,7 @@ final class JSONWriterJSONB extends JSONWriter {
                 bytes = Arrays.copyOf(bytes, newCapacity);
             }
 
-            bytes[off++] = BC_INT64_INT;
+            bytes[off++] = JSONB.Constants.BC_INT64_INT;
             bytes[off++] = (byte) (val >>> 24);
             bytes[off++] = (byte) (val >>> 16);
             bytes[off++] = (byte) (val >>> 8);
@@ -845,7 +849,7 @@ final class JSONWriterJSONB extends JSONWriter {
             // minCapacity is usually close to size, so this is a win:
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
-        bytes[off++] = BC_INT64;
+        bytes[off++] = JSONB.Constants.BC_INT64;
         bytes[off++] = (byte) (val >>> 56);
         bytes[off++] = (byte) (val >>> 48);
         bytes[off++] = (byte) (val >>> 40);
@@ -881,15 +885,15 @@ final class JSONWriterJSONB extends JSONWriter {
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
 
-        if (size <= ARRAY_FIX_LEN) {
-            bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
+        if (size <= JSONB.Constants.ARRAY_FIX_LEN) {
+            bytes[off++] = (byte) (JSONB.Constants.BC_ARRAY_FIX_MIN + size);
         } else {
-            bytes[off++] = BC_ARRAY;
+            bytes[off++] = JSONB.Constants.BC_ARRAY;
             writeInt32(size);
         }
 
         for (long val : value) {
-            if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
+            if (val >= JSONB.Constants.BC_INT32_NUM_MIN && val <= JSONB.Constants.BC_INT32_NUM_MAX) {
                 // inline ensureCapacity(off + 1);
                 if (off == bytes.length) {
                     int minCapacity = off + 1;
@@ -911,7 +915,7 @@ final class JSONWriterJSONB extends JSONWriter {
                 continue;
             }
 
-            if (val >= INT64_BYTE_MIN && val <= INT64_BYTE_MAX) {
+            if (val >= JSONB.Constants.INT64_BYTE_MIN && val <= JSONB.Constants.INT64_BYTE_MAX) {
                 int minCapacity = off + 2;
                 if (minCapacity - bytes.length > 0) {
                     int oldCapacity = bytes.length;
@@ -927,12 +931,12 @@ final class JSONWriterJSONB extends JSONWriter {
                     bytes = Arrays.copyOf(bytes, newCapacity);
                 }
 
-                bytes[off++] = (byte) (BC_INT64_BYTE_ZERO + (val >> 8));
+                bytes[off++] = (byte) (JSONB.Constants.BC_INT64_BYTE_ZERO + (val >> 8));
                 bytes[off++] = (byte) (val);
                 continue;
             }
 
-            if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
+            if (val >= JSONB.Constants.INT64_SHORT_MIN && val <= JSONB.Constants.INT64_SHORT_MAX) {
                 int minCapacity = off + 3;
                 if (minCapacity - bytes.length > 0) {
                     int oldCapacity = bytes.length;
@@ -948,7 +952,7 @@ final class JSONWriterJSONB extends JSONWriter {
                     bytes = Arrays.copyOf(bytes, newCapacity);
                 }
 
-                bytes[off++] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
+                bytes[off++] = (byte) (JSONB.Constants.BC_INT64_SHORT_ZERO + (val >> 16));
                 bytes[off++] = (byte) (val >> 8);
                 bytes[off++] = (byte) (val);
                 continue;
@@ -968,7 +972,7 @@ final class JSONWriterJSONB extends JSONWriter {
                 // minCapacity is usually close to size, so this is a win:
                 bytes = Arrays.copyOf(bytes, newCapacity);
             }
-            bytes[off++] = BC_INT64;
+            bytes[off++] = JSONB.Constants.BC_INT64;
             bytes[off++] = (byte) (val >>> 56);
             bytes[off++] = (byte) (val >>> 48);
             bytes[off++] = (byte) (val >>> 40);
@@ -985,18 +989,18 @@ final class JSONWriterJSONB extends JSONWriter {
 
     @Override
     public void writeFloat(float value) {
-        if (value >= INT32_SHORT_MIN && value <= INT32_SHORT_MAX) {
+        if (value >= JSONB.Constants.INT32_SHORT_MIN && value <= JSONB.Constants.INT32_SHORT_MAX) {
             int int32Value = (int) value;
             if (int32Value == value) {
                 ensureCapacity(off + 1);
-                bytes[off++] = BC_FLOAT_INT;
+                bytes[off++] = JSONB.Constants.BC_FLOAT_INT;
                 writeInt32(int32Value);
                 return;
             }
         }
 
         ensureCapacity(off + 5);
-        bytes[off++] = BC_FLOAT;
+        bytes[off++] = JSONB.Constants.BC_FLOAT;
         int i = Float.floatToIntBits(value);
         bytes[off++] = (byte) (i >>> 24);
         bytes[off++] = (byte) (i >>> 16);
@@ -1021,13 +1025,13 @@ final class JSONWriterJSONB extends JSONWriter {
     public void writeDouble(double value) {
         if (value == 0) {
             ensureCapacity(off + 1);
-            bytes[off++] = BC_DOUBLE_NUM_0;
+            bytes[off++] = JSONB.Constants.BC_DOUBLE_NUM_0;
             return;
         }
 
         if (value == 1) {
             ensureCapacity(off + 1);
-            bytes[off++] = BC_DOUBLE_NUM_1;
+            bytes[off++] = JSONB.Constants.BC_DOUBLE_NUM_1;
             return;
         }
 
@@ -1035,14 +1039,14 @@ final class JSONWriterJSONB extends JSONWriter {
             long longValue = (long) value;
             if (longValue == value) {
                 ensureCapacity(off + 1);
-                bytes[off++] = BC_DOUBLE_LONG;
+                bytes[off++] = JSONB.Constants.BC_DOUBLE_LONG;
                 writeInt64(longValue);
                 return;
             }
         }
 
         ensureCapacity(off + 9);
-        bytes[off++] = BC_DOUBLE;
+        bytes[off++] = JSONB.Constants.BC_DOUBLE;
         long i = Double.doubleToLongBits(value);
         bytes[off++] = (byte) (i >>> 56);
         bytes[off++] = (byte) (i >>> 48);
@@ -1105,15 +1109,15 @@ final class JSONWriterJSONB extends JSONWriter {
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
 
-        if (size <= ARRAY_FIX_LEN) {
-            bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
+        if (size <= JSONB.Constants.ARRAY_FIX_LEN) {
+            bytes[off++] = (byte) (JSONB.Constants.BC_ARRAY_FIX_MIN + size);
         } else {
-            bytes[off++] = BC_ARRAY;
+            bytes[off++] = JSONB.Constants.BC_ARRAY;
             writeInt32(size);
         }
 
         for (int val : values) {
-            if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
+            if (val >= JSONB.Constants.BC_INT32_NUM_MIN && val <= JSONB.Constants.BC_INT32_NUM_MAX) {
                 if (off == bytes.length) {
                     int minCapacity = off + 1;
 
@@ -1134,7 +1138,7 @@ final class JSONWriterJSONB extends JSONWriter {
                 continue;
             }
 
-            if (val >= INT32_BYTE_MIN && val <= INT32_BYTE_MAX) {
+            if (val >= JSONB.Constants.INT32_BYTE_MIN && val <= JSONB.Constants.INT32_BYTE_MAX) {
                 int minCapacity = off + 2;
                 if (minCapacity - bytes.length > 0) {
                     int oldCapacity = bytes.length;
@@ -1150,12 +1154,12 @@ final class JSONWriterJSONB extends JSONWriter {
                     bytes = Arrays.copyOf(bytes, newCapacity);
                 }
 
-                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (val >> 8));
+                bytes[off++] = (byte) (JSONB.Constants.BC_INT32_BYTE_ZERO + (val >> 8));
                 bytes[off++] = (byte) (val);
                 continue;
             }
 
-            if (val >= INT32_SHORT_MIN && val <= INT32_SHORT_MAX) {
+            if (val >= JSONB.Constants.INT32_SHORT_MIN && val <= JSONB.Constants.INT32_SHORT_MAX) {
                 int minCapacity = off + 3;
                 if (minCapacity - bytes.length > 0) {
                     int oldCapacity = bytes.length;
@@ -1171,7 +1175,7 @@ final class JSONWriterJSONB extends JSONWriter {
                     bytes = Arrays.copyOf(bytes, newCapacity);
                 }
 
-                bytes[off++] = (byte) (BC_INT32_SHORT_ZERO + (val >> 16));
+                bytes[off++] = (byte) (JSONB.Constants.BC_INT32_SHORT_ZERO + (val >> 16));
                 bytes[off++] = (byte) (val >> 8);
                 bytes[off++] = (byte) (val);
                 continue;
@@ -1192,7 +1196,7 @@ final class JSONWriterJSONB extends JSONWriter {
                 bytes = Arrays.copyOf(bytes, newCapacity);
             }
 
-            bytes[off++] = BC_INT32;
+            bytes[off++] = JSONB.Constants.BC_INT32;
             bytes[off++] = (byte) (val >>> 24);
             bytes[off++] = (byte) (val >>> 16);
             bytes[off++] = (byte) (val >>> 8);
@@ -1220,7 +1224,7 @@ final class JSONWriterJSONB extends JSONWriter {
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
 
-        bytes[off++] = BC_INT8;
+        bytes[off++] = JSONB.Constants.BC_INT8;
         bytes[off++] = val;
     }
 
@@ -1241,14 +1245,14 @@ final class JSONWriterJSONB extends JSONWriter {
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
 
-        bytes[off++] = BC_INT16;
+        bytes[off++] = JSONB.Constants.BC_INT16;
         bytes[off++] = (byte) (val >>> 8);
         bytes[off++] = (byte) val;
     }
 
     @Override
     public void writeInt32(int val) {
-        if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
+        if (val >= JSONB.Constants.BC_INT32_NUM_MIN && val <= JSONB.Constants.BC_INT32_NUM_MAX) {
             if (off == bytes.length) {
                 int minCapacity = off + 1;
 
@@ -1269,7 +1273,7 @@ final class JSONWriterJSONB extends JSONWriter {
             return;
         }
 
-        if (val >= INT32_BYTE_MIN && val <= INT32_BYTE_MAX) {
+        if (val >= JSONB.Constants.INT32_BYTE_MIN && val <= JSONB.Constants.INT32_BYTE_MAX) {
             int minCapacity = off + 2;
             if (minCapacity - bytes.length > 0) {
                 int oldCapacity = bytes.length;
@@ -1285,12 +1289,12 @@ final class JSONWriterJSONB extends JSONWriter {
                 bytes = Arrays.copyOf(bytes, newCapacity);
             }
 
-            bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (val >> 8));
+            bytes[off++] = (byte) (JSONB.Constants.BC_INT32_BYTE_ZERO + (val >> 8));
             bytes[off++] = (byte) (val);
             return;
         }
 
-        if (val >= INT32_SHORT_MIN && val <= INT32_SHORT_MAX) {
+        if (val >= JSONB.Constants.INT32_SHORT_MIN && val <= JSONB.Constants.INT32_SHORT_MAX) {
             int minCapacity = off + 3;
             if (minCapacity - bytes.length > 0) {
                 int oldCapacity = bytes.length;
@@ -1306,7 +1310,7 @@ final class JSONWriterJSONB extends JSONWriter {
                 bytes = Arrays.copyOf(bytes, newCapacity);
             }
 
-            bytes[off++] = (byte) (BC_INT32_SHORT_ZERO + (val >> 16));
+            bytes[off++] = (byte) (JSONB.Constants.BC_INT32_SHORT_ZERO + (val >> 16));
             bytes[off++] = (byte) (val >> 8);
             bytes[off++] = (byte) (val);
             return;
@@ -1327,7 +1331,7 @@ final class JSONWriterJSONB extends JSONWriter {
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
 
-        bytes[off++] = BC_INT32;
+        bytes[off++] = JSONB.Constants.BC_INT32;
         bytes[off++] = (byte) (val >>> 24);
         bytes[off++] = (byte) (val >>> 16);
         bytes[off++] = (byte) (val >>> 8);
@@ -1352,9 +1356,9 @@ final class JSONWriterJSONB extends JSONWriter {
         }
 
         if ((this.context.features & Feature.NullAsDefaultValue.mask) != 0) {
-            bytes[off++] = BC_ARRAY_FIX_MIN;
+            bytes[off++] = JSONB.Constants.BC_ARRAY_FIX_MIN;
         } else {
-            bytes[off++] = BC_NULL;
+            bytes[off++] = JSONB.Constants.BC_NULL;
         }
     }
 
@@ -1403,7 +1407,7 @@ final class JSONWriterJSONB extends JSONWriter {
                     bytes = Arrays.copyOf(bytes, newCapacity);
                 }
 
-                this.bytes[off++] = BC_SYMBOL;
+                this.bytes[off++] = JSONB.Constants.BC_SYMBOL;
                 writeInt32(-symbol);
                 return;
             }
@@ -1429,7 +1433,7 @@ final class JSONWriterJSONB extends JSONWriter {
                 // minCapacity is usually close to size, so this is a win:
                 this.bytes = Arrays.copyOf(this.bytes, newCapacity);
             }
-            this.bytes[off++] = BC_SYMBOL;
+            this.bytes[off++] = JSONB.Constants.BC_SYMBOL;
             writeInt32(symbol);
             return;
         }
@@ -1474,7 +1478,7 @@ final class JSONWriterJSONB extends JSONWriter {
             // minCapacity is usually close to size, so this is a win:
             this.bytes = Arrays.copyOf(this.bytes, newCapacity);
         }
-        this.bytes[off++] = BC_SYMBOL;
+        this.bytes[off++] = JSONB.Constants.BC_SYMBOL;
         System.arraycopy(name, 0, this.bytes, off, name.length);
         off += name.length;
         writeInt32(symbol);
@@ -1489,7 +1493,7 @@ final class JSONWriterJSONB extends JSONWriter {
 
         ensureCapacity(off + 5);
 
-        bytes[off++] = BC_LOCAL_DATE;
+        bytes[off++] = JSONB.Constants.BC_LOCAL_DATE;
         int year = date.getYear();
         bytes[off++] = (byte) (year >>> 8);
         bytes[off++] = (byte) year;
@@ -1506,7 +1510,7 @@ final class JSONWriterJSONB extends JSONWriter {
 
         ensureCapacity(off + 4);
 
-        bytes[off++] = BC_LOCAL_TIME;
+        bytes[off++] = JSONB.Constants.BC_LOCAL_TIME;
         bytes[off++] = (byte) time.getHour();
         bytes[off++] = (byte) time.getMinute();
         bytes[off++] = (byte) time.getSecond();
@@ -1524,7 +1528,7 @@ final class JSONWriterJSONB extends JSONWriter {
 
         ensureCapacity(off + 8);
 
-        bytes[off++] = BC_LOCAL_DATETIME;
+        bytes[off++] = JSONB.Constants.BC_LOCAL_DATETIME;
         int year = dateTime.getYear();
         bytes[off++] = (byte) (year >>> 8);
         bytes[off++] = (byte) year;
@@ -1547,7 +1551,7 @@ final class JSONWriterJSONB extends JSONWriter {
 
         ensureCapacity(off + 8);
 
-        bytes[off++] = BC_TIMESTAMP_WITH_TIMEZONE;
+        bytes[off++] = JSONB.Constants.BC_TIMESTAMP_WITH_TIMEZONE;
         int year = dateTime.getYear();
         bytes[off++] = (byte) (year >>> 8);
         bytes[off++] = (byte) year;
@@ -1572,7 +1576,7 @@ final class JSONWriterJSONB extends JSONWriter {
         }
 
         ensureCapacity(off + 1);
-        bytes[off++] = BC_TIMESTAMP;
+        bytes[off++] = JSONB.Constants.BC_TIMESTAMP;
         long second = instant.getEpochSecond();
         int nano = instant.getNano();
         writeInt64(second);
@@ -1591,8 +1595,8 @@ final class JSONWriterJSONB extends JSONWriter {
 
 
         ensureCapacity(off + 18);
-        bytes[off++] = BC_BINARY;
-        bytes[off++] = BC_INT32_NUM_16;
+        bytes[off++] = JSONB.Constants.BC_BINARY;
+        bytes[off++] = JSONB.Constants.BC_INT32_NUM_16;
 
         bytes[off++] = (byte) (msb >>> 56);
         bytes[off++] = (byte) (msb >>> 48);
@@ -1636,7 +1640,7 @@ final class JSONWriterJSONB extends JSONWriter {
                 // minCapacity is usually close to size, so this is a win:
                 bytes = Arrays.copyOf(bytes, newCapacity);
             }
-            bytes[off++] = BC_BIGINT_LONG;
+            bytes[off++] = JSONB.Constants.BC_BIGINT_LONG;
             long int64Value = value.longValue();
             writeInt64(int64Value);
             return;
@@ -1645,7 +1649,7 @@ final class JSONWriterJSONB extends JSONWriter {
         byte[] bytes = value.toByteArray();
         ensureCapacity(off + 5 + bytes.length);
 
-        this.bytes[off++] = BC_BIGINT;
+        this.bytes[off++] = JSONB.Constants.BC_BIGINT;
         writeInt32(bytes.length);
         System.arraycopy(bytes, 0, this.bytes, off, bytes.length);
         off += bytes.length;
@@ -1659,7 +1663,7 @@ final class JSONWriterJSONB extends JSONWriter {
         }
 
         ensureCapacity(off + 5 + bytes.length);
-        this.bytes[off++] = BC_BINARY;
+        this.bytes[off++] = JSONB.Constants.BC_BINARY;
         writeInt32(bytes.length);
 
         System.arraycopy(bytes, 0, this.bytes, off, bytes.length);
@@ -1685,7 +1689,7 @@ final class JSONWriterJSONB extends JSONWriter {
                 && unscaledValue.compareTo(BIGINT_INT64_MIN) >= 0
                 && unscaledValue.compareTo(BIGINT_INT64_MAX) <= 0) {
             ensureCapacity(off + 1);
-            this.bytes[off++] = BC_DECIMAL_LONG;
+            this.bytes[off++] = JSONB.Constants.BC_DECIMAL_LONG;
             writeInt64(
                     unscaledValue.longValue()
             );
@@ -1693,7 +1697,7 @@ final class JSONWriterJSONB extends JSONWriter {
         }
 
         ensureCapacity(off + 1);
-        this.bytes[off++] = BC_DECIMAL;
+        this.bytes[off++] = JSONB.Constants.BC_DECIMAL;
         writeInt32(scale);
         writeBigInt(unscaledValue);
     }
@@ -1714,7 +1718,7 @@ final class JSONWriterJSONB extends JSONWriter {
             // minCapacity is usually close to size, so this is a win:
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
-        this.bytes[off++] = value ? BC_TRUE : BC_FALSE;
+        this.bytes[off++] = value ? JSONB.Constants.BC_TRUE : JSONB.Constants.BC_FALSE;
     }
 
     @Override
@@ -1747,7 +1751,7 @@ final class JSONWriterJSONB extends JSONWriter {
             // minCapacity is usually close to size, so this is a win:
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
-        bytes[off++] = BC_REFERENCE;
+        bytes[off++] = JSONB.Constants.BC_REFERENCE;
 
         if (path == this.lastReference) {
             writeString("#-1");
@@ -1769,7 +1773,7 @@ final class JSONWriterJSONB extends JSONWriter {
 
         ensureCapacity(off + 8);
 
-        bytes[off++] = BC_LOCAL_DATETIME;
+        bytes[off++] = JSONB.Constants.BC_LOCAL_DATETIME;
         bytes[off++] = (byte) (year >>> 8);
         bytes[off++] = (byte) year;
         bytes[off++] = (byte) month;

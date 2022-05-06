@@ -5,7 +5,9 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_INT32;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_INT32_NUM_MIN;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
 final class ObjectReaderImplEnum2X4 implements ObjectReader {
     final Class enumClass;

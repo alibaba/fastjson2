@@ -11,7 +11,10 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
     PropertyPreFilter propertyPreFilter;

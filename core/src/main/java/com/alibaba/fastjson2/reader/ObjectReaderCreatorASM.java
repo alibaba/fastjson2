@@ -1,23 +1,53 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.internal.asm.*;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.codec.BeanInfo;
-import com.alibaba.fastjson2.function.*;
+import com.alibaba.fastjson2.function.ObjBoolConsumer;
+import com.alibaba.fastjson2.function.ObjByteConsumer;
+import com.alibaba.fastjson2.function.ObjCharConsumer;
+import com.alibaba.fastjson2.function.ObjFloatConsumer;
+import com.alibaba.fastjson2.function.ObjShortConsumer;
+import com.alibaba.fastjson2.internal.asm.ASMUtils;
+import com.alibaba.fastjson2.internal.asm.ClassWriter;
+import com.alibaba.fastjson2.internal.asm.FieldWriter;
+import com.alibaba.fastjson2.internal.asm.Label;
+import com.alibaba.fastjson2.internal.asm.MethodWriter;
+import com.alibaba.fastjson2.internal.asm.Opcodes;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
-import com.alibaba.fastjson2.util.*;
-import com.alibaba.fastjson2.JSONReader;
-
+import com.alibaba.fastjson2.util.DynamicClassLoader;
+import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.ObjDoubleConsumer;
+import java.util.function.ObjIntConsumer;
+import java.util.function.ObjLongConsumer;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.reader.ObjectReader.HASH_TYPE;
 

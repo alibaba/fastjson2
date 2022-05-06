@@ -9,8 +9,17 @@ import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.io.IOException;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ObjectReaderGen {
     final Class<?> objectClass;

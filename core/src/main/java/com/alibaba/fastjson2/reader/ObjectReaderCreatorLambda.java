@@ -1,6 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.function.*;
+import com.alibaba.fastjson2.function.ObjBoolConsumer;
+import com.alibaba.fastjson2.function.ObjByteConsumer;
+import com.alibaba.fastjson2.function.ObjCharConsumer;
+import com.alibaba.fastjson2.function.ObjFloatConsumer;
+import com.alibaba.fastjson2.function.ObjShortConsumer;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.JSONException;
@@ -9,14 +13,28 @@ import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 
-import java.lang.invoke.*;
+import java.lang.invoke.CallSite;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.ObjDoubleConsumer;
+import java.util.function.ObjIntConsumer;
+import java.util.function.ObjLongConsumer;
+import java.util.function.Supplier;
 
 public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
 
