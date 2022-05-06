@@ -1049,7 +1049,12 @@ final class JSONReaderUTF16 extends JSONReader {
                 break;
             }
 
-            ch = chars[offset++];
+            if (offset < end) {
+                ch = chars[offset++];
+            } else {
+                ch = EOI;
+                break;
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -1439,12 +1444,18 @@ final class JSONReaderUTF16 extends JSONReader {
             case 't':
             case 'f':
             case 'n':
-                for (; offset < end; ) {
-                    ch = chars[offset++];
-                    if (ch == '}' || ch == ']') {
+                for (; ; ) {
+                    if (offset < end) {
+                        ch = chars[offset++];
+                    } else {
+                        ch = EOI;
+                        break;
+                    }
+                    if (ch == '}' || ch == ']' || ch == '{' || ch == '[') {
                         break;
                     }
                     if (ch == ',') {
+                        comma = true;
                         if (offset >= end) {
                             ch = EOI;
                             return;
@@ -1485,6 +1496,8 @@ final class JSONReaderUTF16 extends JSONReader {
                 ch = chars[offset];
             }
             offset++;
+        } else if (!comma && ch != '}' && ch != ']' && ch != EOI) {
+            throw new JSONValidException("offset " + offset);
         }
     }
 

@@ -1,10 +1,9 @@
-package com.alibaba.fastjson.issue_3400;
+package com.alibaba.fastjson2.v1issues.issue_3400;
 
-import com.alibaba.fastjson.JSONValidator;
+import com.alibaba.fastjson2.JSONValidator;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Description:  <br>

@@ -15,9 +15,8 @@ public class Issue3293 {
         JSONValidator jv = JSONValidator.from("{\"a\"}");
         Assertions.assertFalse(jv.validate());
 
-        jv = JSONValidator.from("113{}[]");
-        jv.setSupportMultiValue(false);
-        Assertions.assertFalse(jv.validate());
+        jv = JSONValidator.from("113");
+        Assertions.assertTrue(jv.validate());
         Assertions.assertEquals(JSONValidator.Type.Value, jv.getType());
 
         jv = JSONValidator.from("{\"a\":\"12333\"}");
