@@ -3,8 +3,10 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.util.JdbcSupport;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -24,73 +26,94 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
         return field;
     }
 
+    static ObjectReader createFormattedObjectReader(Type fieldType, Class fieldClass, String format) {
+        if (format != null && !format.isEmpty()) {
+            String typeName = fieldType.getTypeName();
+            switch (typeName) {
+                case "java.sql.Time":
+                    return JdbcSupport.createTimeReader(format);
+                case "java.sql.Timestamp":
+                    return JdbcSupport.createTimestampReader(format);
+                case "java.sql.Date":
+                    return JdbcSupport.createDateReader(format);
+                case "byte[]":
+                case "[B":
+                    if ("base64".equals(format)) {
+                        return ObjectReaderBaseModule.Base64Impl.INSTANCE;
+                    }
+                    break;
+                default:
+                    if (Calendar.class.isAssignableFrom(fieldClass)) {
+                        if (format == null) {
+                            return ObjectReaderBaseModule.CalendarImpl.INSTANCE;
+                        }
+
+                        switch (format) {
+                            case "unixtime":
+                                return ObjectReaderBaseModule.CalendarImpl.INSTANCE_UNIXTIME;
+                            default:
+                                return new ObjectReaderBaseModule.CalendarImpl(format);
+                        }
+                    }
+
+                    if (fieldClass == ZonedDateTime.class) {
+                        if (format == null) {
+                            return ObjectReaderBaseModule.ZonedDateTimeImpl.INSTANCE;
+                        }
+
+                        switch (format) {
+                            case "unixtime":
+                                return ObjectReaderBaseModule.ZonedDateTimeImpl.INSTANCE_UNIXTIME;
+                            default:
+                                return new ObjectReaderBaseModule.ZonedDateTimeImpl(format);
+                        }
+                    }
+
+                    if (fieldClass == LocalDateTime.class) {
+                        if (format == null) {
+                            return ObjectReaderBaseModule.LocalDateTimeImpl.INSTANCE;
+                        }
+
+                        switch (format) {
+                            case "unixtime":
+                                return ObjectReaderBaseModule.LocalDateTimeImpl.INSTANCE_UNIXTIME;
+                            default:
+                                return new ObjectReaderBaseModule.LocalDateTimeImpl(format);
+                        }
+                    }
+
+                    if (fieldClass == Optional.class) {
+                        if (fieldType instanceof ParameterizedType) {
+                            Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();
+                            if (actualTypeArguments.length == 1) {
+                                Type paramType = actualTypeArguments[0];
+                                Class<?> paramClass = TypeUtils.getClass(paramType);
+                                return createFormattedObjectReader(paramType, paramClass, format);
+                            }
+                        }
+                        return ObjectReaderBaseModule.OptionalImpl.INSTANCE;
+                    }
+                    break;
+            }
+        }
+        return null;
+    }
+
     @Override
     public ObjectReader getObjectReader(JSONReader jsonReader) {
         if (reader != null) {
             return reader;
         }
 
-        if (format != null && !format.isEmpty()) {
-            String typeName = fieldType.getTypeName();
-            switch (typeName) {
-                case "java.sql.Time":
-                    return reader = JdbcSupport.createTimeReader(format);
-                case "java.sql.Timestamp":
-                    return reader = JdbcSupport.createTimestampReader(format);
-                case "java.sql.Date":
-                    return JdbcSupport.createDateReader(format);
-                default:
-                    break;
-            }
+        ObjectReader formattedObjectReader = createFormattedObjectReader(fieldType, fieldClass, format);
+        if (formattedObjectReader != null) {
+            return  reader = formattedObjectReader;
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
             return reader = ObjectReaderImplMap.of(fieldType, fieldClass, features);
         } else if (Collection.class.isAssignableFrom(fieldClass)) {
             return reader = ObjectReaderImplList.of(fieldType, fieldClass, features);
-        }
-
-        if (byte[].class == fieldClass && "base64".equals(format)) {
-            return reader = ObjectReaderBaseModule.Base64Impl.INSTANCE;
-        }
-
-        if (fieldClass == Calendar.class) {
-            if (format == null) {
-                return reader = ObjectReaderBaseModule.CalendarImpl.INSTANCE;
-            }
-
-            switch (format) {
-                case "unixtime":
-                    return reader = ObjectReaderBaseModule.CalendarImpl.INSTANCE_UNIXTIME;
-                default:
-                    return reader = new ObjectReaderBaseModule.CalendarImpl(format);
-            }
-        }
-
-        if (fieldClass == ZonedDateTime.class) {
-            if (format == null) {
-                return reader = ObjectReaderBaseModule.ZonedDateTimeImpl.INSTANCE;
-            }
-
-            switch (format) {
-                case "unixtime":
-                    return reader = ObjectReaderBaseModule.ZonedDateTimeImpl.INSTANCE_UNIXTIME;
-                default:
-                    return reader = new ObjectReaderBaseModule.ZonedDateTimeImpl(format);
-            }
-        }
-
-        if (fieldClass == LocalDateTime.class) {
-            if (format == null) {
-                return reader = ObjectReaderBaseModule.LocalDateTimeImpl.INSTANCE;
-            }
-
-            switch (format) {
-                case "unixtime":
-                    return reader = ObjectReaderBaseModule.LocalDateTimeImpl.INSTANCE_UNIXTIME;
-                default:
-                    return reader = new ObjectReaderBaseModule.LocalDateTimeImpl(format);
-            }
         }
 
         return reader = jsonReader.getObjectReader(fieldType);
