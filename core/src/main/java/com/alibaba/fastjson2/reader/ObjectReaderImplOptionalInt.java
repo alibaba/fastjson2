@@ -13,7 +13,7 @@ final class ObjectReaderImplOptionalInt extends ObjectReaderBaseModule.Primitive
         if (integer == null) {
             return OptionalInt.empty();
         }
-        return OptionalInt.of(integer);
+        return OptionalInt.of(integer.intValue());
     }
 
     @Override
@@ -22,6 +22,6 @@ final class ObjectReaderImplOptionalInt extends ObjectReaderBaseModule.Primitive
         if (integer == null) {
             return OptionalInt.empty();
         }
-        return OptionalInt.of(integer);
+        return OptionalInt.of(integer.intValue());
     }
 }

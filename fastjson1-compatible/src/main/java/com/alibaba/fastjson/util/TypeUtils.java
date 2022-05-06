@@ -22,12 +22,25 @@ import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.reader.ObjectReader;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * @author wenshao[szujobs@hotmail.com]
@@ -327,7 +340,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Boolean) {
-            return (Boolean) value ? 1 : 0;
+            return ((Boolean) value).booleanValue() ? 1 : 0;
         }
         if (value instanceof Map) {
             Map map = (Map) value;

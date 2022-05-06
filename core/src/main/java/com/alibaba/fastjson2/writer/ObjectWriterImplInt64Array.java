@@ -36,7 +36,7 @@ final class ObjectWriterImplInt64Array extends ObjectWriterBaseModule.PrimitiveI
                 jsonWriter.writeNull();
                 continue;
             }
-            jsonWriter.writeInt64(item);
+            jsonWriter.writeInt64(item.longValue());
         }
         jsonWriter.endArray();
     }

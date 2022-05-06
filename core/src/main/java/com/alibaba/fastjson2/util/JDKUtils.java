@@ -123,7 +123,7 @@ public class JDKUtils {
         }
         BIG_ENDIAN = bigEndian == null
                 ? -1
-                : bigEndian ? (byte) 1 : (byte) 0;
+                : bigEndian.booleanValue() ? (byte) 1 : (byte) 0;
 
         if (JVM_VERSION == 8) {
             Field field = null;

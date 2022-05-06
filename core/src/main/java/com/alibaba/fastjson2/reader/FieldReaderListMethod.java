@@ -1,12 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
 
 final class FieldReaderListMethod<T> extends FieldReaderObjectMethod<T>
         implements FieldReaderList<T, Object> {

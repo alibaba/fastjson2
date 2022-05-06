@@ -21,8 +21,8 @@ public class UnsafeUtils {
             Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
             theUnsafeField.setAccessible(true);
             unsafe = (Unsafe) theUnsafeField.get(null);
-        } catch (Throwable e) {
-            e.printStackTrace();
+        } catch (Throwable ignored) {
+            ignored.printStackTrace();
         }
         UNSAFE = unsafe;
     }

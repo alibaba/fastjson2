@@ -16,7 +16,7 @@ final class ObjectWriterImplInt16 extends ObjectWriterBaseModule.PrimitiveImpl {
             return;
         }
 
-        jsonWriter.writeInt16((Short) object);
+        jsonWriter.writeInt16(((Short) object).shortValue());
     }
 
     @Override
@@ -25,6 +25,6 @@ final class ObjectWriterImplInt16 extends ObjectWriterBaseModule.PrimitiveImpl {
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32((Short) object);
+        jsonWriter.writeInt32(((Short) object).shortValue());
     }
 }

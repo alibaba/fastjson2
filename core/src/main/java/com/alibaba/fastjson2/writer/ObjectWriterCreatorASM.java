@@ -9,9 +9,6 @@ import com.alibaba.fastjson2.internal.asm.*;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.*;
-import com.alibaba.fastjson2.internal.asm.ClassWriter;
-import com.alibaba.fastjson2.internal.asm.Label;
-import com.alibaba.fastjson2.internal.asm.MethodWriter;
 
 import java.lang.reflect.*;
 import java.lang.reflect.Type;

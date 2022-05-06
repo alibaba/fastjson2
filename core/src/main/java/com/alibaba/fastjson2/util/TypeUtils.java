@@ -490,7 +490,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Number) {
-            return ((Number) value).longValue();
+            return Long.valueOf(((Number) value).longValue());
         }
 
         if (value instanceof String) {
@@ -534,7 +534,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Number) {
-            return ((Number) value).intValue();
+            return Integer.valueOf(((Number) value).intValue());
         }
 
         if (value instanceof String) {
@@ -646,7 +646,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Number) {
-            return ((Number) value).intValue();
+            return Integer.valueOf(((Number) value).intValue());
         }
 
         if (value instanceof String) {

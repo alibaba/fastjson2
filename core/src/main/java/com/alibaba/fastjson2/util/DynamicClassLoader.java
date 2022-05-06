@@ -15,6 +15,7 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.lang.reflect.Type;
+import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,8 +70,9 @@ public class DynamicClassLoader extends ClassLoader {
     }
 
     static {
-        DOMAIN = (java.security.ProtectionDomain) java.security.AccessController.doPrivileged(
+        DOMAIN = (java.security.ProtectionDomain) AccessController.doPrivileged(
                 (PrivilegedAction<Object>) DynamicClassLoader.class::getProtectionDomain);
+
     }
 
     private final ClassLoader parent;

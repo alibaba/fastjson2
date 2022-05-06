@@ -538,7 +538,7 @@ public abstract class JSONReader implements Closeable {
         switch (valueType) {
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    return (long) (negative ? -mag3 : mag3);
+                    return Long.valueOf(negative ? -mag3 : mag3);
                 }
                 int[] mag;
                 if (mag0 == 0) {
@@ -566,7 +566,7 @@ public abstract class JSONReader implements Closeable {
             case JSON_TYPE_DEC:
                 return getNumber().longValue();
             case JSON_TYPE_BOOL:
-                return (long) (boolValue ? 1 : 0);
+                return Long.valueOf(boolValue ? 1 : 0);
             case JSON_TYPE_NULL:
                 return null;
             case JSON_TYPE_STRING: {
@@ -1373,7 +1373,7 @@ public abstract class JSONReader implements Closeable {
                 if (exponent != 0) { // TODO
                     double doubleValue = Double.parseDouble(
                             decimal + "E" + exponent);
-                    return doubleValue;
+                    return Double.valueOf(doubleValue);
                 }
 
                 if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {

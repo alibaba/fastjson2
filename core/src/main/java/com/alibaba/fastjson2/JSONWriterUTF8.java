@@ -5,10 +5,6 @@ import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.RyuDouble;
 import com.alibaba.fastjson2.util.RyuFloat;
 
-import static com.alibaba.fastjson2.util.IOUtils.DigitOnes;
-import static com.alibaba.fastjson2.util.IOUtils.DigitTens;
-import static com.alibaba.fastjson2.util.IOUtils.digits;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -21,7 +17,15 @@ import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONFactory.CACHE_THREAD;
+import static com.alibaba.fastjson2.JSONFactory.DIGITS;
+import static com.alibaba.fastjson2.JSONFactory.HIGH;
+import static com.alibaba.fastjson2.JSONFactory.HIGH_BIGINT;
+import static com.alibaba.fastjson2.JSONFactory.LOW;
+import static com.alibaba.fastjson2.JSONFactory.LOW_BIGINT;
+import static com.alibaba.fastjson2.util.IOUtils.DigitOnes;
+import static com.alibaba.fastjson2.util.IOUtils.DigitTens;
+import static com.alibaba.fastjson2.util.IOUtils.digits;
 
 class JSONWriterUTF8 extends JSONWriter {
     static final byte[] REF_PREF = "{\"$ref\":".getBytes(StandardCharsets.US_ASCII);

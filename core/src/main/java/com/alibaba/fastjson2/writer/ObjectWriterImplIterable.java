@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 class ObjectWriterImplIterable extends ObjectWriterBaseModule.PrimitiveImpl {

@@ -5,8 +5,6 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.util.Map;
-
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
 public abstract class ObjectReaderBean<T> implements ObjectReader<T> {

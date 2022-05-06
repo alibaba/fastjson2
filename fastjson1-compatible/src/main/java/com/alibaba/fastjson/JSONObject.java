@@ -229,7 +229,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return false;
         }
 
-        return booleanVal;
+        return booleanVal.booleanValue();
     }
 
     public byte getByteValue(String key) {
@@ -240,7 +240,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return 0;
         }
 
-        return byteVal;
+        return byteVal.byteValue();
     }
 
     public Short getShort(String key) {
@@ -257,7 +257,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return 0;
         }
 
-        return shortVal;
+        return shortVal.shortValue();
     }
 
     public Integer getInteger(String key) {
@@ -287,7 +287,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return 0L;
         }
 
-        return longVal;
+        return longVal.longValue();
     }
 
     public Float getFloat(String key) {
@@ -304,7 +304,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return 0F;
         }
 
-        return floatValue;
+        return floatValue.floatValue();
     }
 
     public Double getDouble(String key) {
@@ -321,7 +321,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return 0D;
         }
 
-        return doubleValue;
+        return doubleValue.doubleValue();
     }
 
     public BigDecimal getBigDecimal(String key) {

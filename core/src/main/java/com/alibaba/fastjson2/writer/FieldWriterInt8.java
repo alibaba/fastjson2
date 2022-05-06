@@ -83,6 +83,6 @@ abstract class FieldWriterInt8<T> extends FieldWriterImpl<T> {
             jsonWriter.writeNull();
             return;
         }
-        jsonWriter.writeInt32(value);
+        jsonWriter.writeInt32(value.byteValue());
     }
 }

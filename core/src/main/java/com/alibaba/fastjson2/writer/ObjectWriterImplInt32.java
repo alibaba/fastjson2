@@ -13,7 +13,7 @@ final class ObjectWriterImplInt32 extends ObjectWriterBaseModule.PrimitiveImpl {
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32((Integer) object);
+        jsonWriter.writeInt32(((Integer) object).intValue());
     }
 
     @Override
@@ -22,6 +22,6 @@ final class ObjectWriterImplInt32 extends ObjectWriterBaseModule.PrimitiveImpl {
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32((Integer) object);
+        jsonWriter.writeInt32(((Integer) object).intValue());
     }
 }

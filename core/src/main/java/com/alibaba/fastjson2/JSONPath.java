@@ -301,7 +301,7 @@ public abstract class JSONPath {
             throw new JSONException("can not convert to long : " + object);
         }
         Object converted = typeConvert.apply(object);
-        return (Long) converted;
+        return ((Long) converted).longValue();
     }
 
     public Integer extractInt32(JSONReader jsonReader) {
@@ -326,7 +326,7 @@ public abstract class JSONPath {
             throw new JSONException("can not convert to int : " + object);
         }
         Object converted = typeConvert.apply(object);
-        return (Integer) converted;
+        return ((Integer) converted).intValue();
     }
 
     public static JSONPath of(String path) {
@@ -1182,11 +1182,11 @@ public abstract class JSONPath {
             } else if (fieldValue instanceof Float) {
                 cmp = ((Float) fieldValue)
                         .compareTo(
-                                (float) value);
+                                Float.valueOf(value));
             } else if (fieldValue instanceof Double) {
                 cmp = ((Double) fieldValue)
                         .compareTo(
-                                (double) value);
+                                Double.valueOf(value));
             } else {
                 throw new UnsupportedOperationException();
             }
@@ -2838,11 +2838,11 @@ public abstract class JSONPath {
         }
 
         public void setInt(Context context, int value) {
-            set(context, value);
+            set(context, Integer.valueOf(value));
         }
 
         public void setLong(Context context, long value) {
-            set(context, value);
+            set(context, Long.valueOf(value));
         }
     }
 
@@ -4025,7 +4025,7 @@ public abstract class JSONPath {
                             Object entryKey = entry.getKey();
                             Object entryValue = entry.getValue();
                             if (entryKey instanceof Long) {
-                                if (entryKey.equals((long) index)) {
+                                if (entryKey.equals(Long.valueOf(index))) {
                                     value = entryValue;
                                     break;
                                 }
@@ -4041,7 +4041,7 @@ public abstract class JSONPath {
                             Object entryKey = entry.getKey();
                             Object entryValue = entry.getValue();
                             if (entryKey instanceof Long) {
-                                if (entryKey.equals((long) index)) {
+                                if (entryKey.equals(Long.valueOf(index))) {
                                     value = entryValue;
                                     break;
                                 }

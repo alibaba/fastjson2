@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;

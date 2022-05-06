@@ -546,8 +546,8 @@ public class Differ {
                     }
                 }
 
-            } catch (Throwable e) {
-                e.printStackTrace();
+            } catch (Throwable ignored) {
+                ignored.printStackTrace();
             }
         }
 

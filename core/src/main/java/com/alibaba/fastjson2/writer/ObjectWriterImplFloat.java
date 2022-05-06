@@ -13,7 +13,7 @@ final class ObjectWriterImplFloat extends ObjectWriterBaseModule.PrimitiveImpl {
             jsonWriter.writeNull();
             return;
         }
-        jsonWriter.writeFloat((Float) object);
+        jsonWriter.writeFloat(((Float) object).floatValue());
     }
 
     @Override
@@ -22,6 +22,6 @@ final class ObjectWriterImplFloat extends ObjectWriterBaseModule.PrimitiveImpl {
             jsonWriter.writeNull();
             return;
         }
-        jsonWriter.writeFloat((Float) object);
+        jsonWriter.writeFloat(((Float) object).floatValue());
     }
 }

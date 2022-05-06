@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.util.DynamicClassLoader;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import javax.tools.*;
 import java.io.*;
