@@ -917,7 +917,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     public <T> T toJavaObject(Type type) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(type);
-        return objectReader.createInstance(this);
+        return objectReader.createInstance(this, 0L);
     }
 
     /**
@@ -931,7 +931,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     public <T> T toJavaObject(Class<T> clazz) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(clazz);
-        return objectReader.createInstance(this);
+        return objectReader.createInstance(this, 0L);
     }
 
     /**
@@ -945,11 +945,15 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
      * @throws JSONException If no suitable conversion method is found
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> T getObject(String key, Type type) {
+    public <T> T getObject(String key, Type type, JSONReader.Feature... features) {
         Object value = super.get(key);
 
         if (value == null) {
             return null;
+        }
+
+        if (type == Object.class && features.length == 0) {
+            return (T) value;
         }
 
         Class<?> valueClass = value.getClass();
@@ -961,7 +965,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
 
         if (value instanceof Map) {
             ObjectReader<T> objectReader = provider.getObjectReader(type);
-            return objectReader.createInstance((Map) value);
+            return objectReader.createInstance((Map) value, features);
         }
 
         if (value instanceof Collection) {
@@ -976,6 +980,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
 
         String json = JSON.toJSONString(value);
         JSONReader jsonReader = JSONReader.of(json);
+        jsonReader.context.config(features);
 
         ObjectReader objectReader = provider.getObjectReader(clazz);
         return (T) objectReader.readObject(jsonReader);

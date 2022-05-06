@@ -204,7 +204,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
     }
 
     @Override
-    public Object createInstance(Map map) {
+    public Object createInstance(Map map, long features) {
         if (mapType.isInstance(map)) {
             return map;
         }
