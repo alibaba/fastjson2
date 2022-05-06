@@ -84,9 +84,7 @@ public class TLongIntHashMap {
                     int probe = 1 + (hash % (length - 2));
                     final int loopIndex = index;
 
-                    /**
-                     * Look until FREE slot or we start to loop
-                     */
+                    // Look until FREE slot or we start to loop
                     do {
                         index -= probe;
                         if (index < 0) {
@@ -277,9 +275,7 @@ public class TLongIntHashMap {
             int probe = 1 + (hash % (length - 2));
             final int loopIndex = index;
 
-            /**
-             * Look until FREE slot or we start to loop
-             */
+            // Look until FREE slot or we start to loop
             do {
                 index -= probe;
                 if (index < 0) {

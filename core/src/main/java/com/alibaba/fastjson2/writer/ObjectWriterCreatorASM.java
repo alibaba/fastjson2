@@ -1807,7 +1807,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             mw.visitJumpInsn(Opcodes.IFNE, endIfNull_);
         }
 
-        /**
+        /*
          * boolean refDetect = jsonWriter.isRefDetect();
          * if (refDetect) {
          *     if (value == object) {
