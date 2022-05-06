@@ -73,6 +73,10 @@ public abstract class JSONReader implements Closeable {
         return ch;
     }
 
+    public final boolean isEnd() {
+        return ch == EOI;
+    }
+
     public byte getType() {
         return -128;
     }
