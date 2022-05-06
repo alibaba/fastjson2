@@ -1828,12 +1828,18 @@ class JSONReaderUTF8 extends JSONReader {
             case 't':
             case 'f':
             case 'n':
-                for (; offset < end; ) {
-                    ch = (char) bytes[offset++];
-                    if (ch == '}' || ch == ']') {
+                for (; ; ) {
+                    if (offset < end) {
+                        ch = (char) bytes[offset++];
+                    } else {
+                        ch = EOI;
+                        break;
+                    }
+                    if (ch == '}' || ch == ']' || ch == '{' || ch == '[') {
                         break;
                     }
                     if (ch == ',') {
+                        comma = true;
                         if (offset >= end) {
                             ch = EOI;
                             return;
@@ -1875,6 +1881,8 @@ class JSONReaderUTF8 extends JSONReader {
                 ch = (char) bytes[offset];
             }
             offset++;
+        } else if (!comma && ch != '}' && ch != ']' && ch != EOI) {
+            throw new JSONValidException("offset " + offset);
         }
     }
 
@@ -2024,7 +2032,12 @@ class JSONReaderUTF8 extends JSONReader {
                 break;
             }
 
-            ch = bytes[offset++];
+            if (offset < end) {
+                ch = bytes[offset++];
+            } else {
+                ch = EOI;
+                break;
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
