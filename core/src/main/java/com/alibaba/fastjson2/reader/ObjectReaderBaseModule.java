@@ -2219,7 +2219,13 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     }
 
     static class Inte8ValueArrayImpl extends PrimitiveImpl {
-        static final Inte8ValueArrayImpl INSTANCE = new Inte8ValueArrayImpl();
+        static final Inte8ValueArrayImpl INSTANCE = new Inte8ValueArrayImpl(null);
+
+        final String format;
+
+        Inte8ValueArrayImpl(String format) {
+            this.format = format;
+        }
 
         @Override
         public Object readObject(JSONReader jsonReader, long features) {

@@ -6,10 +6,16 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 
 final class ObjectWriterImplOptional extends ObjectWriterBaseModule.PrimitiveImpl {
-    static final ObjectWriterImplOptional INSTANCE = new ObjectWriterImplOptional();
+    static final ObjectWriterImplOptional INSTANCE = new ObjectWriterImplOptional(null);
 
     Type valueType;
     long features;
+
+    final ObjectWriter initValueWriter;
+
+    public ObjectWriterImplOptional(ObjectWriter initValueWriter) {
+        this.initValueWriter = initValueWriter;
+    }
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {

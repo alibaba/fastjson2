@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.time;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.JSONBDump;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.*;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +24,12 @@ public class DateTest {
         date.setDate(new java.util.Date(0));
         jw.writeAny(date);
         assertEquals("{\"date\":\"1970-01-01 00:00:00\"}", jw.toString());
+    }
+
+    @Test
+    public void testDateNull() {
+        Date[] dates = new Date[] {null};
+        assertEquals("[null]", JSON.toJSONString(dates));
     }
 
     @Test
