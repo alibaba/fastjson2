@@ -1233,7 +1233,12 @@ public abstract class JSONWriter implements Closeable {
     }
 
     public void flushTo(java.io.Writer to) {
-        throw new UnsupportedOperationException();
+        try {
+            String json = this.toString();
+            to.write(json);
+        } catch (IOException e) {
+            throw new JSONException("flushTo error", e);
+        }
     }
 
     public int flushTo(OutputStream to) throws IOException {
