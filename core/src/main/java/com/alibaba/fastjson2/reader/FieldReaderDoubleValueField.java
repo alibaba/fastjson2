@@ -6,8 +6,8 @@ import com.alibaba.fastjson2.JSONReader;
 import java.lang.reflect.Field;
 
 final class FieldReaderDoubleValueField<T> extends FieldReaderObjectField<T> {
-    FieldReaderDoubleValueField(String fieldName, Class fieldType, int ordinal, long features, String format, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, field);
+    FieldReaderDoubleValueField(String fieldName, Class fieldType, int ordinal, long features, String format, Double defaultValue, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
     }
 
     @Override

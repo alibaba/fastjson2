@@ -185,6 +185,7 @@ public class ObjectReaderCreator {
                         fieldInfo.ordinal,
                         fieldInfo.features,
                         fieldInfo.format,
+                        fieldInfo.defaultValue,
                         method.getGenericReturnType(),
                         method.getReturnType(),
                         method
@@ -210,6 +211,7 @@ public class ObjectReaderCreator {
                     , fieldInfo.ordinal
                     , fieldInfo.features
                     , fieldInfo.format
+                    , fieldInfo.defaultValue
                     , fieldType
                     , fieldClass
                     , method
@@ -235,6 +237,7 @@ public class ObjectReaderCreator {
                                             , fieldInfo.ordinal
                                             , fieldInfo.features
                                             , fieldInfo.format
+                                            , fieldInfo.defaultValue
                                             , fieldType
                                             , fieldClass
                                             , method
@@ -703,6 +706,7 @@ public class ObjectReaderCreator {
                 , fieldInfo.ordinal
                 , fieldInfo.features
                 , fieldInfo.format
+                , fieldInfo.defaultValue
                 , fieldType
                 , fieldClass
                 , field);
@@ -728,6 +732,7 @@ public class ObjectReaderCreator {
                                         , alternateName
                                         , fieldInfo.ordinal
                                         , fieldInfo.features
+                                        , fieldInfo.defaultValue
                                         , null
                                         , fieldType
                                         , fieldClass
@@ -796,6 +801,7 @@ public class ObjectReaderCreator {
                     fieldInfo.ordinal,
                     fieldInfo.features,
                     fieldInfo.format,
+                    fieldInfo.defaultValue,
                     method.getGenericReturnType(),
                     method.getReturnType(),
                     method
@@ -828,6 +834,7 @@ public class ObjectReaderCreator {
                 , fieldInfo.ordinal
                 , fieldInfo.features
                 , fieldInfo.format
+                , fieldInfo.defaultValue
                 , fieldType
                 , fieldClass
                 , method
@@ -852,6 +859,7 @@ public class ObjectReaderCreator {
                                         , fieldInfo.ordinal
                                         , fieldInfo.features
                                         , fieldInfo.format
+                                        , fieldInfo.defaultValue
                                         , fieldType
                                         , fieldClass
                                         , method
@@ -970,7 +978,7 @@ public class ObjectReaderCreator {
             , Class fieldClass
             , Method method
     ) {
-        return createFieldReaderMethod(objectType, objectType, fieldName, 0, 0L, null, fieldType, fieldClass, method);
+        return createFieldReaderMethod(objectType, objectType, fieldName, 0, 0L, null, null, fieldType, fieldClass, method);
     }
 
     public <T> FieldReader createFieldReader(
@@ -992,7 +1000,7 @@ public class ObjectReaderCreator {
             , Class fieldClass
             , Method method
     ) {
-        return createFieldReaderMethod(objectClass, objectClass, fieldName, 0, 0L, format, fieldType, fieldClass, method);
+        return createFieldReaderMethod(objectClass, objectClass, fieldName, 0, 0L, format, null, fieldType, fieldClass, method);
     }
 
     protected <T> FieldReader createFieldReaderParam(
@@ -1032,6 +1040,7 @@ public class ObjectReaderCreator {
             , int ordinal
             , long features
             , String format
+            , Object defaultValue
             , Type fieldType
             , Class fieldClass
             , Method method
@@ -1040,71 +1049,83 @@ public class ObjectReaderCreator {
             method.setAccessible(true);
         }
 
-        if (fieldType == boolean.class) {
-            return new FieldReaderBoolValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+        if (defaultValue != null && defaultValue.getClass() != fieldClass) {
+            Function typeConvert = JSONFactory
+                    .getDefaultObjectReaderProvider()
+                    .getTypeConvert(defaultValue.getClass(), fieldType);
+            if (typeConvert != null) {
+                defaultValue = typeConvert.apply(defaultValue);
+            } else {
+                throw new JSONException("illegal defaultValue : " + defaultValue + ", class " + fieldClass.getName());
+            }
         }
+
+        if (fieldType == boolean.class) {
+            return new FieldReaderBoolValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Boolean) defaultValue, method);
+        }
+
         if (fieldType == Boolean.class) {
-            return new FieldReaderBoolMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderBoolMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Boolean) defaultValue, method);
         }
 
         if (fieldType == byte.class) {
-            return new FieldReaderInt8ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderInt8ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Byte) defaultValue, method);
         }
 
         if (fieldType == short.class) {
-            return new FieldReaderInt16ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderInt16ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Short) defaultValue, method);
         }
 
         if (fieldType == int.class) {
-            return new FieldReaderInt32ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderInt32ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Integer) defaultValue, method);
         }
 
         if (fieldType == long.class) {
-            return new FieldReaderInt64ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderInt64ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Long) defaultValue, method);
         }
 
         if (fieldType == float.class) {
-            return new FieldReaderFloatValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderFloatValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Float) defaultValue, method);
         }
 
         if (fieldType == double.class) {
-            return new FieldReaderDoubleValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderDoubleValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Double) defaultValue, method);
         }
 
         if (fieldType == Byte.class) {
-            return new FieldReaderInt8Method(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderInt8Method(fieldName, fieldType, fieldClass, ordinal, features, format, (Byte) defaultValue, method);
         }
 
         if (fieldType == Short.class) {
-            return new FieldReaderInt16Method(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderInt16Method(fieldName, fieldType, fieldClass, ordinal, features, format, (Short) defaultValue, method);
         }
 
         if (fieldType == Integer.class) {
-            return new FieldReaderInt32Method(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderInt32Method(fieldName, fieldType, fieldClass, ordinal, features, format, (Integer) defaultValue, method);
         }
 
         if (fieldType == Long.class) {
-            return new FieldReaderInt64Method(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderInt64Method(fieldName, fieldType, fieldClass, ordinal, features, format, (Long)defaultValue, method);
         }
 
         if (fieldType == Float.class) {
-            return new FieldReaderFloatMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderFloatMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Float) defaultValue, method);
         }
 
         if (fieldType == Double.class) {
-            return new FieldReaderDoubleMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderDoubleMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Double) defaultValue, method);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderBigDecimalMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (BigDecimal) defaultValue, method);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderBigIntegerMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (BigInteger) defaultValue, method);
         }
 
         if (fieldType == String.class) {
-            return new FieldReaderStringMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderStringMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (String) defaultValue, method);
         }
 
         if (method.getParameterCount() == 0) {
@@ -1183,6 +1204,7 @@ public class ObjectReaderCreator {
                 , ordinal
                 , features
                 , format
+                , defaultValue
                 , method
         );
     }
@@ -1215,7 +1237,7 @@ public class ObjectReaderCreator {
             , Class fieldClass
             , Field field
     ) {
-        return createFieldReader(objectClass, objectType, fieldName, 0, features, format, fieldType, field.getType(), field);
+        return createFieldReader(objectClass, objectType, fieldName, 0, features, format, null, fieldType, field.getType(), field);
     }
 
     public <T> FieldReader<T> createFieldReader(
@@ -1225,10 +1247,22 @@ public class ObjectReaderCreator {
             , int ordinal
             , long features
             , String format
+            , Object defaultValue
             , Type fieldType
             , Class fieldClass
             , Field field
     ) {
+        if (defaultValue != null && defaultValue.getClass() != fieldClass) {
+            Function typeConvert = JSONFactory
+                    .getDefaultObjectReaderProvider()
+                    .getTypeConvert(defaultValue.getClass(), fieldType);
+            if (typeConvert != null) {
+                defaultValue = typeConvert.apply(defaultValue);
+            } else {
+                throw new JSONException("illegal defaultValue : " + defaultValue + ", class " + fieldClass.getName());
+            }
+        }
+
         if (field != null) {
             if (!objectClass.getName().startsWith("java.lang")) {
                 field.setAccessible(true);
@@ -1236,78 +1270,78 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == int.class) {
-            return new FieldReaderInt32ValueField(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderInt32ValueField(fieldName, fieldClass, ordinal, format, (Integer) defaultValue, field);
         }
         if (fieldClass == Integer.class) {
-            return new FieldReaderInt32Field(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderInt32Field(fieldName, fieldClass, ordinal, format, (Integer) defaultValue, field);
         }
 
         if (fieldClass == long.class) {
-            return new FieldReaderInt64ValueField(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderInt64ValueField(fieldName, fieldClass, ordinal, format, (Long) defaultValue, field);
         }
         if (fieldClass == Long.class) {
-            return new FieldReaderInt64Field(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderInt64Field(fieldName, fieldClass, ordinal, format, (Long) defaultValue, field);
         }
 
         if (fieldClass == short.class) {
-            return new FieldReaderInt16ValueField(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderInt16ValueField(fieldName, fieldClass, ordinal, format, (Short) defaultValue, field);
         }
 
         if (fieldClass == Short.class) {
-            return new FieldReaderInt16Field(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderInt16Field(fieldName, fieldClass, ordinal, format, (Short) defaultValue, field);
         }
 
         if (fieldClass == boolean.class) {
-            return new FieldReaderBoolValueField(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderBoolValueField(fieldName, fieldClass, ordinal, (Boolean) defaultValue, field);
         }
         if (fieldClass == Boolean.class) {
-            return new FieldReaderBoolField(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderBoolField(fieldName, fieldClass, ordinal, (Boolean) defaultValue, field);
         }
 
         if (fieldClass == byte.class) {
-            return new FieldReaderInt8ValueField(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderInt8ValueField(fieldName, fieldClass, ordinal, (Byte) defaultValue, field);
         }
 
         if (fieldClass == Byte.class) {
-            return new FieldReaderInt8Field(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderInt8Field(fieldName, fieldClass, ordinal, format, (Byte) defaultValue, field);
         }
 
         if (fieldClass == float.class) {
-            return new FieldReaderFloatValueField(fieldName, fieldClass, ordinal, features, format, field);
+            return new FieldReaderFloatValueField(fieldName, fieldClass, ordinal, features, format, (Float) defaultValue, field);
         }
         if (fieldClass == Float.class) {
-            return new FieldReaderFloatField(fieldName, fieldClass, ordinal, features, format, field);
+            return new FieldReaderFloatField(fieldName, fieldClass, ordinal, features, format, (Float) defaultValue, field);
         }
 
         if (fieldClass == double.class) {
-            return new FieldReaderDoubleValueField(fieldName, fieldClass, ordinal, features, format, field);
+            return new FieldReaderDoubleValueField(fieldName, fieldClass, ordinal, features, format, (Double) defaultValue, field);
         }
         if (fieldClass == Double.class) {
-            return new FieldReaderDoubleField(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderDoubleField(fieldName, fieldClass, ordinal, format, (Double) defaultValue, field);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalField(fieldName, fieldClass, ordinal, features, format, field);
+            return new FieldReaderBigDecimalField(fieldName, fieldClass, ordinal, features, format, (BigDecimal) defaultValue, field);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerField(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderBigIntegerField(fieldName, fieldClass, ordinal, format, (BigInteger) defaultValue, field);
         }
 
         if (fieldClass == String.class) {
-            return new FieldReaderStringField(fieldName, fieldClass, ordinal, features, format, field);
+            return new FieldReaderStringField(fieldName, fieldClass, ordinal, features, format, (String) defaultValue, field);
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDateField(fieldName, fieldClass, ordinal, features, format, field);
+            return new FieldReaderDateField(fieldName, fieldClass, ordinal, features, format, (Date) defaultValue, field);
         }
 
         if (fieldClass == AtomicBoolean.class) {
-            return new FieldReaderAtomicBooleanFieldReadOnly(fieldName, fieldClass, ordinal, field);
+            return new FieldReaderAtomicBooleanFieldReadOnly(fieldName, fieldClass, ordinal, format, (AtomicBoolean) defaultValue, field);
         }
 
         if (fieldClass == AtomicReference.class) {
-            return new FieldReaderAtomicReferenceField(fieldName, fieldType, fieldClass, ordinal, field);
+            return new FieldReaderAtomicReferenceField(fieldName, fieldType, fieldClass, ordinal, format, field);
         }
 
         Type fieldTypeResolved = null;
@@ -1382,11 +1416,11 @@ public class ObjectReaderCreator {
 
         if (finalField) {
             if (fieldClass == int[].class) {
-                return new FieldReaderInt32ValueArrayFinalField(fieldName, fieldClass, ordinal, field);
+                return new FieldReaderInt32ValueArrayFinalField(fieldName, fieldClass, ordinal, format, (int[]) defaultValue, field);
             }
 
             if (fieldClass == long[].class) {
-                return new FieldReaderInt64ValueArrayFinalField(fieldName, fieldClass, ordinal, field);
+                return new FieldReaderInt64ValueArrayFinalField(fieldName, fieldClass, ordinal, format, (long[]) defaultValue, field);
             }
         }
 
@@ -1399,6 +1433,7 @@ public class ObjectReaderCreator {
                         , ordinal
                         , features
                         , format
+                        , defaultValue
                         , field);
             } else {
                 return new FieldReaderObjectField(
@@ -1408,14 +1443,15 @@ public class ObjectReaderCreator {
                         , ordinal
                         , features
                         , format
+                        , defaultValue
                         , field);
             }
         }
 
         if (JDKUtils.UNSAFE_SUPPORT) {
-            return new FieldReaderObjectFieldUF(fieldName, fieldType, fieldClass, ordinal, features, format, field);
+            return new FieldReaderObjectFieldUF(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, field);
         }
-        return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, field);
+        return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, field);
     }
 
     <T, V> FieldReader createFieldReader(
@@ -1425,7 +1461,7 @@ public class ObjectReaderCreator {
             , Method method
             , BiConsumer<T, V> function
     ) {
-        return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, 0, null, method, function);
+        return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, 0, null, null, method, function);
     }
 
     <T, V> FieldReader createFieldReader(
@@ -1437,6 +1473,7 @@ public class ObjectReaderCreator {
             , int ordinal
             , long features
             , String format
+            , Object defaultValue
             , Method method
             , BiConsumer<T, V> function
     ) {

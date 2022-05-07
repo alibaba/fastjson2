@@ -120,24 +120,26 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         {
-            provider.registerTypeConvert(String.class, double.class
-                    , o -> o == null || "null".equals(o) || "".equals(o) ? 0D : Double.parseDouble(((String) o)));
+            provider.registerTypeConvert(String.class, double.class, new StringToNumber(double.class, (double) 0));
+            provider.registerTypeConvert(String.class, Double.class, new StringToNumber(Double.class, null));
+
+            provider.registerTypeConvert(String.class, float.class, new StringToNumber(float.class, (float) 0));
+            provider.registerTypeConvert(String.class, Float.class, new StringToNumber(Float.class, null));
         }
         {
-            provider.registerTypeConvert(String.class, float.class
-                    , o -> o == null || "null".equals(o) || "".equals(o) ? 0F : Float.parseFloat(((String) o)));
-        }
-        {
-            provider.registerTypeConvert(String.class, short.class
-                    , o -> o == null || "null".equals(o) || "".equals(o) ? (short) 0 : Short.parseShort(((String) o)));
+            provider.registerTypeConvert(String.class, short.class, new StringToNumber(short.class, (short) 0));
+            provider.registerTypeConvert(String.class, Short.class, new StringToNumber(Short.class, null));
         }
         {
             provider.registerTypeConvert(String.class, byte.class
                     , o -> o == null || "null".equals(o) || "".equals(o) ? (byte) 0 : Byte.parseByte(((String) o)));
+            provider.registerTypeConvert(String.class, Byte.class
+                    , o -> o == null || "null".equals(o) || "".equals(o) ? null : Byte.parseByte(((String) o)));
         }
 
         {
             provider.registerTypeConvert(String.class, boolean.class, STRING_TO_BOOLEAN_VALUE);
+            provider.registerTypeConvert(String.class, Boolean.class, STRING_TO_BOOLEAN_VALUE);
             provider.registerTypeConvert(Boolean.class, boolean.class, o -> o);
         }
         {
@@ -648,6 +650,13 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                             }
                             break;
                         }
+                        case "defaultValue": {
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                fieldInfo.defaultValue = value;
+                            }
+                            break;
+                        }
                         case "alternateNames": {
                             String[] alternateNames = (String[]) result;
                             if (alternateNames.length != 0) {
@@ -724,6 +733,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 }
 
                 fieldInfo.format = jsonFieldFormat;
+            }
+
+            String defaultValue = jsonField.defaultValue();
+            if (!defaultValue.isEmpty()) {
+                fieldInfo.defaultValue = defaultValue;
             }
 
             String[] alternateNames = jsonField.alternateNames();

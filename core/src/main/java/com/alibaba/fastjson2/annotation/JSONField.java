@@ -71,4 +71,10 @@ public @interface JSONField {
     JSONWriter.Feature[] serializeFeatures() default {};
 
     boolean value() default false;
+
+    /**
+     *
+     * @since 1.2.61
+     */
+    String defaultValue() default "";
 }

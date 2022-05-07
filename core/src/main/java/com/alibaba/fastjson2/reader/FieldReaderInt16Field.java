@@ -7,8 +7,8 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Field;
 
 final class FieldReaderInt16Field<T> extends FieldReaderObjectField<T> {
-    FieldReaderInt16Field(String fieldName, Class fieldType, int ordinal, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, null, field);
+    FieldReaderInt16Field(String fieldName, Class fieldType, int ordinal, String format, Short defaultValue, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, 0, format, defaultValue, field);
     }
 
     @Override
