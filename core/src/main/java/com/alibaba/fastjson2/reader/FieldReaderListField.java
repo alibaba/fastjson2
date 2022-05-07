@@ -29,7 +29,7 @@ class FieldReaderListField<T>
             String format,
             Field field) {
 
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, field);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, field);
         this.itemType = itemType;
         this.fieldClassHash = fieldClass == null ? 0 : Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
         this.fieldObjectReader = ObjectReaderImplList.of(fieldType, fieldClass, features);

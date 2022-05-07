@@ -14,7 +14,12 @@ class FieldReaderObjectMethod<T>
     ObjectReader fieldObjectReader;
 
     FieldReaderObjectMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null);
+        this.method = method;
+    }
+
+    FieldReaderObjectMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue, Method method) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue);
         this.method = method;
     }
 

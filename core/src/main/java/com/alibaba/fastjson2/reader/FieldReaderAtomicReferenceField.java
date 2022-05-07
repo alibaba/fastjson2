@@ -13,8 +13,8 @@ final class FieldReaderAtomicReferenceField<T>
     final Field field;
     final boolean readOnly;
 
-    FieldReaderAtomicReferenceField(String fieldName, Type fieldType, Class fieldClass, int ordinal, Field field) {
-        super(fieldName, fieldType, fieldClass, ordinal, 0, null);
+    FieldReaderAtomicReferenceField(String fieldName, Type fieldType, Class fieldClass, int ordinal, String format, Field field) {
+        super(fieldName, fieldType, fieldClass, ordinal, 0, format);
         this.field = field;
 
         readOnly = Modifier.isFinal(field.getModifiers());

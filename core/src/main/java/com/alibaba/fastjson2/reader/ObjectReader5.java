@@ -88,6 +88,20 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
         if (fieldReader4.isUnwrapped()) {
             extraFieldReader = fieldReader4;
         }
+
+        hasDefaultValue = fieldReader0.getDefaultValue() != null
+                || fieldReader1.getDefaultValue() != null
+                || fieldReader2.getDefaultValue() != null
+                || fieldReader3.getDefaultValue() != null
+                || fieldReader4.getDefaultValue() != null;
+    }
+
+    protected void initDefaultValue(T object) {
+        fieldReader0.setDefault(object);
+        fieldReader1.setDefault(object);
+        fieldReader2.setDefault(object);
+        fieldReader3.setDefault(object);
+        fieldReader4.setDefault(object);
     }
 
     @Override
@@ -203,7 +217,10 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
         if (jsonReader.isArray()
                 && jsonReader.isSupportBeanArray()) {
             jsonReader.nextIfMatch('[');
-            Object object = defaultCreator.get();
+            T object = defaultCreator.get();
+            if (hasDefaultValue) {
+                initDefaultValue(object);
+            }
 
             fieldReader0.readFieldValue(jsonReader, object);
             fieldReader1.readFieldValue(jsonReader, object);
@@ -223,7 +240,11 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
         }
 
         jsonReader.nextIfMatch('{');
-        Object object = defaultCreator.get();
+        T object = defaultCreator.get();
+        if (hasDefaultValue) {
+            initDefaultValue(object);
+        }
+
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfMatch('}')) {
                 break;

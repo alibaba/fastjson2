@@ -110,7 +110,8 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
                         , fieldName
                         , fieldInfo.ordinal
                         , fieldInfo.features
-                        , null
+                        , fieldInfo.format
+                        , fieldInfo.defaultValue
                         , method.getGenericReturnType()
                         , method.getReturnType()
                         , method);
@@ -131,7 +132,8 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
                     , fieldName
                     , fieldInfo.ordinal
                     , fieldInfo.features
-                    , null
+                    , fieldInfo.format
+                    , fieldInfo.defaultValue
                     , fieldType
                     , fieldClass
                     , method
@@ -162,6 +164,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
                                     , fieldInfo.ordinal
                                     , fieldInfo.features
                                     , fieldInfo.format
+                                    , fieldInfo.defaultValue
                                     , field.getGenericType()
                                     , field.getType()
                                     , field
@@ -191,6 +194,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
             , int ordinal
             , long features
             , String format
+            , Object defaultValue
             , Type fieldType
             , Class fieldClass
             , Method method
@@ -198,9 +202,9 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
         if ((method != null && method.getReturnType() != void.class)
                 || !Modifier.isPublic(objectClass.getModifiers())
                 || isExternalClass(objectClass)) {
-            return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, fieldType, fieldClass, method);
+            return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, defaultValue, fieldType, fieldClass, method);
         }
-        return createFieldReaderLambda(objectClass, objectType, fieldName, ordinal, features, format, fieldType, fieldClass, method);
+        return createFieldReaderLambda(objectClass, objectType, fieldName, ordinal, features, format, defaultValue, fieldType, fieldClass, method);
     }
 
     protected <T> FieldReader createFieldReaderLambda(
@@ -210,6 +214,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
             , int ordinal
             , long features
             , String format
+            , Object defaultValue
             , Type fieldType
             , Class fieldClass
             , Method method
@@ -255,7 +260,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
         }
 
         BiConsumer function = (BiConsumer) lambdaFunction(objectClass, fieldClass, method);
-        return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, method, function);
+        return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, method, function);
     }
 
     private static Object lambdaFunction(Class objectType, Class fieldClass, Method method) {

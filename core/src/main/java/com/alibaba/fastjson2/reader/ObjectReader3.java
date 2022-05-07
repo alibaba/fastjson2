@@ -67,6 +67,17 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
         if (fieldReader2.isUnwrapped()) {
             extraFieldReader = fieldReader2;
         }
+
+        hasDefaultValue = fieldReader0.getDefaultValue() != null
+                || fieldReader1.getDefaultValue() != null
+                || fieldReader2.getDefaultValue() != null
+        ;
+    }
+
+    protected void initDefaultValue(T object) {
+        fieldReader0.setDefault(object);
+        fieldReader1.setDefault(object);
+        fieldReader2.setDefault(object);
     }
 
     @Override
@@ -186,7 +197,10 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
         if (jsonReader.isArray()
                 && jsonReader.isSupportBeanArray()) {
             jsonReader.nextIfMatch('[');
-            Object object = defaultCreator.get();
+            T object = defaultCreator.get();
+            if (hasDefaultValue) {
+                initDefaultValue(object);
+            }
 
             fieldReader0.readFieldValue(jsonReader, object);
             fieldReader1.readFieldValue(jsonReader, object);
@@ -200,11 +214,15 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
             if (buildFunction != null) {
                 return (T) buildFunction.apply(object);
             }
-            return (T) object;
+            return object;
         }
 
         jsonReader.nextIfMatch('{');
-        Object object = defaultCreator.get();
+        T object = defaultCreator.get();
+        if (hasDefaultValue) {
+            initDefaultValue(object);
+        }
+
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfMatch('}')) {
                 break;

@@ -55,6 +55,13 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
         if (second.isUnwrapped()) {
             extraFieldReader = second;
         }
+
+        hasDefaultValue = first.getDefaultValue() != null || second.getDefaultValue() != null;
+    }
+
+    protected void initDefaultValue(T object) {
+        first.setDefault(object);
+        second.setDefault(object);
     }
 
     @Override
@@ -85,7 +92,10 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
                 throw new JSONException("not support input entryCount " + entryCnt);
             }
 
-            Object object = defaultCreator.get();
+            T object = defaultCreator.get();
+            if (hasDefaultValue) {
+                initDefaultValue(object);
+            }
 
             first.readFieldValue(jsonReader, object);
             second.readFieldValue(jsonReader, object);
@@ -166,11 +176,14 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
             return null;
         }
 
-        Object object;
+        T object;
         if (jsonReader.isArray()
                 && jsonReader.isSupportBeanArray(this.features | features)) {
             jsonReader.next();
             object = defaultCreator.get();
+            if (hasDefaultValue) {
+                initDefaultValue(object);
+            }
 
             first.readFieldValue(jsonReader, object);
             second.readFieldValue(jsonReader, object);
@@ -182,6 +195,10 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
         } else {
             jsonReader.nextIfMatch('{');
             object = defaultCreator.get();
+            if (hasDefaultValue) {
+                initDefaultValue(object);
+            }
+
             for (int i = 0; ; ++i) {
                 if (jsonReader.nextIfMatch('}')) {
                     break;

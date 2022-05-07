@@ -9,8 +9,8 @@ import java.lang.reflect.Type;
 final class FieldReaderStringMethod<T> extends FieldReaderObjectMethod<T> {
     final boolean trim;
 
-    FieldReaderStringMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, setter);
+    FieldReaderStringMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, String defaultValue, Method setter) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, setter);
         trim = "trim".equals(format);
     }
 

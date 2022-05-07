@@ -12,7 +12,7 @@ class FieldReaderMapFieldReadOnly<T> extends FieldReaderObjectField<T> implement
     volatile ObjectReader itemReader;
 
     FieldReaderMapFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Field field) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, field);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, field);
     }
 
     @Override

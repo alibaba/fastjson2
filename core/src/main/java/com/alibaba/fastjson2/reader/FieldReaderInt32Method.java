@@ -8,8 +8,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 final class FieldReaderInt32Method<T> extends FieldReaderObjectMethod<T> {
-    FieldReaderInt32Method(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, setter);
+    FieldReaderInt32Method(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Integer defaultValue, Method setter) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, setter);
     }
 
     @Override

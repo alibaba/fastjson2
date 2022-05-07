@@ -13,7 +13,7 @@ final class FieldReaderAtomicBooleanMethodReadOnly<T>
     final Method method;
 
     FieldReaderAtomicBooleanMethodReadOnly(String fieldName, Class fieldClass, int ordinal, Method method) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, null);
+        super(fieldName, fieldClass, fieldClass, ordinal, 0, null, null);
         this.method = method;
     }
 

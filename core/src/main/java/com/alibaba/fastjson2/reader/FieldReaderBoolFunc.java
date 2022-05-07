@@ -10,7 +10,7 @@ final class FieldReaderBoolFunc<T, V> extends FieldReaderImpl<T> {
     final BiConsumer<T, V> function;
 
     FieldReaderBoolFunc(String fieldName, Class<V> fieldClass, int ordinal, Method method, BiConsumer<T, V> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, null);
+        super(fieldName, fieldClass, fieldClass, ordinal, 0, null, null);
         this.method = method;
         this.function = function;
     }

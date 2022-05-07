@@ -35,6 +35,8 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
         if (fieldReader.isUnwrapped()) {
             extraFieldReader = fieldReader;
         }
+
+        hasDefaultValue = fieldReader.getDefaultValue() != null;
     }
 
     @Override
@@ -150,6 +152,10 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
         return (T) object;
     }
 
+    protected void initDefaultValue(T object) {
+        fieldReader.setDefault(object);
+    }
+
     @Override
     public T readObject(JSONReader jsonReader, long features) {
         if (jsonReader.isJSONB()) {
@@ -180,9 +186,13 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
         }
 
         jsonReader.nextIfMatch('{');
-        Object object = defaultCreator != null
+        T object = defaultCreator != null
                 ? defaultCreator.get()
                 : null;
+
+        if (hasDefaultValue) {
+            initDefaultValue(object);
+        }
 
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfMatch('}')) {
