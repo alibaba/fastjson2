@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONB;
 import org.junit.jupiter.api.Test;
 
@@ -8,7 +9,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONFieldTest_defaultValue {
     @Test
@@ -266,6 +267,22 @@ public class JSONFieldTest_defaultValue {
 
         public void setValue6(BigDecimal value6) {
             this.value6 = value6;
+        }
+    }
+
+    @Test
+    public void test_9() {
+        Bean9 bean = JSON.parseObject("{}", Bean9.class);
+        assertNotNull(bean.list);
+        assertTrue(bean.list.isEmpty());
+    }
+
+    public static class Bean9 {
+        @JSONField(defaultValue = "[]")
+        public JSONArray list;
+
+        public Bean9() {
+
         }
     }
 }
