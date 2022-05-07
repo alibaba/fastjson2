@@ -1044,8 +1044,13 @@ final class JSONReaderUTF16 extends JSONReader {
                 ch = char1(ch);
                 continue;
             }
+
             if (ch == quote) {
-                ch = chars[offset++];
+                if (offset < end) {
+                    ch = chars[offset++];
+                } else {
+                    ch = EOI;
+                }
                 break;
             }
 
