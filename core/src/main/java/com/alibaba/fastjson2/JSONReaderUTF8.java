@@ -2028,7 +2028,11 @@ class JSONReaderUTF8 extends JSONReader {
                 continue;
             }
             if (ch == quote) {
-                ch = bytes[offset++];
+                if (offset < end) {
+                    ch = bytes[offset++];
+                } else {
+                    ch = EOI;
+                }
                 break;
             }
 

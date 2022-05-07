@@ -1049,10 +1049,42 @@ public interface JSON {
 
         try (JSONReader jsonReader = JSONReader.of(text)) {
             jsonReader.skipValue();
+            return jsonReader.isEnd();
         } catch (JSONException error) {
             return false;
         }
-        return true;
+    }
+
+    static boolean isValidObject(String text) {
+        if (text == null || text.isEmpty()) {
+            return false;
+        }
+
+        try (JSONReader jsonReader = JSONReader.of(text)) {
+            if (!jsonReader.isObject()) {
+                return false;
+            }
+            jsonReader.skipValue();
+            return jsonReader.isEnd();
+        } catch (JSONException error) {
+            return false;
+        }
+    }
+
+    static boolean isValidObject(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return false;
+        }
+
+        try (JSONReader jsonReader = JSONReader.of(bytes)) {
+            if (!jsonReader.isObject()) {
+                return false;
+            }
+            jsonReader.skipValue();
+            return jsonReader.isEnd();
+        } catch (JSONException error) {
+            return false;
+        }
     }
 
     /**
@@ -1071,10 +1103,10 @@ public interface JSON {
                 return false;
             }
             jsonReader.skipValue();
+            return jsonReader.isEnd();
         } catch (JSONException error) {
             return false;
         }
-        return true;
     }
 
     /**
@@ -1090,10 +1122,10 @@ public interface JSON {
 
         try (JSONReader jsonReader = JSONReader.of(bytes)) {
             jsonReader.skipValue();
+            return jsonReader.isEnd();
         } catch (JSONException error) {
             return false;
         }
-        return true;
     }
 
     /**
@@ -1112,10 +1144,10 @@ public interface JSON {
                 return false;
             }
             jsonReader.skipValue();
+            return jsonReader.isEnd();
         } catch (JSONException error) {
             return false;
         }
-        return true;
     }
 
     /**
@@ -1134,10 +1166,10 @@ public interface JSON {
 
         try (JSONReader jsonReader = JSONReader.of(bytes, offset, length, charset)) {
             jsonReader.skipValue();
+            return jsonReader.isEnd();
         } catch (JSONException error) {
             return false;
         }
-        return true;
     }
 
     /**
