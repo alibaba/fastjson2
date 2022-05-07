@@ -1,9 +1,12 @@
 package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -12,6 +15,13 @@ public class JSONFieldTest_defaultValue {
     public void test_0() {
         assertEquals(Boolean.TRUE
                 , JSON.parseObject("{}", Bean0.class).value
+        );
+    }
+
+    @Test
+    public void test_0_jsonb() {
+        assertEquals(Boolean.TRUE
+                , JSONB.parseObject(JSONB.toBytes(new HashMap<>()), Bean0.class).value
         );
     }
 
@@ -51,6 +61,13 @@ public class JSONFieldTest_defaultValue {
         assertEquals(2, bean.value1);
     }
 
+    @Test
+    public void test_3_jsonb() {
+        Bean3 bean = JSONB.parseObject(JSONB.toBytes(Collections.emptyMap()), Bean3.class);
+        assertEquals(1, bean.value0);
+        assertEquals(2, bean.value1);
+    }
+
     public static class Bean3 {
         @JSONField(defaultValue = "1")
         public Integer value0;
@@ -62,6 +79,14 @@ public class JSONFieldTest_defaultValue {
     @Test
     public void test_4() {
         Bean4 bean = JSON.parseObject("{}", Bean4.class);
+        assertEquals(1, bean.value0);
+        assertEquals(2, bean.value1);
+        assertEquals(3.1f, bean.value2);
+    }
+
+    @Test
+    public void test_4_jsonb() {
+        Bean4 bean = JSONB.parseObject(JSONB.toBytes(Collections.emptyMap()), Bean4.class);
         assertEquals(1, bean.value0);
         assertEquals(2, bean.value1);
         assertEquals(3.1f, bean.value2);
@@ -87,6 +112,15 @@ public class JSONFieldTest_defaultValue {
         assertEquals(4.2D, bean.value3);
     }
 
+    @Test
+    public void test_5_jsonb() {
+        Bean5 bean = JSONB.parseObject(JSONB.toBytes(Collections.emptyMap()), Bean5.class);
+        assertEquals(1, bean.value0);
+        assertEquals(2, bean.value1);
+        assertEquals(3.1f, bean.value2);
+        assertEquals(4.2D, bean.value3);
+    }
+
     public static class Bean5 {
         @JSONField(defaultValue = "1")
         public int value0;
@@ -104,6 +138,16 @@ public class JSONFieldTest_defaultValue {
     @Test
     public void test_6() {
         Bean6 bean = JSON.parseObject("{}", Bean6.class);
+        assertEquals(1, bean.value0);
+        assertEquals(2, bean.value1);
+        assertEquals(3.1f, bean.value2);
+        assertEquals(4.2D, bean.value3);
+        assertEquals(6.3D, bean.value4);
+    }
+
+    @Test
+    public void test_6_jsonb() {
+        Bean6 bean = JSONB.parseObject(JSONB.toBytes(Collections.emptyMap()), Bean6.class);
         assertEquals(1, bean.value0);
         assertEquals(2, bean.value1);
         assertEquals(3.1f, bean.value2);
@@ -139,6 +183,17 @@ public class JSONFieldTest_defaultValue {
         assertEquals("xx", bean.value5);
     }
 
+    @Test
+    public void test_7_jsonb() {
+        Bean7 bean = JSONB.parseObject(JSONB.toBytes(Collections.emptyMap()), Bean7.class);
+        assertEquals(1, bean.value0);
+        assertEquals(2, bean.value1);
+        assertEquals(3.1f, bean.value2);
+        assertEquals(4.2D, bean.value3);
+        assertEquals(6.3D, bean.value4);
+        assertEquals("xx", bean.value5);
+    }
+
     public static class Bean7 {
         @JSONField(defaultValue = "1")
         public int value0;
@@ -162,6 +217,18 @@ public class JSONFieldTest_defaultValue {
     @Test
     public void test_8() {
         Bean8 bean = JSON.parseObject("{}", Bean8.class);
+        assertEquals(1, bean.value0);
+        assertEquals(2, bean.value1);
+        assertEquals(3.1f, bean.value2);
+        assertEquals(4.2D, bean.value3);
+        assertEquals(6.3D, bean.value4);
+        assertEquals("xx", bean.value5);
+        assertEquals(new BigDecimal(123.5), bean.value6);
+    }
+
+    @Test
+    public void test_8_jsonb() {
+        Bean8 bean = JSONB.parseObject(JSONB.toBytes(Collections.emptyMap()), Bean8.class);
         assertEquals(1, bean.value0);
         assertEquals(2, bean.value1);
         assertEquals(3.1f, bean.value2);

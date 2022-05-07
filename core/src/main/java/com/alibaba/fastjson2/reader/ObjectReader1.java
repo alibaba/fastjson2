@@ -89,17 +89,21 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
             }
         }
 
-        Object object;
+        T object;
         if (defaultCreator != null) {
             object = defaultCreator.get();
         } else if (JDKUtils.UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
             try {
-                object = UnsafeUtils.UNSAFE.allocateInstance(objectClass);
+                object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {
                 throw new JSONException("create instance error", e);
             }
         } else {
             object = null;
+        }
+
+        if (object != null && hasDefaultValue) {
+            initDefaultValue(object);
         }
 
         for (int i = 0; ; ++i) {

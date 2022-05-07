@@ -141,17 +141,21 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
             throw new JSONException("expect object, but " + JSONB.typeName(jsonReader.getType()));
         }
 
-        Object object;
+        T object;
         if (defaultCreator != null) {
             object = defaultCreator.get();
         } else if (JDKUtils.UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
             try {
-                object = UnsafeUtils.UNSAFE.allocateInstance(objectClass);
+                object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {
                 throw new JSONException("create instance error", e);
             }
         } else {
             object = null;
+        }
+
+        if (object != null && hasDefaultValue) {
+            initDefaultValue(object);
         }
 
         for (; ; ) {
