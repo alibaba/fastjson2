@@ -1,11 +1,11 @@
 ---
-name: Problem support
-about: Ask questions about the project
+name: 问题支持
+about: 提出针对本项目使用及其他方面的问题
 title: '[QUESTION]'
 labels: 'question'
-assignees: 'wenshao'
+assignees: ''
 
 ---
 
-### Please describe your problem.
-Ask questions about the use of this project and other aspects.
+### 请描述您的问题
+*询问有关本项目的使用和其他方面的相关问题。*

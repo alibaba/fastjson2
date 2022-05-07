@@ -1,35 +1,41 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: BUG 提交
+about: 提交问题缺陷帮助我们更好的改进
 title: '[BUG]'
 labels: 'bug'
-assignees: 'wenshao'
+assignees: ''
 
 ---
 
-### Describe the bug
-A clear and concise description of what the bug is.
-
-### Env (please complete the following information):
- - OS: [e.g. iOS]
- - Env: Docker compose? Local dev?
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+### 问题描述
+*简要描述您碰到的问题。*
 
 
-### To Reproduce
-*Steps to reproduce the behavior:*
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+### 环境信息
+*请填写以下信息：*
 
-### Expected behavior
-A clear and concise description of what you expected to happen.
+ - OS信息：  [e.g.：CentOS 8.4.2105 4Core 3.10GHz 16 GB]
+ - JDK信息： [e.g.：Openjdk 1.8.0_312]
+ - 版本信息：[e.g.：Fastjson2 2.x.x]
+ 
 
-### Screenshots
-If applicable, add screenshots to help explain your problem.
+### 重现步骤
+*如何操作可以重现该问题：*
+
+1. 使用 `xxx.xxx` 方法
+2. 输入 `...`  数据
+3. 出现 `...` 错误
+```java
+//可在此输入示例代码
+```
+
+### 期待的正确结果
+*对您期望发生的结果进行清晰简洁的描述。*
 
 
-#### Additional context
-Add any other context about the problem here.
+### 相关日志输出
+*请复制并粘贴任何相关的日志输出。*
+
+
+#### 附加信息
+*如果你还有其他需要提供的信息，可以在这里填写（可以提供截图、视频等）。*
