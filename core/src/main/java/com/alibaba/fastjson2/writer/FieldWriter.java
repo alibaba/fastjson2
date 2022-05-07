@@ -1,7 +1,12 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.IOUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -12,6 +17,8 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
 import static java.time.temporal.ChronoField.YEAR;
@@ -135,6 +142,25 @@ public interface FieldWriter<T> extends Comparable {
 
         writeFieldName(jsonWriter);
         if ("base64".equals(getFormat())) {
+            jsonWriter.writeBase64(value);
+        } else if ("gzip,base64".equals(getFormat())) {
+            GZIPOutputStream gzipOut = null;
+            try {
+                ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+                if (value.length < 512) {
+                    gzipOut = new GZIPOutputStream(byteOut, value.length);
+                } else {
+                    gzipOut = new GZIPOutputStream(byteOut);
+                }
+                gzipOut.write(value);
+                gzipOut.finish();
+                value = byteOut.toByteArray();
+            } catch (IOException ex) {
+                throw new JSONException("write gzipBytes error", ex);
+            } finally {
+                IOUtils.close(gzipOut);
+            }
+
             jsonWriter.writeBase64(value);
         } else {
             jsonWriter.writeBinary(value);

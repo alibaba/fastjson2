@@ -139,7 +139,7 @@ public class JSON {
         }
     }
 
-    private static void config(JSONReader.Context context, Feature[] features) {
+    protected static void config(JSONReader.Context context, Feature[] features) {
         for (Feature feature : features) {
             switch (feature) {
                 case SupportArrayToBean:

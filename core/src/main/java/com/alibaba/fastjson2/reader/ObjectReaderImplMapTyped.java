@@ -40,7 +40,7 @@ class ObjectReaderImplMapTyped implements ObjectReader {
     }
 
     @Override
-    public Object createInstance(Map input) {
+    public Object createInstance(Map input, long features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
         Map<String, Object> object = (Map<String, Object>) createInstance();
@@ -59,7 +59,7 @@ class ObjectReaderImplMapTyped implements ObjectReader {
                 if (valueObjectReader == null) {
                     valueObjectReader = provider.getObjectReader(valueType);
                 }
-                value = valueObjectReader.createInstance(map);
+                value = valueObjectReader.createInstance(map, features);
             } else if (value instanceof Collection) {
                 if (valueObjectReader == null) {
                     valueObjectReader = provider.getObjectReader(valueType);

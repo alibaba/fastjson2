@@ -37,22 +37,32 @@ public interface ObjectReader<T> {
         throw new UnsupportedOperationException();
     }
 
+    default T createInstance(Map map, JSONReader.Feature... features) {
+        long featuresValue = 0;
+        for (JSONReader.Feature feature : features) {
+            featuresValue |= feature.mask;
+        }
+        return createInstance(map, featuresValue);
+    }
     /**
      * @return {@link T}
      * @throws JSONException If a suitable ObjectReader is not found
      */
-    default T createInstance(Map map) {
+    default T createInstance(Map map, long features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         Object typeKey = map.get(getTypeKey());
 
         if (typeKey instanceof String) {
             String typeName = (String) typeKey;
             long typeHash = Fnv.hashCode64(typeName);
-            ObjectReader<T> reader = autoType(provider, typeHash);
+            ObjectReader<T> reader = null;
+            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0 || this instanceof ObjectReaderSeeAlso) {
+                reader = autoType(provider, typeHash);
+            }
 
             if (reader == null) {
                 reader = provider.getObjectReader(
-                        typeName, getObjectClass(), getFeatures()
+                        typeName, getObjectClass(), features | getFeatures()
                 );
 
                 if (reader == null) {
@@ -61,7 +71,7 @@ public interface ObjectReader<T> {
             }
 
             if (reader != this) {
-                return reader.createInstance(map);
+                return reader.createInstance(map, features);
             }
         }
 

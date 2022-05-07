@@ -74,7 +74,7 @@ public class JodaSupport {
         }
 
         @Override
-        public Object createInstance(Map map) {
+        public Object createInstance(Map map, long features) {
             Number millis = (Long) map.get("millis");
             if (millis != null) {
                 return createInstanceFromMillis(millis.longValue());
@@ -116,7 +116,7 @@ public class JodaSupport {
 
             if (jsonReader.isObject()) {
                 Map object = jsonReader.readObject();
-                return createInstance(object);
+                return createInstance(object, features);
             }
 
             throw new JSONException("not support");
