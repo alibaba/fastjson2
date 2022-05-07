@@ -1294,6 +1294,7 @@ public class ObjectReaderCreator {
         if (fieldClass == boolean.class) {
             return new FieldReaderBoolValueField(fieldName, fieldClass, ordinal, (Boolean) defaultValue, field);
         }
+
         if (fieldClass == Boolean.class) {
             return new FieldReaderBoolField(fieldName, fieldClass, ordinal, (Boolean) defaultValue, field);
         }
@@ -1377,10 +1378,10 @@ public class ObjectReaderCreator {
                     }
 
                     if (JDKUtils.UNSAFE_SUPPORT) {
-                        return new FieldReaderListFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, itemType, ordinal, features, format, field);
+                        return new FieldReaderListFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, itemType, ordinal, features, format, (Collection) defaultValue, field);
                     }
 
-                    return new FieldReaderListField(fieldName, fieldTypeResolved, fieldClassResolved, itemType, ordinal, features, format, field);
+                    return new FieldReaderListField(fieldName, fieldTypeResolved, fieldClassResolved, itemType, ordinal, features, format, (Collection) defaultValue, field);
                 }
             }
 
@@ -1396,9 +1397,9 @@ public class ObjectReaderCreator {
             }
 
             if (JDKUtils.UNSAFE_SUPPORT) {
-                return new FieldReaderListFieldUF(fieldName, fieldType, fieldClass, itemType, ordinal, features, format, field);
+                return new FieldReaderListFieldUF(fieldName, fieldType, fieldClass, itemType, ordinal, features, format, (Collection) defaultValue, field);
             }
-            return new FieldReaderListField(fieldName, fieldType, fieldClass, itemType, ordinal, features, format, field);
+            return new FieldReaderListField(fieldName, fieldType, fieldClass, itemType, ordinal, features, format, (Collection) defaultValue, field);
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {
