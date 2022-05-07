@@ -1,5 +1,6 @@
-package com.alibaba.fastjson;
+package com.alibaba.fastjson2.v1issues;
 
+import com.alibaba.fastjson2.JSONArray;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;

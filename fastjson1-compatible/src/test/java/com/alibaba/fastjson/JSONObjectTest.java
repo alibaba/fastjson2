@@ -15,14 +15,20 @@
  */
 package com.alibaba.fastjson;
 
+import com.alibaba.fastjson2.JSONException;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JSONObjectTest extends TestCase {
 
@@ -193,5 +199,300 @@ public class JSONObjectTest extends TestCase {
 
         Assert.assertEquals("default", json.getOrDefault("testNonKet", "default"));
         Assert.assertEquals("default", json.getOrDefault("testKey2", "default"));
+    }
+
+    @Test
+    public void test_null() {
+        JSONObject object = new JSONObject();
+        object.put("val", null);
+        assertEquals(0L, object.getLongValue("val"));
+        assertEquals(null, object.getLong("val"));
+
+        assertEquals(0, object.getIntValue("val"));
+        assertEquals(null, object.getInteger("val"));
+
+        assertEquals(null, object.getString("val"));
+        assertEquals(null, object.getJSONArray("val"));
+        assertEquals(null, object.getJSONObject("val"));
+        assertEquals(null, object.getBigInteger("val"));
+        assertEquals(null, object.getBigDecimal("val"));
+        assertEquals(null, object.getDouble("val"));
+        assertEquals(0D, object.getDoubleValue("val"));
+        assertEquals(null, object.getFloat("val"));
+        assertEquals(0F, object.getFloatValue("val"));
+        assertEquals(false, object.getBooleanValue("val"));
+        assertEquals(null, object.getBoolean("val"));
+        assertEquals((short) 0, object.getShortValue("val"));
+        assertEquals(null, object.getShort("val"));
+        assertEquals((byte) 0, object.getByteValue("val"));
+        assertEquals(null, object.getByte("val"));
+    }
+
+    @Test
+    public void test_null_str() {
+        JSONObject object = new JSONObject();
+        object.put("val", "null");
+        assertEquals(0L, object.getLongValue("val"));
+        assertEquals(null, object.getLong("val"));
+
+        assertEquals(0, object.getIntValue("val"));
+        assertEquals(null, object.getInteger("val"));
+
+        assertEquals(null, object.getJSONArray("val"));
+        assertEquals(null, object.getJSONObject("val"));
+        assertEquals(null, object.getBigInteger("val"));
+        assertEquals(null, object.getBigDecimal("val"));
+        assertEquals(null, object.getFloat("val"));
+        assertEquals(null, object.getDouble("val"));
+        assertEquals(null, object.getBoolean("val"));
+        assertEquals(null, object.getByte("val"));
+        assertEquals(null, object.getShort("val"));
+        assertEquals(0, object.getByteValue("val"));
+        assertEquals(0, object.getShortValue("val"));
+    }
+
+    @Test
+    public void test_null_str_empty() {
+        JSONObject object = new JSONObject();
+        object.put("val", "");
+        assertEquals(0L, object.getLongValue("val"));
+        assertEquals(null, object.getLong("val"));
+
+        assertEquals(0, object.getIntValue("val"));
+        assertEquals(null, object.getInteger("val"));
+
+        assertEquals(null, object.getJSONArray("val"));
+        assertEquals(null, object.getJSONObject("val"));
+        assertEquals(null, object.getBigInteger("val"));
+        assertEquals(null, object.getBigDecimal("val"));
+        assertEquals(null, object.getBoolean("val"));
+        assertEquals(null, object.getFloat("val"));
+        assertEquals(null, object.getDouble("val"));
+        assertEquals(null, object.getByte("val"));
+        assertEquals(null, object.getShort("val"));
+        assertEquals(0, object.getByteValue("val"));
+        assertEquals(0, object.getShortValue("val"));
+    }
+
+    @Test
+    public void test_error() {
+        JSONObject jsonObject = new JSONObject().fluentPut("val", new Object());
+        {
+            Exception error = null;
+            try {
+                jsonObject.getLong("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getLongValue("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getInteger("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getIntValue("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getShort("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getShortValue("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getByte("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getByteValue("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getDouble("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getDoubleValue("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getFloat("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getFloatValue("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getBigInteger("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getBigDecimal("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getBoolean("val");
+            } catch (com.alibaba.fastjson2.JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getBooleanValue("val");
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+    }
+
+    @Test
+    public void test_getBoolean2() {
+        assertEquals(
+                Boolean.TRUE
+                , new JSONObject()
+                        .fluentPut("val", 1)
+                        .getBoolean("val"));
+        assertEquals(
+                Boolean.TRUE
+                , new JSONObject()
+                        .fluentPut("val", "true")
+                        .getBoolean("val"));
+        assertEquals(
+                Boolean.FALSE
+                , new JSONObject()
+                        .fluentPut("val", Boolean.FALSE)
+                        .getBoolean("val"));
+        assertEquals(
+                Boolean.FALSE
+                , new JSONObject()
+                        .fluentPut("val", "FALSE")
+                        .getBoolean("val"));
+    }
+
+    @Test
+    public void test_getBigInt() {
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONObject()
+                        .fluentPut("val", 12)
+                        .getBigInteger("val"));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONObject()
+                        .fluentPut("val", (byte) 12)
+                        .getBigInteger("val"));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONObject()
+                        .fluentPut("val", (short) 12)
+                        .getBigInteger("val"));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONObject()
+                        .fluentPut("val", 12L)
+                        .getBigInteger("val"));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONObject()
+                        .fluentPut("val", 12F)
+                        .getBigInteger("val"));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONObject()
+                        .fluentPut("val", 12D)
+                        .getBigInteger("val"));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONObject()
+                        .fluentPut("val", new BigDecimal("12"))
+                        .getBigInteger("val"));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONObject()
+                        .fluentPut("val", new BigInteger("12"))
+                        .getBigInteger("val"));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONObject()
+                        .fluentPut("val", "12")
+                        .getBigInteger("val"));
     }
 }
