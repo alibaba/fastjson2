@@ -62,12 +62,16 @@ public class JSON_test_validate {
 
     @Test
     public void test_isValidObject() {
+        assertFalse(JSON.isValidObject((String) null));
+        assertFalse(JSON.isValidObject(""));
         assertFalse(JSON.isValidObject("123"));
         assertFalse(JSON.isValidObject("1}"));
         assertFalse(JSON.isValidObject("\"aaa\""));
         assertFalse(JSON.isValidObject("\"aaa\"}"));
         assertTrue(JSON.isValidObject("{}"));
         assertFalse(JSON.isValidObject("{}]"));
+        assertFalse(JSON.isValidObject("{]"));
+        assertFalse(JSON.isValidObject("{"));
         assertFalse(JSON.isValidObject("[]"));
         assertFalse(JSON.isValidObject("[]]"));
     }
@@ -83,6 +87,8 @@ public class JSON_test_validate {
         assertFalse(JSON.isValidObject("\"aaa\"}".getBytes(StandardCharsets.UTF_8)));
         assertTrue(JSON.isValidObject("{}".getBytes(StandardCharsets.UTF_8)));
         assertFalse(JSON.isValidObject("{}]".getBytes(StandardCharsets.UTF_8)));
+        assertFalse(JSON.isValidObject("{]".getBytes(StandardCharsets.UTF_8)));
+        assertFalse(JSON.isValidObject("{".getBytes(StandardCharsets.UTF_8)));
         assertFalse(JSON.isValidObject("[]".getBytes(StandardCharsets.UTF_8)));
         assertFalse(JSON.isValidObject("[]]".getBytes(StandardCharsets.UTF_8)));
     }
