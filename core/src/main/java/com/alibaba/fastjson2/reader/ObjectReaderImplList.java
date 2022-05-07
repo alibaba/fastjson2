@@ -173,7 +173,7 @@ public final class ObjectReaderImplList implements ObjectReader {
                     if (itemObjectReader == null) {
                         itemObjectReader = provider.getObjectReader(itemType);
                     }
-                    value = itemObjectReader.createInstance(map);
+                    value = itemObjectReader.createInstance(map, 0L);
                 } else if (value instanceof Collection) {
                     if (itemObjectReader == null) {
                         itemObjectReader = provider.getObjectReader(itemType);

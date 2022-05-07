@@ -454,7 +454,7 @@ public abstract class JSONWriter implements Closeable {
 
     public void writeBinary(byte[] bytes) {
         if (bytes == null) {
-            writeNull();
+            writeArrayNull();
             return;
         }
         startArray();
@@ -1429,7 +1429,10 @@ public abstract class JSONWriter implements Closeable {
         FieldBased(1),
         IgnoreNoneSerializable(1 << 1),
         BeanToArray(1 << 2),
+
         WriteNulls(1 << 3),
+        WriteMapNullValue(1 << 3),
+
         BrowserCompatible(1 << 4),
         NullAsDefaultValue(1 << 5),
         WriteBooleanAsNumber(1 << 6),

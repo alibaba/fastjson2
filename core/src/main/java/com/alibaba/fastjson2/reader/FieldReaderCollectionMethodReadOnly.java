@@ -74,7 +74,7 @@ class FieldReaderCollectionMethodReadOnly<T> extends FieldReaderObjectMethod<T> 
                                 .getDefaultObjectReaderProvider()
                                 .getObjectReader(itemType);
                     }
-                    item = itemReader.createInstance((Map) item);
+                    item = itemReader.createInstance((Map) item, 0L);
                 }
             }
             collection.add(item);

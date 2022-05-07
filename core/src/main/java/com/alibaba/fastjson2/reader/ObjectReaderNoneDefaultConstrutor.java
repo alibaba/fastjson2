@@ -268,7 +268,7 @@ class ObjectReaderNoneDefaultConstrutor<T>
     }
 
     @Override
-    public T createInstance(Map map) {
+    public T createInstance(Map map, long features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
         LinkedHashMap<Long, Object> valueMap = null;

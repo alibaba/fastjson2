@@ -134,7 +134,7 @@ public class TypeUtils {
         }
 
         if (obj instanceof Map) {
-            return (Instant) ObjectReaderImplInstant.INSTANCE.createInstance((Map) obj);
+            return (Instant) ObjectReaderImplInstant.INSTANCE.createInstance((Map) obj, 0L);
         }
 
         throw new JSONException("can not cast to Date from " + obj.getClass());
@@ -164,7 +164,7 @@ public class TypeUtils {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         if (obj instanceof Map) {
             ObjectReader objectReader = provider.getObjectReader(targetClass);
-            return (T) objectReader.createInstance((Map) obj);
+            return (T) objectReader.createInstance((Map) obj, 0L);
         }
 
         Function typeConvert = provider.getTypeConvert(obj.getClass(), targetClass);

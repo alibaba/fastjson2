@@ -39,7 +39,7 @@ public final class ObjectReaderInterface<T> extends ObjectReaderAdapter<T> {
     }
 
     @Override
-    public T createInstance(Map map) {
+    public T createInstance(Map map, long features) {
         JSONObject object;
         if (map instanceof JSONObject) {
             object = (JSONObject) map;

@@ -16,8 +16,10 @@
 package com.alibaba.fastjson;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson.util.IOUtils;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
@@ -158,14 +160,17 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         throw new JSONException("TODO");
     }
 
-    //
     public <T> T getObject(String key, Class<T> clazz) {
+        return getObject(key, clazz, new Feature[0]);
+    }
+    //
+    public <T> T getObject(String key, Class<T> clazz, Feature... features) {
         Object obj = map.get(key);
         if (obj == null) {
             return null;
         }
 
-        if (clazz.isInstance(obj)) {
+        if (clazz != Object.class && clazz.isInstance(obj)) {
             return (T) obj;
         }
 
@@ -178,6 +183,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         String json = JSON.toJSONString(obj);
         ObjectReader objectReader = provider.getObjectReader(clazz);
         JSONReader jsonReader = JSONReader.of(json);
+        config(jsonReader.getContext(), features);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
@@ -188,34 +194,82 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
         return (T) objectReader.readObject(jsonReader);
     }
-//
-//    public <T> T getObject(String key, TypeReference typeReference) {
-//        Object obj = map.get(key);
-//        if (typeReference == null) {
-//            return (T) obj;
-//        }
-//        return TypeUtils.cast(obj, typeReference.getType(), ParserConfig.getGlobalInstance());
-//    }
-//
-//    public Boolean getBoolean(String key) {
-//        Object value = get(key);
-//
-//        if (value == null) {
-//            return null;
-//        }
-//
-//        return castToBoolean(value);
-//    }
-//
-//    public byte[] getBytes(String key) {
-//        Object value = get(key);
-//
-//        if (value == null) {
-//            return null;
-//        }
-//
-//        return castToBytes(value);
-//    }
+
+    public <T> T getObject(String key, TypeReference typeReference) {
+        Object obj = map.get(key);
+        if (typeReference == null) {
+            return (T) obj;
+        }
+        return TypeUtils.cast(obj, typeReference.getType(), ParserConfig.getGlobalInstance());
+    }
+
+    public Boolean getBoolean(String key) {
+        Object value = map.get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).intValue() == 1;
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            return str.equalsIgnoreCase("true") || str.equals("1");
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Boolean");
+    }
+
+    public Byte getByte(String key) {
+        Object value = map.get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).byteValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            return Byte.parseByte(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Byte");
+    }
+
+    public byte[] getBytes(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof byte[]) {
+            return (byte[]) value;
+        }
+        if (value instanceof String) {
+            return IOUtils.decodeBase64((String) value);
+        }
+        throw new com.alibaba.fastjson.JSONException("can not cast to byte[], value : " + value);
+    }
 
     public <T> T getObject(String key, Type type) {
         Object obj = map.get(key);
@@ -548,7 +602,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
     public <T> T toJavaObject(Type type) {
         if (type instanceof Class) {
-            return (T) JSONFactory.getDefaultObjectReaderProvider().getObjectReader(type).createInstance(this);
+            return (T) JSONFactory.getDefaultObjectReaderProvider().getObjectReader(type).createInstance(this, 0L);
         }
         String str = com.alibaba.fastjson2.JSON.toJSONString(this);
         return com.alibaba.fastjson2.JSON.parseObject(str, type);
@@ -569,7 +623,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader objectReader = provider.getObjectReader(clazz);
-        return (T) objectReader.createInstance(this);
+        return (T) objectReader.createInstance(this, 0L);
     }
 
     public <T> T toJavaObject(Class<T> clazz, ParserConfig config, int features) {

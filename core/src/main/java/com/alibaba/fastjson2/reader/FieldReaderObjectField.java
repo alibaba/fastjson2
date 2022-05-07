@@ -38,10 +38,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
                     return JdbcSupport.createDateReader(format);
                 case "byte[]":
                 case "[B":
-                    if ("base64".equals(format)) {
-                        return ObjectReaderBaseModule.Base64Impl.INSTANCE;
-                    }
-                    break;
+                    return new ObjectReaderBaseModule.Inte8ArrayImpl(format);
                 default:
                     if (Calendar.class.isAssignableFrom(fieldClass)) {
                         if (format == null) {
