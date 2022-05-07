@@ -60,6 +60,17 @@ public abstract class JSONPath {
         return JSON.toJSONString(object);
     }
 
+
+    public static boolean contains(Object rootObject, String path) {
+        if (rootObject == null) {
+            return false;
+        }
+
+        JSONPath jsonPath = JSONPath.of(path);
+        return jsonPath.contains(rootObject);
+    }
+
+
     public static Object set(Object rootObject, String path, Object value) {
         JSONPath.of(path)
                 .set(rootObject, value);
