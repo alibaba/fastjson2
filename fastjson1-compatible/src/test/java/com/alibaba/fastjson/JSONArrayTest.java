@@ -17,11 +17,16 @@ package com.alibaba.fastjson;
 
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JSONArrayTest extends TestCase {
 //
@@ -205,5 +210,800 @@ public class JSONArrayTest extends TestCase {
             this.name = name;
         }
 
+    }
+
+    @Test
+    public void test_null() {
+        JSONArray array = new JSONArray();
+        array.add(null);
+        assertEquals(0L, array.getLongValue(0));
+        assertEquals(null, array.getLong(0));
+
+        assertEquals(0, array.getIntValue(0));
+        assertEquals(null, array.getInteger(0));
+
+        assertEquals(null, array.getString(0));
+        assertEquals(null, array.getJSONArray(0));
+        assertEquals(null, array.getJSONObject(0));
+    }
+
+    @Test
+    public void test_null2() {
+        JSONArray array = new JSONArray();
+        array.add(null);
+        assertEquals(0L, array.getLongValue(0));
+        assertEquals(null, array.getLong(0));
+
+        assertEquals(0, array.getIntValue(0));
+        assertEquals(null, array.getInteger(0));
+
+        assertEquals(null, array.getString(0));
+        assertEquals(null, array.getJSONArray(0));
+        assertEquals(null, array.getJSONObject(0));
+        assertEquals(null, array.getBigInteger(0));
+        assertEquals(null, array.getBigDecimal(0));
+        assertEquals(null, array.getDouble(0));
+        assertEquals(0D, array.getDoubleValue(0));
+        assertEquals(null, array.getFloat(0));
+        assertEquals(0F, array.getFloatValue(0));
+        assertEquals(false, array.getBooleanValue(0));
+        assertEquals(null, array.getBoolean(0));
+        assertEquals((short) 0, array.getShortValue(0));
+        assertEquals(null, array.getShort(0));
+        assertEquals((byte) 0, array.getByteValue(0));
+        assertEquals(null, array.getByte(0));
+    }
+
+    @Test
+    public void test_null_str() {
+        JSONArray object = new JSONArray();
+        object.add("null");
+        assertEquals(0L, object.getLongValue(0));
+        assertEquals(null, object.getLong(0));
+
+        assertEquals(0, object.getIntValue(0));
+        assertEquals(null, object.getInteger(0));
+
+        assertEquals(null, object.getJSONArray(0));
+        assertEquals(null, object.getJSONObject(0));
+        assertEquals(null, object.getBigInteger(0));
+        assertEquals(null, object.getBigDecimal(0));
+        assertEquals(null, object.getFloat(0));
+        assertEquals(null, object.getDouble(0));
+        assertEquals(null, object.getBoolean(0));
+        assertEquals(null, object.getByte(0));
+        assertEquals(null, object.getShort(0));
+        assertEquals(0, object.getByteValue(0));
+        assertEquals(0, object.getShortValue(0));
+    }
+
+    @Test
+    public void test_null_str_empty() {
+        JSONArray object = new JSONArray();
+        object.add("");
+        assertEquals(0L, object.getLongValue(0));
+        assertEquals(null, object.getLong(0));
+
+        assertEquals(0, object.getIntValue(0));
+        assertEquals(null, object.getInteger(0));
+
+        assertEquals(null, object.getJSONArray(0));
+        assertEquals(null, object.getJSONObject(0));
+        assertEquals(null, object.getBigInteger(0));
+        assertEquals(null, object.getBigDecimal(0));
+        assertEquals(null, object.getBoolean(0));
+        assertEquals(null, object.getFloat(0));
+        assertEquals(null, object.getDouble(0));
+        assertEquals(null, object.getByte(0));
+        assertEquals(null, object.getShort(0));
+        assertEquals(0, object.getByteValue(0));
+        assertEquals(0, object.getShortValue(0));
+    }
+
+    @Test
+    public void test_error() {
+        JSONArray jsonObject = new JSONArray().fluentAdd(new Object());
+        {
+            Exception error = null;
+            try {
+                jsonObject.getLong(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getLongValue(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getInteger(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getIntValue(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getShort(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getShortValue(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getByte(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getByteValue(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getDouble(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getDoubleValue(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getFloat(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getFloatValue(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getBigInteger(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getBigDecimal(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getBoolean(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+        {
+            Exception error = null;
+            try {
+                jsonObject.getBooleanValue(0);
+            } catch (JSONException ex) {
+                error = ex;
+            }
+            assertNotNull(error);
+        }
+    }
+
+    @Test
+    public void test_getBigInt() {
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12)
+                        .getBigInteger(0));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd((byte) 12)
+                        .getBigInteger(0));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd((short) 12)
+                        .getBigInteger(0));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12L)
+                        .getBigInteger(0));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12F)
+                        .getBigInteger(0));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12D)
+                        .getBigInteger(0));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(new BigDecimal("12"))
+                        .getBigInteger(0));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(new BigInteger("12"))
+                        .getBigInteger(0));
+        assertEquals(
+                BigInteger.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd("12")
+                        .getBigInteger(0));
+    }
+
+    @Test
+    public void test_getBigDecimal() {
+        assertEquals(
+                BigDecimal.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12)
+                        .getBigDecimal(0));
+        assertEquals(
+                BigDecimal.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd((byte) 12)
+                        .getBigDecimal(0));
+        assertEquals(
+                BigDecimal.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd((short) 12)
+                        .getBigDecimal(0));
+        assertEquals(
+                BigDecimal.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12L)
+                        .getBigDecimal(0));
+        assertEquals(
+                BigDecimal.valueOf(12F)
+                , new JSONArray()
+                        .fluentAdd(12F)
+                        .getBigDecimal(0));
+        assertEquals(
+                BigDecimal.valueOf(12D)
+                , new JSONArray()
+                        .fluentAdd(12D)
+                        .getBigDecimal(0));
+        assertEquals(
+                BigDecimal.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(new BigDecimal("12"))
+                        .getBigDecimal(0));
+        assertEquals(
+                BigDecimal.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(new BigInteger("12"))
+                        .getBigDecimal(0));
+        assertEquals(
+                BigDecimal.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd("12")
+                        .getBigDecimal(0));
+    }
+
+    @Test
+    public void test_getFloatValue() {
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12)
+                        .getFloatValue(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd((byte) 12)
+                        .getFloatValue(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd((short) 12)
+                        .getFloatValue(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12L)
+                        .getFloatValue(0));
+        assertEquals(
+                Float.valueOf(12F)
+                , new JSONArray()
+                        .fluentAdd(12F)
+                        .getFloatValue(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12D)
+                        .getFloatValue(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(new BigDecimal("12"))
+                        .getFloatValue(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(new BigInteger("12"))
+                        .getFloatValue(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd("12")
+                        .getFloatValue(0));
+    }
+
+    @Test
+    public void test_getFloat() {
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12)
+                        .getFloat(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd((byte) 12)
+                        .getFloat(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd((short) 12)
+                        .getFloat(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12L)
+                        .getFloat(0));
+        assertEquals(
+                Float.valueOf(12F)
+                , new JSONArray()
+                        .fluentAdd(12F)
+                        .getFloat(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12D)
+                        .getFloat(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(new BigDecimal("12"))
+                        .getFloat(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(new BigInteger("12"))
+                        .getFloat(0));
+        assertEquals(
+                Float.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd("12")
+                        .getFloat(0));
+    }
+
+    @Test
+    public void test_getDoubleValue() {
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12)
+                        .getDoubleValue(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd((byte) 12)
+                        .getDoubleValue(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd((short) 12)
+                        .getDoubleValue(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12L)
+                        .getDoubleValue(0));
+        assertEquals(
+                Double.valueOf(12F)
+                , new JSONArray()
+                        .fluentAdd(12F)
+                        .getDoubleValue(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12D)
+                        .getDoubleValue(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(new BigDecimal("12"))
+                        .getDoubleValue(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(new BigInteger("12"))
+                        .getDoubleValue(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd("12")
+                        .getDoubleValue(0));
+    }
+
+    @Test
+    public void test_getDouble() {
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12)
+                        .getDouble(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd((byte) 12)
+                        .getDouble(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd((short) 12)
+                        .getDouble(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12L)
+                        .getDouble(0));
+        assertEquals(
+                Double.valueOf(12F)
+                , new JSONArray()
+                        .fluentAdd(12F)
+                        .getDouble(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(12D)
+                        .getDouble(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(new BigDecimal("12"))
+                        .getDouble(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd(new BigInteger("12"))
+                        .getDouble(0));
+        assertEquals(
+                Double.valueOf(12)
+                , new JSONArray()
+                        .fluentAdd("12")
+                        .getDouble(0));
+    }
+
+    @Test
+    public void test_getBoolean() {
+        assertEquals(
+                Boolean.TRUE
+                , new JSONArray()
+                        .fluentAdd(1)
+                        .getBoolean(0));
+        assertEquals(
+                Boolean.TRUE
+                , new JSONArray()
+                        .fluentAdd("true")
+                        .getBoolean(0));
+        assertEquals(
+                Boolean.FALSE
+                , new JSONArray()
+                        .fluentAdd(Boolean.FALSE)
+                        .getBoolean(0));
+        assertEquals(
+                Boolean.FALSE
+                , new JSONArray()
+                        .fluentAdd("FALSE")
+                        .getBoolean(0));
+    }
+
+    @Test
+    public void test_getBooleanValue() {
+        assertEquals(
+                true
+                , new JSONArray()
+                        .fluentAdd(1)
+                        .getBooleanValue(0));
+        assertEquals(
+                true
+                , new JSONArray()
+                        .fluentAdd("true")
+                        .getBooleanValue(0));
+        assertEquals(
+                false
+                , new JSONArray()
+                        .fluentAdd("FALSE")
+                        .getBooleanValue(0));
+        assertEquals(
+                false
+                , new JSONArray()
+                        .fluentAdd(Boolean.FALSE)
+                        .getBooleanValue(0));
+    }
+
+    @Test
+    public void test_getShortValue() {
+        assertEquals(
+                (short) 12
+                , new JSONArray()
+                        .fluentAdd(12)
+                        .getShortValue(0));
+        assertEquals(
+                (short) 12
+                , new JSONArray()
+                        .fluentAdd((byte) 12)
+                        .getShortValue(0));
+        assertEquals(
+                (short) 12
+                , new JSONArray()
+                        .fluentAdd((short) 12)
+                        .getShortValue(0));
+        assertEquals(
+                (short) 12
+                , new JSONArray()
+                        .fluentAdd(12L)
+                        .getShortValue(0));
+        assertEquals(
+                (short) 12
+                , new JSONArray()
+                        .fluentAdd(12F)
+                        .getShortValue(0));
+        assertEquals(
+                (short) 12
+                , new JSONArray()
+                        .fluentAdd(12D)
+                        .getShortValue(0));
+        assertEquals(
+                (short) 12
+                , new JSONArray()
+                        .fluentAdd(new BigDecimal("12"))
+                        .getShortValue(0));
+        assertEquals(
+                (short) 12
+                , new JSONArray()
+                        .fluentAdd(new BigInteger("12"))
+                        .getShortValue(0));
+        assertEquals(
+                (short) 12
+                , new JSONArray()
+                        .fluentAdd("12")
+                        .getShortValue(0));
+    }
+
+    @Test
+    public void test_getShort() {
+        assertEquals(
+                Short.valueOf((short) 12)
+                , new JSONArray()
+                        .fluentAdd(12)
+                        .getShort(0));
+        assertEquals(
+                Short.valueOf((short) 12)
+                , new JSONArray()
+                        .fluentAdd((byte) 12)
+                        .getShort(0));
+        assertEquals(
+                Short.valueOf((short) 12)
+                , new JSONArray()
+                        .fluentAdd((short) 12)
+                        .getShort(0));
+        assertEquals(
+                Short.valueOf((short) 12)
+                , new JSONArray()
+                        .fluentAdd(12L)
+                        .getShort(0));
+        assertEquals(
+                Short.valueOf((short) 12)
+                , new JSONArray()
+                        .fluentAdd(12F)
+                        .getShort(0));
+        assertEquals(
+                Short.valueOf((short) 12)
+                , new JSONArray()
+                        .fluentAdd(12D)
+                        .getShort(0));
+        assertEquals(
+                Short.valueOf((short) 12)
+                , new JSONArray()
+                        .fluentAdd(new BigDecimal("12"))
+                        .getShort(0));
+        assertEquals(
+                Short.valueOf((short) 12)
+                , new JSONArray()
+                        .fluentAdd(new BigInteger("12"))
+                        .getShort(0));
+        assertEquals(
+                Short.valueOf((short) 12)
+                , new JSONArray()
+                        .fluentAdd(Short.valueOf((short) 12))
+                        .getShort(0));
+        assertEquals(
+                Short.valueOf((short) 12)
+                , new JSONArray()
+                        .fluentAdd(Byte.valueOf((byte) 12))
+                        .getShort(0));
+        assertEquals(
+                Short.valueOf((short) 12)
+                , new JSONArray()
+                        .fluentAdd("12")
+                        .getShort(0));
+    }
+
+    @Test
+    public void test_getByteValue() {
+        assertEquals(
+                (byte) 12
+                , new JSONArray()
+                        .fluentAdd(12)
+                        .getByteValue(0));
+        assertEquals(
+                (byte) 12
+                , new JSONArray()
+                        .fluentAdd((byte) 12)
+                        .getByteValue(0));
+        assertEquals(
+                (byte) 12
+                , new JSONArray()
+                        .fluentAdd((short) 12)
+                        .getByteValue(0));
+        assertEquals(
+                (byte) 12
+                , new JSONArray()
+                        .fluentAdd(12L)
+                        .getByteValue(0));
+        assertEquals(
+                (byte) 12
+                , new JSONArray()
+                        .fluentAdd(12F)
+                        .getByteValue(0));
+        assertEquals(
+                (byte) 12
+                , new JSONArray()
+                        .fluentAdd(12D)
+                        .getByteValue(0));
+        assertEquals(
+                (byte) 12
+                , new JSONArray()
+                        .fluentAdd(new BigDecimal("12"))
+                        .getByteValue(0));
+        assertEquals(
+                (byte) 12
+                , new JSONArray()
+                        .fluentAdd(new BigInteger("12"))
+                        .getByteValue(0));
+        assertEquals(
+                (byte) 12
+                , new JSONArray()
+                        .fluentAdd("12")
+                        .getByteValue(0));
+    }
+
+    @Test
+    public void test_getByte() {
+        assertEquals(
+                Byte.valueOf((byte) 12)
+                , new JSONArray()
+                        .fluentAdd(12)
+                        .getByte(0));
+        assertEquals(
+                Byte.valueOf((byte) 12)
+                , new JSONArray()
+                        .fluentAdd((byte) 12)
+                        .getByte(0));
+        assertEquals(
+                Byte.valueOf((byte) 12)
+                , new JSONArray()
+                        .fluentAdd((short) 12)
+                        .getByte(0));
+        assertEquals(
+                Byte.valueOf((byte) 12)
+                , new JSONArray()
+                        .fluentAdd(12L)
+                        .getByte(0));
+        assertEquals(
+                Byte.valueOf((byte) 12)
+                , new JSONArray()
+                        .fluentAdd(12F)
+                        .getByte(0));
+        assertEquals(
+                Byte.valueOf((byte) 12)
+                , new JSONArray()
+                        .fluentAdd(12D)
+                        .getByte(0));
+        assertEquals(
+                Byte.valueOf((byte) 12)
+                , new JSONArray()
+                        .fluentAdd(new BigDecimal("12"))
+                        .getByte(0));
+        assertEquals(
+                Byte.valueOf((byte) 12)
+                , new JSONArray()
+                        .fluentAdd(new BigInteger("12"))
+                        .getByte(0));
+        assertEquals(
+                Byte.valueOf((byte) 12)
+                , new JSONArray()
+                        .fluentAdd(Short.valueOf((short) 12))
+                        .getByte(0));
+        assertEquals(
+                Byte.valueOf((byte) 12)
+                , new JSONArray()
+                        .fluentAdd(Byte.valueOf((byte) 12))
+                        .getByte(0));
+        assertEquals(
+                Byte.valueOf((byte) 12)
+                , new JSONArray()
+                        .fluentAdd("12")
+                        .getByte(0));
     }
 }

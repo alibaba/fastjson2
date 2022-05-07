@@ -433,6 +433,10 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 return null;
             }
 
+            if (str.indexOf('.') != -1) {
+                return (long) Double.parseDouble(str);
+            }
+
             return Long.parseLong(str);
         }
 
@@ -463,6 +467,10 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
 
             if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return 0;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (long) Double.parseDouble(str);
             }
 
             return Long.parseLong(str);
@@ -501,6 +509,10 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 return null;
             }
 
+            if (str.indexOf('.') != -1) {
+                return (int) Double.parseDouble(str);
+            }
+
             return Integer.parseInt(str);
         }
 
@@ -531,6 +543,10 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
 
             if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return 0;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (int) Double.parseDouble(str);
             }
 
             return Integer.parseInt(str);
@@ -751,11 +767,11 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             return null;
         }
 
-        if (value instanceof Number) {
-            if (value instanceof BigInteger) {
-                return (BigInteger) value;
-            }
+        if (value instanceof BigInteger) {
+            return (BigInteger) value;
+        }
 
+        if (value instanceof Number) {
             if (value instanceof BigDecimal) {
                 return ((BigDecimal) value).toBigInteger();
             }

@@ -54,6 +54,23 @@ public class JSONArray extends ArrayList<Object> {
         }
     }
 
+    public Object set(int index, Object element) {
+        if (index == -1) {
+            add(element);
+            return null;
+        }
+
+        if (size() <= index) {
+            for (int i = size(); i < index; ++i) {
+                add(null);
+            }
+            add(element);
+            return null;
+        }
+
+        return super.set(index, element);
+    }
+
     /**
      * Returns the {@link JSONArray} at the specified location in this {@link JSONArray}.
      *
@@ -904,6 +921,36 @@ public class JSONArray extends ArrayList<Object> {
      */
     public JSONArray fluentAdd(Object element) {
         add(element);
+        return this;
+    }
+
+    public JSONArray fluentClear() {
+        clear();
+        return this;
+    }
+
+    public JSONArray fluentRemove(int index) {
+        remove(index);
+        return this;
+    }
+
+    public JSONArray fluentSet(int index, Object element) {
+        set(index, element);
+        return this;
+    }
+
+    public JSONArray fluentRemove(Object o) {
+        remove(o);
+        return this;
+    }
+
+    public JSONArray fluentRemoveAll(Collection<?> c) {
+        removeAll(c);
+        return this;
+    }
+
+    public JSONArray fluentAddAll(Collection<?> c) {
+        addAll(c);
         return this;
     }
 

@@ -43,6 +43,8 @@ import static com.alibaba.fastjson.util.TypeUtils.*;
  * @author wenshao[szujobs@hotmail.com]
  */
 public class JSONObject extends JSON implements Map<String, Object>, Cloneable, Serializable {
+    static ObjectReader<JSONArray> arrayReader;
+    static ObjectReader<JSONObject> objectReader;
 
     private static final long serialVersionUID = 1L;
     private static final int DEFAULT_INITIAL_CAPACITY = 16;
@@ -129,16 +131,25 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return (JSONObject) value;
         }
 
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            JSONReader reader = JSONReader.of(str);
+            if (objectReader == null) {
+                objectReader = reader.getObjectReader(JSONObject.class);
+            }
+            return objectReader.readObject(reader, 0);
+        }
+
         if (value instanceof Map) {
             return new JSONObject((Map) value);
         }
 
-        if (value instanceof String) {
-            return JSON.parseObject((String) value);
-        }
-
-//        return (JSONObject) toJSON(value);
-        throw new JSONException("TODO");
+        return null;
     }
 
     public JSONArray getJSONArray(String key) {
@@ -148,16 +159,25 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return (JSONArray) value;
         }
 
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            JSONReader reader = JSONReader.of(str);
+            if (arrayReader == null) {
+                arrayReader = reader.getObjectReader(JSONArray.class);
+            }
+            return arrayReader.readObject(reader, 0);
+        }
+
         if (value instanceof List) {
             return new JSONArray((List) value);
         }
 
-        if (value instanceof String) {
-            return (JSONArray) JSON.parse((String) value);
-        }
-
-//        return (JSONArray) toJSON(value);
-        throw new JSONException("TODO");
+        return null;
     }
 
     public <T> T getObject(String key, Class<T> clazz) {
@@ -200,7 +220,34 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         if (typeReference == null) {
             return (T) obj;
         }
-        return TypeUtils.cast(obj, typeReference.getType(), ParserConfig.getGlobalInstance());
+
+        Type type = typeReference.getType();
+
+        if (type instanceof Class) {
+            Class clazz = (Class) type;
+            if (clazz != Object.class && clazz.isInstance(obj)) {
+                return (T) obj;
+            }
+        }
+
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        Function typeConvert = provider.getTypeConvert(obj.getClass(), type);
+        if (typeConvert != null) {
+            return (T) typeConvert.apply(obj);
+        }
+
+        String json = JSON.toJSONString(obj);
+        ObjectReader objectReader = provider.getObjectReader(type);
+        JSONReader jsonReader = JSONReader.of(json);
+
+        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
+            jsonReader
+                    .getContext()
+                    .setUtilDateFormat(defaultDateFormat);
+        }
+
+        return (T) objectReader.readObject(jsonReader);
     }
 
     public Boolean getBoolean(String key) {
@@ -287,107 +334,377 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
     }
 
     public byte getByteValue(String key) {
-        Object value = get(key);
+        Object value = map.get(key);
 
-        Byte byteVal = castToByte(value);
-        if (byteVal == null) {
+        if (value == null) {
             return 0;
         }
 
-        return byteVal.byteValue();
+        if (value instanceof Number) {
+            return ((Number) value).byteValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return 0;
+            }
+
+            return Byte.parseByte(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to byte value");
     }
 
     public Short getShort(String key) {
-        Object value = get(key);
+        Object value = map.get(key);
 
-        return castToShort(value);
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Short) {
+            return (Short) value;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).shortValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            return Short.parseShort(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Short");
     }
 
     public short getShortValue(String key) {
-        Object value = get(key);
+        Object value = map.get(key);
 
-        Short shortVal = castToShort(value);
-        if (shortVal == null) {
+        if (value == null) {
             return 0;
         }
 
-        return shortVal.shortValue();
+        if (value instanceof Number) {
+            return ((Number) value).shortValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return 0;
+            }
+
+            return Short.parseShort(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to short value");
     }
 
     public Integer getInteger(String key) {
-        Object value = get(key);
+        Object value = map.get(key);
 
-        return castToInt(value);
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Integer) {
+            return ((Integer) value);
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (int) Double.parseDouble(str);
+            }
+
+            return Integer.parseInt(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Integer");
     }
 
     //
     public int getIntValue(String key) {
-        Object value = get(key);
-        return com.alibaba.fastjson2.util.TypeUtils.toIntValue(value);
+        Object value = map.get(key);
+
+        if (value == null) {
+            return 0;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return 0;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (int) Double.parseDouble(str);
+            }
+
+            return Integer.parseInt(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to int value");
     }
 
     //
     public Long getLong(String key) {
-        Object value = get(key);
+        Object value = map.get(key);
 
-        return castToLong(value);
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Long) {
+            return ((Long) value);
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (long) Double.parseDouble(str);
+            }
+
+            return Long.parseLong(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Long");
     }
 
     public long getLongValue(String key) {
-        Object value = get(key);
+        Object value = map.get(key);
 
-        Long longVal = castToLong(value);
-        if (longVal == null) {
-            return 0L;
+        if (value == null) {
+            return 0;
         }
 
-        return longVal.longValue();
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return 0;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (long) Double.parseDouble(str);
+            }
+
+            return Long.parseLong(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to long value");
     }
 
     public Float getFloat(String key) {
-        Object value = get(key);
+        Object value = map.get(key);
 
-        return castToFloat(value);
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Float) {
+            return (Float) value;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).floatValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            return Float.parseFloat(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Float");
     }
 
     public float getFloatValue(String key) {
-        Object value = get(key);
+        Object value = map.get(key);
 
-        Float floatValue = castToFloat(value);
-        if (floatValue == null) {
+        if (value == null) {
             return 0F;
         }
 
-        return floatValue.floatValue();
+        if (value instanceof Number) {
+            return ((Number) value).floatValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return 0F;
+            }
+
+            return Float.parseFloat(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to float value");
     }
 
     public Double getDouble(String key) {
-        Object value = get(key);
+        Object value = map.get(key);
 
-        return castToDouble(value);
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Double) {
+            return (Double) value;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            return Double.parseDouble(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to Double");
     }
 
     public double getDoubleValue(String key) {
-        Object value = get(key);
+        Object value = map.get(key);
 
-        Double doubleValue = castToDouble(value);
-        if (doubleValue == null) {
+        if (value == null) {
             return 0D;
         }
 
-        return doubleValue.doubleValue();
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return 0D;
+            }
+
+            return Double.parseDouble(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to double value");
     }
 
     public BigDecimal getBigDecimal(String key) {
-        Object value = get(key);
+        Object value = map.get(key);
 
-        return castToBigDecimal(value);
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Number) {
+            if (value instanceof BigDecimal) {
+                return (BigDecimal) value;
+            }
+
+            if (value instanceof BigInteger) {
+                return new BigDecimal((BigInteger) value);
+            }
+
+            if (value instanceof Float
+                    || value instanceof Double) {
+                // Floating point number have no cached BigDecimal
+                return new BigDecimal(value.toString());
+            }
+
+            long longValue = ((Number) value).longValue();
+            return BigDecimal.valueOf(longValue);
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            return new BigDecimal(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
     }
 
     public BigInteger getBigInteger(String key) {
-        Object value = get(key);
+        Object value = map.get(key);
 
-        return castToBigInteger(value);
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof BigInteger) {
+            return (BigInteger) value;
+        }
+
+        if (value instanceof Number) {
+            if (value instanceof BigDecimal) {
+                return ((BigDecimal) value).toBigInteger();
+            }
+
+            long longValue = ((Number) value).longValue();
+            return BigInteger.valueOf(longValue);
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            return new BigInteger(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
     }
 
     public String getString(String key) {

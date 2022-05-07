@@ -1,11 +1,11 @@
 package com.alibaba.fastjson;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -13,6 +13,10 @@ import java.util.*;
 import java.util.function.Function;
 
 public class JSONArray extends JSON implements List {
+    static ObjectWriter<JSONArray> arrayWriter;
+    static ObjectReader<JSONArray> arrayReader;
+    static ObjectReader<JSONObject> objectReader;
+
     private List list = new com.alibaba.fastjson2.JSONArray();
 
     public JSONArray() {
@@ -250,7 +254,7 @@ public class JSONArray extends JSON implements List {
     }
 
     public Long getLong(int index) {
-        Object value = get(index);
+        Object value = list.get(index);
         if (value == null) {
             return null;
         }
@@ -328,22 +332,31 @@ public class JSONArray extends JSON implements List {
     }
 
     public JSONObject getJSONObject(int index) {
-        Object value = list.get(index);
+        Object value = get(index);
 
         if (value instanceof JSONObject) {
             return (JSONObject) value;
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            JSONReader reader = JSONReader.of(str);
+            if (objectReader == null) {
+                objectReader = reader.getObjectReader(JSONObject.class);
+            }
+            return objectReader.readObject(reader, 0);
         }
 
         if (value instanceof Map) {
             return new JSONObject((Map) value);
         }
 
-        if (value instanceof String) {
-            return JSON.parseObject((String) value);
-        }
-
-//        return (JSONObject) toJSON(value);
-        throw new JSONException("TODO");
+        return null;
     }
 
     @Override
@@ -640,6 +653,19 @@ public class JSONArray extends JSON implements List {
 
     @Override
     public Object set(int index, Object element) {
+        if (index == -1) {
+            list.add(element);
+            return null;
+        }
+
+        if (list.size() <= index) {
+            for (int i = list.size(); i < index; ++i) {
+                list.add(null);
+            }
+            list.add(element);
+            return null;
+        }
+
         return list.set(index, element);
     }
 
@@ -692,17 +718,31 @@ public class JSONArray extends JSON implements List {
     }
 
     public JSONArray getJSONArray(int index) {
-        Object value = list.get(index);
+        Object value = get(index);
 
         if (value instanceof JSONArray) {
             return (JSONArray) value;
         }
 
-        if (value instanceof List) {
-            return new JSONArray((List) value);
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                return null;
+            }
+
+            JSONReader reader = JSONReader.of(str);
+            if (arrayReader == null) {
+                arrayReader = reader.getObjectReader(JSONArray.class);
+            }
+            return arrayReader.readObject(reader, 0);
         }
 
-        return (JSONArray) toJSON(value);
+        if (value instanceof List) {
+            return new JSONArray((List<?>) value);
+        }
+
+        return null;
     }
 
     public <T> T getObject(int index, Class<T> clazz) {
