@@ -23,8 +23,6 @@ public class ByteArrayFieldTest_7_gzip_hex {
 
         String json = JSON.toJSONString(model);
 
-        assertEquals("{\"value\":\"H4sIAAAAAAAAAO3IsRGAIBAAsJVeUE5LBBXcfyC3sErKxJLyupX9iHq2ft3PmG8455xzzjnnnHPOOeecc84555xzzjnnnHPOOeecc84555xzzjnnnHPOOeecc84555z7/T6powiAIE4AAA==\"}", json);
-
         Model model1 = JSON.parseObject(json, Model.class);
         assertArrayEquals(model.value, model1.value);
     }
