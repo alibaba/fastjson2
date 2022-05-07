@@ -1,20 +1,24 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
+name: 需求建议
+about: 提出针对本项目的想法和建议
 title: '[FEATURE]'
 labels: 'enhancement'
-assignees: 'wenshao'
+assignees: ''
 
 ---
 
-### Is your feature request related to a problem? Please describe.
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+### 请描述您的需求或者改进建议
+*对您想要需求或建议的清晰简洁的描述。*
 
-### Describe the solution you'd like
-A clear and concise description of what you want to happen.
 
-### Describe alternatives you've considered
-A clear and concise description of any alternative solutions or features you've considered.
+### 请描述你建议的实现方案
+*对您想要需求或建议的实现方案的详细描述。*
 
-#### Additional context
-Add any other context or screenshots about the feature request here.
+
+### 描述您考虑过的替代方案
+*对您考虑过的任何替代解决方案或功能的描述。*
+
+
+#### 附加信息
+*如果你还有其他需要提供的信息，可以在这里填写（可以提供截图、视频等）。*
+
