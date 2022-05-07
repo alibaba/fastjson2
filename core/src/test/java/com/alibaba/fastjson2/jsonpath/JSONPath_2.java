@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.jsonpath;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
+import com.alibaba.fastjson2.JSONReader;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -157,5 +159,46 @@ public class JSONPath_2 {
                         .eval(new Object[0])
                         .toString()
         );
+    }
+
+
+    @Test
+    public void test_path_offset() {
+        String content = "{\n"
+            + "    \"code\":\"success\",\n"
+            + "    \"data\":{\n"
+            + "        \"data2\":{\n"
+            + "            \"id\":null,\n"
+            + "            \"type\":null,\n"
+            + "            \"serveCategoryInfoList\":[\n"
+            + "                {\n"
+            + "                    \"id\":0,\n"
+            + "                    \"infoList\":[\n"
+            + "\n"
+            + "                    ],\n"
+            + "                    \"idList\":[\n"
+            + "                        200226\n"
+            + "                    ]\n"
+            + "                },\n"
+            + "                {\n"
+            + "                    \"id\":1,\n"
+            + "                    \"idList\":[\n"
+            + "                        1,\n"
+            + "                        2,\n"
+            + "                        3,\n"
+            + "                        4,\n"
+            + "                        5,\n"
+            + "                        6,\n"
+            + "                        7\n"
+            + "                    ]\n"
+            + "                },\n"
+            + "            ]\n"
+            + "        },\n"
+            + "    },\n"
+            + "    \"msg\":\"\",\n"
+            + "    \"status\":\"1\"\n"
+            + "}\n";
+        JSONPath path = JSONPath.of("$.status");
+        assertEquals(path.extract(JSONReader.of(content)), "1");
     }
 }
