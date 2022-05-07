@@ -7,6 +7,7 @@ import static com.alibaba.fastjson2.util.IOUtils.DigitOnes;
 import static com.alibaba.fastjson2.util.IOUtils.DigitTens;
 import static com.alibaba.fastjson2.util.IOUtils.digits;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -24,6 +25,14 @@ class JSONWriterUTF16 extends JSONWriter {
         chars = JSONFactory.CHARS_UPDATER.getAndSet(JSONFactory.CACHE, null);
         if (chars == null) {
             chars = new char[1024];
+        }
+    }
+
+    public void flushTo(java.io.Writer to) {
+        try {
+            to.write(chars, 0, off);
+        } catch (IOException e) {
+            throw new JSONException("flushTo error", e);
         }
     }
 

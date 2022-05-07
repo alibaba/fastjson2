@@ -1,6 +1,7 @@
 package com.alibaba.fastjson;
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson2.JSONReader;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -15,7 +16,53 @@ public class JSONWriter {
     }
 
     public void config(SerializerFeature feature, boolean state) {
-
+        com.alibaba.fastjson2.JSONWriter.Context ctx = raw.getContext();
+        switch (feature) {
+            case UseISO8601DateFormat:
+                if (state) {
+                    ctx.setDateFormat("iso8601");
+                }
+                break;
+            case WriteMapNullValue:
+                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.WriteNulls, state);
+                break;
+            case WriteNullListAsEmpty:
+            case WriteNullStringAsEmpty:
+            case WriteNullNumberAsZero:
+            case WriteNullBooleanAsFalse:
+                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue, state);
+                break;
+            case BrowserCompatible:
+                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.BrowserCompatible, state);
+                break;
+            case WriteClassName:
+                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName, state);
+                break;
+            case WriteNonStringValueAsString:
+                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString, state);
+                break;
+            case WriteEnumUsingToString:
+                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.WriteEnumUsingToString, state);
+                break;
+            case NotWriteRootClassName:
+                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.NotWriteRootClassName, state);
+                break;
+            case IgnoreErrorGetter:
+                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.IgnoreErrorGetter, state);
+                break;
+            case WriteDateUseDateFormat:
+                if (state) {
+                    ctx.setDateFormat(JSON.DEFFAULT_DATE_FORMAT);
+                }
+                break;
+            case BeanToArray:
+                if (state) {
+                    ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray);
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     public void writeObject(Object object) {
@@ -24,6 +71,7 @@ public class JSONWriter {
 
     public void flush() throws IOException {
         raw.flushTo(out);
+        out.flush();
     }
 
     public void close() {
