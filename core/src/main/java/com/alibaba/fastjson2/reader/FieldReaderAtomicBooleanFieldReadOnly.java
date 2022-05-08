@@ -41,14 +41,14 @@ final class FieldReaderAtomicBooleanFieldReadOnly<T>
     }
 
     @Override
-    public void readFieldValue(JSONReader jsonReader, T object) {
-        Boolean value = jsonReader.readBool();
+    public void readFieldValue(JSONReader reader, T object) {
+        Boolean value = reader.readBool();
         accept(object, value);
     }
 
     @Override
-    public Object readFieldValue(JSONReader jsonReader) {
-        return jsonReader.readBool();
+    public Object readFieldValue(JSONReader reader) {
+        return reader.readBool();
     }
 
     @Override

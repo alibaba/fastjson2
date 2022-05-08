@@ -590,21 +590,21 @@ public class ObjectReaderGen {
         }
     }
 
-    void println(String str) {
+    void println(String content) {
         try {
-            out.append(str);
+            out.append(content);
             out.append('\n');
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    void println(int tabCnt, String str) {
+    void println(int tabCnt, String content) {
         try {
             for (int i = 0; i < tabCnt; ++i) {
                 out.append('\t');
             }
-            out.append(str);
+            out.append(content);
             out.append('\n');
         } catch (IOException e) {
             throw new IllegalStateException(e);

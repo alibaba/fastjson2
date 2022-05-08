@@ -52,7 +52,7 @@ public class SimplePropertyPreFilter implements PropertyPreFilter {
     }
 
     @Override
-    public boolean process(JSONWriter jsonWriter, Object source, String name) {
+    public boolean process(JSONWriter writer, Object source, String name) {
         if (source == null) {
             return true;
         }
@@ -66,7 +66,7 @@ public class SimplePropertyPreFilter implements PropertyPreFilter {
         }
 
         if (maxLevel > 0) {
-            if (jsonWriter.level() > maxLevel) {
+            if (writer.level() > maxLevel) {
                 return false;
             }
         }
