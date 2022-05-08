@@ -12,13 +12,13 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.PropertyFilter;
 import com.alibaba.fastjson2.filter.PropertyPreFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
-import com.alibaba.fastjson2.modules.ObjectReaderModule;
-import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.support.AwtRederModule;
 import com.alibaba.fastjson2.support.AwtWriterModule;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,7 +36,6 @@ public class JSON {
     static final Cache CACHE = new Cache();
     static final AtomicReferenceFieldUpdater<Cache, char[]> CHARS_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(Cache.class, char[].class, "chars");
-    static final SerializeFilter[] emptyFilters = new SerializeFilter[0];
     public static TimeZone defaultTimeZone = TimeZone.getDefault();
     public static Locale defaultLocale = Locale.getDefault();
     public static String DEFAULT_TYPE_KEY = "@type";
@@ -45,19 +44,13 @@ public class JSON {
     public static int DEFAULT_GENERATE_FEATURE;
 
     static {
-        List<ObjectReaderModule> readerModuels = JSONFactory
-                .getDefaultObjectReaderProvider()
-                .getModules();
-        readerModuels.add(AwtRederModule.INSTANCE);
-        readerModuels.add(new Fastjson1xReaderModule(JSONFactory.getDefaultObjectReaderProvider()));
-//        readerModuels.add(Fastjson1xReaderModule.INSTANCE);
+        ObjectReaderProvider readerProvider = JSONFactory.getDefaultObjectReaderProvider();
+        readerProvider.register(AwtRederModule.INSTANCE);
+        readerProvider.register(new Fastjson1xReaderModule(readerProvider));
 
-
-        List<ObjectWriterModule> writerModules = JSONFactory
-                .getDefaultObjectWriterProvider()
-                .getModules();
-        writerModules.add(AwtWriterModule.INSTANCE);
-        writerModules.add(new Fastjson1xWriterModule(JSONFactory.getDefaultObjectWriterProvider()));
+        ObjectWriterProvider writerProvider = JSONFactory.getDefaultObjectWriterProvider();
+        writerProvider.register(AwtWriterModule.INSTANCE);
+        writerProvider.register(new Fastjson1xWriterModule(writerProvider));
 
     }
 

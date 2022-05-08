@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
+import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -368,6 +369,17 @@ public class ObjectReaderProvider {
 
     public boolean register(Type type, ObjectReader objectReader) {
         return cache.put(type, objectReader) == null;
+    }
+
+    public boolean register(ObjectReaderModule module) {
+        for (int i = modules.size() - 1; i >= 0; i--) {
+            if (modules.get(i) == module) {
+                return false;
+            }
+        }
+
+        modules.add(0, module);
+        return true;
     }
 
     public ObjectReaderCreator getCreator() {

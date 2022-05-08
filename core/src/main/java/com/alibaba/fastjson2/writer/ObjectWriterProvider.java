@@ -63,6 +63,17 @@ public class ObjectWriterProvider {
         return cache.put(type, objectWriter) == null;
     }
 
+    public boolean register(ObjectWriterModule module) {
+        for (int i = modules.size() - 1; i >= 0; i--) {
+            if (modules.get(i) == module) {
+                return false;
+            }
+        }
+
+        modules.add(0, module);
+        return true;
+    }
+
     public Class getMixIn(Class target) {
         return mixInCache.get(target);
     }
