@@ -2049,7 +2049,7 @@ public abstract class JSONReader implements Closeable {
         }
 
         public ObjectReader getObjectReaderAutoType(String typeName, Class expectClass) {
-            if (autoTypeBeforeHandler != null) {
+            if (autoTypeBeforeHandler != null && !ObjectReaderProvider.SAFE_MODE) {
                 Class<?> autoTypeClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
                 if (autoTypeClass != null) {
                     boolean fieldBased = (features & Feature.FieldBased.mask) != 0;

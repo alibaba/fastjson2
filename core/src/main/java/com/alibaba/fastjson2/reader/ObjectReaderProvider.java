@@ -23,7 +23,7 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
 
 public class ObjectReaderProvider {
-    static final boolean SAFE_MODE;
+    public static final boolean SAFE_MODE;
     static final String[] DENYS;
     static final String[] AUTO_TYPE_ACCEPT_LIST;
 
