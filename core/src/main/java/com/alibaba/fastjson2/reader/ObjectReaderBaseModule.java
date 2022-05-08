@@ -504,6 +504,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                     case "com.fasterxml.jackson.annotation.JsonAlias":
                         processJacksonJsonAlias(fieldInfo, annotation);
                         break;
+                    case "com.taobao.api.internal.mapping.ApiField":
+                        processTaobaoApiField(fieldInfo, annotation);
+                        break;
                     default:
                         break;
                 }
@@ -551,6 +554,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAlias":
                         processJacksonJsonAlias(fieldInfo, annotation);
+                        break;
+                    case "com.taobao.api.internal.mapping.ApiField":
+                        processTaobaoApiField(fieldInfo, annotation);
                         break;
                     default:
                         break;
@@ -603,6 +609,27 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                             String[] values = (String[]) result;
                             if (values.length != 0) {
                                 fieldInfo.alternateNames = values;
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {}
+            });
+        }
+
+        private void processTaobaoApiField(FieldInfo fieldInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "value": {
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                // fieldInfo.alternateNames = new String[]{value};
                             }
                             break;
                         }
