@@ -1099,10 +1099,14 @@ public class JSONArrayTest {
     @Test
     public void test_set_index() {
         JSONArray array = new JSONArray();
-        array.add(-1);
-        array.add(2);
+        array.set(-1, -1);
+        assertEquals(
+            "[-1]", array.toString()
+        );
 
         array.set(0, 1);
+        array.add(2);
+
         assertEquals(
             "[1,2]", array.toString()
         );
