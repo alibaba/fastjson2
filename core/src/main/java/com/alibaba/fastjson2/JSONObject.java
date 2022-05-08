@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class JSONObject extends LinkedHashMap implements InvocationHandler {
@@ -1108,7 +1107,17 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         return (T) objectReader.readObject(jsonReader);
     }
 
-    public <T> T getObject(String key, TypeReference typeReference, JSONReader.Feature... features) {
+    /**
+     * Returns the result of the {@link TypeReference} converter conversion of the associated value in this {@link JSONObject}.
+     *
+     * @param key           the key whose associated value is to be returned
+     * @param typeReference specify the {@link TypeReference} to be converted
+     * @return {@code <T>} or null
+     * @throws JSONException If no suitable conversion method is found
+     * @see JSONObject#getObject(String, Type, JSONReader.Feature...)
+     * @since 2.0.3
+     */
+    public <T> T getObject(String key, TypeReference<?> typeReference, JSONReader.Feature... features) {
         return getObject(key, typeReference.getType(), features);
     }
 
@@ -1134,7 +1143,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 throw new JSONException("This method '" + methodName + "' is not a setter");
             }
 
-            String name = getAnnotationName(method);
+            String name = getJSONFieldName(method);
 
             if (name == null) {
                 name = methodName;
@@ -1159,7 +1168,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 throw new JSONException("This method '" + methodName + "' is not a getter");
             }
 
-            String name = getAnnotationName(method);
+            String name = getJSONFieldName(method);
 
             Object value;
             if (name == null) {
@@ -1227,55 +1236,43 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         throw new UnsupportedOperationException(method.toGenericString());
     }
 
-    private String getAnnotationName(Method method) {
-        String name = null;
-        Annotation[] annotations = method.getAnnotations();
-        for (Annotation annotation : annotations) {
+    /**
+     * Returns the {@link JSONField#name()} of the {@link Method}
+     *
+     * @param method specify the method to be solve
+     * @return {@link String} or {@code null}
+     */
+    private String getJSONFieldName(Method method) {
+        for (Annotation annotation : method.getAnnotations()) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
             if (annotationType == JSONField.class) {
                 JSONField jsonField = (JSONField) annotation;
-                if (jsonField != null) {
-                    name = jsonField.name();
-                    if (name.isEmpty()) {
-                        name = null;
-                    }
+                String target = jsonField.name();
+                if (!target.isEmpty()) {
+                    return target;
                 }
             } else if (annotationType.getName().equals("com.alibaba.fastjson.annotation.JSONField")) {
-                NameConsumer nameConsumer = new NameConsumer(annotation);
-                BeanUtils.annotationMethods(annotationType, nameConsumer);
-                if (nameConsumer.name != null) {
-                    name = nameConsumer.name;
+                final String[] target = {null};
+                BeanUtils.annotationMethods(
+                    annotationType, proxyMethod -> {
+                        if ("name".equals(proxyMethod.getName())) {
+                            try {
+                                String result = (String) proxyMethod.invoke(annotation);
+                                if (!result.isEmpty()) {
+                                    target[0] = result;
+                                }
+                            } catch (IllegalAccessException | InvocationTargetException e) {
+                                // nothing
+                            }
+                        }
+                    }
+                );
+                if (target[0] != null) {
+                    return target[0];
                 }
             }
-
         }
-        return name;
-    }
-
-    static class NameConsumer implements Consumer<Method> {
-        final Annotation annotation;
-        String name;
-
-        NameConsumer(Annotation annotation) {
-            this.annotation = annotation;
-        }
-
-        @Override
-        public void accept(Method method) {
-            String methodName = method.getName();
-            switch (methodName) {
-                case "name":
-                    try {
-                        String result = (String) method.invoke(annotation);
-                        if (!result.isEmpty()) {
-                            name = result;
-                        }
-                    } catch (IllegalAccessException | InvocationTargetException ignored) {}
-                    break;
-                default:
-                    break;
-            }
-        }
+        return null;
     }
 
     /**
@@ -1289,6 +1286,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
      * @param key   key with which the specified value is to be associated
      * @param value value to be associated with the specified key
      */
+    @SuppressWarnings("unchecked")
     public Object put(String key, Object value) {
         return super.put(key, value);
     }
