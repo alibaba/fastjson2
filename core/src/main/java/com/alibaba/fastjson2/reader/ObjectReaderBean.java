@@ -150,7 +150,7 @@ public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
 
             if (fieldReader == null) {
                 if (this instanceof ObjectReaderBean) {
-                    ((ObjectReaderBean) this).processExtra(jsonReader, object);
+                    processExtra(jsonReader, object);
                 } else {
                     jsonReader.skipValue();
                 }

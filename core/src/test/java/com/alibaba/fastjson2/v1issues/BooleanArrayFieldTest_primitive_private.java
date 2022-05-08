@@ -5,14 +5,19 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
-public class BooleanArrayFieldTest_primitive_private extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+public class BooleanArrayFieldTest_primitive_private {
+
+    @Test
     public void test_array() throws Exception {
-        Assert.assertEquals("[true]", JSON.toJSONString(new boolean[] { true }));
+        assertEquals("[true]", JSON.toJSONString(new boolean[] { true }));
 
     }
 
+    @Test
     public void test_codec_null() throws Exception {
         V0 v = new V0();
 
@@ -20,13 +25,14 @@ public class BooleanArrayFieldTest_primitive_private extends TestCase {
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue);
-        Assert.assertEquals("{\"value\":null}", text);
+        assertEquals("{\"value\":null}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
-        Assert.assertEquals(v1.getValue(), v.getValue());
+        assertEquals(v1.getValue(), v.getValue());
     }
 
+    @Test
     public void test_codec_null_1() throws Exception {
         V0 v = new V0();
 
@@ -34,7 +40,7 @@ public class BooleanArrayFieldTest_primitive_private extends TestCase {
         mapping.setAsmEnable(false);
 
         String text = JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullListAsEmpty);
-        Assert.assertEquals("{\"value\":[]}", text);
+        assertEquals("{\"value\":[]}", text);
     }
 
     private static class V0 {
