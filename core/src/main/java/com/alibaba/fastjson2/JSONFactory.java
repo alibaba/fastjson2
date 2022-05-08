@@ -24,7 +24,6 @@ public final class JSONFactory {
 
     public static final String PROPERTY_DENY_PROPERTY = "fastjson2.parser.deny";
     public static final String PROPERTY_AUTO_TYPE_ACCEPT = "fastjson2.autoTypeAccept";
-    public static final String PROPERTY_AUTO_TYPE_SUPPORT = "fastjson2.autoTypeSupport";
     public static final String PROPERTY_AUTO_TYPE_HANDLER = "fastjson2.autoTypeHandler";
     public static final String PROPERTY_AUTO_TYPE_BEFORE_HANDLER = "fastjson2.autoTypeBeforeHandler";
 
