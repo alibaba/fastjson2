@@ -50,26 +50,51 @@ public class JSONArray extends ArrayList<Object> {
     public JSONArray(Object... items) {
         super(items.length);
         for (Object item : items) {
-            add(item);
+            super.add(item);
         }
     }
 
+    /**
+     * Replaces the element at the specified position with the specified element
+     *
+     * <pre>{@code
+     *    JSONArray array = new JSONArray();
+     *    array.add(-1); // [-1]
+     *    array.add(2); // [-1,2]
+     *    array.set(0, 1); // [1,2]
+     *    array.set(4, 3); // [1,2,null,null,3]
+     *    array.set(-1, -1); // [1,2,null,null,-1]
+     * }</pre>
+     *
+     * @param index   index of the element to replace
+     * @param element element to be stored at the specified position
+     * @return the element previously at the specified position
+     */
     @Override
     public Object set(int index, Object element) {
-        if (index == -1) {
-            add(element);
-            return null;
-        }
-
-        if (size() <= index) {
-            for (int i = size(); i < index; ++i) {
-                add(null);
+        int size = super.size();
+        if (index < 0) {
+            index += size;
+            if (index < 0) {
+                super.add(element);
+                return null;
             }
-            add(element);
-            return null;
+            return super.set(
+                index, element
+            );
         }
 
-        return super.set(index, element);
+        if (index < size) {
+            return super.set(
+                index, element
+            );
+        }
+
+        while (index-- != size) {
+            super.add(null);
+        }
+        super.add(element);
+        return null;
     }
 
     /**
