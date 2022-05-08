@@ -16,8 +16,8 @@ final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
     static final AtomicReferenceFieldUpdater<FieldReaderDateField, SimpleDateFormat> FORMATTER_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(FieldReaderDateField.class, SimpleDateFormat.class, "formatter");
 
-    FieldReaderDateField(String fieldName, Class fieldType, int ordinal, long features, String format, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, field);
+    FieldReaderDateField(String fieldName, Class fieldType, int ordinal, long features, String format, Date defaultValue, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
     }
 
     @Override

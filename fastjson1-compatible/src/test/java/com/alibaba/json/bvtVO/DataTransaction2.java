@@ -2,13 +2,14 @@ package com.alibaba.json.bvtVO;
 
 
 import com.alibaba.fastjson.JSON;
-import org.junit.Assert;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * 交易消息体
@@ -298,21 +299,21 @@ public class DataTransaction2 implements Serializable {
         System.out.println(dt.toJSON());
         DataTransaction2 dt1 = JSON.parseObject(dt.toJSON(), DataTransaction2.class);
         System.out.println(dt1.toJSON());
-        
-        Assert.assertEquals(dt.toJSON(), dt1.toJSON());
-        
+
+        assertEquals(dt.toJSON(), dt1.toJSON());
+
         System.out.println("=================");
         System.out.println(dt.toJSON());
         dt.setRetMsgCode("-1", "错误");
         dt.setDataSet("1000", new ArrayList<Map<String, Object>>());
         System.out.println(dt.toJSON());
-        
+
         String text = dt.toJSON();
         System.out.println(text);
-        
+
         DataTransaction2 dt2 = JSON.parseObject(text, DataTransaction2.class);
         System.out.println(JSON.toJSONString(dt2));
 
-        Assert.assertEquals(dt.toJSON(), dt2.toJSON());
+        assertEquals(dt.toJSON(), dt2.toJSON());
     }
 }

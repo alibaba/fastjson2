@@ -82,6 +82,10 @@ public class JSON {
     }
 
     public static <T> T parseObject(String str, Type type, Feature... features) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
         JSONReader reader = JSONReader.of(str);
         JSONReader.Context context = reader.getContext();
         context.setObjectClass(JSONObject.class);
@@ -104,6 +108,10 @@ public class JSON {
     }
 
     public static <T> T parseObject(byte[] jsonBytes, Type type, Feature... features) {
+        if (jsonBytes == null) {
+            return null;
+        }
+
         JSONReader reader = JSONReader.of(jsonBytes);
         JSONReader.Context context = reader.getContext();
         context.setObjectClass(JSONObject.class);
@@ -126,6 +134,10 @@ public class JSON {
     }
 
     public static Object parse(String str, Feature... features) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
         try (JSONReader reader = JSONReader.of(str)) {
             JSONReader.Context context = reader.getContext();
             context.setObjectClass(JSONObject.class);
@@ -200,7 +212,61 @@ public class JSON {
             int position = charBuf.position();
 
             JSONReader reader = JSONReader.of(chars, 0, position);
+            JSONReader.Context context = reader.getContext();
+
+            for (Feature feature : Feature.values()) {
+                if ((features & feature.mask) != 0) {
+                    switch (feature) {
+                        case SupportArrayToBean:
+                            context.config(JSONReader.Feature.SupportArrayToBean);
+                            break;
+                        case SupportAutoType:
+                            context.config(JSONReader.Feature.SupportAutoType);
+                            break;
+                        case ErrorOnEnumNotMatch:
+                            context.config(JSONReader.Feature.ErrorOnEnumNotMatch);
+                        case SupportNonPublicField:
+                            context.config(JSONReader.Feature.FieldBased);
+                        default:
+                            break;
+                    }
+                }
+            }
+
             return reader.read(Object.class);
+        } finally {
+            if (chars.length <= 1024 * 64) {
+                CHARS_UPDATER.set(CACHE, chars);
+            }
+        }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public static <T> T parseObject(byte[] input, //
+                                    int off, //
+                                    int len, //
+                                    CharsetDecoder charsetDecoder, //
+                                    Type clazz, //
+                                    Feature... features) {
+        charsetDecoder.reset();
+
+        int scaleLength = (int) (len * (double) charsetDecoder.maxCharsPerByte());
+
+        char[] chars = CHARS_UPDATER.getAndSet(CACHE, null);
+        if (chars == null || chars.length < scaleLength) {
+            chars = new char[scaleLength];
+        }
+
+        try {
+            ByteBuffer byteBuf = ByteBuffer.wrap(input, off, len);
+            CharBuffer charByte = CharBuffer.wrap(chars);
+            IOUtils.decode(charsetDecoder, byteBuf, charByte);
+
+            int position = charByte.position();
+
+            JSONReader reader = JSONReader.of(chars, 0, position);
+            return reader.read(clazz);
         } finally {
             if (chars.length <= 1024 * 64) {
                 CHARS_UPDATER.set(CACHE, chars);
@@ -302,7 +368,7 @@ public class JSON {
         return toJSONBytes(object, new SerializeFilter[0], features);
     }
 
-    private static void config(JSONWriter.Context ctx, SerializerFeature[] features) {
+    static void config(JSONWriter.Context ctx, SerializerFeature[] features) {
 
         ctx.setDateFormat("millis");
         ctx.setZoneId(defaultTimeZone.toZoneId());

@@ -35,6 +35,8 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
         if (fieldReader.isUnwrapped()) {
             extraFieldReader = fieldReader;
         }
+
+        hasDefaultValue = fieldReader.getDefaultValue() != null;
     }
 
     @Override
@@ -87,17 +89,21 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
             }
         }
 
-        Object object;
+        T object;
         if (defaultCreator != null) {
             object = defaultCreator.get();
         } else if (JDKUtils.UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
             try {
-                object = UnsafeUtils.UNSAFE.allocateInstance(objectClass);
+                object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {
                 throw new JSONException("create instance error", e);
             }
         } else {
             object = null;
+        }
+
+        if (object != null && hasDefaultValue) {
+            initDefaultValue(object);
         }
 
         for (int i = 0; ; ++i) {
@@ -150,6 +156,10 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
         return (T) object;
     }
 
+    protected void initDefaultValue(T object) {
+        fieldReader.setDefault(object);
+    }
+
     @Override
     public T readObject(JSONReader jsonReader, long features) {
         if (jsonReader.isJSONB()) {
@@ -180,9 +190,13 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
         }
 
         jsonReader.nextIfMatch('{');
-        Object object = defaultCreator != null
+        T object = defaultCreator != null
                 ? defaultCreator.get()
                 : null;
+
+        if (hasDefaultValue) {
+            initDefaultValue(object);
+        }
 
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfMatch('}')) {

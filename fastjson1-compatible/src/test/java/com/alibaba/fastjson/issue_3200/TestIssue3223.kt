@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.parser.ParserConfig
 import com.alibaba.fastjson.serializer.SerializerFeature
-import org.junit.Assert
 import org.junit.jupiter.api.Test
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.properties.Delegates

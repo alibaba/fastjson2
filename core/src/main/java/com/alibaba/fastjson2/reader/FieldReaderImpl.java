@@ -24,8 +24,10 @@ abstract class FieldReaderImpl<T>
 
     volatile JSONPath referenceCache;
 
+    final Object defaultValue;
+
     public FieldReaderImpl(String fieldName, Type fieldType) {
-        this (fieldName, fieldType, TypeUtils.getClass(fieldType), 0, 0L, null);
+        this (fieldName, fieldType, TypeUtils.getClass(fieldType), 0, 0L, null, null);
     }
 
     public FieldReaderImpl(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format) {
@@ -37,11 +39,29 @@ abstract class FieldReaderImpl<T>
         this.fieldNameHash = Fnv.hashCode64(fieldName);
         this.ordinal = ordinal;
         this.format = format;
+        this.defaultValue = null;
+    }
+
+    public FieldReaderImpl(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue) {
+        this.fieldName = fieldName;
+        this.fieldType = fieldType;
+        this.fieldClass = fieldClass;
+        this.fieldClassSerializable = fieldClass != null && Serializable.class.isAssignableFrom(fieldClass);
+        this.features = features;
+        this.fieldNameHash = Fnv.hashCode64(fieldName);
+        this.ordinal = ordinal;
+        this.format = format;
+        this.defaultValue = defaultValue;
     }
 
     @Override
     public boolean isFieldClassSerializable() {
         return fieldClassSerializable;
+    }
+
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
     @Override

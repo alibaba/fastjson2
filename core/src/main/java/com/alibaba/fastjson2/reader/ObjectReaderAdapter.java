@@ -69,6 +69,10 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
             if (fieldReader.isUnwrapped()) {
                 this.extraFieldReader = fieldReader;
             }
+
+            if (fieldReader.getDefaultValue() != null) {
+                this.hasDefaultValue = true;
+            }
         }
 
         this.hashCodes = Arrays.copyOf(hashCodes, hashCodes.length);
@@ -179,31 +183,58 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
         return creator.get();
     }
 
+    protected void initDefaultValue(T object) {
+        for (FieldReader fieldReader : fieldReaders) {
+            Object defaultValue = fieldReader.getDefaultValue();
+            if (defaultValue != null) {
+                fieldReader.accept(object, defaultValue);
+            }
+        }
+    }
+
     @Override
     public T createInstance(long features) {
         if (instantiationError) {
             if (constructor != null) {
+                T object;
                 try {
-                    return (T) constructor.newInstance();
+                    object = (T) constructor.newInstance();
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
                     throw new JSONException("create instance error, " + objectClass, ex);
                 }
+
+                if (hasDefaultValue) {
+                    initDefaultValue(object);
+                }
+
+                return object;
             }
         }
 
         if ((features & JSONReader.Feature.UseDefaultConstructorAsPossible.mask) != 0 && constructor.getParameterCount() == 0) {
             if (constructor != null) {
+                T object;
                 try {
-                    return (T) constructor.newInstance();
+                    object = (T) constructor.newInstance();
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
                     throw new JSONException("create instance error, " + objectClass, ex);
                 }
+
+                if (hasDefaultValue) {
+                    initDefaultValue(object);
+                }
+
+                return object;
             }
         }
 
         InstantiationException error;
         try {
-            return (T) createInstance0(features);
+            T object = (T) createInstance0(features);
+            if (hasDefaultValue) {
+                initDefaultValue(object);
+            }
+            return object;
         } catch (InstantiationException ex) {
             error = ex;
         }
@@ -211,7 +242,11 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
 
         if (constructor != null) {
             try {
-                return (T) constructor.newInstance();
+                T object = (T) constructor.newInstance();
+                if (hasDefaultValue) {
+                    initDefaultValue(object);
+                }
+                return object;
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
                 throw new JSONException("create instance error, " + objectClass, ex);
             }

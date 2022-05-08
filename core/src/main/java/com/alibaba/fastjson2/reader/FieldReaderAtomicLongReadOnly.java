@@ -10,7 +10,7 @@ final class FieldReaderAtomicLongReadOnly<T> extends FieldReaderImpl<T> implemen
     protected final Method method;
 
     FieldReaderAtomicLongReadOnly(String fieldName, Class fieldType, int ordinal, Method method) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, null);
+        super(fieldName, fieldType, fieldType, ordinal, 0, null, null);
         this.method = method;
     }
 

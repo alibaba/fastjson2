@@ -1,13 +1,18 @@
 package com.alibaba.fastjson;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class JSONObjectTest7 extends TestCase {
+import static org.junit.jupiter.api.Assertions.*;
 
+public class JSONObjectTest7 {
+
+    @Test
     public void test() throws Exception {
         JSONObject jsonObject = JSON.parseObject("{\"test\":null,\"a\":\"cc\"}");
         assertEquals(2, jsonObject.entrySet().size());
         assertTrue(jsonObject.containsKey("test"));
+        assertTrue(jsonObject.containsValue("cc"));
+        assertFalse(jsonObject.isEmpty());
     }
 
 }

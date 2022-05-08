@@ -67,6 +67,17 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
         if (fieldReader2.isUnwrapped()) {
             extraFieldReader = fieldReader2;
         }
+
+        hasDefaultValue = fieldReader0.getDefaultValue() != null
+                || fieldReader1.getDefaultValue() != null
+                || fieldReader2.getDefaultValue() != null
+        ;
+    }
+
+    protected void initDefaultValue(T object) {
+        fieldReader0.setDefault(object);
+        fieldReader1.setDefault(object);
+        fieldReader2.setDefault(object);
     }
 
     @Override
@@ -109,17 +120,21 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
             throw new JSONException("expect object, but " + JSONB.typeName(jsonReader.getType()));
         }
 
-        Object object;
+        T object;
         if (defaultCreator != null) {
             object = defaultCreator.get();
         } else if (JDKUtils.UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
             try {
-                object = UnsafeUtils.UNSAFE.allocateInstance(objectClass);
+                object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {
                 throw new JSONException("create instance error", e);
             }
         } else {
             object = null;
+        }
+
+        if (object != null && hasDefaultValue) {
+            initDefaultValue(object);
         }
 
         for (; ; ) {
@@ -186,7 +201,10 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
         if (jsonReader.isArray()
                 && jsonReader.isSupportBeanArray()) {
             jsonReader.nextIfMatch('[');
-            Object object = defaultCreator.get();
+            T object = defaultCreator.get();
+            if (hasDefaultValue) {
+                initDefaultValue(object);
+            }
 
             fieldReader0.readFieldValue(jsonReader, object);
             fieldReader1.readFieldValue(jsonReader, object);
@@ -200,11 +218,15 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
             if (buildFunction != null) {
                 return (T) buildFunction.apply(object);
             }
-            return (T) object;
+            return object;
         }
 
         jsonReader.nextIfMatch('{');
-        Object object = defaultCreator.get();
+        T object = defaultCreator.get();
+        if (hasDefaultValue) {
+            initDefaultValue(object);
+        }
+
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfMatch('}')) {
                 break;

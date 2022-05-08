@@ -1,18 +1,22 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class JSONObject extends LinkedHashMap implements InvocationHandler {
@@ -433,6 +437,10 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 return null;
             }
 
+            if (str.indexOf('.') != -1) {
+                return (long) Double.parseDouble(str);
+            }
+
             return Long.parseLong(str);
         }
 
@@ -463,6 +471,10 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
 
             if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return 0;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (long) Double.parseDouble(str);
             }
 
             return Long.parseLong(str);
@@ -501,6 +513,10 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 return null;
             }
 
+            if (str.indexOf('.') != -1) {
+                return (int) Double.parseDouble(str);
+            }
+
             return Integer.parseInt(str);
         }
 
@@ -531,6 +547,10 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
 
             if (str.isEmpty() || str.equalsIgnoreCase("null")) {
                 return 0;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (int) Double.parseDouble(str);
             }
 
             return Integer.parseInt(str);
@@ -751,11 +771,11 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             return null;
         }
 
-        if (value instanceof Number) {
-            if (value instanceof BigInteger) {
-                return (BigInteger) value;
-            }
+        if (value instanceof BigInteger) {
+            return (BigInteger) value;
+        }
 
+        if (value instanceof Number) {
             if (value instanceof BigDecimal) {
                 return ((BigDecimal) value).toBigInteger();
             }
@@ -914,10 +934,19 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
      * @param type specify the {@link Type} to be converted
      */
     @SuppressWarnings("unchecked")
-    public <T> T toJavaObject(Type type) {
+    public <T> T toJavaObject(Type type, JSONReader.Feature... features) {
+        long featuresValue = 0L;
+        boolean fieldBased = false;
+        for (JSONReader.Feature feature : features) {
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+            }
+            featuresValue |= feature.mask;
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<T> objectReader = provider.getObjectReader(type);
-        return objectReader.createInstance(this, 0L);
+        ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
+        return objectReader.createInstance(this, featuresValue);
     }
 
     /**
@@ -928,10 +957,86 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
      * @param clazz specify the {@code Class<T>} to be converted
      */
     @SuppressWarnings("unchecked")
-    public <T> T toJavaObject(Class<T> clazz) {
+    public <T> T toJavaObject(Class<T> clazz, JSONReader.Feature... features) {
+        long featuresValue = 0L;
+        boolean fieldBased = false;
+        for (JSONReader.Feature feature : features) {
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+            }
+            featuresValue |= feature.mask;
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<T> objectReader = provider.getObjectReader(clazz);
-        return objectReader.createInstance(this, 0L);
+        ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
+        return objectReader.createInstance(this, featuresValue);
+    }
+
+    /**
+     * Returns the result of the {@link Type} converter conversion of the associated value in this {@link JSONObject}.
+     *
+     * {@code User user = jsonObject.getObject("user", User.class);}
+     *
+     * @param key  the key whose associated value is to be returned
+     * @param type specify the {@link Class} to be converted
+     * @return {@code <T>} or null
+     * @throws JSONException If no suitable conversion method is found
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> T getObject(String key, Class<T> type, JSONReader.Feature... features) {
+        Object value = super.get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (type == Object.class && features.length == 0) {
+            return (T) value;
+        }
+
+        boolean fieldBased = false;
+        for (JSONReader.Feature feature : features) {
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+                break;
+            }
+        }
+
+        Class<?> valueClass = value.getClass();
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        Function typeConvert = provider.getTypeConvert(valueClass, type);
+        if (typeConvert != null) {
+            return (T) typeConvert.apply(value);
+        }
+
+        if (value instanceof Map) {
+            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
+            return objectReader.createInstance((Map) value, features);
+        }
+
+        if (value instanceof Collection) {
+            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
+            return objectReader.createInstance((Collection) value);
+        }
+
+        Class clazz = TypeUtils.getMapping(type);
+        if (clazz.isInstance(value)) {
+            return (T) value;
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.isEmpty() || "null".equals(str)) {
+                return null;
+            }
+        }
+
+        String json = JSON.toJSONString(value);
+        JSONReader jsonReader = JSONReader.of(json);
+        jsonReader.context.config(features);
+
+        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
+        return (T) objectReader.readObject(jsonReader);
     }
 
     /**
@@ -956,6 +1061,14 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             return (T) value;
         }
 
+        boolean fieldBased = false;
+        for (JSONReader.Feature feature : features) {
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+                break;
+            }
+        }
+
         Class<?> valueClass = value.getClass();
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         Function typeConvert = provider.getTypeConvert(valueClass, type);
@@ -964,26 +1077,39 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         }
 
         if (value instanceof Map) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type);
+            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
             return objectReader.createInstance((Map) value, features);
         }
 
         if (value instanceof Collection) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type);
+            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
             return objectReader.createInstance((Collection) value);
         }
 
-        Class clazz = TypeUtils.getMapping(type);
-        if (clazz.isInstance(value)) {
-            return (T) value;
+        if (type instanceof Class) {
+            Class clazz = (Class) type;
+            if (clazz.isInstance(value)) {
+                return (T) value;
+            }
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.isEmpty() || "null".equals(str)) {
+                return null;
+            }
         }
 
         String json = JSON.toJSONString(value);
         JSONReader jsonReader = JSONReader.of(json);
         jsonReader.context.config(features);
 
-        ObjectReader objectReader = provider.getObjectReader(clazz);
+        ObjectReader objectReader = provider.getObjectReader(type, fieldBased);
         return (T) objectReader.readObject(jsonReader);
+    }
+
+    public <T> T getObject(String key, TypeReference typeReference, JSONReader.Feature... features) {
+        return getObject(key, typeReference.getType(), features);
     }
 
     /**
@@ -1008,14 +1134,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 throw new JSONException("This method '" + methodName + "' is not a setter");
             }
 
-            String name = null;
-            JSONField annotation = method.getAnnotation(JSONField.class);
-            if (annotation != null) {
-                name = annotation.name();
-                if (name.isEmpty()) {
-                    name = null;
-                }
-            }
+            String name = getAnnotationName(method);
 
             if (name == null) {
                 name = methodName;
@@ -1040,14 +1159,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 throw new JSONException("This method '" + methodName + "' is not a getter");
             }
 
-            String name = null;
-            JSONField annotation = method.getAnnotation(JSONField.class);
-            if (annotation != null) {
-                name = annotation.name();
-                if (name.isEmpty()) {
-                    name = null;
-                }
-            }
+            String name = getAnnotationName(method);
 
             Object value;
             if (name == null) {
@@ -1115,6 +1227,57 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         throw new UnsupportedOperationException(method.toGenericString());
     }
 
+    private String getAnnotationName(Method method) {
+        String name = null;
+        Annotation[] annotations = method.getAnnotations();
+        for (Annotation annotation : annotations) {
+            Class<? extends Annotation> annotationType = annotation.annotationType();
+            if (annotationType == JSONField.class) {
+                JSONField jsonField = (JSONField) annotation;
+                if (jsonField != null) {
+                    name = jsonField.name();
+                    if (name.isEmpty()) {
+                        name = null;
+                    }
+                }
+            } else if (annotationType.getName().equals("com.alibaba.fastjson.annotation.JSONField")) {
+                NameConsumer nameConsumer = new NameConsumer(annotation);
+                BeanUtils.annotationMethods(annotationType, nameConsumer);
+                if (nameConsumer.name != null) {
+                    name = nameConsumer.name;
+                }
+            }
+
+        }
+        return name;
+    }
+
+    static class NameConsumer implements Consumer<Method> {
+        final Annotation annotation;
+        String name;
+
+        NameConsumer(Annotation annotation) {
+            this.annotation = annotation;
+        }
+
+        @Override
+        public void accept(Method method) {
+            String methodName = method.getName();
+            switch (methodName) {
+                case "name":
+                    try {
+                        String result = (String) method.invoke(annotation);
+                        if (!result.isEmpty()) {
+                            name = result;
+                        }
+                    } catch (IllegalAccessException | InvocationTargetException ignored) {}
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
     /**
      * addition of elements
      *
@@ -1143,6 +1306,17 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     public JSONObject fluentPut(String key, Object value) {
         put(key, value);
         return this;
+    }
+
+    /**
+     *
+     * <pre>
+     * JSONObject jsonObject = JSONObject.of();
+     * </pre>
+     *
+     */
+    public static JSONObject of() {
+        return new JSONObject();
     }
 
     /**

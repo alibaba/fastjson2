@@ -1,7 +1,6 @@
 package com.alibaba.fastjson.issue_3200;
 
 import com.alibaba.fastjson.JSONValidator;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

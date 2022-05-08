@@ -8,8 +8,8 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
 final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
-    FieldReaderBigDecimalField(String fieldName, Class fieldType, int ordinal, long features, String format, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, field);
+    FieldReaderBigDecimalField(String fieldName, Class fieldType, int ordinal, long features, String format, BigDecimal defaultValue, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
     }
 
     @Override

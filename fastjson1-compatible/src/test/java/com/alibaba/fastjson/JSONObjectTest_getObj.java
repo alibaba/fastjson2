@@ -1,33 +1,42 @@
 package com.alibaba.fastjson;
 
-import junit.framework.TestCase;
-import org.junit.Assert;
+
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.List;
 
-public class JSONObjectTest_getObj extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+public class JSONObjectTest_getObj {
+
+    @Test
     public void test_get_empty() throws Exception {
         JSONObject obj = new JSONObject();
         obj.put("value", "");
-        Assert.assertEquals("", obj.get("value"));
-        Assert.assertNull(obj.getObject("value", Model.class));
+        assertEquals("", obj.get("value"));
+        assertNull(obj.getObject("value", Model.class));
+        assertNull(obj.getObject("value", new TypeReference<Model>(){}));
     }
 
+    @Test
     public void test_get_null() throws Exception {
         JSONObject obj = new JSONObject();
         obj.put("value", "null");
-        Assert.assertEquals("null", obj.get("value"));
-        Assert.assertNull(obj.getObject("value", Model.class));
+        assertEquals("null", obj.get("value"));
+        assertNull(obj.getObject("value", Model.class));
+        assertNull(obj.getObject("value", new TypeReference<Model>(){}));
     }
 
+    @Test
     public void test_get_obj() throws Exception {
         JSONObject obj = new JSONObject();
         obj.put("value", new HashMap());
-        Assert.assertEquals(new JSONObject(), obj.getObject("value", JSONObject.class));
+        assertEquals(new JSONObject(), obj.getObject("value", JSONObject.class));
     }
 
+    @Test
     public void test_get_obj2() throws Exception {
         List<JSONObject> json = JSON.parseArray("[{\"values\":[{}]}]", JSONObject.class);
 

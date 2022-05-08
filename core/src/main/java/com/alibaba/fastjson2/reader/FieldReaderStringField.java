@@ -8,8 +8,8 @@ import java.lang.reflect.Field;
 final class FieldReaderStringField<T> extends FieldReaderObjectField<T> {
     final boolean trim;
 
-    FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, field);
+    FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, String defaultValue, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
         trim = "trim".equals(format);
     }
 

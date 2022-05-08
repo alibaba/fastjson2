@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
@@ -57,7 +58,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             provider.registerTypeConvert(Short.class, BigDecimal.class, NUMBER_TO_DECIMAL);
             provider.registerTypeConvert(Integer.class, BigDecimal.class, NUMBER_TO_DECIMAL);
             provider.registerTypeConvert(Long.class, BigDecimal.class, NUMBER_TO_DECIMAL);
-            provider.registerTypeConvert(String.class, BigDecimal.class, STRING_TO_DECIMAL);
         }
 
         {
@@ -65,7 +65,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             provider.registerTypeConvert(Byte.class, Integer.class, NUMBER_TO_INTEGER);
             provider.registerTypeConvert(Short.class, Integer.class, NUMBER_TO_INTEGER);
             provider.registerTypeConvert(Long.class, Integer.class, NUMBER_TO_INTEGER);
-            provider.registerTypeConvert(String.class, Integer.class, STRING_TO_INTEGER);
             provider.registerTypeConvert(BigDecimal.class, Integer.class, DECIMAL_TO_INTEGER);
         }
 
@@ -77,9 +76,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             provider.registerTypeConvert(Long.class, int.class, NUMBER_TO_INTEGER_VALUE);
             provider.registerTypeConvert(Long.class, int.class, NUMBER_TO_INTEGER_VALUE);
             provider.registerTypeConvert(Long.class, Integer.class, NUMBER_TO_INTEGER_VALUE);
-            provider.registerTypeConvert(String.class
-                    , int.class, o -> o == null || "null".equals(o) || "".equals(o)
-                            ? 0 : Integer.parseInt((String) o));
             provider.registerTypeConvert(BigDecimal.class, int.class, o -> o == null ? 0 : ((BigDecimal) o).intValueExact());
             provider.registerTypeConvert(Boolean.class, int.class, o -> o == null ? 0 : ((Boolean) o).booleanValue() ? 1 : 0);
         }
@@ -91,18 +87,12 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             provider.registerTypeConvert(Integer.class, long.class, NUMBER_TO_LONG);
             provider.registerTypeConvert(Long.class, long.class, NUMBER_TO_LONG);
             provider.registerTypeConvert(Integer.class, Long.class, NUMBER_TO_LONG);
-            provider.registerTypeConvert(String.class, long.class, STRING_TO_LONG_VALUE);
             provider.registerTypeConvert(BigDecimal.class, long.class, o -> o == null ? 0 : ((BigDecimal) o).longValue());
             provider.registerTypeConvert(Boolean.class, long.class, o -> o == null ? 0 : ((Boolean) o).booleanValue() ? 1L : 0L);
-        }
-        {
-            // cast to Long
-            provider.registerTypeConvert(String.class, Long.class, STRING_TO_LONG);
         }
 
         {
             // cast to BigInteger
-            provider.registerTypeConvert(String.class, BigInteger.class, o -> o == null || "null".equals(o) ? null : new BigInteger((String) o));
             provider.registerTypeConvert(Long.class, BigInteger.class, o -> o == null ? null : BigInteger.valueOf(((Long) o).longValue()));
             provider.registerTypeConvert(Integer.class, BigInteger.class, o -> o == null ? null : BigInteger.valueOf(((Integer) o).intValue()));
         }
@@ -110,34 +100,36 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
         {
             // cast to char
-            provider.registerTypeConvert(String.class, char.class, o -> ((String) o).charAt(0));
             provider.registerTypeConvert(Character.class, char.class, o -> o);
         }
 
         {
-            // cast to Character
-            provider.registerTypeConvert(String.class, Character.class, o -> ((String) o).charAt(0));
+            // String to Any
+            provider.registerTypeConvert(String.class, char.class, new StringToAny(char.class, '0'));
+            provider.registerTypeConvert(String.class, boolean.class, new StringToAny(boolean.class, false));
+            provider.registerTypeConvert(String.class, float.class, new StringToAny(float.class, (float) 0));
+            provider.registerTypeConvert(String.class, double.class, new StringToAny(double.class, (double) 0));
+            provider.registerTypeConvert(String.class, byte.class, new StringToAny(byte.class, (byte) 0));
+            provider.registerTypeConvert(String.class, short.class, new StringToAny(short.class, (short) 0));
+            provider.registerTypeConvert(String.class, int.class, new StringToAny(int.class, 0));
+            provider.registerTypeConvert(String.class, long.class, new StringToAny(long.class, 0L));
+
+            provider.registerTypeConvert(String.class, Character.class, new StringToAny(Character.class, null));
+            provider.registerTypeConvert(String.class, Boolean.class, new StringToAny(Boolean.class, null));
+            provider.registerTypeConvert(String.class, Double.class, new StringToAny(Double.class, null));
+            provider.registerTypeConvert(String.class, Float.class, new StringToAny(Float.class, null));
+            provider.registerTypeConvert(String.class, Byte.class, new StringToAny(Byte.class, null));
+            provider.registerTypeConvert(String.class, Short.class, new StringToAny(Short.class, null));
+            provider.registerTypeConvert(String.class, Integer.class, new StringToAny(Integer.class, null));
+            provider.registerTypeConvert(String.class, Long.class, new StringToAny(Long.class, null));
+            provider.registerTypeConvert(String.class, BigDecimal.class, new StringToAny(BigDecimal.class, null));
+            provider.registerTypeConvert(String.class, BigInteger.class, new StringToAny(BigInteger.class, null));
+            provider.registerTypeConvert(String.class, Collection.class, new StringToAny(Collection.class, null));
+            provider.registerTypeConvert(String.class, List.class, new StringToAny(List.class, null));
+            provider.registerTypeConvert(String.class, JSONArray.class, new StringToAny(JSONArray.class, null));
         }
 
         {
-            provider.registerTypeConvert(String.class, double.class
-                    , o -> o == null || "null".equals(o) || "".equals(o) ? 0D : Double.parseDouble(((String) o)));
-        }
-        {
-            provider.registerTypeConvert(String.class, float.class
-                    , o -> o == null || "null".equals(o) || "".equals(o) ? 0F : Float.parseFloat(((String) o)));
-        }
-        {
-            provider.registerTypeConvert(String.class, short.class
-                    , o -> o == null || "null".equals(o) || "".equals(o) ? (short) 0 : Short.parseShort(((String) o)));
-        }
-        {
-            provider.registerTypeConvert(String.class, byte.class
-                    , o -> o == null || "null".equals(o) || "".equals(o) ? (byte) 0 : Byte.parseByte(((String) o)));
-        }
-
-        {
-            provider.registerTypeConvert(String.class, boolean.class, STRING_TO_BOOLEAN_VALUE);
             provider.registerTypeConvert(Boolean.class, boolean.class, o -> o);
         }
         {
@@ -648,6 +640,13 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                             }
                             break;
                         }
+                        case "defaultValue": {
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                fieldInfo.defaultValue = value;
+                            }
+                            break;
+                        }
                         case "alternateNames": {
                             String[] alternateNames = (String[]) result;
                             if (alternateNames.length != 0) {
@@ -724,6 +723,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 }
 
                 fieldInfo.format = jsonFieldFormat;
+            }
+
+            String defaultValue = jsonField.defaultValue();
+            if (!defaultValue.isEmpty()) {
+                fieldInfo.defaultValue = defaultValue;
             }
 
             String[] alternateNames = jsonField.alternateNames();
