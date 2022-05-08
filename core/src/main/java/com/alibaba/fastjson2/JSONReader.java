@@ -2011,6 +2011,14 @@ public abstract class JSONReader implements Closeable {
         }
     }
 
+    public static interface Filter {
+
+    }
+
+    public interface AutoTypeBeforeHandler extends JSONReader.Filter {
+        Class<?> apply(String typeName, Class<?> expectClass, long features);
+    }
+
     public static class Context {
         String utilDateFormat;
         DateTimeFormatter dateFormat;
@@ -2019,6 +2027,7 @@ public abstract class JSONReader implements Closeable {
         Locale locale;
         TimeZone timeZone;
         Class objectClass;
+        AutoTypeBeforeHandler autoTypeBeforeHandler;
 
         protected final ObjectReaderProvider provider;
 
@@ -2040,6 +2049,14 @@ public abstract class JSONReader implements Closeable {
         }
 
         public ObjectReader getObjectReaderAutoType(String typeName, Class expectClass) {
+            if (autoTypeBeforeHandler != null) {
+                Class<?> autoTypeClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
+                if (autoTypeClass != null) {
+                    boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
+                    return provider.getObjectReader(autoTypeClass, fieldBased);
+                }
+            }
+
             return provider.getObjectReader(typeName, expectClass, features);
         }
 
@@ -2103,6 +2120,16 @@ public abstract class JSONReader implements Closeable {
         }
 
         public void config(Feature... features) {
+            for (Feature feature : features) {
+                this.features |= feature.mask;
+            }
+        }
+
+        public void config(Filter filter, Feature... features) {
+            if (filter instanceof AutoTypeBeforeHandler) {
+                autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
+            }
+
             for (Feature feature : features) {
                 this.features |= feature.mask;
             }
