@@ -108,6 +108,7 @@ final class ObjectReader6<T> extends ObjectReaderBean<T> {
                 || fieldReader5.getDefaultValue() != null;
     }
 
+    @Override
     protected void initDefaultValue(T object) {
         fieldReader0.setDefault(object);
         fieldReader1.setDefault(object);

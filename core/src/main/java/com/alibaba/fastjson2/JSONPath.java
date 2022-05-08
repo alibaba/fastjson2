@@ -1220,6 +1220,7 @@ public abstract class JSONPath {
             }
         }
 
+        @Override
         public void set(Context context, Object value) {
             Object object = context.parent == null
                     ? context.root
@@ -4633,6 +4634,7 @@ public abstract class JSONPath {
             ctx.eval = true;
         }
 
+        @Override
         public void set(Context context, Object value) {
             Object object = context.parent == null
                     ? context.root
@@ -4658,6 +4660,7 @@ public abstract class JSONPath {
             throw new JSONException("UnsupportedOperation " + getClass());
         }
 
+        @Override
         public boolean remove(Context context) {
             Object object = context.parent == null
                     ? context.root
@@ -4968,6 +4971,7 @@ public abstract class JSONPath {
             context.eval = true;
         }
 
+        @Override
         public boolean remove(Context context) {
             Object object = context.parent == null
                     ? context.root

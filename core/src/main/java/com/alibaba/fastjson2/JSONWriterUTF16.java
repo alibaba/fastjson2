@@ -28,6 +28,7 @@ class JSONWriterUTF16 extends JSONWriter {
         }
     }
 
+    @Override
     public void flushTo(java.io.Writer to) {
         try {
             to.write(chars, 0, off);

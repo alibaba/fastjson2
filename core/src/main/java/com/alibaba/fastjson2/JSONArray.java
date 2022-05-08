@@ -54,6 +54,7 @@ public class JSONArray extends ArrayList<Object> {
         }
     }
 
+    @Override
     public Object set(int index, Object element) {
         if (index == -1) {
             add(element);
