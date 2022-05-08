@@ -7,7 +7,6 @@ import com.google.common.base.Objects;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNull;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

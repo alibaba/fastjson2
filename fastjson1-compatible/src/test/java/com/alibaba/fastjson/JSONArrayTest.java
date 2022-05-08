@@ -15,8 +15,6 @@
  */
 package com.alibaba.fastjson;
 
-import junit.framework.TestCase;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
@@ -25,79 +23,82 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class JSONArrayTest extends TestCase {
+public class JSONArrayTest {
 //
+//    @Test
 //    public void test_toString() throws Exception {
 //        StringWriter out = new StringWriter();
 //        new JSONArray().writeJSONString(out);
-//        Assert.assertEquals("[]", out.toString());
-//        Assert.assertEquals("[]", new JSONArray().toString());
+//        assertEquals("[]", out.toString());
+//        assertEquals("[]", new JSONArray().toString());
 //    }
 
+    @Test
     public void test_toJSONString() throws Exception {
-        Assert.assertEquals("null", JSONArray.toJSONString(null));
-        Assert.assertEquals("[null]", JSONArray.toJSONString(Collections.singletonList(null)));
+        assertEquals("null", JSONArray.toJSONString(null));
+        assertEquals("[null]", JSONArray.toJSONString(Collections.singletonList(null)));
     }
 
+    @Test
     public void test_1() throws Exception {
         JSONArray array = new JSONArray(3);
-        Assert.assertEquals(true, array.isEmpty());
+        assertEquals(true, array.isEmpty());
         array.add(1);
-        Assert.assertEquals(false, array.isEmpty());
-        Assert.assertEquals(true, array.contains(1));
-        Assert.assertEquals(1, array.toArray()[0]);
+        assertEquals(false, array.isEmpty());
+        assertEquals(true, array.contains(1));
+        assertEquals(1, array.toArray()[0]);
         {
             Object[] items = new Object[1];
             array.toArray(items);
-            Assert.assertEquals(1, items[0]);
+            assertEquals(1, items[0]);
         }
-        Assert.assertEquals(true, array.containsAll(Collections.singletonList(1)));
-        Assert.assertEquals(true, array.remove(Integer.valueOf(1)));
-        Assert.assertEquals(true, array.isEmpty());
+        assertEquals(true, array.containsAll(Collections.singletonList(1)));
+        assertEquals(true, array.remove(Integer.valueOf(1)));
+        assertEquals(true, array.isEmpty());
         array.addAll(Collections.singletonList(1));
-        Assert.assertEquals(1, array.size());
+        assertEquals(1, array.size());
         array.removeAll(Collections.singletonList(1));
-        Assert.assertEquals(0, array.size());
+        assertEquals(0, array.size());
         array.addAll(0, Arrays.asList(1, 2, 3));
-        Assert.assertEquals(3, array.size());
+        assertEquals(3, array.size());
         array.clear();
         array.addAll(0, Arrays.asList(1, 2, 3));
-        Assert.assertEquals(true, array.retainAll(Arrays.asList(1, 2)));
-        Assert.assertEquals(2, array.size());
-        Assert.assertEquals(true, array.retainAll(Arrays.asList(2, 4)));
-        Assert.assertEquals(1, array.size());
+        assertEquals(true, array.retainAll(Arrays.asList(1, 2)));
+        assertEquals(2, array.size());
+        assertEquals(true, array.retainAll(Arrays.asList(2, 4)));
+        assertEquals(1, array.size());
         array.set(0, 4);
-        Assert.assertEquals(4, array.toArray()[0]);
+        assertEquals(4, array.toArray()[0]);
         array.add(0, 4);
-        Assert.assertEquals(4, array.toArray()[0]);
+        assertEquals(4, array.toArray()[0]);
         array.remove(0);
         array.remove(0);
-        Assert.assertEquals(0, array.size());
+        assertEquals(0, array.size());
         array.addAll(Arrays.asList(1, 2, 3, 4, 5, 4, 3));
-        Assert.assertEquals(2, array.indexOf(3));
-        Assert.assertEquals(6, array.lastIndexOf(3));
+        assertEquals(2, array.indexOf(3));
+        assertEquals(6, array.lastIndexOf(3));
         {
             AtomicInteger count = new AtomicInteger();
             for (ListIterator<Object> iter = array.listIterator(); iter.hasNext(); iter.next()) {
                 count.incrementAndGet();
             }
-            Assert.assertEquals(7, count.get());
+            assertEquals(7, count.get());
         }
         {
             AtomicInteger count = new AtomicInteger();
             for (ListIterator<Object> iter = array.listIterator(2); iter.hasNext(); iter.next()) {
                 count.incrementAndGet();
             }
-            Assert.assertEquals(5, count.get());
+            assertEquals(5, count.get());
         }
         {
-            Assert.assertEquals(2, array.subList(2, 4).size());
+            assertEquals(2, array.subList(2, 4).size());
         }
     }
 
+    @Test
     public void test_2() throws Exception {
         JSONArray array = new JSONArray();
         array.add(123);
@@ -107,86 +108,93 @@ public class JSONArrayTest extends TestCase {
         array.add("true");
         array.add(null);
 
-        Assert.assertEquals(123, array.getByte(0).byteValue());
-        Assert.assertEquals(123, array.getByteValue(0));
+        assertEquals(123, array.getByte(0).byteValue());
+        assertEquals(123, array.getByteValue(0));
 
-        Assert.assertEquals(123, array.getShort(0).shortValue());
-        Assert.assertEquals(123, array.getShortValue(0));
+        assertEquals(123, array.getShort(0).shortValue());
+        assertEquals(123, array.getShortValue(0));
 
-        Assert.assertTrue(123F == array.getFloat(0).floatValue());
-        Assert.assertTrue(123F == array.getFloatValue(0));
+        assertTrue(123F == array.getFloat(0).floatValue());
+        assertTrue(123F == array.getFloatValue(0));
 
-        Assert.assertTrue(123D == array.getDouble(0).doubleValue());
-        Assert.assertTrue(123D == array.getDoubleValue(0));
+        assertTrue(123D == array.getDouble(0).doubleValue());
+        assertTrue(123D == array.getDoubleValue(0));
 
-        Assert.assertEquals(123, array.getIntValue(0));
-        Assert.assertEquals(123, array.getLongValue(0));
-        Assert.assertEquals(new BigDecimal("123"), array.getBigDecimal(0));
+        assertEquals(123, array.getIntValue(0));
+        assertEquals(123, array.getLongValue(0));
+        assertEquals(new BigDecimal("123"), array.getBigDecimal(0));
 
-        Assert.assertEquals(222, array.getIntValue(1));
-        Assert.assertEquals(new Integer(222), array.getInteger(1));
-        Assert.assertEquals(new Long(222), array.getLong(1));
-        Assert.assertEquals(new BigDecimal("222"), array.getBigDecimal(1));
+        assertEquals(222, array.getIntValue(1));
+        assertEquals(new Integer(222), array.getInteger(1));
+        assertEquals(new Long(222), array.getLong(1));
+        assertEquals(new BigDecimal("222"), array.getBigDecimal(1));
 
-        Assert.assertEquals(true, array.getBooleanValue(4));
-        Assert.assertEquals(Boolean.TRUE, array.getBoolean(4));
+        assertEquals(true, array.getBooleanValue(4));
+        assertEquals(Boolean.TRUE, array.getBoolean(4));
 
-        Assert.assertEquals(0, array.getIntValue(5));
-        Assert.assertEquals(0, array.getLongValue(5));
-        Assert.assertEquals(null, array.getInteger(5));
-        Assert.assertEquals(null, array.getLong(5));
-        Assert.assertEquals(null, array.getBigDecimal(5));
-        Assert.assertEquals(null, array.getBoolean(5));
-        Assert.assertEquals(false, array.getBooleanValue(5));
+        assertEquals(0, array.getIntValue(5));
+        assertEquals(0, array.getLongValue(5));
+        assertEquals(null, array.getInteger(5));
+        assertEquals(null, array.getLong(5));
+        assertEquals(null, array.getBigDecimal(5));
+        assertEquals(null, array.getBoolean(5));
+        assertEquals(false, array.getBooleanValue(5));
     }
 
+    @Test
     public void test_getObject_null() throws Exception {
         JSONArray array = new JSONArray();
         array.add(null);
 
-        Assert.assertTrue(array.getJSONObject(0) == null);
+        assertTrue(array.getJSONObject(0) == null);
     }
 
+    @Test
     public void test_getObject() throws Exception {
         JSONArray array = new JSONArray();
         array.add(new JSONObject());
 
-        Assert.assertEquals(0, array.getJSONObject(0).size());
+        assertEquals(0, array.getJSONObject(0).size());
     }
 
+    @Test
     public void test_getObject_map() throws Exception {
         JSONArray array = new JSONArray();
         array.add(new HashMap());
 
-        Assert.assertEquals(0, array.getJSONObject(0).size());
+        assertEquals(0, array.getJSONObject(0).size());
     }
 
+    @Test
     public void test_getArray() throws Exception {
         JSONArray array = new JSONArray();
         array.add(new ArrayList());
 
-        Assert.assertEquals(0, array.getJSONArray(0).size());
+        assertEquals(0, array.getJSONArray(0).size());
     }
 
+    @Test
     public void test_getArray_1() throws Exception {
         JSONArray array = new JSONArray();
         array.add(new JSONArray());
 
-        Assert.assertEquals(0, array.getJSONArray(0).size());
+        assertEquals(0, array.getJSONArray(0).size());
     }
 
+    @Test
     public void test_constructor() throws Exception {
         List<Object> list = new ArrayList();
         JSONArray array = new JSONArray(list);
         array.add(3);
-        Assert.assertEquals(1, list.size());
-        Assert.assertEquals(3, list.get(0));
+        assertEquals(1, list.size());
+        assertEquals(3, list.get(0));
     }
 
+    @Test
     public void test_getJavaBean() throws Exception {
-        JSONArray array = JSON.parseArray("[{id:123, name:'aaa'}]");
-        Assert.assertEquals(1, array.size());
-        Assert.assertEquals(123, array.getObject(0, User.class).getId());
+        JSONArray array = JSON.parseArray("[{'id':123, 'name':'aaa'}]");
+        assertEquals(1, array.size());
+        assertEquals(123, array.getObject(0, User.class).getId());
     }
 
     public static class User {

@@ -1,14 +1,16 @@
 package com.alibaba.fastjson;
 
-import com.alibaba.fastjson.parser.ParserConfig;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public class JSONObjectTest_readObject extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class JSONObjectTest_readObject {
+    @Test
     public void test_0() throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("id", 123);
@@ -30,6 +32,7 @@ public class JSONObjectTest_readObject extends TestCase {
         assertEquals(jsonObject, obj);
     }
 
+    @Test
     public void test_2() throws Exception {
         JSONObject jsonObject = JSON.parseObject("{123:345}");
 
@@ -49,6 +52,7 @@ public class JSONObjectTest_readObject extends TestCase {
         assertEquals(jsonObject, obj);
     }
 
+    @Test
     public void test_3() throws Exception {
         JSONObject jsonObject = JSON.parseObject("{123:345,\"items\":[1,2,3,4]}");
 
@@ -68,6 +72,7 @@ public class JSONObjectTest_readObject extends TestCase {
         assertEquals(jsonObject, obj);
     }
 
+    @Test
     public void test_4() throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("val", new Byte[]{});
@@ -88,6 +93,7 @@ public class JSONObjectTest_readObject extends TestCase {
         assertEquals(jsonObject.toJSONString(), JSON.toJSONString(obj));
     }
 
+    @Test
     public void test_5() throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("val", new byte[]{});
@@ -108,6 +114,7 @@ public class JSONObjectTest_readObject extends TestCase {
         assertEquals(jsonObject.toJSONString(), JSON.toJSONString(obj));
     }
 
+    @Test
     public void test_6() throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("val", new Character[]{});
@@ -130,6 +137,7 @@ public class JSONObjectTest_readObject extends TestCase {
         assertEquals(jsonObject.toJSONString(), JSON.toJSONString(obj));
     }
 
+    @Test
     public void test_7() throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("m", new java.util.HashMap());

@@ -1024,6 +1024,13 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             return (T) value;
         }
 
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.isEmpty() || "null".equals(str)) {
+                return null;
+            }
+        }
+
         String json = JSON.toJSONString(value);
         JSONReader jsonReader = JSONReader.of(json);
         jsonReader.context.config(features);
@@ -1079,17 +1086,30 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             return objectReader.createInstance((Collection) value);
         }
 
-        Class clazz = TypeUtils.getClass(type);
-        if (clazz.isInstance(value)) {
-            return (T) value;
+        if (type instanceof Class) {
+            Class clazz = (Class) type;
+            if (clazz.isInstance(value)) {
+                return (T) value;
+            }
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.isEmpty() || "null".equals(str)) {
+                return null;
+            }
         }
 
         String json = JSON.toJSONString(value);
         JSONReader jsonReader = JSONReader.of(json);
         jsonReader.context.config(features);
 
-        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
+        ObjectReader objectReader = provider.getObjectReader(type, fieldBased);
         return (T) objectReader.readObject(jsonReader);
+    }
+
+    public <T> T getObject(String key, TypeReference typeReference, JSONReader.Feature... features) {
+        return getObject(key, typeReference.getType(), features);
     }
 
     /**

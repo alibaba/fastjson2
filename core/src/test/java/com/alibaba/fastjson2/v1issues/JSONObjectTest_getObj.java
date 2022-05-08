@@ -1,6 +1,9 @@
-package com.alibaba.fastjson;
+package com.alibaba.fastjson2.v1issues;
 
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

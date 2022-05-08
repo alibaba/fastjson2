@@ -1,6 +1,5 @@
 package com.alibaba.fastjson.issue_2700;
 
-//import static org.junit.Assert.assertArrayEquals;
 //
 //import java.util.regex.Pattern;
 

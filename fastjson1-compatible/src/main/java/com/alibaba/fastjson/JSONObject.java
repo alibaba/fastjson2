@@ -192,6 +192,10 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return null;
         }
 
+        if (clazz == Object.class && obj instanceof JSONObject) {
+            return (T) obj;
+        }
+
         if (clazz != Object.class && clazz.isInstance(obj)) {
             return (T) obj;
         }
@@ -200,6 +204,13 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         Function typeConvert = provider.getTypeConvert(obj.getClass(), clazz);
         if (typeConvert != null) {
             return (T) typeConvert.apply(obj);
+        }
+
+        if (obj instanceof String) {
+            String str = (String) obj;
+            if (str.isEmpty() || "null".equals(str)) {
+                return null;
+            }
         }
 
         String json = JSON.toJSONString(obj);
@@ -238,6 +249,13 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         Function typeConvert = provider.getTypeConvert(obj.getClass(), type);
         if (typeConvert != null) {
             return (T) typeConvert.apply(obj);
+        }
+
+        if (obj instanceof String) {
+            String str = (String) obj;
+            if (str.isEmpty() || "null".equals(str)) {
+                return null;
+            }
         }
 
         String json = JSON.toJSONString(obj);
@@ -323,8 +341,47 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
     }
 
     public <T> T getObject(String key, Type type) {
+        return getObject(key, type, new Feature[0]);
+    }
+
+    public <T> T getObject(String key, Type type, Feature... features) {
         Object obj = map.get(key);
-        return TypeUtils.cast(obj, type, ParserConfig.getGlobalInstance());
+        if (obj == null) {
+            return null;
+        }
+
+        if (type instanceof Class) {
+            Class clazz = (Class) type;
+            if (clazz != Object.class && clazz.isInstance(obj)) {
+                return (T) obj;
+            }
+        }
+
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        Function typeConvert = provider.getTypeConvert(obj.getClass(), type);
+        if (typeConvert != null) {
+            return (T) typeConvert.apply(obj);
+        }
+
+        if (obj instanceof String && ((String) obj).isEmpty()) {
+            return null;
+        }
+
+        String json = JSON.toJSONString(obj);
+        JSONReader jsonReader = JSONReader.of(json);
+        config(jsonReader.getContext(), features);
+
+        boolean fieldBased = jsonReader.getContext().isEnable(JSONReader.Feature.FieldBased);
+        ObjectReader objectReader = provider.getObjectReader(type, fieldBased);
+
+        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
+            jsonReader
+                    .getContext()
+                    .setUtilDateFormat(defaultDateFormat);
+        }
+
+        return (T) objectReader.readObject(jsonReader);
     }
 
     public boolean getBooleanValue(String key) {

@@ -1,7 +1,6 @@
 package com.alibaba.json.bvt.date;
 
 import com.alibaba.fastjson.JSON;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

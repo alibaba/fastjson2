@@ -2,19 +2,22 @@ package com.alibaba.fastjson;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.parser.Feature;
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class JSONObjectTest_get_2 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class JSONObjectTest_get_2 {
+    @Test
     public void test_get() throws Exception {
         JSONObject obj = JSON.parseObject("{\"value\":{}}");
         JSONObject value = (JSONObject) obj.getObject("value", Object.class);
-        Assert.assertEquals(0, value.size());
+        assertEquals(0, value.size());
     }
 
+    @Test
     public void test_get_obj() throws Exception {
         JSONObject obj = new JSONObject();
         {
@@ -24,7 +27,7 @@ public class JSONObjectTest_get_2 extends TestCase {
             obj.put("value", value);
         }
         VO value = (VO) obj.getObject("value", Object.class, Feature.SupportAutoType);
-        Assert.assertEquals(1001, value.getId());
+        assertEquals(1001, value.getId());
     }
 
     public static interface VO {

@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
