@@ -4,6 +4,7 @@ import com.alibaba.fastjson2_vo.Integer1;
 import com.alibaba.fastjson2_vo.Long1;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -1056,6 +1057,42 @@ public class JSONArrayTest {
 
         assertThrows(JSONException.class,
                 () -> JSONArray.of(1).getObject(0, Bean.class)
+        );
+
+        assertNull(
+                JSONArray
+                        .of().fluentAdd(null)
+                        .getObject(0, (Type) Object.class)
+        );
+
+        assertEquals(Integer.valueOf(123),
+                JSONArray
+                        .of(123)
+                        .getObject(0, (Type) Object.class)
+        );
+
+        assertEquals("123",
+                JSONArray
+                        .of(123)
+                        .getObject(0, (Type) String.class)
+        );
+
+        assertEquals(Integer.valueOf(123),
+                JSONArray
+                        .of("123")
+                        .getObject(0, (Type) Integer.class)
+        );
+
+        assertEquals(Integer.valueOf(123),
+                JSONArray
+                        .of(123)
+                        .getObject(0, (Type) Number.class)
+        );
+
+        assertEquals(new ArrayList(),
+                JSONArray
+                        .of( new ArrayList())
+                        .getObject(0, List.class)
         );
     }
 

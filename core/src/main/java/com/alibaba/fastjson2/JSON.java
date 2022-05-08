@@ -191,9 +191,11 @@ public interface JSON {
         }
 
         try (JSONReader reader = JSONReader.of(text)) {
-            reader.context.config(features);
+            JSONReader.Context context = reader.context;
+            context.config(features);
             Type type = typeReference.getType();
-            ObjectReader<T> objectReader = reader.context.provider.getObjectReader(type);
+            boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+            ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
             return objectReader.readObject(reader, 0);
         }
     }
@@ -243,7 +245,8 @@ public interface JSON {
             }
             context.config(features);
 
-            ObjectReader<T> objectReader = context.provider.getObjectReader(clazz);
+            boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+            ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
             return objectReader.readObject(reader, 0);
         }
     }

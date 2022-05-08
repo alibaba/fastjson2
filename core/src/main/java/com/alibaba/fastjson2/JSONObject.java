@@ -930,10 +930,19 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
      * @param type specify the {@link Type} to be converted
      */
     @SuppressWarnings("unchecked")
-    public <T> T toJavaObject(Type type) {
+    public <T> T toJavaObject(Type type, JSONReader.Feature... features) {
+        long featuresValue = 0L;
+        boolean fieldBased = false;
+        for (JSONReader.Feature feature : features) {
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+            }
+            featuresValue |= feature.mask;
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<T> objectReader = provider.getObjectReader(type);
-        return objectReader.createInstance(this, 0L);
+        ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
+        return objectReader.createInstance(this, featuresValue);
     }
 
     /**
@@ -944,10 +953,79 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
      * @param clazz specify the {@code Class<T>} to be converted
      */
     @SuppressWarnings("unchecked")
-    public <T> T toJavaObject(Class<T> clazz) {
+    public <T> T toJavaObject(Class<T> clazz, JSONReader.Feature... features) {
+        long featuresValue = 0L;
+        boolean fieldBased = false;
+        for (JSONReader.Feature feature : features) {
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+            }
+            featuresValue |= feature.mask;
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<T> objectReader = provider.getObjectReader(clazz);
-        return objectReader.createInstance(this, 0L);
+        ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
+        return objectReader.createInstance(this, featuresValue);
+    }
+
+    /**
+     * Returns the result of the {@link Type} converter conversion of the associated value in this {@link JSONObject}.
+     *
+     * {@code User user = jsonObject.getObject("user", User.class);}
+     *
+     * @param key  the key whose associated value is to be returned
+     * @param type specify the {@link Class} to be converted
+     * @return {@code <T>} or null
+     * @throws JSONException If no suitable conversion method is found
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> T getObject(String key, Class<T> type, JSONReader.Feature... features) {
+        Object value = super.get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (type == Object.class && features.length == 0) {
+            return (T) value;
+        }
+
+        boolean fieldBased = false;
+        for (JSONReader.Feature feature : features) {
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+                break;
+            }
+        }
+
+        Class<?> valueClass = value.getClass();
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        Function typeConvert = provider.getTypeConvert(valueClass, type);
+        if (typeConvert != null) {
+            return (T) typeConvert.apply(value);
+        }
+
+        if (value instanceof Map) {
+            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
+            return objectReader.createInstance((Map) value, features);
+        }
+
+        if (value instanceof Collection) {
+            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
+            return objectReader.createInstance((Collection) value);
+        }
+
+        Class clazz = TypeUtils.getMapping(type);
+        if (clazz.isInstance(value)) {
+            return (T) value;
+        }
+
+        String json = JSON.toJSONString(value);
+        JSONReader jsonReader = JSONReader.of(json);
+        jsonReader.context.config(features);
+
+        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
+        return (T) objectReader.readObject(jsonReader);
     }
 
     /**
@@ -972,6 +1050,14 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             return (T) value;
         }
 
+        boolean fieldBased = false;
+        for (JSONReader.Feature feature : features) {
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+                break;
+            }
+        }
+
         Class<?> valueClass = value.getClass();
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         Function typeConvert = provider.getTypeConvert(valueClass, type);
@@ -980,16 +1066,16 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         }
 
         if (value instanceof Map) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type);
+            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
             return objectReader.createInstance((Map) value, features);
         }
 
         if (value instanceof Collection) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type);
+            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
             return objectReader.createInstance((Collection) value);
         }
 
-        Class clazz = TypeUtils.getMapping(type);
+        Class clazz = TypeUtils.getClass(type);
         if (clazz.isInstance(value)) {
             return (T) value;
         }
@@ -998,7 +1084,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         JSONReader jsonReader = JSONReader.of(json);
         jsonReader.context.config(features);
 
-        ObjectReader objectReader = provider.getObjectReader(clazz);
+        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
         return (T) objectReader.readObject(jsonReader);
     }
 
@@ -1159,6 +1245,17 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     public JSONObject fluentPut(String key, Object value) {
         put(key, value);
         return this;
+    }
+
+    /**
+     *
+     * <pre>
+     * JSONObject jsonObject = JSONObject.of();
+     * </pre>
+     *
+     */
+    public static JSONObject of() {
+        return new JSONObject();
     }
 
     /**

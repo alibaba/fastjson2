@@ -201,9 +201,11 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         }
 
         String json = JSON.toJSONString(obj);
-        ObjectReader objectReader = provider.getObjectReader(clazz);
         JSONReader jsonReader = JSONReader.of(json);
         config(jsonReader.getContext(), features);
+
+        boolean fieldBased = jsonReader.getContext().isEnable(JSONReader.Feature.FieldBased);
+        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
