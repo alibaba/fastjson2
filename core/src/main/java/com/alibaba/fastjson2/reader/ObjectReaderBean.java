@@ -73,6 +73,7 @@ public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
 
     }
 
+    @Override
     public T readObject(JSONReader jsonReader, long features) {
         if (jsonReader.isJSONB()) {
             return readJSONBObject(jsonReader, features);

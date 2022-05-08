@@ -59,6 +59,7 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
         hasDefaultValue = first.getDefaultValue() != null || second.getDefaultValue() != null;
     }
 
+    @Override
     protected void initDefaultValue(T object) {
         first.setDefault(object);
         second.setDefault(object);

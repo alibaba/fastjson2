@@ -183,6 +183,7 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
         return creator.get();
     }
 
+    @Override
     protected void initDefaultValue(T object) {
         for (FieldReader fieldReader : fieldReaders) {
             Object defaultValue = fieldReader.getDefaultValue();
