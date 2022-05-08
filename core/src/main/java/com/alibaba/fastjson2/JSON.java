@@ -163,6 +163,35 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into Java Object
      *
+     * @param text  the JSON {@link String} to be parsed
+     * @param clazz specify the Class to be converted
+     * @param filter
+     * @param features features to be enabled in parsing
+     * @return Class
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(
+            String text,
+            Class<T> clazz,
+            JSONReader.Filter filter,
+            JSONReader.Feature... features) {
+        if (text == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            JSONReader.Context context = reader.context;
+            reader.context.config(filter, features);
+
+            boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+            ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
+            return objectReader.readObject(reader, 0);
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into Java Object
+     *
      * @param text the JSON {@link String} to be parsed
      * @param type specify the {@link Type} to be converted
      */
