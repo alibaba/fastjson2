@@ -113,7 +113,7 @@ public class JdbcSupport {
                 }
             } else {
                 String str = jsonReader.readString();
-                if ("0000-00-00".equals(str)) {
+                if ("0000-00-00".equals(str) || "0000-00-00 00:00:00".equals(str)) {
                     return new java.sql.Time(0);
                 }
                 return java.sql.Time.valueOf(str);

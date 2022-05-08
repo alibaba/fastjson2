@@ -4661,6 +4661,12 @@ class JSONReaderUTF8 extends JSONReader {
             return null;
         }
 
+        if (year == 0 && month == 0 && dom == 0) {
+            year = 1970;
+            month = 1;
+            dom = 1;
+        }
+
         LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second, millis);
 
         offset += 20;
