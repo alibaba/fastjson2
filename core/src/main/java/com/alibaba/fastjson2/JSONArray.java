@@ -69,14 +69,18 @@ public class JSONArray extends ArrayList<Object> {
      * @param index   index of the element to replace
      * @param element element to be stored at the specified position
      * @return the element previously at the specified position
-     * @throws ArrayIndexOutOfBoundsException if the index is out of range {@code (index < -size()}
      */
     @Override
     public Object set(int index, Object element) {
         int size = super.size();
         if (index < 0) {
+            index += size;
+            if (index < 0) {
+                super.add(element);
+                return null;
+            }
             return super.set(
-                index + size, element
+                index, element
             );
         }
 
