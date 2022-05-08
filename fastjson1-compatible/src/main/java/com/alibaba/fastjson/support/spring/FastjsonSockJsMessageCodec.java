@@ -19,10 +19,12 @@ public class FastjsonSockJsMessageCodec extends AbstractSockJsMessageCodec {
         this.fastJsonConfig = fastJsonConfig;
     }
 
+    @Override
     public String[] decode(String content) {
         return JSON.parseObject(content, String[].class);
     }
 
+    @Override
     public String[] decodeInputStream(InputStream content) {
         return JSON.parseObject(content, String[].class);
     }
