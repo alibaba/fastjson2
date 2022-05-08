@@ -141,7 +141,7 @@ public class JdbcTimeTest {
         d.value = new java.sql.Date(millis);
         String str = JSON.toJSONString(d);
         D d1 = JSON.parseObject(str, D.class);
-        assertEquals(d.value.getTime(), d1.value.getTime());
+        assertEquals(d.value.getTime(), d1.value.getTime(), str);
 
         byte[] bytes = JSONB.toBytes(d);
         D d2 = JSONB.parseObject(bytes, D.class);
