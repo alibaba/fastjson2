@@ -74,6 +74,7 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
         ;
     }
 
+    @Override
     protected void initDefaultValue(T object) {
         fieldReader0.setDefault(object);
         fieldReader1.setDefault(object);

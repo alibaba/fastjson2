@@ -156,6 +156,7 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
         return (T) object;
     }
 
+    @Override
     protected void initDefaultValue(T object) {
         fieldReader.setDefault(object);
     }
