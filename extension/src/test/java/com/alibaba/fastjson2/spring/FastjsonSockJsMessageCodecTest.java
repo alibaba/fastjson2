@@ -1,10 +1,11 @@
-package com.alibaba.fastjson.support.spring;
+package com.alibaba.fastjson2.spring;
 
+import com.alibaba.fastjson2.support.spring.websocket.sockjs.FastjsonSockJsMessageCodec;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class FastjsonSockJsMessageCodecTest_encode {
+public class FastjsonSockJsMessageCodecTest {
     @Test
     public void test_encode() {
         FastjsonSockJsMessageCodec fastjsonCodec = new FastjsonSockJsMessageCodec();
