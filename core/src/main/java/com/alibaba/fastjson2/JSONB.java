@@ -344,7 +344,8 @@ public interface JSONB {
             ctx.features |= feature.mask;
         }
 
-        ObjectReader objectReader = provider.getObjectReader(objectType);
+        boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = provider.getObjectReader(objectType, fieldBased);
 
         T object = (T) objectReader.readJSONBObject(reader, 0);
         if (reader.resolveTasks != null) {
@@ -378,7 +379,8 @@ public interface JSONB {
                     object = jsonReader.readAny();
                 }
             } else {
-                ObjectReader objectReader = provider.getObjectReader(objectClass);
+                boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
+                ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
                 object = objectReader.readJSONBObject(jsonReader, 0);
             }
 
@@ -402,7 +404,8 @@ public interface JSONB {
             ctx.features |= feature.mask;
         }
 
-        ObjectReader objectReader = provider.getObjectReader(objectClass);
+        boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
 
         T object = (T) objectReader.readJSONBObject(reader, 0);
         if (reader.resolveTasks != null) {
@@ -423,7 +426,8 @@ public interface JSONB {
                 , len
                 , null);
 
-        ObjectReader objectReader = provider.getObjectReader(objectClass);
+        boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
 
         T object = (T) objectReader.readJSONBObject(reader, 0);
         if (reader.resolveTasks != null) {
@@ -444,7 +448,8 @@ public interface JSONB {
                 , len
                 , null);
 
-        ObjectReader objectReader = provider.getObjectReader(objectClass);
+        boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
 
         T object = (T) objectReader.readJSONBObject(reader, 0);
         if (reader.resolveTasks != null) {
@@ -468,7 +473,8 @@ public interface JSONB {
                 , off
                 , len, null);
 
-        ObjectReader objectReader = provider.getObjectReader(objectClass);
+        boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
 
         T object = (T) objectReader.readJSONBObject(reader, 0);
         if (reader.resolveTasks != null) {
