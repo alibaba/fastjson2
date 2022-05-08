@@ -29,6 +29,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -42,7 +43,7 @@ import static com.alibaba.fastjson.util.TypeUtils.*;
 /**
  * @author wenshao[szujobs@hotmail.com]
  */
-public class JSONObject extends JSON implements Map<String, Object>, Cloneable, Serializable {
+public class JSONObject extends JSON implements Map<String, Object>, Cloneable, Serializable, InvocationHandler {
     static ObjectReader<JSONArray> arrayReader;
     static ObjectReader<JSONObject> objectReader;
 
@@ -177,7 +178,8 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return new JSONArray((List) value);
         }
 
-        return null;
+        String jsonString = JSON.toJSONString(value);
+        return JSON.parseArray(jsonString);
     }
 
     public <T> T getObject(String key, Class<T> clazz) {
