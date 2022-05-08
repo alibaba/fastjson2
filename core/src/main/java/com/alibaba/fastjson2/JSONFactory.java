@@ -127,6 +127,7 @@ public final class JSONFactory {
         Properties properties = new Properties();
 
         InputStream inputStream = AccessController.doPrivileged(new PrivilegedAction<InputStream>() {
+            @Override
             public InputStream run() {
                 ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
