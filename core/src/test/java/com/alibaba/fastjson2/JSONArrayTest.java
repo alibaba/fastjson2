@@ -1131,6 +1131,21 @@ public class JSONArrayTest {
         assertEquals(
             "[-6,1,2,null,-2,-1]", array.toString()
         );
+
+        // size = 6
+        // Integer.MAX_VALUE out of range (6 + 4096 = 4102)
+        array.set(
+            Integer.MAX_VALUE, Integer.MAX_VALUE
+        );
+        assertEquals(
+            "[-6,1,2,null,-2,-1]", array.toString()
+        );
+        array.set(
+            4102, 4102
+        );
+        assertEquals(
+            "[-6,1,2,null,-2,-1]", array.toString()
+        );
     }
 
     public static class Bean {
