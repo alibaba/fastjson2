@@ -80,18 +80,17 @@ public class JSONArray extends ArrayList<Object> {
             );
         }
 
-        int range = index - size;
-        if (range > 0) {
-            while (--range != -1) {
-                super.add(null);
-            }
-            super.add(element);
-            return null;
+        if (index < size) {
+            return super.set(
+                index, element
+            );
         }
 
-        return super.set(
-            index, element
-        );
+        while (index-- != size) {
+            super.add(null);
+        }
+        super.add(element);
+        return null;
     }
 
     /**
