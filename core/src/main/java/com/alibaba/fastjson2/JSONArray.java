@@ -79,9 +79,8 @@ public class JSONArray extends ArrayList<Object> {
         if (index < 0) {
             index += size;
             if (index < 0) {
-                super.add(
-                    0, element
-                );
+                // left join elem
+                super.add(0, element);
                 return null;
             }
             return super.set(
@@ -95,10 +94,13 @@ public class JSONArray extends ArrayList<Object> {
             );
         }
 
-        while (index-- != size) {
-            super.add(null);
+        // max expansion (size + 4096)
+        if (index < size + 4096) {
+            while (index-- != size) {
+                super.add(null);
+            }
+            super.add(element);
         }
-        super.add(element);
         return null;
     }
 
