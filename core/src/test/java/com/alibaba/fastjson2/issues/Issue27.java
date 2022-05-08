@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
-
 public class Issue27 {
     @Test
     public void test_parse() {

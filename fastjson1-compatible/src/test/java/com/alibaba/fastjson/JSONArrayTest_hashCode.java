@@ -1,15 +1,18 @@
 package com.alibaba.fastjson;
 
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
-public class JSONArrayTest_hashCode extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+public class JSONArrayTest_hashCode {
+
+    @Test
     public void test_hashCode() throws Exception {
-        Assert.assertEquals(new JSONArray().hashCode(), new JSONArray().hashCode());
+        assertEquals(new JSONArray().hashCode(), new JSONArray().hashCode());
     }
 
+    @Test
     public void test_hashCode_1() throws Exception {
-        Assert.assertEquals(JSON.parseArray("[]"), JSON.parseArray("[]"));
+        assertEquals(JSON.parseArray("[]"), JSON.parseArray("[]"));
     }
 }

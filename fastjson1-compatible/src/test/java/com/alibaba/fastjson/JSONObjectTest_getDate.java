@@ -1,14 +1,17 @@
 package com.alibaba.fastjson;
 
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
-public class JSONObjectTest_getDate extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+public class JSONObjectTest_getDate {
+
+    @Test
     public void test_get_empty() throws Exception {
         JSONObject obj = new JSONObject();
         obj.put("value", "");
-        Assert.assertEquals("", obj.get("value"));
-        Assert.assertNull(obj.getDate("value"));
+        assertEquals("", obj.get("value"));
+        assertNull(obj.getDate("value"));
     }
 }

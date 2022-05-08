@@ -812,4 +812,20 @@ public class JSONArray extends JSON implements List {
     public Object clone() {
         return new JSONArray(new ArrayList<Object>(list));
     }
+
+    public int hashCode() {
+        return this.list.hashCode();
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof JSONArray) {
+            return this.list.equals(((JSONArray) obj).list);
+        }
+
+        return this.list.equals(obj);
+    }
 }

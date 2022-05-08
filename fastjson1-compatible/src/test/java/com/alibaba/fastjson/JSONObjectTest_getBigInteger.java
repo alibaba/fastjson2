@@ -1,30 +1,34 @@
 package com.alibaba.fastjson;
 
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 
-public class JSONObjectTest_getBigInteger extends TestCase {
+import static org.junit.jupiter.api.Assertions.*;
 
-    public void test_get_float() throws Exception {
+public class JSONObjectTest_getBigInteger {
+
+    @Test
+    public void test_get_float() {
         JSONObject obj = new JSONObject();
         obj.put("value", 123.45F);
-        Assert.assertTrue(123.45F == ((Float) obj.get("value")).floatValue());
-        Assert.assertEquals(new BigInteger("123"), obj.getBigInteger("value"));
+        assertTrue(123.45F == ((Float) obj.get("value")).floatValue());
+        assertEquals(new BigInteger("123"), obj.getBigInteger("value"));
     }
 
-    public void test_get_double() throws Exception {
+    @Test
+    public void test_get_double() {
         JSONObject obj = new JSONObject();
         obj.put("value", 123.45D);
-        Assert.assertTrue(123.45D == ((Double) obj.get("value")).doubleValue());
-        Assert.assertEquals(new BigInteger("123"), obj.getBigInteger("value"));
+        assertTrue(123.45D == ((Double) obj.get("value")).doubleValue());
+        assertEquals(new BigInteger("123"), obj.getBigInteger("value"));
     }
 
-    public void test_get_empty() throws Exception {
+    @Test
+    public void test_get_empty() {
         JSONObject obj = new JSONObject();
         obj.put("value", "");
-        Assert.assertEquals("", obj.get("value"));
-        Assert.assertNull(obj.getBigInteger("value"));
+        assertEquals("", obj.get("value"));
+        assertNull(obj.getBigInteger("value"));
     }
 }
