@@ -11,19 +11,22 @@ import java.awt.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PointTest {
+
+public class ColorTest {
     @BeforeEach
     public void setUp() {
-         JSONFactory.getDefaultObjectWriterProvider().register(AwtWriterModule.INSTANCE);
-         JSONFactory.getDefaultObjectReaderProvider().register(AwtRederModule.INSTANCE);
+        JSONFactory.getDefaultObjectWriterProvider().register(AwtWriterModule.INSTANCE);
+        JSONFactory.getDefaultObjectReaderProvider().register(AwtRederModule.INSTANCE);
     }
 
     @Test
     public void test0() {
-        Point point = new Point(3, 4);
-        String text = JSON.toJSONString(point);
-        Point point2 = JSON.parseObject(text, Point.class);
+        Color color = Color.RED;
+        String text = JSON.toJSONString(color);
+        System.out.println(text);
 
-        assertEquals(point, point2);
+        Color color2 = JSON.parseObject(text, Color.class);
+
+        assertEquals(color, color2);
     }
 }
