@@ -813,10 +813,12 @@ public class JSONArray extends JSON implements List {
         return new JSONArray(new ArrayList<Object>(list));
     }
 
+    @Override
     public int hashCode() {
         return this.list.hashCode();
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

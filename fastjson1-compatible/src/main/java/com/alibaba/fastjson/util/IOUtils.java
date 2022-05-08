@@ -242,12 +242,14 @@ public class IOUtils {
         int sIx = 0, eIx = sLen - 1; // Start and end index after trimming.
 
         // Trim illegal chars from start
-        while (sIx < eIx && IA[s.charAt(sIx) & 0xff] < 0)
+        while (sIx < eIx && IA[s.charAt(sIx) & 0xff] < 0) {
             sIx++;
+        }
 
         // Trim illegal chars from end
-        while (eIx > 0 && IA[s.charAt(eIx) & 0xff] < 0)
+        while (eIx > 0 && IA[s.charAt(eIx) & 0xff] < 0) {
             eIx--;
+        }
 
         // get the padding count (=) (0, 1 or 2)
         int pad = s.charAt(eIx) == '=' ? (s.charAt(eIx - 1) == '=' ? 2 : 1) : 0; // Count '=' at end.
@@ -279,11 +281,13 @@ public class IOUtils {
         if (d < len) {
             // Decode last 1-3 bytes (incl '=') into 1-3 bytes
             int i = 0;
-            for (int j = 0; sIx <= eIx - pad; j++)
+            for (int j = 0; sIx <= eIx - pad; j++) {
                 i |= IA[s.charAt(sIx++)] << (18 - j * 6);
+            }
 
-            for (int r = 16; d < len; r -= 8)
+            for (int r = 16; d < len; r -= 8) {
                 dArr[d++] = (byte) (i >> r);
+            }
         }
 
         return dArr;

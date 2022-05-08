@@ -866,6 +866,7 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         return this.map.hashCode();
     }
 
+    @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes.length == 1) {
