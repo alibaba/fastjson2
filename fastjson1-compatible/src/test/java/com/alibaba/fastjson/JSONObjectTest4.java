@@ -1,14 +1,16 @@
 package com.alibaba.fastjson;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
-public class JSONObjectTest4 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    public void test_interface() throws Exception {
-        VO vo = JSON.parseObject("{id:123}", VO.class);
-        Assert.assertEquals(123, vo.getId());
+public class JSONObjectTest4 {
+
+    @Test
+    public void test_interface() {
+        VO vo = JSON.parseObject("{\"id\":123}", VO.class);
+        assertEquals(123, vo.getId());
     }
 
     public static interface VO {

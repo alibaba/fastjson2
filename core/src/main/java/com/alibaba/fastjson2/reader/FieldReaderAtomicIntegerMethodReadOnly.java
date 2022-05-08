@@ -10,7 +10,7 @@ class FieldReaderAtomicIntegerMethodReadOnly<T> extends FieldReaderImpl<T> imple
     final Method method;
 
     FieldReaderAtomicIntegerMethodReadOnly(String fieldName, Class fieldType, int ordinal, Method method) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, null);
+        super(fieldName, fieldType, fieldType, ordinal, 0, null, null);
         this.method = method;
     }
 

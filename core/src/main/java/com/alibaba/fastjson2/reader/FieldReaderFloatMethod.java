@@ -8,8 +8,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 final class FieldReaderFloatMethod<T> extends FieldReaderObjectMethod<T> {
-    FieldReaderFloatMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, setter);
+    FieldReaderFloatMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Float defaultValue, Method setter) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, setter);
     }
 
     @Override

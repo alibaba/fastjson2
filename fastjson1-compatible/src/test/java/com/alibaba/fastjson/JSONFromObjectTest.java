@@ -1,14 +1,17 @@
 package com.alibaba.fastjson;
 
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class JSONFromObjectTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+public class JSONFromObjectTest {
+
+    @Test
     public void test_0() throws Exception {
         User user = new User();
         user.setId(3);
@@ -16,10 +19,11 @@ public class JSONFromObjectTest extends TestCase {
 
         JSONObject json = (JSONObject) JSON.toJSON(user);
 
-        Assert.assertEquals(new Long(3), json.getLong("id"));
-        Assert.assertEquals("周访", json.getString("name"));
+        assertEquals(new Long(3), json.getLong("id"));
+        assertEquals("周访", json.getString("name"));
     }
 
+    @Test
     public void test_1() throws Exception {
         JSONObject user = new JSONObject();
         user.put("id", 3);
@@ -27,10 +31,11 @@ public class JSONFromObjectTest extends TestCase {
 
         JSONObject json = (JSONObject) JSON.toJSON(user);
 
-        Assert.assertEquals(new Long(3), json.getLong("id"));
-        Assert.assertEquals("周访", json.getString("name"));
+        assertEquals(new Long(3), json.getLong("id"));
+        assertEquals("周访", json.getString("name"));
     }
 
+    @Test
     public void test_2() throws Exception {
         HashMap user = new HashMap();
         user.put("id", 3);
@@ -38,10 +43,11 @@ public class JSONFromObjectTest extends TestCase {
 
         JSONObject json = (JSONObject) JSON.toJSON(user);
 
-        Assert.assertEquals(new Long(3), json.getLong("id"));
-        Assert.assertEquals("周访", json.getString("name"));
+        assertEquals(new Long(3), json.getLong("id"));
+        assertEquals("周访", json.getString("name"));
     }
 
+    @Test
     public void test_3() throws Exception {
         List users = new ArrayList();
         HashMap user = new HashMap();
@@ -52,10 +58,11 @@ public class JSONFromObjectTest extends TestCase {
         JSONArray array = (JSONArray) JSON.toJSON(users);
         JSONObject json = array.getJSONObject(0);
 
-        Assert.assertEquals(new Long(3), json.getLong("id"));
-        Assert.assertEquals("周访", json.getString("name"));
+        assertEquals(new Long(3), json.getLong("id"));
+        assertEquals("周访", json.getString("name"));
     }
 
+    @Test
     public void test_error() throws Exception {
         C c = new C();
 
@@ -65,7 +72,7 @@ public class JSONFromObjectTest extends TestCase {
         } catch (JSONException e) {
             error = e;
         }
-        Assert.assertNotNull(error);
+        assertNotNull(error);
     }
 
     public static class User {

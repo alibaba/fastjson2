@@ -8,8 +8,8 @@ import java.lang.reflect.Field;
 import java.math.BigInteger;
 
 final class FieldReaderBigIntegerField<T> extends FieldReaderObjectField<T> {
-    FieldReaderBigIntegerField(String fieldName, Class fieldType, int ordinal, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, null, field);
+    FieldReaderBigIntegerField(String fieldName, Class fieldType, int ordinal, String format, BigInteger defaultValue, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, 0, format, defaultValue, field);
     }
 
     @Override

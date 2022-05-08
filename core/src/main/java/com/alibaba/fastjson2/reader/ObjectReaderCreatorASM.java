@@ -142,11 +142,12 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
             , int ordinal
             , long features
             , String format
+            , Object defaultValue
             , Type fieldType
             , Class fieldClass
             , Field field
     ) {
-        return super.createFieldReader(objectClass, objectType, fieldName, ordinal, features, format, fieldType, fieldClass, field);
+        return super.createFieldReader(objectClass, objectType, fieldName, ordinal, features, format, defaultValue, fieldType, fieldClass, field);
     }
 
     private static class FieldReaderInfo {
@@ -247,6 +248,8 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
         FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType, beanInfo, fieldBased, modules);
         Arrays.sort(fieldReaderArray);
 
+        boolean match = true;
+
         if (!fieldBased) {
             if (JDKUtils.JVM_VERSION >= 9 && objectClass == StackTraceElement.class) {
                 try {
@@ -256,22 +259,31 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
                 }
             }
 
-            boolean match = true;
             for (FieldReader fieldReader : fieldReaderArray) {
                 if (fieldReader.getMethod() != null) {
                     match = false;
                     break;
                 }
 
-                if (fieldReader instanceof FieldReaderReadOnly || fieldReader.isUnwrapped()) {
+                if (fieldReader instanceof FieldReaderReadOnly
+                        || fieldReader.isUnwrapped()
+                ) {
                     match = false;
                     break;
                 }
             }
+        }
 
-            if (!match) {
-                return super.createObjectReader(objectClass, objectType, fieldBased, modules);
+        for (FieldReader fieldReader : fieldReaderArray) {
+            if (fieldReader.getDefaultValue() != null
+            ) {
+                match = false;
+                break;
             }
+        }
+
+        if (!match) {
+            return super.createObjectReader(objectClass, objectType, fieldBased, modules);
         }
 
         Supplier<T> supplier = createInstanceSupplier(objectClass);

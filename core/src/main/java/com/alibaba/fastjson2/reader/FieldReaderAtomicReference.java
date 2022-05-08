@@ -9,7 +9,7 @@ public abstract class FieldReaderAtomicReference<T> extends FieldReaderImpl<T> {
     final Type referenceType;
 
     public FieldReaderAtomicReference(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null);
 
         Type referenceType = null;
         if (fieldType instanceof ParameterizedType) {

@@ -99,6 +99,22 @@ final class ObjectReader6<T> extends ObjectReaderBean<T> {
         if (fieldReader5.isUnwrapped()) {
             extraFieldReader = fieldReader5;
         }
+
+        hasDefaultValue = fieldReader0.getDefaultValue() != null
+                || fieldReader1.getDefaultValue() != null
+                || fieldReader2.getDefaultValue() != null
+                || fieldReader3.getDefaultValue() != null
+                || fieldReader4.getDefaultValue() != null
+                || fieldReader5.getDefaultValue() != null;
+    }
+
+    protected void initDefaultValue(T object) {
+        fieldReader0.setDefault(object);
+        fieldReader1.setDefault(object);
+        fieldReader2.setDefault(object);
+        fieldReader3.setDefault(object);
+        fieldReader4.setDefault(object);
+        fieldReader5.setDefault(object);
     }
 
     @Override
@@ -144,17 +160,21 @@ final class ObjectReader6<T> extends ObjectReaderBean<T> {
             throw new JSONException("expect object, but " + JSONB.typeName(jsonReader.getType()));
         }
 
-        Object object;
+        T object;
         if (defaultCreator != null) {
             object = defaultCreator.get();
         } else if (JDKUtils.UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
             try {
-                object = UnsafeUtils.UNSAFE.allocateInstance(objectClass);
+                object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {
                 throw new JSONException("create instance error", e);
             }
         } else {
             object = null;
+        }
+
+        if (object != null && hasDefaultValue) {
+            initDefaultValue(object);
         }
 
         for (; ; ) {
@@ -224,7 +244,10 @@ final class ObjectReader6<T> extends ObjectReaderBean<T> {
         if (jsonReader.isArray()
                 && jsonReader.isSupportBeanArray()) {
             jsonReader.nextIfMatch('[');
-            Object object = defaultCreator.get();
+            T object = defaultCreator.get();
+            if (hasDefaultValue) {
+                initDefaultValue(object);
+            }
 
             fieldReader0.readFieldValue(jsonReader, object);
             fieldReader1.readFieldValue(jsonReader, object);
@@ -245,7 +268,11 @@ final class ObjectReader6<T> extends ObjectReaderBean<T> {
         }
 
         jsonReader.nextIfMatch('{');
-        Object object = defaultCreator.get();
+        T object = defaultCreator.get();
+        if (hasDefaultValue) {
+            initDefaultValue(object);
+        }
+
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfMatch('}')) {
 //                jsonReader.next();

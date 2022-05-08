@@ -1,80 +1,87 @@
 package com.alibaba.fastjson;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
-public class JSONObjectTest3 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-    public void test_0() throws Exception {
-        String text = "{value:'123',big:false}";
+public class JSONObjectTest3 {
+
+    @Test
+    public void test_0() {
+        String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
-        Assert.assertEquals("123", bean.getValue());
-        Assert.assertEquals(false, bean.isBig());
-        Assert.assertEquals(123, bean.getIntValue());
+        assertEquals("123", bean.getValue());
+        assertEquals(false, bean.isBig());
+        assertEquals(123, bean.getIntValue());
 
         bean.setBig(true);
-        Assert.assertEquals(true, bean.isBig());
+        assertEquals(true, bean.isBig());
 
         bean.setID(567);
-        Assert.assertEquals(567, bean.getID());
-
+        assertEquals(567, bean.getID());
     }
 
-    public void test_error_0() throws Exception {
-        String text = "{value:'123',big:false}";
+    @Test
+    public void test_error_0() {
+        String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
-        JSONException error = null;
+        Exception error = null;
         try {
             bean.f();
-        } catch (JSONException ex) {
+        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        assertNotNull(error);
     }
 
-    public void test_error_1() throws Exception {
-        String text = "{value:'123',big:false}";
+    @Test
+    public void test_error_1() {
+        String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
-        JSONException error = null;
+        Exception error = null;
         try {
             bean.f(1);
-        } catch (JSONException ex) {
+        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        assertNotNull(error);
     }
 
-    public void test_error_2() throws Exception {
-        String text = "{value:'123',big:false}";
+    @Test
+    public void test_error_2() {
+        String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
-        JSONException error = null;
+        Exception error = null;
         try {
             bean.get();
-        } catch (JSONException ex) {
+        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        assertNotNull(error);
     }
 
-    public void test_error_3() throws Exception {
-        String text = "{value:'123',big:false}";
+    @Test
+    public void test_error_3() {
+        String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
-        JSONException error = null;
+        Exception error = null;
         try {
             bean.is();
-        } catch (JSONException ex) {
+        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        assertNotNull(error);
     }
 
-    public void test_error_4() throws Exception {
-        String text = "{value:'123',big:false}";
+    @Test
+    public void test_error_4() {
+        String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
         Exception error = null;
@@ -83,62 +90,66 @@ public class JSONObjectTest3 extends TestCase {
         } catch (UnsupportedOperationException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        assertNotNull(error);
     }
 
-    public void test_error_5() throws Exception {
-        String text = "{value:'123',big:false}";
+    @Test
+    public void test_error_5() {
+        String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
-        JSONException error = null;
+        Exception error = null;
         try {
             bean.getA();
-        } catch (JSONException ex) {
+        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        assertNotNull(error);
     }
 
-    public void test_error_6() throws Exception {
-        String text = "{value:'123',big:false}";
+    @Test
+    public void test_error_6() {
+        String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
-        JSONException error = null;
+        Exception error = null;
         try {
             bean.f1(1);
-        } catch (JSONException ex) {
+        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        assertNotNull(error);
     }
 
-    public void test_error_7() throws Exception {
-        String text = "{value:'123',big:false}";
+    @Test
+    public void test_error_7() {
+        String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
-        JSONException error = null;
+        Exception error = null;
         try {
             bean.set(1);
-        } catch (JSONException ex) {
+        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        assertNotNull(error);
     }
 
-    public void test_error_8() throws Exception {
-        String text = "{value:'123',big:false}";
+    @Test
+    public void test_error_8() {
+        String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
-        JSONException error = null;
+        Exception error = null;
         try {
             bean.xx();
-        } catch (JSONException ex) {
+        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
             error = ex;
         }
-        Assert.assertNotNull(error);
+        assertNotNull(error);
     }
 
-    public static interface Bean {
+    public interface Bean {
 
         String getValue();
 

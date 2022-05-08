@@ -1,24 +1,25 @@
 package com.alibaba.fastjson;
 
-import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.util.TypeUtils;
-import junit.framework.TestCase;
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 
-public class JSONObjectTest_getObj_2 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-    public void test_get_empty() throws Exception {
+public class JSONObjectTest_getObj_2 {
+
+    @Test
+    public void test_get_empty() {
         JSONObject obj = new JSONObject();
         obj.put("value", "");
-        Assert.assertEquals("", obj.get("value"));
-        Assert.assertNull(obj.getObject("value", Model.class));
-    }
-
-    public void test_get_null() throws Exception {
-        TypeUtils.cast("null", getType(), ParserConfig.getGlobalInstance());
-        TypeUtils.cast("", getType(), ParserConfig.getGlobalInstance());
+        assertEquals("", obj.get("value"));
+        assertNull(
+                obj.getObject("value", Model.class)
+        );
+        assertNull(
+                obj.getObject("value", getType())
+        );
     }
 
     public static class Model {

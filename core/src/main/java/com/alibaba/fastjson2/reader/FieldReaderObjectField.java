@@ -16,8 +16,8 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
     protected final Field field;
     protected ObjectReader fieldObjectReader;
 
-    FieldReaderObjectField(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Field field) {
-        super(fieldName, fieldType == null ? field.getType() : fieldType, fieldClass, ordinal, features, format);
+    FieldReaderObjectField(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue, Field field) {
+        super(fieldName, fieldType == null ? field.getType() : fieldType, fieldClass, ordinal, features, format, defaultValue);
         this.field = field;
     }
 

@@ -318,6 +318,13 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                             loadJsonFieldFormat(fieldInfo, (String) result);
                             break;
                         }
+                        case "defaultValue": {
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                fieldInfo.defaultValue = value;
+                            }
+                            break;
+                        }
                         case "ordinal": {
                             Integer ordinal = (Integer) result;
                             if (ordinal.intValue() != 0) {
@@ -475,6 +482,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             String jsonFieldName = jsonField.name();
             if (!jsonFieldName.isEmpty()) {
                 fieldInfo.fieldName = jsonFieldName;
+            }
+
+            String defaultValue = jsonField.defaultValue();
+            if (!defaultValue.isEmpty()) {
+                fieldInfo.defaultValue = defaultValue;
             }
 
             loadJsonFieldFormat(fieldInfo, jsonField.format());

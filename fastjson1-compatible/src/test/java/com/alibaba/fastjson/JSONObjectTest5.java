@@ -1,9 +1,12 @@
 package com.alibaba.fastjson;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class JSONObjectTest5 extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+public class JSONObjectTest5 {
+
+    @Test
     public void test() throws Exception {
         JSONObject jsonObject = new JSONObject(3, true);
         jsonObject.put("name", "J.K.SAGE");

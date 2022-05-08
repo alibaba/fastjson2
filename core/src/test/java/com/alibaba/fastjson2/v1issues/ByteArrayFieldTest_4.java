@@ -2,10 +2,9 @@ package com.alibaba.fastjson2.v1issues;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
-import junit.framework.TestCase;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ByteArrayFieldTest_4 {
@@ -21,7 +20,7 @@ public class ByteArrayFieldTest_4 {
         assertEquals("{\"value\":x'414243444547'}", json);
 
         Model model1 = JSON.parseObject(json, Model.class);
-        Assert.assertArrayEquals(model.value, model1.value);
+        assertArrayEquals(model.value, model1.value);
 
     }
 

@@ -5,7 +5,6 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -54,6 +54,23 @@ public class JSONArray extends ArrayList<Object> {
         }
     }
 
+    public Object set(int index, Object element) {
+        if (index == -1) {
+            add(element);
+            return null;
+        }
+
+        if (size() <= index) {
+            for (int i = size(); i < index; ++i) {
+                add(null);
+            }
+            add(element);
+            return null;
+        }
+
+        return super.set(index, element);
+    }
+
     /**
      * Returns the {@link JSONArray} at the specified location in this {@link JSONArray}.
      *
@@ -828,15 +845,24 @@ public class JSONArray extends ArrayList<Object> {
      * @param clazz specify the {@code Class<T>} to be converted
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> List<T> toJavaList(Class<T> clazz) {
+    public <T> List<T> toJavaList(Class<T> clazz, JSONReader.Feature... features) {
+        boolean fieldBased = false;
+        long featuresValue = 0;
+        for (JSONReader.Feature feature : features) {
+            featuresValue |= feature.mask;
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+            }
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<?> objectReader = provider.getObjectReader(clazz);
+        ObjectReader<?> objectReader = provider.getObjectReader(clazz, fieldBased);
 
         List<T> list = new ArrayList<>(size());
         for (Object item : this) {
             T classItem;
             if (item instanceof Map) {
-                classItem = (T) objectReader.createInstance((Map) item, 0L);
+                classItem = (T) objectReader.createInstance((Map) item, featuresValue);
             } else {
                 throw new JSONException(
                         (item == null ? "null" : item.getClass()) + " cannot be converted to " + clazz
@@ -860,7 +886,7 @@ public class JSONArray extends ArrayList<Object> {
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> T getObject(int index, Type type) {
+    public <T> T getObject(int index, Type type, JSONReader.Feature... features) {
         Object value = get(index);
 
         if (value == null) {
@@ -875,13 +901,81 @@ public class JSONArray extends ArrayList<Object> {
             return (T) typeConvert.apply(value);
         }
 
+        boolean fieldBased = false;
+        long featuresValue = 0;
+        for (JSONReader.Feature feature : features) {
+            featuresValue |= feature.mask;
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+            }
+        }
+
         if (value instanceof Map) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type);
-            return objectReader.createInstance((Map) value, 0L);
+            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
+            return objectReader.createInstance((Map) value, featuresValue);
         }
 
         if (value instanceof Collection) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type);
+            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
+            return objectReader.createInstance((Collection) value);
+        }
+
+        Class clazz = TypeUtils.getMapping(type);
+        if (clazz.isInstance(value)) {
+            return (T) value;
+        }
+
+        String json = JSON.toJSONString(value);
+        JSONReader jsonReader = JSONReader.of(json);
+        jsonReader.context.config(features);
+
+        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
+        return (T) objectReader.readObject(jsonReader);
+    }
+
+    /**
+     * Returns the result of the {@link Type} converter conversion of the element at the specified position in this {@link JSONArray}.
+     * <p>
+     * {@code User user = jsonArray.getObject(0, User.class);}
+     *
+     * @param index index of the element to return
+     * @param type  specify the {@link Class} to be converted
+     * @return {@code <T>} or null
+     * @throws JSONException             If no suitable conversion method is found
+     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> T getObject(int index, Class<T> type, JSONReader.Feature... features) {
+        Object value = get(index);
+
+        if (value == null) {
+            return null;
+        }
+
+        Class<?> valueClass = value.getClass();
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        Function typeConvert = provider.getTypeConvert(valueClass, type);
+
+        if (typeConvert != null) {
+            return (T) typeConvert.apply(value);
+        }
+
+        boolean fieldBased = false;
+        long featuresValue = 0;
+        for (JSONReader.Feature feature : features) {
+            featuresValue |= feature.mask;
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+            }
+        }
+
+        if (value instanceof Map) {
+            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
+            return objectReader.createInstance((Map) value, featuresValue);
+        }
+
+        if (value instanceof Collection) {
+            ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
             return objectReader.createInstance((Collection) value);
         }
 
@@ -904,6 +998,36 @@ public class JSONArray extends ArrayList<Object> {
      */
     public JSONArray fluentAdd(Object element) {
         add(element);
+        return this;
+    }
+
+    public JSONArray fluentClear() {
+        clear();
+        return this;
+    }
+
+    public JSONArray fluentRemove(int index) {
+        remove(index);
+        return this;
+    }
+
+    public JSONArray fluentSet(int index, Object element) {
+        set(index, element);
+        return this;
+    }
+
+    public JSONArray fluentRemove(Object o) {
+        remove(o);
+        return this;
+    }
+
+    public JSONArray fluentRemoveAll(Collection<?> c) {
+        removeAll(c);
+        return this;
+    }
+
+    public JSONArray fluentAddAll(Collection<?> c) {
+        addAll(c);
         return this;
     }
 

@@ -27,9 +27,10 @@ class FieldReaderListField<T>
             int ordinal,
             long features,
             String format,
+            Collection defaultValue,
             Field field) {
 
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, field);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, field);
         this.itemType = itemType;
         this.fieldClassHash = fieldClass == null ? 0 : Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
         this.fieldObjectReader = ObjectReaderImplList.of(fieldType, fieldClass, features);

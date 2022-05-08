@@ -11,8 +11,8 @@ final class FieldReaderAtomicBooleanFieldReadOnly<T>
 
     final Field field;
 
-    FieldReaderAtomicBooleanFieldReadOnly(String fieldName, Class fieldClass, int ordinal, Field field) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, null);
+    FieldReaderAtomicBooleanFieldReadOnly(String fieldName, Class fieldClass, int ordinal, String format, AtomicBoolean defaultValue, Field field) {
+        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, defaultValue);
         this.field = field;
     }
 

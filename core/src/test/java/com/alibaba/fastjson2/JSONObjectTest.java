@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -1097,6 +1098,42 @@ public class JSONObjectTest {
                 JSONObject
                         .of("id", 101, "name", "DataWorks")
                         .size()
+        );
+
+        assertNull(
+                JSONObject
+                        .of()
+                        .getObject("id", (Type) User.class)
+        );
+
+        assertEquals(Integer.valueOf(123),
+                JSONObject
+                        .of("id", 123)
+                        .getObject("id", (Type) Object.class)
+        );
+
+        assertEquals("123",
+                JSONObject
+                        .of("id", 123)
+                        .getObject("id", (Type) String.class)
+        );
+
+        assertEquals(Integer.valueOf(123),
+                JSONObject
+                        .of("id", "123")
+                        .getObject("id", (Type) Integer.class)
+        );
+
+        assertEquals(Integer.valueOf(123),
+                JSONObject
+                        .of("id", 123)
+                        .getObject("id", (Type) Number.class)
+        );
+
+        assertEquals(new ArrayList(),
+                JSONObject
+                        .of("id", new ArrayList())
+                        .getObject("id", List.class)
         );
     }
 

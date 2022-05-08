@@ -48,6 +48,17 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
         return null;
     }
 
+    default Object getDefaultValue() {
+        return null;
+    }
+
+    default void setDefault(T object) {
+        Object defaultValue = getDefaultValue();
+        if (defaultValue != null) {
+            accept(object, defaultValue);
+        }
+    }
+
     String getFieldName();
 
     default long getFieldNameHash() {
