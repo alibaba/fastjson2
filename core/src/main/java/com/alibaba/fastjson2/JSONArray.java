@@ -64,11 +64,14 @@ public class JSONArray extends ArrayList<Object> {
      *    array.set(0, 1); // [1,2]
      *    array.set(4, 3); // [1,2,null,null,3]
      *    array.set(-1, -1); // [1,2,null,null,-1]
+     *    array.set(-2, -2); // [1,2,null,-2,-1]
+     *    array.set(-6, -6); // [-6,1,2,null,-2,-1]
      * }</pre>
      *
      * @param index   index of the element to replace
      * @param element element to be stored at the specified position
      * @return the element previously at the specified position
+     * @since 2.0.3
      */
     @Override
     public Object set(int index, Object element) {
@@ -76,7 +79,8 @@ public class JSONArray extends ArrayList<Object> {
         if (index < 0) {
             index += size;
             if (index < 0) {
-                super.add(element);
+                // left join elem
+                super.add(0, element);
                 return null;
             }
             return super.set(
@@ -90,10 +94,13 @@ public class JSONArray extends ArrayList<Object> {
             );
         }
 
-        while (index-- != size) {
-            super.add(null);
+        // max expansion (size + 4096)
+        if (index < size + 4096) {
+            while (index-- != size) {
+                super.add(null);
+            }
+            super.add(element);
         }
-        super.add(element);
         return null;
     }
 
