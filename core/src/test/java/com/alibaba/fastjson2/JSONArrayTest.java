@@ -1125,6 +1125,12 @@ public class JSONArrayTest {
         assertEquals(
             "[1,2,null,-2,-1]", array.toString()
         );
+
+        // out of range
+        array.set(-6, -6);
+        assertEquals(
+            "[-6,1,2,null,-2,-1]", array.toString()
+        );
     }
 
     public static class Bean {
