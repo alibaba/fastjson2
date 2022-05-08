@@ -2,11 +2,22 @@ package com.alibaba.fastjson.support.spring;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import org.springframework.web.socket.sockjs.frame.AbstractSockJsMessageCodec;
 
 import java.io.InputStream;
 
 public class FastjsonSockJsMessageCodec extends AbstractSockJsMessageCodec {
+
+    private FastJsonConfig fastJsonConfig = new FastJsonConfig();
+
+    public FastJsonConfig getFastJsonConfig() {
+        return fastJsonConfig;
+    }
+
+    public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
+        this.fastJsonConfig = fastJsonConfig;
+    }
 
     public String[] decode(String content) {
         return JSON.parseObject(content, String[].class);
@@ -23,8 +34,8 @@ public class FastjsonSockJsMessageCodec extends AbstractSockJsMessageCodec {
 
     @Override
     public String encode(String... messages) {
-        JSONWriter jsonWriter = JSONWriter.of();
-        jsonWriter.writeRaw(new char[] {'a'});
+        JSONWriter jsonWriter = JSONWriter.of(fastJsonConfig.getWriterFeatures());
+        jsonWriter.writeRaw(new char[]{'a'});
         jsonWriter.startArray();
         for (int i = 0; i < messages.length; i++) {
             if (i != 0) {
