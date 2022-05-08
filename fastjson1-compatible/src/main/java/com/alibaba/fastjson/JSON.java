@@ -82,6 +82,10 @@ public class JSON {
     }
 
     public static <T> T parseObject(String str, Type type, Feature... features) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
         JSONReader reader = JSONReader.of(str);
         JSONReader.Context context = reader.getContext();
         context.setObjectClass(JSONObject.class);
@@ -104,6 +108,10 @@ public class JSON {
     }
 
     public static <T> T parseObject(byte[] jsonBytes, Type type, Feature... features) {
+        if (jsonBytes == null) {
+            return null;
+        }
+
         JSONReader reader = JSONReader.of(jsonBytes);
         JSONReader.Context context = reader.getContext();
         context.setObjectClass(JSONObject.class);
@@ -126,6 +134,10 @@ public class JSON {
     }
 
     public static Object parse(String str, Feature... features) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
         try (JSONReader reader = JSONReader.of(str)) {
             JSONReader.Context context = reader.getContext();
             context.setObjectClass(JSONObject.class);
