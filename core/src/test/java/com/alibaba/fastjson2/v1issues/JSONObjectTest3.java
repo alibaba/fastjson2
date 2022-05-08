@@ -1,6 +1,8 @@
-package com.alibaba.fastjson;
+package com.alibaba.fastjson2.v1issues;
 
-import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,7 +33,7 @@ public class JSONObjectTest3 {
         Exception error = null;
         try {
             bean.f();
-        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
+        } catch (JSONException ex) {
             error = ex;
         }
         assertNotNull(error);
@@ -45,7 +47,7 @@ public class JSONObjectTest3 {
         Exception error = null;
         try {
             bean.f(1);
-        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
+        } catch (JSONException ex) {
             error = ex;
         }
         assertNotNull(error);
@@ -59,7 +61,7 @@ public class JSONObjectTest3 {
         Exception error = null;
         try {
             bean.get();
-        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
+        } catch (JSONException ex) {
             error = ex;
         }
         assertNotNull(error);
@@ -73,7 +75,7 @@ public class JSONObjectTest3 {
         Exception error = null;
         try {
             bean.is();
-        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
+        } catch (JSONException ex) {
             error = ex;
         }
         assertNotNull(error);
@@ -101,7 +103,7 @@ public class JSONObjectTest3 {
         Exception error = null;
         try {
             bean.getA();
-        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
+        } catch (JSONException ex) {
             error = ex;
         }
         assertNotNull(error);
@@ -115,7 +117,7 @@ public class JSONObjectTest3 {
         Exception error = null;
         try {
             bean.f1(1);
-        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
+        } catch (JSONException ex) {
             error = ex;
         }
         assertNotNull(error);
@@ -129,7 +131,7 @@ public class JSONObjectTest3 {
         Exception error = null;
         try {
             bean.set(1);
-        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
+        } catch (JSONException ex) {
             error = ex;
         }
         assertNotNull(error);
@@ -143,7 +145,7 @@ public class JSONObjectTest3 {
         Exception error = null;
         try {
             bean.xx();
-        } catch (JSONException | com.alibaba.fastjson2.JSONException ex) {
+        } catch (JSONException ex) {
             error = ex;
         }
         assertNotNull(error);

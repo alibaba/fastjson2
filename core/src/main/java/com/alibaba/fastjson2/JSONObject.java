@@ -1,18 +1,22 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class JSONObject extends LinkedHashMap implements InvocationHandler {
@@ -1110,14 +1114,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 throw new JSONException("This method '" + methodName + "' is not a setter");
             }
 
-            String name = null;
-            JSONField annotation = method.getAnnotation(JSONField.class);
-            if (annotation != null) {
-                name = annotation.name();
-                if (name.isEmpty()) {
-                    name = null;
-                }
-            }
+            String name = getAnnotationName(method);
 
             if (name == null) {
                 name = methodName;
@@ -1142,14 +1139,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 throw new JSONException("This method '" + methodName + "' is not a getter");
             }
 
-            String name = null;
-            JSONField annotation = method.getAnnotation(JSONField.class);
-            if (annotation != null) {
-                name = annotation.name();
-                if (name.isEmpty()) {
-                    name = null;
-                }
-            }
+            String name = getAnnotationName(method);
 
             Object value;
             if (name == null) {
@@ -1215,6 +1205,57 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         }
 
         throw new UnsupportedOperationException(method.toGenericString());
+    }
+
+    private String getAnnotationName(Method method) {
+        String name = null;
+        Annotation[] annotations = method.getAnnotations();
+        for (Annotation annotation : annotations) {
+            Class<? extends Annotation> annotationType = annotation.annotationType();
+            if (annotationType == JSONField.class) {
+                JSONField jsonField = (JSONField) annotation;
+                if (jsonField != null) {
+                    name = jsonField.name();
+                    if (name.isEmpty()) {
+                        name = null;
+                    }
+                }
+            } else if (annotationType.getName().equals("com.alibaba.fastjson.annotation.JSONField")) {
+                NameConsumer nameConsumer = new NameConsumer(annotation);
+                BeanUtils.annotationMethods(annotationType, nameConsumer);
+                if (nameConsumer.name != null) {
+                    name = nameConsumer.name;
+                }
+            }
+
+        }
+        return name;
+    }
+
+    static class NameConsumer implements Consumer<Method> {
+        final Annotation annotation;
+        String name;
+
+        NameConsumer(Annotation annotation) {
+            this.annotation = annotation;
+        }
+
+        @Override
+        public void accept(Method method) {
+            String methodName = method.getName();
+            switch (methodName) {
+                case "name":
+                    try {
+                        String result = (String) method.invoke(annotation);
+                        if (!result.isEmpty()) {
+                            name = result;
+                        }
+                    } catch (IllegalAccessException | InvocationTargetException ignored) {}
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     /**
