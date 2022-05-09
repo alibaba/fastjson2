@@ -34,38 +34,36 @@ interface FieldListStrReader<T> extends FieldReader<T> {
     }
 
     @Override
-    default void readFieldValue(JSONReader jsonReader, T object) {
-        if (jsonReader.isJSONB()) {
-            int entryCnt = jsonReader.startArray();
+    default void readFieldValue(JSONReader reader, T object) {
+        if (reader.isJSONB()) {
+            int entryCnt = reader.startArray();
 
             String[] array = new String[entryCnt];
             for (int i = 0; i < entryCnt; ++i) {
-                array[i] = jsonReader.readString();
+                array[i] = reader.readString();
             }
             List list = Arrays.asList(array);
             accept(object, list);
             return;
         }
 
-        if (jsonReader.current() == '[') {
+        if (reader.current() == '[') {
             List list = createList();
-            jsonReader.startArray();
+            reader.startArray();
             for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (reader.nextIfMatch(']')) {
                     break;
                 }
 
                 list.add(
-                        jsonReader.readString()
+                        reader.readString()
                 );
 
-                if (jsonReader.nextIfMatch(',')) {
-                    continue;
-                }
+                reader.nextIfMatch(',');
             }
             accept(object, list);
 
-            jsonReader.nextIfMatch(',');
+            reader.nextIfMatch(',');
         }
     }
 }

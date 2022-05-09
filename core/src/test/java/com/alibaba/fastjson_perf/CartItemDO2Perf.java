@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.Throughput)
 @Warmup(iterations = 3)
-@Measurement(iterations = 1000, time = 5, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 1000, time = 5)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class CartItemDO2Perf {
     static List<CartItemDO2> list;
@@ -21,11 +21,11 @@ public class CartItemDO2Perf {
             return list;
         }
 
-        list = new ArrayList();
-        for (long i = 90000000000l; i < 90000000000l + 1000; i++) {
+        list = new ArrayList<>();
+        for (long i = 90000000000L; i < 90000000000L+ 1000; i++) {
             CartItemDO2 cartItemDO2 = new CartItemDO2();
             cartItemDO2.setUserId(i);
-            cartItemDO2.setAttributes(new HashMap());
+            cartItemDO2.setAttributes(new HashMap<>());
             cartItemDO2.setCartId(i * 100);
             cartItemDO2.setCityCode(i * 12);
             cartItemDO2.setItemId(i * 3);
