@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 public class Issue208 {
     @Test
     public void testMemberMetadata() {
@@ -16,7 +18,7 @@ public class Issue208 {
         MemberMetadata source = new MemberMetadata();
         source.setCode("项目成员1");
         source.setFormatType((byte) 0);
-        source.setId("a368f1ff-8702-4d80-9cdf-5260b5fe0fdd");
+        source.setId(UUID.fromString("a368f1ff-8702-4d80-9cdf-5260b5fe0fdd"));
         source.setLevel(0);
         String jsonString = JSON.toJSONString(source);
         System.out.println(jsonString);
@@ -28,7 +30,7 @@ public class Issue208 {
         private String code;
         private byte formatType;
         //------这里是重点，不能使用id作为名称------
-        private String id;
+        private UUID id;
         private int level;
 
         public String getCode() {
@@ -47,11 +49,11 @@ public class Issue208 {
             this.formatType = formatType;
         }
 
-        public String getId() {
+        public UUID getId() {
             return id;
         }
 
-        public void setId(String id) {
+        public void setId(UUID id) {
             this.id = id;
         }
 
