@@ -1729,6 +1729,11 @@ final class JSONReaderStr extends JSONReader {
             if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
                 offset += 33;
                 ch = str.charAt(offset++);
+
+                if (ch == ',') {
+                    next();
+                }
+
                 return new UUID(
                         msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
                         lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
@@ -1750,6 +1755,11 @@ final class JSONReaderStr extends JSONReader {
                 if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
                     offset += 37;
                     ch = str.charAt(offset++);
+
+                    if (ch == ',') {
+                        next();
+                    }
+
                     return new UUID(
                             msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
                             lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
