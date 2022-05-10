@@ -124,6 +124,8 @@ final class JSONReaderStr extends JSONReader {
                         ch = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     case '.':
                     case '-':
                     case '+':
@@ -228,6 +230,8 @@ final class JSONReaderStr extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     default:
                         c = char1(c);
                         break;
@@ -306,6 +310,8 @@ final class JSONReaderStr extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     default:
                         c = char1(c);
                         break;
@@ -379,6 +385,8 @@ final class JSONReaderStr extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     default:
                         c = char1(c);
                         break;
@@ -430,6 +438,8 @@ final class JSONReaderStr extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     case '.':
                     case '-':
                     case '+':
@@ -480,7 +490,6 @@ final class JSONReaderStr extends JSONReader {
                         break;
                     }
                     default:
-                        c = char1(c);
                         break;
                 }
                 offset++;
@@ -545,7 +554,6 @@ final class JSONReaderStr extends JSONReader {
                         break;
                     }
                     default:
-                        c = char1(c);
                         break;
                 }
                 offset++;
@@ -974,6 +982,9 @@ final class JSONReaderStr extends JSONReader {
         for (; ; ) {
             if (ch == '\\') {
                 ch = str.charAt(offset++);
+                if (ch == '\\' || ch == '"') {
+                    continue;
+                }
                 char1(ch);
                 continue;
             }
@@ -1042,6 +1053,9 @@ final class JSONReaderStr extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
+                        break;
                     default:
                         c = char1(c);
                         break;
@@ -1115,6 +1129,9 @@ final class JSONReaderStr extends JSONReader {
                             c = char2(c1, c2);
                             break;
                         }
+                        case '\\':
+                        case '"':
+                            break;
                         default:
                             c = char1(c);
                             break;
@@ -1226,6 +1243,9 @@ final class JSONReaderStr extends JSONReader {
                                 c = char2(c1, c2);
                                 break;
                             }
+                            case '\\':
+                            case '"':
+                                break;
                             default:
                                 c = char1(c);
                                 break;

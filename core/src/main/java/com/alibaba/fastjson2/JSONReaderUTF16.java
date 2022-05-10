@@ -5,10 +5,13 @@ import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.math.BigInteger;
 import java.time.*;
+import java.util.Arrays;
 import java.util.TimeZone;
 import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.UUIDUtils.*;
+import static com.alibaba.fastjson2.JSONFactory.Utils.*;
+import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK11;
 
 final class JSONReaderUTF16 extends JSONReader {
     private final String str;
@@ -168,6 +171,8 @@ final class JSONReaderUTF16 extends JSONReader {
                         ch = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     case '.':
                     case '-':
                     case '+':
@@ -272,6 +277,8 @@ final class JSONReaderUTF16 extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     default:
                         c = char1(c);
                         break;
@@ -350,6 +357,8 @@ final class JSONReaderUTF16 extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     default:
                         c = char1(c);
                         break;
@@ -423,6 +432,8 @@ final class JSONReaderUTF16 extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     default:
                         c = char1(c);
                         break;
@@ -449,7 +460,7 @@ final class JSONReaderUTF16 extends JSONReader {
     @Override
     public String getFieldName() {
         if (!nameEscape) {
-            if (this.str != null && JDKUtils.JVM_VERSION > 8) {
+            if (this.str != null) {
                 return this.str.substring(nameBegin, nameEnd);
             } else {
                 return new String(chars, nameBegin, nameEnd - nameBegin);
@@ -478,6 +489,8 @@ final class JSONReaderUTF16 extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     case '.':
                     case '-':
                     case '+':
@@ -528,7 +541,6 @@ final class JSONReaderUTF16 extends JSONReader {
                         break;
                     }
                     default:
-                        c = char1(c);
                         break;
                 }
                 offset++;
@@ -569,6 +581,14 @@ final class JSONReaderUTF16 extends JSONReader {
             offset++;
         }
 
+        if (!nameEscape) {
+            if (this.str != null) {
+                return this.str.substring(nameBegin, nameEnd);
+            } else {
+                return new String(chars, nameBegin, nameEnd - nameBegin);
+            }
+        }
+
         return getFieldName();
     }
 
@@ -593,7 +613,6 @@ final class JSONReaderUTF16 extends JSONReader {
                         break;
                     }
                     default:
-                        c = char1(c);
                         break;
                 }
                 offset++;
@@ -1041,6 +1060,9 @@ final class JSONReaderUTF16 extends JSONReader {
         for (; ; ) {
             if (ch == '\\') {
                 ch = chars[offset++];
+                if (ch == '\\' || ch == '"') {
+                    continue;
+                }
                 ch = char1(ch);
                 continue;
             }
@@ -1119,6 +1141,9 @@ final class JSONReaderUTF16 extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
+                        break;
                     default:
                         c = char1(c);
                         break;
@@ -1192,6 +1217,9 @@ final class JSONReaderUTF16 extends JSONReader {
                             c = char2(c1, c2);
                             break;
                         }
+                        case '\\':
+                        case '"':
+                            break;
                         default:
                             c = char1(c);
                             break;
@@ -1303,6 +1331,9 @@ final class JSONReaderUTF16 extends JSONReader {
                                 c = char2(c1, c2);
                                 break;
                             }
+                            case '\\':
+                            case '"':
+                                break;
                             default:
                                 c = char1(c);
                                 break;
@@ -1314,7 +1345,22 @@ final class JSONReaderUTF16 extends JSONReader {
                     offset++;
                 }
 
-                str = new String(chars);
+                if (JDKUtils.JVM_VERSION == 8) {
+                    if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                        try {
+                            STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                        } catch (Throwable e) {
+                            STRING_CREATOR_ERROR = true;
+                        }
+                    }
+                    if (STRING_CREATOR_JDK8 != null) {
+                        str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                    } else {
+                        str = new String(chars);
+                    }
+                } else {
+                    str = new String(chars);
+                }
             } else {
                 if (this.str != null && JDKUtils.JVM_VERSION > 8) {
                     str = this.str.substring(this.offset, offset);

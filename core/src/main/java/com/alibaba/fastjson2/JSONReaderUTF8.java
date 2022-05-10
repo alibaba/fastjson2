@@ -184,6 +184,8 @@ class JSONReaderUTF8 extends JSONReader {
                         ch = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     case '.':
                     case '-':
                     case '+':
@@ -281,6 +283,8 @@ class JSONReaderUTF8 extends JSONReader {
                         ch = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     case '.':
                         break;
                     default:
@@ -373,6 +377,8 @@ class JSONReaderUTF8 extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     default:
                         c = char1(c);
                         break;
@@ -488,6 +494,8 @@ class JSONReaderUTF8 extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     default:
                         c = char1(c);
                         break;
@@ -646,6 +654,8 @@ class JSONReaderUTF8 extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     default:
                         c = char1(c);
                         break;
@@ -796,6 +806,8 @@ class JSONReaderUTF8 extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
                     case '.':
                     case '-':
                     case '+':
@@ -1452,6 +1464,9 @@ class JSONReaderUTF8 extends JSONReader {
                             c = char2(c1, c2);
                             break;
                         }
+                        case '\\':
+                        case '"':
+                            break;
                         default:
                             c = char1(c);
                             break;
@@ -1575,7 +1590,6 @@ class JSONReaderUTF8 extends JSONReader {
                         break;
                     }
                     default:
-                        c = char1(c);
                         break;
                 }
                 offset++;
@@ -1640,6 +1654,9 @@ class JSONReaderUTF8 extends JSONReader {
                             c = char2(c1, c2);
                             break;
                         }
+                        case '\\':
+                        case '"':
+                            break;
                         default:
                             c = char1(c);
                             break;
@@ -1981,6 +1998,9 @@ class JSONReaderUTF8 extends JSONReader {
                         c = char2(c1, c2);
                         break;
                     }
+                    case '\\':
+                    case '"':
+                        break;
                     default:
                         c = char1(c);
                         break;
@@ -2023,7 +2043,9 @@ class JSONReaderUTF8 extends JSONReader {
         for (; ; ) {
             if (ch == '\\') {
                 ch = bytes[offset++];
-                char1(ch);
+                if (ch != '\\' && ch != '"') {
+                    char1(ch);
+                }
                 ch = bytes[offset++];
                 continue;
             }
@@ -2096,7 +2118,6 @@ class JSONReaderUTF8 extends JSONReader {
                             break;
                         }
                         default:
-                            c = char1(c);
                             break;
                     }
                     offset++;
@@ -2161,6 +2182,9 @@ class JSONReaderUTF8 extends JSONReader {
                                 c = char2(c1, c2);
                                 break;
                             }
+                            case '\\':
+                            case '"':
+                                break;
                             default:
                                 c = char1(c);
                                 break;
