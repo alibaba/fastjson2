@@ -7,6 +7,16 @@ class JSONTest {
 
     @Test
     fun test_parseObject1() {
+        val text = """{"id":1,"name":"kraity"}"""
+        val data = text.to<User>()
+
+        assertEquals(1, data.id)
+        assertEquals("kraity", data.name)
+        assertEquals("""{"id":1,"name":"kraity"}""", data.toJSONString())
+    }
+
+    @Test
+    fun test_parseObject2() {
         parseObject<User>(
             """{"id":1,"name":"kraity"}"""
         ).apply {
