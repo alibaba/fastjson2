@@ -10,7 +10,7 @@ public class JSONValidator {
     private Type type;
     private char firstChar;
 
-    private JSONValidator(JSONReader jsonReader) {
+    protected JSONValidator(JSONReader jsonReader) {
         this.jsonReader = jsonReader;
     }
 
@@ -20,6 +20,10 @@ public class JSONValidator {
 
     public static JSONValidator from(String jsonStr) {
         return new JSONValidator(JSONReader.of(jsonStr));
+    }
+
+    public static JSONValidator from(JSONReader jsonReader) {
+        return new JSONValidator(jsonReader);
     }
 
     public boolean validate() {

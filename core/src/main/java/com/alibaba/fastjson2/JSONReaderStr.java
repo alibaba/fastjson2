@@ -22,6 +22,9 @@ final class JSONReaderStr extends JSONReader {
     protected int nameEnd;
     protected int nameLength;
 
+    JSONReaderStr(Context ctx, String str) {
+        this(ctx, str, 0, str.length());
+    }
 
     JSONReaderStr(Context ctx, String str, int offset, int length) {
         super(ctx);
@@ -702,6 +705,16 @@ final class JSONReaderStr extends JSONReader {
         if (ch == '"' || ch == '\'') {
             quote = ch;
             ch = str.charAt(offset++);
+
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = str.charAt(offset++);
+                }
+                nextIfMatch(',');
+                return null;
+            }
         }
 
         if (ch == '-') {
@@ -754,7 +767,11 @@ final class JSONReaderStr extends JSONReader {
         }
 
         if (quote != 0) {
-            ch = str.charAt(offset++);
+            if (offset < end) {
+                ch = str.charAt(offset++);
+            } else {
+                ch = EOI;
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -896,6 +913,16 @@ final class JSONReaderStr extends JSONReader {
         if (ch == '"' || ch == '\'') {
             quote = ch;
             ch = str.charAt(offset++);
+
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = str.charAt(offset++);
+                }
+                nextIfMatch(',');
+                return null;
+            }
         }
 
         if (ch == '-') {
@@ -945,7 +972,11 @@ final class JSONReaderStr extends JSONReader {
         }
 
         if (quote != 0) {
-            ch = str.charAt(offset++);
+            if (offset < end) {
+                ch = str.charAt(offset++);
+            } else {
+                ch = EOI;
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -989,11 +1020,21 @@ final class JSONReaderStr extends JSONReader {
                 continue;
             }
             if (ch == quote) {
-                ch = str.charAt(offset++);
+                if (offset < end) {
+                    ch = str.charAt(offset++);
+                } else {
+                    ch = EOI;
+                }
+
                 break;
             }
 
-            ch = str.charAt(offset++);
+            if (offset < end) {
+                ch = str.charAt(offset++);
+            } else {
+                ch = EOI;
+                break;
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -1389,12 +1430,18 @@ final class JSONReaderStr extends JSONReader {
             case 't':
             case 'f':
             case 'n':
-                for (; offset < end; ) {
-                    ch = str.charAt(offset++);
-                    if (ch == '}' || ch == ']') {
+                for (; ; ) {
+                    if (offset < end) {
+                        ch = str.charAt(offset++);
+                    } else {
+                        ch = EOI;
+                        break;
+                    }
+                    if (ch == '}' || ch == ']' || ch == '{' || ch == '[') {
                         break;
                     }
                     if (ch == ',') {
+                        comma = true;
                         if (offset >= end) {
                             ch = EOI;
                             return;
@@ -1436,6 +1483,8 @@ final class JSONReaderStr extends JSONReader {
                 ch = str.charAt(offset);
             }
             offset++;
+        } else if (!comma && ch != '}' && ch != ']' && ch != EOI) {
+            throw new JSONValidException("offset " + offset);
         }
     }
 
@@ -1454,6 +1503,17 @@ final class JSONReaderStr extends JSONReader {
         if (ch == '"' || ch == '\'') {
             quote = ch;
             ch = str.charAt(offset++);
+
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = str.charAt(offset++);
+                }
+                nextIfMatch(',');
+                wasNull = true;
+                return;
+            }
         }
         final int start = offset;
 
@@ -1625,7 +1685,11 @@ final class JSONReaderStr extends JSONReader {
                 valueType = JSON_TYPE_STRING;
                 return;
             }
-            ch = str.charAt(offset++);
+            if (offset < end) {
+                ch = str.charAt(offset++);
+            } else {
+                ch = EOI;
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -3396,6 +3460,12 @@ final class JSONReaderStr extends JSONReader {
             millis *= 1000_000;
         } else {
             return null;
+        }
+
+        if (year == 0 && month == 0 && dom == 0) {
+            year = 1970;
+            month = 1;
+            dom = 1;
         }
 
         LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second, millis);
