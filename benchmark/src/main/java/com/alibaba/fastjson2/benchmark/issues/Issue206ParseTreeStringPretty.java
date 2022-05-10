@@ -82,6 +82,8 @@ public class Issue206ParseTreeStringPretty {
     }
 
     public static void main(String[] args) throws RunnerException {
+//        new Issue206ParseTreeStringPretty().fastjson2_perf_test();
+
         Options options = new OptionsBuilder()
                 .include(Issue206ParseTreeStringPretty.class.getName())
                 .mode(Mode.Throughput)

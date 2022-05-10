@@ -1277,35 +1277,68 @@ final class JSONReaderUTF16 extends JSONReader {
             int start = offset;
             int valueLength;
             boolean valueEscape = false;
+            boolean ascii = true;
 
-            _for:
-            for (int i = 0; ; ++i) {
-                char c = chars[offset];
-                if (c == '\\') {
-                    valueEscape = true;
-                    c = chars[++offset];
-                    switch (c) {
-                        case 'u': {
-                            offset += 4;
-                            break;
+            if (JDKUtils.JVM_VERSION > 8) {
+                _for:
+                for (int i = 0; ; ++i) {
+                    char c = chars[offset];
+                    if (c == '\\') {
+                        valueEscape = true;
+                        c = chars[++offset];
+                        switch (c) {
+                            case 'u': {
+                                offset += 4;
+                                break;
+                            }
+                            case 'x': {
+                                offset += 2;
+                                break;
+                            }
+                            default:
+                                // skip
+                                break;
                         }
-                        case 'x': {
-                            offset += 2;
-                            break;
-                        }
-                        default:
-                            // skip
-                            break;
+                        offset++;
+                        continue;
+                    }
+
+                    if (c == quote) {
+                        valueLength = i;
+                        break _for;
                     }
                     offset++;
-                    continue;
                 }
+            } else {
+                _for:
+                for (int i = 0; ; ++i) {
+                    char c = chars[offset];
+                    if (c == '\\') {
+                        valueEscape = true;
+                        c = chars[++offset];
+                        switch (c) {
+                            case 'u': {
+                                offset += 4;
+                                break;
+                            }
+                            case 'x': {
+                                offset += 2;
+                                break;
+                            }
+                            default:
+                                // skip
+                                break;
+                        }
+                        offset++;
+                        continue;
+                    }
 
-                if (c == quote) {
-                    valueLength = i;
-                    break _for;
+                    if (c == quote) {
+                        valueLength = i;
+                        break _for;
+                    }
+                    offset++;
                 }
-                offset++;
             }
 
             String str;

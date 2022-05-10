@@ -1725,14 +1725,18 @@ public abstract class JSONReader implements Closeable {
             }
         }
 
-        char[] chars = JDKUtils.getCharArray(str);
-        return new JSONReaderUTF16(
-                ctx
-                , str
-                , chars
-                , 0
-                , chars.length
-        );
+        if (JDKUtils.JVM_VERSION > 8) {
+            return new JSONReaderStr(ctx, str, 0, str.length());
+        } else {
+            char[] chars = JDKUtils.getCharArray(str);
+            return new JSONReaderUTF16(
+                    ctx
+                    , str
+                    , chars
+                    , 0
+                    , chars.length
+            );
+        }
     }
 
     void bigInt(char[] chars, int off, int len) {

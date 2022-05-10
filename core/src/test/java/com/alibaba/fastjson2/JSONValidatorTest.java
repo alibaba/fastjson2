@@ -32,4 +32,18 @@ public class JSONValidatorTest {
         assertTrue(validator.validate());
         assertTrue(validator.validate());
     }
+
+    @Test
+    public void test0_str() {
+        assertTrue(JSONValidator.from(new JSONReaderStr(JSONFactory.createReadContext(), "{}")).validate());
+        assertTrue(JSONValidator.from(new JSONReaderStr(JSONFactory.createReadContext(), "[]")).validate());
+        assertTrue(JSONValidator.from(new JSONReaderStr(JSONFactory.createReadContext(), "1")).validate());
+        assertTrue(JSONValidator.from(new JSONReaderStr(JSONFactory.createReadContext(), "\"123\"")).validate());
+
+        assertEquals(JSONValidator.Type.Value, JSONValidator.from(new JSONReaderStr(JSONFactory.createReadContext(), "\"123\"")).getType());
+
+        JSONValidator validator = JSONValidator.from(new JSONReaderStr(JSONFactory.createReadContext(), "{}"));
+        assertTrue(validator.validate());
+        assertTrue(validator.validate());
+    }
 }
