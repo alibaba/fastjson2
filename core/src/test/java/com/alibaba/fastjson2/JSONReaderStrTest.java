@@ -4,6 +4,8 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,5 +72,15 @@ public class JSONReaderStrTest {
         assertEquals(1238
                 , reader.readInt64()
                         .intValue());
+    }
+
+
+    @Test
+    public void test1_str() {
+        String str = "\"2022-05-10T11:07Z[UTC]\"";
+        JSONReader reader = new JSONReaderStr(JSONFactory.createReadContext(), str, 0, str.length());
+
+        Instant instant = reader.readInstant();
+        assertNotNull(instant);
     }
 }

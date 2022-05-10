@@ -6,10 +6,12 @@ import com.alibaba.fastjson2_vo.Instant1;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class InstantTest {
     static ZoneId zoneId = ZoneId.of("UTC");
@@ -68,4 +70,17 @@ public class InstantTest {
         }
     }
 
+    @Test
+    public void test1_default() {
+        String str = "\"2022-05-10T11:07Z[UTC]\"";
+        Instant instant = JSON.parseObject(str, Instant.class);
+        assertNotNull(instant);
+    }
+
+    @Test
+    public void test1_utf8() {
+        String str = "\"2022-05-10T11:07Z[UTC]\"";
+        Instant instant = JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), Instant.class);
+        assertNotNull(instant);
+    }
 }
