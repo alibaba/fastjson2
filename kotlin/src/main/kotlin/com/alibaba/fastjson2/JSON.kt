@@ -101,55 +101,129 @@ inline fun String?.isJSONArray() = JSON.isValidArray(this)
 inline fun ByteArray?.isJSONArray() = JSON.isValidArray(this)
 
 /**
+ * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject}
+ *
+ * @return {@link JSONArray} or {@link JSONObject}
+ * @since 2.0.3
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun String?.parse() =
+    JSON.parse(this)
+
+/**
+ * Parse JSON {@link String} into {@link JSONObject}
+ *
+ * <pre>{@code
+ *    val text = "..."
+ *    val data = text.parseObject()
+ * }</pre>
+ *
+ * @return T?
+ * @since 2.0.3
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun String?.parseObject() =
+    JSON.parseObject(this)
+
+/**
  * Parse JSON {@link String} into Object
  *
  * <pre>{@code
  *    val text = "..."
- *    val data = parseObject<User>(text)
+ *    val data = text.parseObject<User>()
  * }</pre>
  *
- * @param text the JSON {@link String} to be parsed
  * @return T?
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
-inline fun <reified T> parseObject(
-    text: String
-) = JSON.parseObject(
-    text, T::class.java
-)
+inline fun <reified T> String?.parseObject() =
+    JSON.parseObject(
+        this, T::class.java
+    )
 
 /**
  * Parse JSON {@link String} into Object
  *
- * @param text the JSON {@link String} to be parsed
  * @param features features to be enabled in parsing
  * @return T?
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
-inline fun <reified T> parseObject(
-    text: String,
+inline fun <reified T> String?.parseObject(
     vararg features: JSONReader.Feature
 ) = JSON.parseObject(
-    text, T::class.java, *features
+    this, T::class.java, *features
 )
 
 /**
  * Parse JSON {@link String} into Object
  *
- * @param text the JSON {@link String} to be parsed
  * @param features features to be enabled in parsing
  * @return T?
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
-inline fun <reified T> parseObject(
-    text: String,
+inline fun <reified T> String?.parseObject(
     filter: JSONReader.Filter,
     vararg features: JSONReader.Feature
 ) = JSON.parseObject(
-    text, T::class.java, filter, *features
+    this, T::class.java, filter, *features
+)
+
+/**
+ * Parse JSON {@link String} into {@link JSONArray}
+ *
+ * <pre>{@code
+ *    val text = "..."
+ *    val data = text.parseArray()
+ * }</pre>
+ *
+ * @return T?
+ * @since 2.0.3
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun String?.parseArray() =
+    JSON.parseArray(this)
+
+/**
+ * Parse JSON {@link String} into {@link List}
+ *
+ * <pre>{@code
+ *    val text = "..."
+ *    val list = text.parseArray<User>()
+ * }</pre>
+ *
+ * @return T?
+ * @since 2.0.3
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T> String?.parseArray() =
+    JSON.parseArray<T>(
+        this, T::class.java
+    )
+
+/**
+ * Parse JSON {@link String} into {@link List}
+ *
+ * @param features features to be enabled in parsing
+ * @return T?
+ * @since 2.0.3
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T> String?.parseArray(
+    vararg features: JSONReader.Feature
+) = JSON.parseArray<T>(
+    this, T::class.java, *features
 )
 
 /**
