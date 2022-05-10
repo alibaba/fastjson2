@@ -26,7 +26,6 @@ public class Issue206ParseTreeStringPretty {
         try {
             InputStream is = Int2Test.class.getClassLoader().getResourceAsStream("issue206.json");
             str = IOUtils.toString(is, "UTF-8");
-            JSON.parseObject(str, MediaContent.class);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -63,14 +62,14 @@ public class Issue206ParseTreeStringPretty {
 
     public static void fastjson2_perf() {
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
+        for (int i = 0; i < 1000 * 100; ++i) {
             JSON.parseObject(str);
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("millis : " + millis);
-        // zulu17.32.13 : 769
-        // zulu11.52.13 : 796
-        // zulu8.58.0.13 : 720
+        // zulu17.32.13 :
+        // zulu11.52.13 :
+        // zulu8.58.0.13 : 929 928
     }
 
     public static void fastjson1_perf() {
