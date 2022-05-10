@@ -111,6 +111,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
                         , fieldInfo.ordinal
                         , fieldInfo.features
                         , fieldInfo.format
+                        , fieldInfo.locale
                         , fieldInfo.defaultValue
                         , method.getGenericReturnType()
                         , method.getReturnType()
@@ -133,6 +134,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
                     , fieldInfo.ordinal
                     , fieldInfo.features
                     , fieldInfo.format
+                    , fieldInfo.locale
                     , fieldInfo.defaultValue
                     , fieldType
                     , fieldClass
@@ -164,6 +166,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
                                     , fieldInfo.ordinal
                                     , fieldInfo.features
                                     , fieldInfo.format
+                                    , fieldInfo.locale
                                     , fieldInfo.defaultValue
                                     , field.getGenericType()
                                     , field.getType()
@@ -194,6 +197,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
             , int ordinal
             , long features
             , String format
+            , Locale locale
             , Object defaultValue
             , Type fieldType
             , Class fieldClass
@@ -202,9 +206,9 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
         if ((method != null && method.getReturnType() != void.class)
                 || !Modifier.isPublic(objectClass.getModifiers())
                 || isExternalClass(objectClass)) {
-            return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, defaultValue, fieldType, fieldClass, method);
+            return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, null, defaultValue, fieldType, fieldClass, method);
         }
-        return createFieldReaderLambda(objectClass, objectType, fieldName, ordinal, features, format, defaultValue, fieldType, fieldClass, method);
+        return createFieldReaderLambda(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, fieldType, fieldClass, method);
     }
 
     protected <T> FieldReader createFieldReaderLambda(
@@ -214,6 +218,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
             , int ordinal
             , long features
             , String format
+            , Locale locale
             , Object defaultValue
             , Type fieldType
             , Class fieldClass

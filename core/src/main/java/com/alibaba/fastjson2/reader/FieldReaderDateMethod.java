@@ -6,17 +6,19 @@ import com.alibaba.fastjson2.JSONReader;
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
-    volatile SimpleDateFormat formatter;
-    static final AtomicReferenceFieldUpdater<FieldReaderDateMethod, SimpleDateFormat> FORMATTER_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(FieldReaderDateMethod.class, SimpleDateFormat.class, "formatter");
-
+    DateTimeFormatter formatter;
     ObjectReaderBaseModule.UtilDateImpl dateReader;
+    final Locale locale;
 
-    FieldReaderDateMethod(String fieldName, Class fieldClass, int ordinal, long features, String format, Method method) {
+    FieldReaderDateMethod(String fieldName, Class fieldClass, int ordinal, long features, String format, Locale locale, Method method) {
         super(fieldName, fieldClass, fieldClass, ordinal, features, format, method);
+        this.locale = locale;
     }
 
     @Override
@@ -36,17 +38,17 @@ final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
                 String str = (String) value;
 
                 if (format != null) {
-                    SimpleDateFormat formatter = FORMATTER_UPDATER.getAndSet(this, null);
-                    if (formatter == null) {
-                        formatter = new SimpleDateFormat(format);
+                    DateTimeFormatter formatter = getFormatter(null);
+                    LocalDateTime ldt;
+                    if (format.indexOf("HH") == -1) {
+                        ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                    } else {
+                        ldt = LocalDateTime.parse(str, formatter);
                     }
-                    try {
-                        value = formatter.parse(str);
-                    } catch (ParseException e) {
-                        throw new JSONException("parse date error, fieldName : " + fieldName, e);
-                    } finally {
-                        FORMATTER_UPDATER.set(this, formatter);
-                    }
+
+                    ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
+                    long millis = zdt.toInstant().toEpochMilli();
+                    value = new java.util.Date(millis);
                 }
             }
 
@@ -67,18 +69,20 @@ final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
             fieldValue = null;
         } else {
             if (format != null) {
-                SimpleDateFormat formatter = FORMATTER_UPDATER.getAndSet(this, null);
-                if (formatter == null) {
-                    formatter = new SimpleDateFormat(format);
+                Locale locale = jsonReader.getContext().getLocale();
+                DateTimeFormatter formatter = getFormatter(locale);
+                String str = jsonReader.readString();
+
+                LocalDateTime ldt;
+                if (format.indexOf("HH") == -1) {
+                    ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                } else {
+                    ldt = LocalDateTime.parse(str, formatter);
                 }
-                try {
-                    String str = jsonReader.readString();
-                    fieldValue = formatter.parse(str);
-                } catch (ParseException e) {
-                    throw new JSONException("parse date error, fieldName : " + fieldName, e);
-                } finally {
-                    FORMATTER_UPDATER.set(this, formatter);
-                }
+
+                ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
+                long millis = zdt.toInstant().toEpochMilli();
+                fieldValue = new java.util.Date(millis);
             } else {
                 long millis = jsonReader.readMillisFromString();
                 fieldValue = new java.util.Date(millis);
@@ -90,5 +94,23 @@ final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
+    }
+
+    private DateTimeFormatter getFormatter(Locale locale) {
+        if (formatter != null && locale == null) {
+            return formatter;
+        }
+
+        String format = this.format.replaceAll("aa", "a");
+
+        if (locale != null && locale != Locale.getDefault()) {
+            return DateTimeFormatter.ofPattern(format, locale);
+        }
+
+        if (this.locale != null) {
+            return formatter = DateTimeFormatter.ofPattern(format, this.locale);
+        }
+
+        return formatter = DateTimeFormatter.ofPattern(format);
     }
 }

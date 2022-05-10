@@ -1033,6 +1033,12 @@ public abstract class JSONReader implements Closeable {
         return (T) objectReader.readObject(this, 0);
     }
 
+    public <T> T read(Class<T> type) {
+        boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
+        return (T) objectReader.readObject(this, 0);
+    }
+
     public Map<String, Object> readObject() {
         nextIfObjectStart();
         Map object;

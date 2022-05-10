@@ -185,6 +185,7 @@ public class ObjectReaderCreator {
                         fieldInfo.ordinal,
                         fieldInfo.features,
                         fieldInfo.format,
+                        fieldInfo.locale,
                         fieldInfo.defaultValue,
                         method.getGenericReturnType(),
                         method.getReturnType(),
@@ -211,6 +212,7 @@ public class ObjectReaderCreator {
                     , fieldInfo.ordinal
                     , fieldInfo.features
                     , fieldInfo.format
+                    , fieldInfo.locale
                     , fieldInfo.defaultValue
                     , fieldType
                     , fieldClass
@@ -237,6 +239,7 @@ public class ObjectReaderCreator {
                                             , fieldInfo.ordinal
                                             , fieldInfo.features
                                             , fieldInfo.format
+                                            , fieldInfo.locale
                                             , fieldInfo.defaultValue
                                             , fieldType
                                             , fieldClass
@@ -706,6 +709,7 @@ public class ObjectReaderCreator {
                 , fieldInfo.ordinal
                 , fieldInfo.features
                 , fieldInfo.format
+                , fieldInfo.locale
                 , fieldInfo.defaultValue
                 , fieldType
                 , fieldClass
@@ -732,8 +736,9 @@ public class ObjectReaderCreator {
                                         , alternateName
                                         , fieldInfo.ordinal
                                         , fieldInfo.features
-                                        , fieldInfo.defaultValue
                                         , null
+                                        , fieldInfo.locale
+                                        , fieldInfo.defaultValue
                                         , fieldType
                                         , fieldClass
                                         , field
@@ -801,6 +806,7 @@ public class ObjectReaderCreator {
                     fieldInfo.ordinal,
                     fieldInfo.features,
                     fieldInfo.format,
+                    fieldInfo.locale,
                     fieldInfo.defaultValue,
                     method.getGenericReturnType(),
                     method.getReturnType(),
@@ -834,6 +840,7 @@ public class ObjectReaderCreator {
                 , fieldInfo.ordinal
                 , fieldInfo.features
                 , fieldInfo.format
+                , fieldInfo.locale
                 , fieldInfo.defaultValue
                 , fieldType
                 , fieldClass
@@ -859,6 +866,7 @@ public class ObjectReaderCreator {
                                         , fieldInfo.ordinal
                                         , fieldInfo.features
                                         , fieldInfo.format
+                                        , fieldInfo.locale
                                         , fieldInfo.defaultValue
                                         , fieldType
                                         , fieldClass
@@ -978,7 +986,7 @@ public class ObjectReaderCreator {
             , Class fieldClass
             , Method method
     ) {
-        return createFieldReaderMethod(objectType, objectType, fieldName, 0, 0L, null, null, fieldType, fieldClass, method);
+        return createFieldReaderMethod(objectType, objectType, fieldName, 0, 0L, null, null, null, fieldType, fieldClass, method);
     }
 
     public <T> FieldReader createFieldReader(
@@ -1000,7 +1008,7 @@ public class ObjectReaderCreator {
             , Class fieldClass
             , Method method
     ) {
-        return createFieldReaderMethod(objectClass, objectClass, fieldName, 0, 0L, format, null, fieldType, fieldClass, method);
+        return createFieldReaderMethod(objectClass, objectClass, fieldName, 0, 0L, format, null, null, fieldType, fieldClass, method);
     }
 
     protected <T> FieldReader createFieldReaderParam(
@@ -1040,6 +1048,7 @@ public class ObjectReaderCreator {
             , int ordinal
             , long features
             , String format
+            , Locale locale
             , Object defaultValue
             , Type fieldType
             , Class fieldClass
@@ -1190,7 +1199,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDateMethod(fieldName, fieldClass, ordinal, features, format, method);
+            return new FieldReaderDateMethod(fieldName, fieldClass, ordinal, features, format, locale, method);
         }
 
         if (fieldClass == StackTraceElement[].class && method.getDeclaringClass() == Throwable.class) {
@@ -1237,7 +1246,7 @@ public class ObjectReaderCreator {
             , Class fieldClass
             , Field field
     ) {
-        return createFieldReader(objectClass, objectType, fieldName, 0, features, format, null, fieldType, field.getType(), field);
+        return createFieldReader(objectClass, objectType, fieldName, 0, features, format, null, null, fieldType, field.getType(), field);
     }
 
     public <T> FieldReader<T> createFieldReader(
@@ -1247,6 +1256,7 @@ public class ObjectReaderCreator {
             , int ordinal
             , long features
             , String format
+            , Locale locale
             , Object defaultValue
             , Type fieldType
             , Class fieldClass
@@ -1334,7 +1344,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDateField(fieldName, fieldClass, ordinal, features, format, (Date) defaultValue, field);
+            return new FieldReaderDateField(fieldName, fieldClass, ordinal, features, format, locale, (Date) defaultValue, field);
         }
 
         if (fieldClass == AtomicBoolean.class) {
