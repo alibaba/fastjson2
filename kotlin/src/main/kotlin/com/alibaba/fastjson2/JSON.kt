@@ -3,6 +3,34 @@ package com.alibaba.fastjson2
 import com.alibaba.fastjson2.filter.Filter
 
 /**
+ * Parse JSON {@link String} into Object
+ *
+ * <pre>{@code
+ *    val text = "..."
+ *    val data = text.to<User>()
+ * }</pre>
+ *
+ * @return T?
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T> String.to() =
+    JSON.parseObject(this, T::class.java)
+
+/**
+ * Parse JSON {@link ByteArray} into Object
+ *
+ * <pre>{@code
+ *    val text = "..."
+ *    val data = text.to<User>()
+ * }</pre>
+ *
+ * @return T?
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T> ByteArray.to() =
+    JSON.parseObject(this, T::class.java)
+
+/**
  * Verify the {@link String} is JSON Object
  *
  * <pre>{@code
