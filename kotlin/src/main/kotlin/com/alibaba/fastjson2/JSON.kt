@@ -1,17 +1,70 @@
 package com.alibaba.fastjson2
 
+import com.alibaba.fastjson2.filter.Filter
+
 /**
- * Serialize Java Object to JSON {@link String}
+ * Verify the {@link String} is JSON Object
  *
  * <pre>{@code
- *    val obj = ...
- *    val text = obj.toJSONString()
+ *    val text = ...
+ *    val bool = text.isJSONObject()
  * }</pre>
  *
  * @receiver Any?
  */
-@Suppress("NOTHING_TO_INLINE", "HasPlatformType")
-inline fun Any?.toJSONString() = JSON.toJSONString(this)
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun String?.isJSONObject() = JSON.isValidObject(this)
+
+/**
+ * Verify the {@link ByteArray} is JSON Object
+ *
+ * <pre>{@code
+ *    val text = ...
+ *    val bool = text.isJSONObject()
+ * }</pre>
+ *
+ * @receiver Any?
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun ByteArray?.isJSONObject() = JSON.isValidObject(this)
+
+/**
+ * Verify the {@link String} is JSON Array
+ *
+ * <pre>{@code
+ *    val text = ...
+ *    val bool = text.isJSONArray()
+ * }</pre>
+ *
+ * @receiver Any?
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun String?.isJSONArray() = JSON.isValidArray(this)
+
+/**
+ * Verify the {@link ByteArray} is JSON Array
+ *
+ * <pre>{@code
+ *    val text = ...
+ *    val bool = text.isJSONArray()
+ * }</pre>
+ *
+ * @receiver Any?
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun ByteArray?.isJSONArray() = JSON.isValidArray(this)
 
 /**
  * Parse JSON {@link String} into Object
@@ -41,10 +94,9 @@ inline fun <reified T> parseObject(
 @Suppress("HasPlatformType")
 inline fun <reified T> parseObject(
     text: String,
-    filter: JSONReader.Filter,
     vararg features: JSONReader.Feature
 ) = JSON.parseObject(
-    text, T::class.java, filter, *features
+    text, T::class.java, *features
 )
 
 /**
@@ -57,7 +109,133 @@ inline fun <reified T> parseObject(
 @Suppress("HasPlatformType")
 inline fun <reified T> parseObject(
     text: String,
+    filter: JSONReader.Filter,
     vararg features: JSONReader.Feature
 ) = JSON.parseObject(
-    text, T::class.java, *features
+    text, T::class.java, filter, *features
+)
+
+/**
+ * Serialize Any to JSON {@link String}
+ *
+ * <pre>{@code
+ *    val obj = ...
+ *    val text = obj.toJSONString()
+ * }</pre>
+ *
+ * @receiver Any?
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun Any?.toJSONString() = JSON.toJSONString(this)
+
+/**
+ * Serialize Any to JSON {@link String}
+ *
+ * @receiver Any?
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun Any?.toJSONString(
+    filter: Filter,
+    vararg features: JSONWriter.Feature
+) = JSON.toJSONString(
+    this, filter, *features
+)
+
+/**
+ * Serialize Any to JSON {@link String}
+ *
+ * @receiver Any?
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun Any?.toJSONString(
+    filter: Array<out Filter>
+) = JSON.toJSONString(
+    this, filter
+)
+
+/**
+ * Serialize Any to JSON {@link String}
+ *
+ * @receiver Any?
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun Any?.toJSONString(
+    filter: Array<out Filter>,
+    vararg features: JSONWriter.Feature
+) = JSON.toJSONString(
+    this, filter, *features
+)
+
+/**
+ * Serialize Any to JSON {@link String}
+ *
+ * @receiver Any?
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun Any?.toJSONString(
+    vararg features: JSONWriter.Feature
+) = JSON.toJSONString(
+    this, *features
+)
+
+/**
+ * Serialize Any to JSON {@link ByteArray}
+ *
+ * <pre>{@code
+ *    val obj = ...
+ *    val text = obj.toJSONByteArray()
+ * }</pre>
+ *
+ * @receiver Any?
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun Any?.toJSONByteArray() = JSON.toJSONBytes(this)
+
+/**
+ * Serialize Any to JSON {@link ByteArray}
+ *
+ * @receiver Any?
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun Any?.toJSONByteArray(
+    filter: Array<out Filter>
+) = JSON.toJSONBytes(
+    this, filter
+)
+
+/**
+ * Serialize Any to JSON {@link ByteArray}
+ *
+ * @receiver Any?
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun Any?.toJSONByteArray(
+    filter: Array<out Filter>,
+    vararg features: JSONWriter.Feature
+) = JSON.toJSONBytes(
+    this, filter, *features
 )
