@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.codec;
 
+import java.util.Locale;
+
 public class FieldInfo {
     public String fieldName;
     public String format;
@@ -11,6 +13,7 @@ public class FieldInfo {
     public boolean fieldClassMixIn;
     public boolean isTransient;
     public String defaultValue;
+    public Locale locale;
 
     public void init() {
         fieldName = null;
@@ -23,6 +26,7 @@ public class FieldInfo {
         fieldClassMixIn = false;
         isTransient = false;
         defaultValue = null;
+        Locale locale;
     }
 
    public static final long VALUE_MASK = 1L << 48;

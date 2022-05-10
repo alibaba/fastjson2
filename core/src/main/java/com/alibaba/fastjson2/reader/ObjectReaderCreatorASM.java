@@ -142,12 +142,13 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
             , int ordinal
             , long features
             , String format
+            , Locale locale
             , Object defaultValue
             , Type fieldType
             , Class fieldClass
             , Field field
     ) {
-        return super.createFieldReader(objectClass, objectType, fieldName, ordinal, features, format, defaultValue, fieldType, fieldClass, field);
+        return super.createFieldReader(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, fieldType, fieldClass, field);
     }
 
     private static class FieldReaderInfo {

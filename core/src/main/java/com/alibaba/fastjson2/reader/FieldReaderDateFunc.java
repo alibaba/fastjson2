@@ -4,19 +4,16 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Method;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.BiConsumer;
 
 final class FieldReaderDateFunc<T> extends FieldReaderImpl<T> {
     final Method method;
     final BiConsumer<T, Date> function;
-    final String format;
-    volatile SimpleDateFormat formatter;
-    static final AtomicReferenceFieldUpdater<FieldReaderDateFunc, SimpleDateFormat> FORMATTER_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(FieldReaderDateFunc.class, SimpleDateFormat.class, "formatter");
+    DateTimeFormatter formatter;
 
     ObjectReader dateReader;
 
@@ -28,10 +25,9 @@ final class FieldReaderDateFunc<T> extends FieldReaderImpl<T> {
             , String format
             , Method method
             , BiConsumer<T, Date> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, null);
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format);
         this.method = method;
         this.function = function;
-        this.format = format;
     }
 
     @Override
@@ -71,20 +67,16 @@ final class FieldReaderDateFunc<T> extends FieldReaderImpl<T> {
             fieldValue = null;
         } else {
             if (format != null) {
-                SimpleDateFormat formatter = FORMATTER_UPDATER.getAndSet(this, null);
                 if (formatter == null) {
-                    formatter = new SimpleDateFormat(format);
+                    String format = this.format.replaceAll("aa", "a");
+                    formatter = DateTimeFormatter.ofPattern(format);
                 }
+                String str = jsonReader.readString();
 
-                String str = null;
-                try {
-                    str = jsonReader.readString();
-                    fieldValue = formatter.parse(str);
-                } catch (ParseException e) {
-                    throw new JSONException("parse date error, fieldName : " + fieldName, e);
-                } finally {
-                    FORMATTER_UPDATER.set(this, formatter);
-                }
+                LocalDateTime ldt = LocalDateTime.parse(str, formatter);
+                ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
+                long millis = zdt.toInstant().toEpochMilli();
+                fieldValue = new java.util.Date(millis);
             } else {
                 long millis = jsonReader.readMillisFromString();
                 fieldValue = new Date(millis);

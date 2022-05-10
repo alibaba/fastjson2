@@ -757,6 +757,14 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 fieldInfo.defaultValue = defaultValue;
             }
 
+            String locale = jsonField.locale();
+            if (!locale.isEmpty()) {
+                String[] parts = locale.split("_");
+                if (parts.length == 2) {
+                    fieldInfo.locale = new Locale(parts[0], parts[1]);
+                }
+            }
+
             String[] alternateNames = jsonField.alternateNames();
             if (alternateNames.length != 0) {
                 if (fieldInfo.alternateNames == null) {

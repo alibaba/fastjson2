@@ -190,6 +190,12 @@ final class JSONReaderJSONB extends JSONReader {
         return (T) objectReader.readJSONBObject(this, 0);
     }
 
+    public <T> T read(Class<T> type) {
+        boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
+        return (T) objectReader.readJSONBObject(this, 0);
+    }
+
     @Override
     public Map<String, Object> readObject() {
         type = bytes[offset++];
