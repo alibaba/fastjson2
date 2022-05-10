@@ -533,6 +533,10 @@ final class JSONReaderStr extends JSONReader {
             offset++;
         }
 
+        if (!nameEscape) {
+            return this.str.substring(nameBegin, nameEnd);
+        }
+
         return getFieldName();
     }
 
