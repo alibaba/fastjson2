@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson_perf.Int2Test;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +16,7 @@ public class PathTest {
     private JSONObject rootObject;
 
     public PathTest() throws Exception {
-        InputStream is = Int2Test.class.getClassLoader().getResourceAsStream("data/path_01.json");
+        InputStream is = PathTest.class.getClassLoader().getResourceAsStream("data/path_01.json");
         str = IOUtils.toString(is, "UTF-8");
         utf8Bytes = str.getBytes(StandardCharsets.UTF_8);
         rootObject = JSON.parseObject(str);

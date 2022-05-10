@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson_perf.Int2Test;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
@@ -16,17 +15,17 @@ public class JSONBTest4 {
 
     public JSONBTest4() throws Exception {
         {
-            InputStream is = Int2Test.class.getClassLoader().getResourceAsStream("data/path_01.json");
+            InputStream is = JSONBTest4.class.getClassLoader().getResourceAsStream("data/path_01.json");
             str1 = IOUtils.toString(is, "UTF-8");
             is.close();
         }
         {
-            InputStream is = Int2Test.class.getClassLoader().getResourceAsStream("data/path_02.json");
+            InputStream is = JSONBTest4.class.getClassLoader().getResourceAsStream("data/path_02.json");
             str2 = IOUtils.toString(is, "UTF-8");
             is.close();
         }
         {
-            InputStream is = Int2Test.class.getClassLoader().getResourceAsStream("data/path_03.json");
+            InputStream is = JSONBTest4.class.getClassLoader().getResourceAsStream("data/path_03.json");
             str3 = IOUtils.toString(is, "UTF-8");
             is.close();
         }
