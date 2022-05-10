@@ -1,0 +1,63 @@
+{
+  "@timestamp": "timestamptimestamptimestamptimestamp",
+  "@metadata": {
+    "beat": "beat",
+    "type": "type",
+    "version": "version"
+  },
+  "agent": {
+    "hostname": "hostnamehostname",
+    "ephemeral_id": "ephemeral_idephemeral_idephemeral_idephemeral_id",
+    "id": "ididididididididididididididididid",
+    "name": "namenamenamenamenamenamenamenamename",
+    "type": "filebeat",
+    "version": "versionversionversionversion"
+  },
+  "source": "sourcesourcesourcesourcesourcesourcesourcesourcesourcesourcesourcesourcesourcesource",
+  "message": "{\"log\":\"2022-03-01 09:34:01.374 INFO [andler Thread-2] EsSenderRunnable [run ]:66 - addRequestToBulkProcessor -- index-\\u003e prm_t_login_f_cc | type-\\u003e t_login_f_cc | keys-\\u003e [seqNo] | doc-\\u003e {\\\"serviceType\\\":\\\"\\\",\\\"imsi2\\\":\\\"###\\\",\\\"ipnAdr\\\":\\\"ipnAdripnAdripnAdr\\\",\\\"loginId\\\":\\\"020005330206\\\",\\\"availableHeight\\\":\\\"-9999\\\",\\\"seqNo\\\":\\\"990cde693b7e45399be1f288d3c3b427\\\",\\\"isRoot\\\":\\\"N\\\",\\\"cpuModel\\\":\\\"ARM64E\\\",\\\"ipCountry\\\":\\\"CN\\\",\\\"phoneNum\\\":\\\"###\\\",\\\"pid\\\":\\\"10000000000041088109\\\",\\\"imei2\\\":\\\"###\\\",\\\"rand\\\":\\\"255482\\\",\\\"wirelessMac\\\":\\\"###\\\",\\\"acctNo\\\":\\\"020005330206\\\",\\\"mobileModel\\\":\\\"mobileModelmobileModel\\\",\\\"isCusIce\\\":\\\"0\\\",\\\"lbsCity\\\":\\\"lbsCitylbsCity\\\",\\\"userIP\\\":\\\"userIPuserIPuserIP\\\",\\\"idfv\\\":\\\"F419FB82-88E9-4581-A99B-C1FC68F27EDF\\\",\\\"transCode\\\":\\\"3003032\\\",\\\"deviceType\\\":\\\"D\\\",\\\"branchId\\\":\\\"\\\",\\\"cpuSerial\\\":\\\"###\\\",\\\"accountType\\\":\\\"\\\",\\\"bluetoothMac\\\":\\\"###\\\",\\\"deviceData\\\":\\\"\\\",\\\"screenScaledDensity\\\":\\\"-9999.0\\\",\\\"version\\\":\\\"10.1.3\\\",\\\"ssId\\\":\\\"424\\\",\\\"lbsDistance\\\":\\\"\\\",\\\"appIdn\\\":\\\"1D141000202011171840325351ed81-A99B-C1FC68F27EDFmLkHdf8\u003ddFfmgJg\u003d\\\",\\\"romVolume\\\":\\\"119.09\\\",\\\"safeDistanceFlag\\\":\\\"\\\",\\\"phoneNickname\\\":\\\"iPhone\\\",\\\"ramVolume\\\":\\\"3.62\\\",\\\"screenDensity\\\":\\\"-9999.0\\\",\\\"bluetoothName\\\":\\\"###\\\",\\\"lbs\\\":\\\"116.253308|40.011070\\\",\\\"lbsCountry\\\":\\\"CHN\\\",\\\"userMAC\\\":\\\"1D141000202011171840325351ed81-A99B-C1FC68F27EDFmLkHdf8\u003ddFfmgJg\u003d\\\",\\\"bluetoothRssi\\\":\\\"-9999\\\",\\\"screenWidth\\\":\\\"screenWidthscreenWidth\\\",\\\"custAlertedDate\\\":\\\"\\\",\\\"ipCity\\\":\\\"ipCityipCity\\\",\\\"loginType\\\":\\\"D\\\",\\\"dsType\\\":\\\"48\\\",\\\"remark\\\":\\\"\\\",\\\"imsi\\\":\\\"###8086\\\",\\\"screenXdpi\\\":\\\"screenXdpi\\\",\\\"uid\\\":\\\"uiduiduiduid\\\",\\\"osVersion\\\":\\\"osVersionosVersion\\\",\\\"ddApdate\\\":\\\"ddApdateddApdate\\\",\\\"imeiIdfa\\\":\\\"###\\\",\\\"currency\\\":\\\"\\\",\\\"highestRuleNo\\\":\\\"\\\",\\\"mobileProducer\\\":\\\"mobileProducermobileProducer\\\",\\\"authType\\\":\\\"authType\\\",\\\"seq\\\":\\\"\\\",\\\"phoneNumR11\\\":\\\"phoneNumR11phoneNumR11###\\\",\\\"amount\\\":\\\"\\\",\\\"isCusWatch\\\":\\\"0\\\",\\\"ddApdatestr\\\":\\\"ddApdatestrddApdatestrddApdatestr\\\",\\\"lbsCityNew\\\":\\\"lbsCityNew\\\",\\\"bssId\\\":\\\"bssIdbssIdbssIdbssId\\\",\\\"screenHeight\\\":\\\"screenHeight\\\",\\\"userAgent\\\":\\\"\\\",\\\"pidType\\\":\\\"4\\\",\\\"TraceInfo\\\":{\\\"traceId\\\":\\\"traceIdtraceIdtraceId\\\",\\\"spanId\\\":\\\"spanIdspanIdspanId\\\",\\\"count\\\":\\\"1\\\",\\\"parentSpanId\\\":\\\"0\\\",\\\"sampled\\\":\\\"1\\\"},\\\"logTime\\\":\\\"logTimelogTimelogTime\\\",\\\"bluetoothUuid\\\":\\\"bluetoothUuidbluetoothUuidbluetoothUuidbluetoothUuid\\\",\\\"cpuAbi\\\":\\\"###\\\",\\\"feeAmount\\\":\\\"\\\",\\\"screenYdpi\\\":\\\"-9999.0\\\",\\\"screenColorDepth\\\":\\\"-9999\\\",\\\"lbsCountryNew\\\":\\\"CN\\\",\\\"custAlertedRule\\\":\\\"\\\",\\\"smUserId\\\":\\\"smUserIdsmUserId\\\"}\\n\",\"stream\":\"stdout\",\"time\":\"timetimetimetimetimetimetime\"}",
+  "logtype": "logtypelogtypelogtypelogtype",
+  "kubernetes": {
+    "pod": {
+      "uid": "uiduiduiduiduiduiduiduiduiduiduiduid",
+      "labels": {
+        "test": "testtesttesttesttesttest",
+        "testtest": "testtesttesttesttesttesttesttesttest",
+        "pod-template-hash": "pod-template-hashpod-template-hashpod-template-hash",
+        "app": "appappappappappappapp",
+        "app_alauda_io/name": "appappappappappappappappappappappappappapp"
+      },
+      "ip": "ipipipipipipipipip",
+      "name": "namenamenamenamenamenamenamenamename"
+    },
+    "node": {
+      "hostname": "hostnamehostnamehostnamehostnamehostnamehostname",
+      "name": "namenamenamenamenamenamenamenamename",
+      "uid": "uiduiduiduiduiduiduiduiduiduiduiduiduid"
+    },
+    "namespace": "namespacenamespacenamespacenamespacenamespace",
+    "labels": {
+      "testtest": "testtesttesttesttesttesttesttesttesttesttest",
+      "test": "testtesttesttesttest"
+    },
+    "container": {
+      "name": "namenamenamenamenamename",
+      "image": "imageimageimageimageimageimageimageimageimageimageimageimageimage",
+      "runtime": "runtimeruntimeruntimeruntimeruntime"
+    }
+  },
+  "offset": "offsetoffsetoffset",
+  "meta_paas": {
+    "cluster": "clusterclustercluster",
+    "podName": "podNamepodNamepodNamepodNamepodName",
+    "guid": "guidguidguidguidguid",
+    "namespace": "namespacenamespacenamespacenamespace"
+  },
+  "host": {
+    "name": "namenamename"
+  },
+  "clusterName": "clusterNameclusterName",
+  "nodename": "nodenamenodenamenodenamenodenamenodenamenodename",
+  "ecs": {
+    "version": "versionversion"
+  }
+}
