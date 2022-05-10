@@ -3,6 +3,36 @@ package com.alibaba.fastjson2
 import com.alibaba.fastjson2.filter.Filter
 
 /**
+ * Parse JSON {@link String} into Object
+ *
+ * <pre>{@code
+ *    val text = "..."
+ *    val data = text.to<User>()
+ * }</pre>
+ *
+ * @return T?
+ * @since 2.0.3
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T> String.to() =
+    JSON.parseObject(this, T::class.java)
+
+/**
+ * Parse JSON {@link ByteArray} into Object
+ *
+ * <pre>{@code
+ *    val text = "..."
+ *    val data = text.to<User>()
+ * }</pre>
+ *
+ * @return T?
+ * @since 2.0.3
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T> ByteArray.to() =
+    JSON.parseObject(this, T::class.java)
+
+/**
  * Verify the {@link String} is JSON Object
  *
  * <pre>{@code
@@ -11,6 +41,7 @@ import com.alibaba.fastjson2.filter.Filter
  * }</pre>
  *
  * @receiver Any?
+ * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
@@ -27,6 +58,7 @@ inline fun String?.isJSONObject() = JSON.isValidObject(this)
  * }</pre>
  *
  * @receiver Any?
+ * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
@@ -43,6 +75,7 @@ inline fun ByteArray?.isJSONObject() = JSON.isValidObject(this)
  * }</pre>
  *
  * @receiver Any?
+ * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
@@ -59,6 +92,7 @@ inline fun String?.isJSONArray() = JSON.isValidArray(this)
  * }</pre>
  *
  * @receiver Any?
+ * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
@@ -76,6 +110,7 @@ inline fun ByteArray?.isJSONArray() = JSON.isValidArray(this)
  *
  * @param text the JSON {@link String} to be parsed
  * @return T?
+ * @since 2.0.3
  */
 @Suppress("HasPlatformType")
 inline fun <reified T> parseObject(
@@ -90,6 +125,7 @@ inline fun <reified T> parseObject(
  * @param text the JSON {@link String} to be parsed
  * @param features features to be enabled in parsing
  * @return T?
+ * @since 2.0.3
  */
 @Suppress("HasPlatformType")
 inline fun <reified T> parseObject(
@@ -105,6 +141,7 @@ inline fun <reified T> parseObject(
  * @param text the JSON {@link String} to be parsed
  * @param features features to be enabled in parsing
  * @return T?
+ * @since 2.0.3
  */
 @Suppress("HasPlatformType")
 inline fun <reified T> parseObject(
@@ -124,6 +161,7 @@ inline fun <reified T> parseObject(
  * }</pre>
  *
  * @receiver Any?
+ * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
@@ -135,6 +173,7 @@ inline fun Any?.toJSONString() = JSON.toJSONString(this)
  * Serialize Any to JSON {@link String}
  *
  * @receiver Any?
+ * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
@@ -151,6 +190,7 @@ inline fun Any?.toJSONString(
  * Serialize Any to JSON {@link String}
  *
  * @receiver Any?
+ * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
@@ -166,6 +206,7 @@ inline fun Any?.toJSONString(
  * Serialize Any to JSON {@link String}
  *
  * @receiver Any?
+ * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
@@ -182,6 +223,7 @@ inline fun Any?.toJSONString(
  * Serialize Any to JSON {@link String}
  *
  * @receiver Any?
+ * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
@@ -202,6 +244,7 @@ inline fun Any?.toJSONString(
  * }</pre>
  *
  * @receiver Any?
+ * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
@@ -213,6 +256,7 @@ inline fun Any?.toJSONByteArray() = JSON.toJSONBytes(this)
  * Serialize Any to JSON {@link ByteArray}
  *
  * @receiver Any?
+ * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
@@ -228,6 +272,7 @@ inline fun Any?.toJSONByteArray(
  * Serialize Any to JSON {@link ByteArray}
  *
  * @receiver Any?
+ * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
