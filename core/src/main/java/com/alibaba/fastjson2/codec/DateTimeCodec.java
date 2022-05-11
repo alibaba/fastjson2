@@ -1,7 +1,18 @@
 package com.alibaba.fastjson2.codec;
 
 
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.JdbcSupport;
+import com.alibaba.fastjson2.util.JodaSupport;
+import com.alibaba.fastjson2.writer.*;
+
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
 public abstract class DateTimeCodec {
     public final String format;
@@ -9,12 +20,27 @@ public abstract class DateTimeCodec {
     public final boolean formatMillis;
     public final boolean formatISO8601;
 
+    protected final boolean formatHasDay;
+    protected final boolean formatHasHour;
+    protected final boolean useSimpleFormatter;
+
+    public final Locale locale;
+
     DateTimeFormatter dateFormatter;
 
     public DateTimeCodec(String format) {
-        this.format = format;
+        this(format, null);
+    }
 
-        boolean formatUnixTime = false, formatISO8601 = false, formatMillis = false;
+    public DateTimeCodec(String format, Locale locale) {
+        if (format != null) {
+            format = format.replaceAll("aa", "a");
+        }
+
+        this.format = format;
+        this.locale = locale;
+
+        boolean formatUnixTime = false, formatISO8601 = false, formatMillis = false, hasDay = false, hasHour = false;
         if (format != null) {
             switch (format) {
                 case "unixtime":
@@ -27,18 +53,52 @@ public abstract class DateTimeCodec {
                     formatMillis = true;
                     break;
                 default:
+                    hasDay = format.indexOf("d") != -1;
+                    hasHour = format.indexOf("H") != -1;
                     break;
             }
         }
         this.formatUnixTime = formatUnixTime;
         this.formatMillis = formatMillis;
         this.formatISO8601 = formatISO8601;
+
+        this.formatHasDay = hasDay;
+        this.formatHasHour = hasHour;
+        this.useSimpleFormatter = "yyyyMMddHHmmssSSSZ".equals(format);
     }
 
     public DateTimeFormatter getDateFormatter() {
         if (dateFormatter == null && format != null && !formatMillis && !formatISO8601 && !formatUnixTime) {
-            dateFormatter = DateTimeFormatter.ofPattern(format);
+            if (locale == null) {
+                dateFormatter = DateTimeFormatter.ofPattern(format);
+            } else {
+                dateFormatter = DateTimeFormatter.ofPattern(format, locale);
+            }
         }
         return dateFormatter;
+    }
+
+    public DateTimeFormatter getDateFormatter(Locale locale) {
+        if (format == null || formatMillis || formatISO8601 || formatUnixTime) {
+            return null;
+        }
+
+        if (dateFormatter != null) {
+            if ((this.locale == null && (locale == null || locale == Locale.getDefault()))
+                    || this.locale != null && this.locale.equals(locale)
+            ) {
+                return dateFormatter;
+            }
+        }
+
+        if (locale == null) {
+            if (this.locale == null) {
+                return dateFormatter = DateTimeFormatter.ofPattern(format);
+            } else {
+                return dateFormatter = DateTimeFormatter.ofPattern(format, this.locale);
+            }
+        }
+
+        return dateFormatter = DateTimeFormatter.ofPattern(format, locale);
     }
 }

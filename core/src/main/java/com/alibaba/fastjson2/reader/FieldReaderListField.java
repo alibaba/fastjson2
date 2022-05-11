@@ -27,6 +27,7 @@ class FieldReaderListField<T>
             int ordinal,
             long features,
             String format,
+            Locale locale,
             Collection defaultValue,
             Field field) {
 
@@ -37,7 +38,7 @@ class FieldReaderListField<T>
 
         if (format != null) {
             if (itemType == Date.class) {
-                itemReader = new ObjectReaderBaseModule.UtilDateImpl(format);
+                itemReader = new ObjectReaderImplDate(format, locale);
             }
         }
     }

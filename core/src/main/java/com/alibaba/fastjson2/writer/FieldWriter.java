@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.JdbcSupport;
+import com.alibaba.fastjson2.util.JodaSupport;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -11,12 +13,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.List;
+import java.time.*;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -413,5 +411,75 @@ public interface FieldWriter<T> extends Comparable {
 
     default void writeListStr(JSONWriter jsonWriter, boolean writeFieldName, List<String> list) {
         throw new UnsupportedOperationException();
+    }
+
+    static ObjectWriter getObjectWriter(Type fieldType, Class fieldClass, String format, Locale locale, Class valueClass) {
+        if (Map.class.isAssignableFrom(valueClass)) {
+            if (fieldClass.isAssignableFrom(valueClass)) {
+                return ObjectWriterImplMap.of(fieldType, valueClass);
+            } else {
+                return ObjectWriterImplMap.of(valueClass);
+            }
+        } else {
+            if (Calendar.class.isAssignableFrom(valueClass)) {
+                if (format == null || format.isEmpty()) {
+                    return ObjectWriterImplCalendar.INSTANCE;
+                }
+                switch (format) {
+                    case "unixtime":
+                        return ObjectWriterImplCalendar.INSTANCE_UNIXTIME;
+                    default:
+                        return new ObjectWriterImplCalendar(format);
+                }
+            }
+
+            if (ZonedDateTime.class.isAssignableFrom(valueClass)) {
+                if (format == null || format.isEmpty()) {
+                    return ObjectWriterImplZonedDateTime.INSTANCE;
+                } else {
+                    switch (format) {
+                        case "unixtime":
+                            return ObjectWriterImplZonedDateTime.INSTANCE_UNIXTIME;
+                        default:
+                            return new ObjectWriterImplZonedDateTime(format);
+                    }
+                }
+            }
+
+            if (LocalDateTime.class.isAssignableFrom(valueClass)) {
+                if (format == null || format.isEmpty()) {
+                    return ObjectWriterImplLocalDateTime.INSTANCE;
+                } else {
+                    switch (format) {
+                        case "unixtime":
+                            return ObjectWriterImplLocalDateTime.INSTANCE_UNIXTIME;
+                        default:
+                            return new ObjectWriterImplLocalDateTime(format);
+                    }
+                }
+            }
+
+            if (Optional.class == valueClass) {
+                return ObjectWriterImplOptional.of(format, locale);
+            }
+
+            String className = valueClass.getName();
+            switch (className) {
+                case "java.sql.Time":
+                    return JdbcSupport.createTimeWriter(format);
+                case "java.sql.Date":
+                    return new ObjectWriterImplDate(format);
+                case "java.sql.Timestamp":
+                    return JdbcSupport.createTimestampWriter(format);
+                case "org.joda.time.LocalDate":
+                    return JodaSupport.createLocalDateWriter(valueClass, format);
+                case "org.joda.time.LocalDateTime":
+                    return JodaSupport.createLocalDateTimeWriter(valueClass, format);
+                default:
+                    break;
+            }
+        }
+
+        return null;
     }
 }
