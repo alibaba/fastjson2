@@ -35,17 +35,17 @@ public class DecodeASCIIBenchmarkJDK8 {
     }
 
     @Benchmark
-    public void unsafeEncodeUTF8() throws Exception {
+    public String unsafeEncodeUTF8() throws Exception {
         char[] chars = new char[utf8BytesLength];
         for (int i = 0; i < utf8BytesLength; i++) {
             chars[i] = (char) utf8Bytes[i];
         }
-        stringCreator.apply(chars, Boolean.TRUE);
+        return stringCreator.apply(chars, Boolean.TRUE);
     }
 
     @Benchmark
-    public void newStringUTF8() throws Exception {
-        new String(utf8Bytes, 0, utf8BytesLength, StandardCharsets.UTF_8);
+    public String newStringUTF8() throws Exception {
+        return new String(utf8Bytes, 0, utf8BytesLength, StandardCharsets.UTF_8);
     }
 
     public static void main(String[] args) throws RunnerException {

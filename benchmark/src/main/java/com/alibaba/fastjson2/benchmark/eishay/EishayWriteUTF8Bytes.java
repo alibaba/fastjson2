@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -32,13 +33,18 @@ public class EishayWriteUTF8Bytes {
     }
 
     @Benchmark
-    public void fastjson1() {
-        com.alibaba.fastjson.JSON.toJSONBytes(mc);
+    public void fastjson1(Blackhole bh) {
+        bh.consume(com.alibaba.fastjson.JSON.toJSONBytes(mc));
     }
 
     @Benchmark
-    public void fastjson2() {
-        JSON.toJSONBytes(mc);
+    public void fastjson2(Blackhole bh) {
+        bh.consume(JSON.toJSONBytes(mc));
+    }
+
+    @Benchmark
+    public void jackson(Blackhole bh) throws Exception {
+        bh.consume(mapper.writeValueAsBytes(mc));
     }
 
     //    @Test
@@ -57,11 +63,6 @@ public class EishayWriteUTF8Bytes {
         System.out.println("millis : " + millis);
         // zulu17.32.13 : 330
         // zulu8.58.0.13 : 379 332
-    }
-
-    @Benchmark
-    public void jackson() throws Exception {
-        mapper.writeValueAsBytes(mc);
     }
 
     public static void main(String[] args) throws RunnerException {
