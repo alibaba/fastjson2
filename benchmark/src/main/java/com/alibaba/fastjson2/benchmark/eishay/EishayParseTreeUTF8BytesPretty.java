@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -30,18 +31,18 @@ public class EishayParseTreeUTF8BytesPretty {
     }
 
     @Benchmark
-    public void fastjson1() {
-        com.alibaba.fastjson.JSON.parse(utf8Bytes);
+    public void fastjson1(Blackhole bh) {
+        bh.consume(com.alibaba.fastjson.JSON.parse(utf8Bytes));
     }
 
     @Benchmark
-    public void fastjson2() {
-        JSON.parseObject(utf8Bytes);
+    public void fastjson2(Blackhole bh) {
+        bh.consume(JSON.parseObject(utf8Bytes));
     }
 
     @Benchmark
-    public void jackson() throws Exception {
-        mapper.readValue(utf8Bytes, HashMap.class);
+    public void jackson(Blackhole bh) throws Exception {
+        bh.consume(mapper.readValue(utf8Bytes, HashMap.class));
     }
 
     //    @Test
