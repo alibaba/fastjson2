@@ -14,11 +14,9 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
     DateTimeFormatter formatter;
     ObjectReaderBaseModule.UtilDateImpl dateReader;
-    final Locale locale;
 
     FieldReaderDateMethod(String fieldName, Class fieldClass, int ordinal, long features, String format, Locale locale, Method method) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, method);
-        this.locale = locale;
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, null, method);
     }
 
     @Override

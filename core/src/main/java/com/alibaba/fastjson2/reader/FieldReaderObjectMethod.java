@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Locale;
 
 class FieldReaderObjectMethod<T>
         extends FieldReaderImpl<T>
@@ -20,6 +21,11 @@ class FieldReaderObjectMethod<T>
 
     FieldReaderObjectMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue, Method method) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue);
+        this.method = method;
+    }
+
+    FieldReaderObjectMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Object defaultValue, Method method) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue);
         this.method = method;
     }
 
@@ -64,8 +70,7 @@ class FieldReaderObjectMethod<T>
         if (this.fieldObjectReader != null) {
             objectReader = this.fieldObjectReader;
         } else {
-            objectReader = this.fieldObjectReader = jsonReader.getContext()
-                    .getObjectReader(fieldType);
+            objectReader = this.fieldObjectReader = FieldReaderObject.createFormattedObjectReader(fieldType, fieldClass, format, locale);
         }
 
         if (jsonReader.isReference()) {

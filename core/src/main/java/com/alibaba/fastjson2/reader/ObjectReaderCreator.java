@@ -1207,14 +1207,15 @@ public class ObjectReaderCreator {
         }
 
         return new FieldReaderObjectMethod(
-                fieldName
-                , fieldTypeResolved != null ? fieldTypeResolved : fieldType
-                , fieldClass
-                , ordinal
-                , features
-                , format
-                , defaultValue
-                , method
+                fieldName,
+                fieldTypeResolved != null ? fieldTypeResolved : fieldType,
+                fieldClass,
+                ordinal,
+                features,
+                format,
+                locale,
+                defaultValue,
+                method
         );
     }
 
