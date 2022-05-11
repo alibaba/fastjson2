@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -28,21 +29,21 @@ public class String20Test {
     }
 
     @Benchmark
-    public void fastjson1() {
-        com.alibaba.fastjson.JSON.parseObject(str, String20.class);
+    public String20 fastjson1(Blackhole bh) {
+        return com.alibaba.fastjson.JSON.parseObject(str, String20.class);
     }
 
     @Benchmark
-    public void fastjson2() {
-        com.alibaba.fastjson2.JSON.parseObject(str, String20.class);
+    public String20 fastjson2() {
+        return com.alibaba.fastjson2.JSON.parseObject(str, String20.class);
     }
 
     @Benchmark
-    public void jackson() throws Exception {
-        mapper.readValue(str, String20.class);
+    public String20 jackson() throws Exception {
+        return mapper.readValue(str, String20.class);
     }
 
-//    @Test
+    //    @Test
     public void fastjson2_perf_test() {
         for (int i = 0; i < 10; i++) {
             fastjson2_perf();
