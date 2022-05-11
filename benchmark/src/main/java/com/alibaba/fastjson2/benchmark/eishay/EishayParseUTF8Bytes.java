@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -30,18 +31,18 @@ public class EishayParseUTF8Bytes {
     }
 
     @Benchmark
-    public void fastjson1() {
-        com.alibaba.fastjson.JSON.parseObject(utf8Bytes, MediaContent.class);
+    public void fastjson1(Blackhole bh) {
+        bh.consume(com.alibaba.fastjson.JSON.parseObject(utf8Bytes, MediaContent.class));
     }
 
     @Benchmark
-    public void fastjson2() {
-        JSON.parseObject(utf8Bytes, MediaContent.class);
+    public void fastjson2(Blackhole bh) {
+        bh.consume(JSON.parseObject(utf8Bytes, MediaContent.class));
     }
 
     @Benchmark
-    public void jackson() throws Exception {
-        mapper.readValue(utf8Bytes, MediaContent.class);
+    public void jackson(Blackhole bh) throws Exception {
+        bh.consume(mapper.readValue(utf8Bytes, MediaContent.class));
     }
 
     //    @Test

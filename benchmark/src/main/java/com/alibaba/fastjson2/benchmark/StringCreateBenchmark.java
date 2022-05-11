@@ -56,8 +56,20 @@ public class StringCreateBenchmark {
     }
 
     @Benchmark
-    public void creator() {
-        String string = STRING_CREATOR.apply(chars, Boolean.TRUE);
+    public String creator() {
+        return STRING_CREATOR.apply(chars, Boolean.TRUE);
+    }
+
+    @Benchmark
+    public String newString() {
+        return new String(chars);
+    }
+
+    @Benchmark
+    public String unsafe() throws Exception {
+        String str = (String) UnsafeUtils.UNSAFE.allocateInstance(String.class);
+        UnsafeUtils.UNSAFE.putObject(str, valueOffset, chars);
+        return str;
     }
 
     public void creator_benchmark() {
@@ -67,17 +79,6 @@ public class StringCreateBenchmark {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("creator : " + millis);
-    }
-
-    @Benchmark
-    public void newString() {
-        String string = new String(chars);
-    }
-
-    @Benchmark
-    public void unsafe() throws Exception {
-        String str = (String) UnsafeUtils.UNSAFE.allocateInstance(String.class);
-        UnsafeUtils.UNSAFE.putObject(str, valueOffset, chars);
     }
 
     public void new_benchmark() throws Exception {

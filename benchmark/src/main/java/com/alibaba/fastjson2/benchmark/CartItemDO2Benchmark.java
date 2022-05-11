@@ -42,8 +42,8 @@ public class CartItemDO2Benchmark {
     }
 
     @Benchmark
-    public void testCartItem() throws Exception {
-        byte[] bytes3 = JSONB.toBytes(
+    public byte[] testCartItem() throws Exception {
+        return JSONB.toBytes(
                 newCartsItem()
                 , JSONB.symbolTable("myId")
                 , JSONWriter.Feature.BeanToArray
