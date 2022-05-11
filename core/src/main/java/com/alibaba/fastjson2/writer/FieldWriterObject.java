@@ -42,67 +42,11 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
-            initValueClass = valueClass;
-            if (Map.class.isAssignableFrom(valueClass)) {
-                if (fieldClass.isAssignableFrom(valueClass)) {
-                    return initObjectWriter = ObjectWriterImplMap.of(fieldType, valueClass);
-                } else {
-                    return initObjectWriter = ObjectWriterImplMap.of(valueClass);
-                }
+            ObjectWriter formattedWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
+            if (formattedWriter == null) {
+                return initObjectWriter = jsonWriter.getObjectWriter(valueClass);
             } else {
-                if (Calendar.class.isAssignableFrom(valueClass)) {
-                    if (format == null || format.isEmpty()) {
-                        return initObjectWriter = ObjectWriterImplCalendar.INSTANCE;
-                    }
-                    switch (format) {
-                        case "unixtime":
-                            return initObjectWriter = ObjectWriterImplCalendar.INSTANCE_UNIXTIME;
-                        default:
-                            return initObjectWriter = new ObjectWriterImplCalendar(format);
-                    }
-                }
-
-                if (ZonedDateTime.class.isAssignableFrom(valueClass)) {
-                    if (format == null || format.isEmpty()) {
-                        return initObjectWriter = ObjectWriterImplZonedDateTime.INSTANCE;
-                    } else {
-                        switch (format) {
-                            case "unixtime":
-                                return initObjectWriter = ObjectWriterImplZonedDateTime.INSTANCE_UNIXTIME;
-                            default:
-                                return initObjectWriter = new ObjectWriterImplZonedDateTime(format);
-                        }
-                    }
-                }
-
-                if (LocalDateTime.class.isAssignableFrom(valueClass)) {
-                    if (format == null || format.isEmpty()) {
-                        return initObjectWriter = ObjectWriterImplLocalDateTime.INSTANCE;
-                    } else {
-                        switch (format) {
-                            case "unixtime":
-                                return initObjectWriter = ObjectWriterImplLocalDateTime.INSTANCE_UNIXTIME;
-                            default:
-                                return initObjectWriter = new ObjectWriterImplLocalDateTime(format);
-                        }
-                    }
-                }
-
-                String className = valueClass.getName();
-                switch (className) {
-                    case "java.sql.Time":
-                        return initObjectWriter = JdbcSupport.createTimeWriter(format);
-                    case "java.sql.Date":
-                        return initObjectWriter = new ObjectWriterImplDate(format);
-                    case "java.sql.Timestamp":
-                        return initObjectWriter = JdbcSupport.createTimestampWriter(format);
-                    case "org.joda.time.LocalDate":
-                        return initObjectWriter = JodaSupport.createLocalDateWriter(valueClass, format);
-                    case "org.joda.time.LocalDateTime":
-                        return JodaSupport.createLocalDateTimeWriter(valueClass, format);
-                    default:
-                        return initObjectWriter = jsonWriter.getObjectWriter(valueClass);
-                }
+                return initObjectWriter = formattedWriter;
             }
         } else {
             if (initValueClass == valueClass) {

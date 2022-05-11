@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.date;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
@@ -9,13 +8,14 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import org.junit.jupiter.api.Test;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class DateFormatTest_Local {
+public class DateFormatTest_zdt_Instant {
     @Test
     void localeDateTest() {
         final String date = "{\"today\": \"2022 March 10\"}";
@@ -46,13 +46,13 @@ public class DateFormatTest_Local {
 
     private static class Today {
         @JSONField(format = "yyyy MMMM dd")
-        private Date today;
+        private ZonedDateTime today;
 
-        public Date getToday() {
+        public ZonedDateTime getToday() {
             return today;
         }
 
-        public void setToday(Date today) {
+        public void setToday(ZonedDateTime today) {
             this.today = today;
         }
 
@@ -72,13 +72,13 @@ public class DateFormatTest_Local {
 
     private static class TodayCN {
         @JSONField(format = "yyyy MMMM dd", locale = "zh_CN")
-        private Date today;
+        private ZonedDateTime today;
 
-        public Date getToday() {
+        public ZonedDateTime getToday() {
             return today;
         }
 
-        public void setToday(Date today) {
+        public void setToday(ZonedDateTime today) {
             this.today = today;
         }
 

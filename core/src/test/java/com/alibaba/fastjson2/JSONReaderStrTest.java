@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2;
 
 
+import com.alibaba.fastjson2.JSONValidator;
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -82,5 +82,12 @@ public class JSONReaderStrTest {
 
         Instant instant = reader.readInstant();
         assertNotNull(instant);
+    }
+
+    @Test
+    public void test2_str() {
+        String str = "{\"type\":\"APP_SYNC\",\"appList\":[{\"appPath\":\"C:\\\\Users\\\\apple\\\\AppData\"}]}";
+        JSONReader reader = new JSONReaderStr(JSONFactory.createReadContext(), str, 0, str.length());
+        assertTrue(JSONValidator.from(reader).validate());
     }
 }

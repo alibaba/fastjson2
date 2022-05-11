@@ -25,7 +25,7 @@ public class JSONPathPerf {
         }
     }
 
-//    @Test
+    //    @Test
     public void perf_extract_id_test() throws Exception {
         for (int i = 0; i < 10; ++i) {
             long start = System.currentTimeMillis();
@@ -38,13 +38,13 @@ public class JSONPathPerf {
     }
 
     @Benchmark
-    public void fastjsonReaderAuthors() {
-        JSONPath.extract(str, "$.store.book[*].author");
+    public Object fastjsonReaderAuthors() {
+        return JSONPath.extract(str, "$.store.book[*].author");
     }
 
     @Benchmark
-    public void jaywayReadAuthors() {
-        List<String> authors = JsonPath.read(str, "$.store.book[*].author");
+    public List<String> jaywayReadAuthors() {
+        return JsonPath.read(str, "$.store.book[*].author");
     }
 
     public static void main(String[] args) throws Exception {

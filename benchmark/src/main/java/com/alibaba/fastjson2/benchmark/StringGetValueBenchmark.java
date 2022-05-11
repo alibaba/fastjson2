@@ -46,16 +46,16 @@ public class StringGetValueBenchmark {
 //    }
 
     @Benchmark
-    public void reflect() throws Exception {
-        char[] chars = (char[]) valueField.get(STR);
+    public char[] reflect() throws Exception {
+        return (char[]) valueField.get(STR);
 //        for (int i = 0; i < chars.length; i++) {
 //            char ch = chars[i];
 //        }
     }
 
     @Benchmark
-    public void unsafe() throws Exception {
-        char[] chars = (char[]) UnsafeUtils.UNSAFE.getObject(STR, valueFieldOffset);
+    public char[] unsafe() throws Exception {
+        return (char[]) UnsafeUtils.UNSAFE.getObject(STR, valueFieldOffset);
 //        for (int i = 0; i < chars.length; i++) {
 //            char ch = chars[i];
 //        }

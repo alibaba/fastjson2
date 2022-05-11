@@ -479,7 +479,7 @@ final class JSONReaderStr extends JSONReader {
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
         for (int i = 0; offset < end ; ++i) {
-            int c = str.charAt(offset);
+            char c = str.charAt(offset);
             if (c == '\\') {
                 nameEscape = true;
                 c = str.charAt(++offset);
@@ -526,7 +526,7 @@ final class JSONReaderStr extends JSONReader {
                 }
 
                 this.offset = offset + 1;
-                this.ch = (char) c;
+                this.ch = c;
                 break;
             }
 
@@ -1018,6 +1018,7 @@ final class JSONReaderStr extends JSONReader {
             if (ch == '\\') {
                 ch = str.charAt(offset++);
                 if (ch == '\\' || ch == '"') {
+                    ch = str.charAt(offset++);
                     continue;
                 }
                 char1(ch);

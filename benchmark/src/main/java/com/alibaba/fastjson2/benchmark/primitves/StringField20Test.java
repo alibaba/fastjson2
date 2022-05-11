@@ -28,18 +28,18 @@ public class StringField20Test {
     }
 
     @Benchmark
-    public void fastjson1() {
-        com.alibaba.fastjson.JSON.parseObject(str, StringField20.class);
+    public StringField20 fastjson1() {
+        return com.alibaba.fastjson.JSON.parseObject(str, StringField20.class);
     }
 
     @Benchmark
-    public void fastjson2() {
-        JSON.parseObject(str, StringField20.class);
+    public StringField20 fastjson2() {
+        return JSON.parseObject(str, StringField20.class);
     }
 
     @Benchmark
-    public void jackson() throws Exception {
-        mapper.readValue(str, StringField20.class);
+    public StringField20 jackson() throws Exception {
+        return mapper.readValue(str, StringField20.class);
     }
 
     //    @Test

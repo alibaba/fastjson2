@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -31,18 +32,18 @@ public class EishayWriteString {
     }
 
     @Benchmark
-    public void fastjson1() {
-        com.alibaba.fastjson.JSON.toJSONString(mc);
+    public void fastjson1(Blackhole bh) {
+        bh.consume(com.alibaba.fastjson.JSON.toJSONString(mc));
     }
 
     @Benchmark
-    public void fastjson2() {
-        JSON.toJSONString(mc);
+    public void fastjson2(Blackhole bh) {
+        bh.consume(JSON.toJSONString(mc));
     }
 
     @Benchmark
-    public void jackson() throws Exception {
-        mapper.writeValueAsString(mc);
+    public void jackson(Blackhole bh) throws Exception {
+        bh.consume(mapper.writeValueAsString(mc));
     }
 
     public static void main(String[] args) throws RunnerException {

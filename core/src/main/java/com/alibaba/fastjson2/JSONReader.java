@@ -105,6 +105,14 @@ public abstract class JSONReader implements Closeable {
         return context;
     }
 
+    public Locale getLocale() {
+        return context.getLocale();
+    }
+
+    public ZoneId getZoneId() {
+        return context.getZoneId();
+    }
+
     public long features(long features) {
         return context.features | features;
     }
