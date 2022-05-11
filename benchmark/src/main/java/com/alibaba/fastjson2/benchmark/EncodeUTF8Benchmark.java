@@ -30,15 +30,16 @@ public class EncodeUTF8Benchmark {
     }
 
     @Benchmark
-    public void unsafeEncodeUTF8() throws Exception {
+    public int unsafeEncodeUTF8() throws Exception {
         char[] chars = (char[]) UnsafeUtils.UNSAFE.getObject(STR, valueFieldOffset);
-        int len = IOUtils.encodeUTF8(chars, 0, chars.length, out, 0);
+        return IOUtils.encodeUTF8(chars, 0, chars.length, out, 0);
     }
 
     @Benchmark
-    public void getBytesUTF8() throws Exception {
+    public byte[] getBytesUTF8() throws Exception {
         byte[] bytes = STR.getBytes(StandardCharsets.UTF_8);
         System.arraycopy(bytes, 0, out, 0, bytes.length);
+        return out;
     }
 
     public static void main(String[] args) throws RunnerException {
