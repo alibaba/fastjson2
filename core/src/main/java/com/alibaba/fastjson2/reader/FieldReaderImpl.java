@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Locale;
 
 abstract class FieldReaderImpl<T>
         implements FieldReader<T> {
@@ -20,6 +21,7 @@ abstract class FieldReaderImpl<T>
     final long fieldNameHash;
     final long features;
     final String format;
+    final Locale locale;
     volatile ObjectReader reader;
 
     volatile JSONPath referenceCache;
@@ -27,7 +29,7 @@ abstract class FieldReaderImpl<T>
     final Object defaultValue;
 
     public FieldReaderImpl(String fieldName, Type fieldType) {
-        this (fieldName, fieldType, TypeUtils.getClass(fieldType), 0, 0L, null, null);
+        this (fieldName, fieldType, TypeUtils.getClass(fieldType), 0, 0L, null, null, null);
     }
 
     public FieldReaderImpl(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format) {
@@ -39,6 +41,7 @@ abstract class FieldReaderImpl<T>
         this.fieldNameHash = Fnv.hashCode64(fieldName);
         this.ordinal = ordinal;
         this.format = format;
+        this.locale = null;
         this.defaultValue = null;
     }
 
@@ -51,6 +54,20 @@ abstract class FieldReaderImpl<T>
         this.fieldNameHash = Fnv.hashCode64(fieldName);
         this.ordinal = ordinal;
         this.format = format;
+        this.locale = null;
+        this.defaultValue = defaultValue;
+    }
+
+    public FieldReaderImpl(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Object defaultValue) {
+        this.fieldName = fieldName;
+        this.fieldType = fieldType;
+        this.fieldClass = fieldClass;
+        this.fieldClassSerializable = fieldClass != null && Serializable.class.isAssignableFrom(fieldClass);
+        this.features = features;
+        this.fieldNameHash = Fnv.hashCode64(fieldName);
+        this.ordinal = ordinal;
+        this.format = format;
+        this.locale = locale;
         this.defaultValue = defaultValue;
     }
 

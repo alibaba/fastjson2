@@ -11,8 +11,14 @@ import java.util.Map;
 class FieldReaderAnySetter<T> extends FieldReaderObjectMethod<T> implements FieldReaderReadOnly<T> {
     volatile ObjectReader itemReader;
 
-    FieldReaderAnySetter(Type fieldType, Class fieldClass, int ordinal, long features, String format, Method method) {
-        super("$$any$$", fieldType, fieldClass, ordinal, features, format, method);
+    FieldReaderAnySetter(
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Method method) {
+        super("$$any$$", fieldType, fieldClass, ordinal, features, format, null, null, method);
     }
 
     @Override
