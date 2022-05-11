@@ -3,18 +3,29 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;
+import java.util.Locale;
 import java.util.Optional;
 
 final class ObjectWriterImplOptional extends ObjectWriterBaseModule.PrimitiveImpl {
-    static final ObjectWriterImplOptional INSTANCE = new ObjectWriterImplOptional(null);
+    static final ObjectWriterImplOptional INSTANCE = new ObjectWriterImplOptional(null, null);
 
     Type valueType;
     long features;
 
-    final ObjectWriter initValueWriter;
+    final String format;
+    final Locale locale;
 
-    public ObjectWriterImplOptional(ObjectWriter initValueWriter) {
-        this.initValueWriter = initValueWriter;
+    public static ObjectWriterImplOptional of(String format, Locale locale) {
+        if (format == null) {
+            return INSTANCE;
+        }
+
+        return new ObjectWriterImplOptional(format, locale);
+    }
+
+    public ObjectWriterImplOptional(String format, Locale locale) {
+        this.format = format;
+        this.locale = locale;
     }
 
     @Override
@@ -49,7 +60,15 @@ final class ObjectWriterImplOptional extends ObjectWriterBaseModule.PrimitiveImp
         }
 
         Object value = optional.get();
-        ObjectWriter objectWriter = jsonWriter.getObjectWriter(value.getClass());
-        objectWriter.write(jsonWriter, value, fieldName, valueType, this.features);
+        Class<?> valueClass = value.getClass();
+        ObjectWriter valueWriter = null;
+        if (format != null) {
+            valueWriter = FieldWriter.getObjectWriter(null, null, format, locale, valueClass);
+        }
+
+        if (valueWriter == null) {
+            valueWriter = jsonWriter.getObjectWriter(valueClass);;
+        }
+        valueWriter.write(jsonWriter, value, fieldName, valueType, this.features);
     }
 }

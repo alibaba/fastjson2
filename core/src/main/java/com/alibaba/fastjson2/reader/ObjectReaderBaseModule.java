@@ -24,8 +24,6 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -1018,7 +1016,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         if (type == Optional.class) {
-            return OptionalImpl.INSTANCE;
+            return ObjectReaderImplOptional.INSTANCE;
         }
 
         if (type == UUID.class) {
@@ -1074,11 +1072,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         if (type == Calendar.class || typeName.equals("javax.xml.datatype.XMLGregorianCalendar")) {
-            return CalendarImpl.INSTANCE;
+            return ObjectReaderImplCalendar.INSTANCE;
         }
 
         if (type == Date.class) {
-            return UtilDateImpl.INSTANCE;
+            return ObjectReaderImplDate.INSTANCE;
         }
 
         if (type == LocalDate.class) {
@@ -1094,7 +1092,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         if (type == ZonedDateTime.class) {
-            return ZonedDateTimeImpl.INSTANCE;
+            return ObjectReaderImplZonedDateTime.INSTANCE;
         }
 
         if (type == Instant.class) {
@@ -1452,7 +1450,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 }
 
                 if (rawType == Optional.class) {
-                    return new OptionalImpl(itemType);
+                    return ObjectReaderImplOptional.of(type, null, null);
                 }
 
                 if (rawType == AtomicReference.class) {
@@ -1480,11 +1478,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
         switch (typeName) {
             case "java.sql.Time":
-                return JdbcSupport.createTimeReader(null);
+                return JdbcSupport.createTimeReader(null, null);
             case "java.sql.Timestamp":
-                return JdbcSupport.createTimestampReader(null);
+                return JdbcSupport.createTimestampReader(null, null);
             case "java.sql.Date":
-                return JdbcSupport.createDateReader(null);
+                return JdbcSupport.createDateReader(null, null);
             case "org.joda.time.Chronology":
                 return JodaSupport.createChronologyReader((Class) type);
             case "org.joda.time.LocalDate":
@@ -1620,53 +1618,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 return OptionalDouble.empty();
             }
             return OptionalDouble.of(value.doubleValue());
-        }
-    }
-
-    static class OptionalImpl extends PrimitiveImpl {
-        static final OptionalImpl INSTANCE = new OptionalImpl(null);
-
-        final Type itemType;
-        ObjectReader itemObjectReader = null;
-
-        public OptionalImpl(Type itemType) {
-            this.itemType = itemType;
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            Object value;
-            if (itemType == null) {
-                value = jsonReader.readAny();
-            } else {
-                if (itemObjectReader == null) {
-                    itemObjectReader = jsonReader.getObjectReader(itemType);
-                }
-                value = itemObjectReader.readJSONBObject(jsonReader, 0);
-            }
-
-            if (value == null) {
-                return Optional.empty();
-            }
-            return Optional.of(value);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            Object value;
-            if (itemType == null) {
-                value = jsonReader.readAny();
-            } else {
-                if (itemObjectReader == null) {
-                    itemObjectReader = jsonReader.getObjectReader(itemType);
-                }
-                value = itemObjectReader.readObject(jsonReader, 0);
-            }
-
-            if (value == null) {
-                return Optional.empty();
-            }
-            return Optional.of(value);
         }
     }
 
@@ -1817,158 +1768,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class CalendarImpl extends DateTimeCodec implements ObjectReader {
-        static final CalendarImpl INSTANCE = new CalendarImpl(null);
-        static final CalendarImpl INSTANCE_UNIXTIME = new CalendarImpl("unixtime");
-
-        public CalendarImpl(String format) {
-            super (format);
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            if (jsonReader.isInt()) {
-                long millis = jsonReader.readInt64Value();
-
-                if (formatUnixTime) {
-                    millis *= 1000;
-                }
-
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(millis);
-                return calendar;
-            }
-
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            long millis = jsonReader.readMillisFromString();
-            if (formatUnixTime) {
-                millis *= 1000;
-            }
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(millis);
-            return calendar;
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.current() == '"') {
-                if (format != null) {
-                    DateTimeFormatter formatter = getDateFormatter();
-                    if (formatter != null) {
-                        String str = jsonReader.readString();
-                        LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-                        ZonedDateTime zdt = ZonedDateTime.of(ldt, jsonReader.getContext().getZoneId());
-
-                        long millis = zdt.toInstant().toEpochMilli();
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.setTimeInMillis(millis);
-                        return calendar;
-                    }
-                }
-
-                long millis = jsonReader.readMillisFromString();
-                if (formatUnixTime) {
-                    millis *= 1000;
-                }
-
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(millis);
-                return calendar;
-            }
-
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            long millis = jsonReader.readInt64Value();
-            if (formatUnixTime) {
-                millis *= 1000;
-            }
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(millis);
-            return calendar;
-        }
-    }
-
-    public static class UtilDateImpl extends DateTimeCodec implements ObjectReader {
-        static final UtilDateImpl INSTANCE = new UtilDateImpl(null);
-
-        protected volatile SimpleDateFormat formatter;
-        protected static final AtomicReferenceFieldUpdater<UtilDateImpl, SimpleDateFormat> FORMATTER_UPDATER
-                = AtomicReferenceFieldUpdater.newUpdater(UtilDateImpl.class, SimpleDateFormat.class, "formatter");
-
-        public UtilDateImpl(String format) {
-            super (format);
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            if (jsonReader.isInt()) {
-                long millis = jsonReader.readInt64Value();
-                if (formatUnixTime) {
-                    millis *= 1000;
-                }
-                return new Date(millis);
-            }
-
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            return readDate(jsonReader);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.isInt()) {
-                long millis = jsonReader.readInt64Value();
-                if (formatUnixTime) {
-                    millis *= 1000;
-                }
-                return new Date(millis);
-            }
-
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            return readDate(jsonReader);
-        }
-
-        private Object readDate(JSONReader jsonReader) {
-            Date date;
-            if (format != null) {
-                SimpleDateFormat formatter = FORMATTER_UPDATER.getAndSet(this, null);
-                if (formatter == null) {
-                    formatter = new SimpleDateFormat(format);
-                }
-
-                String str = null;
-                try {
-                    str = jsonReader.readString();
-                    date = formatter.parse(str);
-                } catch (ParseException e) {
-                    throw new JSONException("parse date error, format " + format + ", input " + str, e);
-                } finally {
-                    FORMATTER_UPDATER.set(this, formatter);
-                }
-            } else {
-                long millis = jsonReader.readMillisFromString();
-                if (formatUnixTime) {
-                    millis *= 1000;
-                }
-                date = new Date(millis);
-            }
-
-            return date;
-        }
-    }
-
     static class LocalDateImpl extends PrimitiveImpl {
         static final LocalDateImpl INSTANCE = new LocalDateImpl();
 
@@ -1994,39 +1793,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         @Override
         public Object readObject(JSONReader jsonReader, long features) {
             return jsonReader.readLocalTime();
-        }
-    }
-
-    static class ZonedDateTimeImpl extends DateTimeCodec implements ObjectReader {
-        static final ZonedDateTimeImpl INSTANCE = new ZonedDateTimeImpl(null);
-        static final ZonedDateTimeImpl INSTANCE_UNIXTIME = new ZonedDateTimeImpl("unixtime");
-
-        public ZonedDateTimeImpl(String format) {
-            super(format);
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return jsonReader.readZonedDateTime();
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.isInt()) {
-                long millis = jsonReader.readInt64Value();
-                if (formatUnixTime) {
-                    millis *= 1000;
-                }
-
-                Instant instant = Instant.ofEpochMilli(millis);
-                return ZonedDateTime.ofInstant(instant, jsonReader.getContext().getZoneId());
-            }
-
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            return jsonReader.readZonedDateTime();
         }
     }
 

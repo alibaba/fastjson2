@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Method;
@@ -44,8 +43,8 @@ final class FieldReaderDateFunc<T> extends FieldReaderImpl<T> {
     public ObjectReader getObjectReader(JSONReader jsonReader) {
         if (dateReader == null) {
             dateReader = format == null
-                    ? ObjectReaderBaseModule.UtilDateImpl.INSTANCE
-                    : new ObjectReaderBaseModule.UtilDateImpl(format);
+                    ? ObjectReaderImplDate.INSTANCE
+                    : new ObjectReaderImplDate(format, locale);
         }
         return dateReader;
     }

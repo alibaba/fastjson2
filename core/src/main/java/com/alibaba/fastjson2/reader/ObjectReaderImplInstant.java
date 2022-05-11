@@ -12,8 +12,15 @@ import java.util.Map;
 public final class ObjectReaderImplInstant extends DateTimeCodec implements ObjectReader {
     public static final ObjectReaderImplInstant INSTANCE = new ObjectReaderImplInstant(null, null);
 
+    public static ObjectReaderImplInstant of(String format, Locale locale) {
+        if (format == null) {
+            return INSTANCE;
+        }
 
-    public ObjectReaderImplInstant(String format, Locale locale) {
+        return new ObjectReaderImplInstant(format, locale);
+    }
+
+    ObjectReaderImplInstant(String format, Locale locale) {
         super(format, locale);
     }
 
