@@ -206,7 +206,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
         if ((method != null && method.getReturnType() != void.class)
                 || !Modifier.isPublic(objectClass.getModifiers())
                 || isExternalClass(objectClass)) {
-            return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, null, defaultValue, fieldType, fieldClass, method);
+            return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, fieldType, fieldClass, method);
         }
         return createFieldReaderLambda(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, fieldType, fieldClass, method);
     }
