@@ -3,14 +3,15 @@ package com.alibaba.fastjson2
 import com.alibaba.fastjson2.filter.Filter
 
 /**
- * Parse JSON {@link String} into Object
+ * Parse JSON [String] into [T]
  *
- * <pre>{@code
- *    val text = "..."
- *    val data = text.to<User>()
- * }</pre>
+ * E.g.
+ * ```
+ *   val text = "..."
+ *   val data = text.to<User>()
+ * ```
  *
- * @return T?
+ * @return [T]?
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
@@ -18,14 +19,15 @@ inline fun <reified T> String.to() =
     JSON.parseObject(this, T::class.java)
 
 /**
- * Parse JSON {@link ByteArray} into Object
+ * Parse JSON [ByteArray] into [T]
  *
- * <pre>{@code
- *    val text = "..."
- *    val data = text.to<User>()
- * }</pre>
+ * E.g.
+ * ```
+ *   val text = "..."
+ *   val data = text.to<User>()
+ * ```
  *
- * @return T?
+ * @return [T]?
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
@@ -33,14 +35,15 @@ inline fun <reified T> ByteArray.to() =
     JSON.parseObject(this, T::class.java)
 
 /**
- * Verify the {@link String} is JSON Object
+ * Verify the [String] is JSON `Object`
  *
- * <pre>{@code
- *    val text = ...
- *    val bool = text.isJSONObject()
- * }</pre>
+ * E.g.
+ * ```
+ *   val text = ...
+ *   val bool = text.isJSONObject()
+ * ```
  *
- * @receiver Any?
+ * @receiver [Boolean]
  * @since 2.0.3
  */
 @Suppress(
@@ -50,14 +53,15 @@ inline fun <reified T> ByteArray.to() =
 inline fun String?.isJSONObject() = JSON.isValidObject(this)
 
 /**
- * Verify the {@link ByteArray} is JSON Object
+ * Verify the [ByteArray] is JSON `Object`
  *
- * <pre>{@code
- *    val text = ...
- *    val bool = text.isJSONObject()
- * }</pre>
+ * E.g.
+ * ```
+ *   val text = ...
+ *   val bool = text.isJSONObject()
+ * ```
  *
- * @receiver Any?
+ * @receiver [Boolean]
  * @since 2.0.3
  */
 @Suppress(
@@ -67,14 +71,15 @@ inline fun String?.isJSONObject() = JSON.isValidObject(this)
 inline fun ByteArray?.isJSONObject() = JSON.isValidObject(this)
 
 /**
- * Verify the {@link String} is JSON Array
+ * Verify the [String] is JSON `Array`
  *
- * <pre>{@code
- *    val text = ...
- *    val bool = text.isJSONArray()
- * }</pre>
+ * E.g.
+ * ```
+ *   val text = ...
+ *   val bool = text.isJSONArray()
+ * ```
  *
- * @receiver Any?
+ * @receiver [Boolean]
  * @since 2.0.3
  */
 @Suppress(
@@ -84,12 +89,13 @@ inline fun ByteArray?.isJSONObject() = JSON.isValidObject(this)
 inline fun String?.isJSONArray() = JSON.isValidArray(this)
 
 /**
- * Verify the {@link ByteArray} is JSON Array
+ * Verify the [ByteArray] is JSON `Array`
  *
- * <pre>{@code
- *    val text = ...
- *    val bool = text.isJSONArray()
- * }</pre>
+ * E.g.
+ * ```
+ *   val text = ...
+ *   val bool = text.isJSONArray()
+ * ```
  *
  * @receiver Any?
  * @since 2.0.3
@@ -101,9 +107,9 @@ inline fun String?.isJSONArray() = JSON.isValidArray(this)
 inline fun ByteArray?.isJSONArray() = JSON.isValidArray(this)
 
 /**
- * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject}
+ * Parse JSON [String] into [JSONArray] or [JSONObject]
  *
- * @return {@link JSONArray} or {@link JSONObject}
+ * @return [JSONArray] or [JSONObject]
  * @since 2.0.3
  */
 @Suppress(
@@ -114,14 +120,15 @@ inline fun String?.parse() =
     JSON.parse(this)
 
 /**
- * Parse JSON {@link String} into {@link JSONObject}
+ * Parse JSON [String] into [JSONObject]
  *
- * <pre>{@code
- *    val text = "..."
- *    val data = text.parseObject()
- * }</pre>
+ * E.g.
+ * ```
+ *   val text = "..."
+ *   val data = text.parseObject()
+ * ```
  *
- * @return T?
+ * @return [JSONObject]?
  * @since 2.0.3
  */
 @Suppress(
@@ -132,14 +139,15 @@ inline fun String?.parseObject() =
     JSON.parseObject(this)
 
 /**
- * Parse JSON {@link String} into Object
+ * Parse JSON [String] into [T]
  *
- * <pre>{@code
- *    val text = "..."
- *    val data = text.parseObject<User>()
- * }</pre>
+ * E.g.
+ * ```
+ *   val text = "..."
+ *   val data = text.parseObject<User>()
+ * ```
  *
- * @return T?
+ * @return [T]?
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
@@ -149,10 +157,10 @@ inline fun <reified T> String?.parseObject() =
     )
 
 /**
- * Parse JSON {@link String} into Object
+ * Parse JSON [String] into [T]
  *
  * @param features features to be enabled in parsing
- * @return T?
+ * @return [T]?
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
@@ -163,10 +171,10 @@ inline fun <reified T> String?.parseObject(
 )
 
 /**
- * Parse JSON {@link String} into Object
+ * Parse JSON [String] into [T]
  *
  * @param features features to be enabled in parsing
- * @return T?
+ * @return [T]?
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
@@ -178,14 +186,15 @@ inline fun <reified T> String?.parseObject(
 )
 
 /**
- * Parse JSON {@link String} into {@link JSONArray}
+ * Parse JSON [String] into [JSONArray]
  *
- * <pre>{@code
- *    val text = "..."
- *    val data = text.parseArray()
- * }</pre>
+ * E.g.
+ * ```
+ *   val text = "..."
+ *   val data = text.parseArray()
+ * ```
  *
- * @return T?
+ * @return [JSONArray]?
  * @since 2.0.3
  */
 @Suppress(
@@ -196,14 +205,15 @@ inline fun String?.parseArray() =
     JSON.parseArray(this)
 
 /**
- * Parse JSON {@link String} into {@link List}
+ * Parse JSON [String] into [List]
  *
- * <pre>{@code
- *    val text = "..."
- *    val list = text.parseArray<User>()
- * }</pre>
+ * E.g.
+ * ```
+ *   val text = "..."
+ *   val list = text.parseArray<User>()
+ * ```
  *
- * @return T?
+ * @return [List]?
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
@@ -213,10 +223,10 @@ inline fun <reified T> String?.parseArray() =
     )
 
 /**
- * Parse JSON {@link String} into {@link List}
+ * Parse JSON [String] into [List]
  *
  * @param features features to be enabled in parsing
- * @return T?
+ * @return [List]?
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
@@ -227,14 +237,15 @@ inline fun <reified T> String?.parseArray(
 )
 
 /**
- * Serialize Any to JSON {@link String}
+ * Serialize [Any]? to JSON [String]
  *
- * <pre>{@code
- *    val obj = ...
- *    val text = obj.toJSONString()
- * }</pre>
+ * E.g.
+ * ```
+ *   val obj = ...
+ *   val text = obj.toJSONString()
+ * ```
  *
- * @receiver Any?
+ * @receiver [String]
  * @since 2.0.3
  */
 @Suppress(
@@ -244,9 +255,9 @@ inline fun <reified T> String?.parseArray(
 inline fun Any?.toJSONString() = JSON.toJSONString(this)
 
 /**
- * Serialize Any to JSON {@link String}
+ * Serialize [Any]? to JSON [String]
  *
- * @receiver Any?
+ * @receiver [String]
  * @since 2.0.3
  */
 @Suppress(
@@ -261,9 +272,9 @@ inline fun Any?.toJSONString(
 )
 
 /**
- * Serialize Any to JSON {@link String}
+ * Serialize [Any]? to JSON [String]
  *
- * @receiver Any?
+ * @receiver [String]
  * @since 2.0.3
  */
 @Suppress(
@@ -277,9 +288,9 @@ inline fun Any?.toJSONString(
 )
 
 /**
- * Serialize Any to JSON {@link String}
+ * Serialize [Any]? to JSON [String]
  *
- * @receiver Any?
+ * @receiver [String]
  * @since 2.0.3
  */
 @Suppress(
@@ -294,9 +305,9 @@ inline fun Any?.toJSONString(
 )
 
 /**
- * Serialize Any to JSON {@link String}
+ * Serialize [Any]? to JSON [String]
  *
- * @receiver Any?
+ * @receiver [String]
  * @since 2.0.3
  */
 @Suppress(
@@ -310,14 +321,15 @@ inline fun Any?.toJSONString(
 )
 
 /**
- * Serialize Any to JSON {@link ByteArray}
+ * Serialize [Any]? to JSON [ByteArray]
  *
- * <pre>{@code
- *    val obj = ...
- *    val text = obj.toJSONByteArray()
- * }</pre>
+ * E.g.
+ * ```
+ *   val obj = ...
+ *   val text = obj.toJSONByteArray()
+ * ```
  *
- * @receiver Any?
+ * @receiver [ByteArray]
  * @since 2.0.3
  */
 @Suppress(
@@ -327,9 +339,9 @@ inline fun Any?.toJSONString(
 inline fun Any?.toJSONByteArray() = JSON.toJSONBytes(this)
 
 /**
- * Serialize Any to JSON {@link ByteArray}
+ * Serialize [Any]? to JSON [ByteArray]
  *
- * @receiver Any?
+ * @receiver [ByteArray]
  * @since 2.0.3
  */
 @Suppress(
@@ -343,9 +355,9 @@ inline fun Any?.toJSONByteArray(
 )
 
 /**
- * Serialize Any to JSON {@link ByteArray}
+ * Serialize [Any]? to JSON [ByteArray]
  *
- * @receiver Any?
+ * @receiver [ByteArray]
  * @since 2.0.3
  */
 @Suppress(
