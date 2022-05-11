@@ -222,9 +222,9 @@ Product product = JSONB.parseObject(jsonbBytes, Product.class);
 Product product = JSONB.parseObject(jsonbBytes, Product.class, JSONReader.Feature.SupportBeanArrayMapping);
 ```
 
-# 6. Using `JavaPath`
+# 6. Using `JSONPath`
 
-## 6.1 Use `JavaPath` selection to read data
+## 6.1 Use `JSONPath` selection to read data
 
 ```java
 String str = ...;
@@ -236,7 +236,7 @@ JSONReader parser = JSONReader.of(str);
 Object result = path.extract(parser);
 ```
 
-## 6.2 Reading partial `utf8Bytes` data using `JavaPath`
+## 6.2 Reading partial `utf8Bytes` data using `JSONPath`
 
 ```java
 byte[] utf8Bytes = ...;
@@ -248,7 +248,7 @@ JSONReader parser = JSONReader.of(utf8Bytes);
 Object result = path.extract(parser);
 ```
 
-## 6.3 Reading partial `jsonbBytes` data using `JsonPath`
+## 6.3 Reading partial `jsonbBytes` data using `JSONPath`
 
 ```java
 byte[] jsonbBytes = ...;
