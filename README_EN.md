@@ -12,30 +12,30 @@
 [![user repos](https://badgen.net/github/dependents-repo/alibaba/fastjson2?label=user%20repos)](https://github.com/alibaba/fastjson2/network/dependents)
 [![GitHub Contributors](https://img.shields.io/github/contributors/alibaba/fastjson2)](https://github.com/alibaba/fastjson2/graphs/contributors)
 
-##### 语言： 中文 | [English](README_EN.md)
+##### Language: [中文](README.md) | English
 
 # 1. FASTJSON v2
 
-`FASTJSON v2`是`FASTJSON`项目的重要升级，目标是为下一个十年提供一个高性能的`JSON`库。通过同一套`API`，
+`FASTJSONv2` is an upgrade of the `FASTJSON`, with the goal of providing a highly optimized `JSON` library for the next ten years.
 
-- 支持`JSON/JSONB`两种协议，`JSONPath`是一等公民；
-- 支持全量解析和部分解析；
-- 支持`Java`服务端、客户端`Android`、大数据场景。
+- Supports the JSON and JSONB Protocols
+- Supports full parsing and partial parsing
+- Supports Java servers and Android Clients, and has big data applications.
 
 ![fastjson](docs/logo.jpg "fastjson")
 
-相关文档：
+Related Documents:
 
-- `JSONB`格式文档：  
+- `JSONB` format documentation:  
   https://github.com/alibaba/fastjson2/wiki/jsonb_format_cn
-- `FASTJSON v2`性能有了很大提升，具体性能数据看这里：  
+- `FASTJSON v2`'s performance has been significantly improved. For the benchmark, see here:  
   https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark
 
-# 2. 使用前准备
+# 2. Setup
 
-## 2.1 `Maven`依赖
+## 2.1 `Maven` Build System
 
-在`fastjson v2`中，`groupId`和`1.x`不一样，是`com.alibaba.fastjson2`：
+`FASTJSONv2`'s groupId is different from versions `1.x`, it is instead `com.alibaba.fastjson2`:
 
 ```xml
 <dependency>
@@ -45,11 +45,11 @@
 </dependency>
 ```
 
-可以在 [maven.org](https://search.maven.org/artifact/com.alibaba.fastjson2/fastjson2) 查看最新可用的版本。
+Find the latest version of `FASTJSONv2`at [maven.org](https://search.maven.org/artifact/com.alibaba.fastjson2/fastjson2).
 
-## 2.2 `fastjson v1`的兼容包
+## 2.2 `fastjson v1` Compatibility Package
 
-如果原来使用`fastjson 1.2.x`版本，可以使用兼容包，兼容包不能保证100%兼容，请仔细测试验证，发现问题请及时反馈。
+If you are using `fastjson 1.2.x`, you can use the compatibility package. The compatibility package cannot guarantee 100% compatibility. Please test  it yourself and report any problems.
 
 ```xml
 <dependency>
@@ -59,35 +59,35 @@
 </dependency>
 ```
 
-## 2.3 常用类和方法
+## 2.3 Best Practice
 
-在`fastjson v2`中，`package`和`1.x`不一样，是`com.alibaba.fastjson2`。如果你之前用的是`fastjson1`，大多数情况直接更包名就即可。
+The package name of `fastjson v2` is different from `fastjson v1`. It is `com.alibaba.fastjson2`. If you used `fastjson v1` before, simply change the package name.
 
 ```java
 package com.alibaba.fastjson2;
 
 class JSON {
-    // 将字符串解析成JSONObject
+    // Parse String into JSONObject
     static JSONObject parseObject(String str);
 
-    // 将字符串解析成JSONArray
+    // Parse a String into JSONArray
     static JSONArray parseArray(String str);
 
-    // 将字符串解析成Java对象
+    // Parse a String into a Java Object
     static T parseObject(byte[] utf8Bytes, Class<T> objectClass);
 
-    // 将Java对象输出成字符串
+    // Output a Java Object into a string
     static String toJSONString(Object object);
 
-    // 将Java对象输出成UTF8编码的byte[]
+    // Output a Java Object into a JSON Byte Array
     static byte[] toJSONBytes(Object object);
 }
 
 class JSONB {
-    // 将jsonb格式的byte[]解析成Java对象
+    // Parse a JSONB byte array into a Java Object
     static T parseObject(byte[] jsonbBytes, Class<T> objectClass);
 
-    // 将Java对象输出成jsonb格式的byte[]
+    // Convert a Java Object into a JSONB Byte Array
     static byte[] toBytes(Object object);
 }
 
@@ -99,7 +99,7 @@ class JSONObject {
     Long getLong(String key);
     T getObject(String key, Class<T> objectClass);
 
-    // 将JSONObject对象转换为Java对象
+    // Convert JSONObject into a Java Object
     T toJavaObject(Class<T> objectClass);
 }
 
@@ -113,32 +113,33 @@ class JSONArray {
 }
 
 class JSONPath {
-    // 构造JSONPath
+    // Construct a JSONPath
     static JSONPath of(String path);
 
-    // 根据path直接解析输入，会部分解析优化，不会全部解析
+    // The input is directly parsed according to the path,
+    // which will be parsed and optimized but not fully parsed.
     Object extract(JSONReader jsonReader);
 
-    // 根据path对对象求值
+    // Evaluate object based on the path
     Object eval(Object rootObject);
 }
 
 class JSONReader {
-    // 构造基于String输入的JSONReader
+    // Constructs a JSONReader given a JSON String
     static JSONReader of(String str);
 
-    // 构造基于utf8编码byte数组输入的JSONReader
+    // Constructs a JSONReader given a UTF-8 encoded byte array
     static JSONReader of(byte[] utf8Bytes);
 
-    // 构造基于char[]输入的JSONReader
+    // Construct a JSONReader given a char array
     static JSONReader of(char[] chars);
 
-    // 构造基于json格式byte数组输入的JSONReader
+    // Construct a JSONReader given a JSONB-formatted byte array
     static JSONReader ofJSONB(byte[] jsonbBytes);
 }
 ```
 
-# 3. 读取`JSON`对象
+# 3. Reading a `JSON` Object
 
 ```java
 String str = "{\"id\":123}";
@@ -153,9 +154,9 @@ String name = jsonArray.getString(0);
 int id = jsonArray.getIntValue(1);
 ```
 
-# 4. 将`JavaBean`对象生成`JSON`
+# 4. Generate `JSON` using a `JavaBean` object
 
-## 4.1 将`JavaBean`对象生成`JSON`格式的字符串
+## 4.1 Generating a `JSON` String using `JavaBean`
 
 ```java
 class Product {
@@ -169,18 +170,18 @@ product.name = "DataWorks";
 
 JSON.toJSONString(product);
 
-// 生成如下的结果
+// Produces the following result
 {
     "id"   : 1001,
     "name" : "DataWorks"
 }
 
 JSON.toJSONString(product, JSONWriter.Feature.BeanToArray);
-// 生成如下的结果
+// Produces the following result
 [1001, "DataWorks"]
 ```
 
-## 4.2 将`JavaBean`对象生成`UTF8`编码的`byte[]`
+## 4.2 Generating a UTF-8 encoded byte array from a ``JavaBean`` Object
 
 ```java
 Product product = ...;
@@ -196,23 +197,23 @@ byte[] jsonbBytes = JSONB.toBytes(product);
 byte[] jsonbBytes = JSONB.toBytes(product, JSONWriter.Feature.BeanToArray);
 ```
 
-# 5. 读取`JavaBean`
+# 5. Reading `JSON` using `JavaBean`
 
-## 5.1 将字符串读取成`JavaBean`
+## 5.1 Reading a String using `JavaBean`
 
 ```java
 String str = "{\"id\":123}";
 Product product = JSON.parseObject(str, Product.class);
 ```
 
-## 5.2 将`UTF8`编码的`byte[]`读取成`JavaBean`
+## 5.2 Reading a `UTF-8`encoded byte array with `JavaBean`
 
 ```java
 byte[] utf8Bytes = "{\"id\":123}".getBytes(StandardCharsets.UTF_8);
 Product product = JSON.parseObject(utf8Bytes, Product.class);
-```
+``` 
 
-## 5.3 将`JSONB`数据读取成`JavaBean`
+## 5.3 Reading `JSONB` data with `JavaBean`
 
 ```java
 byte[] jsonbBytes = ...
@@ -221,37 +222,41 @@ Product product = JSONB.parseObject(jsonbBytes, Product.class);
 Product product = JSONB.parseObject(jsonbBytes, Product.class, JSONReader.Feature.SupportBeanArrayMapping);
 ```
 
-# 6. 使用`JSONPath`
+# 6. Using `JavaPath`
 
-## 6.1 使用`JSONPath`部分读取数据
+## 6.1 Use `JavaPath` selection to read data
 
 ```java
 String str = ...;
 
-JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
+// Caching and Reusing can improve performance
+JSONPath path = JSONPath.of("$.id"); 
 
 JSONReader parser = JSONReader.of(str);
 Object result = path.extract(parser);
 ```
 
-## 6.2 使用`JSONPath`读取部分`utf8Bytes`的数据
+## 6.2 Reading partial `utf8Bytes` data using `JavaPath`
 
 ```java
 byte[] utf8Bytes = ...;
 
-JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
+// Caching and Reusing can improve perforamance
+JSONPath path = JSONPath.of("$.id"); 
 
 JSONReader parser = JSONReader.of(utf8Bytes);
 Object result = path.extract(parser);
 ```
 
-## 6.3 使用`JSONPath`读取部分`jsonbBytes`的数据
+## 6.3 Reading partial `jsonbBytes` data using `JsonPath`
 
 ```java
 byte[] jsonbBytes = ...;
 
-JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
+// Caching and Reusing can improve performance
+JSONPath path = JSONPath.of("$.id");
 
-JSONReader parser = JSONReader.ofJSONB(jsonbBytes); // 注意，这是利用ofJSONB方法
+// Note that this is using the ofJSONB method
+JSONReader parser = JSONReader.ofJSONB(jsonbBytes); 
 Object result = path.extract(parser);
 ```
