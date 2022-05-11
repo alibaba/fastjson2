@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.Locale;
 
 final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
-    private ObjectReaderBaseModule.UtilDateImpl dateReader;
+    private ObjectReaderImplDate dateReader;
     DateTimeFormatter formatter;
     final Locale locale;
 
@@ -27,8 +27,8 @@ final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
     public ObjectReader getObjectReader(JSONReader jsonReader) {
         if (dateReader == null) {
             dateReader = format == null
-                    ? ObjectReaderBaseModule.UtilDateImpl.INSTANCE
-                    : new ObjectReaderBaseModule.UtilDateImpl(format);
+                    ? ObjectReaderImplDate.INSTANCE
+                    : new ObjectReaderImplDate(format, locale);
         }
         return dateReader;
     }

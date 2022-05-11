@@ -1,12 +1,12 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.codec.DateTimeCodec;
+import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderBaseModule;
 
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
@@ -15,30 +15,31 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Locale;
 
 public class JdbcSupport {
-    public static ObjectReader createTimeReader(String format) {
+    public static ObjectReader createTimeReader(String format, Locale locale) {
         if (format == null || format.isEmpty()) {
             return TimeReader.INSTANCE;
         }
 
-        return new TimeReader(format);
+        return new TimeReader(format, locale);
     }
 
-    public static ObjectReader createTimestampReader(String format) {
+    public static ObjectReader createTimestampReader(String format, Locale locale) {
         if (format == null || format.isEmpty()) {
             return TimestampReader.INSTANCE;
         }
 
-        return new TimestampReader(format);
+        return new TimestampReader(format, locale);
     }
 
-    public static ObjectReader createDateReader(String format) {
+    public static ObjectReader createDateReader(String format, Locale locale) {
         if (format == null || format.isEmpty()) {
             return DateReader.INSTANCE;
         }
 
-        return new DateReader(format);
+        return new DateReader(format, locale);
     }
 
     public static ObjectWriter createTimeWriter(String format) {
@@ -57,11 +58,11 @@ public class JdbcSupport {
         return new TimestampWriter(format);
     }
 
-    static class TimeReader extends ObjectReaderBaseModule.UtilDateImpl {
-        static final TimeReader INSTANCE = new TimeReader(null);
+    static class TimeReader extends ObjectReaderImplDate {
+        static final TimeReader INSTANCE = new TimeReader(null, null);
 
-        public TimeReader(String format) {
-            super(format);
+        public TimeReader(String format, Locale locale) {
+            super(format, locale);
         }
 
         @Override
@@ -96,21 +97,31 @@ public class JdbcSupport {
 
             long millis;
             if (format != null) {
-                SimpleDateFormat formatter = FORMATTER_UPDATER.getAndSet(this, null);
-                if (formatter == null) {
-                    formatter = new SimpleDateFormat(format);
-                }
+                DateTimeFormatter formatter = getDateFormatter(jsonReader.getLocale());
 
-                String str = null;
-                try {
-                    str = jsonReader.readString();
-                    java.util.Date utilDate = formatter.parse(str);
-                    millis = utilDate.getTime();
-                } catch (ParseException e) {
-                    throw new JSONException("parse date error, format " + format + ", input " + str, e);
-                } finally {
-                    FORMATTER_UPDATER.set(this, formatter);
+                ZonedDateTime zdt;
+                if (formatter != null) {
+                    String str = jsonReader.readString();
+
+                    LocalDateTime ldt;
+                    if (format.indexOf("HH") == -1) {
+                        ldt = LocalDateTime.of(
+                                LocalDate.parse(str, formatter),
+                                LocalTime.MIN
+                        );
+                    } else if (format.indexOf("DD") == -1) {
+                        ldt = LocalDateTime.of(
+                                LocalDate.of(1970, 1, 1),
+                                LocalTime.parse(str, formatter)
+                        );
+                    } else {
+                        ldt = LocalDateTime.parse(str, formatter);
+                    }
+                    zdt = ldt.atZone(jsonReader.getContext().getZoneId());
+                } else {
+                    zdt = jsonReader.readZonedDateTime();
                 }
+                millis = zdt.toInstant().toEpochMilli();
             } else {
                 String str = jsonReader.readString();
                 if ("0000-00-00".equals(str) || "0000-00-00 00:00:00".equals(str)) {
@@ -295,11 +306,11 @@ public class JdbcSupport {
         }
     }
 
-    static class TimestampReader extends ObjectReaderBaseModule.UtilDateImpl {
-        public static TimestampReader INSTANCE = new TimestampReader(null);
+    static class TimestampReader extends ObjectReaderImplDate {
+        public static TimestampReader INSTANCE = new TimestampReader(null, null);
 
-        public TimestampReader(String format) {
-            super(format);
+        public TimestampReader(String format, Locale locale) {
+            super(format, locale);
         }
 
         @Override
@@ -373,11 +384,11 @@ public class JdbcSupport {
         }
     }
 
-    static class DateReader extends ObjectReaderBaseModule.UtilDateImpl {
-        public static DateReader INSTANCE = new DateReader(null);
+    static class DateReader extends ObjectReaderImplDate {
+        public static DateReader INSTANCE = new DateReader(null, null);
 
-        public DateReader(String format) {
-            super(format);
+        public DateReader(String format, Locale locale) {
+            super(format, null);
         }
 
         @Override

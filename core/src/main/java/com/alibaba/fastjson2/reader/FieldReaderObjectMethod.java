@@ -70,7 +70,12 @@ class FieldReaderObjectMethod<T>
         if (this.fieldObjectReader != null) {
             objectReader = this.fieldObjectReader;
         } else {
-            objectReader = this.fieldObjectReader = FieldReaderObject.createFormattedObjectReader(fieldType, fieldClass, format, locale);
+            ObjectReader formattedObjectReader = FieldReaderObject.createFormattedObjectReader(fieldType, fieldClass, format, locale);
+            if (formattedObjectReader != null) {
+                objectReader = this.fieldObjectReader = formattedObjectReader;
+            } else {
+                objectReader = this.fieldObjectReader = jsonReader.getContext().getObjectReader(fieldType);
+            }
         }
 
         if (jsonReader.isReference()) {

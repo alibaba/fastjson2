@@ -1389,10 +1389,21 @@ public class ObjectReaderCreator {
                     }
 
                     if (JDKUtils.UNSAFE_SUPPORT) {
-                        return new FieldReaderListFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, itemType, ordinal, features, format, (Collection) defaultValue, field);
+                        return new FieldReaderListFieldUF(
+                                fieldName,
+                                fieldTypeResolved,
+                                fieldClassResolved,
+                                itemType,
+                                ordinal,
+                                features,
+                                format,
+                                locale,
+                                (Collection) defaultValue,
+                                field
+                        );
                     }
 
-                    return new FieldReaderListField(fieldName, fieldTypeResolved, fieldClassResolved, itemType, ordinal, features, format, (Collection) defaultValue, field);
+                    return new FieldReaderListField(fieldName, fieldTypeResolved, fieldClassResolved, itemType, ordinal, features, format, locale, (Collection) defaultValue, field);
                 }
             }
 
@@ -1408,9 +1419,31 @@ public class ObjectReaderCreator {
             }
 
             if (JDKUtils.UNSAFE_SUPPORT) {
-                return new FieldReaderListFieldUF(fieldName, fieldType, fieldClass, itemType, ordinal, features, format, (Collection) defaultValue, field);
+                return new FieldReaderListFieldUF(
+                        fieldName,
+                        fieldType,
+                        fieldClass,
+                        itemType,
+                        ordinal,
+                        features,
+                        format,
+                        locale,
+                        (Collection) defaultValue,
+                        field
+                );
             }
-            return new FieldReaderListField(fieldName, fieldType, fieldClass, itemType, ordinal, features, format, (Collection) defaultValue, field);
+            return new FieldReaderListField(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    itemType,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    (Collection) defaultValue,
+                    field
+            );
         }
 
         if (Map.class.isAssignableFrom(fieldClass)) {

@@ -4,16 +4,13 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Method;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
     DateTimeFormatter formatter;
-    ObjectReaderBaseModule.UtilDateImpl dateReader;
+    ObjectReaderImplDate dateReader;
 
     FieldReaderDateMethod(String fieldName, Class fieldClass, int ordinal, long features, String format, Locale locale, Method method) {
         super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, null, method);
@@ -23,8 +20,8 @@ final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
     public ObjectReader getObjectReader(JSONReader jsonReader) {
         if (dateReader == null) {
             dateReader = format == null
-                    ? ObjectReaderBaseModule.UtilDateImpl.INSTANCE
-                    : new ObjectReaderBaseModule.UtilDateImpl(format);
+                    ? ObjectReaderImplDate.INSTANCE
+                    : new ObjectReaderImplDate(format, locale);
         }
         return dateReader;
     }

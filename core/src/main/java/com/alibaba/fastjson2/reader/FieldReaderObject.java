@@ -2,14 +2,12 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.JdbcSupport;
-import com.alibaba.fastjson2.util.TypeUtils;
-
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -28,39 +26,21 @@ public interface FieldReaderObject<T, V> extends FieldReader<T> {
             String typeName = fieldType.getTypeName();
             switch (typeName) {
                 case "java.sql.Time":
-                    return JdbcSupport.createTimeReader(format);
+                    return JdbcSupport.createTimeReader(format, locale);
                 case "java.sql.Timestamp":
-                    return JdbcSupport.createTimestampReader(format);
+                    return JdbcSupport.createTimestampReader(format, locale);
                 case "java.sql.Date":
-                    return JdbcSupport.createDateReader(format);
+                    return JdbcSupport.createDateReader(format, locale);
                 case "byte[]":
                 case "[B":
                     return new ObjectReaderBaseModule.Inte8ArrayImpl(format);
                 default:
                     if (Calendar.class.isAssignableFrom(fieldClass)) {
-                        if (format == null) {
-                            return ObjectReaderBaseModule.CalendarImpl.INSTANCE;
-                        }
-
-                        switch (format) {
-                            case "unixtime":
-                                return ObjectReaderBaseModule.CalendarImpl.INSTANCE_UNIXTIME;
-                            default:
-                                return new ObjectReaderBaseModule.CalendarImpl(format);
-                        }
+                        return ObjectReaderImplCalendar.of(format, locale);
                     }
 
                     if (fieldClass == ZonedDateTime.class) {
-                        if (format == null) {
-                            return ObjectReaderBaseModule.ZonedDateTimeImpl.INSTANCE;
-                        }
-
-                        switch (format) {
-                            case "unixtime":
-                                return ObjectReaderBaseModule.ZonedDateTimeImpl.INSTANCE_UNIXTIME;
-                            default:
-                                return new ObjectReaderBaseModule.ZonedDateTimeImpl(format);
-                        }
+                        return ObjectReaderImplZonedDateTime.of(format, locale);
                     }
 
                     if (fieldClass == LocalDateTime.class) {
@@ -77,24 +57,17 @@ public interface FieldReaderObject<T, V> extends FieldReader<T> {
                     }
 
                     if (fieldClass == Instant.class) {
-                        if (format == null) {
-                            return ObjectReaderImplInstant.INSTANCE;
-                        }
-
-                        return new ObjectReaderImplInstant(format, locale);
+                        return ObjectReaderImplInstant.of(format, locale);
                     }
 
                     if (fieldClass == Optional.class) {
-                        if (fieldType instanceof ParameterizedType) {
-                            Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();
-                            if (actualTypeArguments.length == 1) {
-                                Type paramType = actualTypeArguments[0];
-                                Class<?> paramClass = TypeUtils.getClass(paramType);
-                                return createFormattedObjectReader(paramType, paramClass, format, locale);
-                            }
-                        }
-                        return ObjectReaderBaseModule.OptionalImpl.INSTANCE;
+                        return ObjectReaderImplOptional.of(fieldType, format, locale);
                     }
+
+                    if (fieldClass == Date.class) {
+                        return ObjectReaderImplDate.of(format, locale);
+                    }
+
                     break;
             }
         }
