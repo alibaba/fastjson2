@@ -10,6 +10,7 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
+import javax.security.auth.callback.Callback;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -70,10 +71,16 @@ public abstract class JSONPath {
         return jsonPath.contains(rootObject);
     }
 
-
     public static Object set(Object rootObject, String path, Object value) {
         JSONPath.of(path)
                 .set(rootObject, value);
+
+        return rootObject;
+    }
+
+    public static Object setCallback(Object rootObject, String path, Function callback) {
+        JSONPath.of(path)
+                .setCallback(rootObject, callback);
 
         return rootObject;
     }
@@ -235,6 +242,8 @@ public abstract class JSONPath {
     }
 
     public abstract void set(Object rootObject, Object value);
+
+    public abstract void setCallback(Object rootObject, Function callback);
 
     public abstract void setInt(Object rootObject, int value);
 
@@ -1972,6 +1981,11 @@ public abstract class JSONPath {
         }
 
         @Override
+        public void setCallback(Object rootObject, Function callback) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public void setInt(Object rootObject, int value) {
             throw new UnsupportedOperationException();
         }
@@ -2116,6 +2130,34 @@ public abstract class JSONPath {
                     }
                 }
             }
+            fieldReader.accept(rootObject, value);
+        }
+
+        @Override
+        public void setCallback(Object rootObject, Function callback) {
+            if (rootObject instanceof Map) {
+                Map map = (Map) rootObject;
+                Object originValue = map.get(name);
+                map.put(name, callback.apply(originValue));
+                return;
+            }
+            ObjectReaderProvider provider = getReaderContext().getProvider();
+            Class<?> objectClass = rootObject.getClass();
+
+            FieldReader fieldReader = this
+                    .getReaderContext()
+                    .getProvider()
+                    .getObjectReader(objectClass)
+                    .getFieldReader(nameHashCode);
+
+            FieldWriter fieldWriter = this
+                    .getWriterContext()
+                    .getProvider()
+                    .getObjectWriter(objectClass)
+                    .getFieldWriter(nameHashCode);
+
+            Object fieldValue = fieldWriter.getFieldValue(rootObject);
+            Object value = callback.apply(fieldValue);
             fieldReader.accept(rootObject, value);
         }
 
@@ -2586,6 +2628,13 @@ public abstract class JSONPath {
         }
 
         @Override
+        public void setCallback(Object root, Function callback) {
+            Context ctx = new Context(this, null, segment, null);
+            ctx.root = root;
+            segment.setCallback(ctx, callback);
+        }
+
+        @Override
         public void setInt(Object root, int value) {
             Context ctx = new Context(this, null, segment, null);
             ctx.root = root;
@@ -2755,6 +2804,31 @@ public abstract class JSONPath {
         }
 
         @Override
+        public void setCallback(Object root, Function callback) {
+            Context ctx = null;
+            int size = segments.size();
+            for (int i = 0; i < size - 1; i++) {
+                Segment segment = segments.get(i);
+                Segment nextSegment = null;
+                int nextIndex = i + 1;
+                if (nextIndex < size) {
+                    nextSegment = segments.get(nextIndex);
+                }
+                ctx = new Context(this, ctx, segment, nextSegment);
+                if (i == 0) {
+                    ctx.root = root;
+                }
+
+                segment.eval(ctx);
+            }
+            ctx = new Context(this, ctx, segments.get(0), null);
+            ctx.root = root;
+
+            Segment segment = segments.get(size - 1);
+            segment.setCallback(ctx, callback);
+        }
+
+        @Override
         public void setInt(Object rootObject, int value) {
             set(rootObject, value);
         }
@@ -2850,6 +2924,10 @@ public abstract class JSONPath {
         }
 
         public void set(Context context, Object value) {
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
+
+        public void setCallback(Context context, Function callback) {
             throw new JSONException("UnsupportedOperation " + getClass());
         }
 
@@ -3357,6 +3435,42 @@ public abstract class JSONPath {
         }
 
         @Override
+        public void setCallback(Context context, Function callback) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof Map) {
+                Map map = (Map) object;
+                Object origin = map.get(name);
+                if (origin != null) {
+                    Object applyValue = callback.apply(origin);
+                    map.put(name, applyValue);
+                }
+                return;
+            }
+
+            ObjectReaderProvider provider = context.path.getReaderContext().getProvider();
+
+            ObjectReader objectReader = provider.
+                    getObjectReader(object.getClass());
+            ObjectWriter objectWriter = context.path
+                    .getWriterContext()
+                    .getProvider()
+                    .getObjectWriter(object.getClass());
+
+            FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
+            FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
+            if (fieldReader == null || fieldWriter == null) {
+                return;
+            }
+
+            Object fieldValue = fieldWriter.getFieldValue(object);
+            Object applyValue = callback.apply(fieldValue);
+            fieldReader.accept(object, applyValue);
+        }
+
+        @Override
         public void accept(JSONReader jsonReader, Context ctx) {
             if (ctx.parent != null
                     && (ctx.parent.eval
@@ -3667,6 +3781,16 @@ public abstract class JSONPath {
             action.accept(object);
         }
 
+        @Override
+        public void setCallback(Context context, Function callback) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            LoopCallback action = new LoopCallback(context, callback);
+            action.accept(object);
+        }
+
         class MapLoop implements BiConsumer, Consumer {
             final Context context;
             final List values;
@@ -3765,6 +3889,58 @@ public abstract class JSONPath {
                     }
 
                     ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(entryValueClass);
+                    List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
+                    for (FieldWriter fieldWriter : fieldWriters) {
+                        Object fieldValue = fieldWriter.getFieldValue(object);
+                        accept(fieldValue);
+                    }
+                }
+            }
+        }
+
+        class LoopCallback {
+            final Context context;
+            final Function callback;
+
+            public LoopCallback(Context context, Function callback) {
+                this.context = context;
+                this.callback = callback;
+            }
+
+            public void accept(Object object) {
+                if (object instanceof Map) {
+                    for (Map.Entry entry : (Iterable<Map.Entry>) ((Map) object).entrySet()) {
+                        Object entryValue = entry.getValue();
+                        if (name.equals(entry.getKey())) {
+                            Object applyValue = callback.apply(entryValue);
+                            entry.setValue(applyValue);
+                            context.eval = true;
+                        } else {
+                            if (entryValue != null) {
+                                accept(entryValue);
+                            }
+                        }
+                    }
+                } else if (object instanceof Collection) {
+                    for (Object item : ((List<?>) object)) {
+                        accept(item);
+                    }
+                } else {
+                    Class<?> entryValueClass = object.getClass();
+                    ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(entryValueClass);
+                    ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(entryValueClass);
+                    if (objectReader instanceof ObjectReaderBean) {
+                        FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
+                        FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
+                        if (fieldWriter != null && fieldReader != null) {
+                            Object fieldValue = fieldWriter.getFieldValue(object);
+                            fieldValue = callback.apply(fieldValue);
+                            fieldReader.accept(object, fieldValue);
+                            context.eval = true;
+                            return;
+                        }
+                    }
+
                     List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
                     for (FieldWriter fieldWriter : fieldWriters) {
                         Object fieldValue = fieldWriter.getFieldValue(object);
