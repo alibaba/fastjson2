@@ -34,16 +34,16 @@ public class DecodeUTF8BenchmarkJDK17 {
     }
 
     @Benchmark
-    public void unsafeEncodeUTF8_17() throws Exception {
+    public String unsafeEncodeUTF8_17() throws Exception {
         byte[] buf = new byte[utf8Bytes.length * 2];
         int len = IOUtils.decodeUTF8(utf8Bytes, 0, utf8Bytes.length, buf);
         byte[] chars = Arrays.copyOf(buf, len);
-        stringCreator.apply(chars, StandardCharsets.US_ASCII);
+        return stringCreator.apply(chars, StandardCharsets.US_ASCII);
     }
 
     @Benchmark
-    public void newStringUTF8_17() throws Exception {
-        new String(utf8Bytes);
+    public String newStringUTF8_17() throws Exception {
+        return new String(utf8Bytes);
     }
 
     public static void main(String[] args) throws RunnerException {
