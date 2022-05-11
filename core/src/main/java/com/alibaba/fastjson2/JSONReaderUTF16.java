@@ -1061,6 +1061,7 @@ final class JSONReaderUTF16 extends JSONReader {
             if (ch == '\\') {
                 ch = chars[offset++];
                 if (ch == '\\' || ch == '"') {
+                    ch = chars[offset++];
                     continue;
                 }
                 ch = char1(ch);
