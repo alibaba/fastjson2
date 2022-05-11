@@ -34,10 +34,6 @@
         <url>https://github.com/alibaba</url>
     </organization>
 
-    <properties>
-        <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
