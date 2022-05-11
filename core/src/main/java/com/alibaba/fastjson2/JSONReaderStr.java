@@ -1018,6 +1018,7 @@ final class JSONReaderStr extends JSONReader {
             if (ch == '\\') {
                 ch = str.charAt(offset++);
                 if (ch == '\\' || ch == '"') {
+                    ch = str.charAt(offset++);
                     continue;
                 }
                 char1(ch);
