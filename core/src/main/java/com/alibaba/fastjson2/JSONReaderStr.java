@@ -1068,6 +1068,41 @@ final class JSONReaderStr extends JSONReader {
     }
 
     @Override
+    void skipLineComment() {
+        for (;;) {
+            if (ch == '\n') {
+                offset++;
+
+                if (offset >= length) {
+                    ch = EOI;
+                    return;
+                }
+
+                ch = str.charAt(offset);
+
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    offset++;
+                    if (offset >= length) {
+                        ch = EOI;
+                        return;
+                    }
+                    ch = str.charAt(offset);
+                }
+
+                offset++;
+                break;
+            }
+
+            offset++;
+            if (offset >= length) {
+                ch = EOI;
+                return;
+            }
+            ch = str.charAt(offset);
+        }
+    }
+
+    @Override
     public String getString() {
         if (stringValue != null) {
             return stringValue;

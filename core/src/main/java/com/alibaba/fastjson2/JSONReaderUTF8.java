@@ -2093,6 +2093,41 @@ class JSONReaderUTF8 extends JSONReader {
     }
 
     @Override
+    void skipLineComment() {
+        for (;;) {
+            if (ch == '\n') {
+                offset++;
+
+                if (offset >= length) {
+                    ch = EOI;
+                    return;
+                }
+
+                ch = (char) bytes[offset];
+
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    offset++;
+                    if (offset >= length) {
+                        ch = EOI;
+                        return;
+                    }
+                    ch = (char) bytes[offset];
+                }
+
+                offset++;
+                break;
+            }
+
+            offset++;
+            if (offset >= length) {
+                ch = EOI;
+                return;
+            }
+            ch = (char) bytes[offset];
+        }
+    }
+
+    @Override
     public String readString() {
         if (ch == '"' || ch == '\'') {
             char quote = this.ch;

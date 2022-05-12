@@ -1066,6 +1066,7 @@ public abstract class JSONReader implements Closeable {
             }
         }
 
+        for_:
         for (; ; ) {
             if (ch == '}') {
                 next();
@@ -1112,6 +1113,12 @@ public abstract class JSONReader implements Closeable {
                     readNull();
                     val = null;
                     break;
+                case '/':
+                    next();
+                    if (ch == '/') {
+                        skipLineComment();
+                    }
+                    continue for_;
                 default:
                     throw new JSONException("illegal input offset " + offset + ", char " + ch);
             }
@@ -1124,6 +1131,10 @@ public abstract class JSONReader implements Closeable {
         }
 
         return object;
+    }
+
+    void skipLineComment() {
+        throw new UnsupportedOperationException();
     }
 
     public Boolean readBool() {
