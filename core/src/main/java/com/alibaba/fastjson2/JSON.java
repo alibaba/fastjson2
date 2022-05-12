@@ -165,7 +165,7 @@ public interface JSON {
      *
      * @param text  the JSON {@link String} to be parsed
      * @param clazz specify the Class to be converted
-     * @param filter
+     * @param filter specify filter to be enabled
      * @param features features to be enabled in parsing
      * @return Class
      */
