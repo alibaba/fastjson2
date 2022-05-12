@@ -407,6 +407,13 @@ public abstract class JSONWriter implements Closeable {
         );
     }
 
+    public static JSONWriter ofJSONB(Feature... features) {
+        return new JSONWriterJSONB(
+                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features)
+                , null
+        );
+    }
+
     public static JSONWriter ofJSONB(JSONB.SymbolTable symbolTable) {
         return new JSONWriterJSONB(
                 new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider)

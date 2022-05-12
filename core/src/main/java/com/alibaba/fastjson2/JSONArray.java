@@ -865,11 +865,42 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * Serialize to JSON {@link String}
-     *
+     * @param features features to be enabled in serialization
      * @return JSON {@link String}
      */
-    public String toJSONString() {
-        return toString();
+    public String toString(JSONWriter.Feature... features) {
+        try (JSONWriter writer = JSONWriter.of(features)) {
+            if (arrayWriter == null) {
+                arrayWriter = writer.getObjectWriter(JSONArray.class, JSONArray.class);
+            }
+            arrayWriter.write(writer, this, null, null, 0);
+            return writer.toString();
+        }
+    }
+
+    /**
+     * Serialize to JSON {@link String}
+     *
+     * @param features features to be enabled in serialization
+     * @return JSON {@link String}
+     */
+    public String toJSONString(JSONWriter.Feature... features) {
+        return toString(features);
+    }
+
+    /**
+     * Serialize to JSONB bytes
+     * @param features features to be enabled in serialization
+     * @return JSONB bytes
+     */
+    public byte[] toJSONBBytes(JSONWriter.Feature... features) {
+        try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
+            if (arrayWriter == null) {
+                arrayWriter = writer.getObjectWriter(JSONArray.class, JSONArray.class);
+            }
+            arrayWriter.write(writer, this, null, null, 0);
+            return writer.getBytes();
+        }
     }
 
     /**

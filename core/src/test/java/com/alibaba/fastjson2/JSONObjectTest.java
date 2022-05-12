@@ -1137,6 +1137,36 @@ public class JSONObjectTest {
         );
     }
 
+    @Test
+    public void testFeatures() {
+        JSONObject object = JSONObject.of("id", null);
+        assertEquals("{}", object.toString());
+        assertEquals("{\"id\":null}", object.toString(JSONWriter.Feature.WriteNulls));
+    }
+
+    @Test
+    public void testFeatures1() {
+        JSONArray array = JSONArray.of(JSONObject.of("id", null));
+        assertEquals("[{}]", array.toString());
+        assertEquals("[{\"id\":null}]", array.toString(JSONWriter.Feature.WriteNulls));
+    }
+
+    @Test
+    public void testToJSONBBytes() {
+        JSONObject object = JSONObject.of("id", null);
+        byte[] jsonbBytes = object.toJSONBBytes(JSONWriter.Feature.WriteNulls);
+        JSONObject object2 = JSONB.parseObject(jsonbBytes);
+        assertEquals(object, object2);
+    }
+
+    @Test
+    public void testToJSONBBytes1() {
+        JSONArray array = JSONArray.of(JSONObject.of("id", null));
+        byte[] jsonbBytes = array.toJSONBBytes(JSONWriter.Feature.WriteNulls);
+        JSONArray array2 = JSONB.parseArray(jsonbBytes);
+        assertEquals(array, array2);
+    }
+
     public interface User {
         String getName();
     }
