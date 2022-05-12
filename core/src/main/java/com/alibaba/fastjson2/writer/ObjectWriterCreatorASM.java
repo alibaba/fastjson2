@@ -341,7 +341,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
 
 
         cw.visit(Opcodes.V1_8
-                , Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER
+                , Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER
                 , classNameType
                 ,
                 TYPE_OBJECT_WRITER_ADAPTER
