@@ -2138,9 +2138,12 @@ public abstract class JSONPath {
             if (rootObject instanceof Map) {
                 Map map = (Map) rootObject;
                 Object originValue = map.get(name);
-                map.put(name, callback.apply(originValue));
+                if (originValue != null || map.containsKey(name)) {
+                    map.put(name, callback.apply(originValue));
+                }
                 return;
             }
+
             ObjectReaderProvider provider = getReaderContext().getProvider();
             Class<?> objectClass = rootObject.getClass();
 
@@ -2156,9 +2159,11 @@ public abstract class JSONPath {
                     .getObjectWriter(objectClass)
                     .getFieldWriter(nameHashCode);
 
-            Object fieldValue = fieldWriter.getFieldValue(rootObject);
-            Object value = callback.apply(fieldValue);
-            fieldReader.accept(rootObject, value);
+            if (fieldReader != null && fieldWriter != null) {
+                Object fieldValue = fieldWriter.getFieldValue(rootObject);
+                Object value = callback.apply(fieldValue);
+                fieldReader.accept(rootObject, value);
+            }
         }
 
         @Override
