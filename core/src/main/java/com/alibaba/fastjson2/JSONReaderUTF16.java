@@ -518,6 +518,10 @@ final class JSONReaderUTF16 extends JSONReader {
 
     @Override
     public String readFieldName() {
+        if (ch == '/') {
+            skipLineComment();
+        }
+
         if (ch != '"' && ch != '\'') {
             return null;
         }
@@ -1584,6 +1588,41 @@ final class JSONReaderUTF16 extends JSONReader {
             offset++;
         } else if (!comma && ch != '}' && ch != ']' && ch != EOI) {
             throw new JSONValidException("offset " + offset);
+        }
+    }
+
+    @Override
+    void skipLineComment() {
+        for (;;) {
+            if (ch == '\n') {
+                offset++;
+
+                if (offset >= length) {
+                    ch = EOI;
+                    return;
+                }
+
+                ch = chars[offset];
+
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    offset++;
+                    if (offset >= length) {
+                        ch = EOI;
+                        return;
+                    }
+                    ch = chars[offset];
+                }
+
+                offset++;
+                break;
+            }
+
+            offset++;
+            if (offset >= length) {
+                ch = EOI;
+                return;
+            }
+            ch = chars[offset];
         }
     }
 

@@ -97,4 +97,8 @@ public class TestUtils {
         }
         return dArr;
     }
+
+    public static JSONReader createJSONReaderStr(String str) {
+        return new JSONReaderStr(JSONFactory.createReadContext(), str);
+    }
 }
