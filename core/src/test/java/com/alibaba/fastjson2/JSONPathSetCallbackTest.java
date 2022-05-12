@@ -46,6 +46,22 @@ public class JSONPathSetCallbackTest {
     }
 
     @Test
+    public void test3() {
+        JSONObject object = JSONObject.of("item", JSONObject.of("id", 101));
+
+        JSONPath.setCallback(object, "$.item.id",
+                (obj, val) -> ((Integer) val).intValue() + 1
+        );
+        assertEquals(102, object.getJSONObject("item").getIntValue("id"));
+
+        JSONPath.setCallback(object, "$.item.id2",
+                (obj, val) -> ((Integer) val).intValue() + 1
+        );
+        assertEquals(102, object.getJSONObject("item").getIntValue("id"));
+        assertEquals(1, object.getJSONObject("item").size());
+    }
+
+    @Test
     public void testJSONArray() {
         JSONObject object = JSONObject.of("items", JSONArray.of(101));
 

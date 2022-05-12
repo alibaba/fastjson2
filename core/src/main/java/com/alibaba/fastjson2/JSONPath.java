@@ -18,6 +18,7 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -79,6 +80,13 @@ public abstract class JSONPath {
     }
 
     public static Object setCallback(Object rootObject, String path, Function callback) {
+        JSONPath.of(path)
+                .setCallback(rootObject, callback);
+
+        return rootObject;
+    }
+
+    public static Object setCallback(Object rootObject, String path, BiFunction callback) {
         JSONPath.of(path)
                 .setCallback(rootObject, callback);
 
@@ -243,7 +251,14 @@ public abstract class JSONPath {
 
     public abstract void set(Object rootObject, Object value);
 
-    public abstract void setCallback(Object rootObject, Function callback);
+    public void setCallback(Object rootObject, Function callback) {
+        setCallback(
+                rootObject,
+                (object, value) -> callback.apply(value)
+        );
+    }
+
+    public abstract void setCallback(Object rootObject, BiFunction callback);
 
     public abstract void setInt(Object rootObject, int value);
 
@@ -1981,7 +1996,7 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void setCallback(Object rootObject, Function callback) {
+        public void setCallback(Object rootObject, BiFunction callback) {
             throw new UnsupportedOperationException();
         }
 
@@ -2134,18 +2149,18 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void setCallback(Object rootObject, Function callback) {
-            if (rootObject instanceof Map) {
-                Map map = (Map) rootObject;
+        public void setCallback(Object object, BiFunction callback) {
+            if (object instanceof Map) {
+                Map map = (Map) object;
                 Object originValue = map.get(name);
                 if (originValue != null || map.containsKey(name)) {
-                    map.put(name, callback.apply(originValue));
+                    map.put(name, callback.apply(map, originValue));
                 }
                 return;
             }
 
             ObjectReaderProvider provider = getReaderContext().getProvider();
-            Class<?> objectClass = rootObject.getClass();
+            Class<?> objectClass = object.getClass();
 
             FieldReader fieldReader = this
                     .getReaderContext()
@@ -2160,32 +2175,32 @@ public abstract class JSONPath {
                     .getFieldWriter(nameHashCode);
 
             if (fieldReader != null && fieldWriter != null) {
-                Object fieldValue = fieldWriter.getFieldValue(rootObject);
-                Object value = callback.apply(fieldValue);
-                fieldReader.accept(rootObject, value);
+                Object fieldValue = fieldWriter.getFieldValue(object);
+                Object value = callback.apply(object, fieldValue);
+                fieldReader.accept(object, value);
             }
         }
 
         @Override
-        public void setInt(Object rootObject, int value) {
-            if (rootObject instanceof Map) {
-                ((Map) rootObject).put(name, value);
+        public void setInt(Object obejct, int value) {
+            if (obejct instanceof Map) {
+                ((Map) obejct).put(name, value);
                 return;
             }
             ObjectReaderProvider provider = getReaderContext().getProvider();
-            ObjectReader objectReader = provider.getObjectReader(rootObject.getClass());
-            objectReader.setFieldValue(rootObject, name, nameHashCode, value);
+            ObjectReader objectReader = provider.getObjectReader(obejct.getClass());
+            objectReader.setFieldValue(obejct, name, nameHashCode, value);
         }
 
         @Override
-        public void setLong(Object rootObject, long value) {
-            if (rootObject instanceof Map) {
-                ((Map) rootObject).put(name, value);
+        public void setLong(Object object, long value) {
+            if (object instanceof Map) {
+                ((Map) object).put(name, value);
                 return;
             }
             ObjectReaderProvider provider = getReaderContext().getProvider();
-            ObjectReader objectReader = provider.getObjectReader(rootObject.getClass());
-            objectReader.setFieldValue(rootObject, name, nameHashCode, value);
+            ObjectReader objectReader = provider.getObjectReader(object.getClass());
+            objectReader.setFieldValue(object, name, nameHashCode, value);
         }
 
         @Override
@@ -2633,7 +2648,7 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void setCallback(Object root, Function callback) {
+        public void setCallback(Object root, BiFunction callback) {
             Context context = new Context(this, null, segment, null);
             context.root = root;
             segment.setCallback(context, callback);
@@ -2809,7 +2824,7 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void setCallback(Object root, Function callback) {
+        public void setCallback(Object root, BiFunction callback) {
             Context context = null;
             int size = segments.size();
             for (int i = 0; i < size - 1; i++) {
@@ -2932,7 +2947,7 @@ public abstract class JSONPath {
             throw new JSONException("UnsupportedOperation " + getClass());
         }
 
-        public void setCallback(Context context, Function callback) {
+        public void setCallback(Context context, BiFunction callback) {
             throw new JSONException("UnsupportedOperation " + getClass());
         }
 
@@ -3440,7 +3455,7 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void setCallback(Context context, Function callback) {
+        public void setCallback(Context context, BiFunction callback) {
             Object object = context.parent == null
                     ? context.root
                     : context.parent.value;
@@ -3449,7 +3464,7 @@ public abstract class JSONPath {
                 Map map = (Map) object;
                 Object origin = map.get(name);
                 if (origin != null) {
-                    Object applyValue = callback.apply(origin);
+                    Object applyValue = callback.apply(map, origin);
                     map.put(name, applyValue);
                 }
                 return;
@@ -3471,7 +3486,7 @@ public abstract class JSONPath {
             }
 
             Object fieldValue = fieldWriter.getFieldValue(object);
-            Object applyValue = callback.apply(fieldValue);
+            Object applyValue = callback.apply(object, fieldValue);
             fieldReader.accept(object, applyValue);
         }
 
@@ -3787,7 +3802,7 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void setCallback(Context context, Function callback) {
+        public void setCallback(Context context, BiFunction callback) {
             Object object = context.parent == null
                     ? context.root
                     : context.parent.value;
@@ -3905,9 +3920,9 @@ public abstract class JSONPath {
 
         class LoopCallback {
             final Context context;
-            final Function callback;
+            final BiFunction callback;
 
-            public LoopCallback(Context context, Function callback) {
+            public LoopCallback(Context context, BiFunction callback) {
                 this.context = context;
                 this.callback = callback;
             }
@@ -3917,7 +3932,7 @@ public abstract class JSONPath {
                     for (Map.Entry entry : (Iterable<Map.Entry>) ((Map) object).entrySet()) {
                         Object entryValue = entry.getValue();
                         if (name.equals(entry.getKey())) {
-                            Object applyValue = callback.apply(entryValue);
+                            Object applyValue = callback.apply(object, entryValue);
                             entry.setValue(applyValue);
                             context.eval = true;
                         } else {
@@ -3939,7 +3954,7 @@ public abstract class JSONPath {
                         FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
                         if (fieldWriter != null && fieldReader != null) {
                             Object fieldValue = fieldWriter.getFieldValue(object);
-                            fieldValue = callback.apply(fieldValue);
+                            fieldValue = callback.apply(object, fieldValue);
                             fieldReader.accept(object, fieldValue);
                             context.eval = true;
                             return;
@@ -4304,7 +4319,7 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void setCallback(Context context, Function callback) {
+        public void setCallback(Context context, BiFunction callback) {
             Object object = context.parent == null
                     ? context.root
                     : context.parent.value;
@@ -4314,14 +4329,14 @@ public abstract class JSONPath {
                 if (index >= 0) {
                     if (index < list.size()) {
                         Object value = list.get(index);
-                        value = callback.apply(value);
+                        value = callback.apply(object, value);
                         list.set(index, value);
                     }
                 } else {
                     int itemIndex = list.size() + this.index;
                     if (itemIndex >= 0) {
                         Object value = list.get(index);
-                        value = callback.apply(value);
+                        value = callback.apply(object, value);
                         list.set(itemIndex, value);
                     }
                 }
@@ -4333,12 +4348,12 @@ public abstract class JSONPath {
                 if (index >= 0) {
                     if (index < array.length) {
                         Object value = array[index];
-                        value = callback.apply(value);
+                        value = callback.apply(object, value);
                         array[index] = value;
                     }
                 } else {
                     Object value = array[index];
-                    value = callback.apply(value);
+                    value = callback.apply(object, value);
                     array[array.length + index] = value;
                 }
                 return;
@@ -4349,14 +4364,14 @@ public abstract class JSONPath {
                 if (index >= 0) {
                     if (index < length) {
                         Object value = Array.get(object, index);
-                        value = callback.apply(value);
+                        value = callback.apply(object, value);
                         Array.set(object, index, value);
                     }
                 } else {
                     int arrayIndex = length + index;
                     if (arrayIndex >= 0) {
                         Object value = Array.get(object, index);
-                        value = callback.apply(value);
+                        value = callback.apply(object, value);
                         Array.set(object, arrayIndex, value);
                     }
                 }
