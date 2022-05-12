@@ -1,7 +1,8 @@
 package com.alibaba.fastjson2
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.io.ByteArrayInputStream
 
 class JSONTest {
 
@@ -31,6 +32,38 @@ class JSONTest {
 
         assertEquals(1, user.get("id"))
         assertEquals("kraity", user.get("name"))
+    }
+
+    @Test
+    fun test_parseObject4() {
+        val input = ByteArrayInputStream(
+            "{\"id\":1,\"name\":\"fastjson\"}\n{\"id\":2,\"name\":\"fastjson2\"}\n".toByteArray()
+        )
+
+        input.parseObject<User> {
+            when (it.id) {
+                1 -> assertEquals("fastjson", it.name)
+                2 -> assertEquals("fastjson2", it.name)
+            }
+        }
+
+        input.reset()
+
+        input.parseObject<User>(Charsets.UTF_8) {
+            when (it.id) {
+                1 -> assertEquals("fastjson", it.name)
+                2 -> assertEquals("fastjson2", it.name)
+            }
+        }
+
+        input.reset()
+
+        input.parseObject<User>(Charsets.UTF_8, '\n') {
+            when (it.id) {
+                1 -> assertEquals("fastjson", it.name)
+                2 -> assertEquals("fastjson2", it.name)
+            }
+        }
     }
 
     @Test
