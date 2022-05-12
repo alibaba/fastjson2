@@ -50,8 +50,6 @@ public interface Opcodes {
     int ACC_STATIC = 0x0008; // field, method
     int ACC_FINAL = 0x0010; // class, field, method, parameter
     int ACC_SUPER = 0x0020; // class
-    Integer DOUBLE = Frame.ITEM_DOUBLE;
-    Integer NULL = Frame.ITEM_NULL;
 
     // The JVM opcode values (with the MethodVisitor method name used to visit them in comment, and
     // where '-' means 'same method name as on the previous line').
@@ -95,11 +93,7 @@ public interface Opcodes {
     int POP = 87; // visitInsn
     int POP2 = 88; // -
     int DUP = 89; // -
-    int DUP_X1 = 90; // -
-    int DUP_X2 = 91; // -
     int DUP2 = 92; // -
-    int DUP2_X1 = 93; // -
-    int DUP2_X2 = 94; // -
     int SWAP = 95; // -
     int IADD = 96; // -
     int LADD = 97; // -
@@ -128,10 +122,7 @@ public interface Opcodes {
     int IXOR = 130; // -
     int LXOR = 131; // -
     int IINC = 132; // visitIincInsn
-    int I2L = 133; // visitInsn
-    int I2F = 134; // -
-    int I2D = 135; // -
-    int L2I = 136; // -
+    int L2I = 136; // visitInsn
     int F2I = 139; // -
     int D2I = 142; // -
     int D2L = 143; // -
