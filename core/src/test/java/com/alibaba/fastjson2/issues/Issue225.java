@@ -89,4 +89,37 @@ public class Issue225 {
                         .get("item_id")
         );
     }
+
+    @Test
+    public void test4() {
+        JSONObject jsonObject = JSON.parseObject("{\"root\":{\"items\":[[{\"item_id\":101}]]}}");
+
+        jsonObject.valueFilter(
+                (object, name, value) -> name.equals("item_id") ? ((Integer) value).intValue() + 1 : value
+        );
+
+        assertEquals(
+                102,
+                jsonObject
+                        .getJSONObject("root")
+                        .getJSONArray("items")
+                        .getJSONArray(0)
+                        .getJSONObject(0)
+                        .get("item_id")
+        );
+
+        jsonObject.nameFilter(
+                (object, name, value) -> NamingStrategy.snakeToCamel(name)
+        );
+
+        assertEquals(
+                102,
+                jsonObject
+                        .getJSONObject("root")
+                        .getJSONArray("items")
+                        .getJSONArray(0)
+                        .getJSONObject(0)
+                        .get("itemId")
+        );
+    }
 }
