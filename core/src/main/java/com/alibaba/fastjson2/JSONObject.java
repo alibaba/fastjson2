@@ -1064,7 +1064,8 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
      *
      * @param key  the key whose associated value is to be returned
      * @param type specify the {@link Type} to be converted
-     * @return {@code <T>} or null
+     * @param features features to be enabled in parsing
+     * @return {@code <T>} or {@code null}
      * @throws JSONException If no suitable conversion method is found
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -1126,7 +1127,19 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         return (T) objectReader.readObject(jsonReader);
     }
 
-    public <T> T getObject(String key, TypeReference typeReference, JSONReader.Feature... features) {
+    /**
+     * Returns the result of the {@link Type} converter conversion of the associated value in this {@link JSONObject}.
+     *
+     * {@code User user = jsonObject.getObject("user", User.class);}
+     *
+     * @param key  the key whose associated value is to be returned
+     * @param typeReference specify the {@link TypeReference} to be converted
+     * @param features features to be enabled in parsing
+     * @return {@code <T>} or {@code null}
+     * @throws JSONException If no suitable conversion method is found
+     * @since 2.0.3
+     */
+    public <T> T getObject(String key, TypeReference<?> typeReference, JSONReader.Feature... features) {
         return getObject(key, typeReference.getType(), features);
     }
 

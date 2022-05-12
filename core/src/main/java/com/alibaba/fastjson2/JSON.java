@@ -1087,6 +1087,12 @@ public interface JSON {
         }
     }
 
+    /**
+     * Verify the {@link String} is JSON Object
+     *
+     * @param text the {@link String} to validate
+     * @return {@code true} or {@code false}
+     */
     static boolean isValidObject(String text) {
         if (text == null || text.isEmpty()) {
             return false;
@@ -1103,6 +1109,12 @@ public interface JSON {
         }
     }
 
+    /**
+     * Verify the byte array is JSON Object
+     *
+     * @param bytes the byte array to validate
+     * @return {@code true} or {@code false}
+     */
     static boolean isValidObject(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return false;
@@ -1265,7 +1277,7 @@ public interface JSON {
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
      * @since 2.0.2
      */
-    static boolean register(Type type, ObjectWriter<?> objectReader) {
-        return JSONFactory.defaultObjectWriterProvider.register(type, objectReader);
+    static boolean register(Type type, ObjectWriter<?> objectWriter) {
+        return JSONFactory.defaultObjectWriterProvider.register(type, objectWriter);
     }
 }
