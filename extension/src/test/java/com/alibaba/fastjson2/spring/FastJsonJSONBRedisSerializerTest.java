@@ -65,6 +65,7 @@ public class FastJsonJSONBRedisSerializerTest {
         FastJsonConfig fastJsonConfig = new FastJsonConfig();
         fastJsonConfig.setReaderFeatures(JSONReader.Feature.SupportAutoType);
         fastJsonConfig.setWriterFeatures(JSONWriter.Feature.WriteClassName);
+        fastJsonConfig.setSymbolTable("id", "name", "age");
 
         FastJsonJSONBRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonJSONBRedisSerializer<>(Object.class);
         assertNotNull(fastJsonRedisSerializer.getFastJsonConfig());
