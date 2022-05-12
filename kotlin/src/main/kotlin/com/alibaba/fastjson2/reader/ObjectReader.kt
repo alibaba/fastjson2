@@ -10,6 +10,7 @@ import com.alibaba.fastjson2.JSON
  * ```
  * @receiver ObjectReader<*>
  * @return [Boolean]
+ * @since 2.0.3
  */
 inline fun <reified T> ObjectReader<*>.register() =
     JSON.register(T::class.java, this)

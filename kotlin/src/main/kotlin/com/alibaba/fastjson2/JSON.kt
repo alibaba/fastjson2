@@ -2,6 +2,10 @@ package com.alibaba.fastjson2
 
 import com.alibaba.fastjson2.filter.Filter
 
+import java.io.InputStream
+import java.io.Reader
+import java.nio.charset.Charset
+
 /**
  * Parse JSON [String] into [T]
  *
@@ -183,6 +187,103 @@ inline fun <reified T> String?.parseObject(
     vararg features: JSONReader.Feature
 ) = JSON.parseObject(
     this, T::class.java, filter, *features
+)
+
+/**
+ * Parse JSON [ByteArray] into [T]
+ *
+ * @return [T]?
+ * @since 2.0.3
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T> ByteArray?.parseObject(
+) = JSON.parseObject(
+    this, T::class.java
+)
+
+/**
+ * Parse JSON [ByteArray] into [T]
+ *
+ * @return [T]?
+ * @since 2.0.3
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T> ByteArray.parseObject(
+    offset: Int,
+    length: Int = size,
+    charset: Charset = Charsets.UTF_8
+) = JSON.parseObject<T>(
+    this, offset, length, charset, T::class.java
+)
+
+/**
+ * Parse JSON [Reader] into [T]
+ *
+ * E.g.
+ * ```
+ *   val reader = ...
+ *   reader.parseObject<User>() {
+ *       val id = it.id
+ *   }
+ * ```
+ *
+ * @param delimiter specify the delimiter
+ * @param consumer Function1<T, Unit>
+ * @since 2.0.3
+ */
+inline fun <reified T> Reader.parseObject(
+    delimiter: Char = '\n',
+    noinline consumer: (T) -> Unit
+) = JSON.parseObject(
+    this, delimiter, T::class.java, consumer
+)
+
+/**
+ * Parse JSON [InputStream] into [T]
+ *
+ * E.g.
+ * ```
+ *   val input = ...
+ *   input.parseObject<User> {
+ *       val id = it.id
+ *   }
+ * ```
+ *
+ * @param features features to be enabled in parsing
+ * @param consumer Function1<T, Unit>
+ * @since 2.0.3
+ */
+inline fun <reified T> InputStream.parseObject(
+    vararg features: JSONReader.Feature,
+    noinline consumer: (T) -> Unit
+) = JSON.parseObject(
+    this, T::class.java, consumer, *features
+)
+
+/**
+ * Parse JSON [InputStream] into [T]
+ *
+ * E.g.
+ * ```
+ *   val input = ...
+ *   input.parseObject<User>(Charsets.UTF_8) {
+ *       val id = it.id
+ *   }
+ * ```
+ *
+ * @param charset   specify [Charset] to parse
+ * @param delimiter specify the delimiter
+ * @param features features to be enabled in parsing
+ * @param consumer Function1<T, Unit>
+ * @since 2.0.3
+ */
+inline fun <reified T> InputStream.parseObject(
+    charset: Charset,
+    delimiter: Char = '\n',
+    vararg features: JSONReader.Feature,
+    noinline consumer: (T) -> Unit
+) = JSON.parseObject(
+    this, charset, delimiter, T::class.java, consumer, *features
 )
 
 /**
