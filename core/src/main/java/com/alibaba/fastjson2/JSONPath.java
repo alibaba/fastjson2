@@ -1140,7 +1140,7 @@ public abstract class JSONPath {
     }
 
     static abstract class FilterSegment extends Segment implements EvalSegment {
-        abstract boolean apply(Context ctx, Object object);
+        abstract boolean apply(Context context, Object object);
     }
 
     interface EvalSegment {
@@ -1339,18 +1339,18 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            if (ctx.parent == null) {
-                ctx.root = jsonReader.readAny();
+        public void accept(JSONReader jsonReader, Context context) {
+            if (context.parent == null) {
+                context.root = jsonReader.readAny();
             }
-            eval(ctx);
+            eval(context);
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (object instanceof List) {
                 List list = (List) object;
@@ -1359,7 +1359,7 @@ public abstract class JSONPath {
                     Object item = list.get(i);
                     boolean match = and;
                     for (FilterSegment filter : filters) {
-                        boolean result = filter.apply(ctx, item);
+                        boolean result = filter.apply(context, item);
                         if (and) {
                             if (!result) {
                                 match = false;
@@ -1376,14 +1376,14 @@ public abstract class JSONPath {
                         array.add(item);
                     }
                 }
-                ctx.value = array;
-                ctx.eval = true;
+                context.value = array;
+                context.eval = true;
                 return;
             }
 
             boolean match = and;
             for (FilterSegment filter : filters) {
-                boolean result = filter.apply(ctx, object);
+                boolean result = filter.apply(context, object);
                 if (and) {
                     if (!result) {
                         match = false;
@@ -1397,9 +1397,9 @@ public abstract class JSONPath {
                 }
             }
             if (match) {
-                ctx.value = object;
+                context.value = object;
             }
-            ctx.eval = true;
+            context.eval = true;
         }
     }
 
@@ -1595,24 +1595,24 @@ public abstract class JSONPath {
         abstract boolean apply(Object fieldValue);
 
         @Override
-        public final void accept(JSONReader jsonReader, Context ctx) {
-            if (ctx.parent == null) {
-                ctx.root = jsonReader.readAny();
+        public final void accept(JSONReader jsonReader, Context context) {
+            if (context.parent == null) {
+                context.root = jsonReader.readAny();
             }
-            eval(ctx);
+            eval(context);
         }
 
         @Override
-        public boolean remove(Context ctx) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public boolean remove(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (object instanceof List) {
                 List list = (List) object;
                 for (int i = list.size() - 1; i >= 0; i--) {
                     Object item = list.get(i);
-                    if (apply(ctx, item)) {
+                    if (apply(context, item)) {
                         list.remove(i);
                     }
                 }
@@ -1623,22 +1623,22 @@ public abstract class JSONPath {
         }
 
         @Override
-        public final void eval(Context ctx) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public final void eval(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (object instanceof List) {
                 List list = (List) object;
                 JSONArray array = new JSONArray(list.size());
                 for (int i = 0, l = list.size(); i < l; i++) {
                     Object item = list.get(i);
-                    if (apply(ctx, item)) {
+                    if (apply(context, item)) {
                         array.add(item);
                     }
                 }
-                ctx.value = array;
-                ctx.eval = true;
+                context.value = array;
+                context.eval = true;
                 return;
             }
 
@@ -1646,23 +1646,23 @@ public abstract class JSONPath {
                 Object[] list = (Object[]) object;
                 JSONArray array = new JSONArray(list.length);
                 for (Object item : list) {
-                    if (apply(ctx, item)) {
+                    if (apply(context, item)) {
                         array.add(item);
                     }
                 }
-                ctx.value = array;
-                ctx.eval = true;
+                context.value = array;
+                context.eval = true;
                 return;
             }
 
-            if (apply(ctx, object)) {
-                ctx.value = object;
-                ctx.eval = true;
+            if (apply(context, object)) {
+                context.value = object;
+                context.eval = true;
             }
         }
 
         @Override
-        public final boolean apply(Context ctx, Object object) {
+        public final boolean apply(Context context, Object object) {
             if (object == null) {
                 return false;
             }
@@ -1680,7 +1680,7 @@ public abstract class JSONPath {
                 return apply(fieldValue);
             }
 
-            ObjectWriter objectWriter = ctx.path.getWriterContext().getObjectWriter(object.getClass());
+            ObjectWriter objectWriter = context.path.getWriterContext().getObjectWriter(object.getClass());
             if (objectWriter instanceof ObjectWriterAdapter) {
                 FieldWriter fieldWriter = objectWriter.getFieldWriter(fieldNameNameHash);
                 Object fieldValue = fieldWriter.getFieldValue(object);
@@ -1900,10 +1900,10 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             JSONArray array = new JSONArray();
             if (object instanceof List) {
@@ -1916,15 +1916,15 @@ public abstract class JSONPath {
                         }
                     }
                 }
-                ctx.value = array;
+                context.value = array;
                 return;
             }
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            eval(ctx);
+        public void accept(JSONReader jsonReader, Context context) {
+            eval(context);
         }
 
         @Override
@@ -1933,7 +1933,7 @@ public abstract class JSONPath {
         }
 
         @Override
-        public boolean apply(Context ctx, Object object) {
+        public boolean apply(Context context, Object object) {
             throw new UnsupportedOperationException();
         }
     }
@@ -2600,16 +2600,16 @@ public abstract class JSONPath {
 
         @Override
         public boolean remove(Object root) {
-            Context ctx = new Context(this, null, segment, null);
-            ctx.root = root;
-            return segment.remove(ctx);
+            Context context = new Context(this, null, segment, null);
+            context.root = root;
+            return segment.remove(context);
         }
 
         @Override
         public boolean contains(Object root) {
-            Context ctx = new Context(this, null, segment, null);
-            ctx.root = root;
-            return segment.contains(ctx);
+            Context context = new Context(this, null, segment, null);
+            context.root = root;
+            return segment.contains(context);
         }
 
         @Override
@@ -2619,52 +2619,52 @@ public abstract class JSONPath {
 
         @Override
         public Object eval(Object root) {
-            Context ctx = new Context(this, null, segment, null);
-            ctx.root = root;
-            segment.eval(ctx);
-            return ctx.value;
+            Context context = new Context(this, null, segment, null);
+            context.root = root;
+            segment.eval(context);
+            return context.value;
         }
 
         @Override
         public void set(Object root, Object value) {
-            Context ctx = new Context(this, null, segment, null);
-            ctx.root = root;
-            segment.set(ctx, value);
+            Context context = new Context(this, null, segment, null);
+            context.root = root;
+            segment.set(context, value);
         }
 
         @Override
         public void setCallback(Object root, Function callback) {
-            Context ctx = new Context(this, null, segment, null);
-            ctx.root = root;
-            segment.setCallback(ctx, callback);
+            Context context = new Context(this, null, segment, null);
+            context.root = root;
+            segment.setCallback(context, callback);
         }
 
         @Override
         public void setInt(Object root, int value) {
-            Context ctx = new Context(this, null, segment, null);
-            ctx.root = root;
-            segment.setInt(ctx, value);
+            Context context = new Context(this, null, segment, null);
+            context.root = root;
+            segment.setInt(context, value);
         }
 
         @Override
         public void setLong(Object root, long value) {
-            Context ctx = new Context(this, null, segment, null);
-            ctx.root = root;
-            segment.setLong(ctx, value);
+            Context context = new Context(this, null, segment, null);
+            context.root = root;
+            segment.setLong(context, value);
         }
 
         @Override
         public Object extract(JSONReader jsonReader) {
-            Context ctx = new Context(this, null, segment, null);
-            segment.accept(jsonReader, ctx);
-            return ctx.value;
+            Context context = new Context(this, null, segment, null);
+            segment.accept(jsonReader, context);
+            return context.value;
         }
 
         @Override
         public String extractScalar(JSONReader jsonReader) {
-            Context ctx = new Context(this, null, segment, null);
-            segment.accept(jsonReader, ctx);
-            return JSON.toJSONString(ctx.value);
+            Context context = new Context(this, null, segment, null);
+            segment.accept(jsonReader, context);
+            return JSON.toJSONString(context.value);
         }
     }
 
@@ -2690,7 +2690,7 @@ public abstract class JSONPath {
 
         @Override
         public boolean remove(Object root) {
-            Context ctx = null;
+            Context context = null;
 
             int size = segments.size();
             if (size == 0) {
@@ -2704,17 +2704,17 @@ public abstract class JSONPath {
                 if (nextIndex < size) {
                     nextSegment = segments.get(nextIndex);
                 }
-                ctx = new Context(this, ctx, segment, nextSegment);
+                context = new Context(this, context, segment, nextSegment);
                 if (i == 0) {
-                    ctx.root = root;
+                    context.root = root;
                 }
 
                 if (i == size - 1) {
-                    return segment.remove(ctx);
+                    return segment.remove(context);
                 }
-                segment.eval(ctx);
+                segment.eval(context);
 
-                if (ctx.value == null) {
+                if (context.value == null) {
                     return false;
                 }
             }
@@ -2724,7 +2724,7 @@ public abstract class JSONPath {
 
         @Override
         public boolean contains(Object root) {
-            Context ctx = null;
+            Context context = null;
 
             int size = segments.size();
             if (size == 0) {
@@ -2738,15 +2738,15 @@ public abstract class JSONPath {
                 if (nextIndex < size) {
                     nextSegment = segments.get(nextIndex);
                 }
-                ctx = new Context(this, ctx, segment, nextSegment);
+                context = new Context(this, context, segment, nextSegment);
                 if (i == 0) {
-                    ctx.root = root;
+                    context.root = root;
                 }
 
                 if (i == size - 1) {
-                    return segment.contains(ctx);
+                    return segment.contains(context);
                 }
-                segment.eval(ctx);
+                segment.eval(context);
             }
 
             return false;
@@ -2759,7 +2759,7 @@ public abstract class JSONPath {
 
         @Override
         public Object eval(Object root) {
-            Context ctx = null;
+            Context context = null;
 
             int size = segments.size();
             if (size == 0) {
@@ -2773,19 +2773,19 @@ public abstract class JSONPath {
                 if (nextIndex < size) {
                     nextSegment = segments.get(nextIndex);
                 }
-                ctx = new Context(this, ctx, segment, nextSegment);
+                context = new Context(this, context, segment, nextSegment);
                 if (i == 0) {
-                    ctx.root = root;
+                    context.root = root;
                 }
 
-                segment.eval(ctx);
+                segment.eval(context);
             }
-            return ctx.value;
+            return context.value;
         }
 
         @Override
         public void set(Object root, Object value) {
-            Context ctx = null;
+            Context context = null;
             int size = segments.size();
             for (int i = 0; i < size - 1; i++) {
                 Segment segment = segments.get(i);
@@ -2794,23 +2794,23 @@ public abstract class JSONPath {
                 if (nextIndex < size) {
                     nextSegment = segments.get(nextIndex);
                 }
-                ctx = new Context(this, ctx, segment, nextSegment);
+                context = new Context(this, context, segment, nextSegment);
                 if (i == 0) {
-                    ctx.root = root;
+                    context.root = root;
                 }
 
-                segment.eval(ctx);
+                segment.eval(context);
             }
-            ctx = new Context(this, ctx, segments.get(0), null);
-            ctx.root = root;
+            context = new Context(this, context, segments.get(0), null);
+            context.root = root;
 
             Segment segment = segments.get(size - 1);
-            segment.set(ctx, value);
+            segment.set(context, value);
         }
 
         @Override
         public void setCallback(Object root, Function callback) {
-            Context ctx = null;
+            Context context = null;
             int size = segments.size();
             for (int i = 0; i < size - 1; i++) {
                 Segment segment = segments.get(i);
@@ -2819,18 +2819,18 @@ public abstract class JSONPath {
                 if (nextIndex < size) {
                     nextSegment = segments.get(nextIndex);
                 }
-                ctx = new Context(this, ctx, segment, nextSegment);
+                context = new Context(this, context, segment, nextSegment);
                 if (i == 0) {
-                    ctx.root = root;
+                    context.root = root;
                 }
 
-                segment.eval(ctx);
+                segment.eval(context);
             }
-            ctx = new Context(this, ctx, segments.get(0), null);
-            ctx.root = root;
+            context = new Context(this, context, segments.get(0), null);
+            context.root = root;
 
             Segment segment = segments.get(size - 1);
-            segment.setCallback(ctx, callback);
+            segment.setCallback(context, callback);
         }
 
         @Override
@@ -2854,7 +2854,7 @@ public abstract class JSONPath {
                 return null;
             }
 
-            Context ctx = null;
+            Context context = null;
             for (int i = 0; i < size; i++) {
                 Segment segment = segments.get(i);
                 Segment nextSegment = null;
@@ -2864,11 +2864,11 @@ public abstract class JSONPath {
                     nextSegment = segments.get(nextIndex);
                 }
 
-                ctx = new Context(this, ctx, segment, nextSegment);
-                segment.accept(jsonReader, ctx);
+                context = new Context(this, context, segment, nextSegment);
+                segment.accept(jsonReader, context);
             }
 
-            return ctx.value;
+            return context.value;
         }
 
         @Override
@@ -2878,7 +2878,7 @@ public abstract class JSONPath {
                 return null;
             }
 
-            Context ctx = null;
+            Context context = null;
             for (int i = 0; i < size; i++) {
                 Segment segment = segments.get(i);
                 Segment nextSegment = null;
@@ -2888,11 +2888,11 @@ public abstract class JSONPath {
                     nextSegment = segments.get(nextIndex);
                 }
 
-                ctx = new Context(this, ctx, segment, nextSegment);
-                segment.accept(jsonReader, ctx);
+                context = new Context(this, context, segment, nextSegment);
+                segment.accept(jsonReader, context);
             }
 
-            return JSON.toJSONString(ctx.value);
+            return JSON.toJSONString(context.value);
         }
     }
 
@@ -2915,7 +2915,7 @@ public abstract class JSONPath {
     }
 
     static abstract class Segment {
-        public abstract void accept(JSONReader jsonReader, Context ctx);
+        public abstract void accept(JSONReader jsonReader, Context context);
 
         public abstract void eval(Context context);
 
@@ -2949,7 +2949,7 @@ public abstract class JSONPath {
         static final KeysSegment INSTANCE = new KeysSegment();
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
+        public void accept(JSONReader jsonReader, Context context) {
             if (jsonReader.isObject()) {
                 jsonReader.next();
                 JSONArray array = new JSONArray();
@@ -2958,17 +2958,17 @@ public abstract class JSONPath {
                     array.add(fieldName);
                     jsonReader.skipValue();
                 }
-                ctx.value = array;
+                context.value = array;
             }
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
             if (object instanceof Map) {
-                ctx.value = new JSONArray(((Map<?, ?>) object).keySet());
+                context.value = new JSONArray(((Map<?, ?>) object).keySet());
                 return;
             }
 
@@ -2980,32 +2980,32 @@ public abstract class JSONPath {
         static final LengthSegment INSTANCE = new LengthSegment();
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            if (ctx.parent == null) {
-                ctx.root = jsonReader.readAny();
-                ctx.eval = true;
+        public void accept(JSONReader jsonReader, Context context) {
+            if (context.parent == null) {
+                context.root = jsonReader.readAny();
+                context.eval = true;
             }
-            eval(ctx);
+            eval(context);
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object value = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object value = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (value == null) {
                 return;
             }
 
             if (value instanceof Collection) {
-                ctx.value = ((Collection<?>) value).size();
+                context.value = ((Collection<?>) value).size();
             } else if (value.getClass().isArray()) {
-                ctx.value = Array.getLength(value);
+                context.value = Array.getLength(value);
             } else if (value instanceof Map) {
-                ctx.value = ((Map<?, ?>) value).size();
+                context.value = ((Map<?, ?>) value).size();
             } else if (value instanceof String) {
-                ctx.value = ((String) value).length();
+                context.value = ((String) value).length();
             }
         }
     }
@@ -3014,19 +3014,19 @@ public abstract class JSONPath {
         static final FloorSegment INSTANCE = new FloorSegment();
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            if (ctx.parent == null) {
-                ctx.root = jsonReader.readAny();
-                ctx.eval = true;
+        public void accept(JSONReader jsonReader, Context context) {
+            if (context.parent == null) {
+                context.root = jsonReader.readAny();
+                context.eval = true;
             }
-            eval(ctx);
+            eval(context);
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object value = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object value = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (value instanceof Double) {
                 value = Math.floor((Double) value);
@@ -3049,7 +3049,7 @@ public abstract class JSONPath {
                     }
                 }
             }
-            ctx.value = value;
+            context.value = value;
         }
     }
 
@@ -3057,21 +3057,21 @@ public abstract class JSONPath {
         static final TypeSegment INSTANCE = new TypeSegment();
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            if (ctx.parent == null) {
-                ctx.root = jsonReader.readAny();
-                ctx.eval = true;
+        public void accept(JSONReader jsonReader, Context context) {
+            if (context.parent == null) {
+                context.root = jsonReader.readAny();
+                context.eval = true;
             }
-            eval(ctx);
+            eval(context);
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object value = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object value = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
-            ctx.value = type(value);
+            context.value = type(value);
         }
     }
 
@@ -3105,15 +3105,15 @@ public abstract class JSONPath {
         static final MinSegment INSTANCE = new MinSegment();
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            eval(ctx);
+        public void accept(JSONReader jsonReader, Context context) {
+            eval(context);
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object value = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object value = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (value == null) {
                 return;
@@ -3149,8 +3149,8 @@ public abstract class JSONPath {
                 throw new UnsupportedOperationException();
             }
 
-            ctx.value = min;
-            ctx.eval = true;
+            context.value = min;
+            context.eval = true;
         }
     }
 
@@ -3158,15 +3158,15 @@ public abstract class JSONPath {
         static final MaxSegment INSTANCE = new MaxSegment();
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            eval(ctx);
+        public void accept(JSONReader jsonReader, Context context) {
+            eval(context);
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object value = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object value = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (value == null) {
                 return;
@@ -3202,8 +3202,8 @@ public abstract class JSONPath {
                 throw new UnsupportedOperationException();
             }
 
-            ctx.value = max;
-            ctx.eval = true;
+            context.value = max;
+            context.eval = true;
         }
     }
 
@@ -3226,10 +3226,10 @@ public abstract class JSONPath {
         }
 
         @Override
-        public boolean contains(Context ctx) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public boolean contains(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (object == null) {
                 return false;
@@ -3251,7 +3251,7 @@ public abstract class JSONPath {
                         }
                     }
 
-                    ObjectWriter<?> objectWriter = ctx.path
+                    ObjectWriter<?> objectWriter = context.path
                             .getWriterContext()
                             .getObjectWriter(item.getClass());
                     if (objectWriter instanceof ObjectWriterAdapter) {
@@ -3279,7 +3279,7 @@ public abstract class JSONPath {
                         }
                     }
 
-                    ObjectWriter<?> objectWriter = ctx.path
+                    ObjectWriter<?> objectWriter = context.path
                             .getWriterContext()
                             .getObjectWriter(item.getClass());
                     if (objectWriter instanceof ObjectWriterAdapter) {
@@ -3293,7 +3293,7 @@ public abstract class JSONPath {
                 }
             }
 
-            ObjectWriter<?> objectWriter = ctx.path
+            ObjectWriter<?> objectWriter = context.path
                     .getWriterContext()
                     .getObjectWriter(object.getClass());
             if (objectWriter instanceof ObjectWriterAdapter) {
@@ -3307,10 +3307,10 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (object == null) {
                 return;
@@ -3341,7 +3341,7 @@ public abstract class JSONPath {
                     }
                 }
 
-                ctx.value = value;
+                context.value = value;
                 return;
             }
 
@@ -3369,35 +3369,35 @@ public abstract class JSONPath {
                         }
                     }
                 }
-                ctx.value = values;
+                context.value = values;
                 return;
             }
 
-            JSONWriter.Context writerContext = ctx.path.getWriterContext();
+            JSONWriter.Context writerContext = context.path.getWriterContext();
             ObjectWriter<?> objectWriter = writerContext.getObjectWriter(object.getClass());
             if (objectWriter instanceof ObjectWriterAdapter) {
                 FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
                 if (fieldWriter != null) {
-                    ctx.value = fieldWriter.getFieldValue(object);
+                    context.value = fieldWriter.getFieldValue(object);
                 }
 
                 return;
             }
 
             if (nameHashCode == HASH_NAME && object instanceof Enum) {
-                ctx.value = ((Enum<?>) object).name();
+                context.value = ((Enum<?>) object).name();
                 return;
             }
 
             if (nameHashCode == HASH_ORDINAL && object instanceof Enum) {
-                ctx.value = ((Enum<?>) object).ordinal();
+                context.value = ((Enum<?>) object).ordinal();
                 return;
             }
 
             if (object instanceof String) {
                 String str = (String) object;
                 if (!str.isEmpty() && str.charAt(0) == '{') {
-                    ctx.value =
+                    context.value =
                             JSONPath.of("$." + name)
                                     .extract(
                                             JSONReader.of(str));
@@ -3476,13 +3476,13 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            if (ctx.parent != null
-                    && (ctx.parent.eval
-                    || ctx.parent.current instanceof FilterSegment
-                    || ctx.parent.current instanceof MultiIndexSegment)
+        public void accept(JSONReader jsonReader, Context context) {
+            if (context.parent != null
+                    && (context.parent.eval
+                    || context.parent.current instanceof FilterSegment
+                    || context.parent.current instanceof MultiIndexSegment)
             ) {
-                eval(ctx);
+                eval(context);
                 return;
             }
 
@@ -3504,19 +3504,19 @@ public abstract class JSONPath {
                         }
 
                         if (jsonReader.isArray() || jsonReader.isObject()) {
-                            if (ctx.next != null) {
+                            if (context.next != null) {
                                 break;
                             }
                         }
 
-                        ctx.value = jsonReader.readAny();
-                        ctx.eval = true;
+                        context.value = jsonReader.readAny();
+                        context.eval = true;
                         break;
                     }
                     return;
                 } else if (jsonReader.isArray()
-                        && ctx.parent != null
-                        && ctx.parent.current instanceof AllSegment) {
+                        && context.parent != null
+                        && context.parent.current instanceof AllSegment) {
                     List values = new JSONArray();
                     int itemCnt = jsonReader.startArray();
                     for (int i = 0; i < itemCnt; i++) {
@@ -3535,7 +3535,7 @@ public abstract class JSONPath {
                                 }
 
                                 if (jsonReader.isArray() || jsonReader.isObject()) {
-                                    if (ctx.next != null) {
+                                    if (context.next != null) {
                                         break;
                                     }
                                 }
@@ -3547,8 +3547,8 @@ public abstract class JSONPath {
                         }
                     }
 
-                    ctx.value = values;
-                    ctx.eval = true;
+                    context.value = values;
+                    context.eval = true;
                     return;
                 }
 
@@ -3597,13 +3597,13 @@ public abstract class JSONPath {
                             val = jsonReader.getNumber();
                             break;
                         case '[':
-                            if (ctx.next != null && !(ctx.next instanceof EvalSegment)) {
+                            if (context.next != null && !(context.next instanceof EvalSegment)) {
                                 break _for;
                             }
                             val = jsonReader.readArray();
                             break;
                         case '{':
-                            if (ctx.next != null && !(ctx.next instanceof EvalSegment)) {
+                            if (context.next != null && !(context.next instanceof EvalSegment)) {
                                 break _for;
                             }
                             val = jsonReader.readObject();
@@ -3624,10 +3624,10 @@ public abstract class JSONPath {
                             throw new JSONException("TODO : " + jsonReader.ch);
                     }
 
-                    ctx.value = val;
+                    context.value = val;
                     break;
                 }
-            } else if (jsonReader.ch == '[' && ctx.parent != null && ctx.parent.current instanceof AllSegment) {
+            } else if (jsonReader.ch == '[' && context.parent != null && context.parent.current instanceof AllSegment) {
                 jsonReader.next();
                 List values = new JSONArray();
                 while (jsonReader.ch != JSONReader.EOI) {
@@ -3675,13 +3675,13 @@ public abstract class JSONPath {
                                     val = jsonReader.getNumber();
                                     break;
                                 case '[':
-                                    if (ctx.next != null) {
+                                    if (context.next != null) {
                                         break _for;
                                     }
                                     val = jsonReader.readArray();
                                     break;
                                 case '{':
-                                    if (ctx.next != null) {
+                                    if (context.next != null) {
                                         break _for;
                                     }
                                     val = jsonReader.readObject();
@@ -3712,7 +3712,7 @@ public abstract class JSONPath {
                     }
                 }
 
-                ctx.value = values;
+                context.value = values;
             }/* else if (jsonReader.ch == JSONReader.EOI) {
                 return;
             }*/
@@ -3956,14 +3956,14 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
+        public void accept(JSONReader jsonReader, Context context) {
             List values = new JSONArray();
-            accept(jsonReader, ctx, values);
-            ctx.value = values;
-            ctx.eval = true;
+            accept(jsonReader, context, values);
+            context.value = values;
+            context.eval = true;
         }
 
-        public void accept(JSONReader jsonReader, Context ctx, List<Object> values) {
+        public void accept(JSONReader jsonReader, Context context, List<Object> values) {
             if (jsonReader.isJSONB()) {
                 if (jsonReader.nextIfMatch(BC_OBJECT)) {
                     while (!jsonReader.nextIfMatch(BC_OBJECT_END)) {
@@ -3980,7 +3980,7 @@ public abstract class JSONPath {
                                 values.add(jsonReader.readAny());
                             }
                         } else if (jsonReader.isObject() || jsonReader.isArray()) {
-                            accept(jsonReader, ctx, values);
+                            accept(jsonReader, context, values);
                         } else {
                             jsonReader.skipValue();
                         }
@@ -3992,7 +3992,7 @@ public abstract class JSONPath {
                     int itemCnt = jsonReader.startArray();
                     for (int i = 0; i < itemCnt; i++) {
                         if (jsonReader.isObject() || jsonReader.isArray()) {
-                            accept(jsonReader, ctx, values);
+                            accept(jsonReader, context, values);
                             continue;
                         }
 
@@ -4045,7 +4045,7 @@ public abstract class JSONPath {
                                 val = ch == '[' ? jsonReader.readArray() : jsonReader.readObject();
                                 break;
                             }
-                            accept(jsonReader, ctx, values);
+                            accept(jsonReader, context, values);
                             continue _for;
                         case '"':
                         case '\'':
@@ -4086,7 +4086,7 @@ public abstract class JSONPath {
                     }
 
                     if (jsonReader.ch == '{' || jsonReader.ch == '[') {
-                        accept(jsonReader, ctx, values);
+                        accept(jsonReader, context, values);
                     } else {
                         jsonReader.skipValue();
                     }
@@ -4131,13 +4131,13 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (object == null) {
-                ctx.eval = true;
+                context.eval = true;
                 return;
             }
 
@@ -4145,15 +4145,15 @@ public abstract class JSONPath {
                 List list = (List) object;
                 if (index >= 0) {
                     if (index < list.size()) {
-                        ctx.value = list.get(index);
+                        context.value = list.get(index);
                     }
                 } else {
                     int itemIndex = list.size() + this.index;
                     if (itemIndex >= 0) {
-                        ctx.value = list.get(itemIndex);
+                        context.value = list.get(itemIndex);
                     }
                 }
-                ctx.eval = true;
+                context.eval = true;
                 return;
             }
 
@@ -4165,11 +4165,11 @@ public abstract class JSONPath {
                 for (Iterator it = collection.iterator(); it.hasNext(); ++i) {
                     Object item = it.next();
                     if (i == index) {
-                        ctx.value = item;
+                        context.value = item;
                         break;
                     }
                 }
-                ctx.eval = true;
+                context.eval = true;
                 return;
             }
 
@@ -4177,15 +4177,15 @@ public abstract class JSONPath {
                 Object[] array = (Object[]) object;
                 if (index >= 0) {
                     if (index < array.length) {
-                        ctx.value = array[index];
+                        context.value = array[index];
                     }
                 } else {
                     int itemIndex = array.length + this.index;
                     if (itemIndex >= 0) {
-                        ctx.value = array[itemIndex];
+                        context.value = array[itemIndex];
                     }
                 }
-                ctx.eval = true;
+                context.eval = true;
                 return;
             }
 
@@ -4194,15 +4194,15 @@ public abstract class JSONPath {
                 int length = Array.getLength(object);
                 if (index >= 0) {
                     if (index < length) {
-                        ctx.value = Array.get(object, index);
+                        context.value = Array.get(object, index);
                     }
                 } else {
                     int itemIndex = length + this.index;
                     if (itemIndex >= 0) {
-                        ctx.value = Array.get(object, itemIndex);
+                        context.value = Array.get(object, itemIndex);
                     }
                 }
-                ctx.eval = true;
+                context.eval = true;
                 return;
             }
 
@@ -4246,19 +4246,19 @@ public abstract class JSONPath {
                         }
                     }
                 }
-                ctx.value = value;
-                ctx.eval = true;
+                context.value = value;
+                context.eval = true;
                 return;
             }
 
-            throw new JSONException("jsonpath not support operate : " + ctx.path + ", objectClass" + objectClass.getName());
+            throw new JSONException("jsonpath not support operate : " + context.path + ", objectClass" + objectClass.getName());
         }
 
         @Override
-        public void set(Context ctx, Object value) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void set(Context context, Object value) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (object instanceof java.util.List) {
                 List list = (List) object;
@@ -4304,10 +4304,10 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void setCallback(Context ctx, Function callback) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void setCallback(Context context, Function callback) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (object instanceof java.util.List) {
                 List list = (List) object;
@@ -4367,10 +4367,10 @@ public abstract class JSONPath {
         }
 
         @Override
-        public boolean remove(Context ctx) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public boolean remove(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (object instanceof java.util.List) {
                 List list = (List) object;
@@ -4393,10 +4393,10 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void setInt(Context ctx, int value) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void setInt(Context context, int value) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
             if (object instanceof int[]) {
                 int[] array = (int[]) object;
                 if (index >= 0) {
@@ -4427,14 +4427,14 @@ public abstract class JSONPath {
                 return;
             }
 
-            set(ctx, value);
+            set(context, value);
         }
 
         @Override
-        public void setLong(Context ctx, long value) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void setLong(Context context, long value) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
             if (object instanceof int[]) {
                 int[] array = (int[]) object;
                 if (index >= 0) {
@@ -4465,16 +4465,16 @@ public abstract class JSONPath {
                 return;
             }
 
-            set(ctx, value);
+            set(context, value);
         }
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            if (ctx.parent != null
-                    && (ctx.parent.eval
-                    || (ctx.parent.current instanceof CycleNameSegment && ctx.next == null))
+        public void accept(JSONReader jsonReader, Context context) {
+            if (context.parent != null
+                    && (context.parent.eval
+                    || (context.parent.current instanceof CycleNameSegment && context.next == null))
             ) {
-                eval(ctx);
+                eval(context);
                 return;
             }
 
@@ -4488,13 +4488,13 @@ public abstract class JSONPath {
                     }
 
                     if (jsonReader.isArray() || jsonReader.isObject()) {
-                        if (ctx.next != null) {
+                        if (context.next != null) {
                             break;
                         }
                     }
 
-                    ctx.value = jsonReader.readAny();
-                    ctx.eval = true;
+                    context.value = jsonReader.readAny();
+                    context.eval = true;
                     break;
                 }
                 return;
@@ -4537,13 +4537,13 @@ public abstract class JSONPath {
                         val = jsonReader.getNumber();
                         break;
                     case '[':
-                        if (ctx.next != null && !(ctx.next instanceof EvalSegment)) {
+                        if (context.next != null && !(context.next instanceof EvalSegment)) {
                             break _for;
                         }
                         val = jsonReader.readArray();
                         break;
                     case '{':
-                        if (ctx.next != null && !(ctx.next instanceof EvalSegment)) {
+                        if (context.next != null && !(context.next instanceof EvalSegment)) {
                             break _for;
                         }
                         val = jsonReader.readObject();
@@ -4564,7 +4564,7 @@ public abstract class JSONPath {
                         throw new JSONException("TODO : " + jsonReader.ch);
                 }
 
-                ctx.value = val;
+                context.value = val;
             }
         }
 
@@ -4592,13 +4592,13 @@ public abstract class JSONPath {
         Random random = new Random();
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            if (ctx.parent != null
-                && (ctx.parent.eval
-                || (ctx.parent.current instanceof CycleNameSegment && ctx.next == null)
+        public void accept(JSONReader jsonReader, Context context) {
+            if (context.parent != null
+                && (context.parent.eval
+                || (context.parent.current instanceof CycleNameSegment && context.next == null)
             )
             ) {
-                eval(ctx);
+                eval(context);
                 return;
             }
 
@@ -4613,8 +4613,8 @@ public abstract class JSONPath {
                 }
 
                 int index = Math.abs(random.nextInt()) % array.size();
-                ctx.value = array.get(index);
-                ctx.eval = true;
+                context.value = array.get(index);
+                context.eval = true;
                 return;
             }
 
@@ -4670,16 +4670,16 @@ public abstract class JSONPath {
             }
 
             int index = Math.abs(random.nextInt()) % array.size();
-            ctx.value = array.get(index);
-            ctx.eval = true;
+            context.value = array.get(index);
+            context.eval = true;
 
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             if (object instanceof java.util.List) {
                 List list = (List) object;
@@ -4688,8 +4688,8 @@ public abstract class JSONPath {
                 }
 
                 int randomIndex = Math.abs(random.nextInt()) % list.size();
-                ctx.value = list.get(randomIndex);
-                ctx.eval = true;
+                context.value = list.get(randomIndex);
+                context.eval = true;
                 return;
             }
 
@@ -4700,8 +4700,8 @@ public abstract class JSONPath {
                 }
 
                 int randomIndex = random.nextInt() % array.length;
-                ctx.value = array[randomIndex];
-                ctx.eval = true;
+                context.value = array[randomIndex];
+                context.eval = true;
                 return;
             }
 
@@ -4719,10 +4719,10 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             List result = new JSONArray();
 
@@ -4740,8 +4740,8 @@ public abstract class JSONPath {
                         result.add(list.get(i));
                     }
                 }
-                ctx.value = result;
-                ctx.eval = true;
+                context.value = result;
+                context.eval = true;
                 return;
             }
 
@@ -4754,8 +4754,8 @@ public abstract class JSONPath {
                         result.add(array[i]);
                     }
                 }
-                ctx.value = result;
-                ctx.eval = true;
+                context.value = result;
+                context.eval = true;
                 return;
             }
 
@@ -4763,13 +4763,13 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            if (ctx.parent != null
-                    && (ctx.parent.eval
-                    || (ctx.parent.current instanceof CycleNameSegment && ctx.next == null)
+        public void accept(JSONReader jsonReader, Context context) {
+            if (context.parent != null
+                    && (context.parent.eval
+                    || (context.parent.current instanceof CycleNameSegment && context.next == null)
             )
             ) {
-                eval(ctx);
+                eval(context);
                 return;
             }
 
@@ -4800,8 +4800,8 @@ public abstract class JSONPath {
                     }
                 }
 
-                ctx.value = array;
-                ctx.eval = true;
+                context.value = array;
+                context.eval = true;
                 return;
             }
 
@@ -4874,8 +4874,8 @@ public abstract class JSONPath {
                     }
                 }
             }
-            ctx.value = array;
-            ctx.eval = true;
+            context.value = array;
+            context.eval = true;
         }
 
         @Override
@@ -4942,10 +4942,10 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void eval(Context ctx) {
-            Object object = ctx.parent == null
-                    ? ctx.root
-                    : ctx.parent.value;
+        public void eval(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
 
             List result = new JSONArray();
 
@@ -4958,7 +4958,7 @@ public abstract class JSONPath {
                         result.add(list.get(i));
                     }
                 }
-                ctx.value = result;
+                context.value = result;
                 return;
             }
 
@@ -4971,7 +4971,7 @@ public abstract class JSONPath {
                         result.add(array[i]);
                     }
                 }
-                ctx.value = result;
+                context.value = result;
                 return;
             }
 
@@ -4979,11 +4979,11 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            if (ctx.parent != null
-                    && ctx.parent.current instanceof CycleNameSegment
-                    && ctx.next == null) {
-                eval(ctx);
+        public void accept(JSONReader jsonReader, Context context) {
+            if (context.parent != null
+                    && context.parent.current instanceof CycleNameSegment
+                    && context.next == null) {
+                eval(context);
                 return;
             }
 
@@ -4999,7 +4999,7 @@ public abstract class JSONPath {
 
                     array.add(jsonReader.readAny());
                 }
-                ctx.value = array;
+                context.value = array;
                 return;
             }
 
@@ -5064,7 +5064,7 @@ public abstract class JSONPath {
 
                 array.add(val);
             }
-            ctx.value = array;
+            context.value = array;
         }
     }
 
@@ -5235,9 +5235,9 @@ public abstract class JSONPath {
         }
 
         @Override
-        public void accept(JSONReader jsonReader, Context ctx) {
-            if (ctx.parent != null && ctx.parent.eval) {
-                eval(ctx);
+        public void accept(JSONReader jsonReader, Context context) {
+            if (context.parent != null && context.parent.eval) {
+                eval(context);
                 return;
             }
 
@@ -5257,11 +5257,11 @@ public abstract class JSONPath {
                         }
                     }
 
-                    ctx.value = values;
+                    context.value = values;
                     return;
                 }
 
-                if (jsonReader.isArray() && ctx.next != null) {
+                if (jsonReader.isArray() && context.next != null) {
                     // skip
                     return;
                 }
@@ -5330,13 +5330,13 @@ public abstract class JSONPath {
                         jsonReader.next();
                     }
                 }
-                ctx.value = values;
+                context.value = values;
                 return;
             }
 
             if (jsonReader.ch == '[') {
                 // skip
-                if (ctx.next != null) {
+                if (context.next != null) {
                     return;
                 }
 
@@ -5352,7 +5352,7 @@ public abstract class JSONPath {
                         jsonReader.next();
                     }
                 }
-                ctx.value = values;
+                context.value = values;
                 return;
             }
 
