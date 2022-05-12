@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.filter.NameFilter;
+import com.alibaba.fastjson2.filter.ValueFilter;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.reader.ObjectReader;
@@ -1322,6 +1324,88 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     public JSONObject fluentPut(String key, Object value) {
         put(key, value);
         return this;
+    }
+
+    static void nameFilter(Iterable iterable, NameFilter nameFilter) {
+        for (Iterator it = iterable.iterator(); it.hasNext();) {
+            Object item = it.next();
+            if (item instanceof JSONObject) {
+                ((JSONObject) item).nameFilter(nameFilter);
+            } else if (item instanceof Iterable) {
+                nameFilter((Iterable) item, nameFilter);
+            }
+        }
+    }
+
+    static void nameFilter(Map map, NameFilter nameFilter) {
+        JSONObject changed = null;
+        for (Iterator it = map.entrySet().iterator();it.hasNext();) {
+            Map.Entry entry = (Map.Entry) it.next();
+            Object entryKey = entry.getKey();
+            Object entryValue = entry.getValue();
+
+            if (entryValue instanceof JSONObject) {
+                ((JSONObject) entryValue).nameFilter(nameFilter);
+            } else if (entryValue instanceof Iterable) {
+                nameFilter((Iterable) entryValue, nameFilter);
+            }
+
+            if (entryKey instanceof String) {
+                String key = (String) entryKey;
+                String processName = nameFilter.process(map, key, entryValue);
+                if (processName != null && processName != key && !processName.equals(key)) {
+                    if (changed == null) {
+                        changed = new JSONObject();
+                    }
+                    changed.put(processName, entryValue);
+                    it.remove();
+                }
+            }
+        }
+        if (changed != null) {
+            map.putAll(changed);
+        }
+    }
+
+    static void valueFilter(Iterable iterable, ValueFilter valueFilter) {
+        for (Iterator it = iterable.iterator(); it.hasNext();) {
+            Object item = it.next();
+            if (item instanceof Map) {
+                valueFilter((Map) item, valueFilter);
+            } else if (item instanceof Iterable) {
+                valueFilter((Iterable) item, valueFilter);
+            }
+        }
+    }
+
+    static void valueFilter(Map map, ValueFilter valueFilter) {
+        for (Iterator it = map.entrySet().iterator();it.hasNext();) {
+            Map.Entry entry = (Map.Entry) it.next();
+            Object entryKey = entry.getKey();
+            Object entryValue = entry.getValue();
+
+            if (entryValue instanceof Map) {
+                valueFilter((Map) entryValue, valueFilter);
+            } else if (entryValue instanceof Iterable) {
+                valueFilter((Iterable) entryValue, valueFilter);
+            }
+
+            if (entryKey instanceof String) {
+                String key = (String) entryKey;
+                Object applyValue = valueFilter.apply(map, key, entryValue);
+                if (applyValue != entryValue) {
+                    entry.setValue(applyValue);
+                }
+            }
+        }
+    }
+
+    public void valueFilter(ValueFilter valueFilter) {
+        valueFilter(this, valueFilter);
+    }
+
+    public void nameFilter(NameFilter nameFilter) {
+        nameFilter(this, nameFilter);
     }
 
     /**
