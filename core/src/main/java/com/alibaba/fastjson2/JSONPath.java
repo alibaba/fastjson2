@@ -4304,6 +4304,69 @@ public abstract class JSONPath {
         }
 
         @Override
+        public void setCallback(Context ctx, Function callback) {
+            Object object = ctx.parent == null
+                    ? ctx.root
+                    : ctx.parent.value;
+
+            if (object instanceof java.util.List) {
+                List list = (List) object;
+                if (index >= 0) {
+                    if (index < list.size()) {
+                        Object value = list.get(index);
+                        value = callback.apply(value);
+                        list.set(index, value);
+                    }
+                } else {
+                    int itemIndex = list.size() + this.index;
+                    if (itemIndex >= 0) {
+                        Object value = list.get(index);
+                        value = callback.apply(value);
+                        list.set(itemIndex, value);
+                    }
+                }
+                return;
+            }
+
+            if (object instanceof Object[]) {
+                Object[] array = (Object[]) object;
+                if (index >= 0) {
+                    if (index < array.length) {
+                        Object value = array[index];
+                        value = callback.apply(value);
+                        array[index] = value;
+                    }
+                } else {
+                    Object value = array[index];
+                    value = callback.apply(value);
+                    array[array.length + index] = value;
+                }
+                return;
+            }
+
+            if (object != null && object.getClass().isArray()) {
+                int length = Array.getLength(object);
+                if (index >= 0) {
+                    if (index < length) {
+                        Object value = Array.get(object, index);
+                        value = callback.apply(value);
+                        Array.set(object, index, value);
+                    }
+                } else {
+                    int arrayIndex = length + index;
+                    if (arrayIndex >= 0) {
+                        Object value = Array.get(object, index);
+                        value = callback.apply(value);
+                        Array.set(object, arrayIndex, value);
+                    }
+                }
+                return;
+            }
+
+            throw new JSONException("UnsupportedOperation");
+        }
+
+        @Override
         public boolean remove(Context ctx) {
             Object object = ctx.parent == null
                     ? ctx.root
