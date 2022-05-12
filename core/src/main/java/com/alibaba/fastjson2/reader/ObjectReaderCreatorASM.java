@@ -344,7 +344,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
             genFields(fieldReaderArray, cw);
         }
 
-        cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, classNameType, TYPE_OBJECT_READER_ADAPTER, new String[]{});
+        cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER, classNameType, TYPE_OBJECT_READER_ADAPTER, new String[]{});
 
         {
             final int CLASS = 1, SUPPLIER = 2, FIELD_READER_ARRAY = 3;

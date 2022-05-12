@@ -46,88 +46,12 @@ public interface Opcodes {
     int V1_8 = 0 << 16 | 52;
 
     // Access flags values, defined in
-    // - https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.1-200-E.1
-    // - https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.5-200-A.1
-    // - https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.6-200-A.1
-    // - https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.25
-
     int ACC_PUBLIC = 0x0001; // class, field, method
-    int ACC_PRIVATE = 0x0002; // class, field, method
-    int ACC_PROTECTED = 0x0004; // class, field, method
     int ACC_STATIC = 0x0008; // field, method
     int ACC_FINAL = 0x0010; // class, field, method, parameter
     int ACC_SUPER = 0x0020; // class
-    int ACC_SYNCHRONIZED = 0x0020; // method
-    int ACC_OPEN = 0x0020; // module
-    int ACC_TRANSITIVE = 0x0020; // module requires
-    int ACC_VOLATILE = 0x0040; // field
-    int ACC_BRIDGE = 0x0040; // method
-    int ACC_STATIC_PHASE = 0x0040; // module requires
-    int ACC_VARARGS = 0x0080; // method
-    int ACC_TRANSIENT = 0x0080; // field
-    int ACC_NATIVE = 0x0100; // method
-    int ACC_INTERFACE = 0x0200; // class
-    int ACC_ABSTRACT = 0x0400; // class, method
-    int ACC_STRICT = 0x0800; // method
-
-    // ASM specific access flags.
-    // WARNING: the 16 least significant bits must NOT be used, to avoid conflicts with standard
-    // access flags, and also to make sure that these flags are automatically filtered out when
-    // written in class files (because access flags are stored using 16 bits only).
-
-    // Possible values for the type operand of the NEWARRAY instruction.
-    // See https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-6.html#jvms-6.5.newarray.
-
-    int T_BOOLEAN = 4;
-    int T_CHAR = 5;
-    int T_FLOAT = 6;
-    int T_DOUBLE = 7;
-    int T_BYTE = 8;
-    int T_SHORT = 9;
-    int T_INT = 10;
-    int T_LONG = 11;
-
-    // ASM specific stack map frame types, used in {@link ClassVisitor#visitFrame}.
-
-    int F_NEW = -1;
-
-    /**
-     * A compressed frame with complete frame data.
-     */
-    int F_FULL = 0;
-
-    /**
-     * A compressed frame where locals are the same as the locals in the previous frame, except that
-     * additional 1-3 locals are defined, and with an empty stack.
-     */
-    int F_APPEND = 1;
-
-    /**
-     * A compressed frame where locals are the same as the locals in the previous frame, except that
-     * the last 1-3 locals are absent and with an empty stack.
-     */
-    int F_CHOP = 2;
-
-    /**
-     * A compressed frame with exactly the same locals as the previous frame and with an empty stack.
-     */
-    int F_SAME = 3;
-
-    /**
-     * A compressed frame with exactly the same locals as the previous frame and with a single value
-     * on the stack.
-     */
-    int F_SAME1 = 4;
-
-    // Standard stack map frame element types, used in {@link ClassVisitor#visitFrame}.
-
-    Integer TOP = Frame.ITEM_TOP;
-    Integer INTEGER = Frame.ITEM_INTEGER;
-    Integer FLOAT = Frame.ITEM_FLOAT;
     Integer DOUBLE = Frame.ITEM_DOUBLE;
-    Integer LONG = Frame.ITEM_LONG;
     Integer NULL = Frame.ITEM_NULL;
-    Integer UNINITIALIZED_THIS = Frame.ITEM_UNINITIALIZED_THIS;
 
     // The JVM opcode values (with the MethodVisitor method name used to visit them in comment, and
     // where '-' means 'same method name as on the previous line').
@@ -159,8 +83,6 @@ public interface Opcodes {
     int ALOAD = 25; // -
     int IALOAD = 46; // visitInsn
     int LALOAD = 47; // -
-    int FALOAD = 48; // -
-    int DALOAD = 49; // -
     int AALOAD = 50; // -
     int BALOAD = 51; // -
     int CALOAD = 52; // -
@@ -170,15 +92,7 @@ public interface Opcodes {
     int FSTORE = 56; // -
     int DSTORE = 57; // -
     int ASTORE = 58; // -
-    int IASTORE = 79; // visitInsn
-    int LASTORE = 80; // -
-    int FASTORE = 81; // -
-    int DASTORE = 82; // -
-    int AASTORE = 83; // -
-    int BASTORE = 84; // -
-    int CASTORE = 85; // -
-    int SASTORE = 86; // -
-    int POP = 87; // -
+    int POP = 87; // visitInsn
     int POP2 = 88; // -
     int DUP = 89; // -
     int DUP_X1 = 90; // -
@@ -189,24 +103,14 @@ public interface Opcodes {
     int SWAP = 95; // -
     int IADD = 96; // -
     int LADD = 97; // -
-    int FADD = 98; // -
-    int DADD = 99; // -
     int ISUB = 100; // -
     int LSUB = 101; // -
-    int FSUB = 102; // -
-    int DSUB = 103; // -
     int IMUL = 104; // -
     int LMUL = 105; // -
-    int FMUL = 106; // -
-    int DMUL = 107; // -
     int IDIV = 108; // -
     int LDIV = 109; // -
-    int FDIV = 110; // -
-    int DDIV = 111; // -
     int IREM = 112; // -
     int LREM = 113; // -
-    int FREM = 114; // -
-    int DREM = 115; // -
     int INEG = 116; // -
     int LNEG = 117; // -
     int FNEG = 118; // -
@@ -228,14 +132,9 @@ public interface Opcodes {
     int I2F = 134; // -
     int I2D = 135; // -
     int L2I = 136; // -
-    int L2F = 137; // -
-    int L2D = 138; // -
     int F2I = 139; // -
-    int F2L = 140; // -
-    int F2D = 141; // -
     int D2I = 142; // -
     int D2L = 143; // -
-    int D2F = 144; // -
     int I2B = 145; // -
     int I2C = 146; // -
     int I2S = 147; // -
@@ -259,7 +158,6 @@ public interface Opcodes {
     int IF_ACMPEQ = 165; // -
     int IF_ACMPNE = 166; // -
     int GOTO = 167; // -
-    int JSR = 168; // -
     int RET = 169; // visitVarInsn
     int TABLESWITCH = 170; // visiTableSwitchInsn
     int LOOKUPSWITCH = 171; // visitLookupSwitch
@@ -277,17 +175,13 @@ public interface Opcodes {
     int INVOKESPECIAL = 183; // -
     int INVOKESTATIC = 184; // -
     int INVOKEINTERFACE = 185; // -
-    int INVOKEDYNAMIC = 186; // visitInvokeDynamicInsn
     int NEW = 187; // visitTypeInsn
-    int NEWARRAY = 188; // visitIntInsn
-    int ANEWARRAY = 189; // visitTypeInsn
     int ARRAYLENGTH = 190; // visitInsn
     int ATHROW = 191; // -
     int CHECKCAST = 192; // visitTypeInsn
     int INSTANCEOF = 193; // -
     int MONITORENTER = 194; // visitInsn
     int MONITOREXIT = 195; // -
-    int MULTIANEWARRAY = 197; // visitMultiANewArrayInsn
     int IFNULL = 198; // visitJumpInsn
     int IFNONNULL = 199; // -
 }
