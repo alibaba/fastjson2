@@ -2470,8 +2470,8 @@ class JSONReaderUTF8 extends JSONReader {
             while (ch >= '0' && ch <= '9') {
                 int byteVal = (ch - '0');
                 expValue = expValue * 10 + byteVal;
-                if (expValue > 100) {
-                    throw new JSONException("to large exp value : " + expValue);
+                if (expValue > MAX_EXP) {
+                    throw new JSONException("too large exp value : " + expValue);
                 }
 
                 if (offset == end) {
@@ -2661,8 +2661,8 @@ class JSONReaderUTF8 extends JSONReader {
             while (ch >= '0' && ch <= '9') {
                 int byteVal = (ch - '0');
                 expValue = expValue * 10 + byteVal;
-                if (expValue > 100) {
-                    throw new JSONException("to large exp value : " + expValue);
+                if (expValue > MAX_EXP) {
+                    throw new JSONException("too large exp value : " + expValue);
                 }
                 ch = (char) bytes[offset++];
             }
