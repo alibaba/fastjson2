@@ -8,10 +8,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -211,6 +208,25 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
 
         if (value instanceof Collection) {
             return new JSONArray((Collection<?>) value);
+        }
+
+        if (value instanceof Object[]) {
+            return JSONArray.of((Object[]) value);
+        }
+
+        if (value == null) {
+            return null;
+        }
+
+        Class valueClass = value.getClass();
+        if (valueClass.isArray()) {
+            int length = Array.getLength(value);
+            JSONArray jsonArray = new JSONArray(length);
+            for (int i = 0; i < length; i++) {
+                Object item = Array.get(value, i);
+                jsonArray.add(item);
+            }
+            return jsonArray;
         }
 
         return null;
