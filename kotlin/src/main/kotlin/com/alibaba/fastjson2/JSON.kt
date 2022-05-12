@@ -3,6 +3,7 @@ package com.alibaba.fastjson2
 import com.alibaba.fastjson2.filter.Filter
 
 import java.io.InputStream
+import java.io.OutputStream
 import java.io.Reader
 import java.nio.charset.Charset
 
@@ -54,7 +55,8 @@ inline fun <reified T> ByteArray.to() =
     "HasPlatformType",
     "NOTHING_TO_INLINE"
 )
-inline fun String?.isJSONObject() = JSON.isValidObject(this)
+inline fun String?.isJSONObject() =
+    JSON.isValidObject(this)
 
 /**
  * Verify the [ByteArray] is JSON `Object`
@@ -72,7 +74,8 @@ inline fun String?.isJSONObject() = JSON.isValidObject(this)
     "HasPlatformType",
     "NOTHING_TO_INLINE"
 )
-inline fun ByteArray?.isJSONObject() = JSON.isValidObject(this)
+inline fun ByteArray?.isJSONObject() =
+    JSON.isValidObject(this)
 
 /**
  * Verify the [String] is JSON `Array`
@@ -90,7 +93,8 @@ inline fun ByteArray?.isJSONObject() = JSON.isValidObject(this)
     "HasPlatformType",
     "NOTHING_TO_INLINE"
 )
-inline fun String?.isJSONArray() = JSON.isValidArray(this)
+inline fun String?.isJSONArray() =
+    JSON.isValidArray(this)
 
 /**
  * Verify the [ByteArray] is JSON `Array`
@@ -108,7 +112,8 @@ inline fun String?.isJSONArray() = JSON.isValidArray(this)
     "HasPlatformType",
     "NOTHING_TO_INLINE"
 )
-inline fun ByteArray?.isJSONArray() = JSON.isValidArray(this)
+inline fun ByteArray?.isJSONArray() =
+    JSON.isValidArray(this)
 
 /**
  * Parse JSON [String] into [JSONArray] or [JSONObject]
@@ -338,6 +343,20 @@ inline fun <reified T> String?.parseArray(
 )
 
 /**
+ * Parse JSON [ByteArray] into [List]
+ *
+ * @param features features to be enabled in parsing
+ * @return [List]?
+ * @since 2.0.3
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T> ByteArray?.parseArray(
+    vararg features: JSONReader.Feature
+) = JSON.parseArray<T>(
+    this, T::class.java, *features
+)
+
+/**
  * Serialize [Any]? to JSON [String]
  *
  * E.g.
@@ -346,19 +365,22 @@ inline fun <reified T> String?.parseArray(
  *   val text = obj.toJSONString()
  * ```
  *
- * @receiver [String]
+ * @receiver [Any]?
+ * @return [String]
  * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
     "NOTHING_TO_INLINE"
 )
-inline fun Any?.toJSONString() = JSON.toJSONString(this)
+inline fun Any?.toJSONString() =
+    JSON.toJSONString(this)
 
 /**
  * Serialize [Any]? to JSON [String]
  *
- * @receiver [String]
+ * @receiver [Any]?
+ * @return [String]
  * @since 2.0.3
  */
 @Suppress(
@@ -375,7 +397,8 @@ inline fun Any?.toJSONString(
 /**
  * Serialize [Any]? to JSON [String]
  *
- * @receiver [String]
+ * @receiver [Any]?
+ * @return [String]
  * @since 2.0.3
  */
 @Suppress(
@@ -391,7 +414,8 @@ inline fun Any?.toJSONString(
 /**
  * Serialize [Any]? to JSON [String]
  *
- * @receiver [String]
+ * @receiver [Any]?
+ * @return [String]
  * @since 2.0.3
  */
 @Suppress(
@@ -408,7 +432,8 @@ inline fun Any?.toJSONString(
 /**
  * Serialize [Any]? to JSON [String]
  *
- * @receiver [String]
+ * @receiver [Any]?
+ * @return [String]
  * @since 2.0.3
  */
 @Suppress(
@@ -430,19 +455,22 @@ inline fun Any?.toJSONString(
  *   val text = obj.toJSONByteArray()
  * ```
  *
- * @receiver [ByteArray]
+ * @receiver [Any]?
+ * @return [ByteArray]
  * @since 2.0.3
  */
 @Suppress(
     "HasPlatformType",
     "NOTHING_TO_INLINE"
 )
-inline fun Any?.toJSONByteArray() = JSON.toJSONBytes(this)
+inline fun Any?.toJSONByteArray() =
+    JSON.toJSONBytes(this)
 
 /**
  * Serialize [Any]? to JSON [ByteArray]
  *
- * @receiver [ByteArray]
+ * @receiver [Any]?
+ * @return [ByteArray]
  * @since 2.0.3
  */
 @Suppress(
@@ -450,15 +478,16 @@ inline fun Any?.toJSONByteArray() = JSON.toJSONBytes(this)
     "NOTHING_TO_INLINE"
 )
 inline fun Any?.toJSONByteArray(
-    filter: Array<out Filter>
+    filters: Array<out Filter>
 ) = JSON.toJSONBytes(
-    this, filter
+    this, filters
 )
 
 /**
  * Serialize [Any]? to JSON [ByteArray]
  *
- * @receiver [ByteArray]
+ * @receiver [Any]?
+ * @return [ByteArray]
  * @since 2.0.3
  */
 @Suppress(
@@ -466,8 +495,75 @@ inline fun Any?.toJSONByteArray(
     "NOTHING_TO_INLINE"
 )
 inline fun Any?.toJSONByteArray(
-    filter: Array<out Filter>,
     vararg features: JSONWriter.Feature
 ) = JSON.toJSONBytes(
-    this, filter, *features
+    this, *features
+)
+
+/**
+ * Serialize [Any]? to JSON [ByteArray]
+ *
+ * @receiver [Any]?
+ * @return [ByteArray]
+ * @since 2.0.3
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun Any?.toJSONByteArray(
+    filters: Array<out Filter>,
+    vararg features: JSONWriter.Feature
+) = JSON.toJSONBytes(
+    this, filters, *features
+)
+
+/**
+ * Serialize [Any]? to JSON [ByteArray] and write to [OutputStream]
+ *
+ * E.g.
+ * ```
+ *   val out = ...
+ *   val data = ...
+ *   data.writeTo(out)
+ * ```
+ *
+ * @receiver [Any]?
+ * @since 2.0.3
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun Any?.writeTo(
+    out: OutputStream,
+    vararg features: JSONWriter.Feature
+) = JSON.writeTo(
+    out, this, *features
+)
+
+/**
+ * Serialize [Any]? to JSON [ByteArray] and write to [OutputStream]
+ *
+ * E.g.
+ * ```
+ *   val out = ...
+ *   val data = ...
+ *   val filters = ...
+ *   data.writeTo(out, filters)
+ * ```
+ *
+ * @receiver [Any]?
+ * @since 2.0.3
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun Any?.writeTo(
+    out: OutputStream,
+    filters: Array<out Filter>,
+    vararg features: JSONWriter.Feature
+) = JSON.writeTo(
+    out, this, filters, *features
 )
