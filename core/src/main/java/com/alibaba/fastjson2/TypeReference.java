@@ -19,9 +19,9 @@ import java.util.List;
  * <p>
  * For example, to create a type literal for {@code List<String>}, you can
  * create an empty anonymous inner class:
- * <p>
- * {@code TypeReference<List<String>> typeReference = new TypeReference<List<String>>(){};}
- * <p>
+ * <pre>{@code
+ * TypeReference<List<String>> typeReference = new TypeReference<List<String>>(){};
+ * }</pre>
  * For example, use it quickly
  * <pre>{@code String text = "{\"id\":1,\"name\":\"kraity\"}";
  * User user = new TypeReference<User>(){}.parseObject(text);
@@ -60,7 +60,7 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * For example
+     * E.g.
      * <pre>{@code
      * Class<T> klass = ...;
      * TypeReference<Response<T>> ref = new TypeReference<Response<T>>(new Type[]{klass}){};
@@ -100,10 +100,10 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSON#parseObject} for details
+     * See {@link JSON#parseObject(String, Type)} for details
      *
-     * <pre>{@code String text = "{\"id\":1,\"name\":\"kraity\"}";
-     *
+     * <pre>{@code
+     * String text = "{\"id\":1,\"name\":\"kraity\"}";
      * User user = new TypeReference<User>(){}.parseObject(text);
      * }</pre>
      *
@@ -115,15 +115,15 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSON#parseObject} for details
+     * See {@link JSON#parseObject(byte[], Type)} for details
      *
-     * <pre>{@code String utf8Bytes = "{\"id\":1,\"name\":\"kraity\"}".getBytes(StandardCharsets.UTF_8);
-     *
+     * <pre>{@code
+     * String utf8Bytes = "{\"id\":1,\"name\":\"kraity\"}".getBytes(StandardCharsets.UTF_8);
      * User user = new TypeReference<User>(){}.parseObject(utf8Bytes);
      * }</pre>
      *
-     * @param utf8Bytes the JSON {@link String} to be parsed
-     * @since 2.0.2
+     * @param utf8Bytes UTF8 encoded JSON byte array to parse
+     * @since 2.0.3
      */
     public T parseObject(byte[] utf8Bytes) {
         return JSON.parseObject(utf8Bytes, type);
@@ -131,12 +131,15 @@ public abstract class TypeReference<T> {
 
     /**
      * See {@link JSONObject#toJavaObject} for details
-     * <p>
-     * {@code Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.parseObject(jsonObject);}
+     *
+     * <pre>{@code
+     * JSONObject object = ...
+     * Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.parseObject(object);
+     * }</pre>
      *
      * @param object specify the {@link JSONObject} to convert
      * @since 2.0.2
-     * @deprecated since 2.0.3, please use {@link #toJavaObject(JSONObject)}
+     * @deprecated since 2.0.3, please use {@link #toJavaObject(JSONObject, JSONReader.Feature...)}
      */
     @Deprecated
     public T parseObject(JSONObject object) {
@@ -144,24 +147,44 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSON#parseArray} for details
+     * See {@link JSON#parseArray(String, JSONReader.Feature...)} for details
      *
-     * <pre>{@code String text = "[{\"id\":1,\"name\":\"kraity\"}]";
-     *
+     * <pre>{@code
+     * String text = "[{\"id\":1,\"name\":\"kraity\"}]";
      * List<User> users = new TypeReference<User>(){}.parseArray(text);
      * }</pre>
      *
-     * @param text the JSON {@link String} to be parsed
+     * @param text     the JSON {@link String} to be parsed
+     * @param features features to be enabled in parsing
      * @since 2.0.2
      */
-    public List<T> parseArray(String text) {
-        return JSON.parseArray(text, type);
+    public List<T> parseArray(String text, JSONReader.Feature... features) {
+        return JSON.parseArray(text, type, features);
+    }
+
+    /**
+     * See {@link JSON#parseObject(byte[], Type, JSONReader.Feature...))} for details
+     *
+     * <pre>{@code
+     * String utf8Bytes = "[{\"id\":1,\"name\":\"kraity\"}]".getBytes(StandardCharsets.UTF_8);
+     * List<User> users = new TypeReference<User>(){}.parseArray(utf8Bytes);
+     * }</pre>
+     *
+     * @param utf8Bytes UTF8 encoded JSON byte array to parse
+     * @param features  features to be enabled in parsing
+     * @since 2.0.3
+     */
+    public List<T> parseArray(byte[] utf8Bytes, JSONReader.Feature... features) {
+        return JSON.parseArray(utf8Bytes, type, features);
     }
 
     /**
      * See {@link JSONArray#toJavaObject} for details
-     * <p>
-     * {@code List<User> users = new TypeReference<ArrayList<User>>(){}.parseArray(jsonArray);}
+     *
+     * <pre>{@code
+     * JSONArray array = ...
+     * List<User> users = new TypeReference<ArrayList<User>>(){}.parseArray(array);
+     * }</pre>
      *
      * @param array specify the {@link JSONArray} to convert
      * @since 2.0.2
@@ -173,21 +196,28 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSONObject#toJavaObject} for details
-     * <p>
-     * {@code Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.toJavaObject(jsonObject);}
+     * See {@link JSONObject#toJavaObject(Type, JSONReader.Feature...)} for details
      *
-     * @param object specify the {@link JSONObject} to convert
+     * <pre>{@code
+     * JSONObject object = ...
+     * Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.toJavaObject(object);
+     * }</pre>
+     *
+     * @param object   specify the {@link JSONObject} to convert
+     * @param features features to be enabled in parsing
      * @since 2.0.3
      */
-    public T toJavaObject(JSONObject object) {
-        return object.toJavaObject(type);
+    public T toJavaObject(JSONObject object, JSONReader.Feature... features) {
+        return object.toJavaObject(type, features);
     }
 
     /**
-     * See {@link JSONArray#toJavaObject} for details
-     * <p>
-     * {@code List<User> users = new TypeReference<ArrayList<User>>(){}.toJavaObject(jsonArray);}
+     * See {@link JSONArray#toJavaObject(Type)} for details
+     *
+     * <pre>{@code
+     * JSONArray array = ...
+     * List<User> users = new TypeReference<ArrayList<User>>(){}.toJavaObject(array);
+     * }</pre>
      *
      * @param array specify the {@link JSONArray} to convert
      * @since 2.0.3

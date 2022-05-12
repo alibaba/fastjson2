@@ -682,6 +682,21 @@ public class JSONTest {
         assertNotNull(error);
     }
 
+    @Test
+    public void test_parseArray_bytes() {
+        String text = "[{\"id\":1,\"name\":\"kraity\"}]";
+        byte[] data = text.getBytes(StandardCharsets.UTF_8);
+
+        List<User> users = JSON.parseArray(data, User.class);
+        assertNotNull(users);
+        assertEquals(1, users.size());
+
+        User user = users.get(0);
+        assertNotNull(user);
+        assertEquals(1, user.id);
+        assertEquals("kraity", user.name);
+    }
+
     public static class User {
         public int id;
         public String name;

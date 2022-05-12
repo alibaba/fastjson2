@@ -711,6 +711,28 @@ public interface JSON {
     }
 
     /**
+     * Parse UTF8 encoded JSON byte array into {@link List} with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param bytes    UTF8 encoded JSON byte array to parse
+     * @param type     specify the {@link Type} to be converted
+     * @param features features to be enabled in parsing
+     */
+    static <T> List<T> parseArray(byte[] bytes, Type type, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(
+                new Type[]{type}, null, List.class
+        );
+
+        try (JSONReader reader = JSONReader.of(bytes)) {
+            reader.context.config(features);
+            return reader.read(paramType);
+        }
+    }
+
+    /**
      * Serialize Java Object to JSON {@link String}
      *
      * @param object Java Object to be serialized into JSON {@link String}
