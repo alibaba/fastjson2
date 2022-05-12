@@ -938,10 +938,43 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     /**
      * Serialize to JSON {@link String}
      *
+     * @param features features to be enabled in serialization
      * @return JSON {@link String}
      */
-    public String toJSONString() {
-        return toString();
+    @SuppressWarnings("unchecked")
+    public String toString(JSONWriter.Feature... features) {
+        try (JSONWriter writer = JSONWriter.of(features)) {
+            if (objectWriter == null) {
+                objectWriter = writer.getObjectWriter(JSONObject.class);
+            }
+            objectWriter.write(writer, this, null, null, 0);
+            return writer.toString();
+        }
+    }
+
+    /**
+     * Serialize to JSON {@link String}
+     *
+     * @param features features to be enabled in serialization
+     * @return JSON {@link String}
+     */
+    public String toJSONString(JSONWriter.Feature... features) {
+        return toString(features);
+    }
+
+    /**
+     * Serialize to JSONB bytes
+     * @param features features to be enabled in serialization
+     * @return JSONB bytes
+     */
+    public byte[] toJSONBBytes(JSONWriter.Feature... features) {
+        try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
+            if (objectWriter == null) {
+                objectWriter = writer.getObjectWriter(JSONObject.class);
+            }
+            objectWriter.write(writer, this, null, null, 0);
+            return writer.getBytes();
+        }
     }
 
     /**
