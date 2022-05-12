@@ -163,7 +163,7 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSON#parseObject(byte[], Type, JSONReader.Feature...))} for details
+     * See {@link JSON#parseArray(byte[], Type, JSONReader.Feature...)} for details
      *
      * <pre>{@code
      * String utf8Bytes = "[{\"id\":1,\"name\":\"kraity\"}]".getBytes(StandardCharsets.UTF_8);
