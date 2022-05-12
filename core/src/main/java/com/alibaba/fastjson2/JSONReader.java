@@ -26,6 +26,8 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 public abstract class JSONReader implements Closeable {
+    static final int MAX_EXP = 512;
+
     static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
     static final ZoneId UTC = ZoneId.of("UTC");
     static final ZoneId SHANGHAI = ZoneId.of("Asia/Shanghai");
