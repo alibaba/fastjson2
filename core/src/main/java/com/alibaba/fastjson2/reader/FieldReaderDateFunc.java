@@ -3,7 +3,9 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Method;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -72,7 +74,13 @@ final class FieldReaderDateFunc<T> extends FieldReaderImpl<T> {
                 }
                 String str = jsonReader.readString();
 
-                LocalDateTime ldt = LocalDateTime.parse(str, formatter);
+                LocalDateTime ldt;
+                if (format.indexOf("HH") == -1) {
+                    ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                } else {
+                    ldt = LocalDateTime.parse(str, formatter);
+                }
+
                 ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
                 long millis = zdt.toInstant().toEpochMilli();
                 fieldValue = new java.util.Date(millis);
