@@ -12,8 +12,8 @@ final class FieldReaderStringFunc<T, V> extends FieldReaderImpl<T> {
     final String format;
     final boolean trim;
 
-    FieldReaderStringFunc(String fieldName, Class<V> fieldClass, int ordinal, long features, String format, Method method, BiConsumer<T, V> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, null);
+    FieldReaderStringFunc(String fieldName, Class<V> fieldClass, int ordinal, long features, String format, Object defaultValue,Method method, BiConsumer<T, V> function) {
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, defaultValue);
         this.method = method;
         this.function = function;
 

@@ -11,8 +11,8 @@ final class FieldReaderBigIntegerFunc<T, V> extends FieldReaderImpl<T> {
     final Method method;
     final BiConsumer<T, V> function;
 
-    public FieldReaderBigIntegerFunc(String fieldName, Class<V> fieldClass, int ordinal, Method method, BiConsumer<T, V> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, null, null);
+    public FieldReaderBigIntegerFunc(String fieldName, Class<V> fieldClass, int ordinal, String format, Object defaultValue,Method method, BiConsumer<T, V> function) {
+        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, defaultValue);
         this.method = method;
         this.function = function;
     }

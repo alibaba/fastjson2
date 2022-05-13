@@ -16,8 +16,8 @@ final class FieldReaderListFunc<T, V>
     final Type itemType;
     private ObjectReader itemObjectReader;
 
-    FieldReaderListFunc(String fieldName, Type fieldType, Class<V> fieldClass, int ordinal, Method method, BiConsumer<T, V> function) {
-        super(fieldName, fieldType, fieldClass, ordinal, 0, null);
+    FieldReaderListFunc(String fieldName, Type fieldType, Class<V> fieldClass, int ordinal, String format, Object defaultValue, Method method, BiConsumer<T, V> function) {
+        super(fieldName, fieldType, fieldClass, ordinal, 0, format, defaultValue);
         this.method = method;
         this.function = function;
         if (fieldType instanceof ParameterizedType) {

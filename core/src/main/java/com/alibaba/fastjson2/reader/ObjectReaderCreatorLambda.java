@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
@@ -224,6 +225,17 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
             , Class fieldClass
             , Method method
     ) {
+        if (defaultValue != null && defaultValue.getClass() != fieldClass) {
+            Function typeConvert = JSONFactory
+                    .getDefaultObjectReaderProvider()
+                    .getTypeConvert(defaultValue.getClass(), fieldType);
+            if (typeConvert != null) {
+                defaultValue = typeConvert.apply(defaultValue);
+            } else {
+                throw new JSONException("illegal defaultValue : " + defaultValue + ", class " + fieldClass.getName());
+            }
+        }
+
         if (fieldType == boolean.class) {
             ObjBoolConsumer function = (ObjBoolConsumer) lambdaFunction(objectClass, fieldClass, method);
             return new FieldReaderBoolValFunc<>(fieldName, ordinal, method, function);
@@ -251,7 +263,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
 
         if (fieldType == char.class) {
             ObjCharConsumer function = (ObjCharConsumer) lambdaFunction(objectClass, fieldClass, method);
-            return new FieldReaderCharValueFunc<>(fieldName, ordinal, method, function);
+            return new FieldReaderCharValueFunc<>(fieldName, ordinal, null, null, method, function);
         }
 
         if (fieldType == float.class) {

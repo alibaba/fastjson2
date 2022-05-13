@@ -22,6 +22,8 @@ final class FieldReaderListStrFunc<T> extends FieldReaderImpl<T>
             , Type fieldType
             , Class fieldClass
             , int ordinal
+            , String format
+            , Object defaultValue
             , Method method
             , BiConsumer<T, List> function) {
         super(fieldName, fieldType, fieldClass, ordinal, 0, null);
