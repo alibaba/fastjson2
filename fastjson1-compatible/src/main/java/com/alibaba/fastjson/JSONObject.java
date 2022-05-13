@@ -26,6 +26,8 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -148,6 +150,13 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
 
         if (value instanceof Map) {
             return new JSONObject((Map) value);
+        }
+
+        Class valueClass = value.getClass();
+        ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
+        if (objectWriter instanceof ObjectWriterAdapter) {
+            ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) objectWriter;
+            return new JSONObject(writerAdapter.toJSONObject(value));
         }
 
         return null;

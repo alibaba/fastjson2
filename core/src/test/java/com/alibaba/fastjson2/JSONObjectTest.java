@@ -1033,6 +1033,20 @@ public class JSONObjectTest {
     }
 
     @Test
+    public void testGetObject() {
+        Bean bean = new Bean();
+        bean.id = 101;
+        JSONObject object = JSONObject.of("value", bean);
+        JSONObject object1 = object.getJSONObject("value");
+        assertNotNull(object1);
+        assertEquals(bean.id, object1.get("id"));
+
+        JSONObject object2 = JSONArray.of(bean).getJSONObject(0);
+        assertNotNull(object2);
+        assertEquals(bean.id, object2.get("id"));
+    }
+
+    @Test
     public void test_init() {
         {
             JSONObject object = new JSONObject(1, 0.75f);
@@ -1261,5 +1275,9 @@ public class JSONObjectTest {
         void xx(int x1, int x2);
         void x(int z1);
         Object x0();
+    }
+
+    public static class Bean {
+        public int id;
     }
 }

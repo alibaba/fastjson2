@@ -408,6 +408,17 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
         jsonWriter.endObject();
     }
 
+    public JSONObject toJSONObject(T object) {
+        JSONObject jsonObject = new JSONObject();
+
+        for (FieldWriter fieldWriter : fieldWriters) {
+            Object fieldValue = fieldWriter.getFieldValue(object);
+            jsonObject.put(fieldWriter.getFieldName(), fieldValue);
+        }
+
+        return jsonObject;
+    }
+
     @Override
     public String toString() {
         return objectType.getName();

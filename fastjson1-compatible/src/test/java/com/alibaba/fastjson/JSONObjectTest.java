@@ -273,6 +273,30 @@ public class JSONObjectTest {
     }
 
     @Test
+    public void testGetObject() {
+        JSONObject object = new JSONObject();
+        object.put("value", new Bean());
+        JSONObject object1 = object.getJSONObject("value");
+        assertNotNull(object1);
+    }
+
+    @Test
+    public void testGetObject2() {
+        Bean2 bean = new Bean2();
+        bean.id = 101;
+
+        JSONObject object = new JSONObject();
+        object.put("value", bean);
+        JSONObject object1 = object.getJSONObject("value");
+        assertNotNull(object1);
+        assertEquals(bean.id, object1.get("id"));
+
+        JSONObject object2 = new JSONArray().fluentAdd(bean).getJSONObject(0);
+        assertNotNull(object2);
+        assertEquals(bean.id, object2.get("id"));
+    }
+
+    @Test
     public void test_error() {
         JSONObject jsonObject = new JSONObject().fluentPut("val", new Object());
         {
@@ -520,6 +544,10 @@ public class JSONObjectTest {
 
     public static class Bean {
 
+    }
+
+    public static class Bean2 {
+        public int id;
     }
 
     public interface BeanInterface {
