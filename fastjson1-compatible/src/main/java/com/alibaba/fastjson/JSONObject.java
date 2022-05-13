@@ -152,6 +152,10 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
             return new JSONObject((Map) value);
         }
 
+        if (value == null) {
+            return null;
+        }
+
         Class valueClass = value.getClass();
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
         if (objectWriter instanceof ObjectWriterAdapter) {
