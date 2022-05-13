@@ -95,7 +95,7 @@ public class ObjectWriterProvider {
     }
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
-        return this.getObjectWriter(objectClass, objectClass, fieldBased, Boolean.FALSE);
+        return this.getObjectWriter(objectType, objectClass, fieldBased, Boolean.FALSE);
     }
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased, boolean sort) {
