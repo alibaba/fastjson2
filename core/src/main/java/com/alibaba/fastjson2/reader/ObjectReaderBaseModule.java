@@ -137,7 +137,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             provider.registerTypeConvert(Long.class, LocalDateTime.class, function);
         }
         {
-            Function function = o -> o == null || "null".equals(o) || o.equals("")
+            Function function = o -> o == null || "null".equals(o) || "".equals(o)
                     ? null
                     : UUID.fromString((String) o);
             provider.registerTypeConvert(String.class, UUID.class, function);
@@ -1071,7 +1071,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return typedMap((Class) type, TreeMap.class, Object.class);
         }
 
-        if (type == Calendar.class || typeName.equals("javax.xml.datatype.XMLGregorianCalendar")) {
+        if (type == Calendar.class || "javax.xml.datatype.XMLGregorianCalendar".equals(typeName)) {
             return ObjectReaderImplCalendar.INSTANCE;
         }
 
