@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.function.ObjByteConsumer;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -36,5 +37,10 @@ final class FieldReaderInt8ValueFunc<T> extends FieldReaderImpl<T> {
     public void readFieldValue(JSONReader jsonReader, T object) {
         function.accept(object
                 , (byte) jsonReader.readInt32Value());
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return (byte) jsonReader.readInt32Value();
     }
 }

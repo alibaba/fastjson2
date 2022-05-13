@@ -47,6 +47,6 @@ final class FieldReaderInt8ValueMethod<T> extends FieldReaderObjectMethod<T> {
 
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
-        return jsonReader.readInt32Value();
+        return (byte) jsonReader.readInt32Value();
     }
 }
