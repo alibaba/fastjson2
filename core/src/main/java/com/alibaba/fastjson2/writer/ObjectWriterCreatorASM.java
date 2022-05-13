@@ -107,6 +107,15 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             long features,
             List<ObjectWriterModule> modules
     ) {
+        return this.createObjectWriter(objectClass, features, modules, false);
+    }
+
+    @Override
+    public ObjectWriter createObjectWriter(
+            Class objectClass,
+            long features,
+            List<ObjectWriterModule> modules, boolean sort
+    ) {
         int modifiers = objectClass.getModifiers();
         boolean externalClass = classLoader.isExternalClass(objectClass);
         boolean publicClass = Modifier.isPublic(modifiers);
@@ -152,7 +161,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
 
         List<FieldWriter> fieldWriters;
         if (fieldBased && !record) {
-            Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
+            Map<String, FieldWriter> fieldWriterMap = sort ? new TreeMap<>() : new LinkedHashMap<>();
             final FieldInfo fieldInfo = new FieldInfo();
             BeanUtils.declaredFields(objectClass, field -> {
                 if (Modifier.isTransient(field.getModifiers())) {
@@ -166,7 +175,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             });
             fieldWriters = new ArrayList<>(fieldWriterMap.values());
         } else {
-            Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
+            Map<String, FieldWriter> fieldWriterMap = sort ? new TreeMap<>() : new LinkedHashMap<>();
             List<FieldWriter> fieldWriterList = new ArrayList<>();
             boolean fieldWritersCreated = false;
             for (ObjectWriterModule module : modules) {
@@ -286,7 +295,8 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         }
 
         handleIgnores(beanInfo, fieldWriters);
-        Collections.sort(fieldWriters);
+        if(sort)
+            Collections.sort(fieldWriters);
 
         boolean match = true;
         if (fieldWriters.size() >= 100 || Throwable.class.isAssignableFrom(objectClass)) {

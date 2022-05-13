@@ -147,6 +147,14 @@ public class ObjectWriterCreator {
             , long features
             , final List<ObjectWriterModule> modules
     ) {
+        return this.createObjectWriter(objectClass, features, modules, Boolean.FALSE);
+    }
+
+    public ObjectWriter createObjectWriter(
+            Class objectClass
+            , long features
+            , final List<ObjectWriterModule> modules, boolean sort
+    ) {
         BeanInfo beanInfo = new BeanInfo();
         for (ObjectWriterModule module : modules) {
             ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
@@ -184,7 +192,7 @@ public class ObjectWriterCreator {
 
 
         if (fieldBased) {
-            Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
+            Map<String, FieldWriter> fieldWriterMap = sort ? new LinkedHashMap<>() : new TreeMap<>();
             BeanUtils.declaredFields(objectClass, field -> {
                 if (Modifier.isTransient(field.getModifiers())) {
                     return;
@@ -207,7 +215,7 @@ public class ObjectWriterCreator {
             }
 
             if (!fieldWritersCreated) {
-                Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
+                Map<String, FieldWriter> fieldWriterMap = sort ? new LinkedHashMap<>() : new TreeMap<>();
 
                 BeanUtils.fields(objectClass, field -> {
                     if (!Modifier.isPublic(field.getModifiers())) {
@@ -309,8 +317,8 @@ public class ObjectWriterCreator {
         }
 
         handleIgnores(beanInfo, fieldWriters);
-
-        Collections.sort(fieldWriters);
+        if(sort)
+            Collections.sort(fieldWriters);
 
         ObjectWriterAdapter writerAdapter = new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
 

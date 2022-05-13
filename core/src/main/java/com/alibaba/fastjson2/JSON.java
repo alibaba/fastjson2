@@ -738,12 +738,22 @@ public interface JSON {
      * @param object Java Object to be serialized into JSON {@link String}
      */
     static String toJSONString(Object object) {
+        return toJSONString(object, Boolean.FALSE);
+    }
+
+    /**
+     * Serialize Java Object to JSON {@link String}
+     *
+     * @param object Java Object to be serialized into JSON {@link String}
+     * @param sort need to sort
+     */
+    static String toJSONString(Object object, boolean sort) {
         try (JSONWriter writer = JSONWriter.of()) {
             if (object == null) {
                 writer.writeNull();
             } else {
                 Class<?> valueClass = object.getClass();
-                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass, sort);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();

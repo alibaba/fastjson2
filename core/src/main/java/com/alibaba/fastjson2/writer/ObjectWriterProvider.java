@@ -95,6 +95,10 @@ public class ObjectWriterProvider {
     }
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
+        return this.getObjectWriter(objectClass, objectClass, fieldBased, Boolean.FALSE);
+    }
+
+    public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased, boolean sort) {
         ObjectWriter objectWriter = fieldBased
                 ? cacheFieldBased.get(objectType)
                 : cache.get(objectType);
@@ -155,7 +159,7 @@ public class ObjectWriterProvider {
             objectWriter = creator.createObjectWriter(
                     objectClass,
                     fieldBased ? JSONWriter.Feature.FieldBased.mask : 0
-                    , modules
+                    , modules, sort
             );
             ObjectWriter previous = fieldBased
                     ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
