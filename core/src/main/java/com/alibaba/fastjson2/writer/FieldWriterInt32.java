@@ -102,7 +102,7 @@ abstract class FieldWriterInt32<T> extends FieldWriterImpl<T> {
         Integer value = (Integer) getFieldValue(object);
 
         if (value == null) {
-            jsonWriter.writeNull();
+            jsonWriter.writeNumberNull();
             return;
         }
 
