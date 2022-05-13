@@ -83,7 +83,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
         final Supplier<T> supplier;
         try {
             supplier = lambdaConstrunctor(objectClass);
-        } catch (IllegalAccessException ignored) {
+        } catch (IllegalAccessException | NoSuchMethodException ignored) {
             return super.createObjectReader(objectClass, objectType, fieldBased, modules);
         } catch (Throwable e) {
             throw new JSONException("get constructor error, objectClass : " + objectClass, e);
