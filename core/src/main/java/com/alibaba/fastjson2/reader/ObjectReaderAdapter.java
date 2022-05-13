@@ -212,7 +212,9 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
             }
         }
 
-        if ((features & JSONReader.Feature.UseDefaultConstructorAsPossible.mask) != 0 && constructor.getParameterCount() == 0) {
+        if ((features & JSONReader.Feature.UseDefaultConstructorAsPossible.mask) != 0
+                && constructor != null
+                && constructor.getParameterCount() == 0) {
             if (constructor != null) {
                 T object;
                 try {
