@@ -46,7 +46,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -74,7 +74,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -102,7 +102,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -130,7 +130,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -154,7 +154,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
             }
 
@@ -193,7 +193,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -217,7 +217,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
             }
 
@@ -244,7 +244,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -271,7 +271,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -298,7 +298,7 @@ public class JSONArray extends JSON implements List {
 
         if (value instanceof String) {
             String str = (String) value;
-            return str.equalsIgnoreCase("true") || str.equals("1");
+            return "true".equalsIgnoreCase(str) || "1".equals(str);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to boolean value");
@@ -322,11 +322,11 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
-            return str.equalsIgnoreCase("true") || str.equals("1");
+            return "true".equalsIgnoreCase(str) || "1".equals(str);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to Boolean");
@@ -342,7 +342,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -481,7 +481,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
             }
 
@@ -514,7 +514,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0F;
             }
 
@@ -547,7 +547,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0D;
             }
 
@@ -600,7 +600,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
             }
 
@@ -633,7 +633,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -741,7 +741,7 @@ public class JSONArray extends JSON implements List {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 

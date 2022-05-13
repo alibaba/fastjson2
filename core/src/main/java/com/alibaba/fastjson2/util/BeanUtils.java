@@ -552,7 +552,7 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (returnClass == Class.class && methodName.equals("getClass")) {
+            if (returnClass == Class.class && "getClass".equals(methodName)) {
                 continue;
             }
 
@@ -568,7 +568,7 @@ public abstract class BeanUtils {
 
         if (RECORD_CLASS == null) {
             String superclassName = superclass.getName();
-            if (superclassName.equals("java.lang.Record")) {
+            if ("java.lang.Record".equals(superclassName)) {
                 RECORD_CLASS = RECORD_CLASS;
                 return true;
             } else {

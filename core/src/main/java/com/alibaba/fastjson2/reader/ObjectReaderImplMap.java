@@ -73,7 +73,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
             ParameterizedType parameterizedType = (ParameterizedType) fieldType;
 
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-            if (actualTypeArguments.length == 2 && !instanceType.getName().equals("org.springframework.util.LinkedMultiValueMap")) {
+            if (actualTypeArguments.length == 2 && !"org.springframework.util.LinkedMultiValueMap".equals(instanceType.getName())) {
                 Type keyType = actualTypeArguments[0];
                 Type valueType = actualTypeArguments[1];
 
@@ -304,7 +304,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
 
                 if (jsonReader.isReference()) {
                     String reference = jsonReader.readReference();
-                    if (reference.equals("..")) {
+                    if ("..".equals(reference)) {
                         map.put(fieldName, map);
                     } else {
                         jsonReader.addResolveTask((Map) map, fieldName, JSONPath.of(reference));
@@ -328,7 +328,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
                     jsonReader.next();
                 } else if (type == BC_REFERENCE) {
                     String reference = jsonReader.readReference();
-                    if (reference.equals("..")) {
+                    if ("..".equals(reference)) {
                         value = map;
                     } else {
                         value = null;
