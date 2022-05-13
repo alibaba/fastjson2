@@ -3,12 +3,10 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Method;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderDateFunc<T> extends FieldReaderImpl<T> {
@@ -38,6 +36,24 @@ final class FieldReaderDateFunc<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, Object value) {
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (format != null) {
+                DateTimeFormatter formatter = getFormatter(null);
+                LocalDateTime ldt;
+                if (format.indexOf("HH") == -1) {
+                    ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                } else {
+                    ldt = LocalDateTime.parse(str, formatter);
+                }
+
+                ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
+                long millis = zdt.toInstant().toEpochMilli();
+                value = new java.util.Date(millis);
+            }
+        }
+
         function.accept(object, (Date) value);
     }
 
@@ -91,5 +107,23 @@ final class FieldReaderDateFunc<T> extends FieldReaderImpl<T> {
         }
 
         return fieldValue;
+    }
+
+    private DateTimeFormatter getFormatter(Locale locale) {
+        if (formatter != null && locale == null) {
+            return formatter;
+        }
+
+        String format = this.format.replaceAll("aa", "a");
+
+        if (locale != null && locale != Locale.getDefault()) {
+            return DateTimeFormatter.ofPattern(format, locale);
+        }
+
+        if (this.locale != null) {
+            return formatter = DateTimeFormatter.ofPattern(format, this.locale);
+        }
+
+        return formatter = DateTimeFormatter.ofPattern(format);
     }
 }
