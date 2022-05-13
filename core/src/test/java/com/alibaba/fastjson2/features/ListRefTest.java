@@ -2,6 +2,10 @@ package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -20,8 +24,29 @@ public class ListRefTest {
         bean.items.add(null);
         bean.items.add(item);
 
-        assertEquals("{\"items\":[{},null,{\"$ref\":\"$[0]\"}]}",
+        assertEquals("{\"items\":[{},null,{\"$ref\":\"$.items[0]\"}]}",
                 JSON.toJSONString(bean, JSONWriter.Feature.ReferenceDetection)
+        );
+    }
+
+    @Test
+    public void testLambda() {
+        Bean bean = new Bean();
+        bean.items = new ArrayList<>();
+
+        Item item = new Item();
+        bean.items.add(item);
+        bean.items.add(null);
+        bean.items.add(item);
+
+        ObjectWriter objectWriter = ObjectWriterCreatorLambda.INSTANCE.createObjectWriter(Bean.class);
+        JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.ReferenceDetection);
+        jsonWriter.setRootObject(bean);
+
+        objectWriter.write(jsonWriter, bean);
+
+        assertEquals("{\"items\":[{},null,{\"$ref\":\"$.items[0]\"}]}",
+                jsonWriter.toString()
         );
     }
 

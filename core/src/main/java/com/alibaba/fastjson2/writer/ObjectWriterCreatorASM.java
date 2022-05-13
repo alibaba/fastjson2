@@ -1536,7 +1536,11 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
     ) {
         Type fieldType = fieldWriter.getFieldType();
         Class<?> fieldClass = fieldWriter.getFieldClass();
+        String fieldName = fieldWriter.getFieldName();
         MethodWriter mw = mwc.mw;
+
+        int LIST = mwc.var(fieldClass);
+        int REF_PATH = mwc.var("REF_PATH");
 
         boolean listStr = false;
         if (fieldType instanceof ParameterizedType) {
@@ -1554,6 +1558,44 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
 
         Label null_ = new Label(), notNull_ = new Label();
         mw.visitJumpInsn(Opcodes.IFNULL, null_);
+
+        {
+            Label endDetect_ = new Label(), refSetPath_ = new Label();
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isRefDetect", "()Z", false);
+            mw.visitJumpInsn(Opcodes.IFEQ, endDetect_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitVarInsn(Opcodes.ALOAD, LIST);
+            mw.visitJumpInsn(Opcodes.IF_ACMPNE, refSetPath_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitLdcInsn("..");
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeReference", "(Ljava/lang/String;)V", false);
+
+            mw.visitJumpInsn(Opcodes.GOTO, notNull_);
+
+            mw.visitLabel(refSetPath_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitLdcInsn(fieldName);
+            mw.visitVarInsn(Opcodes.ALOAD, LIST);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "setPath", METHOD_DESC_SET_PATH, false);
+            mw.visitInsn(Opcodes.DUP);
+            mw.visitVarInsn(Opcodes.ASTORE, REF_PATH);
+            mw.visitJumpInsn(Opcodes.IFNULL, endDetect_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, REF_PATH);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeReference", METHOD_DESC_WRITE_REFERENCE, false);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, LIST);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "popPath", "(Ljava/lang/Object;)V", false);
+            mw.visitJumpInsn(Opcodes.GOTO, notNull_);
+
+            mw.visitLabel(endDetect_);
+        }
 
         // listStr
         if (listStr) {
