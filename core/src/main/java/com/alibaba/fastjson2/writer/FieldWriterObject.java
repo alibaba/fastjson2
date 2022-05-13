@@ -18,6 +18,7 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
     volatile ObjectWriter initObjectWriter;
     final boolean unwrapped;
     final boolean array;
+    final boolean number;
 
     protected FieldWriterObject(String name, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
         super(name, ordinal, features, format, fieldType, fieldClass);
@@ -32,6 +33,7 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
                 || Collection.class.isAssignableFrom(fieldClass)
                 || fieldClass == AtomicLongArray.class
                 || fieldClass == AtomicIntegerArray.class;
+        number = Number.class.isAssignableFrom(fieldClass);
     }
 
     @Override
@@ -100,6 +102,8 @@ abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
                 writeFieldName(jsonWriter);
                 if (array) {
                     jsonWriter.writeArrayNull();
+                } else if (number) {
+                    jsonWriter.writeNumberNull();
                 } else {
                     jsonWriter.writeNull();
                 }
