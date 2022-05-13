@@ -52,7 +52,7 @@ class FieldReaderMapFieldReadOnly<T> extends FieldReaderObjectField<T> implement
         }
 
         String name = map.getClass().getName();
-        if (name.equals("java.util.Collections$UnmodifiableMap")) {
+        if ("java.util.Collections$UnmodifiableMap".equals(name)) {
             return;
         }
 

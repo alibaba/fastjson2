@@ -61,7 +61,7 @@ final class FieldReaderObjectFunc<T, V> extends FieldReaderImpl<T> implements Fi
 
         if (jsonReader.isReference()) {
             String reference = jsonReader.readReference();
-            if (reference.equals("..")) {
+            if ("..".equals(reference)) {
                 accept(object, object);
             } else {
                 addResolveTask(jsonReader, object, reference);

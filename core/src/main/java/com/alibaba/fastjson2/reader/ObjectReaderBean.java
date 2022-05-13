@@ -31,6 +31,7 @@ public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
     }
 
+    @Override
     public Class<T> getObjectClass() {
         return objectClass;
     }

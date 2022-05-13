@@ -146,7 +146,7 @@ public abstract class JSONPath {
                 Object key = entry.getKey();
 
                 if (key instanceof String) {
-                    String path = parent.equals("/") ? "/" + key : parent + "/" + key;
+                    String path = "/".equals(parent) ? "/" + key : parent + "/" + key;
                     paths(values, paths, path, entry.getValue());
                 }
             }
@@ -158,7 +158,7 @@ public abstract class JSONPath {
 
             int i = 0;
             for (Object item : collection) {
-                String path = parent.equals("/") ? "/" + i : parent + "/" + i;
+                String path = "/".equals(parent) ? "/" + i : parent + "/" + i;
                 paths(values, paths, path, item);
                 ++i;
             }
@@ -174,7 +174,7 @@ public abstract class JSONPath {
             for (int i = 0; i < len; ++i) {
                 Object item = Array.get(javaObject, i);
 
-                String path = parent.equals("/") ? "/" + i : parent + "/" + i;
+                String path = "/".equals(parent) ? "/" + i : parent + "/" + i;
                 paths(values, paths, path, item);
             }
 
@@ -195,7 +195,7 @@ public abstract class JSONPath {
                     String key = entry.getKey();
 
                     if (key != null) {
-                        String path = parent.equals("/") ? "/" + key : parent + "/" + key;
+                        String path = "/".equals(parent) ? "/" + key : parent + "/" + key;
                         paths(values, paths, path, entry.getValue());
                     }
                 }
@@ -365,7 +365,7 @@ public abstract class JSONPath {
     }
 
     public static JSONPath of(String path) {
-        if (path.equals("#-1")) {
+        if ("#-1".equals(path)) {
             return PreviousPath.INSTANCE;
         }
 
@@ -590,7 +590,7 @@ public abstract class JSONPath {
                             break;
                         case 'r':
                             String fieldName = jsonReader.readFieldNameUnquote();
-                            if (fieldName.equals("randomIndex")) {
+                            if ("randomIndex".equals(fieldName)) {
                                 if (!jsonReader.nextIfMatch('(')
                                     || !jsonReader.nextIfMatch(')')
                                     || !(jsonReader.ch == (']'))) {
@@ -910,7 +910,7 @@ public abstract class JSONPath {
                 }
                 case 't': {
                     String ident = jsonReader.readFieldNameUnquote();
-                    if (ident.equalsIgnoreCase("true")) {
+                    if ("true".equalsIgnoreCase(ident)) {
                         segment = new NameIntOpSegment(fieldName, hashCode, function, operator, 1);
                         break;
                     }
@@ -918,7 +918,7 @@ public abstract class JSONPath {
                 }
                 case 'f': {
                     String ident = jsonReader.readFieldNameUnquote();
-                    if (ident.equalsIgnoreCase("false")) {
+                    if ("false".equalsIgnoreCase(ident)) {
                         segment = new NameIntOpSegment(fieldName, hashCode, function, operator, 0);
                         break;
                     }
@@ -974,7 +974,7 @@ public abstract class JSONPath {
             case 'a':
             case 'A': {
                 String fieldName = jsonReader.readFieldNameUnquote();
-                if (!fieldName.equalsIgnoreCase("and")) {
+                if (!"and".equalsIgnoreCase(fieldName)) {
                     throw new JSONException("syntax error : " + fieldName);
                 }
                 and = true;
@@ -983,7 +983,7 @@ public abstract class JSONPath {
             case 'o':
             case 'O': {
                 String fieldName = jsonReader.readFieldNameUnquote();
-                if (!fieldName.equalsIgnoreCase("or")) {
+                if (!"or".equalsIgnoreCase(fieldName)) {
                     throw new JSONException("syntax error : " + fieldName);
                 }
                 and = false;
@@ -1057,7 +1057,7 @@ public abstract class JSONPath {
             case 'L': {
                 jsonReader.readFieldNameHashCodeUnquote();
                 String fieldName = jsonReader.getFieldName();
-                if (fieldName.equalsIgnoreCase("like")) {
+                if ("like".equalsIgnoreCase(fieldName)) {
                     operator = Operator.LIKE;
                 } else {
                     throw new JSONException("not support operator : " + fieldName);
@@ -1069,24 +1069,24 @@ public abstract class JSONPath {
                 jsonReader.readFieldNameHashCodeUnquote();
                 String fieldName = jsonReader.getFieldName();
 
-                if (fieldName.equalsIgnoreCase("nin")) {
+                if ("nin".equalsIgnoreCase(fieldName)) {
                     operator = Operator.NOT_IN;
                     break;
                 }
 
-                if (!fieldName.equalsIgnoreCase("not")) {
+                if (!"not".equalsIgnoreCase(fieldName)) {
                     throw new JSONException("not support operator : " + fieldName);
                 }
 
                 jsonReader.readFieldNameHashCodeUnquote();
                 fieldName = jsonReader.getFieldName();
-                if (fieldName.equalsIgnoreCase("like")) {
+                if ("like".equalsIgnoreCase(fieldName)) {
                     operator = Operator.NOT_LIKE;
-                } else if (fieldName.equalsIgnoreCase("rlike")) {
+                } else if ("rlike".equalsIgnoreCase(fieldName)) {
                     operator = Operator.NOT_RLIKE;
-                } else if (fieldName.equalsIgnoreCase("in")) {
+                } else if ("in".equalsIgnoreCase(fieldName)) {
                     operator = Operator.NOT_IN;
-                } else if (fieldName.equalsIgnoreCase("between")) {
+                } else if ("between".equalsIgnoreCase(fieldName)) {
                     operator = Operator.NOT_BETWEEN;
                 } else {
                     throw new JSONException("not support operator : " + fieldName);
@@ -1097,7 +1097,7 @@ public abstract class JSONPath {
             case 'I': {
                 jsonReader.readFieldNameHashCodeUnquote();
                 String fieldName = jsonReader.getFieldName();
-                if (fieldName.equalsIgnoreCase("in")) {
+                if ("in".equalsIgnoreCase(fieldName)) {
                     operator = Operator.IN;
                 } else {
                     throw new JSONException("not support operator : " + fieldName);
@@ -1108,7 +1108,7 @@ public abstract class JSONPath {
             case 'R': {
                 jsonReader.readFieldNameHashCodeUnquote();
                 String fieldName = jsonReader.getFieldName();
-                if (fieldName.equalsIgnoreCase("rlike")) {
+                if ("rlike".equalsIgnoreCase(fieldName)) {
                     operator = Operator.RLIKE;
                 } else {
                     throw new JSONException("not support operator : " + fieldName);
@@ -1119,7 +1119,7 @@ public abstract class JSONPath {
             case 'B': {
                 jsonReader.readFieldNameHashCodeUnquote();
                 String fieldName = jsonReader.getFieldName();
-                if (fieldName.equalsIgnoreCase("between")) {
+                if ("between".equalsIgnoreCase(fieldName)) {
                     operator = Operator.BETWEEN;
                 } else {
                     throw new JSONException("not support operator : " + fieldName);
