@@ -45,6 +45,13 @@ public class IgnoreNoneSerializableTest {
         assertEquals("{\n" +
                 "\t\"a\":{}\n" +
                 "}", JSONB.toJSONString(JSONB.toBytes(bean, JSONWriter.Feature.IgnoreNoneSerializable)));
+
+        assertEquals("{\n" +
+                "\t\"a\":{}\n" +
+                "}", JSONB.toJSONString(
+                        JSONB.toBytes(bean, JSONWriter.Feature.IgnoreNoneSerializable), JSONB.symbolTable("id")
+                )
+        );
     }
 
     public static class Bean {
