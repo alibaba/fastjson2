@@ -380,7 +380,7 @@ public abstract class JSONWriter implements Closeable {
     }
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
-        return this.getObjectWriter(objectType, objectClass, Boolean.FALSE);
+        return this.getObjectWriter(objectType, objectClass, Boolean.TRUE);
     }
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean sort) {

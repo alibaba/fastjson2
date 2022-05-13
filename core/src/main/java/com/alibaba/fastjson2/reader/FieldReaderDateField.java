@@ -87,7 +87,7 @@ final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
     public void accept(T object, Object value) {
         if (value instanceof String) {
             JSONReader jsonReader = JSONReader.of(
-                    JSON.toJSONString(value));
+                    JSON.toJSONString(value, Boolean.TRUE));
             value = getObjectReader(jsonReader)
                     .readObject(jsonReader);
         } else if (value instanceof Integer) {

@@ -738,7 +738,7 @@ public interface JSON {
      * @param object Java Object to be serialized into JSON {@link String}
      */
     static String toJSONString(Object object) {
-        return toJSONString(object, Boolean.FALSE);
+        return toJSONString(object, Boolean.TRUE);
     }
 
     /**
@@ -1262,7 +1262,7 @@ public interface JSON {
             return object;
         }
 
-        String str = toJSONString(object);
+        String str = toJSONString(object, Boolean.TRUE);
         return parse(str);
     }
 

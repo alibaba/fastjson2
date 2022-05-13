@@ -298,7 +298,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             return (String) value;
         }
 
-        return JSON.toJSONString(value);
+        return JSON.toJSONString(value, Boolean.TRUE);
     }
 
     /**
@@ -1094,7 +1094,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             }
         }
 
-        String json = JSON.toJSONString(value);
+        String json = JSON.toJSONString(value, Boolean.TRUE);
         JSONReader jsonReader = JSONReader.of(json);
         jsonReader.context.config(features);
 

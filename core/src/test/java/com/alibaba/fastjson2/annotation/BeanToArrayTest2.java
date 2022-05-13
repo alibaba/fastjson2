@@ -49,7 +49,7 @@ public class BeanToArrayTest2 {
             assertEquals("{\"value\":[1001,\"DataWorks\"]}", str);
         }
 
-        String str = JSON.toJSONString(p);
+        String str = JSON.toJSONString(p, Boolean.TRUE);
         for (ObjectReaderCreator readerCreator : readerCreators) {
             ObjectReader<Parent> objectReader = readerCreator.createObjectReader(Parent.class);
             Parent p2 = objectReader.readObject(JSONReader.of(str));

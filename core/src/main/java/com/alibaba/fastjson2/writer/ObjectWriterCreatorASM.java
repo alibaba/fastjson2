@@ -107,7 +107,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             long features,
             List<ObjectWriterModule> modules
     ) {
-        return this.createObjectWriter(objectClass, features, modules, false);
+        return this.createObjectWriter(objectClass, features, modules, Boolean.TRUE);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
 
         if (!publicClass || externalClass) {
             if (!JDKUtils.UNSAFE_SUPPORT) {
-                return super.createObjectWriter(objectClass, features, modules, Boolean.FALSE);
+                return super.createObjectWriter(objectClass, features, modules, Boolean.TRUE);
             }
         }
 
@@ -144,7 +144,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         }
 
         if (beanInfo.serializeFilters != null && beanInfo.serializeFilters.length > 0) {
-            return super.createObjectWriter(objectClass, features, modules, Boolean.FALSE);
+            return super.createObjectWriter(objectClass, features, modules, Boolean.TRUE);
         }
 
         long writerFeatures = features | beanInfo.writerFeatures;
@@ -154,7 +154,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         }
 
         if (fieldBased && JDKUtils.JVM_VERSION >= 11 && !JDKUtils.LANG_UNNAMED && Throwable.class.isAssignableFrom(objectClass)) {
-            return super.createObjectWriter(objectClass, features, modules, Boolean.FALSE);
+            return super.createObjectWriter(objectClass, features, modules, Boolean.TRUE);
         }
 
         boolean record = BeanUtils.isRecord(objectClass);
@@ -189,7 +189,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
                 for (FieldWriter fieldWriter : fieldWriterList) {
                     Method method = fieldWriter.getMethod();
                     if (method == null) {
-                        return super.createObjectWriter(objectClass, writerFeatures, modules, Boolean.FALSE);
+                        return super.createObjectWriter(objectClass, writerFeatures, modules, Boolean.TRUE);
                     }
                     fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
                 }
@@ -317,7 +317,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         }
 
         if (!match) {
-            return super.createObjectWriter(objectClass, writerFeatures, modules, Boolean.FALSE);
+            return super.createObjectWriter(objectClass, writerFeatures, modules, Boolean.TRUE);
         }
 
         ClassWriter cw = new ClassWriter();

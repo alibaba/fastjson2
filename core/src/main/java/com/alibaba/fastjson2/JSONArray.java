@@ -226,7 +226,7 @@ public class JSONArray extends ArrayList<Object> {
             return (String) value;
         }
 
-        return JSON.toJSONString(value);
+        return JSON.toJSONString(value, Boolean.TRUE);
     }
 
     /**
@@ -1021,7 +1021,7 @@ public class JSONArray extends ArrayList<Object> {
             return (T) value;
         }
 
-        String json = JSON.toJSONString(value);
+        String json = JSON.toJSONString(value, Boolean.TRUE);
         JSONReader jsonReader = JSONReader.of(json);
         jsonReader.context.config(features);
 

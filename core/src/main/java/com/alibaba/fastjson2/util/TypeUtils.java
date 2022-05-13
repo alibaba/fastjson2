@@ -158,7 +158,7 @@ public class TypeUtils {
         }
 
         if (targetClass == String.class) {
-            return (T) JSON.toJSONString(obj);
+            return (T) JSON.toJSONString(obj, Boolean.TRUE);
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
@@ -184,7 +184,7 @@ public class TypeUtils {
                 jsonReader = JSONReader.of(json);
             } else {
                 jsonReader = JSONReader.of(
-                        JSON.toJSONString(json));
+                        JSON.toJSONString(json, Boolean.TRUE));
             }
 
             ObjectReader objectReader = JSONFactory

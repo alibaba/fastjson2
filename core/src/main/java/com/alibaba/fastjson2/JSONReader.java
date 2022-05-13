@@ -1017,7 +1017,7 @@ public abstract class JSONReader implements Closeable {
     public void readString(ValueConsumer consumer, boolean quoted) {
         String str = readString(); //
         if (quoted) {
-            consumer.accept(JSON.toJSONString(str));
+            consumer.accept(JSON.toJSONString(str, Boolean.TRUE));
         } else {
             consumer.accept(str);
         }

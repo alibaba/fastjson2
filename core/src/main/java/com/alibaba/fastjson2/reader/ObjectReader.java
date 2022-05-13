@@ -115,7 +115,7 @@ public interface ObjectReader<T> {
                 } else if (fieldValue instanceof JSONArray) {
                     typedFieldValue = ((JSONArray) fieldValue).toJavaObject(fieldType);
                 } else {
-                    String fieldValueJSONString = JSON.toJSONString(fieldValue);
+                    String fieldValueJSONString = JSON.toJSONString(fieldValue, Boolean.TRUE);
                     try(JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {
                         ObjectReader fieldObjectReader = fieldReader.getObjectReader(jsonReader);
                         typedFieldValue = fieldObjectReader.readObject(jsonReader, 0);
