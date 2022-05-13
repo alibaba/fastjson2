@@ -365,16 +365,16 @@ public class TypeUtils {
     public static boolean isProxy(Class<?> clazz) {
         for (Class<?> item : clazz.getInterfaces()) {
             String interfaceName = item.getName();
-            if (interfaceName.equals("net.sf.cglib.proxy.Factory") //
-                    || interfaceName.equals("org.springframework.cglib.proxy.Factory")) {
+            if ("net.sf.cglib.proxy.Factory".equals(interfaceName) //
+                    || "org.springframework.cglib.proxy.Factory".equals(interfaceName)) {
                 return true;
             }
-            if (interfaceName.equals("javassist.util.proxy.ProxyObject") //
-                    || interfaceName.equals("org.apache.ibatis.javassist.util.proxy.ProxyObject")
+            if ("javassist.util.proxy.ProxyObject".equals(interfaceName) //
+                    || "org.apache.ibatis.javassist.util.proxy.ProxyObject".equals(interfaceName)
             ) {
                 return true;
             }
-            if (interfaceName.equals("org.hibernate.proxy.HibernateProxy")) {
+            if ("org.hibernate.proxy.HibernateProxy".equals(interfaceName)) {
                 return true;
             }
         }

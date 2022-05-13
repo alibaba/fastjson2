@@ -74,7 +74,7 @@ public class TypeConverts {
             }
 
             if (targetClass == Collections.class || targetClass == List.class || targetClass == JSONArray.class) {
-                if (str.equals("[]")) {
+                if ("[]".equals(str)) {
                     return new JSONArray();
                 }
             }

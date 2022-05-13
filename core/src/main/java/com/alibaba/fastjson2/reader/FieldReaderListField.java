@@ -95,7 +95,7 @@ class FieldReaderListField<T>
 
         if (jsonReader.isReference()) {
             String reference = jsonReader.readReference();
-            if (reference.equals("..")) {
+            if ("..".equals(reference)) {
                 accept(object, object);
             } else {
                 addResolveTask(jsonReader, object, reference);
@@ -138,7 +138,7 @@ class FieldReaderListField<T>
                 Object value;
                 if (jsonReader.isReference()) {
                     String reference = jsonReader.readReference();
-                    if (reference.equals("..")) {
+                    if ("..".equals(reference)) {
                         value = list;
                     } else {
                         addResolveTask(jsonReader, list, i, reference);

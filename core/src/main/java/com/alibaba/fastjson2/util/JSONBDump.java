@@ -586,7 +586,7 @@ public class JSONBDump {
         jsonWriter.writeRaw("{\"$ref\":");
         String reference = readReference();
         jsonWriter.writeString(reference);
-        if (!reference.equals("#-1")) {
+        if (!"#-1".equals(reference)) {
             lastReference = reference;
         }
         jsonWriter.writeRaw("}");
