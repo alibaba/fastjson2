@@ -22,7 +22,7 @@ public abstract class DateTimeCodec {
 
     protected final boolean formatHasDay;
     protected final boolean formatHasHour;
-    protected final boolean useSimpleFormatter;
+    public final boolean useSimpleFormatter;
 
     public final Locale locale;
 

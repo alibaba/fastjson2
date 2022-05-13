@@ -17,10 +17,12 @@ final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
     private ObjectReaderImplDate dateReader;
     DateTimeFormatter formatter;
     final Locale locale;
+    final boolean useSimpleFormatter;
 
     FieldReaderDateField(String fieldName, Class fieldType, int ordinal, long features, String format, Locale locale, Date defaultValue, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
         this.locale = locale;
+        this.useSimpleFormatter = "yyyyMMddHHmmssSSSZ".equals(format);
     }
 
     @Override
@@ -50,19 +52,24 @@ final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
             fieldValue = null;
         } else {
             if (format != null) {
-                String str = jsonReader.readString();
-
-                Locale locale = jsonReader.getContext().getLocale();
-                DateTimeFormatter formatter = getFormatter(locale);
-                LocalDateTime ldt;
-                if (format.indexOf("HH") == -1) {
-                    ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                getObjectReader(jsonReader);
+                if (dateReader.useSimpleFormatter) {
+                    fieldValue = (Date) dateReader.readObject(jsonReader, features);
                 } else {
-                    ldt = LocalDateTime.parse(str, formatter);
+                    String str = jsonReader.readString();
+
+                    Locale locale = jsonReader.getContext().getLocale();
+                    DateTimeFormatter formatter = getFormatter(locale);
+                    LocalDateTime ldt;
+                    if (format.indexOf("HH") == -1) {
+                        ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                    } else {
+                        ldt = LocalDateTime.parse(str, formatter);
+                    }
+                    ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
+                    long millis = zdt.toInstant().toEpochMilli();
+                    fieldValue = new java.util.Date(millis);
                 }
-                ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
-                long millis = zdt.toInstant().toEpochMilli();
-                fieldValue = new java.util.Date(millis);
             } else {
                 long millis = jsonReader.readMillisFromString();
                 fieldValue = new Date(millis);
