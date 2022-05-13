@@ -107,7 +107,7 @@ abstract class FieldWriterInt16<T> extends FieldWriterImpl<T> {
                 return false;
             }
             writeFieldName(jsonWriter);
-            jsonWriter.writeNull();
+            jsonWriter.writeNumberNull();
             return true;
         }
 
@@ -119,7 +119,7 @@ abstract class FieldWriterInt16<T> extends FieldWriterImpl<T> {
     public void writeValue(JSONWriter jsonWriter, T object) {
         Short value = (Short) getFieldValue(object);
         if (value == null) {
-            jsonWriter.writeNull();
+            jsonWriter.writeNumberNull();
             return;
         }
         jsonWriter.writeInt32(value.shortValue());
