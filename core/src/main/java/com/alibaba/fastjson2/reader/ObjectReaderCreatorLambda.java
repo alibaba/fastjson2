@@ -263,7 +263,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
 
         if (fieldType == char.class) {
             ObjCharConsumer function = (ObjCharConsumer) lambdaFunction(objectClass, fieldClass, method);
-            return new FieldReaderCharValueFunc<>(fieldName, ordinal, null, null, method, function);
+            return new FieldReaderCharValueFunc<>(fieldName, ordinal, method, format, method, function);
         }
 
         if (fieldType == float.class) {

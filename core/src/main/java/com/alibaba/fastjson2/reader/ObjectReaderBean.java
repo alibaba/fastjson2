@@ -31,6 +31,10 @@ public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
     }
 
+    public Class<T> getObjectClass() {
+        return objectClass;
+    }
+
     protected void processExtra(JSONReader jsonReader, Object object) {
         if (extraFieldReader == null || object == null) {
             jsonReader.skipValue();
