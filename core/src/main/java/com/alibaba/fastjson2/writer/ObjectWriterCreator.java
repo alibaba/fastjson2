@@ -41,7 +41,7 @@ public class ObjectWriterCreator {
                 , 0
                 , JSONFactory
                         .getDefaultObjectWriterProvider()
-                        .getModules()
+                        .getModules(), Boolean.FALSE
         );
     }
 
@@ -56,7 +56,7 @@ public class ObjectWriterCreator {
             , FieldWriter... fieldWriters
     ) {
         if (fieldWriters.length == 0) {
-            return createObjectWriter(objectType, features, Collections.emptyList());
+            return createObjectWriter(objectType, features, Collections.emptyList(), Boolean.FALSE);
         } else {
             return new ObjectWriterAdapter(objectType, features, fieldWriters);
         }
