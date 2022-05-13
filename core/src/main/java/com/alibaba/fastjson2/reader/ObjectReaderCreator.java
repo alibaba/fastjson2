@@ -1523,39 +1523,39 @@ public class ObjectReaderCreator {
             , BiConsumer<T, V> function
     ) {
         if (fieldClass == Integer.class) {
-            return new FieldReaderInt32Func<>(fieldName, fieldClass, ordinal, method, function);
+            return new FieldReaderInt32Func<>(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
         }
 
         if (fieldClass == Long.class) {
-            return new FieldReaderInt64Func<>(fieldName, fieldClass, ordinal, method, function);
+            return new FieldReaderInt64Func<>(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
         }
 
         if (fieldClass == String.class) {
-            return new FieldReaderStringFunc<>(fieldName, fieldClass, ordinal, features, format, method, function);
+            return new FieldReaderStringFunc<>(fieldName, fieldClass, ordinal, features, format, defaultValue, method, function);
         }
 
         if (fieldClass == Boolean.class) {
-            return new FieldReaderBoolFunc<>(fieldName, fieldClass, ordinal, method, function);
+            return new FieldReaderBoolFunc<>(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
         }
 
         if (fieldClass == Short.class) {
-            return new FieldReaderInt16Func(fieldName, fieldClass, ordinal, method, function);
+            return new FieldReaderInt16Func(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
         }
 
         if (fieldClass == Byte.class) {
-            return new FieldReaderInt8Func(fieldName, fieldClass, ordinal, method, function);
+            return new FieldReaderInt8Func(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalFunc(fieldName, fieldClass, ordinal, method, function);
+            return new FieldReaderBigDecimalFunc(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerFunc(fieldName, fieldClass, ordinal, method, function);
+            return new FieldReaderBigIntegerFunc(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
         }
 
         if (fieldClass == Number.class) {
-            return new FieldReaderNumberFunc(fieldName, fieldClass, ordinal, method, function);
+            return new FieldReaderNumberFunc(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
         }
 
         if (fieldClass == Date.class) {
@@ -1579,19 +1579,19 @@ public class ObjectReaderCreator {
                     Type itemType = actualTypeArguments[0];
                     Class itemClass = TypeUtils.getMapping(itemType);
                     if (itemClass == String.class) {
-                        return new FieldReaderListStrFunc(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, method, function);
+                        return new FieldReaderListStrFunc(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, format, defaultValue, method, function);
                     }
                 }
             }
 
-            return new FieldReaderListFunc(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, method, function);
+            return new FieldReaderListFunc(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, format, defaultValue, method, function);
         }
 
         if (fieldTypeResolved != null) {
-            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, method, function);
+            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, defaultValue, method, function);
         }
 
-        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, method, function);
+        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, method, function);
     }
 
 

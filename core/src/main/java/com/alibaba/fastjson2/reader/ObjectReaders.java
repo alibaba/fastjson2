@@ -57,7 +57,7 @@ public class ObjectReaders {
     }
 
     public static <T> FieldReader fieldReaderChar(String fieldName, ObjCharConsumer<T> function) {
-        return new FieldReaderCharValueFunc<>(fieldName, 0, null, function);
+        return new FieldReaderCharValueFunc<>(fieldName, 0, null, null, null, function);
     }
 
     public static <T> FieldReader fieldReaderFloat(String fieldName, ObjFloatConsumer<T> function) {

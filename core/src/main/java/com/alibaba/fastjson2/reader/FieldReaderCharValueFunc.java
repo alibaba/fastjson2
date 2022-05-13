@@ -9,8 +9,8 @@ final class FieldReaderCharValueFunc<T> extends FieldReaderImpl<T> {
     final Method method;
     final ObjCharConsumer<T> function;
 
-    FieldReaderCharValueFunc(String fieldName, int ordinal, Method method, ObjCharConsumer<T> function) {
-        super(fieldName, char.class, char.class, ordinal, 0, null);
+    FieldReaderCharValueFunc(String fieldName, int ordinal, Method method, String format, Object defaultValue, ObjCharConsumer<T> function) {
+        super(fieldName, char.class, char.class, ordinal, 0, format, defaultValue);
         this.method = method;
         this.function = function;
     }

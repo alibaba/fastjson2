@@ -19,10 +19,11 @@ final class FieldReaderObjectFunc<T, V> extends FieldReaderImpl<T> implements Fi
             , int ordinal
             , long features
             , String format
+            , Object defaultValue
             , Method method
             , BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue);
         this.method = method;
         this.function = function;
     }
