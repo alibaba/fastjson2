@@ -2440,11 +2440,14 @@ public abstract class JSONReader implements Closeable {
 
     protected ZoneId getZoneId(LocalDateTime ldt, String zoneIdStr) {
         ZoneId zoneId;
+
+        int p0, p1;
         if (zoneIdStr != null) {
             if ("000".equals(zoneIdStr)) {
                 zoneId = UTC;
-            } else if ("+08:00[Asia/Shanghai]".equals(zoneIdStr) || "Asia/Shanghai".equals(zoneIdStr)) {
-                zoneId = SHANGHAI;
+            } else if ((p0 = zoneIdStr.indexOf('[')) > 0 && (p1 =zoneIdStr.indexOf(']', p0)) > 0) {
+                String str = zoneIdStr.substring(p0 + 1, p1);
+                zoneId = ZoneId.of(str);
             } else {
                 zoneId = ZoneId.of(zoneIdStr);
             }

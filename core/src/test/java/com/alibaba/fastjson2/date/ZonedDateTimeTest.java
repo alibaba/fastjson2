@@ -57,6 +57,20 @@ public class ZonedDateTimeTest {
         assertEquals(str, JSON.toJSONString(student, "yyyy-MM-dd HH:mm:ss"));
     }
 
+    @Test
+    public void test3() {
+//        ZonedDateTime zonedDateTime = ZonedDateTime.now();
+//        String zonedDateTimeStr = JSON.toJSONString(zonedDateTime);
+//        System.out.println("=========>zonedDateTimeStr:" + zonedDateTimeStr);
+//
+//        ZonedDateTime zonedDateTime1 = JSON.parseObject(zonedDateTimeStr,ZonedDateTime.class);
+//        System.out.println("=========>zonedDateTime1:" + zonedDateTime1);
+
+        String s = "\"2022-04-24T12:29:11.729+03:00[Europe/Moscow]\"";
+        ZonedDateTime zonedDateTime2 = JSON.parseObject(s,ZonedDateTime.class);
+        assertEquals(s, '"' + zonedDateTime2.toString() + '"');
+    }
+
     public static class Student2 {
         public ZonedDateTime birthday;
     }
