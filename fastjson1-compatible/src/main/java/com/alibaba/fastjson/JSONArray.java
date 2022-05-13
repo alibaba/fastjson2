@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -354,6 +355,19 @@ public class JSONArray extends JSON implements List {
 
         if (value instanceof Map) {
             return new JSONObject((Map) value);
+        }
+
+        if (value == null) {
+            return null;
+        }
+
+        Class valueClass = value.getClass();
+        ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
+        if (objectWriter instanceof ObjectWriterAdapter) {
+            ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) objectWriter;
+            return new JSONObject(
+                    writerAdapter.toJSONObject(value)
+            );
         }
 
         return null;
