@@ -198,7 +198,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -252,7 +252,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -327,7 +327,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -359,7 +359,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0D;
             }
 
@@ -395,7 +395,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -427,7 +427,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0F;
             }
 
@@ -463,7 +463,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -499,7 +499,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
             }
 
@@ -539,7 +539,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -575,7 +575,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
             }
 
@@ -615,7 +615,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -647,7 +647,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
             }
 
@@ -679,7 +679,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -711,7 +711,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return 0;
             }
 
@@ -746,11 +746,11 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
-            return str.equalsIgnoreCase("true") || str.equals("1");
+            return "true".equalsIgnoreCase(str) || "1".equals(str);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to Boolean");
@@ -780,7 +780,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
 
         if (value instanceof String) {
             String str = (String) value;
-            return str.equalsIgnoreCase("true") || str.equals("1");
+            return "true".equalsIgnoreCase(str) || "1".equals(str);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to boolean value");
@@ -817,7 +817,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -864,7 +864,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         if (value instanceof String) {
             String str = (String) value;
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 return null;
             }
 
@@ -1202,7 +1202,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         Class<?>[] parameterTypes = method.getParameterTypes();
 
         if (parameterTypes.length == 1) {
-            if (methodName.equals("equals")) {
+            if ("equals".equals(methodName)) {
                 return this.equals(args[0]);
             }
 
@@ -1252,7 +1252,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                         return null;
                     }
                 } else if (name.startsWith("is")) {
-                    if (name.equals("isEmpty")) {
+                    if ("isEmpty".equals(name)) {
                         value = get("empty");
                         if (value == null) {
                             return this.isEmpty();
@@ -1269,13 +1269,13 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                             return false;
                         }
                     }
-                } else if (name.equals("hashCode")) {
+                } else if ("hashCode".equals(name)) {
                     return this.hashCode();
-                } else if (name.equals("toString")) {
+                } else if ("toString".equals(name)) {
                     return this.toString();
                 } else if (name.startsWith("entrySet")) {
                     return this.entrySet();
-                } else if (name.equals("size")) {
+                } else if ("size".equals(name)) {
                     return this.size();
                 } else {
                     throw new JSONException("This method '" + methodName + "' is not a getter");
@@ -1316,7 +1316,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                         name = null;
                     }
                 }
-            } else if (annotationType.getName().equals("com.alibaba.fastjson.annotation.JSONField")) {
+            } else if ("com.alibaba.fastjson.annotation.JSONField".equals(annotationType.getName())) {
                 NameConsumer nameConsumer = new NameConsumer(annotation);
                 BeanUtils.annotationMethods(annotationType, nameConsumer);
                 if (nameConsumer.name != null) {

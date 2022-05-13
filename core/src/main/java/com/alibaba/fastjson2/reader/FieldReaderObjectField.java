@@ -59,7 +59,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
         if (jsonReader.isReference()) {
             String reference = jsonReader.readReference();
-            if (reference.equals("..")) {
+            if ("..".equals(reference)) {
                 accept(object, object);
             } else {
                 addResolveTask(jsonReader, object, reference);
@@ -110,7 +110,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
         if (jsonReader.isReference()) {
             String reference = jsonReader.readReference();
-            if (reference.equals("..")) {
+            if ("..".equals(reference)) {
                 accept(object, object);
             } else {
                 addResolveTask(jsonReader, object, reference);

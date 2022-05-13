@@ -190,6 +190,7 @@ final class JSONReaderJSONB extends JSONReader {
         return (T) objectReader.readJSONBObject(this, 0);
     }
 
+    @Override
     public <T> T read(Class<T> type) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
@@ -232,7 +233,7 @@ final class JSONReaderJSONB extends JSONReader {
 
                 if (isReference()) {
                     String reference = readReference();
-                    if (reference.equals("..")) {
+                    if ("..".equals(reference)) {
                         map.put(name, map);
                     } else {
                         addResolveTask(map, name, JSONPath.of(reference));
@@ -541,7 +542,7 @@ final class JSONReaderJSONB extends JSONReader {
 
                     if (isReference()) {
                         String reference = readReference();
-                        if (reference.equals("..")) {
+                        if ("..".equals(reference)) {
                             map.put(name, map);
                         } else {
                             addResolveTask(map, name, JSONPath.of(reference));
@@ -619,7 +620,7 @@ final class JSONReaderJSONB extends JSONReader {
                     for (int i = 0; i < len; ++i) {
                         if (isReference()) {
                             String reference = readReference();
-                            if (reference.equals("..")) {
+                            if ("..".equals(reference)) {
                                 list.add(list);
                             } else {
                                 list.add(null);

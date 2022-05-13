@@ -84,7 +84,7 @@ public class TypeUtils {
         if (obj instanceof String) {
             String str = (String) obj;
 
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return null;
             }
 
@@ -120,7 +120,7 @@ public class TypeUtils {
 
         if (obj instanceof String) {
             String str = (String) obj;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return null;
             }
 
@@ -174,7 +174,7 @@ public class TypeUtils {
 
         if (obj instanceof String) {
             String json = (String) obj;
-            if (json.isEmpty() || json.equals("null")) {
+            if (json.isEmpty() || "null".equals(json)) {
                 return null;
             }
 
@@ -455,7 +455,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return null;
             }
             return new BigDecimal(str);
@@ -475,7 +475,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return null;
             }
             return new BigInteger(str);
@@ -495,7 +495,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return null;
             }
             return Long.parseLong(str);
@@ -519,7 +519,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return 0;
             }
             return Long.parseLong(str);
@@ -539,7 +539,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return null;
             }
             return Integer.parseInt(str);
@@ -559,7 +559,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return null;
             }
             return Byte.parseByte(str);
@@ -583,7 +583,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return 0;
             }
             return Byte.parseByte(str);
@@ -603,7 +603,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return null;
             }
             return Short.parseShort(str);
@@ -627,7 +627,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return 0;
             }
             return Short.parseShort(str);
@@ -651,7 +651,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return 0;
             }
 
@@ -680,7 +680,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return 0;
             }
             return Float.parseFloat(str);
@@ -700,7 +700,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return null;
             }
             return Float.parseFloat(str);
@@ -724,7 +724,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return 0D;
             }
             return Double.parseDouble(str);
@@ -744,7 +744,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return null;
             }
             return Double.parseDouble(str);
