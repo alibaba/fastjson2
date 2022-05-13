@@ -1062,7 +1062,7 @@ class JSONWriterUTF8 extends JSONWriter {
     @Override
     public void writeBigInt(BigInteger value, long features) {
         if (value == null) {
-            writeNull();
+            writeNumberNull();
             return;
         }
 
