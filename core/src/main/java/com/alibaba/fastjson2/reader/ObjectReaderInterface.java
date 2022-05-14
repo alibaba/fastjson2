@@ -23,29 +23,16 @@ public final class ObjectReaderInterface<T> extends ObjectReaderAdapter<T> {
 
     @Override
     public T readJSONBObject(JSONReader jsonReader, long features) {
-        ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
-        if (autoTypeReader != null && autoTypeReader.getObjectClass() != this.objectClass) {
-            return (T) autoTypeReader.readJSONBObject(jsonReader, features);
-        }
-
-        JSONObject object = jsonReader.read(JSONObject.class);
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public T createInstance(long features) {
-        JSONObject object = new JSONObject();
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public T createInstance(Map map, long features) {
-        JSONObject object;
-        if (map instanceof JSONObject) {
-            object = (JSONObject) map;
-        } else {
-            object = new JSONObject(map);
-        }
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        throw new UnsupportedOperationException();
     }
 }

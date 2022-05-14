@@ -496,7 +496,7 @@ public class ObjectReaderCreator {
             return createEnumReader(objectClass, beanInfo.createMethod, modules);
         }
 
-        if (fieldBased && JDKUtils.JVM_VERSION >= 11 && !JDKUtils.LANG_UNNAMED && Throwable.class.isAssignableFrom(objectClass)) {
+        if (fieldBased && JDKUtils.JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
             fieldBased = false;
             beanInfo.readerFeatures |= JSONReader.Feature.IgnoreSetNullValue.mask;
         }

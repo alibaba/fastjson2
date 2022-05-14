@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -21,21 +22,10 @@ final class JSONWriterUTF8JDK9 extends JSONWriterUTF8 {
 
         byte[] value = null;
 
-        if (JDKUtils.STRING_BYTES_INTERNAL_API) {
-            if (CODER_FUNCTION == null && !CODER_FUNCTION_ERROR) {
-                try {
-                    CODER_FUNCTION = JDKUtils.getStringCode11();
-                    VALUE_FUNCTION = JDKUtils.getStringValue11();
-                } catch (Throwable ignored) {
-                    CODER_FUNCTION_ERROR = true;
-                }
-            }
-        }
-
-        if (CODER_FUNCTION != null && VALUE_FUNCTION != null) {
-            int coder = CODER_FUNCTION.applyAsInt(str);
+        if (JDKUtils.JVM_VERSION > 8) {
+            int coder = UnsafeUtils.getStringCoder(str);
             if (coder == 0) {
-                value = VALUE_FUNCTION.apply(str);
+                value = UnsafeUtils.getStringValue(str);
             }
         }
 

@@ -1,24 +1,12 @@
 package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.function.*;
 
 public class JDKUtils {
     public static final int JVM_VERSION;
-    public static final boolean STRING_BYTES_INTERNAL_API;
-
-    public static final boolean JAVAC_UNNAMED;
-    public static final boolean ILLEGAL_ACCESS_PERMIT;
-    public static final boolean LANG_UNNAMED;
-
-    static final Field FIELD_STRING_VALUE;
-    static final long FIELD_STRING_VALUE_OFFSET;
-    static volatile boolean FIELD_STRING_ERROR;
 
     static volatile ToIntFunction<String> CODER_FUNCTION;
     static volatile Function<String, byte[]> VALUE_FUNCTION;
@@ -35,8 +23,6 @@ public class JDKUtils {
     public final static Function<byte[], String> UNSAFE_ASCII_CREATOR;
 
     static {
-        String vmVendor = "", vmName = "";
-
         int jvmVersion = -1;
         try {
             String property = System.getProperty("java.specification.version");
@@ -44,9 +30,6 @@ public class JDKUtils {
                 property = property.substring(2);
             }
             jvmVersion = Integer.parseInt(property);
-
-            vmName = System.getProperty("java.vm.name");
-            vmVendor = System.getProperty("java.vm.vendor");
         } catch (Throwable ignored) {
         }
 
@@ -72,79 +55,13 @@ public class JDKUtils {
 
         JVM_VERSION = jvmVersion;
 
-        List<String> inputArguments = ManagementFactory.getRuntimeMXBean().getInputArguments();
-
-        JAVAC_UNNAMED = inputArguments.contains("--add-opens=com.sun.tools.javac.processing=ALL-UNNAMED");
-        ILLEGAL_ACCESS_PERMIT = inputArguments.contains("--illegal-access=permit");
-
-        switch (JVM_VERSION) {
-            case 9:
-            case 10:
-            case 11:
-            case 12:
-            case 13:
-            case 14:
-            case 15:
-                STRING_BYTES_INTERNAL_API = true;
-                break;
-            case 17:
-            case 18:
-            case 19: {
-                final boolean INVOKE_UNNAMED = inputArguments.contains("--add-opens=java.base/java.lang.invoke=ALL-UNNAMED");
-                final boolean REFLECT_UNNAMED = inputArguments.contains("--add-opens=java.base/jdk.internal.reflect=ALL-UNNAMED");
-                STRING_BYTES_INTERNAL_API = ILLEGAL_ACCESS_PERMIT || (INVOKE_UNNAMED && REFLECT_UNNAMED);
-                break;
-            }
-            default:
-                STRING_BYTES_INTERNAL_API = false;
-                break;
-        }
-
-        LANG_UNNAMED = !vmVendor.contains("GraalVM") && !vmName.contains("Substrate")
-                && (inputArguments.contains("--add-opens=java.base/java.lang=ALL-UNNAMED") || JVM_VERSION <= 11);
 
         Boolean bigEndian = null;
-        if (STRING_BYTES_INTERNAL_API && LANG_UNNAMED) {
-            Class clazz;
-            try {
-                clazz = Class.forName("java.lang.StringUTF16");
-                Field field = clazz.getDeclaredField("HI_BYTE_SHIFT");
-                field.setAccessible(true);
-                int hiByteShift = field.getInt(null);
-                if (hiByteShift == 8) {
-                    bigEndian = true;
-                } else {
-                    if (hiByteShift == 0) {
-                        bigEndian = false;
-                    }
-                }
-            } catch (Exception ignored) {
-            }
-        }
         BIG_ENDIAN = bigEndian == null
                 ? -1
                 : bigEndian.booleanValue() ? (byte) 1 : (byte) 0;
 
-        if (JVM_VERSION == 8) {
-            Field field = null;
-            long fieldOffset = -1;
-            try {
-                field = String.class.getDeclaredField("value");
-                field.setAccessible(true);
-                fieldOffset = UnsafeUtils.objectFieldOffset(field);
-            } catch (Exception ignored) {
-                FIELD_STRING_ERROR = true;
-            }
-
-            FIELD_STRING_VALUE = field;
-            FIELD_STRING_VALUE_OFFSET = fieldOffset;
-        } else {
-            FIELD_STRING_ERROR = true;
-            FIELD_STRING_VALUE = null;
-            FIELD_STRING_VALUE_OFFSET = -1;
-        }
-
-        boolean unsafeSupport = false;
+        boolean unsafeSupport;
         unsafeSupport = ((Predicate) o -> {
             try {
                 return UnsafeUtils.UNSAFE != null;
@@ -173,14 +90,6 @@ public class JDKUtils {
     }
 
     public static char[] getCharArray(String str) {
-        if (!FIELD_STRING_ERROR) {
-            try {
-                return (char[]) UnsafeUtils.UNSAFE.getObject(str, FIELD_STRING_VALUE_OFFSET);
-            } catch (Exception ignored) {
-                FIELD_STRING_ERROR = true;
-            }
-        }
-
         return str.toCharArray();
     }
 

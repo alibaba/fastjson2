@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
 
@@ -484,20 +485,9 @@ final class JSONWriterJSONB extends JSONWriter {
             return;
         }
 
-        if (JDKUtils.STRING_BYTES_INTERNAL_API) {
-            if (CODER_FUNCTION == null && !CODER_FUNCTION_ERROR) {
-                try {
-                    CODER_FUNCTION = JDKUtils.getStringCode11();
-                    VALUE_FUNCTION = JDKUtils.getStringValue11();
-                } catch (Throwable ignored) {
-                    CODER_FUNCTION_ERROR = true;
-                }
-            }
-        }
-
-        if (CODER_FUNCTION != null && VALUE_FUNCTION != null) {
-            int coder = CODER_FUNCTION.applyAsInt(str);
-            byte[] value = VALUE_FUNCTION.apply(str);
+        if (JDKUtils.JVM_VERSION > 8) {
+            int coder = UnsafeUtils.getStringCoder(str);
+            byte[] value = UnsafeUtils.getStringValue(str);
 
             if (coder == 0) {
                 int minCapacity = value.length
@@ -556,9 +546,7 @@ final class JSONWriterJSONB extends JSONWriter {
                     int result = IOUtils.encodeUTF8(value, 0, value.length, bytes, off + lenByteCnt + 1);
 
                     int utf8len = result - off - lenByteCnt - 1;
-                    if (utf8len > value.length) {
-                        utf16 = true;
-                    } else if (result != -1) {
+                    if (result != -1) {
                         int utf8lenByteCnt = sizeOfInt(utf8len);
                         if (lenByteCnt != utf8lenByteCnt) {
                             System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
@@ -568,15 +556,6 @@ final class JSONWriterJSONB extends JSONWriter {
                         off += utf8len;
                         return;
                     }
-                }
-
-                if (utf16 && (JDKUtils.BIG_ENDIAN == 1 || JDKUtils.BIG_ENDIAN == 0)) {
-                    ensureCapacity(off + 5 + value.length);
-                    bytes[off++] = JDKUtils.BIG_ENDIAN == 1 ? BC_STR_UTF16BE : BC_STR_UTF16LE;
-                    writeInt32(value.length);
-                    System.arraycopy(value, 0, bytes, off, value.length);
-                    off += value.length;
-                    return;
                 }
             }
         }

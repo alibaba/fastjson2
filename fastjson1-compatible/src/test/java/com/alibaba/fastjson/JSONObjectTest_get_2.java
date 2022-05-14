@@ -17,19 +17,6 @@ public class JSONObjectTest_get_2 {
         assertEquals(0, value.size());
     }
 
-    @Test
-    public void test_get_obj() throws Exception {
-        JSONObject obj = new JSONObject();
-        {
-            Map<String, Object> value = new LinkedHashMap<>();
-            value.put("@type", "com.alibaba.fastjson.JSONObjectTest_get_2$VO");
-            value.put("id", 1001);
-            obj.put("value", value);
-        }
-        VO value = (VO) obj.getObject("value", Object.class, Feature.SupportAutoType);
-        assertEquals(1001, value.getId());
-    }
-
     public static interface VO {
         @JSONField()
         int getId();
