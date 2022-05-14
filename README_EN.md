@@ -15,7 +15,7 @@
 
 # FASTJSON v2
 
-`FASTJSONv2` is an upgrade of the `FASTJSON`, with the goal of providing a highly optimized `JSON` library for the next ten years.
+`FASTJSONv2` is an upgrade of the `FASTJSON`, with the goal of providing a highly optimized `JSON` librarray for the next ten years.
 
 - Supports the JSON and JSONB Protocols.
 - Supports full parsing and partial parsing.
@@ -187,29 +187,29 @@ String name = obj.getString("name");
 
 ```java
 String text = "[2, \"fastjson2\"]";
-JSONArray ary = JSON.parseArray(text);
+JSONArray array = JSON.parseArray(text);
 
-int id = ary.getIntValue(0);
-String name = ary.getString(1);
+int id = array.getIntValue(0);
+String name = array.getString(1);
 ```
 
 #### 2.5.2 Get JavaBean
 
 Java:
 ```java
-JSONArray ary = ...
+JSONArray array = ...
 JSONObject obj = ...
 
-User user = ary.getObject(0, User.class);
+User user = array.getObject(0, User.class);
 User user = obj.getObject("key", User.class);
 ```
 
 Kotlin:
 ```kotlin
-val ary = ... // JSONArray
+val array = ... // JSONArray
 val obj = ... // JSONObject
 
-val user = ary.getObject<User>(0)
+val user = array.getObject<User>(0)
 val user = obj.getObject<User>("key")
 ```
 
@@ -217,20 +217,20 @@ val user = obj.getObject<User>("key")
 
 Java:
 ```java
-JSONArray ary = ...
+JSONArray array = ...
 JSONObject obj = ...
 
-User user = ary.toJavaObject(User.class);
+User user = array.toJavaObject(User.class);
 List<User> users = obj.toJavaList(User.class);
 ```
 
 Kotlin:
 ```kotlin
-val ary = ... // JSONArray
+val array = ... // JSONArray
 val obj = ... // JSONObject
 
 val user = obj.toObject<User>() // User
-val users = ary.toList<User>() // List<User>
+val users = array.toList<User>() // List<User>
 ```
 
 ### 2.6 Serialize `JavaBean` to `JSON`
