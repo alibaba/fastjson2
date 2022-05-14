@@ -769,27 +769,6 @@ public class EishayTest {
     }
 
     @Test
-    public void test_read_gen_lambda() throws Exception {
-        ObjectReaderCreator creator = ObjectReaderCreatorLambda.INSTANCE;
-
-        for (int i = 0; i < 5; ++i) {
-            long start = System.currentTimeMillis();
-
-            for (int j = 0; j < 1000 * 10; ++j) {
-                creator.createObjectReader(MediaContent.class);
-//                creator.createObjectReader(Media.class);
-//                creator.createObjectReader(Image.class);
-            }
-
-            long millis = System.currentTimeMillis() - start;
-            System.out.println("read_gen-lambda millis : " + millis);
-            // JDK_8     : 2005
-            // JDK_11.13 :
-        }
-        System.out.println();
-    }
-
-    @Test
     public void test_read_gen_reflect() throws Exception {
         ObjectReaderCreator creator = ObjectReaderCreator.INSTANCE;
 

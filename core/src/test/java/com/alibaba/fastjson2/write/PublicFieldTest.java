@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,16 +15,6 @@ public class PublicFieldTest {
         vo.id = 100;
         JSONWriter jsonWriter = JSONWriter.ofUTF8();
         ObjectWriter objectWriter = ObjectWriterCreator.INSTANCE.createObjectWriter(VO.class);
-        objectWriter.writeArrayMapping(jsonWriter, vo, null, null, 0);
-        assertEquals("[100]", jsonWriter.toString());
-    }
-
-    @Test
-    public void test_lambda_writer() {
-        VO vo = new VO();
-        vo.id = 100;
-        JSONWriter jsonWriter = JSONWriter.ofUTF8();
-        ObjectWriter objectWriter = ObjectWriterCreatorLambda.INSTANCE.createObjectWriter(VO.class);
         objectWriter.writeArrayMapping(jsonWriter, vo, null, null, 0);
         assertEquals("[100]", jsonWriter.toString());
     }
