@@ -173,185 +173,154 @@ val text = text.toJSONString() // String
 val bytes = text.toJSONByteArray() // ByteArray
 ```
 
-### 2.2 Other
+### 2.5 Use `JSONObject`、`JSONArray`
+
+#### 2.5.1 Get simple property
 
 ```java
-package com.alibaba.fastjson2;
+String text = "{\"id\": 2,\"name\": \"fastjson2\"}";
+JSONObject obj = JSON.parseObject(text);
 
-class JSONB {
-    // Parse a JSONB byte array into a Java Object
-    static T parseObject(byte[] jsonbBytes, Class<T> objectClass);
-
-    // Convert a Java Object into a JSONB Byte Array
-    static byte[] toBytes(Object object);
-}
-
-class JSONObject {
-    Object get(String key);
-    int getIntValue(String key);
-    Integer getInteger(String key);
-    long getLongValue(String key);
-    Long getLong(String key);
-    T getObject(String key, Class<T> objectClass);
-
-    // Convert JSONObject into a Java Object
-    T toJavaObject(Class<T> objectClass);
-}
-
-class JSONArray {
-    Object get(int index);
-    int getIntValue(int index);
-    Integer getInteger(int index);
-    long getLongValue(int index);
-    Long getLong(int index);
-    T getObject(int index, Class<T> objectClass);
-}
-
-class JSONPath {
-    // Construct a JSONPath
-    static JSONPath of(String path);
-
-    // The input is directly parsed according to the path,
-    // which will be parsed and optimized but not fully parsed.
-    Object extract(JSONReader jsonReader);
-
-    // Evaluate object based on the path
-    Object eval(Object rootObject);
-}
-
-class JSONReader {
-    // Constructs a JSONReader given a JSON String
-    static JSONReader of(String str);
-
-    // Constructs a JSONReader given a UTF-8 encoded byte array
-    static JSONReader of(byte[] utf8Bytes);
-
-    // Construct a JSONReader given a char array
-    static JSONReader of(char[] chars);
-
-    // Construct a JSONReader given a JSONB-formatted byte array
-    static JSONReader ofJSONB(byte[] jsonbBytes);
-}
-```
-
-# 3. Reading a `JSON` Object
-
-```java
-String str = "{\"id\":123}";
-JSONObject jsonObject = JSON.parseObject(str);
-int id = jsonObject.getIntValue("id");
+int id = obj.getIntValue("id");
+String name = obj.getString("name");
 ```
 
 ```java
-String str = "[\"id\", 123]";
-JSONArray jsonArray = JSON.parseArray(str);
-String name = jsonArray.getString(0);
-int id = jsonArray.getIntValue(1);
+String text = "[2, \"fastjson2\"]";
+JSONArray ary = JSON.parseArray(text);
+
+int id = ary.getIntValue(0);
+String name = ary.getString(1);
 ```
 
-# 4. Generate `JSON` using a `JavaBean` object
+#### 2.5.2 Get JavaBean
 
-## 4.1 Generating a `JSON` String using `JavaBean`
-
+Java:
 ```java
-class Product {
+JSONArray ary = ...
+JSONObject obj = ...
+
+User user = ary.getObject(0, User.class);
+User user = obj.getObject("key", User.class);
+```
+
+Kotlin:
+```kotlin
+val ary = ... // JSONArray
+val obj = ... // JSONObject
+
+val user = ary.getObject<User>(0)
+val user = obj.getObject<User>("key")
+```
+
+#### 2.5.3 Convert to JavaBean
+
+Java:
+```java
+JSONArray ary = ...
+JSONObject obj = ...
+
+User user = ary.toJavaObject(User.class);
+List<User> users = obj.toJavaList(User.class);
+```
+
+Kotlin:
+```kotlin
+val ary = ... // JSONArray
+val obj = ... // JSONObject
+
+val user = obj.toObject<User>() // User
+val users = ary.toList<User>() // List<User>
+```
+
+### 2.6 Serialize `JavaBean` to `JSON`
+
+Java:
+```java
+class User {
     public int id;
     public String name;
 }
 
-Product product = new Product();
-product.id = 1001;
-product.name = "DataWorks";
+User user = new User();
+user.id = 2;
+user.name = "FastJson2";
 
-JSON.toJSONString(product);
+String text = JSON.toJSONString(user);
+byte[] bytes = JSON.toJSONBytes(user);
+```
 
-// Produces the following result
+Kotlin:
+```kotlin
+class User(
+    var id: Int,
+    var name: String
+)
+
+val user = User()
+user.id = 2
+user.name = "FastJson2"
+
+val text = user.toJSONString() // String
+val bytes = user.toJSONByteArray() // ByteArray
+```
+
+Serialization result:
+```json
 {
-    "id"   : 1001,
-    "name" : "DataWorks"
+    "id"   : 2,
+    "name" : "FastJson2"
 }
-
-JSON.toJSONString(product, JSONWriter.Feature.BeanToArray);
-// Produces the following result
-[1001, "DataWorks"]
 ```
 
-## 4.2 Generating a UTF-8 encoded byte array from a ``JavaBean`` Object
+# 3. Advanced usage
+
+### 3.1 Use `JSONB`
+
+#### 3.1.1 Serialize `JavaBean` to `JSONB`
 
 ```java
-Product product = ...;
-byte[] utf8JSONBytes = JSON.toJSONBytes(product);
+User user = ...;
+byte[] bytes = JSONB.toBytes(user);
+byte[] bytes = JSONB.toBytes(user, JSONWriter.Feature.BeanToArray);
 ```
 
-## 4.3 将`JavaBean`对象生成`JSONB`格式的`byte[]`
+#### 3.1.2 Parse `JSONB` to `JavaBean`
 
 ```java
-Product product = ...;
-byte[] jsonbBytes = JSONB.toBytes(product);
-
-byte[] jsonbBytes = JSONB.toBytes(product, JSONWriter.Feature.BeanToArray);
+byte[] bytes = ...
+User user = JSONB.parseObject(bytes, Product.class);
+User user = JSONB.parseObject(bytes, Product.class, JSONReader.Feature.SupportBeanArrayMapping);
 ```
 
-# 5. Reading `JSON` using `JavaBean`
+### 3.2 Use `JSONPath`
 
-## 5.1 Reading a String using `JavaBean`
-
-```java
-String str = "{\"id\":123}";
-Product product = JSON.parseObject(str, Product.class);
-```
-
-## 5.2 Reading a `UTF-8`encoded byte array with `JavaBean`
+#### 3.2.1 Use `JSONPath` to read partial data
 
 ```java
-byte[] utf8Bytes = "{\"id\":123}".getBytes(StandardCharsets.UTF_8);
-Product product = JSON.parseObject(utf8Bytes, Product.class);
-``` 
+String text = ...;
+JSONPath path = JSONPath.of("$.id"); // Cached for reuse
 
-## 5.3 Reading `JSONB` data with `JavaBean`
-
-```java
-byte[] jsonbBytes = ...
-Product product = JSONB.parseObject(jsonbBytes, Product.class);
-
-Product product = JSONB.parseObject(jsonbBytes, Product.class, JSONReader.Feature.SupportBeanArrayMapping);
-```
-
-# 6. Using `JSONPath`
-
-## 6.1 Use `JSONPath` selection to read data
-
-```java
-String str = ...;
-
-// Caching and Reusing can improve performance
-JSONPath path = JSONPath.of("$.id"); 
-
-JSONReader parser = JSONReader.of(str);
+JSONReader parser = JSONReader.of(text);
 Object result = path.extract(parser);
 ```
 
-## 6.2 Reading partial `utf8Bytes` data using `JSONPath`
+#### 3.2.2 Read part of `byte[]` data using `JSONPath`
 
 ```java
-byte[] utf8Bytes = ...;
+byte[] bytes = ...;
+JSONPath path = JSONPath.of("$.id"); // Cached for reuse
 
-// Caching and Reusing can improve perforamance
-JSONPath path = JSONPath.of("$.id"); 
-
-JSONReader parser = JSONReader.of(utf8Bytes);
+JSONReader parser = JSONReader.of(bytes);
 Object result = path.extract(parser);
 ```
 
-## 6.3 Reading partial `jsonbBytes` data using `JSONPath`
+#### 3.2.3 Read part of `byte[]` data using `JSONPath`
 
 ```java
-byte[] jsonbBytes = ...;
+byte[] bytes = ...;
+JSONPath path = JSONPath.of("$.id"); // Cached for reuse
 
-// Caching and Reusing can improve performance
-JSONPath path = JSONPath.of("$.id");
-
-// Note that this is using the ofJSONB method
-JSONReader parser = JSONReader.ofJSONB(jsonbBytes); 
+JSONReader parser = JSONReader.ofJSONB(bytes); // Use ofJSONB method
 Object result = path.extract(parser);
 ```
