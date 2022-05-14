@@ -20,6 +20,7 @@
 - Supports the JSON and JSONB Protocols
 - Supports full parsing and partial parsing
 - Supports Java servers and Android Clients, and has big data applications.
+- Supports Kotlin
 
 ![fastjson](docs/logo.jpg "fastjson")
 
@@ -40,7 +41,7 @@ Related Documents:
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.2</version>
+    <version>2.0.3</version>
 </dependency>
 ```
 
@@ -54,7 +55,7 @@ If you are using `fastjson 1.2.x`, you can use the compatibility package. The co
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.2</version>
+    <version>2.0.3</version>
 </dependency>
 ```
 
