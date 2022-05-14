@@ -252,7 +252,7 @@ class ObjectReaderNoneDefaultConstrutor<T>
                         ? Collections.emptyMap()
                         : valueMap);
 
-        if (setterFieldReaders != null) {
+        if (setterFieldReaders != null && valueMap != null) {
             for (int i = 0; i < setterFieldReaders.length; i++) {
                 FieldReader fieldReader = setterFieldReaders[i];
                 Object fieldValue = valueMap.get(fieldReader.getFieldNameHash());
