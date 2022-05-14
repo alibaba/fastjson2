@@ -753,19 +753,21 @@ final class JSONReaderJSONB extends JSONReader {
                 Class objectClass = autoTypeObjectReader.getObjectClass();
                 if (objectClass != null) {
                     ClassLoader objectClassLoader = objectClass.getClassLoader();
-                    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                    if (objectClassLoader != contextClassLoader) {
-                        String typeName = getString();
-                        Class contextClass = TypeUtils.getMapping(typeName);
-                        if (contextClass == null) {
-                            try {
-                                contextClass = contextClassLoader.loadClass(typeName);
-                            } catch (ClassNotFoundException ignored) {
+                    if (objectClassLoader != null) {
+                        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+                        if (objectClassLoader != contextClassLoader) {
+                            String typeName = getString();
+                            Class contextClass = TypeUtils.getMapping(typeName);
+                            if (contextClass == null) {
+                                try {
+                                    contextClass = contextClassLoader.loadClass(typeName);
+                                } catch (ClassNotFoundException ignored) {
+                                }
                             }
-                        }
 
-                        if (contextClass != null && !objectClass.equals(contextClass)) {
-                            autoTypeObjectReader = getObjectReader(contextClass);
+                            if (contextClass != null && !objectClass.equals(contextClass)) {
+                                autoTypeObjectReader = getObjectReader(contextClass);
+                            }
                         }
                     }
                 }

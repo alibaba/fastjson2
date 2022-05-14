@@ -37,18 +37,21 @@ final class ObjectReaderImplObject extends ObjectReaderBaseModule.PrimitiveImpl 
 
                     if (autoTypeObjectReader != null) {
                         Class objectClass = autoTypeObjectReader.getObjectClass();
-                        ClassLoader objectClassLoader = objectClass.getClassLoader();
-                        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                        if (objectClassLoader != contextClassLoader) {
-                            Class contextClass = null;
+                        if (objectClass != null) {
+                            ClassLoader objectClassLoader = objectClass.getClassLoader();
+                            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+                            if (objectClassLoader != contextClassLoader) {
+                                Class contextClass = null;
 
-                            String typeName = jsonReader.getString();
-                            try {
-                                contextClass = contextClassLoader.loadClass(typeName);
-                            } catch (ClassNotFoundException ignored) {}
+                                String typeName = jsonReader.getString();
+                                try {
+                                    contextClass = contextClassLoader.loadClass(typeName);
+                                } catch (ClassNotFoundException ignored) {
+                                }
 
-                            if (!objectClass.equals(contextClass)) {
-                                autoTypeObjectReader = context.getObjectReader(contextClass);
+                                if (!objectClass.equals(contextClass)) {
+                                    autoTypeObjectReader = context.getObjectReader(contextClass);
+                                }
                             }
                         }
                     }
