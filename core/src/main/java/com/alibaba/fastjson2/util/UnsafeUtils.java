@@ -60,7 +60,7 @@ public class UnsafeUtils {
         return STRING_CREATOR_ASCII;
     }
 
-    public static byte getStringCoder(String str) throws Exception {
+    public static byte getStringCoder(String str) {
         if (str == null) {
             throw new NullPointerException();
         }
@@ -70,21 +70,29 @@ public class UnsafeUtils {
         }
 
         if (STRING_CODER_OFFSET == 0) {
-            Field fieldCode = String.class.getDeclaredField("coder");
-            STRING_CODER_OFFSET = UNSAFE.objectFieldOffset(fieldCode);
+            try {
+                Field fieldCode = String.class.getDeclaredField("coder");
+                STRING_CODER_OFFSET = UNSAFE.objectFieldOffset(fieldCode);
+            } catch (Exception e) {
+                throw new JSONException("unsafe get String.coder error", e);
+            }
         }
 
         return UNSAFE.getByte(str, STRING_CODER_OFFSET);
     }
 
-    public static byte[] getStringValue(String str) throws Exception {
+    public static byte[] getStringValue(String str) {
         if (str == null) {
             throw new NullPointerException();
         }
 
         if (STRING_VALUE_OFFSET == 0) {
-            Field fieldCode = String.class.getDeclaredField("value");
-            STRING_VALUE_OFFSET = UNSAFE.objectFieldOffset(fieldCode);
+            try {
+                Field fieldCode = String.class.getDeclaredField("value");
+                STRING_VALUE_OFFSET = UNSAFE.objectFieldOffset(fieldCode);
+            } catch (Exception e) {
+                throw new JSONException("unsafe get String.value error", e);
+            }
         }
 
         return (byte[]) UNSAFE.getObject(str, STRING_VALUE_OFFSET);
