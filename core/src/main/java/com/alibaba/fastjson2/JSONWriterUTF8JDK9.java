@@ -61,7 +61,7 @@ final class JSONWriterUTF8JDK9 extends JSONWriterUTF8 {
                 this.bytes = Arrays.copyOf(this.bytes, newCapacity);
             }
         }
-        bytes[off++] = '"';
+        bytes[off++] = (byte) quote;
         boolean special = false;
         {
             int i = 0;
@@ -71,7 +71,7 @@ final class JSONWriterUTF8JDK9 extends JSONWriterUTF8 {
                 byte c1 = value[i + 1];
                 byte c2 = value[i + 2];
                 byte c3 = value[i + 3];
-                if (c0 == '"' || c1 == '"' || c2 == '"' || c3 == '"'
+                if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
                         || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
                         || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
                 ) {
@@ -83,7 +83,7 @@ final class JSONWriterUTF8JDK9 extends JSONWriterUTF8 {
             if (!special && i + 2 <= value.length) {
                 byte c0 = value[i];
                 byte c1 = value[i + 1];
-                if (c0 == '"' || c1 == '"' || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' ') {
+                if (c0 == quote || c1 == quote || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' ') {
                     special = true;
                 } else {
                     i += 2;
@@ -91,7 +91,7 @@ final class JSONWriterUTF8JDK9 extends JSONWriterUTF8 {
             }
             if (!special && i + 1 == value.length) {
                 byte c0 = value[i];
-                special = c0 == '"' || c0 == '\\' || c0 < ' ';
+                special = c0 == quote || c0 == '\\' || c0 < ' ';
             }
         }
 
@@ -101,9 +101,9 @@ final class JSONWriterUTF8JDK9 extends JSONWriterUTF8 {
         } else {
             for (int i = 0; i < value.length; ++i) {
                 byte ch = value[i];
-                if (ch == '"') {
+                if (ch == quote) {
                     bytes[off++] = '\\';
-                    bytes[off++] = '"';
+                    bytes[off++] = (byte) quote;
                 } else if (ch == '\\') {
                     bytes[off++] = '\\';
                     bytes[off++] = '\\';
@@ -127,6 +127,6 @@ final class JSONWriterUTF8JDK9 extends JSONWriterUTF8 {
                 }
             }
         }
-        bytes[off++] = '"';
+        bytes[off++] = (byte) quote;
     }
 }

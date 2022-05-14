@@ -188,7 +188,7 @@ class JSONWriterUTF16 extends JSONWriter {
                 char c1 = str.charAt(i + 1);
                 char c2 = str.charAt(i + 2);
                 char c3 = str.charAt(i + 3);
-                if (c0 == '"' || c1 == '"' || c2 == '"' || c3 == '"') {
+                if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
                     special = true;
                     break;
                 }
@@ -205,7 +205,7 @@ class JSONWriterUTF16 extends JSONWriter {
             if (!special && i + 2 <= strlen) {
                 char c0 = str.charAt(i);
                 char c1 = str.charAt(i + 1);
-                if (c0 == '"' || c1 == '"' || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' ') {
+                if (c0 == quote || c1 == quote || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' ') {
                     special = true;
                 } else {
                     i += 2;
@@ -235,19 +235,25 @@ class JSONWriterUTF16 extends JSONWriter {
                 chars = Arrays.copyOf(chars, newCapacity);
             }
 
-            chars[off++] = '"';
+            chars[off++] = quote;
             str.getChars(0, strlen, chars, off);
             off += strlen;
-            chars[off++] = '"';
+            chars[off++] = quote;
             return;
         }
 
         ensureCapacity(off + strlen * 2 + 2);
-        chars[off++] = '"';
+        chars[off++] = quote;
         for (int i = 0; i < strlen; ++i) {
             char ch = str.charAt(i);
             switch (ch) {
                 case '"':
+                case '\'':
+                    if (ch == quote) {
+                        chars[off++] = '\\';
+                    }
+                    chars[off++] = ch;
+                    break;
                 case '\\':
                     chars[off++] = '\\';
                     chars[off++] = ch;
@@ -277,7 +283,7 @@ class JSONWriterUTF16 extends JSONWriter {
                     break;
             }
         }
-        chars[off++] = '"';
+        chars[off++] = quote;
     }
 
     @Override

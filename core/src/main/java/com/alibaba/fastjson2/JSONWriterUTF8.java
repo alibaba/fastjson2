@@ -234,7 +234,7 @@ class JSONWriterUTF8 extends JSONWriter {
             this.bytes = Arrays.copyOf(this.bytes, newCapacity);
         }
 
-        bytes[off++] = (byte) '"';
+        bytes[off++] = (byte) quote;
 
         // vector optimize
         int i = 0;
@@ -243,7 +243,7 @@ class JSONWriterUTF8 extends JSONWriter {
             char c1 = chars[i + 1];
             char c2 = chars[i + 2];
             char c3 = chars[i + 3];
-            if (c0 == '"' || c1 == '"' || c2 == '"' || c3 == '"') {
+            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
                 break;
             }
             if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\') {
@@ -265,7 +265,7 @@ class JSONWriterUTF8 extends JSONWriter {
         if (i + 2 <= chars.length) {
             char c0 = chars[i];
             char c1 = chars[i + 1];
-            if (c0 == '"' || c1 == '"'
+            if (c0 == quote || c1 == quote
                     || c0 == '\\' || c1 == '\\'
                     || c0 < ' ' || c1 < ' '
                     || c0 > 0x007F || c1 > 0x007F
@@ -279,22 +279,22 @@ class JSONWriterUTF8 extends JSONWriter {
         }
         if (i + 1 == chars.length) {
             char c0 = chars[i];
-            if (c0 != '"'
+            if (c0 != quote
                     && c0 != '\\'
                     && c0 >= ' '
                     && c0 <= 0x007F
             ) {
                 bytes[off++] = (byte) c0;
-                bytes[off++] = (byte) '"';
+                bytes[off++] = (byte) quote;
                 return;
             }
         }
         for (; i < chars.length; ++i) { // ascii none special fast write
             char ch = chars[i];
             if ((ch >= 0x0001) && (ch <= 0x007F)) {
-                if (ch == '"') {
+                if (ch == quote) {
                     bytes[off++] = (byte) '\\';
-                    bytes[off++] = '"';
+                    bytes[off++] = (byte) quote;
                 } else if (ch == '\\') {
                     bytes[off++] = (byte) '\\';
                     bytes[off++] = (byte) '\\';
@@ -362,7 +362,7 @@ class JSONWriterUTF8 extends JSONWriter {
             }
         }
 
-        bytes[off++] = (byte) '"';
+        bytes[off++] = (byte) quote;
     }
 
     @Override

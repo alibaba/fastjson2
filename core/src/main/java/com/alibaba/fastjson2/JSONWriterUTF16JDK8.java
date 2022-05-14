@@ -34,7 +34,7 @@ final class JSONWriterUTF16JDK8 extends JSONWriterUTF16 {
                 char c1 = value[i + 1];
                 char c2 = value[i + 2];
                 char c3 = value[i + 3];
-                if (c0 == '"' || c1 == '"' || c2 == '"' || c3 == '"') {
+                if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
                     special = true;
                     break;
                 }
@@ -51,7 +51,7 @@ final class JSONWriterUTF16JDK8 extends JSONWriterUTF16 {
             if (!special && i + 2 <= strlen) {
                 char c0 = value[i];
                 char c1 = value[i + 1];
-                if (c0 == '"' || c1 == '"' || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' ') {
+                if (c0 == quote || c1 == quote || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' ') {
                     special = true;
                 } else {
                     i += 2;
@@ -59,7 +59,7 @@ final class JSONWriterUTF16JDK8 extends JSONWriterUTF16 {
             }
             if (!special && i + 1 == strlen) {
                 char c0 = value[i];
-                special = c0 == '"' || c0 == '\\' || c0 < ' ';
+                special = c0 == quote || c0 == '\\' || c0 < ' ';
             }
         }
 
@@ -81,19 +81,25 @@ final class JSONWriterUTF16JDK8 extends JSONWriterUTF16 {
                 chars = Arrays.copyOf(chars, newCapacity);
             }
 
-            chars[off++] = '"';
+            chars[off++] = quote;
             System.arraycopy(value, 0, chars, off, value.length);
             off += strlen;
-            chars[off++] = '"';
+            chars[off++] = quote;
             return;
         }
 
         ensureCapacity(off + strlen * 2 + 2);
-        chars[off++] = '"';
+        chars[off++] = quote;
         for (int i = 0; i < strlen; ++i) {
             char ch = value[i];
             switch (ch) {
                 case '"':
+                case '\'':
+                    if (ch == quote) {
+                        chars[off++] = '\\';
+                    }
+                    chars[off++] = ch;
+                    break;
                 case '\\':
                     chars[off++] = '\\';
                     chars[off++] = ch;
@@ -123,6 +129,6 @@ final class JSONWriterUTF16JDK8 extends JSONWriterUTF16 {
                     break;
             }
         }
-        chars[off++] = '"';
+        chars[off++] = quote;
     }
 }
