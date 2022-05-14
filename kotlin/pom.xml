@@ -6,7 +6,7 @@
     <parent>
         <artifactId>fastjson-parent</artifactId>
         <groupId>com.alibaba.fastjson2</groupId>
-        <version>2.0.3.graal</version>
+        <version>2.0.3.android</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
