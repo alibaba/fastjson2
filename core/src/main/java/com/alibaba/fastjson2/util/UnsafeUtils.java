@@ -15,6 +15,9 @@ public class UnsafeUtils {
     static volatile Function<byte[], String> STRING_CREATOR_ASCII;
     static volatile boolean STRING_CREATOR_ASCII_ERROR;
 
+    static long STRING_CODER_OFFSET;
+    static long STRING_VALUE_OFFSET;
+
     static {
         Unsafe unsafe = null;
         try {
@@ -57,15 +60,43 @@ public class UnsafeUtils {
         return STRING_CREATOR_ASCII;
     }
 
+    public static byte getStringCoder(String str) throws Exception {
+        if (str == null) {
+            throw new NullPointerException();
+        }
+
+        if (JDKUtils.JVM_VERSION == 8) {
+            return 1;
+        }
+
+        if (STRING_CODER_OFFSET == 0) {
+            Field fieldCode = String.class.getDeclaredField("coder");
+            STRING_CODER_OFFSET = UNSAFE.objectFieldOffset(fieldCode);
+        }
+
+        return UNSAFE.getByte(str, STRING_CODER_OFFSET);
+    }
+
+    public static byte[] getStringValue(String str) throws Exception {
+        if (str == null) {
+            throw new NullPointerException();
+        }
+
+        if (STRING_VALUE_OFFSET == 0) {
+            Field fieldCode = String.class.getDeclaredField("value");
+            STRING_VALUE_OFFSET = UNSAFE.objectFieldOffset(fieldCode);
+        }
+
+        return (byte[]) UNSAFE.getObject(str, STRING_VALUE_OFFSET);
+    }
+
     static final class UTF16StringCreator implements Function<byte[], String> {
         final long CODER_OFFSET;
         final long VALUE_OFFSET;
 
         public UTF16StringCreator() throws Exception {
             Field fieldCode = String.class.getDeclaredField("coder");
-            fieldCode.setAccessible(true);
             Field fieldValue = String.class.getDeclaredField("value");
-            fieldValue.setAccessible(true);
 
             CODER_OFFSET = UNSAFE.objectFieldOffset(fieldCode);
             VALUE_OFFSET = UNSAFE.objectFieldOffset(fieldValue);

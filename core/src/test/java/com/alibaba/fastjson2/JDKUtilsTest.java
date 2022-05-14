@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;
@@ -9,7 +10,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JDKUtilsTest {
     @Test
@@ -54,6 +55,21 @@ public class JDKUtilsTest {
 
             int coder = coderFunction.applyAsInt("abc");
             assertEquals(0, coder);
+        }
+    }
+
+    @Test
+    public void test_unsafe_isAscii() throws Throwable {
+        assertEquals(1, UnsafeUtils.getStringCoder("中国"));
+
+        String str1 = "abc";
+        if (JDKUtils.JVM_VERSION == 8) {
+            assertEquals(1, UnsafeUtils.getStringCoder(str1));
+        } else {
+            assertEquals(0, UnsafeUtils.getStringCoder(str1));
+            byte[] value = UnsafeUtils.getStringValue(str1);
+            assertNotNull(value);
+            assertArrayEquals(str1.getBytes(StandardCharsets.UTF_8), value);
         }
     }
 }
