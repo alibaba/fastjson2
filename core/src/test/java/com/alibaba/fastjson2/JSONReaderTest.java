@@ -12,6 +12,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONReaderTest {
     @Test
+    public void test_null() {
+        assertThrows(NullPointerException.class, () -> JSONReader.of((String) null));
+    }
+
+    @Test
     public void test_x() {
         String str = "{\"\\x69d\":\"\\x69d\" }";
         byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
