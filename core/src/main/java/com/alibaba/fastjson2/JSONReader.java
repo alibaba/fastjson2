@@ -1725,6 +1725,10 @@ public abstract class JSONReader implements Closeable {
     }
 
     public static JSONReader of(String str) {
+        if (str == null) {
+            throw new NullPointerException();
+        }
+
         Context ctx = JSONFactory.createReadContext();
 
         if (JDKUtils.STRING_BYTES_INTERNAL_API) {
