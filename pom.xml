@@ -93,7 +93,10 @@
         <jetty.version>9.4.17.v20190418</jetty.version>
         <jersey.version>2.23.2</jersey.version>
         <springframework.version>5.3.19</springframework.version>
+
         <kotlin.version>1.6.10</kotlin.version>
+        <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
+        <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
 
         <junit5.version>5.8.2</junit5.version>
         <jmh.version>1.35</jmh.version>

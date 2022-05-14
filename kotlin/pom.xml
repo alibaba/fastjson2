@@ -52,6 +52,13 @@
     </dependencies>
 
     <build>
+        <!--
+            Compiling Kotlin and Java sources - Using Maven - Kotlin Programming Language
+            https://kotlinlang.org/docs/maven.html#compile-kotlin-only-source-code
+        -->
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+
         <plugins>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -64,7 +71,40 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+
+            <!--
+               Compiling Kotlin and Java sources - Using Maven - Kotlin Programming Language
+               https://kotlinlang.org/docs/maven.html#compile-kotlin-only-source-code
+           -->
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+                            </sourceDirs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirs>
+                                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+                            </sourceDirs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-
 </project>
