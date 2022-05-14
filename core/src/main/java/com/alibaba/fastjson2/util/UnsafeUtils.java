@@ -129,9 +129,7 @@ public class UnsafeUtils {
 
         public ASCIIStringCreator() throws Exception {
             Field fieldCode = String.class.getDeclaredField("coder");
-            fieldCode.setAccessible(true);
             Field fieldValue = String.class.getDeclaredField("value");
-            fieldValue.setAccessible(true);
 
             CODER_OFFSET = UNSAFE.objectFieldOffset(fieldCode);
             VALUE_OFFSET = UNSAFE.objectFieldOffset(fieldValue);
