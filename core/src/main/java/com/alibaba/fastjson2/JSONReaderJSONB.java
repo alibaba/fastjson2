@@ -1524,7 +1524,6 @@ final class JSONReaderJSONB extends JSONReader {
             }
 
             charset = StandardCharsets.UTF_16BE;
-            throw new JSONException("readString not support type " + typeName(strtype) + ", offset " + offset + "/" + bytes.length);
         }
 
         if (strlen < 0) {
