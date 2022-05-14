@@ -13,14 +13,14 @@
 
 ##### 语言： 中文 | [English](README_EN.md)
 
-# 1. FASTJSON v2
+# FASTJSON v2
 
 `FASTJSON v2`是`FASTJSON`项目的重要升级，目标是为下一个十年提供一个高性能的`JSON`库。通过同一套`API`，
 
-- 支持`JSON/JSONB`两种协议，`JSONPath`是一等公民；
-- 支持全量解析和部分解析；
+- 支持`JSON/JSONB`两种协议，`JSONPath`是一等公民。
+- 支持全量解析和部分解析。
 - 支持`Java`服务端、客户端`Android`、大数据场景。
-- 支持kotlin
+- 支持`kotlin`
 
 ![fastjson](docs/logo.jpg "fastjson")
 
@@ -31,12 +31,13 @@
 - `FASTJSON v2`性能有了很大提升，具体性能数据看这里：  
   https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark
 
-# 2. 使用前准备
+# 1. 使用准备
 
-## 2.1 `Maven`依赖
+## 1.1 添加依赖
 
 在`fastjson v2`中，`groupId`和`1.x`不一样，是`com.alibaba.fastjson2`：
 
+Maven:
 ```xml
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
@@ -45,12 +46,22 @@
 </dependency>
 ```
 
+Gradle:
+```groovy
+dependencies {
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.3'
+}
+```
+
 可以在 [maven.org](https://search.maven.org/artifact/com.alibaba.fastjson2/fastjson2) 查看最新可用的版本。
 
-## 2.2 `fastjson v1`的兼容包
+## 1.2 其他兼容
+
+### fastjson v1 兼容模块
 
 如果原来使用`fastjson 1.2.x`版本，可以使用兼容包，兼容包不能保证100%兼容，请仔细测试验证，发现问题请及时反馈。
 
+Maven:
 ```xml
 <dependency>
     <groupId>com.alibaba</groupId>
@@ -59,29 +70,100 @@
 </dependency>
 ```
 
-## 2.3 常用类和方法
+### fastjson kotlin 兼容模块
+
+如果项目使用`kotlin`，可以使用`fastjson-kotlin`模块，使用方式上采用`kotlin`的特性。
+
+Maven:
+```xml
+<dependency>
+    <groupId>com.alibaba</groupId>
+    <artifactId>fastjson-kotlin</artifactId>
+    <version>2.0.3</version>
+</dependency>
+```
+
+# 2 使用方式
 
 在`fastjson v2`中，`package`和`1.x`不一样，是`com.alibaba.fastjson2`。如果你之前用的是`fastjson1`，大多数情况直接更包名就即可。
 
+### 2.1 将`JSON`解析为`JSONObject`
+
+Java:
+```java
+String text = "...";
+JSONObject data = JSONObject.parseObject(text);
+
+byte[] bytes = ...;
+JSONObject data = JSONObject.parseObject(bytes);
+```
+
+Kotlin:
+```kotlin
+import com.alibaba.fastjson2.*
+
+val text = ... // String
+val data = text.parseObject()
+
+val bytes = ... // ByteArray
+val data = bytes.parseObject() // JSONObject
+```
+
+### 2.2 将`JSON`解析为`JSONArray`
+
+Java:
+```java
+String text = "...";
+JSONArray data = JSONObject.parseArray(text);
+```
+
+Kotlin:
+```kotlin
+import com.alibaba.fastjson2.*
+
+val text = ... // String
+val data = text.parseArray() // JSONArray
+```
+
+### 2.3 将`JSON`解析为Java对象
+
+Java:
+```java
+String text = "...";
+User data = JSONObject.parseObject(text, User.class);
+```
+
+Kotlin:
+```kotlin
+import com.alibaba.fastjson2.*
+
+val text = ... // String
+val data = text.to<User>() // User
+val data = text.parseObject<User>() // User
+```
+
+### 2.4 将Java对象序列化为`JSON`
+
+Java:
+```java
+Object data = "...";
+String text = JSONObject.toJSONString(data);
+byte[] text = JSONObject.toJSONBytes(data);
+```
+
+Kotlin:
+```kotlin
+import com.alibaba.fastjson2.*
+
+val data = ... // Any
+val text = text.toJSONString() // String
+val bytes = text.toJSONByteArray() // ByteArray
+```
+
+### 2.2 常用类和方法
+
 ```java
 package com.alibaba.fastjson2;
-
-class JSON {
-    // 将字符串解析成JSONObject
-    static JSONObject parseObject(String str);
-
-    // 将字符串解析成JSONArray
-    static JSONArray parseArray(String str);
-
-    // 将字符串解析成Java对象
-    static T parseObject(byte[] utf8Bytes, Class<T> objectClass);
-
-    // 将Java对象输出成字符串
-    static String toJSONString(Object object);
-
-    // 将Java对象输出成UTF8编码的byte[]
-    static byte[] toJSONBytes(Object object);
-}
 
 class JSONB {
     // 将jsonb格式的byte[]解析成Java对象
