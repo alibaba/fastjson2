@@ -145,6 +145,11 @@ public final class ObjectReaderImplMap implements ObjectReader {
         this.builder = builder;
     }
 
+    @Override
+    public Class getObjectClass() {
+        return mapType;
+    }
+
     public Function getBuilder() {
         return builder;
     }

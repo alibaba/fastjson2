@@ -4,9 +4,15 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLongArray;
 
 final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray();
+
+    @Override
+    public Class getObjectClass() {
+        return int[].class;
+    }
 
     @Override
     public Object readObject(JSONReader jsonReader, long features) {

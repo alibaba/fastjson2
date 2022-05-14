@@ -13,6 +13,11 @@ final class ObjectReaderImplInt64ValueArray extends ObjectReaderBaseModule.Primi
     static final long HASH_TYPE = Fnv.hashCode64("[J");
 
     @Override
+    public Class getObjectClass() {
+        return long[].class;
+    }
+
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.isJSONB()) {
             return readJSONBObject(jsonReader, features);

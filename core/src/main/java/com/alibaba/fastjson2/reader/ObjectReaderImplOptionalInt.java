@@ -8,6 +8,11 @@ final class ObjectReaderImplOptionalInt extends ObjectReaderBaseModule.Primitive
     static final ObjectReaderImplOptionalInt INSTANCE = new ObjectReaderImplOptionalInt();
 
     @Override
+    public Class getObjectClass() {
+        return OptionalInt.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         Integer integer = jsonReader.readInt32();
         if (integer == null) {

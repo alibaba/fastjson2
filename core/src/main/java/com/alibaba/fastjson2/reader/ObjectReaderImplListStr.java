@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.reader.ObjectReaderImplList.*;
@@ -33,6 +34,11 @@ public final class ObjectReaderImplListStr implements ObjectReader {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new JSONException("create list error, type " + instanceType);
         }
+    }
+
+    @Override
+    public Class getObjectClass() {
+        return listType;
     }
 
     @Override

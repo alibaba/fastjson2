@@ -8,6 +8,11 @@ final class ObjectReaderImplAtomicInteger extends ObjectReaderBaseModule.Primiti
     static final ObjectReaderImplAtomicInteger INSTANCE = new ObjectReaderImplAtomicInteger();
 
     @Override
+    public Class getObjectClass() {
+        return AtomicInteger.class;
+    }
+
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.nextIfNull()) {
             return null;

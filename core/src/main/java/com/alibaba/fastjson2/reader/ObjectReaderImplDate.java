@@ -32,6 +32,11 @@ public class ObjectReaderImplDate extends DateTimeCodec implements ObjectReader 
     }
 
     @Override
+    public Class getObjectClass() {
+        return Date.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();

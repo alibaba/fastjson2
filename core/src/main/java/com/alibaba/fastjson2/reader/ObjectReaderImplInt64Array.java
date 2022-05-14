@@ -9,6 +9,11 @@ final class ObjectReaderImplInt64Array extends ObjectReaderBaseModule.PrimitiveI
     static final ObjectReaderImplInt64Array INSTANCE = new ObjectReaderImplInt64Array();
 
     @Override
+    public Class getObjectClass() {
+        return Long[].class;
+    }
+
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.readIfNull()) {
             return null;

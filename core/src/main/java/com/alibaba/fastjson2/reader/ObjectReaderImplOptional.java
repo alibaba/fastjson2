@@ -43,6 +43,11 @@ class ObjectReaderImplOptional extends ObjectReaderBaseModule.PrimitiveImpl {
     }
 
     @Override
+    public Class getObjectClass() {
+        return Optional.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         Object value;
         if (itemType == null) {

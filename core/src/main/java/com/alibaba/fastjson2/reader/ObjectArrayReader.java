@@ -13,6 +13,11 @@ public final class ObjectArrayReader extends ObjectReaderBaseModule.PrimitiveImp
     public static final long TYPE_HASH_CODE = Fnv.hashCode64("[O");
 
     @Override
+    public Class getObjectClass() {
+        return Object[].class;
+    }
+
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.readIfNull()) {
             return null;

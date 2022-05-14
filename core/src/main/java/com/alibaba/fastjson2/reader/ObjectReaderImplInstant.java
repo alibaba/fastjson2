@@ -25,6 +25,11 @@ public final class ObjectReaderImplInstant extends DateTimeCodec implements Obje
     }
 
     @Override
+    public Class getObjectClass() {
+        return Instant.class;
+    }
+
+    @Override
     public Object createInstance(Map map, long features) {
         Number nano = (Number) map.get("nano");
         Number epochSecond = (Number) map.get("epochSecond");

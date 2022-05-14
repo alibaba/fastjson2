@@ -14,6 +14,11 @@ final class ObjectReaderImplCurrency extends ObjectReaderBaseModule.PrimitiveImp
     static final long TYPE_HASH_FULL = Fnv.hashCode64("java.util.Currency");
 
     @Override
+    public Class getObjectClass() {
+        return Currency.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY) {
             jsonReader.next();

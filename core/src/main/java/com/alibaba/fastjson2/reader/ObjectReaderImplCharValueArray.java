@@ -9,6 +9,11 @@ final class ObjectReaderImplCharValueArray extends ObjectReaderBaseModule.Primit
     static final ObjectReaderImplCharValueArray INSTANCE = new ObjectReaderImplCharValueArray();
 
     @Override
+    public Class getObjectClass() {
+        return char[].class;
+    }
+
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.readIfNull()) {
             return null;

@@ -11,6 +11,11 @@ final class ObjectReaderImplClass extends ObjectReaderBaseModule.PrimitiveImpl {
     static final long TYPE_HASH = Fnv.hashCode64("java.lang.Class");
 
     @Override
+    public Class getObjectClass() {
+        return Class.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long valueHashCode = jsonReader.readTypeHashCode();

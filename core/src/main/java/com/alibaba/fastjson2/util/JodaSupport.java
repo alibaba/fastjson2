@@ -74,6 +74,11 @@ public class JodaSupport {
         }
 
         @Override
+        public Class getObjectClass() {
+            return objectClass;
+        }
+
+        @Override
         public Object createInstance(Map map, long features) {
             Number millis = (Long) map.get("millis");
             if (millis != null) {
@@ -153,6 +158,11 @@ public class JodaSupport {
             } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 throw new JSONException("create ChronologyReader error", e);
             }
+        }
+
+        @Override
+        public Class getObjectClass() {
+            return objectClass;
         }
 
         @Override
@@ -350,6 +360,11 @@ public class JodaSupport {
                     | InvocationTargetException e) {
                 throw new JSONException("create LocalDateWriter error", e);
             }
+        }
+
+        @Override
+        public Class getObjectClass() {
+            return objectClass;
         }
 
         @Override
@@ -557,6 +572,11 @@ public class JodaSupport {
                     | InvocationTargetException e) {
                 throw new JSONException("create LocalDateWriter error", e);
             }
+        }
+
+        @Override
+        public Class getObjectClass() {
+            return objectClass;
         }
 
         @Override

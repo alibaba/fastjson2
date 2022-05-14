@@ -25,6 +25,11 @@ final class ObjectReaderImplCalendar extends DateTimeCodec implements ObjectRead
     }
 
     @Override
+    public Class getObjectClass() {
+        return Calendar.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();

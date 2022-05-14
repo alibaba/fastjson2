@@ -12,6 +12,11 @@ public final class ObjectReaderImplShort extends ObjectReaderBaseModule.Primitiv
     public static final long HASH_TYPE = Fnv.hashCode64("S");
 
     @Override
+    public Class getObjectClass() {
+        return Short.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();
