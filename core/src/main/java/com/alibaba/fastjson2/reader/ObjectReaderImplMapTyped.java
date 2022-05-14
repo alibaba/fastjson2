@@ -40,6 +40,11 @@ class ObjectReaderImplMapTyped implements ObjectReader {
     }
 
     @Override
+    public Class getObjectClass() {
+        return mapType;
+    }
+
+    @Override
     public Object createInstance(Map input, long features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 

@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -732,8 +733,11 @@ final class JSONReaderJSONB extends JSONReader {
 
             if (expectClassHash == typeHash) {
                 ObjectReader objectReader = context.getObjectReader(expectClass);
-                context.getProvider().registerIfAbsent(typeHash, objectReader);
-                return objectReader;
+                Class objectClass = objectReader.getObjectClass();
+                if (objectClass != null && objectClass == expectClass) {
+                    context.getProvider().registerIfAbsent(typeHash, objectReader);
+                    return objectReader;
+                }
             }
 
             boolean isSupportAutoType = ((context.features | features) & Feature.SupportAutoType.mask) != 0;
@@ -744,6 +748,29 @@ final class JSONReaderJSONB extends JSONReader {
 
             ObjectReaderProvider provider = context.provider;
             autoTypeObjectReader = provider.getObjectReader(typeHash);
+
+            if (autoTypeObjectReader != null) {
+                Class objectClass = autoTypeObjectReader.getObjectClass();
+                if (objectClass != null) {
+                    ClassLoader objectClassLoader = objectClass.getClassLoader();
+                    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+                    if (objectClassLoader != contextClassLoader) {
+                        String typeName = getString();
+                        Class contextClass = TypeUtils.getMapping(typeName);
+                        if (contextClass == null) {
+                            try {
+                                contextClass = contextClassLoader.loadClass(typeName);
+                            } catch (ClassNotFoundException ignored) {
+                            }
+                        }
+
+                        if (contextClass != null && !objectClass.equals(contextClass)) {
+                            autoTypeObjectReader = getObjectReader(contextClass);
+                        }
+                    }
+                }
+            }
+
             if (autoTypeObjectReader == null) {
                 String typeName = getString();
                 autoTypeObjectReader = provider.getObjectReader(typeName, expectClass, context.features | features);

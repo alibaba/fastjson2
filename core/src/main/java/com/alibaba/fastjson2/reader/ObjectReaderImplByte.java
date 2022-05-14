@@ -11,6 +11,11 @@ public final class ObjectReaderImplByte extends ObjectReaderBaseModule.Primitive
     public static final long HASH_TYPE = Fnv.hashCode64("B");
 
     @Override
+    public Class getObjectClass() {
+        return Byte.class;
+    }
+
+    @Override
     public Byte readJSONBObject(JSONReader jsonReader, long features) {
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();

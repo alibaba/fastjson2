@@ -11,6 +11,11 @@ final class ObjectReaderImplAtomicLongArray extends ObjectReaderBaseModule.Primi
     static final ObjectReaderImplAtomicLongArray INSTANCE = new ObjectReaderImplAtomicLongArray();
 
     @Override
+    public Class getObjectClass() {
+        return AtomicLongArray.class;
+    }
+
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.readIfNull()) {
             return null;

@@ -8,6 +8,11 @@ final class ObjectReaderImplBigInteger extends ObjectReaderBaseModule.PrimitiveI
     static final ObjectReaderImplBigInteger INSTANCE = new ObjectReaderImplBigInteger();
 
     @Override
+    public Class getObjectClass() {
+        return BigInteger.class;
+    }
+
+    @Override
     public BigInteger readJSONBObject(JSONReader jsonReader, long features) {
         return jsonReader.readBigInteger();
     }

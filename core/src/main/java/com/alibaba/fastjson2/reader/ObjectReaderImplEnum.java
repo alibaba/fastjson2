@@ -44,6 +44,11 @@ final class ObjectReaderImplEnum implements ObjectReader {
         this.enumNameHashCodes = enumNameHashCodes;
     }
 
+    @Override
+    public Class getObjectClass() {
+        return enumClass;
+    }
+
     public Enum getEnumByHashCode(long hashCode) {
         if (enums == null) {
             return null;

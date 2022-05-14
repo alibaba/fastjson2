@@ -46,6 +46,11 @@ final class ObjectReaderImplEnum2X4 implements ObjectReader {
         }
     }
 
+    @Override
+    public Class getObjectClass() {
+        return enumClass;
+    }
+
     public Enum getEnumByHashCode(long hashCode) {
         if (hashCode == enumNameHashCode00) {
             return enum0;
