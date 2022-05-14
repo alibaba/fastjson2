@@ -69,6 +69,13 @@ If you are using `fastjson 1.2.x`, you can use the compatibility package. The co
 </dependency>
 ```
 
+Gradle:
+```groovy
+dependencies {
+    implementation 'com.alibaba:fastjson:2.0.3'
+}
+```
+
 ### Compatible dependence of fastjson-kotlin
 
 If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use the characteristics of `kotlin`.
@@ -76,10 +83,17 @@ If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use
 Maven:
 ```xml
 <dependency>
-    <groupId>com.alibaba</groupId>
-    <artifactId>fastjson-kotlin</artifactId>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-kotlin</artifactId>
     <version>2.0.3</version>
 </dependency>
+```
+
+Kotlin Gradle:
+```kotlin
+dependencies {
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.3")
+}
 ```
 
 # 2 Usage
