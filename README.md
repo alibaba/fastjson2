@@ -97,7 +97,7 @@ dependencies {
 }
 ```
 
-# 2 使用方式
+# 2 简单使用
 
 在`fastjson v2`中，`package`和`1.x`不一样，是`com.alibaba.fastjson2`。如果你之前用的是`fastjson1`，大多数情况直接更包名就即可。
 
@@ -174,180 +174,154 @@ val text = text.toJSONString() // String
 val bytes = text.toJSONByteArray() // ByteArray
 ```
 
-### 2.2 常用类和方法
+### 2.5 使用`JSONObject`、`JSONArray`
+
+#### 2.5.1 获取简单属性
 
 ```java
-package com.alibaba.fastjson2;
+String text = "{\"id\": 2,\"name\": \"fastjson2\"}";
+JSONObject obj = JSON.parseObject(text);
 
-class JSONB {
-    // 将jsonb格式的byte[]解析成Java对象
-    static T parseObject(byte[] jsonbBytes, Class<T> objectClass);
-
-    // 将Java对象输出成jsonb格式的byte[]
-    static byte[] toBytes(Object object);
-}
-
-class JSONObject {
-    Object get(String key);
-    int getIntValue(String key);
-    Integer getInteger(String key);
-    long getLongValue(String key);
-    Long getLong(String key);
-    T getObject(String key, Class<T> objectClass);
-
-    // 将JSONObject对象转换为Java对象
-    T toJavaObject(Class<T> objectClass);
-}
-
-class JSONArray {
-    Object get(int index);
-    int getIntValue(int index);
-    Integer getInteger(int index);
-    long getLongValue(int index);
-    Long getLong(int index);
-    T getObject(int index, Class<T> objectClass);
-}
-
-class JSONPath {
-    // 构造JSONPath
-    static JSONPath of(String path);
-
-    // 根据path直接解析输入，会部分解析优化，不会全部解析
-    Object extract(JSONReader jsonReader);
-
-    // 根据path对对象求值
-    Object eval(Object rootObject);
-}
-
-class JSONReader {
-    // 构造基于String输入的JSONReader
-    static JSONReader of(String str);
-
-    // 构造基于utf8编码byte数组输入的JSONReader
-    static JSONReader of(byte[] utf8Bytes);
-
-    // 构造基于char[]输入的JSONReader
-    static JSONReader of(char[] chars);
-
-    // 构造基于json格式byte数组输入的JSONReader
-    static JSONReader ofJSONB(byte[] jsonbBytes);
-}
-```
-
-# 3. 读取`JSON`对象
-
-```java
-String str = "{\"id\":123}";
-JSONObject jsonObject = JSON.parseObject(str);
-int id = jsonObject.getIntValue("id");
+int id = obj.getIntValue("id");
+String name = obj.getString("name");
 ```
 
 ```java
-String str = "[\"id\", 123]";
-JSONArray jsonArray = JSON.parseArray(str);
-String name = jsonArray.getString(0);
-int id = jsonArray.getIntValue(1);
+String text = "[2, \"fastjson2\"]";
+JSONArray array = JSON.parseArray(text);
+
+int id = array.getIntValue(0);
+String name = array.getString(1);
 ```
 
-# 4. 将`JavaBean`对象生成`JSON`
+#### 2.5.2 读取JavaBean
 
-## 4.1 将`JavaBean`对象生成`JSON`格式的字符串
-
+Java:
 ```java
-class Product {
+JSONArray array = ...
+JSONObject obj = ...
+
+User user = array.getObject(0, User.class);
+User user = obj.getObject("key", User.class);
+```
+
+Kotlin:
+```kotlin
+val array = ... // JSONArray
+val obj = ... // JSONObject
+
+val user = array.getObject<User>(0)
+val user = obj.getObject<User>("key")
+```
+
+#### 2.5.3 转为JavaBean
+
+Java:
+```java
+JSONArray array = ...
+JSONObject obj = ...
+
+User user = array.toJavaObject(User.class);
+List<User> users = obj.toJavaList(User.class);
+```
+
+Kotlin:
+```kotlin
+val array = ... // JSONArray
+val obj = ... // JSONObject
+
+val user = obj.toObject<User>() // User
+val users = array.toList<User>() // List<User>
+```
+
+### 2.6 将`JavaBean`对象序列化为`JSON`
+
+Java:
+```java
+class User {
     public int id;
     public String name;
 }
 
-Product product = new Product();
-product.id = 1001;
-product.name = "DataWorks";
+User user = new User();
+user.id = 2;
+user.name = "FastJson2";
 
-JSON.toJSONString(product);
+String text = JSON.toJSONString(user);
+byte[] bytes = JSON.toJSONBytes(user);
+```
 
-// 生成如下的结果
+Kotlin:
+```kotlin
+class User(
+    var id: Int,
+    var name: String
+)
+
+val user = User()
+user.id = 2
+user.name = "FastJson2"
+
+val text = user.toJSONString() // String
+val bytes = user.toJSONByteArray() // ByteArray
+```
+
+序列化结果:
+```json
 {
-    "id"   : 1001,
-    "name" : "DataWorks"
+    "id"   : 2,
+    "name" : "FastJson2"
 }
-
-JSON.toJSONString(product, JSONWriter.Feature.BeanToArray);
-// 生成如下的结果
-[1001, "DataWorks"]
 ```
 
-## 4.2 将`JavaBean`对象生成`UTF8`编码的`byte[]`
+# 3. 进阶使用
+
+### 3.1 使用`JSONB`
+
+#### 3.1.1 将`JavaBean`对象序列化`JSONB`
 
 ```java
-Product product = ...;
-byte[] utf8JSONBytes = JSON.toJSONBytes(product);
+User user = ...;
+byte[] bytes = JSONB.toBytes(user);
+byte[] bytes = JSONB.toBytes(user, JSONWriter.Feature.BeanToArray);
 ```
 
-## 4.3 将`JavaBean`对象生成`JSONB`格式的`byte[]`
+#### 3.1.2 将`JSONB`数据解析为`JavaBean`
 
 ```java
-Product product = ...;
-byte[] jsonbBytes = JSONB.toBytes(product);
-
-byte[] jsonbBytes = JSONB.toBytes(product, JSONWriter.Feature.BeanToArray);
+byte[] bytes = ...
+User user = JSONB.parseObject(bytes, Product.class);
+User user = JSONB.parseObject(bytes, Product.class, JSONReader.Feature.SupportBeanArrayMapping);
 ```
 
-# 5. 读取`JavaBean`
+### 3.2 使用`JSONPath`
 
-## 5.1 将字符串读取成`JavaBean`
-
-```java
-String str = "{\"id\":123}";
-Product product = JSON.parseObject(str, Product.class);
-```
-
-## 5.2 将`UTF8`编码的`byte[]`读取成`JavaBean`
+#### 3.2.1 使用`JSONPath`读取部分数据
 
 ```java
-byte[] utf8Bytes = "{\"id\":123}".getBytes(StandardCharsets.UTF_8);
-Product product = JSON.parseObject(utf8Bytes, Product.class);
-```
-
-## 5.3 将`JSONB`数据读取成`JavaBean`
-
-```java
-byte[] jsonbBytes = ...
-Product product = JSONB.parseObject(jsonbBytes, Product.class);
-
-Product product = JSONB.parseObject(jsonbBytes, Product.class, JSONReader.Feature.SupportBeanArrayMapping);
-```
-
-# 6. 使用`JSONPath`
-
-## 6.1 使用`JSONPath`部分读取数据
-
-```java
-String str = ...;
-
+String text = ...;
 JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
 
-JSONReader parser = JSONReader.of(str);
+JSONReader parser = JSONReader.of(text);
 Object result = path.extract(parser);
 ```
 
-## 6.2 使用`JSONPath`读取部分`utf8Bytes`的数据
+#### 3.2.2 使用`JSONPath`读取部分`byte[]`的数据
 
 ```java
-byte[] utf8Bytes = ...;
-
+byte[] bytes = ...;
 JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
 
-JSONReader parser = JSONReader.of(utf8Bytes);
+JSONReader parser = JSONReader.of(bytes);
 Object result = path.extract(parser);
 ```
 
-## 6.3 使用`JSONPath`读取部分`jsonbBytes`的数据
+#### 3.2.3 使用`JSONPath`读取部分`byte[]`的数据
 
 ```java
-byte[] jsonbBytes = ...;
-
+byte[] bytes = ...;
 JSONPath path = JSONPath.of("$.id"); // 缓存起来重复使用能提升性能
 
-JSONReader parser = JSONReader.ofJSONB(jsonbBytes); // 注意，这是利用ofJSONB方法
+JSONReader parser = JSONReader.ofJSONB(bytes); // 注意这里使用ofJSONB方法
 Object result = path.extract(parser);
 ```
