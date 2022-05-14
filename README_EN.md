@@ -13,12 +13,12 @@
 
 ##### Language: [中文](README.md) | English
 
-# 1. FASTJSON v2
+# FASTJSON v2
 
 `FASTJSONv2` is an upgrade of the `FASTJSON`, with the goal of providing a highly optimized `JSON` library for the next ten years.
 
-- Supports the JSON and JSONB Protocols
-- Supports full parsing and partial parsing
+- Supports the JSON and JSONB Protocols.
+- Supports full parsing and partial parsing.
 - Supports Java servers and Android Clients, and has big data applications.
 - Supports Kotlin
 
@@ -31,12 +31,13 @@ Related Documents:
 - `FASTJSON v2`'s performance has been significantly improved. For the benchmark, see here:  
   https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark
 
-# 2. Setup
+# 1. Prepare
 
-## 2.1 `Maven` Build System
+## 1.1 Download
 
 `FASTJSONv2`'s groupId is different from versions `1.x`, it is instead `com.alibaba.fastjson2`:
 
+Maven:
 ```xml
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
@@ -45,9 +46,18 @@ Related Documents:
 </dependency>
 ```
 
-Find the latest version of `FASTJSONv2`at [maven.org](https://search.maven.org/artifact/com.alibaba.fastjson2/fastjson2).
+Gradle:
+```groovy
+dependencies {
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.3'
+}
+```
 
-## 2.2 `fastjson v1` Compatibility Package
+Find the latest version of `FASTJSONv2` at [maven.org](https://search.maven.org/artifact/com.alibaba.fastjson2/fastjson2).
+
+## 1.2 Compatible
+
+### Compatible dependence of fastjson-v1
 
 If you are using `fastjson 1.2.x`, you can use the compatibility package. The compatibility package cannot guarantee 100% compatibility. Please test  it yourself and report any problems.
 
@@ -59,29 +69,100 @@ If you are using `fastjson 1.2.x`, you can use the compatibility package. The co
 </dependency>
 ```
 
-## 2.3 Best Practice
+### Compatible dependence of fastjson-kotlin
+
+If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use the characteristics of `kotlin`.
+
+Maven:
+```xml
+<dependency>
+    <groupId>com.alibaba</groupId>
+    <artifactId>fastjson-kotlin</artifactId>
+    <version>2.0.3</version>
+</dependency>
+```
+
+# 2 Usage
 
 The package name of `fastjson v2` is different from `fastjson v1`. It is `com.alibaba.fastjson2`. If you used `fastjson v1` before, simply change the package name.
 
+### 2.1 Parse `JSON` into `JSONObject`
+
+Java:
+```java
+String text = "...";
+JSONObject data = JSONObject.parseObject(text);
+
+byte[] bytes = ...;
+JSONObject data = JSONObject.parseObject(bytes);
+```
+
+Kotlin:
+```kotlin
+import com.alibaba.fastjson2.*
+
+val text = ... // String
+val data = text.parseObject()
+
+val bytes = ... // ByteArray
+val data = bytes.parseObject() // JSONObject
+```
+
+### 2.2 Parse `JSON` into `JSONArray`
+
+Java:
+```java
+String text = "...";
+JSONArray data = JSONObject.parseArray(text);
+```
+
+Kotlin:
+```kotlin
+import com.alibaba.fastjson2.*
+
+val text = ... // String
+val data = text.parseArray() // JSONArray
+```
+
+### 2.3 Parse `JSON` into a Java Object
+
+Java:
+```java
+String text = "...";
+User data = JSONObject.parseObject(text, User.class);
+```
+
+Kotlin:
+```kotlin
+import com.alibaba.fastjson2.*
+
+val text = ... // String
+val data = text.to<User>() // User
+val data = text.parseObject<User>() // User
+```
+
+### 2.4 Serialization Java Object to `JSON`
+
+Java:
+```java
+Object data = "...";
+String text = JSONObject.toJSONString(data);
+byte[] text = JSONObject.toJSONBytes(data);
+```
+
+Kotlin:
+```kotlin
+import com.alibaba.fastjson2.*
+
+val data = ... // Any
+val text = text.toJSONString() // String
+val bytes = text.toJSONByteArray() // ByteArray
+```
+
+### 2.2 Other
+
 ```java
 package com.alibaba.fastjson2;
-
-class JSON {
-    // Parse String into JSONObject
-    static JSONObject parseObject(String str);
-
-    // Parse a String into JSONArray
-    static JSONArray parseArray(String str);
-
-    // Parse a String into a Java Object
-    static T parseObject(byte[] utf8Bytes, Class<T> objectClass);
-
-    // Output a Java Object into a string
-    static String toJSONString(Object object);
-
-    // Output a Java Object into a JSON Byte Array
-    static byte[] toJSONBytes(Object object);
-}
 
 class JSONB {
     // Parse a JSONB byte array into a Java Object
