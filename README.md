@@ -70,6 +70,13 @@ Maven:
 </dependency>
 ```
 
+Gradle:
+```groovy
+dependencies {
+    implementation 'com.alibaba:fastjson:2.0.3'
+}
+```
+
 ### fastjson kotlin 兼容模块
 
 如果项目使用`kotlin`，可以使用`fastjson-kotlin`模块，使用方式上采用`kotlin`的特性。
@@ -77,10 +84,17 @@ Maven:
 Maven:
 ```xml
 <dependency>
-    <groupId>com.alibaba</groupId>
-    <artifactId>fastjson-kotlin</artifactId>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-kotlin</artifactId>
     <version>2.0.3</version>
 </dependency>
+```
+
+Kotlin Gradle:
+```kotlin
+dependencies {
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.3")
+}
 ```
 
 # 2 使用方式
