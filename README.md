@@ -20,6 +20,7 @@
 - 支持`JSON/JSONB`两种协议，`JSONPath`是一等公民；
 - 支持全量解析和部分解析；
 - 支持`Java`服务端、客户端`Android`、大数据场景。
+- 支持kotlin
 
 ![fastjson](docs/logo.jpg "fastjson")
 
@@ -40,7 +41,7 @@
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.2</version>
+    <version>2.0.3</version>
 </dependency>
 ```
 
@@ -54,7 +55,7 @@
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.2</version>
+    <version>2.0.3</version>
 </dependency>
 ```
 
