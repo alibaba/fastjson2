@@ -141,14 +141,18 @@ abstract class FieldWriterImpl<T> implements FieldWriter<T> {
             return;
         }
 
-        if (jsonWriter.isUTF8()) {
-            jsonWriter.writeNameRaw(nameWithColonUTF8);
-            return;
-        }
+        boolean ueSingleQuotes = jsonWriter.isUseSingleQuotes();
 
-        if (jsonWriter.isUTF16()) {
-            jsonWriter.writeNameRaw(nameWithColonUTF16);
-            return;
+        if (!ueSingleQuotes) {
+            if (jsonWriter.isUTF8()) {
+                jsonWriter.writeNameRaw(nameWithColonUTF8);
+                return;
+            }
+
+            if (jsonWriter.isUTF16()) {
+                jsonWriter.writeNameRaw(nameWithColonUTF16);
+                return;
+            }
         }
 
         jsonWriter.writeName(name);

@@ -268,10 +268,11 @@ public class JSON {
     }
 
     public static String toJSONString(Object object, SerializeFilter[] filters, SerializerFeature... features) {
-        try (JSONWriter writer = JSONWriter.of()) {
-            JSONWriter.Context context = writer.getContext();
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        config(context, features);
+
+        try (JSONWriter writer = JSONWriter.of(context)) {
             writer.setRootObject(object);
-            config(context, features);
             for (SerializeFilter filter : filters) {
                 if (filter instanceof NameFilter) {
                     context.setNameFilter((NameFilter) filter);
@@ -303,10 +304,11 @@ public class JSON {
     }
 
     public static byte[] toJSONBytes(Object object, SerializeFilter[] filters, SerializerFeature... features) {
-        try (JSONWriter writer = JSONWriter.ofUTF8()) {
-            JSONWriter.Context context = writer.getContext();
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        config(context, features);
+
+        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
             writer.setRootObject(object);
-            config(context, features);
             for (SerializeFilter filter : filters) {
                 if (filter instanceof NameFilter) {
                     context.setNameFilter((NameFilter) filter);
@@ -404,6 +406,9 @@ public class JSON {
                     break;
                 case BeanToArray:
                     ctx.config(JSONWriter.Feature.BeanToArray);
+                    break;
+                case UseSingleQuotes:
+                    ctx.config(JSONWriter.Feature.UseSingleQuotes);
                     break;
                 default:
                     break;

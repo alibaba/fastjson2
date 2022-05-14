@@ -37,12 +37,15 @@ public abstract class JSONWriter implements Closeable {
     protected IdentityHashMap<Object, Path> refs;
     protected Path path;
     protected String lastReference;
+    protected final char quote;
 
     protected JSONWriter(Context context, Charset charset) {
         this.context = context;
         this.charset = charset;
         this.utf8 = charset == StandardCharsets.UTF_8;
         this.utf16 = charset == StandardCharsets.UTF_16;
+
+        quote = (context.features & Feature.UseSingleQuotes.mask) == 0 ? '"' : '\'';
     }
 
     public boolean isUTF8() {
@@ -171,6 +174,10 @@ public abstract class JSONWriter implements Closeable {
 
     public boolean isRefDetect() {
         return (context.features & Feature.ReferenceDetection.mask) != 0;
+    }
+
+    public boolean isUseSingleQuotes() {
+        return (context.features & Feature.UseSingleQuotes.mask) != 0;
     }
 
     public boolean isRefDetect(Object object) {
@@ -389,6 +396,10 @@ public abstract class JSONWriter implements Closeable {
         return JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF16(writeContext);
     }
 
+    public static JSONWriter of(Context writeContext) {
+        return JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF16(writeContext);
+    }
+
     public static JSONWriter of(Feature... features) {
         Context writeContext = JSONFactory.createWriteContext(features);
         JSONWriterUTF16 jsonWriter = JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF16(writeContext);
@@ -440,16 +451,22 @@ public abstract class JSONWriter implements Closeable {
         }
     }
 
+    public static JSONWriter ofUTF8(JSONWriter.Context context) {
+        if (JDKUtils.JVM_VERSION >= 9) {
+            return new JSONWriterUTF8JDK9(context);
+        } else {
+            return new JSONWriterUTF8(context);
+        }
+    }
+
     public static JSONWriter ofUTF8(Feature... features) {
         Context writeContext = createWriteContext(features);
 
         JSONWriter jsonWriter;
         if (JDKUtils.JVM_VERSION >= 9) {
-            jsonWriter = new JSONWriterUTF8JDK9(
-                    writeContext);
+            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
         } else {
-            jsonWriter = new JSONWriterUTF8(
-                    writeContext);
+            jsonWriter = new JSONWriterUTF8(writeContext);
         }
 
         boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
@@ -1460,6 +1477,7 @@ public abstract class JSONWriter implements Closeable {
         ReferenceDetection(1 << 16),
         WriteNameAsSymbol(1 << 17),
         WriteBigDecimalAsPlain(1 << 18),
+        UseSingleQuotes(1 << 19)
         ;
 
         public final long mask;
