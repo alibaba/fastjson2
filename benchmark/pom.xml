@@ -15,6 +15,16 @@
     <name>fastjson2-benchmark</name>
     <description>JMH Benchmark for Fastjson2</description>
 
+    <properties>
+        <!--
+            skip maven deploy
+            https://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html#skip
+        -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+
+        <uberjar.name>fastjson2-benchmarks</uberjar.name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
@@ -51,10 +61,6 @@
             <artifactId>commons-io</artifactId>
         </dependency>
     </dependencies>
-
-    <properties>
-        <uberjar.name>fastjson2-benchmarks</uberjar.name>
-    </properties>
 
     <build>
         <plugins>

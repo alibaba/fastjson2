@@ -13,6 +13,7 @@
     <artifactId>fastjson2-kotlin</artifactId>
     <packaging>jar</packaging>
     <name>fastjson2-kotlin</name>
+    <description>kotlin integration for Fastjson2</description>
     <url>https://github.com/alibaba/fastjson2</url>
     <inceptionYear>2022</inceptionYear>
 
@@ -28,7 +29,6 @@
         <url>https://github.com/alibaba/fastjson2</url>
         <connection>scm:git:https://git@github.com/alibaba/fastjson2.git</connection>
     </scm>
-
     <organization>
         <name>Alibaba Group</name>
         <url>https://github.com/alibaba</url>
