@@ -592,6 +592,43 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     }
 
     /**
+     * Returns an int value of the associated keys in this {@link JSONObject}.
+     *
+     * @param key the key whose associated value is to be returned
+     * @param defaultValue the default mapping of the key
+     * @return int
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable int
+     * @throws JSONException         Unsupported type conversion to int value
+     */
+    public int getIntValue(String key, int defaultValue) {
+        Object value = super.get(key);
+
+        if (value == null) {
+            return defaultValue;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
+                return 0;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (int) Double.parseDouble(str);
+            }
+
+            return Integer.parseInt(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to int value");
+    }
+
+    /**
      * Returns the {@link Short} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
@@ -989,6 +1026,10 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             objectWriter.write(writer, this, null, null, 0);
             return writer.getBytes();
         }
+    }
+
+    public <T> T to(Function<JSONObject, T> function) {
+        return function.apply(this);
     }
 
     /**

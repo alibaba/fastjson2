@@ -130,7 +130,7 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSONObject#toJavaObject} for details
+     * See {@link JSONObject#to} for details
      *
      * <pre>{@code
      * JSONObject object = ...
