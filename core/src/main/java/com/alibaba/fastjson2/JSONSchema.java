@@ -161,7 +161,7 @@ public abstract class JSONSchema {
 
         @Override
         public boolean isValid(String input) {
-            return com.alibaba.fastjson2.util.EmailValidator.EMAIL_VALIDATOR_WITH_TLD.isValid(input);
+            return com.alibaba.fastjson2.util.EmailValidator.isValid(input);
         }
     }
 

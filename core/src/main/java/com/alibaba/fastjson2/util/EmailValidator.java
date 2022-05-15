@@ -1,8 +1,5 @@
 package com.alibaba.fastjson2.util;
 
-import org.apache.commons.validator.routines.DomainValidator;
-import org.apache.commons.validator.routines.InetAddressValidator;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,18 +17,7 @@ public class EmailValidator {
     private static final Pattern IP_DOMAIN_PATTERN = Pattern.compile(IP_DOMAIN_REGEX);
     private static final Pattern USER_PATTERN = Pattern.compile(USER_REGEX);
 
-    private final boolean allowLocal;
-    private final boolean allowTld;
-
-    public static final EmailValidator EMAIL_VALIDATOR_WITH_TLD = new EmailValidator(false, true);
-
-    protected EmailValidator(boolean allowLocal, boolean allowTld) {
-        super();
-        this.allowLocal = allowLocal;
-        this.allowTld = allowTld;
-    }
-
-    public boolean isValid(String email) {
+    public static boolean isValid(String email) {
         if (email == null) {
             return false;
         }
@@ -57,7 +43,7 @@ public class EmailValidator {
         return true;
     }
 
-    protected boolean isValidDomain(String domain) {
+    protected static boolean isValidDomain(String domain) {
         // see if domain is an IP address in brackets
         Matcher ipDomainMatcher = IP_DOMAIN_PATTERN.matcher(domain);
 
@@ -67,16 +53,11 @@ public class EmailValidator {
             return inetAddressValidator.isValid(ipDomainMatcher.group(1));
         }
         // Domain is symbolic name
-        DomainValidator domainValidator =
-                DomainValidator.getInstance(allowLocal);
-        if (allowTld) {
-            return domainValidator.isValid(domain) || domainValidator.isValidTld(domain);
-        } else {
-            return domainValidator.isValid(domain);
-        }
+        DomainValidator domainValidator = DomainValidator.getInstance(false);
+        return domainValidator.isValid(domain) || domainValidator.isValidTld(domain);
     }
 
-    protected boolean isValidUser(String user) {
+    protected static boolean isValidUser(String user) {
 
         if (user == null || user.length() > 64) {
             return false;
