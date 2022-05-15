@@ -71,7 +71,9 @@ class ObjectReaderImplMapTyped implements ObjectReader {
                 }
                 value = valueObjectReader.createInstance((Collection) value);
             } else {
-                throw new JSONException("can not convert from " + valueClass + " to " + valueType);
+                if (!valueClass.isInstance(value)) {
+                    throw new JSONException("can not convert from " + valueClass + " to " + valueType);
+                }
             }
             object.put(fieldName, value);
         }
