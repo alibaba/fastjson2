@@ -964,6 +964,7 @@ public class JSONArray extends ArrayList<Object> {
      *
      * @param clazz specify the {@code Class<T>} to be converted
      * @param features features to be enabled in parsing
+     * @since 2.0.4
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> List<T> toList(Class<T> clazz, JSONReader.Feature... features) {
@@ -1013,8 +1014,11 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * Returns the result of the {@link Type} converter conversion of the element at the specified position in this {@link JSONArray}.
-     * <p>
-     * {@code User user = jsonArray.getObject(0, User.class);}
+     *
+     * <pre>{@code
+     * JSONArray array = ...
+     * User user = array.getObject(0, TypeReference<HashMap<String ,User>>(){}.getType());
+     * }</pre>
      *
      * @param index index of the element to return
      * @param type  specify the {@link Type} to be converted
@@ -1159,9 +1163,11 @@ public class JSONArray extends ArrayList<Object> {
      */
     public <T> T getObject(int index, Function<JSONObject, T> creator) {
         JSONObject object = getJSONObject(index);
+
         if (object == null) {
             return null;
         }
+
         return creator.apply(object);
     }
 

@@ -7,6 +7,26 @@ import java.io.ByteArrayInputStream
 class JSONTest {
 
     @Test
+    fun test_into1() {
+        val users = """[{"id":1,"name":"kraity"}]""".into<List<User>>()
+        assertEquals(1, users.size)
+
+        val user = users[0]
+        assertEquals(1, user.id)
+        assertEquals("kraity", user.name)
+    }
+
+    @Test
+    fun test_into2() {
+        val users = """{"user":{"id":1,"name":"kraity"}}""".into<Map<String, User>>()
+        assertEquals(1, users.size)
+
+        val user = users["user"]!!
+        assertEquals(1, user.id)
+        assertEquals("kraity", user.name)
+    }
+
+    @Test
     fun test_parseObject1() {
         val text = """{"id":1,"name":"kraity"}"""
         val data = text.to<User>()
