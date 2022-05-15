@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -141,7 +140,7 @@ public class JSONSchemaTest {
     @Test
     public void testString_format() {
         JSONSchema jsonSchema = JSONObject
-                .of("type", "String", "format", "^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$")
+                .of("type", "String", "pattern", "^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$")
                 .to(JSONSchema::of);
 
         jsonSchema.validate("555-1212");
