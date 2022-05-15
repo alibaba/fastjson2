@@ -133,6 +133,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, boolean value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             field.setBoolean(object, value);
         } catch (Exception e) {
@@ -142,6 +146,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, byte value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             field.setByte(object, value);
         } catch (Exception e) {
@@ -151,6 +159,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, short value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             field.setShort(object, value);
         } catch (Exception e) {
@@ -160,6 +172,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             field.setInt(object, value);
         } catch (Exception e) {
@@ -169,6 +185,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             field.setLong(object, value);
         } catch (Exception e) {
@@ -178,6 +198,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, float value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             field.setFloat(object, value);
         } catch (Exception e) {
@@ -187,6 +211,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, double value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             field.setDouble(object, value);
         } catch (Exception e) {
@@ -196,6 +224,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, char value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             field.setChar(object, value);
         } catch (Exception e) {
@@ -205,6 +237,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, Object value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             field.set(object, value);
         } catch (Exception e) {

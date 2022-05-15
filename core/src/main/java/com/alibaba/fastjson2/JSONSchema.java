@@ -52,8 +52,30 @@ public abstract class JSONSchema {
                 || objectClass == double.class
                 || objectClass == Float.class
                 || objectClass == Double.class
+                || objectClass == Number.class
         ) {
             return new NumberSchema(input);
+        }
+
+        if (objectClass == boolean.class
+                || objectClass == Boolean.class) {
+            return new BooleanSchema(input);
+        }
+
+        if (objectClass == String.class) {
+            return new StringSchema(input);
+        }
+
+        if (Iterable.class.isAssignableFrom(objectClass)) {
+            return new ArraySchema(input);
+        }
+
+        if (objectClass.isArray()) {
+            return new ArraySchema(input);
+        }
+
+        if (Map.class.isAssignableFrom(objectClass)) {
+            return new ObjectSchema(input);
         }
 
         return null;

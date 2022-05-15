@@ -21,6 +21,10 @@ final class FieldReaderStringField<T> extends FieldReaderObjectField<T> {
             fieldValue = fieldValue.trim();
         }
 
+        if (schema != null) {
+            schema.validate(fieldValue);
+        }
+
         try {
             field.set(object, fieldValue);
         } catch (Exception e) {
@@ -41,6 +45,10 @@ final class FieldReaderStringField<T> extends FieldReaderObjectField<T> {
     public void accept(T object, Object value) {
         if (value != null && !(value instanceof String)) {
             value = value.toString();
+        }
+
+        if (schema != null) {
+            schema.validate(value);
         }
 
         try {

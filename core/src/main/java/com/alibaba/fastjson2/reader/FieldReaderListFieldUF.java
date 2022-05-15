@@ -31,6 +31,10 @@ final class FieldReaderListFieldUF<T> extends FieldReaderListField<T> {
 
     @Override
     public void accept(Object object, Object value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         UNSAFE.putObject(object, fieldOffset, value);
     }
 }

@@ -23,6 +23,10 @@ final class FieldReaderStringMethod<T> extends FieldReaderObjectMethod<T> {
             fieldValue = fieldValue.trim();
         }
 
+        if (schema != null) {
+            schema.validate(fieldValue);
+        }
+
         try {
             method.invoke(object, fieldValue);
         } catch (Exception e) {

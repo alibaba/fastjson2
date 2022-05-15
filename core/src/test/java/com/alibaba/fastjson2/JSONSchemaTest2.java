@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -281,5 +283,110 @@ public class JSONSchemaTest2 {
     public static class Bean15 {
         @JSONField(schema = "{'minimum':1}")
         public AtomicInteger value;
+    }
+
+    @Test
+    public void test16() {
+        JSON.parseObject("{\"value\":[1,2,3]}", Bean16.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"value\":[]}", Bean16.class)
+        );
+    }
+
+    public static class Bean16 {
+        @JSONField(schema = "{'minItems':1}")
+        public List value = new ArrayList();
+    }
+
+    @Test
+    public void test17() {
+        JSON.parseObject("{\"value\":[1,2,3]}", Bean17.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"value\":[]}", Bean17.class)
+        );
+    }
+
+    public static class Bean17 {
+        @JSONField(schema = "{'minItems':1}")
+        public final List value = new ArrayList();
+    }
+
+    @Test
+    public void test18() {
+        JSON.parseObject("{\"value\":[1,2,3]}", Bean18.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"value\":[]}", Bean18.class)
+        );
+    }
+
+    private static class Bean18 {
+        @JSONField(schema = "{'minItems':1}")
+        public final List value = new ArrayList();
+    }
+
+    @Test
+    public void test19() {
+        JSON.parseObject("{\"value\":[1,2,3]}", Bean19.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"value\":[]}", Bean19.class)
+        );
+    }
+
+    public static class Bean19 {
+        @JSONField(schema = "{'minItems':1}")
+        public int[] value;
+    }
+
+
+    @Test
+    public void test20() {
+        JSON.parseObject("{\"value\":true}", Bean20.class);
+    }
+
+    public static class Bean20 {
+        @JSONField(schema = "{'minItems':1}")
+        public Boolean value;
+    }
+
+    @Test
+    public void test21() {
+        JSON.parseObject("{\"value\":true}", Bean21.class);
+    }
+
+    public static class Bean21 {
+        @JSONField(schema = "{'minItems':1}")
+        public boolean value;
+    }
+
+    @Test
+    public void test22() {
+        JSON.parseObject("{\"value\":{'a':1,'b':2}}", Bean22.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"value\":{}}", Bean22.class)
+        );
+    }
+
+    public static class Bean22 {
+        @JSONField(schema = "{'minProperties':1}")
+        public JSONObject value;
+    }
+
+    @Test
+    public void test23() {
+        JSON.parseObject("{\"value\":\"123\"}", Bean23.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"value\":\"\"}", Bean23.class)
+        );
+    }
+
+    public static class Bean23 {
+        @JSONField(schema = "{'minLength':1}")
+        public String value;
     }
 }
