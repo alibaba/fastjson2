@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.DomainValidator;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.InetAddressValidator;
+import com.alibaba.fastjson2.util.InetAddresses;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
@@ -8,9 +11,17 @@ import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class JSONSchema {
@@ -157,11 +168,198 @@ public abstract class JSONSchema {
     }
 
     static class EmailValidator extends FormatValidator {
+        private static final String SPECIAL_CHARS = "\\p{Cntrl}\\(\\)<>@,;:'\\\\\\\"\\.\\[\\]";
+        private static final String VALID_CHARS = "(\\\\.)|[^\\s" + SPECIAL_CHARS + "]";
+        private static final String QUOTED_USER = "(\"[^\"]*\")";
+        private static final String WORD = "((" + VALID_CHARS + "|')+|" + QUOTED_USER + ")";
+
+        private static final String EMAIL_REGEX = "^\\s*?(.+)@(.+?)\\s*$";
+        private static final String IP_DOMAIN_REGEX = "^\\[(.*)\\]$";
+        private static final String USER_REGEX = "^\\s*" + WORD + "(\\." + WORD + ")*$";
+
+        private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
+        private static final Pattern IP_DOMAIN_PATTERN = Pattern.compile(IP_DOMAIN_REGEX);
+        private static final Pattern USER_PATTERN = Pattern.compile(USER_REGEX);
+
         final static EmailValidator INSTANCE = new EmailValidator();
 
         @Override
+        public boolean isValid(String email) {
+            if (email == null) {
+                return false;
+            }
+
+            if (email.endsWith(".")) { // check this first - it's cheap!
+                return false;
+            }
+
+            // Check the whole email address structure
+            Matcher emailMatcher = EMAIL_PATTERN.matcher(email);
+            if (!emailMatcher.matches()) {
+                return false;
+            }
+
+            if (!isValidUser(emailMatcher.group(1))) {
+                return false;
+            }
+
+            if (!isValidDomain(emailMatcher.group(2))) {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        protected static boolean isValidDomain(String domain) {
+            // see if domain is an IP address in brackets
+            Matcher ipDomainMatcher = IP_DOMAIN_PATTERN.matcher(domain);
+
+            if (ipDomainMatcher.matches()) {
+                InetAddressValidator inetAddressValidator =
+                        InetAddressValidator.getInstance();
+                return inetAddressValidator.isValid(ipDomainMatcher.group(1));
+            }
+            // Domain is symbolic name
+            return DomainValidator.isValid(domain) || DomainValidator.isValidTld(domain);
+        }
+
+        protected static boolean isValidUser(String user) {
+
+            if (user == null || user.length() > 64) {
+                return false;
+            }
+
+            return USER_PATTERN.matcher(user).matches();
+        }
+    }
+
+    static class IPV4AddressValidator extends FormatValidator {
+        final static IPV4AddressValidator INSTANCE = new IPV4AddressValidator();
+        @Override
+        public boolean isValid(String address) {
+            if (address == null) {
+                return false;
+            }
+            return InetAddresses.isInetAddress(address) && address.indexOf('.') != -1;
+        }
+    }
+
+    static class IPV6AddressValidator extends FormatValidator {
+        final static IPV6AddressValidator INSTANCE = new IPV6AddressValidator();
+        @Override
+        public boolean isValid(String address) {
+            if (address == null) {
+                return false;
+            }
+            return InetAddresses.isInetAddress(address) && address.indexOf(':') != -1;
+        }
+    }
+
+    static class URIFormatValidator extends FormatValidator {
+        final static URIFormatValidator INSTANCE = new URIFormatValidator();
+        @Override
+        public boolean isValid(String url) {
+            if (url == null || url.isEmpty()) {
+                return false;
+            }
+
+            try {
+                new URI(url);
+                return true;
+            } catch (URISyntaxException ignored) {
+                return false;
+            }
+        }
+    }
+
+    static class DateTimeFormatValidator extends FormatValidator {
+        final static DateTimeFormatValidator INSTANCE = new DateTimeFormatValidator();
+
+        @Override
         public boolean isValid(String input) {
-            return com.alibaba.fastjson2.util.EmailValidator.isValid(input);
+            if (input == null || input.isEmpty()) {
+                return false;
+            }
+
+            try {
+                LocalDateTime.parse(input);
+                return true;
+            } catch (DateTimeParseException ignored) {
+                return false;
+            }
+        }
+    }
+
+    static class DateFormatValidator extends FormatValidator {
+        final static DateFormatValidator INSTANCE = new DateFormatValidator();
+
+        @Override
+        public boolean isValid(String input) {
+            if (input == null || input.isEmpty()) {
+                return false;
+            }
+
+            try {
+                LocalDate.parse(input);
+                return true;
+            } catch (DateTimeParseException ignored) {
+                return false;
+            }
+        }
+    }
+
+    static class TimeFormatValidator extends FormatValidator {
+        final static TimeFormatValidator INSTANCE = new TimeFormatValidator();
+
+        @Override
+        public boolean isValid(String input) {
+            if (input == null || input.isEmpty()) {
+                return false;
+            }
+
+            try {
+                LocalTime.parse(input);
+                return true;
+            } catch (DateTimeParseException ignored) {
+                return false;
+            }
+        }
+    }
+
+    static class DurationFormatValidator extends FormatValidator {
+        final static DurationFormatValidator INSTANCE = new DurationFormatValidator();
+
+        @Override
+        public boolean isValid(String input) {
+            if (input == null || input.isEmpty()) {
+                return false;
+            }
+
+            try {
+                Duration.parse(input);
+                return true;
+            } catch (DateTimeParseException ignored) {
+                return false;
+            }
+        }
+    }
+
+    static class UUIDFormatValidator extends FormatValidator {
+        final static UUIDFormatValidator INSTANCE = new UUIDFormatValidator();
+
+        @Override
+        public boolean isValid(String input) {
+            if (input == null || input.isEmpty()) {
+                return false;
+            }
+
+            try {
+                UUID.fromString(input);
+                return true;
+            } catch (DateTimeParseException ignored) {
+                return false;
+            }
         }
     }
 
@@ -190,6 +388,30 @@ public abstract class JSONSchema {
                 switch (format) {
                     case "email":
                         formatValidator = EmailValidator.INSTANCE;
+                        break;
+                    case "ipv4":
+                        formatValidator = IPV4AddressValidator.INSTANCE;
+                        break;
+                    case "ipv6":
+                        formatValidator = IPV6AddressValidator.INSTANCE;
+                        break;
+                    case "uri":
+                        formatValidator = URIFormatValidator.INSTANCE;
+                        break;
+                    case "date-time":
+                        formatValidator = DateTimeFormatValidator.INSTANCE;
+                        break;
+                    case "date":
+                        formatValidator = DateFormatValidator.INSTANCE;
+                        break;
+                    case "time":
+                        formatValidator = TimeFormatValidator.INSTANCE;
+                        break;
+                    case "duration":
+                        formatValidator = DurationFormatValidator.INSTANCE;
+                        break;
+                    case "uuid":
+                        formatValidator = UUIDFormatValidator.INSTANCE;
                         break;
                     default:
                         formatValidator = null;
