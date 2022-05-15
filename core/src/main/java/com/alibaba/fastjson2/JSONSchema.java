@@ -64,6 +64,19 @@ public abstract class JSONSchema {
 
             throw new JSONValidException("type Integer not match : " + value.getClass().getName());
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            StringSchema that = (StringSchema) o;
+            return Objects.equals(title, that.title) && Objects.equals(description, that.description);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(title, description);
+        }
     }
 
     public static final class IntegerSchema extends JSONSchema {
@@ -94,6 +107,19 @@ public abstract class JSONSchema {
 
             throw new JSONValidException("type Integer not match : " + valueClass.getName());
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            IntegerSchema that = (IntegerSchema) o;
+            return Objects.equals(title, that.title) && Objects.equals(description, that.description);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(title, description);
+        }
     }
 
     public static final class NumberSchema extends JSONSchema {
@@ -118,6 +144,19 @@ public abstract class JSONSchema {
 
             throw new JSONValidException("type Integer not match : " + value.getClass().getName());
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            NumberSchema that = (NumberSchema) o;
+            return Objects.equals(title, that.title) && Objects.equals(description, that.description);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(title, description);
+        }
     }
 
     public static final class BooleanSchemaSchema extends JSONSchema {
@@ -133,6 +172,19 @@ public abstract class JSONSchema {
         @Override
         public void validate(Object value) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BooleanSchemaSchema that = (BooleanSchemaSchema) o;
+            return Objects.equals(title, that.title) && Objects.equals(description, that.description);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(title, description);
         }
     }
 
@@ -150,6 +202,19 @@ public abstract class JSONSchema {
         public void validate(Object value) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            NullSchemaSchema that = (NullSchemaSchema) o;
+            return Objects.equals(title, that.title) && Objects.equals(description, that.description);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(title, description);
+        }
     }
 
     public static final class ArraySchemaSchema extends JSONSchema {
@@ -165,6 +230,19 @@ public abstract class JSONSchema {
         @Override
         public void validate(Object value) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ArraySchemaSchema that = (ArraySchemaSchema) o;
+            return Objects.equals(title, that.title) && Objects.equals(description, that.description);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(title, description);
         }
     }
 
@@ -271,6 +349,19 @@ public abstract class JSONSchema {
 
         public Set<String> getRequired() {
             return required;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ObjectSchema that = (ObjectSchema) o;
+            return Objects.equals(properties, that.properties) && Objects.equals(required, that.required);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(properties, required);
         }
     }
 }

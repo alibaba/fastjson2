@@ -1027,6 +1027,22 @@ public class JSONArrayTest {
     }
 
     @Test
+    public void test_getObject2() {
+        assertEquals(
+                JSONSchema.Type.Integer,
+                JSONArray
+                        .of("integer")
+                        .getObject(0, JSONSchema.Type.class)
+        );
+        assertEquals(
+                JSONSchema.Type.Integer,
+                JSONArray
+                        .of("Integer")
+                        .getObject(0, JSONSchema.Type.class)
+        );
+    }
+
+    @Test
     public void test_getObject() {
         {
             UUID uuid = UUID.randomUUID();

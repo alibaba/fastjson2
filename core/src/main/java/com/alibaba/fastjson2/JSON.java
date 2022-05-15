@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public interface JSON {
     /**
@@ -454,6 +455,30 @@ public interface JSON {
 
         try (InputStream is = url.openStream()){
             return parseObject(is, type, features);
+        } catch (IOException e) {
+            throw new JSONException("parseObject error", e);
+        }
+    }
+
+    /**
+     * Parse UTF8 URL Resource into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param url      the JSON {@link URL} to be parsed
+     * @param function specify the {@link Function} to be converted
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(URL url, Function<JSONObject, T> function, JSONReader.Feature... features) {
+        if (url == null) {
+            return null;
+        }
+
+        try (InputStream is = url.openStream()){
+            JSONObject object = parseObject(is, features);
+            if (object == null) {
+                return null;
+            }
+            return function.apply(object);
         } catch (IOException e) {
             throw new JSONException("parseObject error", e);
         }

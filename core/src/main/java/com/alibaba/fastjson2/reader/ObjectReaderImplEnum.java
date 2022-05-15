@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
-final class ObjectReaderImplEnum implements ObjectReader {
+public final class ObjectReaderImplEnum implements ObjectReader {
     final Method createMethod;
     final Type createMethodParamType;
     final Member valueField;

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JSONObjectTest3 {
 
@@ -25,6 +26,12 @@ public class JSONObjectTest3 {
                         .of(JSONObject.of("id", 123))
                         .getObject(0, Bean::new)
                         .id
+        );
+    }
+
+    public void test2() {
+        assertThrows(JSONException.class,
+                () -> JSONObject.of("id", 1).getObject("id", Bean.class)
         );
     }
 
