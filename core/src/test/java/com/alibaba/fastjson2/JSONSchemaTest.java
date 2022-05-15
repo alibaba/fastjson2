@@ -440,6 +440,7 @@ public class JSONSchemaTest {
                 .to(JSONSchema::of);
         jsonSchema.validate(JSON.parse("[1, 2, 3, 4, 5]"));
         jsonSchema.validate(JSON.parse("[3, \"different\", { \"types\" : \"of values\" }]"));
+        JSON.parseArray("[1, 2, 3, 4, 5]").validate(jsonSchema);
 
         assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(
                 JSON.parse("{\"Not\": \"an array\"}")

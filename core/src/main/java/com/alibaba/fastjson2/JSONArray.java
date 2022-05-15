@@ -1175,6 +1175,10 @@ public class JSONArray extends ArrayList<Object> {
         return this;
     }
 
+    public void validate(JSONSchema schema) {
+        schema.validate(this);
+    }
+
     /**
      * Pack multiple elements as {@link JSONArray}
      *
