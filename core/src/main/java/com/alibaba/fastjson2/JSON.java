@@ -72,7 +72,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static JSONObject parseObject(String text) {
-        if (text == null) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 

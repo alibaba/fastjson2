@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -19,7 +20,13 @@ public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
 
     protected boolean hasDefaultValue;
 
+    protected final JSONSchema schema;
+
     protected ObjectReaderBean(Class objectClass, String typeName) {
+        this(objectClass, typeName, null);
+    }
+
+    protected ObjectReaderBean(Class objectClass, String typeName, JSONSchema schema) {
         if (typeName == null) {
             if (objectClass != null) {
                 typeName = TypeUtils.getTypeName(objectClass);
@@ -29,6 +36,8 @@ public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
         this.objectClass = objectClass;
         this.typeName = typeName;
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
+
+        this.schema = schema;
     }
 
     @Override
@@ -170,7 +179,11 @@ public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
 
         Function buildFunction = getBuildFunction();
         if (buildFunction != null) {
-            return (T) buildFunction.apply(object);
+            object = (T) buildFunction.apply(object);
+        }
+
+        if (schema != null) {
+            schema.validate(object);
         }
 
         return object;

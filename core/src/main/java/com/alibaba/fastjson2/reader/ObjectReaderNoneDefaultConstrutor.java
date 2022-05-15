@@ -16,16 +16,16 @@ class ObjectReaderNoneDefaultConstrutor<T>
     private List<Constructor> alternateConstructors;
 
     public ObjectReaderNoneDefaultConstrutor(
-            Class objectClass
-            , String typeName
-            , long features
-            , Function<Map<Long, Object>, T> creator
-            , List<Constructor> alternateConstructors
-            , String[] paramNames
-            , FieldReader[] paramFieldReaders
-            , FieldReader[] setterFieldReaders
+            Class objectClass,
+            String typeName,
+            long features,
+            Function<Map<Long, Object>, T> creator,
+            List<Constructor> alternateConstructors,
+            String[] paramNames,
+            FieldReader[] paramFieldReaders,
+            FieldReader[] setterFieldReaders
     ) {
-        super(objectClass, null, typeName, features, null, null, concat(paramFieldReaders, setterFieldReaders));
+        super(objectClass, null, typeName, features, null, null, null, concat(paramFieldReaders, setterFieldReaders));
         this.paramNames = paramNames;
         this.creator = creator;
         this.setterFieldReaders = setterFieldReaders;

@@ -397,6 +397,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             if (ignores.length > 0) {
                 beanInfo.ignores = ignores;
             }
+
+            String schema = jsonType.schema().trim();
+            if (!schema.isEmpty()) {
+                beanInfo.schema = schema;
+            }
         }
 
         @Override

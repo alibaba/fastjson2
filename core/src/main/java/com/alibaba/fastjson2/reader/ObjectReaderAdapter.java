@@ -27,15 +27,16 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
     volatile boolean instantiationError;
 
     public ObjectReaderAdapter(
-            Class objectClass
-            , String typeKey
-            , String typeName
-            , long features
-            , Supplier<T> creator
-            , Function buildFunction
-            , FieldReader... fieldReaders
+            Class objectClass,
+            String typeKey,
+            String typeName,
+            long features,
+            JSONSchema schema,
+            Supplier<T> creator,
+            Function buildFunction,
+            FieldReader... fieldReaders
     ) {
-        super(objectClass, typeName);
+        super(objectClass, typeName, schema);
 
         this.constructor = objectClass == null
                 ? null
@@ -367,6 +368,11 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
         if (object == null) {
             object = createInstance(jsonReader.getContext().getFeatures() | features);
         }
+
+        if (schema != null) {
+            schema.validate(object);
+        }
+
         return (T) object;
     }
 }

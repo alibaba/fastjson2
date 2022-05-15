@@ -32,4 +32,5 @@ public class BeanInfo {
     public Class serializer;
     public Class deserializer;
     public Class<? extends Filter>[] serializeFilters;
+    public String schema;
 }

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Parameter;
@@ -14,8 +15,8 @@ class FieldReaderObjectParam<T>
     final long paramNameHash;
     ObjectReader fieldObjectReader;
 
-    FieldReaderObjectParam(String fieldName, Type fieldType, Class fieldClass, String paramName, Parameter parameter, int ordinal, long features, String format) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format);
+    FieldReaderObjectParam(String fieldName, Type fieldType, Class fieldClass, String paramName, Parameter parameter, int ordinal, long features, String format, JSONSchema schema) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema);
         this.paramName = paramName;
         this.paramNameHash = Fnv.hashCode64(paramName);
         this.parameter = parameter;

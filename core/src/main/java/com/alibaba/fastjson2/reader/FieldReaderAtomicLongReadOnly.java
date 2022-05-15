@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicLong;
@@ -9,8 +10,8 @@ import java.util.concurrent.atomic.AtomicLong;
 final class FieldReaderAtomicLongReadOnly<T> extends FieldReaderImpl<T> implements FieldReaderReadOnly<T> {
     protected final Method method;
 
-    FieldReaderAtomicLongReadOnly(String fieldName, Class fieldType, int ordinal, Method method) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, null, null);
+    FieldReaderAtomicLongReadOnly(String fieldName, Class fieldType, int ordinal, JSONSchema schema, Method method) {
+        super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, schema);
         this.method = method;
     }
 

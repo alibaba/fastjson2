@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.function.ObjCharConsumer;
 
 import java.lang.reflect.Method;
@@ -9,8 +10,8 @@ final class FieldReaderCharValueFunc<T> extends FieldReaderImpl<T> {
     final Method method;
     final ObjCharConsumer<T> function;
 
-    FieldReaderCharValueFunc(String fieldName, int ordinal, Method method, String format, Object defaultValue, ObjCharConsumer<T> function) {
-        super(fieldName, char.class, char.class, ordinal, 0, format, defaultValue);
+    FieldReaderCharValueFunc(String fieldName, int ordinal, String format, Character defaultValue, JSONSchema schema, Method method, ObjCharConsumer<T> function) {
+        super(fieldName, char.class, char.class, ordinal, 0, format, null, defaultValue, schema);
         this.method = method;
         this.function = function;
     }

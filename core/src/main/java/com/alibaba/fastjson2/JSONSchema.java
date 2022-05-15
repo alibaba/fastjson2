@@ -28,6 +28,10 @@ public abstract class JSONSchema {
     }
 
     public static JSONSchema of(JSONObject input, Class objectClass) {
+        if (input == null || input.isEmpty()) {
+            return null;
+        }
+
         if (objectClass == null) {
             return of(input);
         }
