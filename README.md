@@ -128,7 +128,7 @@ val data = bytes.parseObject() // JSONObject
 Java:
 ```java
 String text = "...";
-JSONArray data = JSONObject.parseArray(text);
+JSONArray data = JSON.parseArray(text);
 ```
 
 Kotlin:
@@ -144,7 +144,7 @@ val data = text.parseArray() // JSONArray
 Java:
 ```java
 String text = "...";
-User data = JSONObject.parseObject(text, User.class);
+User data = JSON.parseObject(text, User.class);
 ```
 
 Kotlin:
@@ -161,8 +161,8 @@ val data = text.parseObject<User>() // User
 Java:
 ```java
 Object data = "...";
-String text = JSONObject.toJSONString(data);
-byte[] text = JSONObject.toJSONBytes(data);
+String text = JSON.toJSONString(data);
+byte[] text = JSON.toJSONBytes(data);
 ```
 
 Kotlin:
