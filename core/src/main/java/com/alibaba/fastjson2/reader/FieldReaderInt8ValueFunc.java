@@ -24,19 +24,32 @@ final class FieldReaderInt8ValueFunc<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, byte value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         function.accept(object, value);
     }
 
     @Override
     public void accept(T object, Object value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         function.accept(object
                 , TypeUtils.toByteValue(value));
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        function.accept(object
-                , (byte) jsonReader.readInt32Value());
+        byte value = (byte) jsonReader.readInt32Value();
+
+        if (schema != null) {
+            schema.validate(value);
+        }
+
+        function.accept(object, value);
     }
 
     @Override

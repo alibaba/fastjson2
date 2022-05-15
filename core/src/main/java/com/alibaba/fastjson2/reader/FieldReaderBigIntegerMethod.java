@@ -2,20 +2,27 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
+import java.util.Locale;
 
 final class FieldReaderBigIntegerMethod<T> extends FieldReaderObjectMethod<T> {
-    FieldReaderBigIntegerMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, BigInteger defaultValue, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, method);
+    FieldReaderBigIntegerMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, BigInteger defaultValue, JSONSchema schema, Method method) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         BigInteger fieldValue = jsonReader.readBigInteger();
+
+        if (schema != null) {
+            schema.validate(fieldValue);
+        }
+
         try {
             method.invoke(object, fieldValue);
         } catch (Exception e) {

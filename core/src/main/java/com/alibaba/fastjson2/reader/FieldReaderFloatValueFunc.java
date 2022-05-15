@@ -24,11 +24,19 @@ final class FieldReaderFloatValueFunc<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, float value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         function.accept(object, value);
     }
 
     @Override
     public void accept(T object, Object value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             method.invoke(object
                     , TypeUtils.toFloatValue(value));
@@ -39,7 +47,12 @@ final class FieldReaderFloatValueFunc<T> extends FieldReaderImpl<T> {
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        function.accept(object
-                , jsonReader.readFloatValue());
+        float fieldValue = jsonReader.readFloatValue();
+
+        if (schema != null) {
+            schema.validate(fieldValue);
+        }
+
+        function.accept(object, fieldValue);
     }
 }

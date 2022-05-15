@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
@@ -24,6 +25,11 @@ final class FieldReaderObjectFunc2<T, U> implements FieldReaderObject<T, U> {
         this.fieldType = fieldType;
         this.fieldName = fieldName;
         this.fieldClass = TypeUtils.getMapping(fieldType);
+    }
+
+    @Override
+    public JSONSchema getSchema() {
+        return null;
     }
 
     @Override

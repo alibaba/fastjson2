@@ -2,12 +2,13 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Field;
 
 final class FieldReaderBoolField<T> extends FieldReaderObjectField<T> {
-    FieldReaderBoolField(String fieldName, Class fieldType, int ordinal, Boolean defaultValue, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, null, defaultValue, field);
+    FieldReaderBoolField(String fieldName, Class fieldType, int ordinal, long features, String format, Boolean defaultValue, JSONSchema schema, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
     }
 
     @Override

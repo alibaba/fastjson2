@@ -9,6 +9,8 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 public abstract class JSONSchema {
@@ -23,6 +25,38 @@ public abstract class JSONSchema {
     JSONSchema(String title, String description) {
         this.title = title;
         this.description = description;
+    }
+
+    public static JSONSchema of(JSONObject input, Class objectClass) {
+        if (objectClass == null) {
+            return of(input);
+        }
+
+        if (objectClass == byte.class
+                || objectClass == short.class
+                || objectClass == int.class
+                || objectClass == long.class
+                || objectClass == Byte.class
+                || objectClass == Short.class
+                || objectClass == Integer.class
+                || objectClass == Long.class
+                || objectClass == BigInteger.class
+                || objectClass == AtomicInteger.class
+                || objectClass == AtomicLong.class
+        ) {
+            return new IntegerSchema(input);
+        }
+
+        if (objectClass == BigDecimal.class
+                || objectClass == float.class
+                || objectClass == double.class
+                || objectClass == Float.class
+                || objectClass == Double.class
+        ) {
+            return new NumberSchema(input);
+        }
+
+        return null;
     }
 
     public static JSONSchema of(JSONObject input) {
@@ -66,6 +100,18 @@ public abstract class JSONSchema {
     public abstract Type getType();
 
     public abstract void validate(Object value);
+
+    public void validate(long value) {
+        validate((Object) Long.valueOf(value));
+    }
+
+    public void validate(Integer value) {
+        validate((Object) value);
+    }
+
+    public void validate(Long value) {
+        validate((Object) value);
+    }
 
     public enum Type {
         Null,
@@ -200,6 +246,8 @@ public abstract class JSONSchema {
                     || valueClass == Integer.class
                     || valueClass == Long.class
                     || valueClass == BigInteger.class
+                    || valueClass == AtomicInteger.class
+                    || valueClass == AtomicLong.class
             ) {
                 if (minimum != null) {
                     long longValue = ((Number) value).longValue();
@@ -239,6 +287,118 @@ public abstract class JSONSchema {
             }
 
             throw new JSONSchemaValidException("type Integer not match : " + valueClass.getName());
+        }
+
+        @Override
+        public void validate(long longValue) {
+            if (minimum != null) {
+                if (longValue < minimum.longValue()) {
+                    throw new JSONSchemaValidException("minimum not match, expect >= " + minimum + ", but " + longValue);
+                }
+            }
+
+            if (exclusiveMinimum != null) {
+                if (longValue <= exclusiveMinimum.longValue()) {
+                    throw new JSONSchemaValidException("exclusiveMinimum not match, expect > " + exclusiveMinimum + ", but " + longValue);
+                }
+            }
+
+            if (maximum != null) {
+                if (longValue > maximum.longValue()) {
+                    throw new JSONSchemaValidException("maximum not match, expect <= " + maximum + ", but " + longValue);
+                }
+            }
+
+            if (exclusiveMaximum != null) {
+                if (longValue >= exclusiveMaximum.longValue()) {
+                    throw new JSONSchemaValidException("exclusiveMinimum not match, expect < " + exclusiveMaximum + ", but " + longValue);
+                }
+            }
+
+            if (multipleOf != null) {
+                if (longValue % multipleOf.longValue() != 0) {
+                    throw new JSONSchemaValidException("multipleOf not match, expect multipleOf " + multipleOf + ", but " + longValue);
+                }
+            }
+            return;
+        }
+
+        @Override
+        public void validate(Long value) {
+            if (value == null) {
+                return;
+            }
+
+            long longValue = value.longValue();
+            if (minimum != null) {
+                if (longValue < minimum.longValue()) {
+                    throw new JSONSchemaValidException("minimum not match, expect >= " + minimum + ", but " + longValue);
+                }
+            }
+
+            if (exclusiveMinimum != null) {
+                if (longValue <= exclusiveMinimum.longValue()) {
+                    throw new JSONSchemaValidException("exclusiveMinimum not match, expect > " + exclusiveMinimum + ", but " + longValue);
+                }
+            }
+
+            if (maximum != null) {
+                if (longValue > maximum.longValue()) {
+                    throw new JSONSchemaValidException("maximum not match, expect <= " + maximum + ", but " + longValue);
+                }
+            }
+
+            if (exclusiveMaximum != null) {
+                if (longValue >= exclusiveMaximum.longValue()) {
+                    throw new JSONSchemaValidException("exclusiveMinimum not match, expect < " + exclusiveMaximum + ", but " + longValue);
+                }
+            }
+
+            if (multipleOf != null) {
+                if (longValue % multipleOf.longValue() != 0) {
+                    throw new JSONSchemaValidException("multipleOf not match, expect multipleOf " + multipleOf + ", but " + longValue);
+                }
+            }
+            return;
+        }
+
+        @Override
+        public void validate(Integer value) {
+            if (value == null) {
+                return;
+            }
+
+            long longValue = value.longValue();
+            if (minimum != null) {
+                if (longValue < minimum.longValue()) {
+                    throw new JSONSchemaValidException("minimum not match, expect >= " + minimum + ", but " + longValue);
+                }
+            }
+
+            if (exclusiveMinimum != null) {
+                if (longValue <= exclusiveMinimum.longValue()) {
+                    throw new JSONSchemaValidException("exclusiveMinimum not match, expect > " + exclusiveMinimum + ", but " + longValue);
+                }
+            }
+
+            if (maximum != null) {
+                if (longValue > maximum.longValue()) {
+                    throw new JSONSchemaValidException("maximum not match, expect <= " + maximum + ", but " + longValue);
+                }
+            }
+
+            if (exclusiveMaximum != null) {
+                if (longValue >= exclusiveMaximum.longValue()) {
+                    throw new JSONSchemaValidException("exclusiveMinimum not match, expect < " + exclusiveMaximum + ", but " + longValue);
+                }
+            }
+
+            if (multipleOf != null) {
+                if (longValue % multipleOf.longValue() != 0) {
+                    throw new JSONSchemaValidException("multipleOf not match, expect multipleOf " + multipleOf + ", but " + longValue);
+                }
+            }
+            return;
         }
 
         @Override

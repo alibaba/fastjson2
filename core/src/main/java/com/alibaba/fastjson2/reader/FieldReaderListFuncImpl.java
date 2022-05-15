@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -28,6 +29,11 @@ class FieldReaderListFuncImpl<T, V>
         this.function = function;
         this.itemType = itemType;
         this.fieldName = fieldName;
+    }
+
+    @Override
+    public JSONSchema getSchema() {
+        return null;
     }
 
     @Override

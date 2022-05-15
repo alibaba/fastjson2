@@ -81,6 +81,11 @@ final class FieldReaderListStrMethod<T>
         } else {
             throw new JSONException("json format error : " + jsonReader.current());
         }
+
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             method.invoke(object, value);
         } catch (Exception e) {

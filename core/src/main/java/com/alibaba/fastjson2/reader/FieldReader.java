@@ -38,6 +38,8 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
         return (getFeatures() & FieldInfo.UNWRAPPED_MASK) != 0;
     }
 
+    JSONSchema getSchema();
+
     default void processExtra(JSONReader jsonReader, Object object) {
         jsonReader.skipValue();
     }
