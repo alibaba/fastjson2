@@ -140,6 +140,7 @@ public abstract class JSONSchema {
         final Long exclusiveMinimum;
         final Long maximum;
         final Long exclusiveMaximum;
+        final Long multipleOf;
 
         IntegerSchema(JSONObject input) {
             super(input);
@@ -162,6 +163,8 @@ public abstract class JSONSchema {
                 this.maximum = maximum;
                 this.exclusiveMaximum = input.getLong("exclusiveMaximum");
             }
+
+            this.multipleOf = input.getLong("multipleOf");
         }
 
         @Override
@@ -209,6 +212,13 @@ public abstract class JSONSchema {
                         throw new JSONSchemaValidException("exclusiveMinimum not match, expect < " + exclusiveMaximum + ", but " + value);
                     }
                 }
+
+                if (multipleOf != null) {
+                    long longValue = ((Number) value).longValue();
+                    if (longValue % multipleOf.longValue() != 0) {
+                        throw new JSONSchemaValidException("multipleOf not match, expect multipleOf " + multipleOf + ", but " + value);
+                    }
+                }
                 return;
             }
 
@@ -226,12 +236,13 @@ public abstract class JSONSchema {
                     && Objects.equals(exclusiveMinimum, that.exclusiveMinimum)
                     && Objects.equals(maximum, that.maximum)
                     && Objects.equals(exclusiveMaximum, that.exclusiveMaximum)
+                    && Objects.equals(multipleOf, that.multipleOf)
                     ;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(title, description, minimum, exclusiveMinimum, maximum, exclusiveMaximum);
+            return Objects.hash(title, description, minimum, exclusiveMinimum, maximum, exclusiveMaximum, multipleOf);
         }
     }
 
@@ -240,6 +251,7 @@ public abstract class JSONSchema {
         final BigDecimal exclusiveMinimum;
         final BigDecimal maximum;
         final BigDecimal exclusiveMaximum;
+        final BigInteger multipleOf;
 
         NumberSchema(JSONObject input) {
             super(input);
@@ -263,6 +275,7 @@ public abstract class JSONSchema {
                 this.maximum = maximum;
                 this.exclusiveMaximum = input.getBigDecimal("exclusiveMaximum");
             }
+            this.multipleOf = input.getBigInteger("multipleOf");
         }
 
         @Override
@@ -315,6 +328,13 @@ public abstract class JSONSchema {
                         throw new JSONSchemaValidException("exclusiveMaximum not match, expect < " + exclusiveMaximum + ", but " + value);
                     }
                 }
+
+                if (multipleOf != null) {
+                    BigInteger bigInteger = decimalValue.toBigInteger();
+                    if (!decimalValue.equals(new BigDecimal(bigInteger)) || !bigInteger.mod(multipleOf).equals(BigInteger.ZERO)) {
+                        throw new JSONSchemaValidException("multipleOf not match, expect multipleOf " + multipleOf + ", but " + value);
+                    }
+                }
                 return;
             }
 
@@ -332,12 +352,13 @@ public abstract class JSONSchema {
                     && Objects.equals(exclusiveMinimum, that.exclusiveMinimum)
                     && Objects.equals(maximum, that.maximum)
                     && Objects.equals(exclusiveMaximum, that.exclusiveMaximum)
+                    && Objects.equals(multipleOf, that.multipleOf)
                     ;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(title, description, minimum, exclusiveMinimum, maximum, exclusiveMaximum);
+            return Objects.hash(title, description, minimum, exclusiveMinimum, maximum, exclusiveMaximum, multipleOf);
         }
     }
 

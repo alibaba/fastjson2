@@ -234,6 +234,20 @@ public class JSONSchemaTest {
     }
 
     @Test
+    public void testInteger_multipleOf() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Integer", "multipleOf", 10)
+                .to(JSONSchema::of);
+
+        jsonSchema.validate(0);
+        jsonSchema.validate(10);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(-1));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(99));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(101));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(23));
+    }
+
+    @Test
     public void testNumber1() {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "Number")
@@ -329,6 +343,20 @@ public class JSONSchemaTest {
         assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(-1));
         assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(100));
         assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(101));
+    }
+
+    @Test
+    public void testNumber_multipleOf() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Number", "multipleOf", 10)
+                .to(JSONSchema::of);
+
+        jsonSchema.validate(0);
+        jsonSchema.validate(10);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(-1));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(99));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(101));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(23));
     }
 
     @Test
