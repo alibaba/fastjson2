@@ -2,19 +2,25 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
 final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
-    FieldReaderBigDecimalField(String fieldName, Class fieldType, int ordinal, long features, String format, BigDecimal defaultValue, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
+    FieldReaderBigDecimalField(String fieldName, Class fieldType, int ordinal, long features, String format, BigDecimal defaultValue, JSONSchema schema, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         BigDecimal fieldValue = jsonReader.readBigDecimal();
+
+        if (schema != null) {
+            schema.validate(fieldValue);
+        }
+
         try {
             field.set(object, fieldValue);
         } catch (Exception e) {

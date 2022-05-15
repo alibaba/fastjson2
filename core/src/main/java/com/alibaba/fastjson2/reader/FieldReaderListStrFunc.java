@@ -109,7 +109,10 @@ final class FieldReaderListStrFunc<T> extends FieldReaderImpl<T>
             throw new JSONException("json format error : " + jsonReader.current());
         }
 
-
+        if (schema != null) {
+            schema.validate(value);
+        }
+        
         try {
             function.accept(object, value);
         } catch (Exception e) {

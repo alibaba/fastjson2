@@ -57,6 +57,10 @@ class FieldReaderMapMethodReadOnly<T> extends FieldReaderObjectMethod<T> impleme
             return;
         }
 
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         map.putAll((Map) value);
     }
 

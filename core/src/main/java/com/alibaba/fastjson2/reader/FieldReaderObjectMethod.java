@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -24,8 +25,8 @@ class FieldReaderObjectMethod<T>
         this.method = method;
     }
 
-    FieldReaderObjectMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Object defaultValue, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue);
+    FieldReaderObjectMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Object defaultValue, JSONSchema schema, Method method) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
         this.method = method;
     }
 
@@ -38,6 +39,10 @@ class FieldReaderObjectMethod<T>
     public void accept(T object, Object value) {
         if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
             return;
+        }
+
+        if (schema != null) {
+            schema.validate(value);
         }
 
         try {

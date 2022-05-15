@@ -23,17 +23,29 @@ final class FieldReaderInt64ValueFunc<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         function.accept(object, value);
     }
 
     @Override
     public void accept(T object, Object value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         function.accept(object
                 , TypeUtils.toLongValue(value));
     }
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         function.accept(object, value);
     }
 

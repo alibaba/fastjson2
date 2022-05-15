@@ -14,6 +14,7 @@ public class FieldInfo {
     public boolean isTransient;
     public String defaultValue;
     public Locale locale;
+    public String schema;
 
     public void init() {
         fieldName = null;
@@ -26,7 +27,8 @@ public class FieldInfo {
         fieldClassMixIn = false;
         isTransient = false;
         defaultValue = null;
-        Locale locale;
+        locale = null;
+        schema = null;
     }
 
    public static final long VALUE_MASK = 1L << 48;

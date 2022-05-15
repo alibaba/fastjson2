@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JdbcSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -22,6 +23,7 @@ abstract class FieldReaderImpl<T>
     final long features;
     final String format;
     final Locale locale;
+    final JSONSchema schema;
     volatile ObjectReader reader;
 
     volatile JSONPath referenceCache;
@@ -29,7 +31,7 @@ abstract class FieldReaderImpl<T>
     final Object defaultValue;
 
     public FieldReaderImpl(String fieldName, Type fieldType) {
-        this (fieldName, fieldType, TypeUtils.getClass(fieldType), 0, 0L, null, null, null);
+        this (fieldName, fieldType, TypeUtils.getClass(fieldType), 0, 0L, null, null, null, null);
     }
 
     public FieldReaderImpl(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format) {
@@ -43,6 +45,7 @@ abstract class FieldReaderImpl<T>
         this.format = format;
         this.locale = null;
         this.defaultValue = null;
+        this.schema = null;
     }
 
     public FieldReaderImpl(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue) {
@@ -56,6 +59,7 @@ abstract class FieldReaderImpl<T>
         this.format = format;
         this.locale = null;
         this.defaultValue = defaultValue;
+        this.schema = null;
     }
 
     public FieldReaderImpl(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Object defaultValue) {
@@ -69,6 +73,31 @@ abstract class FieldReaderImpl<T>
         this.format = format;
         this.locale = locale;
         this.defaultValue = defaultValue;
+        this.schema = null;
+    }
+
+    public FieldReaderImpl(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema) {
+
+        this.fieldName = fieldName;
+        this.fieldType = fieldType;
+        this.fieldClass = fieldClass;
+        this.fieldClassSerializable = fieldClass != null && Serializable.class.isAssignableFrom(fieldClass);
+        this.features = features;
+        this.fieldNameHash = Fnv.hashCode64(fieldName);
+        this.ordinal = ordinal;
+        this.format = format;
+        this.locale = locale;
+        this.defaultValue = defaultValue;
+        this.schema = schema;
     }
 
     @Override
@@ -102,6 +131,11 @@ abstract class FieldReaderImpl<T>
         }
 
         return reader = jsonReader.getObjectReader(fieldType);
+    }
+
+    @Override
+    public JSONSchema getSchema() {
+        return schema;
     }
 
     @Override

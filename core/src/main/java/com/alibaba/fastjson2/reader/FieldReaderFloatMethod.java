@@ -2,19 +2,26 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Locale;
 
 final class FieldReaderFloatMethod<T> extends FieldReaderObjectMethod<T> {
-    FieldReaderFloatMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Float defaultValue, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, setter);
+    FieldReaderFloatMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Float defaultValue, JSONSchema schema, Method setter) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         Float fieldValue = jsonReader.readFloat();
+
+        if (schema != null) {
+            schema.validate(fieldValue);
+        }
+
         try {
             method.invoke(object, fieldValue);
         } catch (Exception e) {

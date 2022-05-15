@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
@@ -22,8 +23,9 @@ final class FieldReaderListFieldUF<T> extends FieldReaderListField<T> {
             String format,
             Locale locale,
             Collection defaultValue,
+            JSONSchema schema,
             Field field) {
-        super(fieldName, fieldType, fieldClass, itemType, ordinal, features, format, locale, defaultValue, field);
+        super(fieldName, fieldType, fieldClass, itemType, ordinal, features, format, locale, defaultValue, schema, field);
         fieldOffset = UnsafeUtils.objectFieldOffset(field);
     }
 
