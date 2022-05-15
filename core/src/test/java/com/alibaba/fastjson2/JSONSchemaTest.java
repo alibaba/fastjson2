@@ -15,6 +15,9 @@ public class JSONSchemaTest {
         JSONObject object = JSON.parseObject(url, JSONObject.class);
 
         JSONSchema.ObjectSchema schema = (JSONSchema.ObjectSchema) JSONSchema.of(object);
+        JSONSchema.ObjectSchema schema1 = (JSONSchema.ObjectSchema) JSON.parseObject(url, JSONSchema::of);
+        assertEquals(schema.hashCode(), schema1.hashCode());
+        assertEquals(schema, schema1);
 
         assertEquals("Product", schema.getTitle());
         assertEquals("A product from Acme's catalog", schema.getDescription());

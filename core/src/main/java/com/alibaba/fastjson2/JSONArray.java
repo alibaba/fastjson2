@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
+import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
@@ -1084,7 +1086,37 @@ public class JSONArray extends ArrayList<Object> {
             return (T) value;
         }
 
-        throw new JSONException("Can not convert from " + valueClass + " to " + type);
+        ObjectReader objectReader = null;
+
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.isEmpty() || "null".equals(str)) {
+                return null;
+            }
+
+            if (clazz.isEnum()) {
+                objectReader = provider.getObjectReader(clazz, fieldBased);
+                if (objectReader instanceof ObjectReaderImplEnum) {
+                    long hashCode64 = Fnv.hashCode64(str);
+                    ObjectReaderImplEnum enumReader = (ObjectReaderImplEnum) objectReader;
+                    return (T) enumReader.getEnumByHashCode(hashCode64);
+                }
+            }
+        }
+
+        String json = JSON.toJSONString(value);
+        JSONReader jsonReader = JSONReader.of(json);
+        jsonReader.context.config(features);
+
+        if (objectReader == null) {
+            objectReader = provider.getObjectReader(clazz, fieldBased);
+        }
+
+        T object = (T) objectReader.readObject(jsonReader, 0L);
+        if (!jsonReader.isEnd()) {
+            throw new JSONException("not support input " + json);
+        }
+        return object;
     }
 
     public <T> T getObject(int index, Function<JSONObject, T> creator) {

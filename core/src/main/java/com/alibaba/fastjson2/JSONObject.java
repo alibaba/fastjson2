@@ -3,7 +3,9 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
+import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
 import com.alibaba.fastjson2.util.BeanUtils;
+import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
@@ -1087,10 +1089,21 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             return (T) value;
         }
 
+        ObjectReader objectReader = null;
+
         if (value instanceof String) {
             String str = (String) value;
             if (str.isEmpty() || "null".equals(str)) {
                 return null;
+            }
+
+            if (clazz.isEnum()) {
+                objectReader = provider.getObjectReader(clazz, fieldBased);
+                if (objectReader instanceof ObjectReaderImplEnum) {
+                    long hashCode64 = Fnv.hashCode64(str);
+                    ObjectReaderImplEnum enumReader = (ObjectReaderImplEnum) objectReader;
+                    return (T) enumReader.getEnumByHashCode(hashCode64);
+                }
             }
         }
 
@@ -1098,8 +1111,15 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         JSONReader jsonReader = JSONReader.of(json);
         jsonReader.context.config(features);
 
-        ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
-        return (T) objectReader.readObject(jsonReader);
+        if (objectReader == null) {
+            objectReader = provider.getObjectReader(clazz, fieldBased);
+        }
+
+        T object = (T) objectReader.readObject(jsonReader, 0L);
+        if (!jsonReader.isEnd()) {
+            throw new JSONException("not support input " + json);
+        }
+        return object;
     }
 
     /**
