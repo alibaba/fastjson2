@@ -481,6 +481,12 @@ public class JSONArrayTest {
                 , new JSONArray()
                         .fluentAdd("12")
                         .getBigDecimal(0));
+        assertEquals(
+                BigDecimal.ONE
+                , JSONArray.of(true).getBigDecimal(0));
+        assertEquals(
+                BigDecimal.ZERO
+                , JSONArray.of(false).getBigDecimal(0));
     }
 
     @Test

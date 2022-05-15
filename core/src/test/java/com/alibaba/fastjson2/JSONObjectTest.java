@@ -470,6 +470,16 @@ public class JSONObjectTest {
                 , new JSONObject()
                         .fluentPut("val", "12")
                         .getBigDecimal("val"));
+        assertEquals(
+                BigDecimal.ONE
+                , new JSONObject()
+                        .fluentPut("val", true)
+                        .getBigDecimal("val"));
+        assertEquals(
+                BigDecimal.ZERO
+                , new JSONObject()
+                        .fluentPut("val", false)
+                        .getBigDecimal("val"));
     }
 
     @Test
