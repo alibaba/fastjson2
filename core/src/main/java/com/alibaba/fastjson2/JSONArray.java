@@ -955,9 +955,13 @@ public class JSONArray extends ArrayList<Object> {
         ObjectReader<?> objectReader = provider.getObjectReader(clazz, fieldBased);
 
         List<T> list = new ArrayList<>(size());
-        for (Object item : this) {
+        for (int i = 0; i < this.size(); i++) {
+            Object item = this.get(i);
             T classItem;
-            if (item instanceof Map) {
+
+            if (item instanceof JSONObject) {
+                classItem = (T) objectReader.createInstance((Map) item, featuresValue);
+            } else if (item instanceof Map) {
                 classItem = (T) objectReader.createInstance((Map) item, featuresValue);
             } else {
                 throw new JSONException(
