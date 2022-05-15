@@ -105,10 +105,10 @@ The package name of `fastjson v2` is different from `fastjson v1`. It is `com.al
 Java:
 ```java
 String text = "...";
-JSONObject data = JSONObject.parseObject(text);
+JSONObject data = JSON.parseObject(text);
 
 byte[] bytes = ...;
-JSONObject data = JSONObject.parseObject(bytes);
+JSONObject data = JSON.parseObject(bytes);
 ```
 
 Kotlin:

@@ -106,10 +106,10 @@ dependencies {
 Java:
 ```java
 String text = "...";
-JSONObject data = JSONObject.parseObject(text);
+JSONObject data = JSON.parseObject(text);
 
 byte[] bytes = ...;
-JSONObject data = JSONObject.parseObject(bytes);
+JSONObject data = JSON.parseObject(bytes);
 ```
 
 Kotlin:
