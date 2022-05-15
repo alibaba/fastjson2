@@ -47,6 +47,10 @@ final class FieldReaderObjectFunc<T, V> extends FieldReaderImpl<T> implements Fi
             }
         }
 
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         function.accept(object, (V) value);
     }
 

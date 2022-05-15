@@ -30,6 +30,10 @@ final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             field.set(object, BigDecimal.valueOf(value));
         } catch (Exception e) {
@@ -39,6 +43,10 @@ final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             field.set(object, BigDecimal.valueOf(value));
         } catch (Exception e) {
@@ -48,6 +56,10 @@ final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
 
     @Override
     public void accept(T object, Object value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             field.set(object
                     , TypeUtils.toBigDecimal(value));
