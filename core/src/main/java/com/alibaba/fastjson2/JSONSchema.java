@@ -78,7 +78,7 @@ public abstract class JSONSchema {
             return new ObjectSchema(input);
         }
 
-        return null;
+        return new ObjectSchema(input);
     }
 
     public static JSONSchema of(JSONObject input) {
@@ -1155,6 +1155,28 @@ public abstract class JSONSchema {
                 }
             }
 
+            if (minProperties >= 0 || maxProperties >= 0) {
+                int fieldValueCount = 0;
+                List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
+                for (FieldWriter fieldWriter : fieldWriters) {
+                    Object fieldValue = fieldWriter.getFieldValue(value);
+                    if (fieldValue != null) {
+                        fieldValueCount++;
+                    }
+                }
+
+                if (minProperties >= 0) {
+                    if (fieldValueCount < minProperties) {
+                        throw new JSONSchemaValidException("minProperties not match, expect >= '" + minProperties + "', but " + fieldValueCount);
+                    }
+                }
+
+                if (maxProperties >= 0) {
+                    if (fieldValueCount > maxProperties) {
+                        throw new JSONSchemaValidException("maxProperties not match, expect <= '" + maxProperties + "', but " + fieldValueCount);
+                    }
+                }
+            }
 
         }
 

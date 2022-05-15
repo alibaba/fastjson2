@@ -389,4 +389,39 @@ public class JSONSchemaTest2 {
         @JSONField(schema = "{'minLength':1}")
         public String value;
     }
+
+    @Test
+    public void test24() {
+        JSON.parseObject("{\"value\":{\"id\":\"123\", \"name\":\"xx\"}}", Bean24.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"value\":{}}", Bean24.class)
+        );
+    }
+
+    public static class Bean24 {
+        @JSONField(schema = "{'minProperties':1}")
+        public Item value;
+    }
+
+    @Test
+    public void test25() {
+        JSON.parseObject("{\"value\":{}}", Bean25.class);
+        JSON.parseObject("{\"value\":{\"id\":123}}", Bean25.class);
+        JSON.parseObject("{\"value\":{\"name\":\"xxx\"}}", Bean25.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"value\":{\"id\":\"123\", \"name\":\"xx\"}}", Bean25.class)
+        );
+    }
+
+    public static class Bean25 {
+        @JSONField(schema = "{'maxProperties':1}")
+        public Item value;
+    }
+
+    public static class Item {
+        public Integer id;
+        public String name;
+    }
 }
