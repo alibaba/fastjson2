@@ -42,6 +42,10 @@ final class FieldReaderBigIntegerMethod<T> extends FieldReaderObjectMethod<T> {
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             method.invoke(object, BigInteger.valueOf(value));
         } catch (Exception e) {
@@ -51,6 +55,10 @@ final class FieldReaderBigIntegerMethod<T> extends FieldReaderObjectMethod<T> {
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             method.invoke(object, BigInteger.valueOf(value));
         } catch (Exception e) {

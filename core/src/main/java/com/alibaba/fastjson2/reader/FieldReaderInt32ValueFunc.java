@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
@@ -10,8 +11,8 @@ final class FieldReaderInt32ValueFunc<T> extends FieldReaderImpl<T> {
     final Method method;
     final ObjIntConsumer<T> function;
 
-    public FieldReaderInt32ValueFunc(String fieldName, int ordinal, Method method, ObjIntConsumer<T> function) {
-        super(fieldName, int.class, int.class, ordinal, 0, null);
+    public FieldReaderInt32ValueFunc(String fieldName, int ordinal, Integer defaultValue, JSONSchema schema, Method method, ObjIntConsumer<T> function) {
+        super(fieldName, int.class, int.class, ordinal, 0, null, null, defaultValue, schema);
         this.method = method;
         this.function = function;
     }

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.function.ObjByteConsumer;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -11,8 +12,8 @@ final class FieldReaderInt8ValueFunc<T> extends FieldReaderImpl<T> {
     final Method method;
     final ObjByteConsumer<T> function;
 
-    public FieldReaderInt8ValueFunc(String fieldName, int ordinal, Method method, ObjByteConsumer<T> function) {
-        super(fieldName, byte.class, byte.class, ordinal, 0, null);
+    public FieldReaderInt8ValueFunc(String fieldName, int ordinal, JSONSchema schema, Method method, ObjByteConsumer<T> function) {
+        super(fieldName, byte.class, byte.class, ordinal, 0, null, null, null, schema);
         this.method = method;
         this.function = function;
     }

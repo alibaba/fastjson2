@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
@@ -28,11 +29,12 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
     public ObjectReader2(
             Class objectClass
             , long features
+            , JSONSchema schema
             , Supplier<T> defaultCreator
             , Function buildFunction
             , FieldReader first
             , FieldReader second) {
-        super(objectClass, null);
+        super(objectClass, null, schema);
 
         this.features = features;
         this.defaultCreator = defaultCreator;
@@ -159,10 +161,14 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
         }
 
         if (buildFunction != null) {
-            return (T) buildFunction.apply(object);
+            object = (T) buildFunction.apply(object);
         }
 
-        return (T) object;
+        if (schema != null) {
+            schema.validate(object);
+        }
+
+        return object;
     }
 
     @Override
@@ -257,13 +263,17 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
 
         if (buildFunction != null) {
             try {
-                return (T) buildFunction.apply(object);
+                object = (T) buildFunction.apply(object);
             } catch (IllegalStateException e) {
                 throw new JSONException("build object error", e);
             }
         }
 
-        return (T) object;
+        if (schema != null) {
+            schema.validate(object);
+        }
+
+        return object;
     }
 
     @Override

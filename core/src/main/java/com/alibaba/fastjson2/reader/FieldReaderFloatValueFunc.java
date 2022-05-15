@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.function.ObjFloatConsumer;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -11,8 +12,8 @@ final class FieldReaderFloatValueFunc<T> extends FieldReaderImpl<T> {
     final Method method;
     final ObjFloatConsumer<T> function;
 
-    public FieldReaderFloatValueFunc(String fieldName, int ordinal, Method method, ObjFloatConsumer<T> function) {
-        super(fieldName, float.class, float.class, ordinal, 0, null);
+    public FieldReaderFloatValueFunc(String fieldName, int ordinal, Float defaultValue, JSONSchema schema, Method method, ObjFloatConsumer<T> function) {
+        super(fieldName, float.class, float.class, ordinal, 0, null, null, defaultValue, schema);
         this.method = method;
         this.function = function;
     }

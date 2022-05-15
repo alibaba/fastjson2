@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
@@ -10,8 +11,8 @@ final class FieldReaderInt64ValueFunc<T> extends FieldReaderImpl<T> {
     final Method method;
     final ObjLongConsumer<T> function;
 
-    public FieldReaderInt64ValueFunc(String fieldName, int ordinal, Method method, ObjLongConsumer<T> function) {
-        super(fieldName, long.class, long.class, ordinal, 0, null);
+    public FieldReaderInt64ValueFunc(String fieldName, int ordinal, Long defaultValue, JSONSchema schema, Method method, ObjLongConsumer<T> function) {
+        super(fieldName, long.class, long.class, ordinal, 0, null, null, defaultValue, schema);
         this.method = method;
         this.function = function;
     }
@@ -51,8 +52,13 @@ final class FieldReaderInt64ValueFunc<T> extends FieldReaderImpl<T> {
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        function.accept(object
-                , jsonReader.readInt64Value());
+        long fieldValue = jsonReader.readInt64Value();
+
+        if (schema != null) {
+            schema.validate(fieldValue);
+        }
+
+        function.accept(object, fieldValue);
     }
 
     @Override

@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderObjectFunc<T, V> extends FieldReaderImpl<T> implements FieldReaderObject<T, V> {
@@ -13,17 +15,19 @@ final class FieldReaderObjectFunc<T, V> extends FieldReaderImpl<T> implements Fi
     protected ObjectReader fieldObjectReader;
 
     FieldReaderObjectFunc(
-            String fieldName
-            , Type fieldType
-            , Class<V> fieldClass
-            , int ordinal
-            , long features
-            , String format
-            , Object defaultValue
-            , Method method
-            , BiConsumer<T, V> function
+            String fieldName,
+            Type fieldType,
+            Class<V> fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
         this.method = method;
         this.function = function;
     }

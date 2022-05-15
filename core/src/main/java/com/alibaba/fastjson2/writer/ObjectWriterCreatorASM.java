@@ -134,10 +134,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             }
         }
 
-        if (beanInfo.serializeFilters != null && beanInfo.serializeFilters.length > 0) {
-            return super.createObjectWriter(objectClass, features, modules);
-        }
-
         long writerFeatures = features | beanInfo.writerFeatures;
         boolean fieldBased = (writerFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
         if (fieldBased && (objectClass.isInterface() || objectClass.isInterface())) {
