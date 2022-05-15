@@ -10,7 +10,7 @@ class JSONObjectTest {
         // JSONObject
         val data = """{"key":{"id":1,"name":"kraity"}}""".parseObject()
 
-        val user = data.getObject<User>("key")
+        val user = data.to<User>("key")
         assertEquals(1, user.id)
         assertEquals("kraity", user.name)
     }
@@ -24,6 +24,24 @@ class JSONObjectTest {
         }
 
         val user = data.to<User>()
+        assertEquals(1, user.id)
+        assertEquals("kraity", user.name)
+    }
+
+    @Test
+    fun test_toObject2() {
+        // JSONObject
+        val data = JSONObject().apply {
+            put("user", JSONObject().apply {
+                put("id", 1)
+                put("name", "kraity")
+            })
+        }
+
+        // Use TypeReference
+        val users = data.into<Map<String, User>>()
+        val user = users["user"]!!
+
         assertEquals(1, user.id)
         assertEquals("kraity", user.name)
     }

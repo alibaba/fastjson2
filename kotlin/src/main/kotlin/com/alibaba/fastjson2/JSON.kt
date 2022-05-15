@@ -20,8 +20,27 @@ import java.nio.charset.Charset
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
-inline fun <reified T> String.to() =
+inline fun <reified T> String?.to() =
     JSON.parseObject(this, T::class.java)
+
+/**
+ * Parse JSON [String] into [T]
+ * Implemented using [TypeReference]
+ *
+ * E.g.
+ * ```
+ *   val text = "..."
+ *   val data = text.to<User>()
+ * ```
+ *
+ * @return [T]?
+ * @since 2.0.3
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T : Any> String?.into() =
+    JSON.parseObject<T>(
+        this, reference<T>().getType()
+    )
 
 /**
  * Parse JSON [ByteArray] into [T]
@@ -38,6 +57,25 @@ inline fun <reified T> String.to() =
 @Suppress("HasPlatformType")
 inline fun <reified T> ByteArray.to() =
     JSON.parseObject(this, T::class.java)
+
+/**
+ * Parse JSON [ByteArray] into [T]
+ * Implemented using [TypeReference]
+ *
+ * E.g.
+ * ```
+ *   val text = "..."
+ *   val data = text.into<Map<String, User>()
+ * ```
+ *
+ * @return [T]?
+ * @since 2.0.3
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T : Any> ByteArray.into() =
+    JSON.parseObject<T>(
+        this, reference<T>().getType()
+    )
 
 /**
  * Verify the [String] is JSON `Object`

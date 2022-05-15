@@ -9,7 +9,7 @@ class JSONArrayTest {
         // JSONArray
         val data = """[{"id":1,"name":"kraity"}]""".parseArray()
 
-        val user = data.getObject<User>(0)
+        val user = data.to<User>(0)
         assertEquals(1, user.id)
         assertEquals("kraity", user.name)
     }
