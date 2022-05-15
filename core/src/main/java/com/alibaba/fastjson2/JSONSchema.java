@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2;
 
-import org.everit.json.schema.StringSchema;
-
 import java.math.BigInteger;
 import java.util.*;
 
