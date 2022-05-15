@@ -826,6 +826,37 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     }
 
     /**
+     * Returns a boolean value of the associated key in this object.
+     *
+     * @param key the key whose associated value is to be returned
+     * @param defaultValue the default mapping of the key
+     * @return boolean
+     * @throws JSONException Unsupported type conversion to boolean value
+     */
+    public boolean getBooleanValue(String key, boolean defaultValue) {
+        Object value = super.get(key);
+
+        if (value == null) {
+            return defaultValue;
+        }
+
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).intValue() == 1;
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+            return "true".equalsIgnoreCase(str) || "1".equals(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to boolean value");
+    }
+
+    /**
      * Returns the {@link BigInteger} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
@@ -1455,6 +1486,10 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     public JSONObject fluentPut(String key, Object value) {
         put(key, value);
         return this;
+    }
+
+    public void validate(JSONSchema schema) {
+        schema.validate(this);
     }
 
     static void nameFilter(Iterable iterable, NameFilter nameFilter) {

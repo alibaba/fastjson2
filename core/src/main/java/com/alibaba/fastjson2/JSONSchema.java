@@ -1,5 +1,11 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.writer.FieldWriter;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
+
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -14,9 +20,18 @@ public abstract class JSONSchema {
         this.description = input.getString("description");
     }
 
+    JSONSchema(String title, String description) {
+        this.title = title;
+        this.description = description;
+    }
+
     public static JSONSchema of(JSONObject input) {
         Type type = input.getObject("type", Type.class);
         if (type == null) {
+            String[] enums = input.getObject("enum", String[].class);
+            if (enums != null) {
+                return new EnumSchema(enums);
+            }
             throw new JSONException("type required");
         }
 
@@ -28,13 +43,13 @@ public abstract class JSONSchema {
             case Number:
                 return new NumberSchema(input);
             case Boolean:
-                return new BooleanSchemaSchema(input);
+                return new BooleanSchema(input);
             case Null:
-                return new NullSchemaSchema(input);
+                return new NullSchema(input);
             case Object:
                 return new ObjectSchema(input);
             case Array:
-                return new ArraySchemaSchema(input);
+                return new ArraySchema(input);
             default:
                 throw new JSONException("not support type : " + type);
         }
@@ -62,9 +77,10 @@ public abstract class JSONSchema {
 
         // extended type
         Integer,
+        Enum,
     }
 
-    public static final class StringSchema extends JSONSchema {
+    static final class StringSchema extends JSONSchema {
         final int maxLength;
         final int minLength;
         final boolean required;
@@ -135,7 +151,7 @@ public abstract class JSONSchema {
         }
     }
 
-    public static final class IntegerSchema extends JSONSchema {
+    static final class IntegerSchema extends JSONSchema {
         final Long minimum;
         final Long exclusiveMinimum;
         final Long maximum;
@@ -246,7 +262,7 @@ public abstract class JSONSchema {
         }
     }
 
-    public static final class NumberSchema extends JSONSchema {
+    static final class NumberSchema extends JSONSchema {
         final BigDecimal minimum;
         final BigDecimal exclusiveMinimum;
         final BigDecimal maximum;
@@ -362,8 +378,8 @@ public abstract class JSONSchema {
         }
     }
 
-    public static final class BooleanSchemaSchema extends JSONSchema {
-        BooleanSchemaSchema(JSONObject input) {
+    static final class BooleanSchema extends JSONSchema {
+        BooleanSchema(JSONObject input) {
             super(input);
         }
 
@@ -389,7 +405,7 @@ public abstract class JSONSchema {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            BooleanSchemaSchema that = (BooleanSchemaSchema) o;
+            BooleanSchema that = (BooleanSchema) o;
             return Objects.equals(title, that.title) && Objects.equals(description, that.description);
         }
 
@@ -399,8 +415,8 @@ public abstract class JSONSchema {
         }
     }
 
-    public static final class NullSchemaSchema extends JSONSchema {
-        NullSchemaSchema(JSONObject input) {
+    static final class NullSchema extends JSONSchema {
+        NullSchema(JSONObject input) {
             super(input);
         }
 
@@ -422,7 +438,7 @@ public abstract class JSONSchema {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            NullSchemaSchema that = (NullSchemaSchema) o;
+            NullSchema that = (NullSchema) o;
             return Objects.equals(title, that.title) && Objects.equals(description, that.description);
         }
 
@@ -432,14 +448,90 @@ public abstract class JSONSchema {
         }
     }
 
-    public static final class ArraySchemaSchema extends JSONSchema {
+    static final class EnumSchema extends JSONSchema {
+        Set<Object> items;
+
+        EnumSchema(Object[] items) {
+            super(null, null);
+            this.items = new LinkedHashSet<>(items.length);
+            for (Object name : items) {
+                this.items.add(name);
+            }
+        }
+
+        @Override
+        public Type getType() {
+            return Type.Enum;
+        }
+
+        @Override
+        public void validate(Object value) {
+            if (value == null) {
+                return;
+            }
+
+            if (!items.contains(value)) {
+                throw new JSONSchemaValidException("type Enum not match : " + value);
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            EnumSchema that = (EnumSchema) o;
+            return Objects.equals(title, that.title) && Objects.equals(description, that.description);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(title, description);
+        }
+    }
+
+    static final class ArraySchema extends JSONSchema {
         final int maxLength;
         final int minLength;
+        final JSONSchema itemSchema;
+        final JSONSchema[] prefixItems;
+        final boolean additionalItems;
+        final JSONSchema contains;
+        final int minContains;
+        final int maxContains;
+        final boolean uniqueItems;
 
-        ArraySchemaSchema(JSONObject input) {
+        ArraySchema(JSONObject input) {
             super(input);
-            this.minLength = input.getIntValue("minLength", -1);
-            this.maxLength = input.getIntValue("maxLength", -1);
+            this.minLength = input.getIntValue("minItems", -1);
+            this.maxLength = input.getIntValue("maxItems", -1);
+
+            Object items = input.get("items");
+            if (items == null) {
+                this.additionalItems = true;
+                this.itemSchema = null;
+            } else if (items instanceof Boolean) {
+                this.additionalItems = ((Boolean) items).booleanValue();
+                this.itemSchema = null;
+            } else {
+                this.additionalItems = true;
+                this.itemSchema = JSONSchema.of((JSONObject) items);
+            }
+
+            JSONArray prefixItems = input.getJSONArray("prefixItems");
+            if (prefixItems == null) {
+                this.prefixItems = new JSONSchema[0];
+            } else {
+                this.prefixItems = new JSONSchema[prefixItems.size()];
+                for (int i = 0; i < prefixItems.size(); i++) {
+                    this.prefixItems[i] = prefixItems.getObject(i, JSONSchema::of);
+                }
+            }
+
+            this.contains = input.getObject("contains", JSONSchema::of);
+            this.minContains = input.getIntValue("minContains", -1);
+            this.maxContains = input.getIntValue("maxContains", -1);
+
+            this.uniqueItems = input.getBooleanValue("uniqueItems");
         }
 
         @Override
@@ -453,22 +545,188 @@ public abstract class JSONSchema {
                 return;
             }
 
+            Set uniqueItemsSet = null;
+
             if (value instanceof Object[]) {
                 Object[] array = (Object[]) value;
+                final int size = array.length;
 
-                if (minLength >= 0 && array.length < minLength) {
-                    throw new JSONSchemaValidException("minLength not match, expect " + minLength + ", but" + array.length);
+                if (minLength >= 0 && size < minLength) {
+                    throw new JSONSchemaValidException("minLength not match, expect " + minLength + ", but " + size);
                 }
 
                 if (maxLength >= 0) {
-                    if (maxLength >= 0 && array.length > maxLength) {
-                        throw new JSONSchemaValidException("maxLength not match, expect " + maxLength + ", but" + array.length);
+                    if (maxLength >= 0 && size > maxLength) {
+                        throw new JSONSchemaValidException("maxLength not match, expect " + maxLength + ", but " + size);
+                    }
+                }
+
+                int containsCount = 0;
+                for (int index = 0; index < array.length; index++) {
+                    Object item = array[index];
+
+                    if (itemSchema != null) {
+                        itemSchema.validate(item);
+                    }
+
+                    if (index < prefixItems.length) {
+                        prefixItems[index].validate(item);
+                    }
+
+                    if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
+                        try {
+                            this.contains.validate(item);
+                            containsCount++;
+                        } catch (JSONSchemaValidException ignored) {}
+                    }
+
+                    if (uniqueItems) {
+                        if (uniqueItemsSet == null) {
+                            uniqueItemsSet = new HashSet(size);
+                        }
+
+                        if (!uniqueItemsSet.add(item)) {
+                            throw new JSONSchemaValidException("uniqueItems not match");
+                        }
+                    }
+                }
+                if (this.contains != null && containsCount == 0) {
+                    throw new JSONSchemaValidException("contains not match");
+                }
+                if (minContains >= 0 && containsCount < minContains) {
+                    throw new JSONSchemaValidException("minContains not match, expect " + minContains + ", but " + containsCount);
+                }
+                if (maxContains >= 0 && containsCount > maxContains) {
+                    throw new JSONSchemaValidException("maxContains not match, expect " + maxContains + ", but " + containsCount);
+                }
+
+                if (!additionalItems) {
+                    if (size > prefixItems.length) {
+                        throw new JSONSchemaValidException("additional items not match, max size " + size + ", but " + size);
+                    }
+                }
+                return;
+            }
+            if (value.getClass().isArray()) {
+                final int size = Array.getLength(value);
+
+                if (minLength >= 0 && size < minLength) {
+                    throw new JSONSchemaValidException("minLength not match, expect " + minLength + ", but " + size);
+                }
+
+                if (maxLength >= 0) {
+                    if (maxLength >= 0 && size > maxLength) {
+                        throw new JSONSchemaValidException("maxLength not match, expect " + maxLength + ", but " + size);
+                    }
+                }
+
+                int containsCount = 0;
+                for (int index = 0; index < size; index++) {
+                    Object item = Array.get(value, index);
+
+                    if (itemSchema != null) {
+                        itemSchema.validate(item);
+                    }
+
+                    if (index < prefixItems.length) {
+                        prefixItems[index].validate(item);
+                    }
+
+                    if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
+                        try {
+                            this.contains.validate(item);
+                            containsCount++;
+                        } catch (JSONSchemaValidException ignored) {}
+                    }
+
+                    if (uniqueItems) {
+                        if (uniqueItemsSet == null) {
+                            uniqueItemsSet = new HashSet(size);
+                        }
+
+                        if (!uniqueItemsSet.add(item)) {
+                            throw new JSONSchemaValidException("uniqueItems not match");
+                        }
+                    }
+                }
+                if (this.contains != null && containsCount == 0) {
+                    throw new JSONSchemaValidException("contains not match");
+                }
+                if (minContains >= 0 && containsCount < minContains) {
+                    throw new JSONSchemaValidException("minContains not match, expect " + minContains + ", but " + containsCount);
+                }
+                if (maxContains >= 0 && containsCount > maxContains) {
+                    throw new JSONSchemaValidException("maxContains not match, expect " + maxContains + ", but " + containsCount);
+                }
+
+                if (!additionalItems) {
+                    if (size > prefixItems.length) {
+                        throw new JSONSchemaValidException("additional items not match, max size " + size + ", but " + size);
                     }
                 }
                 return;
             }
 
             if (value instanceof Iterable) {
+                if (value instanceof Collection) {
+                    int size = ((Collection<?>) value).size();
+                    if (minLength >= 0 && size < minLength) {
+                        throw new JSONSchemaValidException("minLength not match, expect " + minLength + ", but " + size);
+                    }
+
+                    if (maxLength >= 0) {
+                        if (maxLength >= 0 && size > maxLength) {
+                            throw new JSONSchemaValidException("maxLength not match, expect " + maxLength + ", but " + size);
+                        }
+                    }
+
+                    if (!additionalItems) {
+                        if (size > prefixItems.length) {
+                            throw new JSONSchemaValidException("additional items not match, max size " + size + ", but " + size);
+                        }
+                    }
+                }
+
+                int index = 0;
+                int containsCount = 0;
+                for (Iterator it = ((Iterable) value).iterator(); it.hasNext(); index++) {
+                    Object item = it.next();
+
+                    if (itemSchema != null) {
+                        itemSchema.validate(item);
+                    }
+
+                    if (index < prefixItems.length) {
+                        prefixItems[index].validate(item);
+                    }
+
+                    if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
+                        try {
+                            this.contains.validate(item);
+                            containsCount++;
+                        } catch (JSONSchemaValidException ignored) {}
+                    }
+
+                    if (uniqueItems) {
+                        if (uniqueItemsSet == null) {
+                            uniqueItemsSet = new HashSet();
+                        }
+
+                        if (!uniqueItemsSet.add(item)) {
+                            throw new JSONSchemaValidException("uniqueItems not match");
+                        }
+                    }
+                }
+                if (this.contains != null && containsCount == 0) {
+                    throw new JSONSchemaValidException("contains not match");
+                }
+                if (minContains >= 0 && containsCount < minContains) {
+                    throw new JSONSchemaValidException("minContains not match, expect " + minContains + ", but " + containsCount);
+                }
+                if (maxContains >= 0 && containsCount > maxContains) {
+                    throw new JSONSchemaValidException("maxContains not match, expect " + maxContains + ", but " + containsCount);
+                }
+
                 return;
             }
 
@@ -479,7 +737,7 @@ public abstract class JSONSchema {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            ArraySchemaSchema that = (ArraySchemaSchema) o;
+            ArraySchema that = (ArraySchema) o;
             return Objects.equals(title, that.title) && Objects.equals(description, that.description);
         }
 
@@ -489,9 +747,27 @@ public abstract class JSONSchema {
         }
     }
 
-    public static final class ObjectSchema extends JSONSchema {
+    static final class PatternProperty {
+        final Pattern pattern;
+        final JSONSchema schema;
+
+        public PatternProperty(Pattern pattern, JSONSchema schema) {
+            this.pattern = pattern;
+            this.schema = schema;
+        }
+    }
+
+    static final class ObjectSchema extends JSONSchema {
         final JSONObject properties;
         final Set<String> required;
+        final boolean additionalProperties;
+        final JSONSchema additionalPropertySchema;
+        final long[] requiredHashCode;
+
+        final PatternProperty[] patternProperties;
+        final Pattern propertyNamesPattern;
+        final int minProperties;
+        final int maxProperties;
 
         public ObjectSchema(JSONObject input) {
             super(input);
@@ -508,9 +784,27 @@ public abstract class JSONSchema {
                 }
             }
 
+            JSONObject patternProperties = input.getJSONObject("patternProperties");
+            if (patternProperties != null) {
+                this.patternProperties = new PatternProperty[patternProperties.size()];
+
+                int index = 0;
+                for (Iterator<Map.Entry<String, Object>> it = patternProperties.entrySet().iterator(); it.hasNext();) {
+                    Map.Entry<String, Object> entry = it.next();
+                    String entryKey = entry.getKey();
+                    JSONObject entryValue = (JSONObject) entry.getValue();
+                    JSONSchema schema = JSONSchema.of(entryValue);
+                    this.patternProperties[index++] = new PatternProperty(Pattern.compile(entryKey), schema);
+                }
+            } else {
+                this.patternProperties = new PatternProperty[0];
+            }
+
+
             JSONArray required = input.getJSONArray("required");
             if (required == null) {
                 this.required = Collections.emptySet();
+                this.requiredHashCode = new long[0];
             } else {
                 this.required = new LinkedHashSet<>(required.size());
                 for (int i = 0; i < required.size(); i++) {
@@ -518,7 +812,42 @@ public abstract class JSONSchema {
                             required.getString(i)
                     );
                 }
+                this.requiredHashCode = new long[this.required.size()];
+                int i = 0;
+                for (String item : this.required) {
+                    this.requiredHashCode[i++] = Fnv.hashCode64(item);
+                }
             }
+
+
+            Object additionalProperties = input.get("additionalProperties");
+            if (additionalProperties instanceof Boolean) {
+                this.additionalPropertySchema = null;
+                this.additionalProperties = ((Boolean) additionalProperties).booleanValue();
+            } else {
+                if (additionalProperties instanceof JSONObject) {
+                    this.additionalPropertySchema = JSONSchema.of((JSONObject) additionalProperties);
+                    this.additionalProperties = false;
+                } else {
+                    this.additionalPropertySchema = null;
+                    this.additionalProperties = true;
+                }
+            }
+
+            JSONObject propertyNames = input.getJSONObject("propertyNames");
+            if (propertyNames == null) {
+                this.propertyNamesPattern = null;
+            } else {
+                String pattern = propertyNames.getString("pattern");
+                if (pattern == null) {
+                    this.propertyNamesPattern = null;
+                } else {
+                    this.propertyNamesPattern = Pattern.compile(pattern);
+                }
+            }
+
+            this.minProperties = input.getIntValue("minProperties", -1);
+            this.maxProperties = input.getIntValue("maxProperties", -1);
         }
 
         @Override
@@ -528,11 +857,15 @@ public abstract class JSONSchema {
 
         @Override
         public void validate(Object value) {
+            if (value == null) {
+                return;
+            }
+
             if (value instanceof Map) {
                 Map map = (Map) value;
 
                 for (String item : required) {
-                    if (!map.containsKey(item)) {
+                    if (map.get(item) == null) {
                         throw new JSONSchemaValidException("require property '" + item + "'");
                     }
                 }
@@ -545,10 +878,102 @@ public abstract class JSONSchema {
                     schema.validate(propertyValue);
                 }
 
+                for (PatternProperty patternProperty : patternProperties) {
+                    for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
+                        Map.Entry entry = it.next();
+                        Object entryKey = entry.getKey();
+                        if (entryKey instanceof String) {
+                            String strKey = (String) entryKey;
+                            if (patternProperty.pattern.matcher(strKey).find()) {
+                                patternProperty.schema.validate(entry.getValue());
+                            }
+                        }
+                    }
+                }
+
+                if (!additionalProperties) {
+                    for_:
+                    for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
+                        Map.Entry entry = it.next();
+                        Object key = entry.getKey();
+
+                        if (properties.containsKey(key)) {
+                            continue;
+                        }
+
+                        for (PatternProperty patternProperty : patternProperties) {
+                            if (key instanceof String) {
+                                String strKey = (String) key;
+                                if (patternProperty.pattern.matcher(strKey).find()) {
+                                    continue for_;
+                                }
+                            }
+                        }
+
+                        if (additionalPropertySchema != null) {
+                            additionalPropertySchema.validate(entry.getValue());
+                            continue;
+                        }
+
+                        throw new JSONSchemaValidException("add additionalProperties '" + key + "'");
+                    }
+                }
+
+                if (propertyNamesPattern != null) {
+                    for (Object key : map.keySet()) {
+                        String strKey = key.toString();
+                        if (!propertyNamesPattern.matcher(strKey).find()) {
+                            throw new JSONSchemaValidException("propertyNames pattern not match, expect '" + propertyNamesPattern + "', but " + strKey);
+                        }
+                    }
+                }
+
+                if (minProperties >= 0) {
+                    if (map.size() < minProperties) {
+                        throw new JSONSchemaValidException("minProperties not match, expect >= '" + minProperties + "', but " + map.size());
+                    }
+                }
+
+                if (maxProperties >= 0) {
+                    if (map.size() > maxProperties) {
+                        throw new JSONSchemaValidException("maxProperties not match, expect <= '" + maxProperties + "', but " + map.size());
+                    }
+                }
+
                 return;
             }
 
-            throw new UnsupportedOperationException();
+            Class valueClass = value.getClass();
+            ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
+
+            if(!(objectWriter instanceof ObjectWriterAdapter)) {
+                throw new JSONSchemaValidException("type Object not match : " + value.getClass().getName());
+            }
+
+            for (int i = 0; i < this.requiredHashCode.length; i++) {
+                long nameHash = requiredHashCode[i];
+                FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHash);
+
+                Object fieldValue = null;
+                if (fieldWriter != null) {
+                    fieldValue = fieldWriter.getFieldValue(value);
+                }
+
+                if (fieldValue == null) {
+                    String fieldName = null;
+                    int j = 0;
+                    for (Iterator<String> it = this.required.iterator(); it.hasNext();) {
+                        String itemName = it.next();
+                        j++;
+                        if (j == i) {
+                            fieldName = itemName;
+                        }
+                    }
+                    throw new JSONSchemaValidException("type Object not match : " + fieldName);
+                }
+            }
+
+
         }
 
         public Map<String, JSONSchema> getProperties() {
@@ -568,7 +993,8 @@ public abstract class JSONSchema {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             ObjectSchema that = (ObjectSchema) o;
-            return Objects.equals(properties, that.properties) && Objects.equals(required, that.required);
+            return Objects.equals(properties, that.properties)
+                    && Objects.equals(required, that.required);
         }
 
         @Override
