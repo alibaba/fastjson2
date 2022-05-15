@@ -4,6 +4,21 @@ package com.alibaba.fastjson2
  * E.g.
  * ```
  *   val data = "...".parseArray()
+ *   val users = data.to<List<User>>()
+ * ```
+ *
+ * @receiver JSONArray
+ * @return [T]?
+ * @since 2.0.3
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T : Any> JSONArray.to() =
+    to<T>(reference<T>().getType())
+
+/**
+ * E.g.
+ * ```
+ *   val data = "...".parseArray()
  *   val user = data.toList<User>()
  * ```
  *
@@ -15,7 +30,7 @@ package com.alibaba.fastjson2
 @Suppress("HasPlatformType")
 inline fun <reified T> JSONArray.toList(
     vararg features: JSONReader.Feature
-) = toJavaList(
+) = toList(
     T::class.java, *features
 )
 

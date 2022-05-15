@@ -130,23 +130,6 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSONObject#to} for details
-     *
-     * <pre>{@code
-     * JSONObject object = ...
-     * Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.parseObject(object);
-     * }</pre>
-     *
-     * @param object specify the {@link JSONObject} to convert
-     * @since 2.0.2
-     * @deprecated since 2.0.3, please use {@link #toJavaObject(JSONObject, JSONReader.Feature...)}
-     */
-    @Deprecated
-    public T parseObject(JSONObject object) {
-        return object.toJavaObject(type);
-    }
-
-    /**
      * See {@link JSON#parseArray(String, JSONReader.Feature...)} for details
      *
      * <pre>{@code
@@ -179,51 +162,57 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * See {@link JSONArray#toJavaObject} for details
+     * See {@link JSONArray#to(Type)} for details
      *
      * <pre>{@code
      * JSONArray array = ...
-     * List<User> users = new TypeReference<ArrayList<User>>(){}.parseArray(array);
+     * List<User> users = new TypeReference<ArrayList<User>>(){}.to(array);
      * }</pre>
      *
      * @param array specify the {@link JSONArray} to convert
-     * @since 2.0.2
-     * @deprecated since 2.0.3, please use {@link #toJavaObject(JSONArray)}
+     * @since 2.0.4
      */
-    @Deprecated
-    public T parseArray(JSONArray array) {
-        return array.toJavaObject(type);
+    public T to(JSONArray array) {
+        return array.to(type);
     }
 
     /**
-     * See {@link JSONObject#toJavaObject(Type, JSONReader.Feature...)} for details
+     * See {@link JSONObject#to(Type, JSONReader.Feature...)} for details
      *
      * <pre>{@code
      * JSONObject object = ...
-     * Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.toJavaObject(object);
+     * Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.to(object);
      * }</pre>
      *
      * @param object   specify the {@link JSONObject} to convert
      * @param features features to be enabled in parsing
-     * @since 2.0.3
+     * @since 2.0.4
      */
-    public T toJavaObject(JSONObject object, JSONReader.Feature... features) {
-        return object.toJavaObject(type, features);
+    public T to(JSONObject object, JSONReader.Feature... features) {
+        return object.to(type, features);
     }
 
     /**
      * See {@link JSONArray#toJavaObject(Type)} for details
      *
-     * <pre>{@code
-     * JSONArray array = ...
-     * List<User> users = new TypeReference<ArrayList<User>>(){}.toJavaObject(array);
-     * }</pre>
-     *
      * @param array specify the {@link JSONArray} to convert
-     * @since 2.0.3
+     * @deprecated since 2.0.4, please use {@link #to(JSONArray)}
      */
+    @Deprecated
     public T toJavaObject(JSONArray array) {
-        return array.toJavaObject(type);
+        return array.to(type);
+    }
+
+    /**
+     * See {@link JSONObject#to(Type, JSONReader.Feature...)} for details
+     *
+     * @param object   specify the {@link JSONObject} to convert
+     * @param features features to be enabled in parsing
+     * @deprecated since 2.0.4, please use {@link #to(JSONObject, JSONReader.Feature...)}
+     */
+    @Deprecated
+    public T toJavaObject(JSONObject object, JSONReader.Feature... features) {
+        return object.to(type, features);
     }
 
     /**
