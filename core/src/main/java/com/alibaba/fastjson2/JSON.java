@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -95,6 +96,21 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(text)) {
             reader.context.config(features);
+            ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
+            return objectReader.readObject(reader, 0);
+        }
+    }
+
+    /**
+     * Parse UTF8 inputStream into into {@link JSONObject}
+     *
+     * @param input    the JSON {@link InputStream} to be parsed
+     * @param features features to be enabled in parsing
+     * @return JSONObject
+     */
+    static JSONObject parseObject(InputStream input, JSONReader.Feature... features) {
+        try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8)) {
+            reader.getContext().config(features);
             ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
             return objectReader.readObject(reader, 0);
         }
@@ -420,6 +436,26 @@ public interface JSON {
             reader.getContext().config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
             return objectReader.readObject(reader, 0);
+        }
+    }
+
+    /**
+     * Parse UTF8 URL Resource into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param url      the JSON {@link URL} to be parsed
+     * @param type     specify the {@link Type} to be converted
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(URL url, Type type, JSONReader.Feature... features) {
+        if (url == null) {
+            return null;
+        }
+
+        try (InputStream is = url.openStream()){
+            return parseObject(is, type, features);
+        } catch (IOException e) {
+            throw new JSONException("parseObject error", e);
         }
     }
 
