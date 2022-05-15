@@ -1083,6 +1083,14 @@ public class JSONArray extends ArrayList<Object> {
         throw new JSONException("Can not convert from " + valueClass + " to " + type);
     }
 
+    public <T> T getObject(int index, Function<JSONObject, T> creator) {
+        JSONObject object = getJSONObject(index);
+        if (object == null) {
+            return null;
+        }
+        return creator.apply(object);
+    }
+
     /**
      * Chained addition of elements
      *
