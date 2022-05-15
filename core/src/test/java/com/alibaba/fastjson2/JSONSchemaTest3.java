@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -469,6 +470,39 @@ public class JSONSchemaTest3 {
 
         public void setValue(String value) {
             this.value = value;
+        }
+    }
+
+    @Test
+    public void test27() {
+        JSON.parseObject("{}", Bean26.class);
+        JSON.parseObject("{\"id\":123}", Bean26.class);
+        JSON.parseObject("{\"name\":\"xxx\"}", Bean26.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"id\":\"123\", \"name\":\"xx\"}", Bean26.class)
+        );
+    }
+
+    @JSONType(schema = "{'maxProperties':1}")
+    public static class Bean26 {
+        private Integer id;
+        private String name;
+
+        public Integer getId() {
+            return id;
+        }
+
+        public void setId(Integer id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
     }
 }
