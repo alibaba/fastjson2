@@ -1,14 +1,13 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONPath;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.function.Function;
 
 final class ObjectArrayTypedReader extends ObjectReaderBaseModule.PrimitiveImpl {
     final Class objectClass;
@@ -133,6 +132,26 @@ final class ObjectArrayTypedReader extends ObjectReaderBaseModule.PrimitiveImpl 
             }
 
             values[i] = value;
+        }
+        return values;
+    }
+
+    @Override
+    public Object createInstance(Collection collection) {
+        Object[] values = (Object[]) Array.newInstance(componentClass, collection.size());
+        int index = 0;
+        for (Object item : collection) {
+            if (item != null) {
+                Class<?> valueClass = item.getClass();
+                if (valueClass != componentType) {
+                    ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+                    Function typeConvert = provider.getTypeConvert(valueClass, componentType);
+                    if (typeConvert != null) {
+                        item = typeConvert.apply(item);
+                    }
+                }
+            }
+            values[index++] = item;
         }
         return values;
     }
