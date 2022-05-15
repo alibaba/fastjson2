@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -88,7 +89,7 @@ public abstract class JSONSchema {
         public void validate(Object value) {
             if (value == null) {
                 if (required) {
-                    throw new JSONValidException("required");
+                    throw new JSONSchemaValidException("required");
                 }
                 return;
             }
@@ -96,23 +97,23 @@ public abstract class JSONSchema {
             if (value instanceof String) {
                 String str = (String) value;
                 if (minLength >= 0 && str.length() < minLength) {
-                    throw new JSONValidException("minLength not match, expect " + minLength + ", but " + str.length());
+                    throw new JSONSchemaValidException("minLength not match, expect " + minLength + ", but " + str.length());
                 }
 
                 if (maxLength >= 0 && str.length() > maxLength) {
-                    throw new JSONValidException("maxLength not match, expect " + maxLength + ", but " + str.length());
+                    throw new JSONSchemaValidException("maxLength not match, expect " + maxLength + ", but " + str.length());
                 }
 
                 if (pattern != null) {
                     if (!pattern.matcher(str).find()) {
-                        throw new JSONValidException("pattern not match, expect " + format + ", but " + str);
+                        throw new JSONSchemaValidException("pattern not match, expect " + format + ", but " + str);
                     }
                 }
 
                 return;
             }
 
-            throw new JSONValidException("type Integer not match : " + value.getClass().getName());
+            throw new JSONSchemaValidException("type Integer not match : " + value.getClass().getName());
         }
 
         @Override
@@ -136,13 +137,31 @@ public abstract class JSONSchema {
 
     public static final class IntegerSchema extends JSONSchema {
         final Long minimum;
+        final Long exclusiveMinimum;
         final Long maximum;
+        final Long exclusiveMaximum;
 
         IntegerSchema(JSONObject input) {
             super(input);
+            Object exclusiveMinimum = input.get("exclusiveMinimum");
+            Long minimum = input.getLong("minimum");
+            if (exclusiveMinimum == Boolean.TRUE) {
+                this.minimum = null;
+                this.exclusiveMinimum = minimum;
+            } else {
+                this.minimum = minimum;
+                this.exclusiveMinimum = input.getLong("exclusiveMinimum");;
+            }
 
-            this.minimum = input.getLong("minimum");
-            this.maximum = input.getLong("maximum");
+            Long maximum = input.getLong("maximum");
+            Object exclusiveMaximum = input.get("exclusiveMaximum");
+            if (exclusiveMaximum == Boolean.TRUE) {
+                this.maximum = null;
+                this.exclusiveMaximum = maximum;
+            } else {
+                this.maximum = maximum;
+                this.exclusiveMaximum = input.getLong("exclusiveMaximum");
+            }
         }
 
         @Override
@@ -166,20 +185,34 @@ public abstract class JSONSchema {
                 if (minimum != null) {
                     long longValue = ((Number) value).longValue();
                     if (longValue < minimum.longValue()) {
-                        throw new JSONValidException("minimum not match, expect >= " + minimum + ", but " + value);
+                        throw new JSONSchemaValidException("minimum not match, expect >= " + minimum + ", but " + value);
+                    }
+                }
+
+                if (exclusiveMinimum != null) {
+                    long longValue = ((Number) value).longValue();
+                    if (longValue <= exclusiveMinimum.longValue()) {
+                        throw new JSONSchemaValidException("exclusiveMinimum not match, expect > " + exclusiveMinimum + ", but " + value);
                     }
                 }
 
                 if (maximum != null) {
                     long longValue = ((Number) value).longValue();
                     if (longValue > maximum.longValue()) {
-                        throw new JSONValidException("maximum not match, expect <= " + maximum + ", but " + value);
+                        throw new JSONSchemaValidException("maximum not match, expect <= " + maximum + ", but " + value);
+                    }
+                }
+
+                if (exclusiveMaximum != null) {
+                    long longValue = ((Number) value).longValue();
+                    if (longValue >= exclusiveMaximum.longValue()) {
+                        throw new JSONSchemaValidException("exclusiveMinimum not match, expect < " + exclusiveMaximum + ", but " + value);
                     }
                 }
                 return;
             }
 
-            throw new JSONValidException("type Integer not match : " + valueClass.getName());
+            throw new JSONSchemaValidException("type Integer not match : " + valueClass.getName());
         }
 
         @Override
@@ -190,19 +223,46 @@ public abstract class JSONSchema {
             return Objects.equals(title, that.title)
                     && Objects.equals(description, that.description)
                     && Objects.equals(minimum, that.minimum)
+                    && Objects.equals(exclusiveMinimum, that.exclusiveMinimum)
                     && Objects.equals(maximum, that.maximum)
+                    && Objects.equals(exclusiveMaximum, that.exclusiveMaximum)
                     ;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(title, description, minimum, maximum);
+            return Objects.hash(title, description, minimum, exclusiveMinimum, maximum, exclusiveMaximum);
         }
     }
 
     public static final class NumberSchema extends JSONSchema {
+        final BigDecimal minimum;
+        final BigDecimal exclusiveMinimum;
+        final BigDecimal maximum;
+        final BigDecimal exclusiveMaximum;
+
         NumberSchema(JSONObject input) {
             super(input);
+
+            Object exclusiveMinimum = input.get("exclusiveMinimum");
+            BigDecimal minimum = input.getBigDecimal("minimum");
+            if (exclusiveMinimum == Boolean.TRUE) {
+                this.minimum = null;
+                this.exclusiveMinimum = minimum;
+            } else {
+                this.minimum = minimum;
+                this.exclusiveMinimum = input.getBigDecimal("exclusiveMinimum");;
+            }
+
+            BigDecimal maximum = input.getBigDecimal("maximum");
+            Object exclusiveMaximum = input.get("exclusiveMaximum");
+            if (exclusiveMaximum == Boolean.TRUE) {
+                this.maximum = null;
+                this.exclusiveMaximum = maximum;
+            } else {
+                this.maximum = maximum;
+                this.exclusiveMaximum = input.getBigDecimal("exclusiveMaximum");
+            }
         }
 
         @Override
@@ -217,10 +277,48 @@ public abstract class JSONSchema {
             }
 
             if (value instanceof Number) {
+                Number number = (Number) value;
+
+                BigDecimal decimalValue;
+                if (number instanceof Byte || number instanceof Short || number instanceof Integer || number instanceof Long) {
+                    decimalValue = BigDecimal.valueOf(number.longValue());
+                } else if (number instanceof Float || number instanceof Double) {
+                    decimalValue = BigDecimal.valueOf((double) number.doubleValue());
+                } else if (number instanceof BigInteger) {
+                    decimalValue = new BigDecimal((BigInteger) number);
+                } else if (number instanceof BigDecimal) {
+                    decimalValue = (BigDecimal) number;
+                } else {
+                    throw new JSONSchemaValidException("type Number not match : " + value.getClass().getName());
+                }
+
+                if (minimum != null) {
+                    if (minimum.compareTo(decimalValue) > 0) {
+                        throw new JSONSchemaValidException("minimum not match, expect >= " + minimum + ", but " + value);
+                    }
+                }
+
+                if (exclusiveMinimum != null) {
+                    if (exclusiveMinimum.compareTo(decimalValue) >= 0) {
+                        throw new JSONSchemaValidException("exclusiveMinimum not match, expect > " + exclusiveMinimum + ", but " + value);
+                    }
+                }
+
+                if (maximum != null) {
+                    if (maximum.compareTo(decimalValue) < 0) {
+                        throw new JSONSchemaValidException("maximum not match, expect <= " + maximum + ", but " + value);
+                    }
+                }
+
+                if (exclusiveMaximum != null) {
+                    if (exclusiveMaximum.compareTo(decimalValue) <= 0) {
+                        throw new JSONSchemaValidException("exclusiveMaximum not match, expect < " + exclusiveMaximum + ", but " + value);
+                    }
+                }
                 return;
             }
 
-            throw new JSONValidException("type Integer not match : " + value.getClass().getName());
+            throw new JSONSchemaValidException("type Number not match : " + value.getClass().getName());
         }
 
         @Override
@@ -228,12 +326,18 @@ public abstract class JSONSchema {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             NumberSchema that = (NumberSchema) o;
-            return Objects.equals(title, that.title) && Objects.equals(description, that.description);
+            return Objects.equals(title, that.title)
+                    && Objects.equals(description, that.description)
+                    && Objects.equals(minimum, that.minimum)
+                    && Objects.equals(exclusiveMinimum, that.exclusiveMinimum)
+                    && Objects.equals(maximum, that.maximum)
+                    && Objects.equals(exclusiveMaximum, that.exclusiveMaximum)
+                    ;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(title, description);
+            return Objects.hash(title, description, minimum, exclusiveMinimum, maximum, exclusiveMaximum);
         }
     }
 
@@ -257,7 +361,7 @@ public abstract class JSONSchema {
                 return;
             }
 
-            throw new JSONValidException("type Boolean not match : " + value.getClass().getName());
+            throw new JSONSchemaValidException("type Boolean not match : " + value.getClass().getName());
         }
 
         @Override
@@ -290,7 +394,7 @@ public abstract class JSONSchema {
                 return;
             }
 
-            throw new JSONValidException("type Null not match : " + value.getClass().getName());
+            throw new JSONSchemaValidException("type Null not match : " + value.getClass().getName());
         }
 
         @Override
@@ -332,12 +436,12 @@ public abstract class JSONSchema {
                 Object[] array = (Object[]) value;
 
                 if (minLength >= 0 && array.length < minLength) {
-                    throw new JSONValidException("minLength not match, expect " + minLength + ", but" + array.length);
+                    throw new JSONSchemaValidException("minLength not match, expect " + minLength + ", but" + array.length);
                 }
 
                 if (maxLength >= 0) {
                     if (maxLength >= 0 && array.length > maxLength) {
-                        throw new JSONValidException("maxLength not match, expect " + maxLength + ", but" + array.length);
+                        throw new JSONSchemaValidException("maxLength not match, expect " + maxLength + ", but" + array.length);
                     }
                 }
                 return;
@@ -347,7 +451,7 @@ public abstract class JSONSchema {
                 return;
             }
 
-            throw new JSONValidException("type Array not match : " + value.getClass().getName());
+            throw new JSONSchemaValidException("type Array not match : " + value.getClass().getName());
         }
 
         @Override
@@ -408,7 +512,7 @@ public abstract class JSONSchema {
 
                 for (String item : required) {
                     if (!map.containsKey(item)) {
-                        throw new JSONValidException("require property '" + item + "'");
+                        throw new JSONSchemaValidException("require property '" + item + "'");
                     }
                 }
 

@@ -48,12 +48,12 @@ public class JSONSchemaTest {
                 .of(
                         "id", 1,
                         "name", "",
-                        "price", 0
+                        "price", 1
                 )
         );
 
         assertThrows(
-                JSONValidException.class,
+                JSONSchemaValidException.class,
                 () -> schema.validate(JSONObject
                         .of(
                             "id", 1,
@@ -63,7 +63,7 @@ public class JSONSchemaTest {
         );
 
         assertThrows(
-                JSONValidException.class,
+                JSONSchemaValidException.class,
                 () -> schema.validate(JSONObject
                         .of(
                                 "id", "1",
@@ -74,7 +74,7 @@ public class JSONSchemaTest {
         );
 
         assertThrows(
-                JSONValidException.class,
+                JSONSchemaValidException.class,
                 () -> schema.validate(JSONObject
                         .of(
                                 "id", 1,
@@ -85,7 +85,7 @@ public class JSONSchemaTest {
         );
 
         assertThrows(
-                JSONValidException.class,
+                JSONSchemaValidException.class,
                 () -> schema.validate(JSONObject
                         .of(
                                 "id", 1,
@@ -104,7 +104,7 @@ public class JSONSchemaTest {
         jsonSchema.validate("aa");
         jsonSchema.validate(null);
 
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate("a123"));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("a123"));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "String", "required", true)
                 .to(JSONSchema::of);
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate(null));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(null));
     }
 
     @Test
@@ -122,7 +122,7 @@ public class JSONSchemaTest {
                 .to(JSONSchema::of);
 
         jsonSchema.validate("aa");
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate("a"));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("a"));
     }
 
     @Test
@@ -133,8 +133,8 @@ public class JSONSchemaTest {
 
         jsonSchema.validate("555-1212");
         jsonSchema.validate("(888)555-1212");
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate("(888)555-1212 ext. 532"));
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate("(800)FLOWERS"));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("(888)555-1212 ext. 532"));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("(800)FLOWERS"));
     }
 
     @Test
@@ -143,9 +143,9 @@ public class JSONSchemaTest {
                 .of("type", "Integer")
                 .to(JSONSchema::of);
 
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate("a"));
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate(1.1F));
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate(new BigDecimal("1.1")));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("a"));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1.1F));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(new BigDecimal("1.1")));
 
         jsonSchema.validate(null);
         jsonSchema.validate(1);
@@ -157,24 +157,80 @@ public class JSONSchemaTest {
     }
 
     @Test
-    public void testInteger2() {
+    public void testInteger_minimum() {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "Integer", "minimum", 10)
                 .to(JSONSchema::of);
         jsonSchema.validate(10);
         jsonSchema.validate(11);
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate(1));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
     }
 
     @Test
-    public void testInteger3() {
+    public void testInteger_exclusiveMinimum() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Integer", "minimum", 10, "exclusiveMinimum", true)
+                .to(JSONSchema::of);
+        jsonSchema.validate(11);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(9));
+    }
+
+    @Test
+    public void testInteger_exclusiveMinimum1() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Integer", "exclusiveMinimum", 10)
+                .to(JSONSchema::of);
+        jsonSchema.validate(11);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(9));
+    }
+
+    @Test
+    public void testInteger_maximum() {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "Integer", "maximum", 10)
                 .to(JSONSchema::of);
 
         jsonSchema.validate(9);
         jsonSchema.validate(10);
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate(11));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(11));
+    }
+
+    @Test
+    public void testInteger_exclusiveMaximum() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Integer", "maximum", 10, "exclusiveMaximum", true)
+                .to(JSONSchema::of);
+
+        jsonSchema.validate(9);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(11));
+    }
+
+    @Test
+    public void testInteger_exclusiveMaximum1() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Integer", "exclusiveMaximum", 10)
+                .to(JSONSchema::of);
+
+        jsonSchema.validate(9);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(11));
+    }
+
+    @Test
+    public void testInteger_range() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Integer", "minimum", 0, "exclusiveMaximum", 100)
+                .to(JSONSchema::of);
+
+        jsonSchema.validate(0);
+        jsonSchema.validate(10);
+        jsonSchema.validate(99);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(-1));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(100));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(101));
     }
 
     @Test
@@ -183,7 +239,7 @@ public class JSONSchemaTest {
                 .of("type", "Number")
                 .to(JSONSchema::of);
 
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate("a"));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("a"));
 
         jsonSchema.validate(null);
         jsonSchema.validate(1);
@@ -194,6 +250,85 @@ public class JSONSchemaTest {
         jsonSchema.validate(Integer.MIN_VALUE);
         jsonSchema.validate(Long.MIN_VALUE);
         jsonSchema.validate(BigInteger.ONE);
+    }
+
+    @Test
+    public void testNumber_minimum() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Number", "minimum", 10)
+                .to(JSONSchema::of);
+        jsonSchema.validate(10);
+        jsonSchema.validate(11);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
+    }
+
+    @Test
+    public void testNumber_exclusiveMinimum() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Number", "minimum", 10, "exclusiveMinimum", true)
+                .to(JSONSchema::of);
+        jsonSchema.validate(11);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(9));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
+    }
+
+    @Test
+    public void testNumber_exclusiveMinimum1() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Number", "exclusiveMinimum", 10)
+                .to(JSONSchema::of);
+        jsonSchema.validate(11);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(9));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
+    }
+
+    @Test
+    public void testNumber_maximum() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Number", "maximum", 10)
+                .to(JSONSchema::of);
+
+        jsonSchema.validate(9);
+        jsonSchema.validate(10);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(11));
+    }
+
+    @Test
+    public void testNumber_exclusiveMaximum() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Number", "maximum", 10, "exclusiveMaximum", true)
+                .to(JSONSchema::of);
+
+        jsonSchema.validate(9);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(11));
+    }
+
+    @Test
+    public void testNumber_exclusiveMaximum1() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Number", "exclusiveMaximum", 10)
+                .to(JSONSchema::of);
+
+        jsonSchema.validate(9);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(11));
+    }
+
+    @Test
+    public void testNumber_range() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "Number", "minimum", 0, "exclusiveMaximum", 100)
+                .to(JSONSchema::of);
+
+        jsonSchema.validate(0);
+        jsonSchema.validate(10);
+        jsonSchema.validate(99);
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(-1));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(100));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(101));
     }
 
     @Test
@@ -211,7 +346,7 @@ public class JSONSchemaTest {
         jsonSchema.validate(null);
         jsonSchema.validate(true);
         jsonSchema.validate(false);
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate(1));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
     }
 
     @Test
@@ -227,8 +362,8 @@ public class JSONSchemaTest {
         assertEquals(jsonSchema.getType(), jsonSchema1.getType());
 
         jsonSchema.validate(null);
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate(1));
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate(true));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(true));
     }
 
     @Test
@@ -245,7 +380,7 @@ public class JSONSchemaTest {
 
         jsonSchema.validate(null);
         jsonSchema.validate(new Object[0]);
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate(1));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
     }
 
     @Test
@@ -255,7 +390,7 @@ public class JSONSchemaTest {
                 .to(JSONSchema::of);
         jsonSchema.validate(new Object[0]);
 
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate(new Object[] {0, 1, 2, 3}));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(new Object[] {0, 1, 2, 3}));
     }
 
     @Test
@@ -266,7 +401,7 @@ public class JSONSchemaTest {
         jsonSchema.validate(new Object[]{0, 1, 2});
         jsonSchema.validate(new Object[]{0, 1, 2, 3});
 
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate(new Object[] {}));
-        assertThrows(JSONValidException.class, () -> jsonSchema.validate(new Object[] {0}));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(new Object[] {}));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(new Object[] {0}));
     }
 }

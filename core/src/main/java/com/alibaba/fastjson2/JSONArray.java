@@ -799,6 +799,10 @@ public class JSONArray extends ArrayList<Object> {
             return new BigDecimal(str);
         }
 
+        if (value instanceof Boolean) {
+            return ((Boolean) value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
+        }
+
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
     }
 
