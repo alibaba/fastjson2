@@ -149,7 +149,7 @@ public class JSONArray extends ArrayList<Object> {
             return null;
         }
 
-        Class valueClass = value.getClass();
+        Class<?> valueClass = value.getClass();
         if (valueClass.isArray()) {
             int length = Array.getLength(value);
             JSONArray jsonArray = new JSONArray(length);
@@ -800,7 +800,7 @@ public class JSONArray extends ArrayList<Object> {
         }
 
         if (value instanceof Boolean) {
-            return ((Boolean) value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
+            return (boolean) value ? BigDecimal.ONE : BigDecimal.ZERO;
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
@@ -886,6 +886,7 @@ public class JSONArray extends ArrayList<Object> {
      * @param features features to be enabled in serialization
      * @return JSON {@link String}
      */
+    @SuppressWarnings("unchecked")
     public String toString(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
             if (arrayWriter == null) {
@@ -911,6 +912,7 @@ public class JSONArray extends ArrayList<Object> {
      * @param features features to be enabled in serialization
      * @return JSONB bytes
      */
+    @SuppressWarnings("unchecked")
     public byte[] toJSONBBytes(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
             if (arrayWriter == null) {
@@ -923,31 +925,48 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * Convert this {@link JSONArray} to the specified Object
-     * <p>
-     * {@code List<User> users = jsonArray.toJavaObject(new TypeReference<ArrayList<User>>(){}.getType());}
+     *
+     * <pre>{@code
+     * JSONArray array = ...
+     * List<User> users = array.to(new TypeReference<ArrayList<User>>(){}.getType());
+     * }</pre>
      *
      * @param type specify the {@link Type} to be converted
+     * @since 2.0.4
      */
     @SuppressWarnings("unchecked")
-    public <T> T toJavaObject(Type type) {
+    public <T> T to(Type type) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(type);
         return objectReader.createInstance(this);
     }
 
     /**
+     * Convert this {@link JSONArray} to the specified Object
+     *
+     * @param type specify the {@link Type} to be converted
+     * @deprecated since 2.0.4, please use {@link #to(Type)}
+     */
+    @Deprecated
+    public <T> T toJavaObject(Type type) {
+        return to(type);
+    }
+
+    /**
      * Convert all the members of this {@link JSONArray} into the specified Object.
      * Warning that each member of the {@link JSONArray} must implement the {@link Map} interface.
      *
-     * <pre>{@code String json = "[{\"id\": 1, \"name\": \"fastjson\"}, {\"id\": 2, \"name\": \"fastjson2\"}]";
+     * <pre>{@code
+     * String json = "[{\"id\": 1, \"name\": \"fastjson\"}, {\"id\": 2, \"name\": \"fastjson2\"}]";
      * JSONArray array = JSON.parseArray(json);
-     * List<User> users = array.toJavaList(User.class);
+     * List<User> users = array.toList(User.class);
      * }</pre>
      *
      * @param clazz specify the {@code Class<T>} to be converted
+     * @param features features to be enabled in parsing
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> List<T> toJavaList(Class<T> clazz, JSONReader.Feature... features) {
+    public <T> List<T> toList(Class<T> clazz, JSONReader.Feature... features) {
         boolean fieldBased = false;
         long featuresValue = 0;
         for (JSONReader.Feature feature : features) {
@@ -978,6 +997,18 @@ public class JSONArray extends ArrayList<Object> {
         }
 
         return list;
+    }
+
+    /**
+     * Convert all the members of this {@link JSONArray} into the specified Object.
+     *
+     * @param clazz specify the {@code Class<T>} to be converted
+     * @param features features to be enabled in parsing
+     * @deprecated since 2.0.4, please use {@link #toList(Class, JSONReader.Feature...)}
+     */
+    @Deprecated
+    public <T> List<T> toJavaList(Class<T> clazz, JSONReader.Feature... features) {
+        return toList(clazz, features);
     }
 
     /**
@@ -1123,6 +1154,9 @@ public class JSONArray extends ArrayList<Object> {
         return object;
     }
 
+    /**
+     * @since 2.0.3
+     */
     public <T> T getObject(int index, Function<JSONObject, T> creator) {
         JSONObject object = getJSONObject(index);
         if (object == null) {
@@ -1145,36 +1179,57 @@ public class JSONArray extends ArrayList<Object> {
         return this;
     }
 
+    /**
+     * @since 2.0.3
+     */
     public JSONArray fluentClear() {
         clear();
         return this;
     }
 
+    /**
+     * @since 2.0.3
+     */
     public JSONArray fluentRemove(int index) {
         remove(index);
         return this;
     }
 
+    /**
+     * @since 2.0.3
+     */
     public JSONArray fluentSet(int index, Object element) {
         set(index, element);
         return this;
     }
 
+    /**
+     * @since 2.0.3
+     */
     public JSONArray fluentRemove(Object o) {
         remove(o);
         return this;
     }
 
+    /**
+     * @since 2.0.3
+     */
     public JSONArray fluentRemoveAll(Collection<?> c) {
         removeAll(c);
         return this;
     }
 
+    /**
+     * @since 2.0.3
+     */
     public JSONArray fluentAddAll(Collection<?> c) {
         addAll(c);
         return this;
     }
 
+    /**
+     * @since 2.0.3
+     */
     public void validate(JSONSchema schema) {
         schema.validate(this);
     }

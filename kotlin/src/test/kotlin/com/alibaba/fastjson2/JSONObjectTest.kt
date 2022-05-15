@@ -23,7 +23,7 @@ class JSONObjectTest {
             put("name", "kraity")
         }
 
-        val user = data.toObject<User>()
+        val user = data.to<User>()
         assertEquals(1, user.id)
         assertEquals("kraity", user.name)
     }
