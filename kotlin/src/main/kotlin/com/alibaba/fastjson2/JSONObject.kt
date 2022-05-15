@@ -4,7 +4,7 @@ package com.alibaba.fastjson2
  * E.g.
  * ```
  *   val data = "...".parseObject()
- *   val user = data.toObject<User>()
+ *   val user = data.to<User>()
  * ```
  *
  * @receiver JSONObject
@@ -13,9 +13,9 @@ package com.alibaba.fastjson2
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
-inline fun <reified T> JSONObject.toObject(
+inline fun <reified T> JSONObject.to(
     vararg features: JSONReader.Feature
-) = toJavaObject(
+) = to(
     T::class.java, *features
 )
 

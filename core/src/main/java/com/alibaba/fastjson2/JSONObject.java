@@ -223,7 +223,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             return null;
         }
 
-        Class valueClass = value.getClass();
+        Class<?> valueClass = value.getClass();
         if (valueClass.isArray()) {
             int length = Array.getLength(value);
             JSONArray jsonArray = new JSONArray(length);
@@ -942,7 +942,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         }
 
         if (value instanceof Boolean) {
-            return ((Boolean) value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
+            return (boolean) value ? BigDecimal.ONE : BigDecimal.ZERO;
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");
@@ -1053,6 +1053,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
      * @param features features to be enabled in serialization
      * @return JSONB bytes
      */
+    @SuppressWarnings("unchecked")
     public byte[] toJSONBBytes(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
             if (objectWriter == null) {
@@ -1063,6 +1064,9 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         }
     }
 
+    /**
+     * @since 2.0.4
+     */
     public <T> T to(Function<JSONObject, T> function) {
         return function.apply(this);
     }
@@ -1070,12 +1074,17 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     /**
      * Convert this {@link JSONObject} to the specified Object
      *
-     * {@code Map<String, User> users = jsonObject.toJavaObject(new TypeReference<HashMap<String, User>>(){}.getType());}
+     * <pre>{@code
+     * JSONObject obj = ...
+     * Map<String, User> users = obj.to(new TypeReference<HashMap<String, User>>(){}.getType());
+     * }</pre>
      *
      * @param type specify the {@link Type} to be converted
+     * @param features features to be enabled in parsing
+     * @since 2.0.4
      */
     @SuppressWarnings("unchecked")
-    public <T> T toJavaObject(Type type, JSONReader.Feature... features) {
+    public <T> T to(Type type, JSONReader.Feature... features) {
         long featuresValue = 0L;
         boolean fieldBased = false;
         for (JSONReader.Feature feature : features) {
@@ -1093,12 +1102,17 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     /**
      * Convert this {@link JSONObject} to the specified Object
      *
-     * {@code User user = jsonObject.toJavaObject(User.class);}
+     * <pre>{@code
+     * JSONObject obj = ...
+     * User user = obj.to(User.class);
+     * }</pre>
      *
      * @param clazz specify the {@code Class<T>} to be converted
+     * @param features features to be enabled in parsing
+     * @since 2.0.4
      */
     @SuppressWarnings("unchecked")
-    public <T> T toJavaObject(Class<T> clazz, JSONReader.Feature... features) {
+    public <T> T to(Class<T> clazz, JSONReader.Feature... features) {
         long featuresValue = 0L;
         boolean fieldBased = false;
         for (JSONReader.Feature feature : features) {
@@ -1111,6 +1125,30 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
         return objectReader.createInstance(this, featuresValue);
+    }
+
+    /**
+     * Convert this {@link JSONObject} to the specified Object
+     *
+     * @param clazz specify the {@code Class<T>} to be converted
+     * @param features features to be enabled in parsing
+     * @deprecated since 2.0.4, please use {@link #to(Class, JSONReader.Feature...)}
+     */
+    @Deprecated
+    public <T> T toJavaObject(Class<T> clazz, JSONReader.Feature... features) {
+        return to(clazz, features);
+    }
+
+    /**
+     * Convert this {@link JSONObject} to the specified Object
+     *
+     * @param type specify the {@link Type} to be converted
+     * @param features features to be enabled in parsing
+     * @deprecated since 2.0.4, please use {@link #to(Type, JSONReader.Feature...)}
+     */
+    @Deprecated
+    public <T> T toJavaObject(Type type, JSONReader.Feature... features) {
+        return to(type, features);
     }
 
     /**
@@ -1281,14 +1319,19 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
      * @since 2.0.3
      */
     public <T> T getObject(String key, TypeReference<?> typeReference, JSONReader.Feature... features) {
-        return getObject(key, typeReference.getType(), features);
+        return getObject(key, typeReference.type, features);
     }
 
+    /**
+     * @since 2.0.4
+     */
     public <T> T getObject(String key, Function<JSONObject, T> creator) {
         JSONObject object = getJSONObject(key);
+
         if (object == null) {
             return null;
         }
+
         return creator.apply(object);
     }
 
@@ -1314,7 +1357,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 throw new JSONException("This method '" + methodName + "' is not a setter");
             }
 
-            String name = getAnnotationName(method);
+            String name = getJSONFieldName(method);
 
             if (name == null) {
                 name = methodName;
@@ -1339,7 +1382,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 throw new JSONException("This method '" + methodName + "' is not a getter");
             }
 
-            String name = getAnnotationName(method);
+            String name = getJSONFieldName(method);
 
             Object value;
             if (name == null) {
@@ -1407,18 +1450,19 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         throw new UnsupportedOperationException(method.toGenericString());
     }
 
-    private String getAnnotationName(Method method) {
+    /**
+     * @since 2.0.4
+     */
+    private String getJSONFieldName(Method method) {
         String name = null;
         Annotation[] annotations = method.getAnnotations();
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
             if (annotationType == JSONField.class) {
                 JSONField jsonField = (JSONField) annotation;
-                if (jsonField != null) {
-                    name = jsonField.name();
-                    if (name.isEmpty()) {
-                        name = null;
-                    }
+                name = jsonField.name();
+                if (name.isEmpty()) {
+                    name = null;
                 }
             } else if ("com.alibaba.fastjson.annotation.JSONField".equals(annotationType.getName())) {
                 NameConsumer nameConsumer = new NameConsumer(annotation);
@@ -1432,6 +1476,9 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         return name;
     }
 
+    /**
+     * @since 2.0.3
+     */
     static class NameConsumer implements Consumer<Method> {
         final Annotation annotation;
         String name;
@@ -1443,17 +1490,15 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         @Override
         public void accept(Method method) {
             String methodName = method.getName();
-            switch (methodName) {
-                case "name":
-                    try {
-                        String result = (String) method.invoke(annotation);
-                        if (!result.isEmpty()) {
-                            name = result;
-                        }
-                    } catch (IllegalAccessException | InvocationTargetException ignored) {}
-                    break;
-                default:
-                    break;
+            if ("name".equals(methodName)) {
+                try {
+                    String result = (String) method.invoke(annotation);
+                    if (!result.isEmpty()) {
+                        name = result;
+                    }
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    // nothing
+                }
             }
         }
     }
@@ -1469,6 +1514,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
      * @param key   key with which the specified value is to be associated
      * @param value value to be associated with the specified key
      */
+    @SuppressWarnings("unchecked")
     public Object put(String key, Object value) {
         return super.put(key, value);
     }
@@ -1488,10 +1534,16 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         return this;
     }
 
+    /**
+     * @since 2.0.4
+     */
     public void validate(JSONSchema schema) {
         schema.validate(this);
     }
 
+    /**
+     * @since 2.0.3
+     */
     static void nameFilter(Iterable iterable, NameFilter nameFilter) {
         for (Iterator it = iterable.iterator(); it.hasNext();) {
             Object item = it.next();
@@ -1503,6 +1555,9 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         }
     }
 
+    /**
+     * @since 2.0.3
+     */
     static void nameFilter(Map map, NameFilter nameFilter) {
         JSONObject changed = null;
         for (Iterator it = map.entrySet().iterator();it.hasNext();) {
@@ -1533,6 +1588,9 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         }
     }
 
+    /**
+     * @since 2.0.3
+     */
     static void valueFilter(Iterable iterable, ValueFilter valueFilter) {
         for (Iterator it = iterable.iterator(); it.hasNext();) {
             Object item = it.next();
@@ -1544,6 +1602,9 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         }
     }
 
+    /**
+     * @since 2.0.3
+     */
     static void valueFilter(Map map, ValueFilter valueFilter) {
         for (Iterator it = map.entrySet().iterator();it.hasNext();) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -1566,10 +1627,16 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         }
     }
 
+    /**
+     * @since 2.0.3
+     */
     public void valueFilter(ValueFilter valueFilter) {
         valueFilter(this, valueFilter);
     }
 
+    /**
+     * @since 2.0.3
+     */
     public void nameFilter(NameFilter nameFilter) {
         nameFilter(this, nameFilter);
     }
