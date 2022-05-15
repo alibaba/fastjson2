@@ -129,7 +129,19 @@ public class JSONSchemaTest {
     @Test
     public void testString_pattern() {
         JSONSchema jsonSchema = JSONObject
-                .of("type", "String", "pattern", "^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$")
+                .of("type", "String", "format", "email")
+                .to(JSONSchema::of);
+
+        jsonSchema.validate("abc@alibaba-inc.com");
+        jsonSchema.validate("xxx@hotmail.com");
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("(888)555-1212 ext. 532"));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("(800)FLOWERS"));
+    }
+
+    @Test
+    public void testString_format() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "String", "format", "^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$")
                 .to(JSONSchema::of);
 
         jsonSchema.validate("555-1212");

@@ -152,20 +152,50 @@ public abstract class JSONSchema {
         Enum,
     }
 
+    static abstract class FormatValidator {
+        public abstract boolean isValid(String input);
+    }
+
+    static class EmailValidator extends FormatValidator {
+        final static EmailValidator INSTANCE = new EmailValidator();
+
+        @Override
+        public boolean isValid(String input) {
+            return com.alibaba.fastjson2.util.EmailValidator.EMAIL_VALIDATOR_WITH_TLD.isValid(input);
+        }
+    }
+
     static final class StringSchema extends JSONSchema {
         final int maxLength;
         final int minLength;
         final boolean required;
         final String format;
+        final String patternFormat;
         final Pattern pattern;
+
+        final FormatValidator formatValidator;
 
         StringSchema(JSONObject input) {
             super(input);
             this.minLength = input.getIntValue("minLength", -1);
             this.maxLength = input.getIntValue("maxLength", -1);
             this.required = input.getBooleanValue("required");
-            this.format = input.getString("pattern");
-            this.pattern = format == null ? null : Pattern.compile(format);
+            this.patternFormat = input.getString("pattern");
+            this.pattern = patternFormat == null ? null : Pattern.compile(patternFormat);
+            this.format = input.getString("format");
+
+            if (format == null) {
+                formatValidator = null;
+            } else {
+                switch (format) {
+                    case "email":
+                        formatValidator = EmailValidator.INSTANCE;
+                        break;
+                    default:
+                        formatValidator = null;
+                        break;
+                }
+            }
         }
 
         @Override
@@ -194,7 +224,13 @@ public abstract class JSONSchema {
 
                 if (pattern != null) {
                     if (!pattern.matcher(str).find()) {
-                        throw new JSONSchemaValidException("pattern not match, expect " + format + ", but " + str);
+                        throw new JSONSchemaValidException("pattern not match, expect " + patternFormat + ", but " + str);
+                    }
+                }
+
+                if (formatValidator != null) {
+                    if (!formatValidator.isValid(str)) {
+                        throw new JSONSchemaValidException("format not match, expect " + format + ", but " + str);
                     }
                 }
 
