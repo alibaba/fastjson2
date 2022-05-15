@@ -109,6 +109,7 @@ public interface JSON {
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
+    @SuppressWarnings("unchecked")
     static JSONObject parseObject(InputStream input, JSONReader.Feature... features) {
         try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8)) {
             reader.getContext().config(features);
@@ -447,7 +448,6 @@ public interface JSON {
      * @param type     specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
-    @SuppressWarnings("unchecked")
     static <T> T parseObject(URL url, Type type, JSONReader.Feature... features) {
         if (url == null) {
             return null;
@@ -467,7 +467,6 @@ public interface JSON {
      * @param function specify the {@link Function} to be converted
      * @param features features to be enabled in parsing
      */
-    @SuppressWarnings("unchecked")
     static <T> T parseObject(URL url, Function<JSONObject, T> function, JSONReader.Feature... features) {
         if (url == null) {
             return null;
@@ -1320,18 +1319,32 @@ public interface JSON {
     /**
      * Convert the Object to the target type
      *
-     * @param object Java Object to be converted
      * @param clazz  converted goal class
+     * @param object Java Object to be converted
+     * @since 2.0.4
      */
-    static <T> T toJavaObject(Object object, Class<T> clazz) {
+    static <T> T to(Class<T> clazz, Object object) {
         if (object == null) {
             return null;
         }
+
         if (object instanceof JSONObject) {
-            return ((JSONObject) object).toJavaObject(clazz);
+            return ((JSONObject) object).to(clazz);
         }
 
         return TypeUtils.cast(object, clazz);
+    }
+
+    /**
+     * Convert the Object to the target type
+     *
+     * @param object Java Object to be converted
+     * @param clazz  converted goal class
+     * @deprecated since 2.0.4, please use {@link #to(Class, Object)}
+     */
+    @Deprecated
+    static <T> T toJavaObject(Object object, Class<T> clazz) {
+        return to(clazz, object);
     }
 
     /**
