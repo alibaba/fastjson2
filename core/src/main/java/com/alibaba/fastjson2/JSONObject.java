@@ -1188,6 +1188,14 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         return getObject(key, typeReference.getType(), features);
     }
 
+    public <T> T getObject(String key, Function<JSONObject, T> creator) {
+        JSONObject object = getJSONObject(key);
+        if (object == null) {
+            return null;
+        }
+        return creator.apply(object);
+    }
+
     /**
      * @param proxy  proxy object, currently useless
      * @param method methods that need reflection
