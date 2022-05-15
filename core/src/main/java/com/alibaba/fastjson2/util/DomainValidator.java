@@ -7,8 +7,6 @@ import java.util.Locale;
 public class DomainValidator {
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    private static final long serialVersionUID = -4407125112880174009L;
-
     // Regular expression strings for hostnames (derived from RFC2396 and RFC 1123)
 
     // RFC2396: domainlabel   = alphanum | alphanum *( alphanum | "-" ) alphanum
@@ -27,60 +25,10 @@ public class DomainValidator {
     private static final String DOMAIN_NAME_REGEX =
             "^(?:" + DOMAIN_LABEL_REGEX + "\\.)+" + "(" + TOP_LABEL_REGEX + ")\\.?$";
 
-    private final boolean allowLocal;
-
-    /**
-     * Singleton instance of this validator, which
-     *  doesn't consider local addresses as valid.
-     */
-    private static final DomainValidator DOMAIN_VALIDATOR = new DomainValidator(false);
-
-    /**
-     * Singleton instance of this validator, which does
-     *  consider local addresses valid.
-     */
-    private static final DomainValidator DOMAIN_VALIDATOR_WITH_LOCAL = new DomainValidator(true);
-
     /**
      * RegexValidator for matching domains.
      */
-    private final RegexValidator domainRegex =
-            new RegexValidator(DOMAIN_NAME_REGEX);
-    /**
-     * RegexValidator for matching a local hostname
-     */
-    // RFC1123 sec 2.1 allows hostnames to start with a digit
-    private final RegexValidator hostnameRegex =
-            new RegexValidator(DOMAIN_LABEL_REGEX);
-
-    /**
-     * Returns the singleton instance of this validator. It
-     *  will not consider local addresses as valid.
-     * @return the singleton instance of this validator
-     */
-    public static synchronized DomainValidator getInstance() {
-        inUse = true;
-        return DOMAIN_VALIDATOR;
-    }
-
-    /**
-     * Returns the singleton instance of this validator,
-     *  with local validation as required.
-     * @param allowLocal Should local addresses be considered valid?
-     * @return the singleton instance of this validator
-     */
-    public static synchronized DomainValidator getInstance(boolean allowLocal) {
-        inUse = true;
-        if(allowLocal) {
-            return DOMAIN_VALIDATOR_WITH_LOCAL;
-        }
-        return DOMAIN_VALIDATOR;
-    }
-
-    /** Private constructor. */
-    private DomainValidator(boolean allowLocal) {
-        this.allowLocal = allowLocal;
-    }
+    private static final RegexValidator domainRegex = new RegexValidator(DOMAIN_NAME_REGEX);
 
     /**
      * Returns true if the specified <code>String</code> parses
@@ -89,7 +37,7 @@ public class DomainValidator {
      * @param domain the parameter to check for domain name syntax
      * @return true if the parameter is a valid domain name
      */
-    public boolean isValid(String domain) {
+    public static boolean isValid(String domain) {
         if (domain == null) {
             return false;
         }
@@ -105,26 +53,8 @@ public class DomainValidator {
         if (groups != null && groups.length > 0) {
             return isValidTld(groups[0]);
         }
-        return allowLocal && hostnameRegex.isValid(domain);
-    }
 
-    // package protected for unit test access
-    // must agree with isValid() above
-    final boolean isValidDomainSyntax(String domain) {
-        if (domain == null) {
-            return false;
-        }
-        domain = unicodeToASCII(domain);
-        // hosts must be equally reachable via punycode and Unicode;
-        // Unicode is never shorter than punycode, so check punycode
-        // if domain did not convert, then it will be caught by ASCII
-        // checks in the regexes below
-        if (domain.length() > 253) {
-            return false;
-        }
-        String[] groups = domainRegex.match(domain);
-        return (groups != null && groups.length > 0)
-                || hostnameRegex.isValid(domain);
+        return false;
     }
 
     /**
@@ -134,11 +64,8 @@ public class DomainValidator {
      * @param tld the parameter to check for TLD status, not null
      * @return true if the parameter is a TLD
      */
-    public boolean isValidTld(String tld) {
+    public static boolean isValidTld(String tld) {
         tld = unicodeToASCII(tld);
-        if(allowLocal && isValidLocalTld(tld)) {
-            return true;
-        }
         return isValidInfrastructureTld(tld)
                 || isValidGenericTld(tld)
                 || isValidCountryCodeTld(tld);
@@ -151,7 +78,7 @@ public class DomainValidator {
      * @param iTld the parameter to check for infrastructure TLD status, not null
      * @return true if the parameter is an infrastructure TLD
      */
-    public boolean isValidInfrastructureTld(String iTld) {
+    static boolean isValidInfrastructureTld(String iTld) {
         final String key = chompLeadingDot(unicodeToASCII(iTld).toLowerCase(Locale.ENGLISH));
         return arrayContains(INFRASTRUCTURE_TLDS, key);
     }
@@ -163,7 +90,7 @@ public class DomainValidator {
      * @param gTld the parameter to check for generic TLD status, not null
      * @return true if the parameter is a generic TLD
      */
-    public boolean isValidGenericTld(String gTld) {
+    public static boolean isValidGenericTld(String gTld) {
         final String key = chompLeadingDot(unicodeToASCII(gTld).toLowerCase(Locale.ENGLISH));
         return (arrayContains(GENERIC_TLDS, key) || arrayContains(GENERIC_TLDS_PLUS, key))
                 && !arrayContains(GENERIC_TLDS_MINUS, key);
@@ -176,25 +103,13 @@ public class DomainValidator {
      * @param ccTld the parameter to check for country code TLD status, not null
      * @return true if the parameter is a country code TLD
      */
-    public boolean isValidCountryCodeTld(String ccTld) {
+    static boolean isValidCountryCodeTld(String ccTld) {
         final String key = chompLeadingDot(unicodeToASCII(ccTld).toLowerCase(Locale.ENGLISH));
         return (arrayContains(COUNTRY_CODE_TLDS, key) || arrayContains(COUNTRY_CODE_TLDS_PLUS, key))
                 && !arrayContains(COUNTRY_CODE_TLDS_MINUS, key);
     }
 
-    /**
-     * Returns true if the specified <code>String</code> matches any
-     * widely used "local" domains (localhost or localdomain). Leading dots are
-     * ignored if present. The search is case-insensitive.
-     * @param lTld the parameter to check for local TLD status, not null
-     * @return true if the parameter is an local TLD
-     */
-    public boolean isValidLocalTld(String lTld) {
-        final String key = chompLeadingDot(unicodeToASCII(lTld).toLowerCase(Locale.ENGLISH));
-        return arrayContains(LOCAL_TLDS, key);
-    }
-
-    private String chompLeadingDot(String str) {
+    private static String chompLeadingDot(String str) {
         if (str.startsWith(".")) {
             return str.substring(1);
         }
@@ -1340,14 +1255,6 @@ public class DomainValidator {
     // The PLUS arrays are valid keys, the MINUS arrays are invalid keys
 
     /*
-     * This field is used to detect whether the getInstance has been called.
-     * After this, the method updateTLDOverride is not allowed to be called.
-     * This field does not need to be volatile since it is only accessed from
-     * synchronized methods.
-     */
-    private static boolean inUse = false;
-
-    /*
      * These arrays are mutable, but they don't need to be volatile.
      * They can only be updated by the updateTLDOverride method, and any readers must get an instance
      * using the getInstance methods which are all (now) synchronised.
@@ -1363,27 +1270,6 @@ public class DomainValidator {
 
     // WARNING: this array MUST be sorted, otherwise it cannot be searched reliably using binary search
     private static volatile String[] GENERIC_TLDS_MINUS = EMPTY_STRING_ARRAY;
-
-
-    enum ArrayType {
-        /** Update the GENERIC_TLDS_PLUS table containing additonal generic TLDs */
-        GENERIC_PLUS,
-        /** Update the GENERIC_TLDS_MINUS table containing deleted generic TLDs */
-        GENERIC_MINUS,
-        /** Update the COUNTRY_CODE_TLDS_PLUS table containing additonal country code TLDs */
-        COUNTRY_CODE_PLUS,
-        /** Update the COUNTRY_CODE_TLDS_MINUS table containing deleted country code TLDs */
-        COUNTRY_CODE_MINUS;
-    };
-
-    // For use by unit test code only
-    static synchronized void clearTLDOverrides() {
-        inUse = false;
-        COUNTRY_CODE_TLDS_PLUS = EMPTY_STRING_ARRAY;
-        COUNTRY_CODE_TLDS_MINUS = EMPTY_STRING_ARRAY;
-        GENERIC_TLDS_PLUS = EMPTY_STRING_ARRAY;
-        GENERIC_TLDS_MINUS = EMPTY_STRING_ARRAY;
-    }
 
     private static class IDNBUGHOLDER {
         private static boolean keepsTrailingDot() {
