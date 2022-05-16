@@ -1236,7 +1236,7 @@ public abstract class JSONReader implements Closeable {
         return object;
     }
 
-    void skipLineComment() {
+    public void skipLineComment() {
         throw new UnsupportedOperationException();
     }
 

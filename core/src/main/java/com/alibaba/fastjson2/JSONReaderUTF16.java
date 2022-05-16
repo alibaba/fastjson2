@@ -67,6 +67,15 @@ final class JSONReaderUTF16 extends JSONReader {
         if (ch == '\uFFFE' || ch == '\uFEFF') {
             next();
         }
+
+        while (ch == '/') {
+            next();
+            if (ch == '/') {
+                skipLineComment();
+            } else {
+                throw new JSONException("input not support " + ch + ", offset " + offset);
+            }
+        }
     }
 
     JSONReaderUTF16(Context ctx, String str, char[] chars, int offset, int length) {
@@ -99,6 +108,15 @@ final class JSONReaderUTF16 extends JSONReader {
 
         if (ch == '\uFFFE' || ch == '\uFEFF') {
             next();
+        }
+
+        while (ch == '/') {
+            next();
+            if (ch == '/') {
+                skipLineComment();
+            } else {
+                throw new JSONException("input not support " + ch + ", offset " + offset);
+            }
         }
     }
 
@@ -1592,7 +1610,7 @@ final class JSONReaderUTF16 extends JSONReader {
     }
 
     @Override
-    void skipLineComment() {
+    public void skipLineComment() {
         for (;;) {
             if (ch == '\n') {
                 offset++;
