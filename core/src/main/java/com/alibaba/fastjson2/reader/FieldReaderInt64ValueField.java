@@ -16,7 +16,7 @@ final class FieldReaderInt64ValueField<T> extends FieldReaderObjectField<T> {
         long fieldLong = jsonReader.readInt64Value();
 
         if (schema != null) {
-            schema.validate(fieldLong);
+            schema.assertValidate(fieldLong);
         }
 
         try {

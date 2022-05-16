@@ -209,7 +209,7 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
         }
 
         if (schema != null) {
-            schema.validate(object);
+            schema.assertValidate(object);
         }
 
         return object;
@@ -329,7 +329,7 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
         }
 
         if (schema != null) {
-            schema.validate(object);
+            schema.assertValidate(object);
         }
 
         return object;

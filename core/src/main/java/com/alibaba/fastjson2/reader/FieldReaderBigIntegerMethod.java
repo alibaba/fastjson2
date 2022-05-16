@@ -20,7 +20,7 @@ final class FieldReaderBigIntegerMethod<T> extends FieldReaderObjectMethod<T> {
         BigInteger fieldValue = jsonReader.readBigInteger();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         try {
@@ -43,7 +43,7 @@ final class FieldReaderBigIntegerMethod<T> extends FieldReaderObjectMethod<T> {
     @Override
     public void accept(T object, int value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
@@ -56,7 +56,7 @@ final class FieldReaderBigIntegerMethod<T> extends FieldReaderObjectMethod<T> {
     @Override
     public void accept(T object, long value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {

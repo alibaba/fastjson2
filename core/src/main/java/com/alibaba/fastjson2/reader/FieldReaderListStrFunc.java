@@ -113,7 +113,7 @@ final class FieldReaderListStrFunc<T> extends FieldReaderImpl<T>
         }
 
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {

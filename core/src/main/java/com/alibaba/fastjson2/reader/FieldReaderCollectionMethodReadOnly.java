@@ -48,7 +48,7 @@ class FieldReaderCollectionMethodReadOnly<T> extends FieldReaderObjectMethod<T> 
 
         if (collection == Collections.EMPTY_LIST || collection == Collections.EMPTY_SET) {
             if (schema != null) {
-                schema.validate(collection);
+                schema.assertValidate(collection);
             }
 
             return;
@@ -86,7 +86,7 @@ class FieldReaderCollectionMethodReadOnly<T> extends FieldReaderObjectMethod<T> 
         }
 
         if (schema != null) {
-            schema.validate(collection);
+            schema.assertValidate(collection);
         }
     }
 

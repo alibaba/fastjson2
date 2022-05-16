@@ -189,7 +189,7 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
         }
 
         if (schema != null) {
-            schema.validate(object);
+            schema.assertValidate(object);
         }
 
         return object;
@@ -298,7 +298,7 @@ class ObjectReader3<T> extends ObjectReaderBean<T> {
         }
 
         if (schema != null) {
-            schema.validate(object);
+            schema.assertValidate(object);
         }
 
         return object;

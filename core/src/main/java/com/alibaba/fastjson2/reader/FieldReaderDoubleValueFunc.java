@@ -25,7 +25,7 @@ final class FieldReaderDoubleValueFunc<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, double value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object, value);
@@ -34,7 +34,7 @@ final class FieldReaderDoubleValueFunc<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object
@@ -46,7 +46,7 @@ final class FieldReaderDoubleValueFunc<T> extends FieldReaderImpl<T> {
         double value = jsonReader.readDoubleValue();
 
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object, value);

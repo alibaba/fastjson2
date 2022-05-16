@@ -36,7 +36,7 @@ final class FieldReaderBigDecimalFunc<T, V> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object
@@ -46,7 +46,7 @@ final class FieldReaderBigDecimalFunc<T, V> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, int value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object, (V) BigDecimal.valueOf(value));
@@ -55,7 +55,7 @@ final class FieldReaderBigDecimalFunc<T, V> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, long value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object, (V) BigDecimal.valueOf(value));
@@ -66,7 +66,7 @@ final class FieldReaderBigDecimalFunc<T, V> extends FieldReaderImpl<T> {
         BigDecimal fieldValue = jsonReader.readBigDecimal();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         function.accept(object, (V) fieldValue);

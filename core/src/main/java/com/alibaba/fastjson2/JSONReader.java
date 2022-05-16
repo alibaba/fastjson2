@@ -653,6 +653,39 @@ public abstract class JSONReader implements Closeable {
 
     public abstract UUID readUUID();
 
+    public boolean isLocalDate() {
+        if (!isString()) {
+            return false;
+        }
+
+        LocalDateTime localDateTime;
+        int len = getStringLength();
+        switch (len) {
+            case 8:
+                localDateTime = readLocalDate8();
+                break;
+            case 9:
+                localDateTime = readLocalDate9();
+                break;
+            case 10:
+                localDateTime = readLocalDate10();
+                break;
+            case 11:
+                localDateTime = readLocalDate11();
+                break;
+            default:
+                return false;
+        }
+
+        if (localDateTime == null) {
+            return false;
+        }
+        return localDateTime.getHour() == 0
+                && localDateTime.getMinute() == 0
+                && localDateTime.getSecond() == 0
+                && localDateTime.getNano() == 0;
+    }
+
     public LocalDate readLocalDate() {
         if (isInt()) {
             long millis = readInt64Value();
@@ -689,6 +722,37 @@ public abstract class JSONReader implements Closeable {
         }
 
         throw new JSONException("not support input : " + str);
+    }
+
+    public boolean isLocalDateTime() {
+        if (!isString()) {
+            return false;
+        }
+
+        int len = getStringLength();
+        switch (len) {
+            case 16:
+                return readLocalDateTime16() != null;
+            case 17:
+                return readLocalDateTime17() != null;
+            case 18:
+                return readLocalDateTime18() != null;
+            case 19:
+                return readLocalDateTime19() != null;
+            case 21:
+            case 22:
+            case 23:
+            case 24:
+            case 25:
+            case 26:
+            case 27:
+            case 28:
+            case 29:
+                return readLocalDateTimeX(len) != null;
+            default:
+                break;
+        }
+        return false;
     }
 
     public LocalDateTime readLocalDateTime() {
@@ -1590,6 +1654,16 @@ public abstract class JSONReader implements Closeable {
                 , chars
                 , 0
                 , chars.length);
+    }
+
+    public static JSONReader of(Context context, char[] chars) {
+        return new JSONReaderUTF16(
+                context,
+                null,
+                chars,
+                0,
+                chars.length
+        );
     }
 
     public static JSONReader ofJSONB(byte[] jsonbBytes) {

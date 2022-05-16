@@ -16,7 +16,7 @@ final class FieldReaderBoolValueField<T> extends FieldReaderObjectField<T> {
         boolean fieldValue = jsonReader.readBoolValue();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         try {

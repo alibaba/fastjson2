@@ -18,7 +18,7 @@ final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
         BigDecimal fieldValue = jsonReader.readBigDecimal();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         try {
@@ -31,7 +31,7 @@ final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
     @Override
     public void accept(T object, int value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
@@ -44,7 +44,7 @@ final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
     @Override
     public void accept(T object, long value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
@@ -57,7 +57,7 @@ final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
