@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Method;
 import java.time.*;
@@ -12,8 +13,8 @@ final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
     DateTimeFormatter formatter;
     ObjectReaderImplDate dateReader;
 
-    FieldReaderDateMethod(String fieldName, Class fieldClass, int ordinal, long features, String format, Locale locale, Method method) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, null, method);
+    FieldReaderDateMethod(String fieldName, Class fieldClass, int ordinal, long features, String format, Locale locale, JSONSchema schema, Method method) {
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, null, schema, method);
     }
 
     @Override

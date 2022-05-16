@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -29,9 +30,10 @@ class FieldReaderListField<T>
             String format,
             Locale locale,
             Collection defaultValue,
+            JSONSchema schema,
             Field field) {
 
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, field);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, schema, field);
         this.itemType = itemType;
         this.fieldClassHash = fieldClass == null ? 0 : Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
         this.fieldObjectReader = ObjectReaderImplList.of(fieldType, fieldClass, features);

@@ -2,14 +2,15 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Field;
 
 final class FieldReaderStringField<T> extends FieldReaderObjectField<T> {
     final boolean trim;
 
-    FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, String defaultValue, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
+    FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, String defaultValue, JSONSchema schema, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
         trim = "trim".equals(format);
     }
 

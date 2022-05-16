@@ -114,6 +114,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
                         , fieldInfo.format
                         , fieldInfo.locale
                         , fieldInfo.defaultValue
+                        , fieldInfo.schema
                         , method.getGenericReturnType()
                         , method.getReturnType()
                         , method);
@@ -169,6 +170,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
                                     , fieldInfo.format
                                     , fieldInfo.locale
                                     , fieldInfo.defaultValue
+                                    , fieldInfo.schema
                                     , field.getGenericType()
                                     , field.getType()
                                     , field
@@ -200,6 +202,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
             , String format
             , Locale locale
             , Object defaultValue
+            , String schema
             , Type fieldType
             , Class fieldClass
             , Method method
@@ -207,7 +210,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
         if ((method != null && method.getReturnType() != void.class)
                 || !Modifier.isPublic(objectClass.getModifiers())
                 || isExternalClass(objectClass)) {
-            return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, fieldType, fieldClass, method);
+            return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, method);
         }
         return createFieldReaderLambda(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, fieldType, fieldClass, method);
     }

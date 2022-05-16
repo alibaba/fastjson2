@@ -22,22 +22,39 @@ final class FieldReaderNumberFunc<T, V> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, Object value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         function.accept(object, (V) value);
     }
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         function.accept(object, (V) Integer.valueOf(value));
     }
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         function.accept(object, (V) Long.valueOf(value));
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         Number fieldValue = jsonReader.readNumber();
+
+        if (schema != null) {
+            schema.validate(fieldValue);
+        }
+
         function.accept(object, (V) fieldValue);
     }
 }

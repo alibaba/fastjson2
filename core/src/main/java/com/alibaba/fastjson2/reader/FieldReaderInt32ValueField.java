@@ -2,18 +2,23 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 
 final class FieldReaderInt32ValueField<T> extends FieldReaderObjectField<T> {
-    FieldReaderInt32ValueField(String fieldName, Class fieldType, int ordinal, String format, Integer defaultValue, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, format, defaultValue, field);
+    FieldReaderInt32ValueField(String fieldName, Class fieldType, int ordinal, String format, Integer defaultValue, JSONSchema schema, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, 0, format, defaultValue, schema, field);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         int fieldInt = jsonReader.readInt32Value();
+        if (schema != null) {
+            schema.validate(fieldInt);
+        }
+
         try {
             field.setInt(object, fieldInt);
         } catch (Exception e) {

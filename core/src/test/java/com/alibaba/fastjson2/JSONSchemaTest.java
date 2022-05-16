@@ -103,7 +103,7 @@ public class JSONSchemaTest {
                 .of("type", "String", "maxLength", 3)
                 .to(JSONSchema::of);
         jsonSchema.validate("aa");
-        jsonSchema.validate(null);
+        jsonSchema.validate((Object) null);
 
         assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("a123"));
     }
@@ -113,7 +113,7 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "String", "required", true)
                 .to(JSONSchema::of);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(null));
+        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate((Object) null));
     }
 
     @Test
@@ -148,7 +148,7 @@ public class JSONSchemaTest {
         assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1.1F));
         assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(new BigDecimal("1.1")));
 
-        jsonSchema.validate(null);
+        jsonSchema.validate((Object) null);
         jsonSchema.validate(1);
         jsonSchema.validate(Byte.MIN_VALUE);
         jsonSchema.validate(Short.MIN_VALUE);
@@ -256,7 +256,7 @@ public class JSONSchemaTest {
 
         assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("a"));
 
-        jsonSchema.validate(null);
+        jsonSchema.validate((Object) null);
         jsonSchema.validate(1);
         jsonSchema.validate(1.1F);
         jsonSchema.validate(1.1D);
@@ -372,7 +372,7 @@ public class JSONSchemaTest {
         assertEquals(jsonSchema, jsonSchema1);
         assertEquals(jsonSchema.getType(), jsonSchema1.getType());
 
-        jsonSchema.validate(null);
+        jsonSchema.validate((Integer) null);
         jsonSchema.validate(true);
         jsonSchema.validate(false);
         assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
@@ -390,7 +390,7 @@ public class JSONSchemaTest {
         assertEquals(jsonSchema, jsonSchema1);
         assertEquals(jsonSchema.getType(), jsonSchema1.getType());
 
-        jsonSchema.validate(null);
+        jsonSchema.validate((Long) null);
         assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
         assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(true));
     }
@@ -407,7 +407,7 @@ public class JSONSchemaTest {
         assertEquals(jsonSchema, jsonSchema1);
         assertEquals(jsonSchema.getType(), jsonSchema1.getType());
 
-        jsonSchema.validate(null);
+        jsonSchema.validate((Integer) null);
         jsonSchema.validate(new Object[0]);
         assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
     }

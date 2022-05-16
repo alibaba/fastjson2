@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -19,8 +20,8 @@ final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
     final Locale locale;
     final boolean useSimpleFormatter;
 
-    FieldReaderDateField(String fieldName, Class fieldType, int ordinal, long features, String format, Locale locale, Date defaultValue, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
+    FieldReaderDateField(String fieldName, Class fieldType, int ordinal, long features, String format, Locale locale, Date defaultValue, JSONSchema schema, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
         this.locale = locale;
         this.useSimpleFormatter = "yyyyMMddHHmmssSSSZ".equals(format);
     }
