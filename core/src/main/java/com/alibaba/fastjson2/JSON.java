@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
@@ -1409,6 +1410,10 @@ public interface JSON {
      */
     static boolean register(Type type, ObjectReader<?> objectReader) {
         return JSONFactory.getDefaultObjectReaderProvider().register(type, objectReader);
+    }
+
+    static boolean register(ObjectReaderModule objectReaderModule) {
+        return JSONFactory.getDefaultObjectReaderProvider().register(objectReaderModule);
     }
 
     /**
