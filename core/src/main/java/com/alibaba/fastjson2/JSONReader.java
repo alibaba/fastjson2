@@ -1029,7 +1029,8 @@ public abstract class JSONReader implements Closeable {
         String str = readString();
 
         if (str.isEmpty()) {
-            return -1;
+            wasNull = true;
+            return 0;
         }
 
         String utilDateFormat = context.getUtilDateFormat();
