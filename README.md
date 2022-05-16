@@ -221,8 +221,8 @@ Java:
 JSONArray array = ...
 JSONObject obj = ...
 
-User user = array.toJavaObject(User.class);
-List<User> users = obj.toJavaList(User.class);
+User user = obj.toJavaObject(User.class);
+List<User> users = array.toJavaList(User.class);
 ```
 
 Kotlin:
