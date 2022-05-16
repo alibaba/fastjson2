@@ -1013,6 +1013,10 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return NumberImpl.INSTANCE;
         }
 
+        if (type == BitSet.class) {
+            return ObjectReaderImplBitSet.INSTANCE;
+        }
+
         if (type == OptionalInt.class) {
             return ObjectReaderImplOptionalInt.INSTANCE;
         }

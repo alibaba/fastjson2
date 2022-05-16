@@ -783,6 +783,10 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             return ObjectWriterImplBigDecimal.INSTANCE;
         }
 
+        if (objectType == BitSet.class) {
+            return ObjectWriterImplBitSet.INSTANCE;
+        }
+
         if (objectType == OptionalInt.class) {
             return ObjectWriterImplOptionalInt.INSTANCE;
         }
