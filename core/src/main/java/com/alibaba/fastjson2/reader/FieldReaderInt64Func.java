@@ -36,7 +36,7 @@ final class FieldReaderInt64Func<T, V> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object
@@ -48,7 +48,7 @@ final class FieldReaderInt64Func<T, V> extends FieldReaderImpl<T> {
         Long fieldValue = jsonReader.readInt64();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         function.accept(object, (V) fieldValue);

@@ -165,7 +165,7 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
         }
 
         if (schema != null) {
-            schema.validate(object);
+            schema.assertValidate(object);
         }
 
         return object;
@@ -270,7 +270,7 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
         }
 
         if (schema != null) {
-            schema.validate(object);
+            schema.assertValidate(object);
         }
 
         return object;

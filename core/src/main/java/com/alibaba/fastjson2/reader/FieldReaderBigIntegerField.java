@@ -18,7 +18,7 @@ final class FieldReaderBigIntegerField<T> extends FieldReaderObjectField<T> {
         BigInteger fieldValue = jsonReader.readBigInteger();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         try {

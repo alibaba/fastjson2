@@ -17,7 +17,7 @@ final class FieldReaderInt8ValueField<T> extends FieldReaderObjectField<T> {
         int fieldInt = jsonReader.readInt32Value();
 
         if (schema != null) {
-            schema.validate(fieldInt);
+            schema.assertValidate(fieldInt);
         }
 
         try {
@@ -29,6 +29,10 @@ final class FieldReaderInt8ValueField<T> extends FieldReaderObjectField<T> {
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setByte(object, (byte) value);
         } catch (Exception e) {
@@ -38,6 +42,10 @@ final class FieldReaderInt8ValueField<T> extends FieldReaderObjectField<T> {
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setByte(object, (byte) value);
         } catch (Exception e) {
@@ -47,6 +55,10 @@ final class FieldReaderInt8ValueField<T> extends FieldReaderObjectField<T> {
 
     @Override
     public void accept(T object, Object value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setByte(object
                     , TypeUtils.toByteValue(value));

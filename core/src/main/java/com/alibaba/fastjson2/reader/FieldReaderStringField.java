@@ -22,7 +22,7 @@ final class FieldReaderStringField<T> extends FieldReaderObjectField<T> {
         }
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         try {
@@ -48,7 +48,7 @@ final class FieldReaderStringField<T> extends FieldReaderObjectField<T> {
         }
 
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {

@@ -37,7 +37,7 @@ final class FieldReaderBigIntegerFunc<T, V> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object
@@ -47,7 +47,7 @@ final class FieldReaderBigIntegerFunc<T, V> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, int value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object, (V) BigInteger.valueOf(value));
@@ -56,7 +56,7 @@ final class FieldReaderBigIntegerFunc<T, V> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, long value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object, (V) BigInteger.valueOf(value));
@@ -67,7 +67,7 @@ final class FieldReaderBigIntegerFunc<T, V> extends FieldReaderImpl<T> {
         BigInteger fieldValue = jsonReader.readBigInteger();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         function.accept(object, (V) fieldValue);

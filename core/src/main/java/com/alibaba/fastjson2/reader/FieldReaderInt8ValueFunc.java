@@ -26,7 +26,7 @@ final class FieldReaderInt8ValueFunc<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, byte value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object, value);
@@ -35,7 +35,7 @@ final class FieldReaderInt8ValueFunc<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object
@@ -47,7 +47,7 @@ final class FieldReaderInt8ValueFunc<T> extends FieldReaderImpl<T> {
         byte value = (byte) jsonReader.readInt32Value();
 
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object, value);

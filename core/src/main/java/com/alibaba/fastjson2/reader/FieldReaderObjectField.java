@@ -129,7 +129,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, boolean value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
@@ -142,7 +142,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, byte value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
@@ -155,7 +155,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, short value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
@@ -168,7 +168,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, int value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
@@ -181,7 +181,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, long value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
@@ -194,7 +194,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, float value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
@@ -207,7 +207,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, double value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
@@ -220,7 +220,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, char value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
@@ -233,7 +233,7 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {

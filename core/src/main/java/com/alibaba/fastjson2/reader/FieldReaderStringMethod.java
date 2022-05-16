@@ -24,7 +24,7 @@ final class FieldReaderStringMethod<T> extends FieldReaderObjectMethod<T> {
         }
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         try {

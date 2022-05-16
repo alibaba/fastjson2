@@ -26,7 +26,7 @@ final class FieldReaderInt32Func<T, V> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object, (V) TypeUtils.toInteger(value));
@@ -37,7 +37,7 @@ final class FieldReaderInt32Func<T, V> extends FieldReaderImpl<T> {
         Integer fieldValue = jsonReader.readInt32();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         function.accept(object, (V) fieldValue);

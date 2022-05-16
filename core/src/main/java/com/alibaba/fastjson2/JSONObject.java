@@ -1537,8 +1537,8 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     /**
      * @since 2.0.4
      */
-    public void validate(JSONSchema schema) {
-        schema.validate(this);
+    public boolean isValid(JSONSchema schema) {
+        return schema.isValid(this);
     }
 
     /**

@@ -26,7 +26,7 @@ final class FieldReaderInt8Func<T, V> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object
@@ -39,7 +39,7 @@ final class FieldReaderInt8Func<T, V> extends FieldReaderImpl<T> {
         Byte fieldValue = value == null ? null : value.byteValue();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         function.accept(object, (V) fieldValue);

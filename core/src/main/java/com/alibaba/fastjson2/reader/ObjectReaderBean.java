@@ -183,7 +183,7 @@ public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
         }
 
         if (schema != null) {
-            schema.validate(object);
+            schema.assertValidate(object);
         }
 
         return object;

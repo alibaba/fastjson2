@@ -161,7 +161,7 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
         }
 
         if (schema != null) {
-            schema.validate(object);
+            schema.assertValidate(object);
         }
 
         return object;
@@ -256,7 +256,7 @@ final class ObjectReader1<T> extends ObjectReaderBean<T> {
         }
 
         if (schema != null) {
-            schema.validate(object);
+            schema.assertValidate(object);
         }
 
         return object;

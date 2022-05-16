@@ -36,7 +36,7 @@ final class FieldReaderInt16Func<T, V> extends FieldReaderImpl<T> {
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object
@@ -49,7 +49,7 @@ final class FieldReaderInt16Func<T, V> extends FieldReaderImpl<T> {
         Short fieldValue = value == null ? null : value.shortValue();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         function.accept(object, (V) fieldValue);

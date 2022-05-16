@@ -1236,8 +1236,10 @@ public class JSONArray extends ArrayList<Object> {
     /**
      * @since 2.0.3
      */
-    public void validate(JSONSchema schema) {
-        schema.validate(this);
+    public boolean isValid(JSONSchema schema) {
+        return schema
+                .validate(this)
+                .isSuccess();
     }
 
     /**

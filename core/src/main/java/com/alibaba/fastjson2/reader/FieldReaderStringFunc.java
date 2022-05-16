@@ -47,7 +47,7 @@ final class FieldReaderStringFunc<T, V> extends FieldReaderImpl<T> {
         }
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         function.accept(object, (V) fieldValue);
@@ -62,7 +62,7 @@ final class FieldReaderStringFunc<T, V> extends FieldReaderImpl<T> {
         }
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         function.accept(object, (V) fieldValue);

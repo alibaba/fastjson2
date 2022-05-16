@@ -56,7 +56,7 @@ final class FieldReaderListFunc<T, V>
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object, (V) value);

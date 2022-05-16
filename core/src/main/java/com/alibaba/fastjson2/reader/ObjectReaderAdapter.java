@@ -370,7 +370,7 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
         }
 
         if (schema != null) {
-            schema.validate(object);
+            schema.assertValidate(object);
         }
 
         return (T) object;

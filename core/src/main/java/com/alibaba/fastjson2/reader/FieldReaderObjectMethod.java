@@ -32,7 +32,7 @@ class FieldReaderObjectMethod<T>
         }
 
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {
