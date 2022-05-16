@@ -65,10 +65,8 @@ public class SimplePropertyPreFilter implements PropertyPreFilter {
             return false;
         }
 
-        if (maxLevel > 0) {
-            if (writer.level() > maxLevel) {
-                return false;
-            }
+        if (maxLevel > 0 && writer.level() > maxLevel) {
+            return false;
         }
 
         return includes.size() == 0
