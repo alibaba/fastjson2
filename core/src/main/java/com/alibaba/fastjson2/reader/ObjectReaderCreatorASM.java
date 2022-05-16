@@ -144,11 +144,12 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
             , String format
             , Locale locale
             , Object defaultValue
+            , String schema
             , Type fieldType
             , Class fieldClass
             , Field field
     ) {
-        return super.createFieldReader(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, fieldType, fieldClass, field);
+        return super.createFieldReader(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, field);
     }
 
     private static class FieldReaderInfo {
@@ -276,8 +277,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
         }
 
         for (FieldReader fieldReader : fieldReaderArray) {
-            if (fieldReader.getDefaultValue() != null
-            ) {
+            if (fieldReader.getDefaultValue() != null || fieldReader.getSchema() != null) {
                 match = false;
                 break;
             }

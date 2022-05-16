@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -17,8 +18,9 @@ class FieldReaderAnySetter<T> extends FieldReaderObjectMethod<T> implements Fiel
             int ordinal,
             long features,
             String format,
+            JSONSchema schema,
             Method method) {
-        super("$$any$$", fieldType, fieldClass, ordinal, features, format, null, null, method);
+        super("$$any$$", fieldType, fieldClass, ordinal, features, format, null, null, schema, method);
     }
 
     @Override

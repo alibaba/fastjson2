@@ -2,19 +2,25 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 final class FieldReaderDoubleMethod<T> extends FieldReaderObjectMethod<T> {
-    FieldReaderDoubleMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Double defaultValue, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, setter);
+    FieldReaderDoubleMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Double defaultValue, JSONSchema schema, Method setter) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, setter);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         Double fieldValue = jsonReader.readDouble();
+
+        if (schema != null) {
+            schema.validate(fieldValue);
+        }
+
         try {
             method.invoke(object, fieldValue);
         } catch (Exception e) {
@@ -24,6 +30,10 @@ final class FieldReaderDoubleMethod<T> extends FieldReaderObjectMethod<T> {
 
     @Override
     public void accept(T object, Object value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         try {
             method.invoke(object
                     , TypeUtils.toDouble(value));

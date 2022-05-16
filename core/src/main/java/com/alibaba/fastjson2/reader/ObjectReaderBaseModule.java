@@ -795,6 +795,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             if (jsonField.unwrapped()) {
                 fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
             }
+
+            String schema = jsonField.schema().trim();
+            if (!schema.isEmpty()) {
+                fieldInfo.schema = schema;
+            }
         }
     }
 

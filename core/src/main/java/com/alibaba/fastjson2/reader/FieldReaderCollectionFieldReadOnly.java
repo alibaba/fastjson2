@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -9,8 +10,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 final class FieldReaderCollectionFieldReadOnly<T> extends FieldReaderObjectField<T> implements FieldReaderReadOnly<T> {
-    FieldReaderCollectionFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Field field) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, field);
+    FieldReaderCollectionFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Field field) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, schema, field);
     }
 
     @Override

@@ -28,13 +28,22 @@ final class FieldReaderInt16ValueFunc<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, Object value) {
+        if (schema != null) {
+            schema.validate(value);
+        }
+
         function.accept(object
                 , TypeUtils.toShortValue(value));
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        function.accept(object
-                , (short) jsonReader.readInt32Value());
+        short fieldInt = (short) jsonReader.readInt32Value();
+
+        if (schema != null) {
+            schema.validate(fieldInt);
+        }
+
+        function.accept(object, fieldInt);
     }
 }

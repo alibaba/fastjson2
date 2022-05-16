@@ -79,4 +79,6 @@ public @interface JSONField {
     String defaultValue() default "";
 
     String locale() default "";
+
+    String schema() default "";
 }

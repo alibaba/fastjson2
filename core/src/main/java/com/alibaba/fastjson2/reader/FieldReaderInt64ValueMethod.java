@@ -2,19 +2,26 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Locale;
 
 final class FieldReaderInt64ValueMethod<T> extends FieldReaderObjectMethod<T> {
-    FieldReaderInt64ValueMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Long defaultValue, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, setter);
+    FieldReaderInt64ValueMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Long defaultValue, JSONSchema schema, Method setter) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         long fieldLong = jsonReader.readInt64Value();
+
+        if (schema != null) {
+            schema.validate(fieldLong);
+        }
+
         try {
             method.invoke(object, fieldLong);
         } catch (Exception e) {

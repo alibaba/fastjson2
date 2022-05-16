@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONSchema;
+import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.util.JdbcSupport;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -17,7 +19,12 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
     protected ObjectReader fieldObjectReader;
 
     FieldReaderObjectField(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue, Field field) {
-        super(fieldName, fieldType == null ? field.getType() : fieldType, fieldClass, ordinal, features, format, defaultValue);
+        super(fieldName, fieldType == null ? field.getType() : fieldType, fieldClass, ordinal, features, format, null, defaultValue);
+        this.field = field;
+    }
+
+    FieldReaderObjectField(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue, JSONSchema schema, Field field) {
+        super(fieldName, fieldType == null ? field.getType() : fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema);
         this.field = field;
     }
 
@@ -97,6 +104,8 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
                 value = fieldObjectReader.readObject(jsonReader, features);
             }
             accept(object, value);
+        } catch (JSONSchemaValidException ex) {
+            throw ex;
         } catch (Exception | IllegalAccessError ex) {
             throw new JSONException("read field '" + field.getDeclaringClass().getName() + "." + field.getName() + "' error, offset " + offset, ex);
         }
