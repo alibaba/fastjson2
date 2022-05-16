@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -18,15 +19,17 @@ final class FieldReaderListStrFunc<T> extends FieldReaderImpl<T>
     final long fieldClassHash;
 
     FieldReaderListStrFunc(
-            String fieldName
-            , Type fieldType
-            , Class fieldClass
-            , int ordinal
-            , String format
-            , Object defaultValue
-            , Method method
-            , BiConsumer<T, List> function) {
-        super(fieldName, fieldType, fieldClass, ordinal, 0, null);
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method, BiConsumer<T, List> function) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
         this.method = method;
         this.function = function;
         this.fieldClassHash = Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
@@ -110,9 +113,9 @@ final class FieldReaderListStrFunc<T> extends FieldReaderImpl<T>
         }
 
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
-        
+
         try {
             function.accept(object, value);
         } catch (Exception e) {

@@ -16,7 +16,7 @@ final class FieldReaderFloatValueField<T> extends FieldReaderObjectField<T> {
         float fieldFloat = jsonReader.readFloatValue();
 
         if (schema != null) {
-            schema.validate(fieldFloat);
+            schema.assertValidate(fieldFloat);
         }
 
         try {

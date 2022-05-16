@@ -16,7 +16,7 @@ final class FieldReaderDoubleField<T> extends FieldReaderObjectField<T> {
         Double fieldValue = jsonReader.readDouble();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         try {

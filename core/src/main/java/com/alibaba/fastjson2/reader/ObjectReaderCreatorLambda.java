@@ -1,10 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.codec.FieldInfo;
@@ -138,6 +137,7 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
                     , fieldInfo.format
                     , fieldInfo.locale
                     , fieldInfo.defaultValue
+                    , fieldInfo.schema
                     , fieldType
                     , fieldClass
                     , method
@@ -212,21 +212,22 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
                 || isExternalClass(objectClass)) {
             return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, method);
         }
-        return createFieldReaderLambda(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, fieldType, fieldClass, method);
+        return createFieldReaderLambda(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, method);
     }
 
     protected <T> FieldReader createFieldReaderLambda(
-            Class<T> objectClass
-            , Type objectType
-            , String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Locale locale
-            , Object defaultValue
-            , Type fieldType
-            , Class fieldClass
-            , Method method
+            Class<T> objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            String schema,
+            Type fieldType,
+            Class fieldClass,
+            Method method
     ) {
         if (defaultValue != null && defaultValue.getClass() != fieldClass) {
             Function typeConvert = JSONFactory
@@ -239,48 +240,56 @@ public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
             }
         }
 
+        JSONSchema jsonSchema = null;
+        if (schema != null && !schema.isEmpty()) {
+            JSONObject object = JSON.parseObject(schema);
+            if (!object.isEmpty()) {
+                jsonSchema = JSONSchema.of(object, fieldClass);
+            }
+        }
+
         if (fieldType == boolean.class) {
             ObjBoolConsumer function = (ObjBoolConsumer) lambdaFunction(objectClass, fieldClass, method);
-            return new FieldReaderBoolValFunc<>(fieldName, ordinal, method, function);
+            return new FieldReaderBoolValFunc<>(fieldName, ordinal, jsonSchema, method, function);
         }
 
         if (fieldType == byte.class) {
             ObjByteConsumer function = (ObjByteConsumer) lambdaFunction(objectClass, fieldClass, method);
-            return new FieldReaderInt8ValueFunc<>(fieldName, ordinal, method, function);
+            return new FieldReaderInt8ValueFunc<>(fieldName, ordinal, jsonSchema, method, function);
         }
 
         if (fieldType == short.class) {
             ObjShortConsumer function = (ObjShortConsumer) lambdaFunction(objectClass, fieldClass, method);
-            return new FieldReaderInt16ValueFunc<>(fieldName, ordinal, method, function);
+            return new FieldReaderInt16ValueFunc<>(fieldName, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method, function);
         }
 
         if (fieldType == int.class) {
             ObjIntConsumer function = (ObjIntConsumer) lambdaFunction(objectClass, fieldClass, method);
-            return new FieldReaderInt32ValueFunc<>(fieldName, ordinal, method, function);
+            return new FieldReaderInt32ValueFunc<>(fieldName, ordinal, (Integer) defaultValue, jsonSchema, method, function);
         }
 
         if (fieldType == long.class) {
             ObjLongConsumer function = (ObjLongConsumer) lambdaFunction(objectClass, fieldClass, method);
-            return new FieldReaderInt64ValueFunc<>(fieldName, ordinal, method, function);
+            return new FieldReaderInt64ValueFunc<>(fieldName, ordinal, (Long) defaultValue, jsonSchema, method, function);
         }
 
         if (fieldType == char.class) {
             ObjCharConsumer function = (ObjCharConsumer) lambdaFunction(objectClass, fieldClass, method);
-            return new FieldReaderCharValueFunc<>(fieldName, ordinal, method, format, method, function);
+            return new FieldReaderCharValueFunc<>(fieldName, ordinal, format, (Character) defaultValue, jsonSchema, method, function);
         }
 
         if (fieldType == float.class) {
             ObjFloatConsumer function = (ObjFloatConsumer) lambdaFunction(objectClass, fieldClass, method);
-            return new FieldReaderFloatValueFunc<>(fieldName, ordinal, method, function);
+            return new FieldReaderFloatValueFunc<>(fieldName, ordinal, (Float) defaultValue, jsonSchema, method, function);
         }
 
         if (fieldType == double.class) {
             ObjDoubleConsumer function = (ObjDoubleConsumer) lambdaFunction(objectClass, fieldClass, method);
-            return new FieldReaderDoubleValueFunc<>(fieldName, ordinal, method, function);
+            return new FieldReaderDoubleValueFunc<>(fieldName, ordinal, (Double) defaultValue, jsonSchema, method, function);
         }
 
         BiConsumer function = (BiConsumer) lambdaFunction(objectClass, fieldClass, method);
-        return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, method, function);
+        return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, method, function);
     }
 
     private static Object lambdaFunction(Class objectType, Class fieldClass, Method method) {

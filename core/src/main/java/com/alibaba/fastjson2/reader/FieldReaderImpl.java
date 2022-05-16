@@ -34,20 +34,6 @@ abstract class FieldReaderImpl<T>
         this (fieldName, fieldType, TypeUtils.getClass(fieldType), 0, 0L, null, null, null, null);
     }
 
-    public FieldReaderImpl(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format) {
-        this.fieldName = fieldName;
-        this.fieldType = fieldType;
-        this.fieldClass = fieldClass;
-        this.fieldClassSerializable = fieldClass != null && Serializable.class.isAssignableFrom(fieldClass);
-        this.features = features;
-        this.fieldNameHash = Fnv.hashCode64(fieldName);
-        this.ordinal = ordinal;
-        this.format = format;
-        this.locale = null;
-        this.defaultValue = null;
-        this.schema = null;
-    }
-
     public FieldReaderImpl(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue) {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
@@ -58,20 +44,6 @@ abstract class FieldReaderImpl<T>
         this.ordinal = ordinal;
         this.format = format;
         this.locale = null;
-        this.defaultValue = defaultValue;
-        this.schema = null;
-    }
-
-    public FieldReaderImpl(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Object defaultValue) {
-        this.fieldName = fieldName;
-        this.fieldType = fieldType;
-        this.fieldClass = fieldClass;
-        this.fieldClassSerializable = fieldClass != null && Serializable.class.isAssignableFrom(fieldClass);
-        this.features = features;
-        this.fieldNameHash = Fnv.hashCode64(fieldName);
-        this.ordinal = ordinal;
-        this.format = format;
-        this.locale = locale;
         this.defaultValue = defaultValue;
         this.schema = null;
     }

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -15,8 +16,8 @@ final class FieldReaderListStrMethod<T>
         implements FieldReaderList<T, Object> {
     final long fieldClassHash;
 
-    FieldReaderListStrMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+    FieldReaderListStrMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Method method) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, method);
         this.fieldClassHash = Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
     }
 
@@ -83,7 +84,7 @@ final class FieldReaderListStrMethod<T>
         }
 
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {

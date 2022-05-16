@@ -20,7 +20,7 @@ final class FieldReaderObjectFieldUF extends FieldReaderObjectField {
     @Override
     public void accept(Object object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         UNSAFE.putObject(object, fieldOffset, value);

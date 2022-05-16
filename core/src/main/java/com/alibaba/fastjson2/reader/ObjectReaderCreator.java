@@ -94,11 +94,13 @@ public class ObjectReaderCreator {
             FieldReader... fieldReaders
     ) {
         return createObjectReader(
-                objectType
-                , null
-                , 0
-                , createInstanceSupplier(objectType)
-                , null, fieldReaders
+                objectType,
+                null,
+                0,
+                null,
+                createInstanceSupplier(objectType),
+                null,
+                fieldReaders
         );
     }
 
@@ -107,7 +109,7 @@ public class ObjectReaderCreator {
             Supplier<T> defaultCreator,
             FieldReader... fieldReaders
     ) {
-        return createObjectReader(objectType, null, 0, defaultCreator, null, fieldReaders);
+        return createObjectReader(objectType, null, 0, null, defaultCreator, null, fieldReaders);
     }
 
     public <T> ObjectReader<T> createObjectReaderSeeAlso(
@@ -347,94 +349,102 @@ public class ObjectReaderCreator {
     }
 
     public <T> ObjectReader<T> createObjectReader(
-            Class<T> objectClass
-            , long features
-            , Supplier<T> defaultCreator
-            , Function buildFunction
-            , FieldReader... fieldReaders
+            Class<T> objectClass,
+            long features,
+            Supplier<T> defaultCreator,
+            Function buildFunction,
+            FieldReader... fieldReaders
     ) {
-        return createObjectReader(objectClass, null, features, defaultCreator, buildFunction, fieldReaders);
+        return createObjectReader(objectClass, null, features, null, defaultCreator, buildFunction, fieldReaders);
     }
 
     public <T> ObjectReader<T> createObjectReader(
-            Class<T> objectClass
-            , String typeKey
-            , long features
-            , Supplier<T> defaultCreator,
+            Class<T> objectClass,
+            String typeKey,
+            long features,
+            JSONSchema schema,
+            Supplier<T> defaultCreator,
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
         if (objectClass != null) {
             int modifiers = objectClass.getModifiers();
             if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)) {
-                return new ObjectReaderAdapter(objectClass, typeKey, null, features, defaultCreator, buildFunction, fieldReaders);
+                return new ObjectReaderAdapter(objectClass, typeKey, null, features, schema, defaultCreator, buildFunction, fieldReaders);
             }
         }
 
         switch (fieldReaders.length) {
             case 1:
                 return new ObjectReader1(
-                        objectClass
-                        , features
-                        , defaultCreator
-                        , buildFunction
-                        , fieldReaders[0]
+                        objectClass,
+                        features,
+                        schema,
+                        defaultCreator,
+                        buildFunction,
+                        fieldReaders[0]
                 );
             case 2:
                 return new ObjectReader2(
                         objectClass
                         , features
+                        , schema
                         , defaultCreator
                         , buildFunction
                         , fieldReaders[0]
                         , fieldReaders[1]);
             case 3:
                 return new ObjectReader3(
-                        objectClass
-                        , defaultCreator
-                        , features
-                        , buildFunction
-                        , fieldReaders[0]
-                        , fieldReaders[1]
-                        , fieldReaders[2]
+                        objectClass,
+                        defaultCreator,
+                        features,
+                        schema,
+                        buildFunction,
+                        fieldReaders[0],
+                        fieldReaders[1],
+                        fieldReaders[2]
                 );
             case 4:
                 return new ObjectReader4(
-                        objectClass
-                        , features
-                        , defaultCreator
-                        , buildFunction
-                        , fieldReaders[0]
-                        , fieldReaders[1]
-                        , fieldReaders[2]
-                        , fieldReaders[3]
+                        objectClass,
+                        features,
+                        schema,
+                        defaultCreator,
+                        buildFunction,
+                        fieldReaders[0],
+                        fieldReaders[1],
+                        fieldReaders[2],
+                        fieldReaders[3]
                 );
             case 5:
                 return new ObjectReader5(
-                        objectClass
-                        , defaultCreator
-                        , features
-                        , buildFunction
-                        , fieldReaders[0]
-                        , fieldReaders[1]
-                        , fieldReaders[2]
-                        , fieldReaders[3]
-                        , fieldReaders[4]
+                        objectClass,
+                        defaultCreator,
+                        features,
+                        schema,
+                        buildFunction,
+                        fieldReaders[0],
+                        fieldReaders[1],
+                        fieldReaders[2],
+                        fieldReaders[3],
+                        fieldReaders[4]
                 );
             case 6:
                 return new ObjectReader6(
-                        objectClass, defaultCreator
-                        , features
-                        , buildFunction
-                        , fieldReaders[0]
-                        , fieldReaders[1]
-                        , fieldReaders[2]
-                        , fieldReaders[3]
-                        , fieldReaders[4]
-                        , fieldReaders[5]
+                        objectClass,
+                        defaultCreator,
+                        features,
+                        schema,
+                        buildFunction,
+                        fieldReaders[0],
+                        fieldReaders[1],
+                        fieldReaders[2],
+                        fieldReaders[3],
+                        fieldReaders[4],
+                        fieldReaders[5]
                 );
             default:
-                return new ObjectReaderAdapter(objectClass, typeKey, null, features, defaultCreator, buildFunction, fieldReaders);
+                return new ObjectReaderAdapter(objectClass, typeKey, null, features, schema, defaultCreator, buildFunction, fieldReaders);
         }
     }
 
@@ -507,6 +517,8 @@ public class ObjectReaderCreator {
         if (fieldBased && objectClass.isInterface()) {
             fieldBased = false;
         }
+
+        JSONSchema jsonSchema = JSONSchema.of(JSON.parseObject(beanInfo.schema), objectClass);
 
         FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType, beanInfo, fieldBased, modules);
 
@@ -647,6 +659,7 @@ public class ObjectReaderCreator {
                 objectClass
                 , beanInfo.typeKey
                 , beanInfo.readerFeatures
+                , jsonSchema
                 , creator
                 , null
                 , fieldReaderArray);
@@ -1046,7 +1059,7 @@ public class ObjectReaderCreator {
             return new FieldReaderInt64Param(fieldName, fieldClass, paramName, parameter, ordinal);
         }
 
-        return new FieldReaderObjectParam(fieldName, fieldType, fieldClass, paramName, parameter, ordinal, 0, format);
+        return new FieldReaderObjectParam(fieldName, fieldType, fieldClass, paramName, parameter, ordinal, 0, format, null);
     }
 
     public <T> FieldReader createFieldReaderMethod(
@@ -1156,27 +1169,27 @@ public class ObjectReaderCreator {
 
         if (method.getParameterCount() == 0) {
             if (fieldClass == AtomicInteger.class) {
-                return new FieldReaderAtomicIntegerMethodReadOnly(fieldName, fieldClass, ordinal, method);
+                return new FieldReaderAtomicIntegerMethodReadOnly(fieldName, fieldClass, ordinal, jsonSchema, method);
             }
 
             if (fieldClass == AtomicLong.class) {
-                return new FieldReaderAtomicLongReadOnly(fieldName, fieldClass, ordinal, method);
+                return new FieldReaderAtomicLongReadOnly(fieldName, fieldClass, ordinal, jsonSchema, method);
             }
 
             if (fieldClass == AtomicIntegerArray.class) {
-                return new FieldReaderAtomicIntegerArrayReadOnly(fieldName, fieldClass, ordinal, method);
+                return new FieldReaderAtomicIntegerArrayReadOnly(fieldName, fieldClass, ordinal, jsonSchema, method);
             }
 
             if (fieldClass == AtomicLongArray.class) {
-                return new FieldReaderAtomicLongArrayReadOnly(fieldName, fieldClass, ordinal, method);
+                return new FieldReaderAtomicLongArrayReadOnly(fieldName, fieldClass, ordinal, jsonSchema, method);
             }
 
             if (fieldClass == AtomicBoolean.class) {
-                return new FieldReaderAtomicBooleanMethodReadOnly(fieldName, fieldClass, ordinal, method);
+                return new FieldReaderAtomicBooleanMethodReadOnly(fieldName, fieldClass, ordinal, jsonSchema, method);
             }
 
             if (fieldClass == AtomicReference.class) {
-                return new FieldReaderAtomicReferenceMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, method);
+                return new FieldReaderAtomicReferenceMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, jsonSchema, method);
             }
 
             if (Collection.class.isAssignableFrom(fieldClass)) {
@@ -1184,7 +1197,7 @@ public class ObjectReaderCreator {
             }
 
             if (Map.class.isAssignableFrom(fieldClass)) {
-                return new FieldReaderMapMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+                return new FieldReaderMapMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, features, format, jsonSchema, method);
             }
 
             return null;
@@ -1206,13 +1219,13 @@ public class ObjectReaderCreator {
                     Class itemClass = TypeUtils.getMapping(itemType);
 
                     if (itemClass == String.class) {
-                        return new FieldReaderListStrMethod(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, method);
+                        return new FieldReaderListStrMethod(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, jsonSchema, method);
                     }
 
-                    return new FieldReaderListMethod(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, itemType, method);
+                    return new FieldReaderListMethod(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, jsonSchema, itemType, method);
                 }
             }
-            return new FieldReaderListMethod(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+            return new FieldReaderListMethod(fieldName, fieldType, fieldClass, ordinal, features, format, jsonSchema, method);
         }
 
         if (fieldClass == Date.class) {
@@ -1376,11 +1389,11 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == AtomicBoolean.class) {
-            return new FieldReaderAtomicBooleanFieldReadOnly(fieldName, fieldClass, ordinal, format, (AtomicBoolean) defaultValue, field);
+            return new FieldReaderAtomicBooleanFieldReadOnly(fieldName, fieldClass, ordinal, format, (AtomicBoolean) defaultValue, jsonSchema, field);
         }
 
         if (fieldClass == AtomicReference.class) {
-            return new FieldReaderAtomicReferenceField(fieldName, fieldType, fieldClass, ordinal, format, field);
+            return new FieldReaderAtomicReferenceField(fieldName, fieldType, fieldClass, ordinal, format, jsonSchema, field);
         }
 
         Type fieldTypeResolved = null;
@@ -1538,60 +1551,61 @@ public class ObjectReaderCreator {
             , Method method
             , BiConsumer<T, V> function
     ) {
-        return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, 0, null, null, method, function);
+        return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, 0, null, null, null, method, function);
     }
 
     <T, V> FieldReader createFieldReader(
-            Class objectClass
-            , Type objectType
-            , String fieldName
-            , Type fieldType
-            , Class<V> fieldClass
-            , int ordinal
-            , long features
-            , String format
-            , Object defaultValue
-            , Method method
-            , BiConsumer<T, V> function
+            Class objectClass,
+            Type objectType,
+            String fieldName,
+            Type fieldType,
+            Class<V> fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            BiConsumer<T, V> function
     ) {
         if (fieldClass == Integer.class) {
-            return new FieldReaderInt32Func<>(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
+            return new FieldReaderInt32Func<>(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Long.class) {
-            return new FieldReaderInt64Func<>(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
+            return new FieldReaderInt64Func<>(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == String.class) {
-            return new FieldReaderStringFunc<>(fieldName, fieldClass, ordinal, features, format, defaultValue, method, function);
+            return new FieldReaderStringFunc<>(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Boolean.class) {
-            return new FieldReaderBoolFunc<>(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
+            return new FieldReaderBoolFunc<>(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Short.class) {
-            return new FieldReaderInt16Func(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
+            return new FieldReaderInt16Func(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Byte.class) {
-            return new FieldReaderInt8Func(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
+            return new FieldReaderInt8Func(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalFunc(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
+            return new FieldReaderBigDecimalFunc(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerFunc(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
+            return new FieldReaderBigIntegerFunc(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Number.class) {
-            return new FieldReaderNumberFunc(fieldName, fieldClass, ordinal, format, defaultValue, method, function);
+            return new FieldReaderNumberFunc(fieldName, fieldClass, ordinal, format, null, (Number) defaultValue, schema, method, function);
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDateFunc(fieldName, fieldClass, ordinal, features, format, method, function);
+            return new FieldReaderDateFunc(fieldName, fieldClass, ordinal, features, format, null, (Date) defaultValue, schema, method, function);
         }
 
         Type fieldTypeResolved = null;
@@ -1611,19 +1625,19 @@ public class ObjectReaderCreator {
                     Type itemType = actualTypeArguments[0];
                     Class itemClass = TypeUtils.getMapping(itemType);
                     if (itemClass == String.class) {
-                        return new FieldReaderListStrFunc(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, format, defaultValue, method, function);
+                        return new FieldReaderListStrFunc(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, null, defaultValue, schema, method, function);
                     }
                 }
             }
 
-            return new FieldReaderListFunc(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, format, defaultValue, method, function);
+            return new FieldReaderListFunc(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldTypeResolved != null) {
-            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, defaultValue, method, function);
+            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
         }
 
-        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, method, function);
+        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
     }
 
 

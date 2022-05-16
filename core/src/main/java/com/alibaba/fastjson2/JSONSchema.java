@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.DomainValidator;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.InetAddressValidator;
+import com.alibaba.fastjson2.util.InetAddresses;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
@@ -8,14 +11,23 @@ import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.*;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.alibaba.fastjson2.JSONFactory.UUIDUtils.parse4Nibbles;
 
 public abstract class JSONSchema {
     final String title;
     final String description;
+
+    final static JSONReader.Context CONTEXT = JSONFactory.createReadContext();
 
     JSONSchema(JSONObject input) {
         this.title = input.getString("title");
@@ -28,6 +40,10 @@ public abstract class JSONSchema {
     }
 
     public static JSONSchema of(JSONObject input, Class objectClass) {
+        if (input == null || input.isEmpty()) {
+            return null;
+        }
+
         if (objectClass == null) {
             return of(input);
         }
@@ -52,11 +68,55 @@ public abstract class JSONSchema {
                 || objectClass == double.class
                 || objectClass == Float.class
                 || objectClass == Double.class
+                || objectClass == Number.class
         ) {
             return new NumberSchema(input);
         }
 
-        return null;
+        if (objectClass == boolean.class
+                || objectClass == Boolean.class) {
+            return new BooleanSchema(input);
+        }
+
+        if (objectClass == String.class) {
+            return new StringSchema(input);
+        }
+
+        if (Iterable.class.isAssignableFrom(objectClass)) {
+            return new ArraySchema(input);
+        }
+
+        if (objectClass.isArray()) {
+            return new ArraySchema(input);
+        }
+
+        if (Map.class.isAssignableFrom(objectClass)) {
+            return new ObjectSchema(input);
+        }
+
+        return new ObjectSchema(input);
+    }
+
+    static class ConstString extends JSONSchema {
+        final String value;
+        ConstString(String value) {
+            super(null, null);
+            this.value = value;
+        }
+
+        @Override
+        public Type getType() {
+            return Type.Const;
+        }
+
+        @Override
+        public ValidateResult validate(Object value) {
+            if (!this.value.equals(value)) {
+                return new ConstFail(this.value, value);
+            }
+
+            return SUCCESS;
+        }
     }
 
     public static JSONSchema of(JSONObject input) {
@@ -66,6 +126,16 @@ public abstract class JSONSchema {
             if (enums != null) {
                 return new EnumSchema(enums);
             }
+
+            Object constValue = input.get("const");
+            if (constValue instanceof String) {
+                return new ConstString((String) constValue);
+            }
+
+            if (input.containsKey("properties")) {
+                return new ObjectSchema(input);
+            }
+
             throw new JSONException("type required");
         }
 
@@ -99,18 +169,70 @@ public abstract class JSONSchema {
 
     public abstract Type getType();
 
-    public abstract void validate(Object value);
+    public abstract ValidateResult validate(Object value);
 
-    public void validate(long value) {
-        validate((Object) Long.valueOf(value));
+    public boolean isValid(Object value) {
+        return validate(value)
+                .isSuccess();
     }
 
-    public void validate(Integer value) {
-        validate((Object) value);
+    public boolean isValid(long value) {
+        return validate(value)
+                .isSuccess();
     }
 
-    public void validate(Long value) {
-        validate((Object) value);
+    public boolean isValid(Integer value) {
+        return validate(value)
+                .isSuccess();
+    }
+
+    public boolean isValid(Long value) {
+        return validate(value)
+                .isSuccess();
+    }
+
+    public ValidateResult validate(long value) {
+        return validate((Object) Long.valueOf(value));
+    }
+
+    public ValidateResult validate(Integer value) {
+        return validate((Object) value);
+    }
+
+    public ValidateResult validate(Long value) {
+        return validate((Object) value);
+    }
+
+    public void assertValidate(Object value) {
+        ValidateResult result = validate(value);
+        if (result.isSuccess()) {
+            return;
+        }
+        throw new JSONSchemaValidException(result.getMessage());
+    }
+
+    public void assertValidate(Integer value) {
+        ValidateResult result = validate(value);
+        if (result.isSuccess()) {
+            return;
+        }
+        throw new JSONSchemaValidException(result.getMessage());
+    }
+
+    public void assertValidate(Long value) {
+        ValidateResult result = validate(value);
+        if (result.isSuccess()) {
+            return;
+        }
+        throw new JSONSchemaValidException(result.getMessage());
+    }
+
+    public void assertValidate(long value) {
+        ValidateResult result = validate(value);
+        if (result.isSuccess()) {
+            return;
+        }
+        throw new JSONSchemaValidException(result.getMessage());
     }
 
     public enum Type {
@@ -124,6 +246,413 @@ public abstract class JSONSchema {
         // extended type
         Integer,
         Enum,
+        Const,
+    }
+
+    static abstract class FormatValidator {
+        public abstract boolean isValid(String input);
+    }
+
+    static final class EmailValidator extends FormatValidator {
+        private static final String SPECIAL_CHARS = "\\p{Cntrl}\\(\\)<>@,;:'\\\\\\\"\\.\\[\\]";
+        private static final String VALID_CHARS = "(\\\\.)|[^\\s" + SPECIAL_CHARS + "]";
+        private static final String QUOTED_USER = "(\"[^\"]*\")";
+        private static final String WORD = "((" + VALID_CHARS + "|')+|" + QUOTED_USER + ")";
+
+        private static final String EMAIL_REGEX = "^\\s*?(.+)@(.+?)\\s*$";
+        private static final String IP_DOMAIN_REGEX = "^\\[(.*)\\]$";
+        private static final String USER_REGEX = "^\\s*" + WORD + "(\\." + WORD + ")*$";
+
+        private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
+        private static final Pattern IP_DOMAIN_PATTERN = Pattern.compile(IP_DOMAIN_REGEX);
+        private static final Pattern USER_PATTERN = Pattern.compile(USER_REGEX);
+
+        final static EmailValidator INSTANCE = new EmailValidator();
+
+        @Override
+        public boolean isValid(String email) {
+            if (email == null) {
+                return false;
+            }
+
+            if (email.endsWith(".")) { // check this first - it's cheap!
+                return false;
+            }
+
+            // Check the whole email address structure
+            Matcher emailMatcher = EMAIL_PATTERN.matcher(email);
+            if (!emailMatcher.matches()) {
+                return false;
+            }
+
+            if (!isValidUser(emailMatcher.group(1))) {
+                return false;
+            }
+
+            if (!isValidDomain(emailMatcher.group(2))) {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        protected static boolean isValidDomain(String domain) {
+            // see if domain is an IP address in brackets
+            Matcher ipDomainMatcher = IP_DOMAIN_PATTERN.matcher(domain);
+
+            if (ipDomainMatcher.matches()) {
+                InetAddressValidator inetAddressValidator =
+                        InetAddressValidator.getInstance();
+                return inetAddressValidator.isValid(ipDomainMatcher.group(1));
+            }
+            // Domain is symbolic name
+            return DomainValidator.isValid(domain) || DomainValidator.isValidTld(domain);
+        }
+
+        protected static boolean isValidUser(String user) {
+
+            if (user == null || user.length() > 64) {
+                return false;
+            }
+
+            return USER_PATTERN.matcher(user).matches();
+        }
+    }
+
+    static final class IPV4AddressValidator extends FormatValidator {
+        final static IPV4AddressValidator INSTANCE = new IPV4AddressValidator();
+        @Override
+        public boolean isValid(String address) {
+            if (address == null) {
+                return false;
+            }
+            return InetAddresses.isInetAddress(address) && address.indexOf('.') != -1;
+        }
+    }
+
+    static final class IPV6AddressValidator extends FormatValidator {
+        final static IPV6AddressValidator INSTANCE = new IPV6AddressValidator();
+        @Override
+        public boolean isValid(String address) {
+            if (address == null) {
+                return false;
+            }
+            return InetAddresses.isInetAddress(address) && address.indexOf(':') != -1;
+        }
+    }
+
+    static final class URIValidator extends FormatValidator {
+        final static URIValidator INSTANCE = new URIValidator();
+        @Override
+        public boolean isValid(String url) {
+            if (url == null || url.isEmpty()) {
+                return false;
+            }
+
+            try {
+                new URI(url);
+                return true;
+            } catch (URISyntaxException ignored) {
+                return false;
+            }
+        }
+    }
+
+    static final class DateTimeValidator extends FormatValidator {
+        final static DateTimeValidator INSTANCE = new DateTimeValidator();
+
+        @Override
+        public boolean isValid(String str) {
+            if (str == null || str.isEmpty()) {
+                return false;
+            }
+
+            char c10;
+            if (str.length() == 19
+                    && str.charAt(4) == '-'
+                    && str.charAt(7) == '-'
+                    && ((c10 = str.charAt(10)) == ' ' || c10 == 'T')
+                    && str.charAt(13) == ':'
+                    && str.charAt(16) == ':'
+            ) {
+                // yyyy-MM-dd hh:mm:ss
+                char y0 = str.charAt(0);
+                char y1 = str.charAt(1);
+                char y2 = str.charAt(2);
+                char y3 = str.charAt(3);
+                char m0 = str.charAt(5);
+                char m1 = str.charAt(6);
+                char d0 = str.charAt(8);
+                char d1 = str.charAt(9);
+                char h0 = str.charAt(11);
+                char h1 = str.charAt(12);
+                char i0 = str.charAt(14);
+                char i1 = str.charAt(15);
+                char s0 = str.charAt(17);
+                char s1 = str.charAt(18);
+
+                if (y0 < '0' || y0 > '9'
+                        || y1 < '0' || y1 > '9'
+                        || y2 < '0' || y2 > '9'
+                        || y3 < '0' || y3 > '9'
+                        || m0 < '0' || m0 > '9'
+                        || m1 < '0' || m1 > '9'
+                        || d0 < '0' || d0 > '9'
+                        || d1 < '0' || d1 > '9'
+                        || h0 < '0' || h0 > '9'
+                        || h1 < '0' || h1 > '9'
+                        || i0 < '0' || i0 > '9'
+                        || i1 < '0' || i1 > '9'
+                        || s0 < '0' || s0 > '9'
+                        || s1 < '0' || s1 > '9'
+                ) {
+                    return false;
+                }
+
+                int yyyy = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+                int mm = (m0 - '0') * 10 + (m1 - '0');
+                int dd = (d0 - '0') * 10 + (d1 - '0');
+                int hh = (h0 - '0') * 10 + (h1 - '0');
+                int ii = (i0 - '0') * 10 + (i1 - '0');
+                int ss = (s0 - '0') * 10 + (s1 - '0');
+
+                if (mm > 12) {
+                    return false;
+                }
+
+                if (dd > 28) {
+                    int dom = 31;
+                    switch (mm) {
+                        case 2:
+                            boolean isLeapYear = ((yyyy & 3) == 0) && ((yyyy % 100) != 0 || (yyyy % 400) == 0);
+                            dom = isLeapYear ? 29 : 28;
+                            break;
+                        case 4:
+                        case 6:
+                        case 9:
+                        case 11:
+                            dom = 30;
+                            break;
+                    }
+                    if (dd > dom) {
+                        return false;
+                    }
+                } else if (dd > 31) {
+                    return false;
+                }
+
+                if (hh > 24) {
+                    return false;
+                }
+
+                if (ii > 60) {
+                    return false;
+                }
+
+                if (ss > 61) {
+                    return false;
+                }
+
+                return true;
+            }
+
+            try {
+                char[] chars = new char[str.length() + 2];
+                chars[0] = '"';
+                str.getChars(0, str.length(), chars, 1);
+                chars[chars.length - 1] = '"';
+
+                return JSONReader.of(CONTEXT, chars).isLocalDateTime();
+            } catch (DateTimeException | JSONException ignored) {
+                return false;
+            }
+        }
+    }
+
+    static final class DateValidator extends FormatValidator {
+        final static DateValidator INSTANCE = new DateValidator();
+
+        @Override
+        public boolean isValid(String str) {
+            if (str == null || str.isEmpty()) {
+                return false;
+            }
+
+            if (str.length() == 10
+                    && str.charAt(4) == '-'
+                    && str.charAt(7) == '-'
+            ) {
+                // yyyy-MM-dd
+                char y0 = str.charAt(0);
+                char y1 = str.charAt(1);
+                char y2 = str.charAt(2);
+                char y3 = str.charAt(3);
+                char m0 = str.charAt(5);
+                char m1 = str.charAt(6);
+                char d0 = str.charAt(8);
+                char d1 = str.charAt(9);
+
+                int yyyy = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+                int mm = (m0 - '0') * 10 + (m1 - '0');
+                int dd = (d0 - '0') * 10 + (d1 - '0');
+
+                if (mm > 12) {
+                    return false;
+                }
+
+                if (dd > 28) {
+                    int dom = 31;
+                    switch (mm) {
+                        case 2:
+                            boolean isLeapYear = ((yyyy & 3) == 0) && ((yyyy % 100) != 0 || (yyyy % 400) == 0);
+                            dom = isLeapYear ? 29 : 28;
+                            break;
+                        case 4:
+                        case 6:
+                        case 9:
+                        case 11:
+                            dom = 30;
+                            break;
+                    }
+                    if (dd > dom) {
+                        return false;
+                    }
+                } else if (dd > 31) {
+                    return false;
+                }
+
+                return true;
+            }
+
+            try {
+                char[] chars = new char[str.length() + 2];
+                chars[0] = '"';
+                str.getChars(0, str.length(), chars, 1);
+                chars[chars.length - 1] = '"';
+
+                return JSONReader.of(CONTEXT, chars)
+                        .isLocalDate();
+            } catch (DateTimeException | JSONException ignored) {
+                return false;
+            }
+        }
+    }
+
+    static final class TimeValidator extends FormatValidator {
+        final static TimeValidator INSTANCE = new TimeValidator();
+
+        @Override
+        public boolean isValid(String str) {
+            if (str == null || str.isEmpty()) {
+                return false;
+            }
+
+            char h0, h1, m0, m1, s0, s1;
+            if (str.length() == 8 && str.charAt(2) == ':' && str.charAt(5) == ':') {
+                h0 = str.charAt(0);
+                h1 = str.charAt(1);
+                m0 = str.charAt(3);
+                m1 = str.charAt(4);
+                s0 = str.charAt(6);
+                s1 = str.charAt(7);
+            } else {
+                try {
+                    LocalTime.parse(str);
+                    return true;
+                } catch (DateTimeParseException ignored) {
+                    return false;
+                }
+            }
+
+            if (h0 >= '0' && h0 <= '2'
+                    && h1 >= '0' && h1 <= '9'
+                    && m0 >= '0' && m0 <= '6'
+                    && m1 >= '0' && m0 <= '9'
+                    && s0 >= '0' && s0 <= '6'
+                    && s1 >= '0' && s0 <= '9'
+            ) {
+                int hh = (h0 - '0') * 10 + (h1 - '0');
+                if (hh > 24) {
+                    return false;
+                }
+
+                int mm = (m0 - '0') * 10 + (m1 - '0');
+                if (mm > 60) {
+                    return false;
+                }
+
+                int ss = (s0 - '0') * 10 + (s1 - '0');
+                if (ss > 61) {
+                    return false;
+                }
+
+                return true;
+            }
+
+           return false;
+        }
+    }
+
+    static final class DurationValidator extends FormatValidator {
+        final static DurationValidator INSTANCE = new DurationValidator();
+
+        @Override
+        public boolean isValid(String input) {
+            if (input == null || input.isEmpty()) {
+                return false;
+            }
+
+            try {
+                Duration.parse(input);
+                return true;
+            } catch (DateTimeParseException ignored) {
+                return false;
+            }
+        }
+    }
+
+    static final class UUIDValidator extends FormatValidator {
+        final static UUIDValidator INSTANCE = new UUIDValidator();
+
+        @Override
+        public boolean isValid(String str) {
+            if (str == null) {
+                return false;
+            }
+
+            if (str.length() == 32) {
+                long msb1 = parse4Nibbles(str, 0);
+                long msb2 = parse4Nibbles(str, 4);
+                long msb3 = parse4Nibbles(str, 8);
+                long msb4 = parse4Nibbles(str, 12);
+                long lsb1 = parse4Nibbles(str, 16);
+                long lsb2 = parse4Nibbles(str, 20);
+                long lsb3 = parse4Nibbles(str, 24);
+                long lsb4 = parse4Nibbles(str, 28);
+
+                return (msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0;
+            }
+
+            if (str.length() == 36) {
+                char ch1 = str.charAt(8);
+                char ch2 = str.charAt(13);
+                char ch3 = str.charAt(18);
+                char ch4 = str.charAt(23);
+                if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
+                    long msb1 = parse4Nibbles(str, 0);
+                    long msb2 = parse4Nibbles(str, 4);
+                    long msb3 = parse4Nibbles(str, 9);
+                    long msb4 = parse4Nibbles(str, 14);
+                    long lsb1 = parse4Nibbles(str, 19);
+                    long lsb2 = parse4Nibbles(str, 24);
+                    long lsb3 = parse4Nibbles(str, 28);
+                    long lsb4 = parse4Nibbles(str, 32);
+                    return (msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0;
+                }
+            }
+            return false;
+        }
     }
 
     static final class StringSchema extends JSONSchema {
@@ -131,15 +660,56 @@ public abstract class JSONSchema {
         final int minLength;
         final boolean required;
         final String format;
+        final String patternFormat;
         final Pattern pattern;
+
+        final FormatValidator formatValidator;
 
         StringSchema(JSONObject input) {
             super(input);
             this.minLength = input.getIntValue("minLength", -1);
             this.maxLength = input.getIntValue("maxLength", -1);
             this.required = input.getBooleanValue("required");
-            this.format = input.getString("pattern");
-            this.pattern = format == null ? null : Pattern.compile(format);
+            this.patternFormat = input.getString("pattern");
+            this.pattern = patternFormat == null ? null : Pattern.compile(patternFormat);
+            this.format = input.getString("format");
+
+            if (format == null) {
+                formatValidator = null;
+            } else {
+                switch (format) {
+                    case "email":
+                        formatValidator = EmailValidator.INSTANCE;
+                        break;
+                    case "ipv4":
+                        formatValidator = IPV4AddressValidator.INSTANCE;
+                        break;
+                    case "ipv6":
+                        formatValidator = IPV6AddressValidator.INSTANCE;
+                        break;
+                    case "uri":
+                        formatValidator = URIValidator.INSTANCE;
+                        break;
+                    case "date-time":
+                        formatValidator = DateTimeValidator.INSTANCE;
+                        break;
+                    case "date":
+                        formatValidator = DateValidator.INSTANCE;
+                        break;
+                    case "time":
+                        formatValidator = TimeValidator.INSTANCE;
+                        break;
+                    case "duration":
+                        formatValidator = DurationValidator.INSTANCE;
+                        break;
+                    case "uuid":
+                        formatValidator = UUIDValidator.INSTANCE;
+                        break;
+                    default:
+                        formatValidator = null;
+                        break;
+                }
+            }
         }
 
         @Override
@@ -148,34 +718,40 @@ public abstract class JSONSchema {
         }
 
         @Override
-        public void validate(Object value) {
+        public ValidateResult validate(Object value) {
             if (value == null) {
                 if (required) {
-                    throw new JSONSchemaValidException("required");
+                    return REQUIRED_NOT_MATCH;
                 }
-                return;
+                return SUCCESS;
             }
 
             if (value instanceof String) {
                 String str = (String) value;
                 if (minLength >= 0 && str.length() < minLength) {
-                    throw new JSONSchemaValidException("minLength not match, expect " + minLength + ", but " + str.length());
+                    return new MinLengthFail(minLength, str.length());
                 }
 
                 if (maxLength >= 0 && str.length() > maxLength) {
-                    throw new JSONSchemaValidException("maxLength not match, expect " + maxLength + ", but " + str.length());
+                    return new MaxLengthFail(minLength, str.length());
                 }
 
                 if (pattern != null) {
                     if (!pattern.matcher(str).find()) {
-                        throw new JSONSchemaValidException("pattern not match, expect " + format + ", but " + str);
+                        return new PatternFail(patternFormat, str);
                     }
                 }
 
-                return;
+                if (formatValidator != null) {
+                    if (!formatValidator.isValid(str)) {
+                        return new FormatFail(format, str);
+                    }
+                }
+
+                return SUCCESS;
             }
 
-            throw new JSONSchemaValidException("type Integer not match : " + value.getClass().getName());
+            return new TypeNotMatchFail(Type.Integer, value.getClass());
         }
 
         @Override
@@ -235,9 +811,9 @@ public abstract class JSONSchema {
         }
 
         @Override
-        public void validate(Object value) {
+        public ValidateResult validate(Object value) {
             if (value == null) {
-                return;
+                return FAIL_INPUT_NULL;
             }
 
             Class valueClass = value.getClass();
@@ -252,153 +828,153 @@ public abstract class JSONSchema {
                 if (minimum != null) {
                     long longValue = ((Number) value).longValue();
                     if (longValue < minimum.longValue()) {
-                        throw new JSONSchemaValidException("minimum not match, expect >= " + minimum + ", but " + value);
+                        return new MinimumFail(minimum , value, false);
                     }
                 }
 
                 if (exclusiveMinimum != null) {
                     long longValue = ((Number) value).longValue();
                     if (longValue <= exclusiveMinimum.longValue()) {
-                        throw new JSONSchemaValidException("exclusiveMinimum not match, expect > " + exclusiveMinimum + ", but " + value);
+                        return new MinimumFail(exclusiveMinimum , value, true);
                     }
                 }
 
                 if (maximum != null) {
                     long longValue = ((Number) value).longValue();
                     if (longValue > maximum.longValue()) {
-                        throw new JSONSchemaValidException("maximum not match, expect <= " + maximum + ", but " + value);
+                        return new MaximumFail(maximum , value, false);
                     }
                 }
 
                 if (exclusiveMaximum != null) {
                     long longValue = ((Number) value).longValue();
                     if (longValue >= exclusiveMaximum.longValue()) {
-                        throw new JSONSchemaValidException("exclusiveMinimum not match, expect < " + exclusiveMaximum + ", but " + value);
+                        return new MaximumFail(exclusiveMaximum , value, true);
                     }
                 }
 
                 if (multipleOf != null) {
                     long longValue = ((Number) value).longValue();
                     if (longValue % multipleOf.longValue() != 0) {
-                        throw new JSONSchemaValidException("multipleOf not match, expect multipleOf " + multipleOf + ", but " + value);
+                        return new MultipleOfFail(multipleOf, (Number) value);
                     }
                 }
-                return;
+                return SUCCESS;
             }
 
-            throw new JSONSchemaValidException("type Integer not match : " + valueClass.getName());
+            return new TypeNotMatchFail(Type.Integer, valueClass);
         }
 
         @Override
-        public void validate(long longValue) {
+        public ValidateResult validate(long longValue) {
             if (minimum != null) {
                 if (longValue < minimum.longValue()) {
-                    throw new JSONSchemaValidException("minimum not match, expect >= " + minimum + ", but " + longValue);
+                    return new MinimumFail(minimum , longValue, false);
                 }
             }
 
             if (exclusiveMinimum != null) {
                 if (longValue <= exclusiveMinimum.longValue()) {
-                    throw new JSONSchemaValidException("exclusiveMinimum not match, expect > " + exclusiveMinimum + ", but " + longValue);
+                    return new MinimumFail(exclusiveMinimum , longValue, true);
                 }
             }
 
             if (maximum != null) {
                 if (longValue > maximum.longValue()) {
-                    throw new JSONSchemaValidException("maximum not match, expect <= " + maximum + ", but " + longValue);
+                    return new MaximumFail(maximum , longValue, false);
                 }
             }
 
             if (exclusiveMaximum != null) {
                 if (longValue >= exclusiveMaximum.longValue()) {
-                    throw new JSONSchemaValidException("exclusiveMinimum not match, expect < " + exclusiveMaximum + ", but " + longValue);
+                    return new MaximumFail(exclusiveMaximum , longValue, true);
                 }
             }
 
             if (multipleOf != null) {
                 if (longValue % multipleOf.longValue() != 0) {
-                    throw new JSONSchemaValidException("multipleOf not match, expect multipleOf " + multipleOf + ", but " + longValue);
+                    return new MultipleOfFail(multipleOf, longValue);
                 }
             }
-            return;
+            return SUCCESS;
         }
 
         @Override
-        public void validate(Long value) {
+        public ValidateResult validate(Long value) {
             if (value == null) {
-                return;
+                return FAIL_INPUT_NULL;
             }
 
             long longValue = value.longValue();
             if (minimum != null) {
                 if (longValue < minimum.longValue()) {
-                    throw new JSONSchemaValidException("minimum not match, expect >= " + minimum + ", but " + longValue);
+                    return new MinimumFail(minimum , value, false);
                 }
             }
 
             if (exclusiveMinimum != null) {
                 if (longValue <= exclusiveMinimum.longValue()) {
-                    throw new JSONSchemaValidException("exclusiveMinimum not match, expect > " + exclusiveMinimum + ", but " + longValue);
+                    return new MinimumFail(exclusiveMinimum , value, true);
                 }
             }
 
             if (maximum != null) {
                 if (longValue > maximum.longValue()) {
-                    throw new JSONSchemaValidException("maximum not match, expect <= " + maximum + ", but " + longValue);
+                    return new MaximumFail(maximum , value, false);
                 }
             }
 
             if (exclusiveMaximum != null) {
                 if (longValue >= exclusiveMaximum.longValue()) {
-                    throw new JSONSchemaValidException("exclusiveMinimum not match, expect < " + exclusiveMaximum + ", but " + longValue);
+                    return new MaximumFail(exclusiveMaximum , value, true);
                 }
             }
 
             if (multipleOf != null) {
                 if (longValue % multipleOf.longValue() != 0) {
-                    throw new JSONSchemaValidException("multipleOf not match, expect multipleOf " + multipleOf + ", but " + longValue);
+                    return new MultipleOfFail(multipleOf, longValue);
                 }
             }
-            return;
+            return SUCCESS;
         }
 
         @Override
-        public void validate(Integer value) {
+        public ValidateResult validate(Integer value) {
             if (value == null) {
-                return;
+                return FAIL_INPUT_NULL;
             }
 
             long longValue = value.longValue();
             if (minimum != null) {
                 if (longValue < minimum.longValue()) {
-                    throw new JSONSchemaValidException("minimum not match, expect >= " + minimum + ", but " + longValue);
+                    return new MinimumFail(minimum , value, false);
                 }
             }
 
             if (exclusiveMinimum != null) {
                 if (longValue <= exclusiveMinimum.longValue()) {
-                    throw new JSONSchemaValidException("exclusiveMinimum not match, expect > " + exclusiveMinimum + ", but " + longValue);
+                    return new MinimumFail(exclusiveMinimum , value, true);
                 }
             }
 
             if (maximum != null) {
                 if (longValue > maximum.longValue()) {
-                    throw new JSONSchemaValidException("maximum not match, expect <= " + maximum + ", but " + longValue);
+                    return new MaximumFail(maximum , value, false);
                 }
             }
 
             if (exclusiveMaximum != null) {
                 if (longValue >= exclusiveMaximum.longValue()) {
-                    throw new JSONSchemaValidException("exclusiveMinimum not match, expect < " + exclusiveMaximum + ", but " + longValue);
+                    return new MaximumFail(exclusiveMaximum , value, true);
                 }
             }
 
             if (multipleOf != null) {
                 if (longValue % multipleOf.longValue() != 0) {
-                    throw new JSONSchemaValidException("multipleOf not match, expect multipleOf " + multipleOf + ", but " + longValue);
+                    return new MultipleOfFail(multipleOf, longValue);
                 }
             }
-            return;
+            return SUCCESS;
         }
 
         @Override
@@ -460,9 +1036,9 @@ public abstract class JSONSchema {
         }
 
         @Override
-        public void validate(Object value) {
+        public ValidateResult validate(Object value) {
             if (value == null) {
-                return;
+                return FAIL_INPUT_NULL;
             }
 
             if (value instanceof Number) {
@@ -478,43 +1054,43 @@ public abstract class JSONSchema {
                 } else if (number instanceof BigDecimal) {
                     decimalValue = (BigDecimal) number;
                 } else {
-                    throw new JSONSchemaValidException("type Number not match : " + value.getClass().getName());
+                    return new TypeNotMatchFail(Type.Number, value.getClass());
                 }
 
                 if (minimum != null) {
                     if (minimum.compareTo(decimalValue) > 0) {
-                        throw new JSONSchemaValidException("minimum not match, expect >= " + minimum + ", but " + value);
+                        return new MinimumFail(minimum, number, false);
                     }
                 }
 
                 if (exclusiveMinimum != null) {
                     if (exclusiveMinimum.compareTo(decimalValue) >= 0) {
-                        throw new JSONSchemaValidException("exclusiveMinimum not match, expect > " + exclusiveMinimum + ", but " + value);
+                        return new MinimumFail(exclusiveMinimum, number, true);
                     }
                 }
 
                 if (maximum != null) {
                     if (maximum.compareTo(decimalValue) < 0) {
-                        throw new JSONSchemaValidException("maximum not match, expect <= " + maximum + ", but " + value);
+                        return new MaximumFail(maximum , minimum, false);
                     }
                 }
 
                 if (exclusiveMaximum != null) {
                     if (exclusiveMaximum.compareTo(decimalValue) <= 0) {
-                        throw new JSONSchemaValidException("exclusiveMaximum not match, expect < " + exclusiveMaximum + ", but " + value);
+                        return new MaximumFail(exclusiveMaximum , minimum, true);
                     }
                 }
 
                 if (multipleOf != null) {
                     BigInteger bigInteger = decimalValue.toBigInteger();
                     if (!decimalValue.equals(new BigDecimal(bigInteger)) || !bigInteger.mod(multipleOf).equals(BigInteger.ZERO)) {
-                        throw new JSONSchemaValidException("multipleOf not match, expect multipleOf " + multipleOf + ", but " + value);
+                        return new MultipleOfFail(multipleOf, number);
                     }
                 }
-                return;
+                return SUCCESS;
             }
 
-            throw new JSONSchemaValidException("type Number not match : " + value.getClass().getName());
+            return new TypeNotMatchFail(Type.Number, value.getClass());
         }
 
         @Override
@@ -549,16 +1125,16 @@ public abstract class JSONSchema {
         }
 
         @Override
-        public void validate(Object value) {
+        public ValidateResult validate(Object value) {
             if (value == null) {
-                return;
+                return FAIL_INPUT_NULL;
             }
 
             if (value instanceof Boolean) {
-                return;
+                return SUCCESS;
             }
 
-            throw new JSONSchemaValidException("type Boolean not match : " + value.getClass().getName());
+            return new TypeNotMatchFail(Type.Boolean, value.getClass());
         }
 
         @Override
@@ -586,12 +1162,12 @@ public abstract class JSONSchema {
         }
 
         @Override
-        public void validate(Object value) {
+        public ValidateResult validate(Object value) {
             if (value == null) {
-                return;
+                return SUCCESS;
             }
 
-            throw new JSONSchemaValidException("type Null not match : " + value.getClass().getName());
+            return new TypeNotMatchFail(Type.Null, value.getClass());
         }
 
         @Override
@@ -625,14 +1201,16 @@ public abstract class JSONSchema {
         }
 
         @Override
-        public void validate(Object value) {
+        public ValidateResult validate(Object value) {
             if (value == null) {
-                return;
+                return FAIL_INPUT_NULL;
             }
 
             if (!items.contains(value)) {
-                throw new JSONSchemaValidException("type Enum not match : " + value);
+                return new TypeNotMatchFail(Type.Enum, value.getClass());
             }
+
+            return SUCCESS;
         }
 
         @Override
@@ -700,9 +1278,9 @@ public abstract class JSONSchema {
         }
 
         @Override
-        public void validate(Object value) {
+        public ValidateResult validate(Object value) {
             if (value == null) {
-                return;
+                return FAIL_INPUT_NULL;
             }
 
             Set uniqueItemsSet = null;
@@ -712,12 +1290,12 @@ public abstract class JSONSchema {
                 final int size = array.length;
 
                 if (minLength >= 0 && size < minLength) {
-                    throw new JSONSchemaValidException("minLength not match, expect " + minLength + ", but " + size);
+                    return new MinLengthFail(minLength, size);
                 }
 
                 if (maxLength >= 0) {
                     if (maxLength >= 0 && size > maxLength) {
-                        throw new JSONSchemaValidException("maxLength not match, expect " + maxLength + ", but " + size);
+                        return new MaxLengthFail(maxLength, size);
                     }
                 }
 
@@ -726,18 +1304,24 @@ public abstract class JSONSchema {
                     Object item = array[index];
 
                     if (itemSchema != null) {
-                        itemSchema.validate(item);
+                        ValidateResult result = itemSchema.validate(item);
+                        if (!result.isSuccess()) {
+                            return result;
+                        }
                     }
 
                     if (index < prefixItems.length) {
-                        prefixItems[index].validate(item);
+                        ValidateResult result = prefixItems[index].validate(item);
+                        if (!result.isSuccess()) {
+                            return result;
+                        }
                     }
 
                     if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
-                        try {
-                            this.contains.validate(item);
+                        ValidateResult result = this.contains.validate(item);
+                        if (result.isSuccess()) {
                             containsCount++;
-                        } catch (JSONSchemaValidException ignored) {}
+                        }
                     }
 
                     if (uniqueItems) {
@@ -746,37 +1330,40 @@ public abstract class JSONSchema {
                         }
 
                         if (!uniqueItemsSet.add(item)) {
-                            throw new JSONSchemaValidException("uniqueItems not match");
+                            return UNIQUE_ITEMS_NOT_MATCH;
                         }
                     }
                 }
+
                 if (this.contains != null && containsCount == 0) {
-                    throw new JSONSchemaValidException("contains not match");
+                    return CONTAINS_NOT_MATCH;
                 }
+
                 if (minContains >= 0 && containsCount < minContains) {
-                    throw new JSONSchemaValidException("minContains not match, expect " + minContains + ", but " + containsCount);
+                    return new MinContainsFail(minContains, containsCount);
                 }
+
                 if (maxContains >= 0 && containsCount > maxContains) {
-                    throw new JSONSchemaValidException("maxContains not match, expect " + maxContains + ", but " + containsCount);
+                    return new MaxContainsFail(maxContains, containsCount);
                 }
 
                 if (!additionalItems) {
                     if (size > prefixItems.length) {
-                        throw new JSONSchemaValidException("additional items not match, max size " + size + ", but " + size);
+                        return new AdditionalItemsFail(prefixItems.length, size);
                     }
                 }
-                return;
+                return SUCCESS;
             }
             if (value.getClass().isArray()) {
                 final int size = Array.getLength(value);
 
                 if (minLength >= 0 && size < minLength) {
-                    throw new JSONSchemaValidException("minLength not match, expect " + minLength + ", but " + size);
+                    return new MinLengthFail(minLength, size);
                 }
 
                 if (maxLength >= 0) {
                     if (maxLength >= 0 && size > maxLength) {
-                        throw new JSONSchemaValidException("maxLength not match, expect " + maxLength + ", but " + size);
+                        return new MaxLengthFail(maxLength, size);
                     }
                 }
 
@@ -785,18 +1372,24 @@ public abstract class JSONSchema {
                     Object item = Array.get(value, index);
 
                     if (itemSchema != null) {
-                        itemSchema.validate(item);
+                        ValidateResult result = itemSchema.validate(item);
+                        if (!result.isSuccess()) {
+                            return result;
+                        }
                     }
 
                     if (index < prefixItems.length) {
-                        prefixItems[index].validate(item);
+                        ValidateResult result = prefixItems[index].validate(item);
+                        if (!result.isSuccess()) {
+                            return result;
+                        }
                     }
 
                     if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
-                        try {
-                            this.contains.validate(item);
+                        ValidateResult result = this.contains.validate(item);
+                        if (result.isSuccess()) {
                             containsCount++;
-                        } catch (JSONSchemaValidException ignored) {}
+                        }
                     }
 
                     if (uniqueItems) {
@@ -805,45 +1398,43 @@ public abstract class JSONSchema {
                         }
 
                         if (!uniqueItemsSet.add(item)) {
-                            throw new JSONSchemaValidException("uniqueItems not match");
+                            return UNIQUE_ITEMS_NOT_MATCH;
                         }
                     }
                 }
                 if (this.contains != null && containsCount == 0) {
-                    throw new JSONSchemaValidException("contains not match");
+                    return CONTAINS_NOT_MATCH;
                 }
                 if (minContains >= 0 && containsCount < minContains) {
-                    throw new JSONSchemaValidException("minContains not match, expect " + minContains + ", but " + containsCount);
+                    return new MinContainsFail(minContains, containsCount);
                 }
                 if (maxContains >= 0 && containsCount > maxContains) {
-                    throw new JSONSchemaValidException("maxContains not match, expect " + maxContains + ", but " + containsCount);
+                    return new MaxContainsFail(maxContains, containsCount);
                 }
 
                 if (!additionalItems) {
                     if (size > prefixItems.length) {
-                        throw new JSONSchemaValidException("additional items not match, max size " + size + ", but " + size);
+                        return new AdditionalItemsFail(prefixItems.length, size);
                     }
                 }
-                return;
+                return SUCCESS;
             }
 
-            if (value instanceof Iterable) {
-                if (value instanceof Collection) {
-                    int size = ((Collection<?>) value).size();
-                    if (minLength >= 0 && size < minLength) {
-                        throw new JSONSchemaValidException("minLength not match, expect " + minLength + ", but " + size);
-                    }
+            if (value instanceof Collection) {
+                int size = ((Collection<?>) value).size();
+                if (minLength >= 0 && size < minLength) {
+                    return new MinLengthFail(minLength, size);
+                }
 
-                    if (maxLength >= 0) {
-                        if (maxLength >= 0 && size > maxLength) {
-                            throw new JSONSchemaValidException("maxLength not match, expect " + maxLength + ", but " + size);
-                        }
+                if (maxLength >= 0) {
+                    if (maxLength >= 0 && size > maxLength) {
+                        return new MaxLengthFail(maxLength, size);
                     }
+                }
 
-                    if (!additionalItems) {
-                        if (size > prefixItems.length) {
-                            throw new JSONSchemaValidException("additional items not match, max size " + size + ", but " + size);
-                        }
+                if (!additionalItems) {
+                    if (size > prefixItems.length) {
+                        return new AdditionalItemsFail(prefixItems.length, size);
                     }
                 }
 
@@ -853,18 +1444,24 @@ public abstract class JSONSchema {
                     Object item = it.next();
 
                     if (itemSchema != null) {
-                        itemSchema.validate(item);
+                        ValidateResult result = itemSchema.validate(item);
+                        if (!result.isSuccess()) {
+                            return result;
+                        }
                     }
 
                     if (index < prefixItems.length) {
-                        prefixItems[index].validate(item);
+                        ValidateResult result = prefixItems[index].validate(item);
+                        if (!result.isSuccess()) {
+                            return result;
+                        }
                     }
 
                     if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
-                        try {
-                            this.contains.validate(item);
+                        ValidateResult result = this.contains.validate(item);
+                        if (result.isSuccess()) {
                             containsCount++;
-                        } catch (JSONSchemaValidException ignored) {}
+                        }
                     }
 
                     if (uniqueItems) {
@@ -873,24 +1470,27 @@ public abstract class JSONSchema {
                         }
 
                         if (!uniqueItemsSet.add(item)) {
-                            throw new JSONSchemaValidException("uniqueItems not match");
+                            return UNIQUE_ITEMS_NOT_MATCH;
                         }
                     }
                 }
+
                 if (this.contains != null && containsCount == 0) {
-                    throw new JSONSchemaValidException("contains not match");
-                }
-                if (minContains >= 0 && containsCount < minContains) {
-                    throw new JSONSchemaValidException("minContains not match, expect " + minContains + ", but " + containsCount);
-                }
-                if (maxContains >= 0 && containsCount > maxContains) {
-                    throw new JSONSchemaValidException("maxContains not match, expect " + maxContains + ", but " + containsCount);
+                    return CONTAINS_NOT_MATCH;
                 }
 
-                return;
+                if (minContains >= 0 && containsCount < minContains) {
+                    return new MinContainsFail(minContains, containsCount);
+                }
+
+                if (maxContains >= 0 && containsCount > maxContains) {
+                    return new MaxContainsFail(maxContains, containsCount);
+                }
+
+                return SUCCESS;
             }
 
-            throw new JSONSchemaValidException("type Array not match : " + value.getClass().getName());
+            return new TypeNotMatchFail(Type.Array, value.getClass());
         }
 
         @Override
@@ -1016,9 +1616,9 @@ public abstract class JSONSchema {
         }
 
         @Override
-        public void validate(Object value) {
+        public ValidateResult validate(Object value) {
             if (value == null) {
-                return;
+                return FAIL_INPUT_NULL;
             }
 
             if (value instanceof Map) {
@@ -1026,7 +1626,7 @@ public abstract class JSONSchema {
 
                 for (String item : required) {
                     if (map.get(item) == null) {
-                        throw new JSONSchemaValidException("require property '" + item + "'");
+                        return new RequiredFail(item);
                     }
                 }
 
@@ -1035,7 +1635,14 @@ public abstract class JSONSchema {
                     JSONSchema schema = (JSONSchema) entry.getValue();
 
                     Object propertyValue = map.get(key);
-                    schema.validate(propertyValue);
+                    if (propertyValue == null && !map.containsKey(key)) {
+                        continue;
+                    }
+
+                    ValidateResult result = schema.validate(propertyValue);
+                    if (!result.isSuccess()) {
+                        return result;
+                    }
                 }
 
                 for (PatternProperty patternProperty : patternProperties) {
@@ -1045,7 +1652,10 @@ public abstract class JSONSchema {
                         if (entryKey instanceof String) {
                             String strKey = (String) entryKey;
                             if (patternProperty.pattern.matcher(strKey).find()) {
-                                patternProperty.schema.validate(entry.getValue());
+                                ValidateResult result = patternProperty.schema.validate(entry.getValue());
+                                if (!result.isSuccess()) {
+                                    return result;
+                                }
                             }
                         }
                     }
@@ -1071,11 +1681,14 @@ public abstract class JSONSchema {
                         }
 
                         if (additionalPropertySchema != null) {
-                            additionalPropertySchema.validate(entry.getValue());
+                            ValidateResult result = additionalPropertySchema.validate(entry.getValue());
+                            if (!result.isSuccess()) {
+                                return result;
+                            }
                             continue;
                         }
 
-                        throw new JSONSchemaValidException("add additionalProperties '" + key + "'");
+                        return new AdditionalPropertiesFail(key);
                     }
                 }
 
@@ -1083,31 +1696,31 @@ public abstract class JSONSchema {
                     for (Object key : map.keySet()) {
                         String strKey = key.toString();
                         if (!propertyNamesPattern.matcher(strKey).find()) {
-                            throw new JSONSchemaValidException("propertyNames pattern not match, expect '" + propertyNamesPattern + "', but " + strKey);
+                            return new PropertyPatternFail( propertyNamesPattern.pattern(), strKey);
                         }
                     }
                 }
 
                 if (minProperties >= 0) {
                     if (map.size() < minProperties) {
-                        throw new JSONSchemaValidException("minProperties not match, expect >= '" + minProperties + "', but " + map.size());
+                        return new MinPropertiesFail(minProperties, map.size());
                     }
                 }
 
                 if (maxProperties >= 0) {
                     if (map.size() > maxProperties) {
-                        throw new JSONSchemaValidException("maxProperties not match, expect <= '" + maxProperties + "', but " + map.size());
+                        return new MaxPropertiesFail(maxProperties, map.size());
                     }
                 }
 
-                return;
+                return SUCCESS;
             }
 
             Class valueClass = value.getClass();
             ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
 
             if(!(objectWriter instanceof ObjectWriterAdapter)) {
-                throw new JSONSchemaValidException("type Object not match : " + value.getClass().getName());
+                return new TypeNotMatchFail(Type.Object, valueClass);
             }
 
             for (int i = 0; i < this.requiredHashCode.length; i++) {
@@ -1129,11 +1742,34 @@ public abstract class JSONSchema {
                             fieldName = itemName;
                         }
                     }
-                    throw new JSONSchemaValidException("type Object not match : " + fieldName);
+                    return new RequiredFail(fieldName);
                 }
             }
 
+            if (minProperties >= 0 || maxProperties >= 0) {
+                int fieldValueCount = 0;
+                List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
+                for (FieldWriter fieldWriter : fieldWriters) {
+                    Object fieldValue = fieldWriter.getFieldValue(value);
+                    if (fieldValue != null) {
+                        fieldValueCount++;
+                    }
+                }
 
+                if (minProperties >= 0) {
+                    if (fieldValueCount < minProperties) {
+                        return new MinPropertiesFail(minProperties, fieldValueCount);
+                    }
+                }
+
+                if (maxProperties >= 0) {
+                    if (fieldValueCount > maxProperties) {
+                        return new MaxPropertiesFail(maxProperties, fieldValueCount);
+                    }
+                }
+            }
+
+            return SUCCESS;
         }
 
         public Map<String, JSONSchema> getProperties() {
@@ -1160,6 +1796,558 @@ public abstract class JSONSchema {
         @Override
         public int hashCode() {
             return Objects.hash(properties, required);
+        }
+    }
+
+    public interface ValidateResult {
+        boolean isSuccess();
+        String getMessage();
+        ValidateResult getCause();
+    }
+
+    static final Success SUCCESS = new Success();
+    static final Fail FAIL_INPUT_NULL = new Fail("input null");
+
+    private static final class Success implements ValidateResult {
+        @Override
+        public boolean isSuccess() {
+            return true;
+        }
+
+        @Override
+        public String getMessage() {
+            return "success";
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class MinimumFail implements ValidateResult {
+        final Object minimum;
+        final Object value;
+        final boolean exclusive;
+        private String message;
+
+        public MinimumFail(Object minimum, Object value, boolean exclusive) {
+            this.minimum = minimum;
+            this.exclusive = exclusive;
+            this.value = value;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = ((exclusive ? "exclusiveMinimum not match, expect >= " : "minimum not match, expect >= ") + minimum + ", but " + value);
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class MaximumFail implements ValidateResult {
+        final Object maximum;
+        final Object value;
+        final boolean exclusive;
+        private String message;
+
+
+        public MaximumFail(Object maximum, Object value, boolean exclusive) {
+            this.maximum = maximum;
+            this.value = value;
+            this.exclusive = exclusive;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = ((exclusive ? "exclusiveMaximum not match, expect >= " : "maximum not match, expect >= ") + maximum + ", but " + value);
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class MultipleOfFail implements ValidateResult {
+        final Number multipleOf;
+        final Number value;
+        private String message;
+
+        public MultipleOfFail(Number multipleOf, Number value) {
+            this.multipleOf = multipleOf;
+            this.value = value;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "multipleOf not match, expect multipleOf " + multipleOf + ", but " + value;
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class TypeNotMatchFail implements ValidateResult {
+        final Type expectType;
+        final Class inputType;
+        private String message;
+
+        public TypeNotMatchFail(Type expectType, Class inputType) {
+            this.expectType = expectType;
+            this.inputType = inputType;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "type " + expectType + " not match : " + inputType.getName();
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class MaxLengthFail implements ValidateResult {
+        final int maxLength;
+        final int size;
+        private String message;
+
+        public MaxLengthFail(int maxLength, int size) {
+            this.maxLength = maxLength;
+            this.size = size;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "maxLength not match, expect " + maxLength + ", but " + size;
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class MinLengthFail implements ValidateResult {
+        final int minLength;
+        final int size;
+        private String message;
+
+        public MinLengthFail(int minLength, int size) {
+            this.minLength = minLength;
+            this.size = size;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "minLength not match, expect " + minLength + ", but " + size;
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class MinPropertiesFail implements ValidateResult {
+        final int minProperties;
+        final int size;
+        private String message;
+
+        public MinPropertiesFail(int minProperties, int size) {
+            this.minProperties = minProperties;
+            this.size = size;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "minProperties not match, expect " + minProperties + ", but " + size;
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class MaxPropertiesFail implements ValidateResult {
+        final int maxProperties;
+        final int size;
+        private String message;
+
+        public MaxPropertiesFail(int maxProperties, int size) {
+            this.maxProperties = maxProperties;
+            this.size = size;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "minProperties not match, expect " + maxProperties + ", but " + size;
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class MinContainsFail implements ValidateResult {
+        final int minContains;
+        final int size;
+        private String message;
+
+        public MinContainsFail(int minContains, int size) {
+            this.minContains = minContains;
+            this.size = size;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "maxContains not match, expect " + minContains + ", but " + size;
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class MaxContainsFail implements ValidateResult {
+        final int maxContains;
+        final int size;
+        private String message;
+
+        public MaxContainsFail(int maxContains, int size) {
+            this.maxContains = maxContains;
+            this.size = size;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "maxContains not match, expect " + maxContains + ", but " + size;
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class AdditionalItemsFail implements ValidateResult {
+        final int maxSize;
+        final int size;
+        private String message;
+
+        public AdditionalItemsFail(int maxSize, int size) {
+            this.maxSize = maxSize;
+            this.size = size;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "additional items not match, max size " + maxSize + ", but " + size;
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class PatternFail implements ValidateResult {
+        final String pattern;
+        final String value;
+        private String message;
+
+        public PatternFail(String pattern, String value) {
+            this.pattern = pattern;
+            this.value = value;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "pattern not match, expect " + pattern + ", but " + value;
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class FormatFail implements ValidateResult {
+        final String format;
+        final String value;
+        private String message;
+
+        public FormatFail(String format, String value) {
+            this.format = format;
+            this.value = value;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "format not match, expect " + format + ", but " + value;
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class ConstFail implements ValidateResult {
+        final Object constValue;
+        final Object value;
+        private String message;
+
+        public ConstFail(Object constValue, Object value) {
+            this.constValue = constValue;
+            this.value = value;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "const not match, expect " + constValue + ", but " + value;
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class PropertyPatternFail implements ValidateResult {
+        final String propertyPattern;
+        final Object property;
+        private String message;
+
+        public PropertyPatternFail(String propertyPattern, Object property) {
+            this.propertyPattern = propertyPattern;
+            this.property = property;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "propertyNames pattern not match, expect '" + propertyPattern + ", but " + property;
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class AdditionalPropertiesFail implements ValidateResult {
+        final Object property;
+        private String message;
+
+        public AdditionalPropertiesFail(Object property) {
+            this.property = property;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "add additionalProperties '" + property + "'";
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    private static final class RequiredFail implements ValidateResult {
+        final String property;
+        private String message;
+
+        public RequiredFail(String property) {
+            this.property = property;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "requried property '" + property + "'";
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    final static Fail CONTAINS_NOT_MATCH = new Fail("contains not match");
+    final static Fail UNIQUE_ITEMS_NOT_MATCH = new Fail("uniqueItems not match");
+    final static Fail REQUIRED_NOT_MATCH = new Fail("required");
+
+    private static final class Fail implements ValidateResult {
+        final String message;
+        final ValidateResult cause;
+
+        public Fail(String message) {
+            this.message = message;
+            this.cause = null;
+        }
+
+        public Fail(String message, ValidateResult cause) {
+            this.message = message;
+            this.cause = cause;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public ValidateResult getCause() {
+            return cause;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
         }
     }
 }

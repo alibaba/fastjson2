@@ -15,16 +15,6 @@ class FieldReaderObjectMethod<T>
     final Method method;
     ObjectReader fieldObjectReader;
 
-    FieldReaderObjectMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null);
-        this.method = method;
-    }
-
-    FieldReaderObjectMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue);
-        this.method = method;
-    }
-
     FieldReaderObjectMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Object defaultValue, JSONSchema schema, Method method) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
         this.method = method;
@@ -42,7 +32,7 @@ class FieldReaderObjectMethod<T>
         }
 
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {

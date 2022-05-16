@@ -13,8 +13,8 @@ final class FieldReaderListMethod<T> extends FieldReaderObjectMethod<T>
     final Type itemType;
     final Class itemClass;
 
-    FieldReaderListMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+    FieldReaderListMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Method method) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, method);
         if (fieldType instanceof ParameterizedType) {
             itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
         } else {
@@ -23,8 +23,8 @@ final class FieldReaderListMethod<T> extends FieldReaderObjectMethod<T>
         this.itemClass = TypeUtils.getClass(itemType);
     }
 
-    FieldReaderListMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, Type itemType, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, null, method);
+    FieldReaderListMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, JSONSchema schema, Type itemType, Method method) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, null, null, null, null, method);
         this.itemType = itemType;
         this.itemClass = TypeUtils.getClass(itemType);
     }

@@ -1,10 +1,13 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -408,6 +411,98 @@ public class JSONSchemaTest3 {
 
         public void setValue(AtomicInteger value) {
             this.value = value;
+        }
+    }
+
+
+    @Test
+    public void test16() {
+        JSON.parseObject("{\"value\":[1,2,3]}", Bean16.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"value\":[]}", Bean16.class)
+        );
+    }
+
+    public static class Bean16 {
+        @JSONField(schema = "{'minItems':1}")
+        private final List value = new ArrayList();
+
+        public List getValue() {
+            return value;
+        }
+    }
+
+    @Test
+    public void test17() {
+        JSON.parseObject("{\"value\":[1,2,3]}", Bean17.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"value\":[]}", Bean17.class)
+        );
+    }
+
+    public static class Bean17 {
+        @JSONField(schema = "{'minItems':1}")
+        private final List value = new ArrayList();
+
+        public List getValue() {
+            return value;
+        }
+    }
+
+    @Test
+    public void test23() {
+        JSON.parseObject("{\"value\":\"123\"}", Bean23.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"value\":\"\"}", Bean23.class)
+        );
+    }
+
+    public static class Bean23 {
+        @JSONField(schema = "{'minLength':1}")
+        private String value;
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+    }
+
+    @Test
+    public void test27() {
+        JSON.parseObject("{}", Bean26.class);
+        JSON.parseObject("{\"id\":123}", Bean26.class);
+        JSON.parseObject("{\"name\":\"xxx\"}", Bean26.class);
+
+        assertThrows(JSONSchemaValidException.class,
+                () -> JSON.parseObject("{\"id\":\"123\", \"name\":\"xx\"}", Bean26.class)
+        );
+    }
+
+    @JSONType(schema = "{'maxProperties':1}")
+    public static class Bean26 {
+        private Integer id;
+        private String name;
+
+        public Integer getId() {
+            return id;
+        }
+
+        public void setId(Integer id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
     }
 }

@@ -19,7 +19,7 @@ final class FieldReaderInt64ValueMethod<T> extends FieldReaderObjectMethod<T> {
         long fieldLong = jsonReader.readInt64Value();
 
         if (schema != null) {
-            schema.validate(fieldLong);
+            schema.assertValidate(fieldLong);
         }
 
         try {
@@ -35,6 +35,10 @@ final class FieldReaderInt64ValueMethod<T> extends FieldReaderObjectMethod<T> {
             value = 0L;
         }
 
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             method.invoke(object
                     , TypeUtils.toLongValue(value));
@@ -45,6 +49,10 @@ final class FieldReaderInt64ValueMethod<T> extends FieldReaderObjectMethod<T> {
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             method.invoke(object, (long) value);
         } catch (Exception e) {

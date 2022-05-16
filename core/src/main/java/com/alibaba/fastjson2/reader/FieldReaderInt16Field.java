@@ -17,7 +17,7 @@ final class FieldReaderInt16Field<T> extends FieldReaderObjectField<T> {
         Integer fieldInt = jsonReader.readInt32();
 
         if (schema != null) {
-            schema.validate(fieldInt);
+            schema.assertValidate(fieldInt);
         }
 
         try {
@@ -29,6 +29,10 @@ final class FieldReaderInt16Field<T> extends FieldReaderObjectField<T> {
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.set(object, (short) value);
         } catch (Exception e) {
@@ -38,6 +42,10 @@ final class FieldReaderInt16Field<T> extends FieldReaderObjectField<T> {
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.set(object, (short) value);
         } catch (Exception e) {
@@ -47,6 +55,10 @@ final class FieldReaderInt16Field<T> extends FieldReaderObjectField<T> {
 
     @Override
     public void accept(T object, Object value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.set(object
                     , TypeUtils.toShort(value));

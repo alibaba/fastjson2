@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -11,8 +12,8 @@ final class FieldReaderAtomicBooleanFieldReadOnly<T>
 
     final Field field;
 
-    FieldReaderAtomicBooleanFieldReadOnly(String fieldName, Class fieldClass, int ordinal, String format, AtomicBoolean defaultValue, Field field) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, defaultValue);
+    FieldReaderAtomicBooleanFieldReadOnly(String fieldName, Class fieldClass, int ordinal, String format, AtomicBoolean defaultValue, JSONSchema schema, Field field) {
+        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, null, defaultValue, schema);
         this.field = field;
     }
 

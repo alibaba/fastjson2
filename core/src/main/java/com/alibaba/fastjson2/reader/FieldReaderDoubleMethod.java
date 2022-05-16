@@ -18,7 +18,7 @@ final class FieldReaderDoubleMethod<T> extends FieldReaderObjectMethod<T> {
         Double fieldValue = jsonReader.readDouble();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         try {
@@ -31,7 +31,7 @@ final class FieldReaderDoubleMethod<T> extends FieldReaderObjectMethod<T> {
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         try {

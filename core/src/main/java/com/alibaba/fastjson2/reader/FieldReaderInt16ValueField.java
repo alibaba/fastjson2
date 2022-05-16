@@ -17,7 +17,7 @@ final class FieldReaderInt16ValueField<T> extends FieldReaderObjectField<T> {
         int fieldInt = jsonReader.readInt32Value();
 
         if (schema != null) {
-            schema.validate(fieldInt);
+            schema.assertValidate(fieldInt);
         }
 
         try {

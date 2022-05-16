@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -9,8 +10,8 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 final class FieldReaderAtomicIntegerArrayReadOnly<T> extends FieldReaderImpl<T> {
     final Method method;
 
-    FieldReaderAtomicIntegerArrayReadOnly(String fieldName, Class fieldType, int ordinal, Method method) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, null, null);
+    FieldReaderAtomicIntegerArrayReadOnly(String fieldName, Class fieldType, int ordinal, JSONSchema jsonSchema, Method method) {
+        super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, jsonSchema);
         this.method = method;
     }
 

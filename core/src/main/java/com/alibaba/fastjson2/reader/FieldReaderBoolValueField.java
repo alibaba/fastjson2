@@ -14,6 +14,11 @@ final class FieldReaderBoolValueField<T> extends FieldReaderObjectField<T> {
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         boolean fieldValue = jsonReader.readBoolValue();
+
+        if (schema != null) {
+            schema.assertValidate(fieldValue);
+        }
+
         try {
             field.setBoolean(object, fieldValue);
         } catch (Exception e) {

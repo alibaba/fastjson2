@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Method;
 import java.time.*;
@@ -17,14 +18,17 @@ final class FieldReaderDateFunc<T> extends FieldReaderImpl<T> {
     ObjectReader dateReader;
 
     public FieldReaderDateFunc(
-            String fieldName
-            , Class fieldClass
-            , int ordinal
-            , long features
-            , String format
-            , Method method
-            , BiConsumer<T, Date> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format);
+            String fieldName,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Date defaultValue,
+            JSONSchema schema,
+            Method method,
+            BiConsumer<T, Date> function) {
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema);
         this.method = method;
         this.function = function;
     }

@@ -22,7 +22,7 @@ final class ObjectReaderSeeAlso<T> extends ObjectReaderAdapter<T> {
             , String[] seeAlsoNames
             , FieldReader... fieldReaders
     ) {
-        super(objectType, typeKey, null, JSONReader.Feature.SupportAutoType.mask, defaultCreator, null, fieldReaders);
+        super(objectType, typeKey, null, JSONReader.Feature.SupportAutoType.mask,  null, defaultCreator, null, fieldReaders);
         this.seeAlso = seeAlso;
         seeAlsoMapping = new HashMap<>(seeAlso.length);
         this.seeAlsoNames = new String[seeAlso.length];
