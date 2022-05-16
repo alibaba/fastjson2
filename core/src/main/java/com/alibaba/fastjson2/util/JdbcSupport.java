@@ -127,6 +127,11 @@ public class JdbcSupport {
                 if ("0000-00-00".equals(str) || "0000-00-00 00:00:00".equals(str)) {
                     return new java.sql.Time(0);
                 }
+
+                if (str.isEmpty() || str.equals("null")) {
+                    return null;
+                }
+
                 return java.sql.Time.valueOf(str);
             }
 
@@ -352,6 +357,8 @@ public class JdbcSupport {
                 LocalDateTime localDateTime = jsonReader.readLocalDateTime();
                 if (localDateTime != null) {
                     return java.sql.Timestamp.valueOf(localDateTime);
+                } else if (jsonReader.wasNull()) {
+                    return null;
                 }
 
                 long millis = jsonReader.readMillisFromString();
@@ -425,6 +432,10 @@ public class JdbcSupport {
                 LocalDateTime localDateTime = jsonReader.readLocalDateTime();
                 if (localDateTime != null) {
                     return java.sql.Date.valueOf(localDateTime.toLocalDate());
+                }
+
+                if (jsonReader.wasNull()) {
+                    return null;
                 }
 
                 long millis = jsonReader.readMillisFromString();

@@ -718,7 +718,7 @@ public abstract class JSONReader implements Closeable {
         }
 
         String str = readString();
-        if (str.isEmpty()) {
+        if (str.isEmpty() || str.equals("null")) {
             return null;
         }
 
@@ -804,7 +804,8 @@ public abstract class JSONReader implements Closeable {
         }
 
         String strVal = readString();
-        if (strVal.isEmpty()) {
+        if (strVal.isEmpty() || strVal.equals("null")) {
+            wasNull = true;
             return null;
         }
 
@@ -883,7 +884,7 @@ public abstract class JSONReader implements Closeable {
         }
 
         String str = readString();
-        if (str.isEmpty()) {
+        if (str.isEmpty() || str.equals("null")) {
             return null;
         }
 
@@ -907,7 +908,7 @@ public abstract class JSONReader implements Closeable {
             if (zdt == null) {
                 String str = readString();
 
-                if (str.isEmpty()) {
+                if (str.isEmpty() || str.equals("null")) {
                     return null;
                 }
 
@@ -1028,7 +1029,7 @@ public abstract class JSONReader implements Closeable {
 
         String str = readString();
 
-        if (str.isEmpty()) {
+        if (str.isEmpty() || str.equals("null")) {
             wasNull = true;
             return 0;
         }

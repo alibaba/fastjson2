@@ -75,6 +75,10 @@ final class ObjectReaderImplCalendar extends DateTimeCodec implements ObjectRead
             }
 
             long millis = jsonReader.readMillisFromString();
+            if (millis == 0 && jsonReader.wasNull()) {
+                return null;
+            }
+
             if (formatUnixTime) {
                 millis *= 1000;
             }
