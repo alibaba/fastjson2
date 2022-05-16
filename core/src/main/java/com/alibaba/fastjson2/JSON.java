@@ -157,6 +157,51 @@ public interface JSON {
     }
 
     /**
+     * Parse UTF8 encoded JSON byte array into {@link JSONObject}
+     *
+     * @param bytes    UTF8 encoded JSON byte array to parse
+     * @param offset  the index of the first byte to parse
+     * @param length  the number of bytes to parse
+     * @param features features to be enabled in parsing
+     * @return JSONObject
+     */
+    @SuppressWarnings("unchecked")
+    static JSONObject parseObject(byte[] bytes, int offset, int length, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(bytes, offset, length)) {
+            reader.context.config(features);
+            ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
+            return objectReader.readObject(reader, 0);
+        }
+    }
+
+    /**
+     * Parse UTF8 encoded JSON byte array into {@link JSONObject}
+     *
+     * @param bytes    UTF8 encoded JSON byte array to parse
+     * @param offset  the index of the first byte to parse
+     * @param length  the number of bytes to parse
+     * @param charset specify {@link Charset} to parse
+     * @param features features to be enabled in parsing
+     * @return JSONObject
+     */
+    @SuppressWarnings("unchecked")
+    static JSONObject parseObject(byte[] bytes, int offset, int length, Charset charset, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(bytes, offset, length, charset)) {
+            reader.context.config(features);
+            ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
+            return objectReader.readObject(reader, 0);
+        }
+    }
+
+    /**
      * Parse JSON {@link String} into Java Object
      *
      * @param text  the JSON {@link String} to be parsed

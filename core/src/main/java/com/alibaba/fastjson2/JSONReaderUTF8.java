@@ -37,6 +37,15 @@ class JSONReaderUTF8 extends JSONReader {
         this.length = length;
         this.end = offset + length;
         next();
+
+        while (ch == '/') {
+            next();
+            if (ch == '/') {
+                skipLineComment();
+            } else {
+                throw new JSONException("input not support " + ch + ", offset " + offset);
+            }
+        }
     }
 
     @Override
@@ -2093,7 +2102,7 @@ class JSONReaderUTF8 extends JSONReader {
     }
 
     @Override
-    void skipLineComment() {
+    public void skipLineComment() {
         for (;;) {
             if (ch == '\n') {
                 offset++;
