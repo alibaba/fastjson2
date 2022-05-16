@@ -116,6 +116,10 @@ public class ObjectReaderImplDate extends DateTimeCodec implements ObjectReader 
             millis = zdt.toInstant().toEpochMilli();
         } else {
             millis = jsonReader.readMillisFromString();
+            if (millis == -1) {
+                return null;
+            }
+
             if (formatUnixTime) {
                 millis *= 1000;
             }
