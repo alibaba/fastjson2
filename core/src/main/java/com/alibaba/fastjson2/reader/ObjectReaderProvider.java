@@ -378,6 +378,8 @@ public class ObjectReaderProvider {
             }
         }
 
+        module.init(this);
+
         modules.add(0, module);
         return true;
     }
