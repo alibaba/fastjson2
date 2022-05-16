@@ -687,6 +687,10 @@ public abstract class JSONReader implements Closeable {
     }
 
     public LocalDate readLocalDate() {
+        if (nextIfNull()) {
+            return null;
+        }
+
         if (isInt()) {
             long millis = readInt64Value();
             Instant instant = Instant.ofEpochMilli(millis);
@@ -714,6 +718,10 @@ public abstract class JSONReader implements Closeable {
         }
 
         String str = readString();
+        if (str.isEmpty()) {
+            return null;
+        }
+
         if (IOUtils.isNumber(str)) {
             long millis = Long.parseLong(str);
             Instant instant = Instant.ofEpochMilli(millis);
@@ -796,6 +804,10 @@ public abstract class JSONReader implements Closeable {
         }
 
         String strVal = readString();
+        if (strVal.isEmpty()) {
+            return null;
+        }
+
         if (IOUtils.isNumber(strVal)) {
             long millis = Long.parseLong(strVal);
             Instant instant = Instant.ofEpochMilli(millis);
@@ -827,6 +839,10 @@ public abstract class JSONReader implements Closeable {
             }
 
             String str = readString();
+            if (str.isEmpty()) {
+                return null;
+            }
+
             if (IOUtils.isNumber(str)) {
                 long millis = Long.parseLong(str);
                 Instant instant = Instant.ofEpochMilli(millis);
@@ -839,6 +855,10 @@ public abstract class JSONReader implements Closeable {
     }
 
     public LocalTime readLocalTime() {
+        if (nextIfNull()) {
+            return null;
+        }
+
         if (isInt()) {
             long millis = readInt64Value();
             Instant instant = Instant.ofEpochMilli(millis);
@@ -863,6 +883,10 @@ public abstract class JSONReader implements Closeable {
         }
 
         String str = readString();
+        if (str.isEmpty()) {
+            return null;
+        }
+
         if (IOUtils.isNumber(str)) {
             long millis = Long.parseLong(str);
             Instant instant = Instant.ofEpochMilli(millis);
@@ -882,6 +906,10 @@ public abstract class JSONReader implements Closeable {
 
             if (zdt == null) {
                 String str = readString();
+
+                if (str.isEmpty()) {
+                    return null;
+                }
 
                 if (IOUtils.isNumber(str)) {
                     long millis = Long.parseLong(str);
@@ -905,6 +933,10 @@ public abstract class JSONReader implements Closeable {
                             readObject(),
                             0L
                     );
+        }
+
+        if (nextIfNull()) {
+            return null;
         }
 
         throw new UnsupportedOperationException();
@@ -995,6 +1027,11 @@ public abstract class JSONReader implements Closeable {
         }
 
         String str = readString();
+
+        if (str.isEmpty()) {
+            return -1;
+        }
+
         String utilDateFormat = context.getUtilDateFormat();
 
         if (utilDateFormat != null && !utilDateFormat.isEmpty()) {
