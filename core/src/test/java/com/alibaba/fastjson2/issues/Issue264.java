@@ -51,6 +51,13 @@ public class Issue264 {
                         .get("type_number")
         );
 
+        byte[] utf16Bytes = str.getBytes(StandardCharsets.UTF_16);
+        assertEquals(
+                1,
+                JSON.parseObject(utf16Bytes, 0, utf16Bytes.length, StandardCharsets.UTF_16)
+                        .get("type_number")
+        );
+
         JSONReader jsonReaderStr = TestUtils.createJSONReaderStr(str);
         assertEquals(
                 1, jsonReaderStr.read(JSONObject.class).get("type_number"));
