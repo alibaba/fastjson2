@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
@@ -34,17 +35,18 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
     final long hashCode4LCase;
 
     ObjectReader5(
-            Class objectClass
-            , Supplier<T> defaultCreator
-            , long features
-            , Function buildFunction
-            , FieldReader fieldReader0
-            , FieldReader fieldReader1
-            , FieldReader fieldReader2
-            , FieldReader fieldReader3
-            , FieldReader fieldReader4
+            Class objectClass,
+            Supplier<T> defaultCreator,
+            long features,
+            JSONSchema schema,
+            Function buildFunction,
+            FieldReader fieldReader0,
+            FieldReader fieldReader1,
+            FieldReader fieldReader2,
+            FieldReader fieldReader3,
+            FieldReader fieldReader4
     ) {
-        super(objectClass, null);
+        super(objectClass, null, schema);
 
         this.defaultCreator = defaultCreator;
         this.features = features;
@@ -203,9 +205,14 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
         }
 
         if (buildFunction != null) {
-            return (T) buildFunction.apply(object);
+            object = (T) buildFunction.apply(object);
         }
-        return (T) object;
+
+        if (schema != null) {
+            schema.assertValidate(object);
+        }
+
+        return object;
     }
 
     @Override
@@ -318,9 +325,14 @@ final class ObjectReader5<T> extends ObjectReaderBean<T> {
         jsonReader.nextIfMatch(',');
 
         if (buildFunction != null) {
-            return (T) buildFunction.apply(object);
+            object = (T) buildFunction.apply(object);
         }
-        return (T) object;
+
+        if (schema != null) {
+            schema.assertValidate(object);
+        }
+
+        return object;
     }
 
     @Override

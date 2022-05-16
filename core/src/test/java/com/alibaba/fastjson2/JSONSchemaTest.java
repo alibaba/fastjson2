@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,27 +45,24 @@ public class JSONSchemaTest {
         assertTrue(required.contains("name"));
         assertTrue(required.contains("price"));
 
-        schema.validate(JSONObject
-                .of(
+        assertTrue(schema
+                .isValid(JSONObject.of(
                         "id", 1,
                         "name", "",
-                        "price", 1
+                        "price", 1)
                 )
         );
 
-        assertThrows(
-                JSONSchemaValidException.class,
-                () -> schema.validate(JSONObject
+        assertFalse(
+                schema.isValid(JSONObject
                         .of(
                             "id", 1,
                             "name", ""
                         )
-            )
+                )
         );
 
-        assertThrows(
-                JSONSchemaValidException.class,
-                () -> schema.validate(JSONObject
+        assertFalse(schema.isValid(JSONObject
                         .of(
                                 "id", "1",
                                 "name", "",
@@ -74,9 +71,7 @@ public class JSONSchemaTest {
                 )
         );
 
-        assertThrows(
-                JSONSchemaValidException.class,
-                () -> schema.validate(JSONObject
+        assertFalse(schema.isValid(JSONObject
                         .of(
                                 "id", 1,
                                 "name", 1,
@@ -85,9 +80,7 @@ public class JSONSchemaTest {
                 )
         );
 
-        assertThrows(
-                JSONSchemaValidException.class,
-                () -> schema.validate(JSONObject
+        assertFalse(schema.isValid(JSONObject
                         .of(
                                 "id", 1,
                                 "name", "",
@@ -102,10 +95,10 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "String", "maxLength", 3)
                 .to(JSONSchema::of);
-        jsonSchema.validate("aa");
-        jsonSchema.validate((Object) null);
+        assertTrue(jsonSchema.isValid("aa"));
+        assertTrue(jsonSchema.validate((Object) null).isSuccess());
 
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("a123"));
+        assertFalse(jsonSchema.validate("a123").isSuccess());
     }
 
     @Test
@@ -113,7 +106,7 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "String", "required", true)
                 .to(JSONSchema::of);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate((Object) null));
+        assertFalse(jsonSchema.validate((Object) null).isSuccess());
     }
 
     @Test
@@ -122,8 +115,111 @@ public class JSONSchemaTest {
                 .of("type", "String", "minLength", 2)
                 .to(JSONSchema::of);
 
-        jsonSchema.validate("aa");
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("a"));
+        assertTrue(jsonSchema.isValid("aa"));
+        assertFalse(jsonSchema.isValid("a"));
+    }
+
+    @Test
+    public void testString_format_email() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "String", "format", "email")
+                .to(JSONSchema::of);
+
+        assertTrue(jsonSchema.isValid("abc@alibaba-inc.com"));
+        assertTrue(jsonSchema.isValid("xxx@hotmail.com"));
+        assertFalse(jsonSchema.isValid("(888)555-1212 ext. 532"));
+        assertFalse(jsonSchema.isValid("(800)FLOWERS"));
+    }
+
+    @Test
+    public void testString_format_date() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "String", "format", "date")
+                .to(JSONSchema::of);
+
+        assertTrue(
+                jsonSchema.isValid("2018-07-12"));
+        assertTrue(
+                jsonSchema.isValid("1970-11-13"));
+        assertFalse(
+                jsonSchema.isValid("1970-13-13"));
+        assertFalse(
+                jsonSchema.isValid("1970-02-31"));
+        assertFalse(jsonSchema.isValid("(888)555-1212 ext. 532"));
+        assertFalse(jsonSchema.isValid("(800)FLOWERS"));
+    }
+
+    @Test
+    public void testString_format_datetime() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "String", "format", "date-time")
+                .to(JSONSchema::of);
+
+        assertTrue(
+                jsonSchema.isValid("2018-07-12 12:13:14"));
+        assertTrue(
+                jsonSchema.isValid("1970-11-13 12:13:14"));
+        assertFalse(
+                jsonSchema.isValid("1970-13-13 12:13:14"));
+        assertFalse(
+                jsonSchema.isValid("1970-02-31 12:13:14"));
+        assertFalse(jsonSchema.isValid("(888)555-1212 ext. 532"));
+        assertFalse(jsonSchema.isValid("(800)FLOWERS"));
+    }
+
+    @Test
+    public void testString_format_time() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "String", "format", "time")
+                .to(JSONSchema::of);
+
+        assertTrue(
+                jsonSchema.isValid("12:13:14"));
+        assertTrue(
+                jsonSchema.isValid("12:13:14"));
+        assertFalse(
+                jsonSchema.isValid("25:13:14"));
+        assertFalse(
+                jsonSchema.isValid("1970-02-01 12:13:14"));
+        assertFalse(jsonSchema.isValid("(888)555-1212 ext. 532"));
+        assertFalse(jsonSchema.isValid("(800)FLOWERS"));
+    }
+
+    @Test
+    public void testString_format_uuid() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "String", "format", "uuid")
+                .to(JSONSchema::of);
+
+        assertTrue(
+                jsonSchema.isValid("a7f41390-39a9-4ca6-a13b-88cf07a41108"));
+        assertTrue(
+                jsonSchema.isValid("A7F41390-39A9-4CA6-A13B-88CF07A41108"));
+        assertTrue(
+                jsonSchema.isValid("a7f4139039a94ca6a13b88cf07a41108"));
+        assertTrue(
+                jsonSchema.isValid("A7F4139039A94CA6A13B88CF07A41108"));
+        assertFalse(
+                jsonSchema.isValid("*7F4139039A94CA6A13B88CF07A41108"));
+        assertFalse(
+                jsonSchema.isValid("1970-02-01 12:13:14"));
+        assertFalse(jsonSchema.isValid("(888)555-1212 ext. 532 (888)555-1212 ext. 532"));
+        assertFalse(jsonSchema.isValid("(888)555-1212 ext. 532"));
+        assertFalse(jsonSchema.isValid("(800)FLOWERS"));
+    }
+
+    @Test
+    public void testString_format_url() {
+        JSONSchema jsonSchema = JSONObject
+                .of("type", "String", "format", "uri")
+                .to(JSONSchema::of);
+
+        assertTrue(
+                jsonSchema.isValid("http://github.com/alibaba/fastjson"));
+        assertFalse(
+                jsonSchema.isValid("1970-02-01 12:13:14"));
+        assertFalse(jsonSchema.isValid("(888)555-1212 ext. 532 (888)555-1212 ext. 532"));
+        assertFalse(jsonSchema.isValid("(888)555-1212 ext. 532"));
     }
 
     @Test
@@ -132,10 +228,10 @@ public class JSONSchemaTest {
                 .of("type", "String", "pattern", "^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$")
                 .to(JSONSchema::of);
 
-        jsonSchema.validate("555-1212");
-        jsonSchema.validate("(888)555-1212");
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("(888)555-1212 ext. 532"));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("(800)FLOWERS"));
+        assertTrue(jsonSchema.isValid("555-1212"));
+        assertTrue(jsonSchema.isValid("(888)555-1212"));
+        assertFalse(jsonSchema.isValid("(888)555-1212 ext. 532"));
+        assertFalse(jsonSchema.isValid("(800)FLOWERS"));
     }
 
     @Test
@@ -144,17 +240,17 @@ public class JSONSchemaTest {
                 .of("type", "Integer")
                 .to(JSONSchema::of);
 
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("a"));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1.1F));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(new BigDecimal("1.1")));
+        assertFalse(jsonSchema.isValid("a"));
+        assertFalse(jsonSchema.isValid(1.1F));
+        assertFalse(jsonSchema.isValid(new BigDecimal("1.1")));
 
-        jsonSchema.validate((Object) null);
-        jsonSchema.validate(1);
-        jsonSchema.validate(Byte.MIN_VALUE);
-        jsonSchema.validate(Short.MIN_VALUE);
-        jsonSchema.validate(Integer.MIN_VALUE);
-        jsonSchema.validate(Long.MIN_VALUE);
-        jsonSchema.validate(BigInteger.ONE);
+        assertFalse(jsonSchema.isValid((Object) null));
+        assertTrue(jsonSchema.isValid(1));
+        assertTrue(jsonSchema.isValid(Byte.MIN_VALUE));
+        assertTrue(jsonSchema.isValid(Short.MIN_VALUE));
+        assertTrue(jsonSchema.isValid(Integer.MIN_VALUE));
+        assertTrue(jsonSchema.isValid(Long.MIN_VALUE));
+        assertTrue(jsonSchema.isValid(BigInteger.ONE));
     }
 
     @Test
@@ -162,9 +258,9 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "Integer", "minimum", 10)
                 .to(JSONSchema::of);
-        jsonSchema.validate(10);
-        jsonSchema.validate(11);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
+        assertTrue(jsonSchema.isValid(10));
+        assertTrue(jsonSchema.isValid(11));
+        assertFalse(jsonSchema.isValid(1));
     }
 
     @Test
@@ -172,9 +268,9 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "Integer", "minimum", 10, "exclusiveMinimum", true)
                 .to(JSONSchema::of);
-        jsonSchema.validate(11);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(9));
+        assertTrue(jsonSchema.isValid(11));
+        assertFalse(jsonSchema.isValid(10));
+        assertFalse(jsonSchema.isValid(9));
     }
 
     @Test
@@ -182,9 +278,9 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "Integer", "exclusiveMinimum", 10)
                 .to(JSONSchema::of);
-        jsonSchema.validate(11);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(9));
+        assertTrue(jsonSchema.isValid(11));
+        assertFalse(jsonSchema.isValid(10));
+        assertFalse(jsonSchema.isValid(9));
     }
 
     @Test
@@ -193,9 +289,9 @@ public class JSONSchemaTest {
                 .of("type", "Integer", "maximum", 10)
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(9);
-        jsonSchema.validate(10);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(11));
+        assertTrue(jsonSchema.isValid(9));
+        assertTrue(jsonSchema.isValid(10));
+        assertFalse(jsonSchema.isValid(11));
     }
 
     @Test
@@ -204,9 +300,9 @@ public class JSONSchemaTest {
                 .of("type", "Integer", "maximum", 10, "exclusiveMaximum", true)
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(9);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(11));
+        assertTrue(jsonSchema.isValid(9));
+        assertFalse(jsonSchema.isValid(10));
+        assertFalse(jsonSchema.isValid(11));
     }
 
     @Test
@@ -215,9 +311,9 @@ public class JSONSchemaTest {
                 .of("type", "Integer", "exclusiveMaximum", 10)
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(9);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(11));
+        assertTrue(jsonSchema.isValid(9));
+        assertFalse(jsonSchema.isValid(10));
+        assertFalse(jsonSchema.isValid(11));
     }
 
     @Test
@@ -226,12 +322,12 @@ public class JSONSchemaTest {
                 .of("type", "Integer", "minimum", 0, "exclusiveMaximum", 100)
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(0);
-        jsonSchema.validate(10);
-        jsonSchema.validate(99);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(-1));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(100));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(101));
+        assertTrue(jsonSchema.isValid(0));
+        assertTrue(jsonSchema.validate(10).isSuccess());
+        assertTrue(jsonSchema.validate(99).isSuccess());
+        assertFalse(jsonSchema.isValid(-1));
+        assertFalse(jsonSchema.isValid(100));
+        assertFalse(jsonSchema.isValid(101));
     }
 
     @Test
@@ -240,12 +336,12 @@ public class JSONSchemaTest {
                 .of("type", "Integer", "multipleOf", 10)
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(0);
-        jsonSchema.validate(10);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(-1));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(99));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(101));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(23));
+        assertTrue(jsonSchema.validate(0).isSuccess());
+        assertTrue(jsonSchema.validate(10).isSuccess());
+        assertFalse(jsonSchema.validate(-1).isSuccess());
+        assertFalse(jsonSchema.validate(99).isSuccess());
+        assertFalse(jsonSchema.validate(101).isSuccess());
+        assertFalse(jsonSchema.validate(23).isSuccess());
     }
 
     @Test
@@ -254,17 +350,35 @@ public class JSONSchemaTest {
                 .of("type", "Number")
                 .to(JSONSchema::of);
 
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate("a"));
+        assertFalse(jsonSchema.isValid("a"));
 
-        jsonSchema.validate((Object) null);
-        jsonSchema.validate(1);
-        jsonSchema.validate(1.1F);
-        jsonSchema.validate(1.1D);
-        jsonSchema.validate(Byte.MIN_VALUE);
-        jsonSchema.validate(Short.MIN_VALUE);
-        jsonSchema.validate(Integer.MIN_VALUE);
-        jsonSchema.validate(Long.MIN_VALUE);
-        jsonSchema.validate(BigInteger.ONE);
+        assertFalse(
+                jsonSchema.isValid(
+                        (Object) null));
+        assertTrue(
+                jsonSchema.isValid(
+                        1));
+        assertTrue(
+                jsonSchema.isValid(
+                        1.1F));
+        assertTrue(
+                jsonSchema.isValid(
+                        1.1D));
+        assertTrue(
+                jsonSchema.isValid(
+                        Byte.MIN_VALUE));
+        assertTrue(
+                jsonSchema.isValid(
+                        Short.MIN_VALUE));
+        assertTrue(
+                jsonSchema.isValid(
+                        Integer.MIN_VALUE));
+        assertTrue(
+                jsonSchema.isValid(
+                        Long.MIN_VALUE));
+        assertTrue(
+                jsonSchema.isValid(
+                        BigInteger.ONE));
     }
 
     @Test
@@ -272,9 +386,9 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "Number", "minimum", 10)
                 .to(JSONSchema::of);
-        jsonSchema.validate(10);
-        jsonSchema.validate(11);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
+        assertTrue(jsonSchema.isValid(10));
+        assertTrue(jsonSchema.isValid(11));
+        assertFalse(jsonSchema.isValid(1));
     }
 
     @Test
@@ -282,10 +396,10 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "Number", "minimum", 10, "exclusiveMinimum", true)
                 .to(JSONSchema::of);
-        jsonSchema.validate(11);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(9));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
+        assertTrue(jsonSchema.isValid(11));
+        assertFalse(jsonSchema.isValid(1));
+        assertFalse(jsonSchema.isValid(9));
+        assertFalse(jsonSchema.isValid(10));
     }
 
     @Test
@@ -293,10 +407,10 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "Number", "exclusiveMinimum", 10)
                 .to(JSONSchema::of);
-        jsonSchema.validate(11);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(9));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
+        assertTrue(jsonSchema.isValid(11));
+        assertFalse(jsonSchema.isValid(1));
+        assertFalse(jsonSchema.isValid(9));
+        assertFalse(jsonSchema.isValid(10));
     }
 
     @Test
@@ -305,9 +419,13 @@ public class JSONSchemaTest {
                 .of("type", "Number", "maximum", 10)
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(9);
-        jsonSchema.validate(10);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(11));
+        assertTrue(
+                jsonSchema.isValid(
+                        9));
+        assertTrue(
+                jsonSchema.isValid(
+                        10));
+        assertFalse(jsonSchema.isValid(11));
     }
 
     @Test
@@ -316,9 +434,11 @@ public class JSONSchemaTest {
                 .of("type", "Number", "maximum", 10, "exclusiveMaximum", true)
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(9);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(11));
+        assertTrue(
+                jsonSchema.isValid(
+                        9));
+        assertFalse(jsonSchema.isValid(10));
+        assertFalse(jsonSchema.isValid(11));
     }
 
     @Test
@@ -327,9 +447,9 @@ public class JSONSchemaTest {
                 .of("type", "Number", "exclusiveMaximum", 10)
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(9);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(10));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(11));
+        assertTrue(jsonSchema.isValid(9));
+        assertFalse(jsonSchema.isValid(10));
+        assertFalse(jsonSchema.isValid(11));
     }
 
     @Test
@@ -338,12 +458,12 @@ public class JSONSchemaTest {
                 .of("type", "Number", "minimum", 0, "exclusiveMaximum", 100)
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(0);
-        jsonSchema.validate(10);
-        jsonSchema.validate(99);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(-1));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(100));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(101));
+        assertTrue(jsonSchema.isValid(0));
+        assertTrue(jsonSchema.isValid(10));
+        assertTrue(jsonSchema.isValid(99));
+        assertFalse(jsonSchema.isValid(-1));
+        assertFalse(jsonSchema.isValid(100));
+        assertFalse(jsonSchema.isValid(101));
     }
 
     @Test
@@ -352,12 +472,12 @@ public class JSONSchemaTest {
                 .of("type", "Number", "multipleOf", 10)
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(0);
-        jsonSchema.validate(10);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(-1));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(99));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(101));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(23));
+        assertTrue(jsonSchema.isValid(0));
+        assertTrue(jsonSchema.isValid(10));
+        assertFalse(jsonSchema.isValid(-1));
+        assertFalse(jsonSchema.isValid(99));
+        assertFalse(jsonSchema.isValid(101));
+        assertFalse(jsonSchema.isValid(23));
     }
 
     @Test
@@ -372,10 +492,10 @@ public class JSONSchemaTest {
         assertEquals(jsonSchema, jsonSchema1);
         assertEquals(jsonSchema.getType(), jsonSchema1.getType());
 
-        jsonSchema.validate((Integer) null);
-        jsonSchema.validate(true);
-        jsonSchema.validate(false);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
+        assertFalse(jsonSchema.isValid((Integer) null));
+        assertTrue(jsonSchema.isValid(true));
+        assertTrue(jsonSchema.isValid(false));
+        assertFalse(jsonSchema.isValid(1));
     }
 
     @Test
@@ -390,9 +510,9 @@ public class JSONSchemaTest {
         assertEquals(jsonSchema, jsonSchema1);
         assertEquals(jsonSchema.getType(), jsonSchema1.getType());
 
-        jsonSchema.validate((Long) null);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(true));
+        assertTrue(jsonSchema.isValid((Long) null));
+        assertFalse(jsonSchema.isValid(1));
+        assertFalse(jsonSchema.isValid(true));
     }
 
     @Test
@@ -407,9 +527,12 @@ public class JSONSchemaTest {
         assertEquals(jsonSchema, jsonSchema1);
         assertEquals(jsonSchema.getType(), jsonSchema1.getType());
 
-        jsonSchema.validate((Integer) null);
-        jsonSchema.validate(new Object[0]);
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
+        assertFalse(
+                jsonSchema.isValid((Integer) null));
+        assertTrue(
+                jsonSchema.isValid(new Object[0]));
+        assertFalse(
+                jsonSchema.isValid(1));
     }
 
     @Test
@@ -417,9 +540,9 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "Array", "maxItems", 3)
                 .to(JSONSchema::of);
-        jsonSchema.validate(new Object[0]);
+        assertTrue(jsonSchema.isValid(new Object[0]));
 
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(new Object[] {0, 1, 2, 3}));
+        assertFalse(jsonSchema.isValid(new Object[] {0, 1, 2, 3}));
     }
 
     @Test
@@ -427,22 +550,22 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of("type", "Array", "minItems", 3)
                 .to(JSONSchema::of);
-        jsonSchema.validate(new Object[]{0, 1, 2});
-        jsonSchema.validate(new Object[]{0, 1, 2, 3});
+        assertTrue(jsonSchema.isValid(new Object[]{0, 1, 2}));
+        assertTrue(jsonSchema.isValid(new Object[]{0, 1, 2, 3}));
 
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(new Object[] {}));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(new Object[] {0}));
+        assertFalse(jsonSchema.isValid(new Object[] {}));
+        assertFalse(jsonSchema.isValid(new Object[] {0}));
     }
 
     @Test
     public void testArray4() {
         JSONSchema jsonSchema = JSON.parseObject("{ \"type\": \"array\" }")
                 .to(JSONSchema::of);
-        jsonSchema.validate(JSON.parse("[1, 2, 3, 4, 5]"));
-        jsonSchema.validate(JSON.parse("[3, \"different\", { \"types\" : \"of values\" }]"));
-        JSON.parseArray("[1, 2, 3, 4, 5]").validate(jsonSchema);
+        assertTrue(jsonSchema.isValid(JSON.parse("[1, 2, 3, 4, 5]")));
+        assertTrue(jsonSchema.isValid(JSON.parse("[3, \"different\", { \"types\" : \"of values\" }]")));
+        assertTrue(JSON.parseArray("[1, 2, 3, 4, 5]").isValid(jsonSchema));
 
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(
+        assertFalse(jsonSchema.isValid(
                 JSON.parse("{\"Not\": \"an array\"}")
         ));
     }
@@ -457,11 +580,11 @@ public class JSONSchemaTest {
                         "}")
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(JSON.parse("[1, 2, 3, 4, 5]"));
-        jsonSchema.validate(JSON.parse("[]"));
+        assertTrue(jsonSchema.isValid(JSON.parse("[1, 2, 3, 4, 5]")));
+        assertTrue(jsonSchema.isValid(JSON.parse("[]")));
 
-        assertThrows(JSONSchemaValidException.class, () ->
-                jsonSchema.validate(
+        assertFalse(
+                jsonSchema.isValid(
                         JSON.parse("[1, 2, \"3\", 4, 5]")
         ));
     }
@@ -479,20 +602,33 @@ public class JSONSchemaTest {
                         "}")
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(JSON.parse("[1600, \"Pennsylvania\", \"Avenue\", \"NW\"]"));
-        jsonSchema.validate(JSON.parse("[10, \"Downing\", \"Street\"]"));
-        jsonSchema.validate(JSON.parse("[1600, \"Pennsylvania\", \"Avenue\", \"NW\", \"Washington\"]"));
-        jsonSchema.validate(new Object[] {10, "Downing", "Street"});
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[1600, \"Pennsylvania\", \"Avenue\", \"NW\"]")));
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[10, \"Downing\", \"Street\"]"))
+        );
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[1600, \"Pennsylvania\", \"Avenue\", \"NW\", \"Washington\"]"))
+        );
+        assertTrue(
+                jsonSchema.isValid(new Object[] {10, "Downing", "Street"})
+        );
 
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(
+        assertFalse(
+                jsonSchema.isValid(
                 JSON.parse("[24, \"Sussex\", \"Drive\"]")
         ));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(
-                JSON.parse("[\"Palais de l'Élysée\"]")
+        assertFalse(
+                jsonSchema.isValid(
+                        JSON.parse("[\"Palais de l'Élysée\"]")
         ));
 
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(
-                new String[] {"Palais de l'Élysée"}
+        assertFalse(
+                jsonSchema.isValid(
+                        new String[] {"Palais de l'Élysée"}
         ));
     }
 
@@ -510,16 +646,21 @@ public class JSONSchemaTest {
                         "}")
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(JSON.parse("[1600, \"Pennsylvania\", \"Avenue\", \"NW\"]"));
-        jsonSchema.validate(JSON.parse("[10, \"Downing\", \"Street\"]"));
-        jsonSchema.validate(new Object[] {10, "Downing", "Street"});
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[1600, \"Pennsylvania\", \"Avenue\", \"NW\"]")));
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[10, \"Downing\", \"Street\"]")));
+        assertTrue(
+                jsonSchema.isValid(
+                        new Object[] {10, "Downing", "Street"}));
 
-        assertThrows(JSONSchemaValidException.class, ()
-                -> jsonSchema.validate(
+        assertFalse(jsonSchema.isValid(
                         JSON.parse("[1600, \"Pennsylvania\", \"Avenue\", \"NW\", \"Washington\"]")
                 )
         );
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(
+        assertFalse(jsonSchema.isValid(
                 new Object[] {1600, "Pennsylvania", "Avenue", "NW", "Washington"}
         ));
     }
@@ -534,17 +675,25 @@ public class JSONSchemaTest {
                         "}")
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(JSON.parse("[\"life\", \"universe\", \"everything\", 42]"));
-        jsonSchema.validate(JSON.parse("[1, 2, 3, 4, 5]"));
-        jsonSchema.validate(new Object[] {10, "Downing", "Street"});
-        jsonSchema.validate(new Object[] {"Downing", "Street", 10});
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[\"life\", \"universe\", \"everything\", 42]")));
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[1, 2, 3, 4, 5]")));
+        assertTrue(
+                jsonSchema.isValid(
+                        new Object[] {10, "Downing", "Street"}));
+        assertTrue(
+                jsonSchema.isValid(
+                        new Object[] {"Downing", "Street", 10}));
 
-        assertThrows(JSONSchemaValidException.class, ()
-                        -> jsonSchema.validate(
+        assertFalse(
+                jsonSchema.isValid(
                         JSON.parse("[\"life\", \"universe\", \"everything\", \"forty-two\"]")
                 )
         );
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(
+        assertFalse(jsonSchema.isValid(
                 new Object[] {"life", "universe", "everything", "forty-two"}
         ));
     }
@@ -561,24 +710,31 @@ public class JSONSchemaTest {
                         "}")
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(JSON.parse("[\"apple\", \"orange\", 2, 4]"));
-        jsonSchema.validate(JSON.parse("[\"apple\", \"orange\", 2, 4, 8]"));
-        jsonSchema.validate(new Object[] {"apple", "orange", 2, 4});
-        jsonSchema.validate(new Object[] {"apple", "orange", 2, 4, 8});
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[\"apple\", \"orange\", 2, 4]")));
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[\"apple\", \"orange\", 2, 4, 8]")));
+        assertTrue(
+                jsonSchema.isValid(
+                        new Object[] {"apple", "orange", 2, 4}));
+        assertTrue(
+                jsonSchema.isValid(
+                        new Object[] {"apple", "orange", 2, 4, 8}));
 
-        assertThrows(JSONSchemaValidException.class, ()
-                        -> jsonSchema.validate(
+        assertFalse(jsonSchema.isValid(
                         JSON.parse("[\"apple\", \"orange\", 2]")
                 )
         );
-        assertThrows(JSONSchemaValidException.class, ()
-                        -> jsonSchema.validate(
+        assertFalse(jsonSchema.isValid(
                         JSON.parse("[\"apple\", \"orange\", 2, 4, 8, 16]")
                 )
         );
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(
+        assertFalse(jsonSchema.isValid(
                 new Object[] {"apple", "orange", 2}
-        )); assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(
+        ));
+        assertFalse(jsonSchema.isValid(
                 new Object[] {"apple", "orange", 2, 4, 8, 16}
         ));
     }
@@ -591,22 +747,33 @@ public class JSONSchemaTest {
                         "}")
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(JSON.parse("[1, 2, 3, 4, 5]"));
-        jsonSchema.validate(JSON.parse("[]"));
-        jsonSchema.validate(new Object[] {1, 2, 3, 4, 5});
-        jsonSchema.validate(new Object[] {});
-        jsonSchema.validate(new int[] {});
-        jsonSchema.validate(new int[] {1, 2, 3, 4, 5});
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[1, 2, 3, 4, 5]")));
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[]")));
+        assertTrue(
+                jsonSchema.isValid(
+                        new Object[] {1, 2, 3, 4, 5}));
+        assertTrue(
+                jsonSchema.isValid(
+                        new Object[] {}));
+        assertTrue(
+                jsonSchema.isValid(
+                        new int[] {}));
+        assertTrue(
+                jsonSchema.isValid(
+                        new int[] {1, 2, 3, 4, 5}));
 
-        assertThrows(JSONSchemaValidException.class, ()
-                        -> jsonSchema.validate(
+        assertFalse(jsonSchema.isValid(
                         JSON.parse("[1, 2, 3, 3, 4]")
                 )
         );
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(
+        assertFalse(jsonSchema.isValid(
                 new Object[] {1, 2, 3, 3, 4}
         ));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(
+        assertFalse(jsonSchema.isValid(
                 new int[] {1, 2, 3, 3, 4}
         ));
     }
@@ -617,20 +784,20 @@ public class JSONSchemaTest {
                 .of("type", "Object")
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(JSONObject.of());
-        jsonSchema.validate(new Bean());
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(new Object[] {}));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1L));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate('A'));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1F));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(1D));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(Byte.MIN_VALUE));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(Short.MIN_VALUE));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(BigDecimal.ZERO));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(BigInteger.ZERO));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(true));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(JSONSchema.Type.Object));
+        assertTrue(jsonSchema.isValid(JSONObject.of()));
+        assertTrue(jsonSchema.isValid(new Bean()));
+        assertFalse(jsonSchema.isValid(new Object[] {}));
+        assertFalse(jsonSchema.isValid(1));
+        assertFalse(jsonSchema.isValid(1L));
+        assertFalse(jsonSchema.isValid('A'));
+        assertFalse(jsonSchema.isValid(1F));
+        assertFalse(jsonSchema.isValid(1D));
+        assertFalse(jsonSchema.isValid(Byte.MIN_VALUE));
+        assertFalse(jsonSchema.isValid(Short.MIN_VALUE));
+        assertFalse(jsonSchema.isValid(BigDecimal.ZERO));
+        assertFalse(jsonSchema.isValid(BigInteger.ZERO));
+        assertFalse(jsonSchema.isValid(true));
+        assertFalse(jsonSchema.isValid(JSONSchema.Type.Object));
     }
 
     @Test
@@ -642,12 +809,12 @@ public class JSONSchemaTest {
                 )
                 .to(JSONSchema::of);
 
-        jsonSchema.validate(JSONObject.of("id", 101));
-        jsonSchema.validate(JSONObject.of("id", 101).toJavaObject(Bean1.class));
+        assertTrue(jsonSchema.validate(JSONObject.of("id", 101)).isSuccess());
+        assertTrue(jsonSchema.validate(JSONObject.of("id", 101).toJavaObject(Bean1.class)).isSuccess());
 
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(JSONObject.of()));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(JSONObject.of().toJavaObject(Bean1.class)));
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(new Bean()));
+        assertFalse(jsonSchema.validate(JSONObject.of()).isSuccess());
+        assertFalse(jsonSchema.validate(JSONObject.of().toJavaObject(Bean1.class)).isSuccess());
+        assertFalse(jsonSchema.validate(new Bean()).isSuccess());
     }
 
     public static class Bean {
@@ -671,23 +838,29 @@ public class JSONSchemaTest {
                 )
                 .to(JSONSchema::of);
 
-        JSON.parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\" }")
-                .validate(jsonSchema);
+        assertTrue(JSON
+                .parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\" }")
+                .isValid(jsonSchema)
+        );
+
+        assertTrue(JSON
+                .parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\" }")
+                .isValid(jsonSchema)
+        );
+
+        assertTrue(JSON
+                .parseObject("{}")
+                .isValid(jsonSchema)
+        );
 
 
-        JSON.parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\" }")
-                .validate(jsonSchema);
+        assertTrue(JSON
+                .parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\", \"direction\": \"NW\" }")
+                .isValid(jsonSchema));
 
-        JSON.parseObject("{}")
-                .validate(jsonSchema);
-
-
-        JSON.parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\", \"direction\": \"NW\" }")
-                .validate(jsonSchema);
-
-        assertThrows(JSONSchemaValidException.class, () -> jsonSchema.validate(
+        assertFalse(jsonSchema.validate(
                 JSON.parseObject("{ \"number\": \"1600\", \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\" }")
-        ));
+        ).isSuccess());
     }
 
     @Test
@@ -700,26 +873,29 @@ public class JSONSchemaTest {
                 "  }\n" +
                 "}").to(JSONSchema::of);
 
-        JSON.parseObject("{}")
-                .validate(jsonSchema);
+        assertTrue(JSON
+                .parseObject("{}")
+                .isValid(jsonSchema));
 
-        JSON.parseObject("{ \"S_25\": \"This is a string\" }")
-                .validate(jsonSchema);
+        assertTrue(JSON
+                .parseObject("{ \"S_25\": \"This is a string\" }")
+                .isValid(jsonSchema));
 
-        JSON.parseObject("{ \"I_0\": 42 }")
-                .validate(jsonSchema);
+        assertTrue(JSON
+                .parseObject("{ \"I_0\": 42 }")
+                .isValid(jsonSchema));
 
-        assertThrows(JSONSchemaValidException.class, () ->
-                JSON.parseObject("{ \"S_0\": 42 }")
-                .validate(jsonSchema)
+        assertFalse(JSON
+                .parseObject("{ \"S_0\": 42 }")
+                .isValid(jsonSchema)
         );
-        assertThrows(JSONSchemaValidException.class, () ->
-                JSON.parseObject("{ \"I_42\": \"This is a string\" }")
-                        .validate(jsonSchema)
+        assertFalse(JSON
+                .parseObject("{ \"I_42\": \"This is a string\" }")
+                .isValid(jsonSchema)
         );
 
-        JSON.parseObject("{ \"keyword\": \"value\" }")
-                .validate(jsonSchema);
+        assertTrue(JSON.parseObject("{ \"keyword\": \"value\" }")
+                .isValid(jsonSchema));
     }
 
     @Test
@@ -734,11 +910,11 @@ public class JSONSchemaTest {
                 "  \"additionalProperties\": false\n" +
                 "}").to(JSONSchema::of);
 
-        JSON.parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\" }")
-                .validate(jsonSchema);
-        assertThrows(JSONSchemaValidException.class, () ->
+        assertTrue(JSON.parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\" }")
+                .isValid(jsonSchema));
+        assertFalse(
                 JSON.parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\", \"direction\": \"NW\" }")
-                        .validate(jsonSchema)
+                        .isValid(jsonSchema)
         );
     }
 
@@ -754,14 +930,14 @@ public class JSONSchemaTest {
                 "  \"additionalProperties\": { \"type\": \"string\" }\n" +
                 "}").to(JSONSchema::of);
 
-        JSON.parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\" }\n")
-                .validate(jsonSchema);
-        JSON.parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\", \"direction\": \"NW\" }")
-                .validate(jsonSchema);
+        assertTrue(JSON.parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\" }\n")
+                .isValid(jsonSchema));
+        assertTrue(JSON.parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\", \"direction\": \"NW\" }")
+                .isValid(jsonSchema));
 
-        assertThrows(JSONSchemaValidException.class, () ->
+        assertFalse(
                 JSON.parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\", \"office_number\": 201 }")
-                        .validate(jsonSchema)
+                        .isValid(jsonSchema)
         );
     }
 
@@ -778,33 +954,33 @@ public class JSONSchemaTest {
                 "  \"required\": [\"name\", \"email\"]\n" +
                 "}").to(JSONSchema::of);
 
-        JSON.parseObject("{\n" +
+        assertTrue(JSON.parseObject("{\n" +
                         "  \"name\": \"William Shakespeare\",\n" +
                         "  \"email\": \"bill@stratford-upon-avon.co.uk\"\n" +
                         "}")
-                .validate(jsonSchema);
-        JSON.parseObject("{\n" +
+                .isValid(jsonSchema));
+        assertTrue(JSON.parseObject("{\n" +
                         "  \"name\": \"William Shakespeare\",\n" +
                         "  \"email\": \"bill@stratford-upon-avon.co.uk\",\n" +
                         "  \"address\": \"Henley Street, Stratford-upon-Avon, Warwickshire, England\",\n" +
                         "  \"authorship\": \"in question\"\n" +
                         "}")
-                .validate(jsonSchema);
+                .isValid(jsonSchema));
 
-        assertThrows(JSONSchemaValidException.class, () ->
+        assertFalse(
                 JSON.parseObject("{\n" +
                                 "  \"name\": \"William Shakespeare\",\n" +
                                 "  \"address\": \"Henley Street, Stratford-upon-Avon, Warwickshire, England\",\n" +
                                 "}")
-                        .validate(jsonSchema)
+                        .isValid(jsonSchema)
         );
-        assertThrows(JSONSchemaValidException.class, () ->
+        assertFalse(
                 JSON.parseObject("{\n" +
                                 "  \"name\": \"William Shakespeare\",\n" +
                                 "  \"address\": \"Henley Street, Stratford-upon-Avon, Warwickshire, England\",\n" +
                                 "  \"email\": null\n" +
                                 "}\n")
-                        .validate(jsonSchema)
+                        .isValid(jsonSchema)
         );
     }
 
@@ -817,15 +993,15 @@ public class JSONSchemaTest {
                 "  }\n" +
                 "}").to(JSONSchema::of);
 
-        JSON.parseObject("{\n" +
+        assertTrue(JSON.parseObject("{\n" +
                         "  \"_a_proper_token_001\": \"value\"\n" +
                         "}")
-                .validate(jsonSchema);
-        assertThrows(JSONSchemaValidException.class, () ->
+                .isValid(jsonSchema));
+        assertFalse(
                 JSON.parseObject("{\n" +
                                 "  \"001 invalid\": \"value\"\n" +
                                 "}")
-                        .validate(jsonSchema)
+                        .isValid(jsonSchema)
         );
     }
 
@@ -837,22 +1013,37 @@ public class JSONSchemaTest {
                 "  \"maxProperties\": 3\n" +
                 "}").to(JSONSchema::of);
 
-        JSON.parseObject("{ \"a\": 0, \"b\": 1 }")
-                .validate(jsonSchema);
-        JSON.parseObject("{ \"a\": 0, \"b\": 1, \"c\": 2 }")
-                .validate(jsonSchema);
+        assertTrue(JSON.parseObject("{ \"a\": 0, \"b\": 1 }")
+                .isValid(jsonSchema));
+        assertTrue(JSON.parseObject("{ \"a\": 0, \"b\": 1, \"c\": 2 }")
+                .isValid(jsonSchema));
 
-        assertThrows(JSONSchemaValidException.class, () ->
-                JSON.parseObject("{}")
-                        .validate(jsonSchema)
+        assertFalse(JSON.parseObject("{}")
+                        .isValid(jsonSchema)
         );
-        assertThrows(JSONSchemaValidException.class, () ->
-                JSON.parseObject("{ \"a\": 0 }")
-                        .validate(jsonSchema)
+        assertFalse(JSON.parseObject("{ \"a\": 0 }")
+                        .isValid(jsonSchema)
         );
-        assertThrows(JSONSchemaValidException.class, () ->
-                JSON.parseObject("{ \"a\": 0, \"b\": 1, \"c\": 2, \"d\": 3 }")
-                        .validate(jsonSchema)
+        assertFalse(JSON.parseObject("{ \"a\": 0, \"b\": 1, \"c\": 2, \"d\": 3 }")
+                        .isValid(jsonSchema)
+        );
+    }
+
+    @Test
+    public void testConstant() {
+        JSONSchema jsonSchema = JSON.parseObject("{\n" +
+                "  \"properties\": {\n" +
+                "    \"country\": {\n" +
+                "      \"const\": \"United States of America\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}").to(JSONSchema::of);
+
+        assertTrue(JSON.parseObject("{ \"country\": \"United States of America\" }")
+                .isValid(jsonSchema));
+
+        assertFalse(JSON.parseObject("{ \"country\": \"Canada\" }")
+                        .isValid(jsonSchema)
         );
     }
 }

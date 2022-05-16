@@ -67,6 +67,15 @@ final class JSONReaderUTF16 extends JSONReader {
         if (ch == '\uFFFE' || ch == '\uFEFF') {
             next();
         }
+
+        while (ch == '/') {
+            next();
+            if (ch == '/') {
+                skipLineComment();
+            } else {
+                throw new JSONException("input not support " + ch + ", offset " + offset);
+            }
+        }
     }
 
     JSONReaderUTF16(Context ctx, String str, char[] chars, int offset, int length) {
@@ -99,6 +108,15 @@ final class JSONReaderUTF16 extends JSONReader {
 
         if (ch == '\uFFFE' || ch == '\uFEFF') {
             next();
+        }
+
+        while (ch == '/') {
+            next();
+            if (ch == '/') {
+                skipLineComment();
+            } else {
+                throw new JSONException("input not support " + ch + ", offset " + offset);
+            }
         }
     }
 
@@ -1592,7 +1610,7 @@ final class JSONReaderUTF16 extends JSONReader {
     }
 
     @Override
-    void skipLineComment() {
+    public void skipLineComment() {
         for (;;) {
             if (ch == '\n') {
                 offset++;
@@ -1951,7 +1969,11 @@ final class JSONReaderUTF16 extends JSONReader {
             long lsb4 = parse4Nibbles(chars, offset + 28);
             if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
                 offset += 33;
-                ch = chars[offset++];
+                if (offset < end) {
+                    ch = chars[offset++];
+                } else {
+                    ch = EOI;
+                }
 
                 if (ch == ',') {
                     next();
@@ -1977,7 +1999,11 @@ final class JSONReaderUTF16 extends JSONReader {
                 long lsb4 = parse4Nibbles(chars, offset + 32);
                 if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
                     offset += 37;
-                    ch = chars[offset++];
+                    if (offset < end) {
+                        ch = chars[offset++];
+                    } else {
+                        ch = EOI;
+                    }
 
                     if (ch == ',') {
                         next();

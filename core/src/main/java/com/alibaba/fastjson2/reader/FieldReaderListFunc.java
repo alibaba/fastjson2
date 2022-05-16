@@ -1,10 +1,12 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderListFunc<T, V>
@@ -16,8 +18,19 @@ final class FieldReaderListFunc<T, V>
     final Type itemType;
     private ObjectReader itemObjectReader;
 
-    FieldReaderListFunc(String fieldName, Type fieldType, Class<V> fieldClass, int ordinal, String format, Object defaultValue, Method method, BiConsumer<T, V> function) {
-        super(fieldName, fieldType, fieldClass, ordinal, 0, format, defaultValue);
+    FieldReaderListFunc(
+            String fieldName,
+            Type fieldType,
+            Class<V> fieldClass,
+            int ordinal,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            BiConsumer<T, V> function
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, 0, format, locale, defaultValue, schema);
         this.method = method;
         this.function = function;
         if (fieldType instanceof ParameterizedType) {
@@ -43,7 +56,7 @@ final class FieldReaderListFunc<T, V>
     @Override
     public void accept(T object, Object value) {
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         function.accept(object, (V) value);

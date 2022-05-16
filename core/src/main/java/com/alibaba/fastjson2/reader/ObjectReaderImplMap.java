@@ -382,6 +382,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
             }
         }
 
+        for_:
         for (; ; ) {
             if (jsonReader.nextIfMatch('}')) {
                 break;
@@ -437,6 +438,15 @@ public final class ObjectReaderImplMap implements ObjectReader {
                     jsonReader.readNull();
                     value = null;
                     break;
+                case '/':
+                    jsonReader.next();
+                    char ch = jsonReader.current();
+                    if (ch == '/') {
+                        jsonReader.skipLineComment();
+                    } else {
+                        throw new JSONException("input not support " + ch + ", offset " + jsonReader.getOffset());
+                    }
+                    continue for_;
                 default:
                     throw new JSONException("error, offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
             }

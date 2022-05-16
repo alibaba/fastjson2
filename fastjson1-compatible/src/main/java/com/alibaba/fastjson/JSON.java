@@ -506,8 +506,8 @@ public class JSON {
             return null;
         }
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
-        JSONReader reader = JSONReader.of(text);
-        try {
+
+        try (JSONReader reader = JSONReader.of(text)) {
             return reader.read(paramType);
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();

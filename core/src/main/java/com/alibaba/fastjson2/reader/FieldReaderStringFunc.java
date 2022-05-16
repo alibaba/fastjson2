@@ -1,8 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Method;
+import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderStringFunc<T, V> extends FieldReaderImpl<T> {
@@ -12,8 +14,19 @@ final class FieldReaderStringFunc<T, V> extends FieldReaderImpl<T> {
     final String format;
     final boolean trim;
 
-    FieldReaderStringFunc(String fieldName, Class<V> fieldClass, int ordinal, long features, String format, Object defaultValue,Method method, BiConsumer<T, V> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, defaultValue);
+    FieldReaderStringFunc(
+            String fieldName,
+            Class<V> fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            BiConsumer<T, V> function
+    ) {
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema);
         this.method = method;
         this.function = function;
 
@@ -33,6 +46,10 @@ final class FieldReaderStringFunc<T, V> extends FieldReaderImpl<T> {
             fieldValue = fieldValue.trim();
         }
 
+        if (schema != null) {
+            schema.assertValidate(fieldValue);
+        }
+
         function.accept(object, (V) fieldValue);
     }
 
@@ -42,6 +59,10 @@ final class FieldReaderStringFunc<T, V> extends FieldReaderImpl<T> {
 
         if (trim && fieldValue != null) {
             fieldValue = fieldValue.trim();
+        }
+
+        if (schema != null) {
+            schema.assertValidate(fieldValue);
         }
 
         function.accept(object, (V) fieldValue);

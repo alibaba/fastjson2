@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchema;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -12,8 +13,8 @@ import java.util.Map;
 class FieldReaderMapMethodReadOnly<T> extends FieldReaderObjectMethod<T> implements FieldReaderReadOnly<T> {
     volatile ObjectReader itemReader;
 
-    FieldReaderMapMethodReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, method);
+    FieldReaderMapMethodReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Method method) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, method);
     }
 
     @Override
@@ -58,7 +59,7 @@ class FieldReaderMapMethodReadOnly<T> extends FieldReaderObjectMethod<T> impleme
         }
 
         if (schema != null) {
-            schema.validate(value);
+            schema.assertValidate(value);
         }
 
         map.putAll((Map) value);

@@ -18,7 +18,7 @@ final class FieldReaderInt32ValueMethod<T> extends FieldReaderObjectMethod<T> {
         int fieldInt = jsonReader.readInt32Value();
 
         if (schema != null) {
-            schema.validate(fieldInt);
+            schema.assertValidate(fieldInt);
         }
 
         try {
@@ -34,6 +34,10 @@ final class FieldReaderInt32ValueMethod<T> extends FieldReaderObjectMethod<T> {
             value = 0;
         }
 
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             method.invoke(object
                     , TypeUtils.toIntValue(value));
@@ -44,6 +48,10 @@ final class FieldReaderInt32ValueMethod<T> extends FieldReaderObjectMethod<T> {
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             method.invoke(object, (int) value);
         } catch (Exception e) {

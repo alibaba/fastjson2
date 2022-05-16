@@ -20,7 +20,7 @@ final class FieldReaderBigDecimalMethod<T> extends FieldReaderObjectMethod<T> {
         BigDecimal fieldValue = jsonReader.readBigDecimal();
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
         try {

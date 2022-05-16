@@ -18,7 +18,7 @@ public final class ObjectReaderInterface<T> extends ObjectReaderAdapter<T> {
             Function buildFunction,
             FieldReader[] fieldReaders
     ) {
-        super(objectClass, typeKey, typeName, features, creator, buildFunction, fieldReaders);
+        super(objectClass, typeKey, typeName, features, null, creator, buildFunction, fieldReaders);
     }
 
     @Override

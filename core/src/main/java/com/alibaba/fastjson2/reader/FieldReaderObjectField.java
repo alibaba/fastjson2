@@ -18,11 +18,6 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
     protected final Field field;
     protected ObjectReader fieldObjectReader;
 
-    FieldReaderObjectField(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue, Field field) {
-        super(fieldName, fieldType == null ? field.getType() : fieldType, fieldClass, ordinal, features, format, null, defaultValue);
-        this.field = field;
-    }
-
     FieldReaderObjectField(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue, JSONSchema schema, Field field) {
         super(fieldName, fieldType == null ? field.getType() : fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema);
         this.field = field;
@@ -133,6 +128,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, boolean value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setBoolean(object, value);
         } catch (Exception e) {
@@ -142,6 +141,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, byte value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setByte(object, value);
         } catch (Exception e) {
@@ -151,6 +154,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, short value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setShort(object, value);
         } catch (Exception e) {
@@ -160,6 +167,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setInt(object, value);
         } catch (Exception e) {
@@ -169,6 +180,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setLong(object, value);
         } catch (Exception e) {
@@ -178,6 +193,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, float value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setFloat(object, value);
         } catch (Exception e) {
@@ -187,6 +206,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, double value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setDouble(object, value);
         } catch (Exception e) {
@@ -196,6 +219,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, char value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setChar(object, value);
         } catch (Exception e) {
@@ -205,6 +232,10 @@ class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
 
     @Override
     public void accept(T object, Object value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.set(object, value);
         } catch (Exception e) {

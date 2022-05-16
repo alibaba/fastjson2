@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONSchema;
 import com.alibaba.fastjson2.internal.asm.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.function.*;
@@ -41,13 +42,14 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
     static final String DESC_FIELD_READER = ASMUtils.desc(FieldReader.class);
     static final String DESC_OBJECT_READER = ASMUtils.desc(ObjectReader.class);
     static final String DESC_SUPPLIER = ASMUtils.desc(Supplier.class);
+    static final String DESC_JSONSCHEMA = ASMUtils.desc(JSONSchema.class);
     static final String DESC_FIELD_READER_ARRAY = ASMUtils.desc(FieldReader[].class);
 
     static final String METHOD_DESC_GET_OBJECT_READER = "(Ljava/lang/reflect/Type;)" + DESC_OBJECT_READER;
     static final String METHOD_DESC_GET_ITEM_OBJECT_READER = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
     static final String METHOD_DESC_GET_OBJECT_READER_1 = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
     static final String METHOD_DESC_INIT = "(Ljava/lang/Class;" + DESC_SUPPLIER + DESC_FIELD_READER_ARRAY + ")V";
-    static final String METHOD_DESC_ADAPTER_INIT = "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;J" + DESC_SUPPLIER + "Ljava/util/function/Function;" + DESC_FIELD_READER_ARRAY + ")V";
+    static final String METHOD_DESC_ADAPTER_INIT = "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;J" + DESC_JSONSCHEMA + DESC_SUPPLIER + "Ljava/util/function/Function;" + DESC_FIELD_READER_ARRAY + ")V";
     static final String METHOD_DESC_READ_OBJECT = "(" + DESC_JSON_READER + "J)Ljava/lang/Object;";
     static final String METHOD_DESC_READ_OBJECT_ROW_COUNT = "(" + DESC_JSON_READER + "JI)Ljava/lang/Object;";
     static final String METHOD_DESC_GET_FIELD_READER = "(J)" + DESC_FIELD_READER;
@@ -283,6 +285,10 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
             }
         }
 
+        if (match && beanInfo.schema != null && !beanInfo.schema.isEmpty()) {
+            match = false;
+        }
+
         if (!match) {
             return super.createObjectReader(objectClass, objectType, fieldBased, modules);
         }
@@ -360,6 +366,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
             }
             mw.visitInsn(Opcodes.ACONST_NULL);
             mw.visitLdcInsn(beanInfo.readerFeatures);
+            mw.visitInsn(Opcodes.ACONST_NULL);
             mw.visitVarInsn(Opcodes.ALOAD, SUPPLIER);
             mw.visitInsn(Opcodes.ACONST_NULL);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_READER_ARRAY);
@@ -402,7 +409,7 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
                 readerFeatures |= JSONReader.Feature.FieldBased.mask;
             }
 
-            ObjectReaderAdapter objectReaderAdapter = new ObjectReaderAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, readerFeatures, supplier, null, fieldReaderArray);
+            ObjectReaderAdapter objectReaderAdapter = new ObjectReaderAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, readerFeatures, null, supplier, null, fieldReaderArray);
 
             genMethodReadJSONBObject(objectClass, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
 

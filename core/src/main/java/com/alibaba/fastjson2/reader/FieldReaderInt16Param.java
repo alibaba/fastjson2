@@ -6,7 +6,7 @@ import java.lang.reflect.Parameter;
 
 final class FieldReaderInt16Param<T> extends FieldReaderObjectParam<T> {
     FieldReaderInt16Param(String fieldName, Class fieldType, String paramName, Parameter parameter, int ordinal) {
-        super(fieldName, fieldType, fieldType, paramName, parameter, ordinal, 0, null);
+        super(fieldName, fieldType, fieldType, paramName, parameter, ordinal, 0, null, null);
     }
 
     @Override

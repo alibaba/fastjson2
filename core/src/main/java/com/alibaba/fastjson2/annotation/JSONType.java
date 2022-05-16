@@ -44,4 +44,6 @@ public @interface JSONType {
     Class<?> deserializer() default Void.class;
 
     Class<? extends Filter>[] serializeFilters() default {};
+
+    String schema() default "";
 }
