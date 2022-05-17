@@ -1331,6 +1331,27 @@ public abstract class JSONReader implements Closeable {
         return read(Object.class);
     }
 
+    public List readArray(Type itemType) {
+        List list = new ArrayList();
+        if (!nextIfMatch('[')) {
+            throw new JSONException("syntax error : " + ch);
+        }
+
+        for (;;) {
+            if (nextIfMatch(']')) {
+                break;
+            }
+            Object item = read(itemType);
+            list.add(item);
+        }
+
+        if (ch == ',') {
+            next();
+        }
+
+        return list;
+    }
+
     public List readArray() {
         next();
 
