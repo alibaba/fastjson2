@@ -439,7 +439,7 @@ public interface JSON {
         }
 
         try (JSONReader reader = JSONReader.of(bytes)) {
-            reader.getContext().config(features);
+            reader.context.config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
             return objectReader.readObject(reader, 0);
         }
@@ -481,7 +481,7 @@ public interface JSON {
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Type type, JSONReader.Feature... features) {
         try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8)) {
-            reader.getContext().config(features);
+            reader.context.config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
             return objectReader.readObject(reader, 0);
         }
@@ -493,6 +493,8 @@ public interface JSON {
      * @param url      the JSON {@link URL} to be parsed
      * @param type     specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
+     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     * @since 2.0.4
      */
     static <T> T parseObject(URL url, Type type, JSONReader.Feature... features) {
         if (url == null) {
@@ -512,6 +514,8 @@ public interface JSON {
      * @param url      the JSON {@link URL} to be parsed
      * @param function specify the {@link Function} to be converted
      * @param features features to be enabled in parsing
+     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     * @since 2.0.4
      */
     static <T> T parseObject(URL url, Function<JSONObject, T> function, JSONReader.Feature... features) {
         if (url == null) {

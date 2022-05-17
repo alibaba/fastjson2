@@ -5,7 +5,9 @@ import com.alibaba.fastjson2.filter.Filter
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.Reader
+import java.net.URL
 import java.nio.charset.Charset
+import kotlin.jvm.Throws
 
 /**
  * Parse JSON [String] into [T]
@@ -21,7 +23,9 @@ import java.nio.charset.Charset
  */
 @Suppress("HasPlatformType")
 inline fun <reified T> String?.to() =
-    JSON.parseObject(this, T::class.java)
+    JSON.parseObject(
+        this, T::class.java
+    )
 
 /**
  * Parse JSON [String] into [T]
@@ -30,7 +34,7 @@ inline fun <reified T> String?.to() =
  * E.g.
  * ```
  *   val text = "..."
- *   val data = text.to<User>()
+ *   val data = text.into<User>()
  * ```
  *
  * @return [T]?
@@ -47,7 +51,7 @@ inline fun <reified T : Any> String?.into() =
  *
  * E.g.
  * ```
- *   val text = "..."
+ *   val text = ...
  *   val data = text.to<User>()
  * ```
  *
@@ -55,8 +59,10 @@ inline fun <reified T : Any> String?.into() =
  * @since 2.0.3
  */
 @Suppress("HasPlatformType")
-inline fun <reified T> ByteArray.to() =
-    JSON.parseObject(this, T::class.java)
+inline fun <reified T> ByteArray?.to() =
+    JSON.parseObject(
+        this, T::class.java
+    )
 
 /**
  * Parse JSON [ByteArray] into [T]
@@ -76,6 +82,86 @@ inline fun <reified T : Any> ByteArray.into() =
     JSON.parseObject<T>(
         this, reference<T>().getType()
     )
+
+/**
+ * Parse JSON [URL] into [T]
+ *
+ * E.g.
+ * ```
+ *   val url = ...
+ *   val data = url.to<User>()
+ * ```
+ *
+ * @return [T]?
+ * @since 2.0.4
+ * @throws JSONException If an I/O error occurs
+ */
+@Suppress("HasPlatformType")
+@Throws(JSONException::class)
+inline fun <reified T> URL?.to(
+    vararg features: JSONReader.Feature
+) = JSON.parseObject<T>(
+    this, T::class.java, *features
+)
+
+/**
+ * Parse JSON [URL] into [T]
+ *
+ * E.g.
+ * ```
+ *   val url = ...
+ *   val data = in.url<User>()
+ * ```
+ *
+ * @return [T]?
+ * @since 2.0.4
+ * @throws JSONException If an I/O error occurs
+ */
+@Suppress("HasPlatformType")
+@Throws(JSONException::class)
+inline fun <reified T : Any> URL?.into(
+    vararg features: JSONReader.Feature
+) = JSON.parseObject<T>(
+    this, reference<T>().getType(), *features
+)
+
+/**
+ * Parse JSON [InputStream] into [T]
+ *
+ * E.g.
+ * ```
+ *   val in = ...
+ *   val data = in.to<User>()
+ * ```
+ *
+ * @return [T]?
+ * @since 2.0.4
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T> InputStream?.to(
+    vararg features: JSONReader.Feature
+) = JSON.parseObject<T>(
+    this, T::class.java, *features
+)
+
+/**
+ * Parse JSON [InputStream] into [T]
+ *
+ * E.g.
+ * ```
+ *   val in = ...
+ *   val data = in.into<User>()
+ * ```
+ *
+ * @return [T]?
+ * @since 2.0.4
+ */
+@Suppress("HasPlatformType")
+inline fun <reified T : Any> InputStream?.into(
+    vararg features: JSONReader.Feature
+) = JSON.parseObject<T>(
+    this, reference<T>().getType(), *features
+)
 
 /**
  * Verify the [String] is JSON `Object`
@@ -167,6 +253,23 @@ inline fun String?.parse() =
     JSON.parse(this)
 
 /**
+ * Parse JSON [String] into [JSONArray] or [JSONObject]
+ *
+ * @param features features to be enabled in parsing
+ * @return [JSONArray] or [JSONObject]
+ * @since 2.0.4
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun String?.parse(
+    vararg features: JSONReader.Feature
+) = JSON.parse(
+    this, *features
+)
+
+/**
  * Parse JSON [String] into [JSONObject]
  *
  * E.g.
@@ -184,6 +287,76 @@ inline fun String?.parse() =
 )
 inline fun String?.parseObject() =
     JSON.parseObject(this)
+
+/**
+ * Parse JSON [ByteArray] into [JSONObject]
+ *
+ * E.g.
+ * ```
+ *   val text = ...
+ *   val data = text.parseObject()
+ * ```
+ *
+ * @return [JSONObject]?
+ * @since 2.0.4
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun ByteArray?.parseObject() =
+    JSON.parseObject(this)
+
+/**
+ * Parse JSON [ByteArray] into [JSONObject]
+ *
+ *
+ * @return [JSONObject]?
+ * @since 2.0.4
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun ByteArray?.parseObject(
+    vararg features: JSONReader.Feature
+) = JSON.parseObject(
+    this, *features
+)
+
+/**
+ * Parse JSON [String] into [JSONObject]
+ *
+ * @param features features to be enabled in parsing
+ * @return [JSONObject]?
+ * @since 2.0.4
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun String?.parseObject(
+    vararg features: JSONReader.Feature
+) = JSON.parseObject(
+    this, *features
+)
+
+/**
+ * Parse JSON [InputStream] into [JSONObject]
+ *
+ * @param features features to be enabled in parsing
+ * @return [JSONObject]?
+ * @since 2.0.4
+ */
+@Suppress(
+    "HasPlatformType",
+    "NOTHING_TO_INLINE"
+)
+inline fun InputStream?.parseObject(
+    vararg features: JSONReader.Feature
+) = JSON.parseObject(
+    this, *features
+)
 
 /**
  * Parse JSON [String] into [T]
