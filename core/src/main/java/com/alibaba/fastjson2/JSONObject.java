@@ -27,7 +27,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
 
     static ObjectReader<JSONArray> arrayReader;
     static ObjectWriter<JSONObject> objectWriter;
-    static ObjectReader<JSONObject> objectReader;
+    static final ObjectReader<JSONObject> READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
 
     /**
      * default
@@ -257,10 +257,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             }
 
             JSONReader reader = JSONReader.of(str);
-            if (objectReader == null) {
-                objectReader = reader.getObjectReader(JSONObject.class);
-            }
-            return objectReader.readObject(reader, 0);
+            return READER.readObject(reader, 0);
         }
 
         if (value instanceof Map) {

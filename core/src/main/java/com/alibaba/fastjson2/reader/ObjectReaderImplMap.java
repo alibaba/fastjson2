@@ -354,7 +354,8 @@ public final class ObjectReaderImplMap implements ObjectReader {
 
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
-        Class objectClass = jsonReader.getContext().getObjectClass();
+        JSONReader.Context context = jsonReader.getContext();
+        Class objectClass = context.getObjectClass();
         Map object;
         if ((mapType == null || mapType == JSONObject.class) && objectClass != null && objectClass != Object.class) {
             try {
@@ -363,7 +364,7 @@ public final class ObjectReaderImplMap implements ObjectReader {
                 throw new JSONException("create object instance error, objectClass " + objectClass.getName());
             }
         } else {
-            object = (Map) createInstance(jsonReader.getContext().getFeatures() | features);
+            object = (Map) createInstance(context.getFeatures() | features);
         }
 
         boolean match = jsonReader.nextIfMatch('{');

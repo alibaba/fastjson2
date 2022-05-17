@@ -78,8 +78,7 @@ public interface JSON {
         }
 
         try (JSONReader reader = JSONReader.of(text)) {
-            ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
-            return objectReader.readObject(reader, 0);
+            return JSONObject.READER.readObject(reader, 0);
         }
     }
 
