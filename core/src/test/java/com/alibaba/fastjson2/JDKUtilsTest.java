@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
@@ -71,5 +73,52 @@ public class JDKUtilsTest {
             assertNotNull(value);
             assertArrayEquals(str1.getBytes(StandardCharsets.UTF_8), value);
         }
+    }
+
+    public String formatYYYYMMDD(Calendar calendar) throws Throwable {
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+
+
+        byte y0 = (byte) (year / 1000 + '0');
+        byte y1 = (byte) ((year / 100) % 10 + '0');
+        byte y2 = (byte) ((year / 10) % 10 + '0');
+        byte y3 = (byte) (year % 10 + '0');
+        byte m0 = (byte) (month / 10 + '0');
+        byte m1 = (byte) (month % 10 + '0');
+        byte d0 = (byte) (dayOfMonth / 10 + '0');
+        byte d1 = (byte) (dayOfMonth % 10 + '0');
+
+        if (JDKUtils.JVM_VERSION >= 9) {
+            byte[] bytes = new byte[]{y0, y1, y2, y3, m0, m1, d0, d1};
+
+            if (JDKUtils.JVM_VERSION == 17) {
+                return JDKUtils.getStringCreatorJDK17().apply(bytes, StandardCharsets.US_ASCII);
+            }
+
+            if (JDKUtils.JVM_VERSION <= 11) {
+                return JDKUtils.getStringCreatorJDK11().apply(bytes);
+            }
+
+            return new String(bytes, StandardCharsets.US_ASCII);
+        }
+
+        char[] chars = new char[]{
+                (char) y0,
+                (char) y1,
+                (char) y2,
+                (char) y3,
+                (char) m0,
+                (char) m1,
+                (char) d0,
+                (char) d1
+        };
+
+        if (JDKUtils.JVM_VERSION == 8) {
+            return JDKUtils.getStringCreatorJDK8().apply(chars, true);
+        }
+
+        return new String(chars);
     }
 }
