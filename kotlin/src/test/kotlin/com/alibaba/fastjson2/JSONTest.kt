@@ -27,6 +27,17 @@ class JSONTest {
     }
 
     @Test
+    fun test_stream_into1() {
+        val input = ByteArrayInputStream(
+            "{\"id\":1,\"name\":\"kraity\"}".toByteArray()
+        )
+
+        val user = input.into<User>()
+        assertEquals(1, user.id)
+        assertEquals("kraity", user.name)
+    }
+
+    @Test
     fun test_parseObject1() {
         val text = """{"id":1,"name":"kraity"}"""
         val data = text.to<User>()
