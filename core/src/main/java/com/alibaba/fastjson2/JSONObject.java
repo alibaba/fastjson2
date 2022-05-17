@@ -155,9 +155,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
      */
     @SuppressWarnings("unchecked")
     public Object getOrDefault(String key, Object defaultValue) {
-        return super.getOrDefault(
-                key, defaultValue
-        );
+        return super.getOrDefault(key, defaultValue);
     }
 
     /**
@@ -516,6 +514,43 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
     }
 
     /**
+     * Returns a long value of the associated keys in this {@link JSONObject}.
+     *
+     * @param key the key whose associated value is to be returned
+     * @param defaultValue the default mapping of the key
+     * @return long
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable long
+     * @throws JSONException         Unsupported type conversion to long value
+     */
+    public long getLongValue(String key, long defaultValue) {
+        Object value = super.get(key);
+
+        if (value == null) {
+            return defaultValue;
+        }
+
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
+                return defaultValue;
+            }
+
+            if (str.indexOf('.') != -1) {
+                return (long) Double.parseDouble(str);
+            }
+
+            return Long.parseLong(str);
+        }
+
+        throw new JSONException("Can not cast '" + value.getClass() + "' to long value");
+    }
+
+    /**
      * Returns the {@link Integer} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
@@ -615,7 +650,7 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
             String str = (String) value;
 
             if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return 0;
+                return defaultValue;
             }
 
             if (str.indexOf('.') != -1) {

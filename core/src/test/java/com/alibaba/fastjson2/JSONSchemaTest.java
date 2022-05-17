@@ -183,6 +183,12 @@ public class JSONSchemaTest {
                 jsonSchema.isValid("1970-02-01 12:13:14"));
         assertFalse(jsonSchema.isValid("(888)555-1212 ext. 532"));
         assertFalse(jsonSchema.isValid("(800)FLOWERS"));
+        assertFalse(
+                jsonSchema.isValid(1F));
+        assertFalse(
+                jsonSchema.isValid(Float.valueOf(1)));
+        assertFalse(
+                jsonSchema.isValid(Double.valueOf(1)));
     }
 
     @Test
@@ -439,6 +445,10 @@ public class JSONSchemaTest {
                         9));
         assertFalse(jsonSchema.isValid(10));
         assertFalse(jsonSchema.isValid(11));
+        assertFalse(jsonSchema.isValid(11D));
+        assertFalse(jsonSchema.isValid(Double.valueOf(11)));
+        assertFalse(jsonSchema.isValid(11F));
+        assertFalse(jsonSchema.isValid(Float.valueOf(11)));
     }
 
     @Test
