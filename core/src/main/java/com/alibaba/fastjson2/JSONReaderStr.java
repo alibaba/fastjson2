@@ -1632,7 +1632,13 @@ final class JSONReaderStr extends JSONReader {
 
         if (intOverflow) {
             int numStart = negative ? start : start - 1;
-            bigInt(numStart, offset - 1);
+            int numDigits = scale > 0 ? offset - 2 - numStart : offset - 1 - numStart;
+            if (numDigits > 38) {
+                valueType = JSON_TYPE_BIG_DEC;
+                stringValue = str.substring(numStart, offset - 1);
+            } else {
+                bigInt(numStart, offset - 1);
+            }
         } else {
             mag3 = -mag3;
         }
@@ -4185,7 +4191,7 @@ final class JSONReaderStr extends JSONReader {
         if (scale > 0) {
             numDigits--;
         }
-        if (numDigits > 128) {
+        if (numDigits > 38) {
             throw new JSONException("number too large : " + str.substring(off, off + numDigits));
         }
 

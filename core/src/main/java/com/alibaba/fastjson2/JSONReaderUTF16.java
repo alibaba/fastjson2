@@ -5,13 +5,11 @@ import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.math.BigInteger;
 import java.time.*;
-import java.util.Arrays;
 import java.util.TimeZone;
 import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.UUIDUtils.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK11;
 
 final class JSONReaderUTF16 extends JSONReader {
     private final String str;
@@ -1739,7 +1737,14 @@ final class JSONReaderUTF16 extends JSONReader {
 
         if (intOverflow) {
             int numStart = negative ? start : start - 1;
-            bigInt(chars, numStart, offset - 1);
+
+            int numDigits = scale > 0 ? offset - 2 - numStart : offset - 1 - numStart;
+            if (numDigits > 38) {
+                valueType = JSON_TYPE_BIG_DEC;
+                stringValue = new String(chars, numStart, offset - 1 - numStart);
+            } else {
+                bigInt(chars, numStart, offset - 1);
+            }
         } else {
             mag3 = -mag3;
         }

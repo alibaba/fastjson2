@@ -41,6 +41,7 @@ public abstract class JSONReader implements Closeable {
     static final byte JSON_TYPE_NULL = 5;
     static final byte JSON_TYPE_OBJECT = 6;
     static final byte JSON_TYPE_ARRAY = 7;
+    static final byte JSON_TYPE_BIG_DEC = 8;
 
     static final char EOI = 0x1A;
     static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
@@ -1443,6 +1444,9 @@ public abstract class JSONReader implements Closeable {
                 BigInteger bigInt = getBigInt(negative, mag);
                 return new BigDecimal(bigInt, scale);
             }
+            case JSON_TYPE_BIG_DEC: {
+                return new BigDecimal(stringValue);
+            }
             case JSON_TYPE_BOOL:
                 return boolValue ? BigDecimal.ONE : BigDecimal.ZERO;
             case JSON_TYPE_NULL:
@@ -1524,6 +1528,13 @@ public abstract class JSONReader implements Closeable {
                 }
 
                 return decimal;
+            }
+            case JSON_TYPE_BIG_DEC: {
+                if (scale > 0) {
+                    return new BigDecimal(stringValue);
+                } else {
+                    return new BigInteger(stringValue);
+                }
             }
             case JSON_TYPE_BOOL:
                 return boolValue ? 1 : 0;
@@ -1901,7 +1912,7 @@ public abstract class JSONReader implements Closeable {
         if (scale > 0) {
             numDigits--;
         }
-        if (numDigits > 128) {
+        if (numDigits > 38) {
             throw new JSONException("number too large : " + new String(chars, off, numDigits));
         }
 
@@ -2039,7 +2050,7 @@ public abstract class JSONReader implements Closeable {
         if (scale > 0) {
             numDigits--;
         }
-        if (numDigits > 128) {
+        if (numDigits > 38) {
             throw new JSONException("number too large : " + new String(chars, off, numDigits));
         }
 
