@@ -17,6 +17,7 @@ class ObjectReaderNoneDefaultConstrutor<T>
 
     public ObjectReaderNoneDefaultConstrutor(
             Class objectClass,
+            String typeKey,
             String typeName,
             long features,
             Function<Map<Long, Object>, T> creator,
@@ -25,7 +26,7 @@ class ObjectReaderNoneDefaultConstrutor<T>
             FieldReader[] paramFieldReaders,
             FieldReader[] setterFieldReaders
     ) {
-        super(objectClass, null, typeName, features, null, null, null, concat(paramFieldReaders, setterFieldReaders));
+        super(objectClass, typeKey, typeName, features, null, null, null, concat(paramFieldReaders, setterFieldReaders));
         this.paramNames = paramNames;
         this.creator = creator;
         this.setterFieldReaders = setterFieldReaders;
@@ -168,7 +169,7 @@ class ObjectReaderNoneDefaultConstrutor<T>
             return readJSONBObject(jsonReader, 0);
         }
 
-        if (jsonReader.isArray() && jsonReader.isSupportBeanArray()) {
+        if (jsonReader.isArray() && jsonReader.isSupportBeanArray(features | this.features)) {
             jsonReader.next();
             LinkedHashMap<Long, Object> valueMap = null;
             for (int i = 0; i < fieldReaders.length; i++) {
@@ -179,6 +180,12 @@ class ObjectReaderNoneDefaultConstrutor<T>
                 long hash = fieldReaders[i].getFieldNameHash();
                 valueMap.put(hash, fieldValue);
             }
+
+            if (!jsonReader.nextIfMatch(']')) {
+                throw new JSONException("array not end, " + jsonReader.current());
+            }
+
+            jsonReader.nextIfMatch(',');
             return createInstanceNoneDefaultConstructor(
                     valueMap == null
                             ? Collections.emptyMap()
@@ -198,7 +205,7 @@ class ObjectReaderNoneDefaultConstrutor<T>
                 continue;
             }
 
-            if (hashCode == HASH_TYPE && i == 0) {
+            if (hashCode == typeKeyHashCode && i == 0) {
                 long typeHash = jsonReader.readTypeHashCode();
                 if (typeHash == typeNameHash) {
                     continue;

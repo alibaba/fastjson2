@@ -35,7 +35,7 @@ public class ObjectReaderCreator {
             , FieldReader[] setterFieldReaders
     ) {
         Function<Map<Long, Object>, T> function = createFunction(constructor, paramNames);
-        return new ObjectReaderNoneDefaultConstrutor(objectClass, null, 0, function, null, paramNames, paramFieldReaders, setterFieldReaders);
+        return new ObjectReaderNoneDefaultConstrutor(objectClass, null, null, 0, function, null, paramNames, paramFieldReaders, setterFieldReaders);
     }
 
     public <T> ObjectReader<T> createObjectReaderNoneDefaultConstrutor(
@@ -44,13 +44,13 @@ public class ObjectReaderCreator {
             FieldReader... fieldReaders
     ) {
 
-        return new ObjectReaderNoneDefaultConstrutor(objectClass, null, 0, creator, null, null, fieldReaders, null);
+        return new ObjectReaderNoneDefaultConstrutor(objectClass, null, null, 0, creator, null, null, fieldReaders, null);
     }
 
     public <T> ObjectReader<T> createObjectReaderFactoryMethod(Method factoryMethod, String... paramNames) {
         Function<Map<Long, Object>, Object> factoryFunction = createFactoryFunction(factoryMethod, paramNames);
         FieldReader[] fieldReaders = createFieldReaders(factoryMethod.getParameters(), paramNames);
-        return new ObjectReaderNoneDefaultConstrutor(null, null, 0, factoryFunction, null, paramNames, fieldReaders, null);
+        return new ObjectReaderNoneDefaultConstrutor(null, null, null, 0, factoryFunction, null, paramNames, fieldReaders, null);
     }
 
     public FieldReader[] createFieldReaders(Parameter[] parameters, String... paramNames) {
@@ -345,7 +345,16 @@ public class ObjectReaderCreator {
         Arrays.sort(setterFieldReaders);
         Arrays.sort(fieldReaderArray);
 
-        return (ObjectReader<T>) new ObjectReaderNoneDefaultConstrutor(objectClass, beanInfo.typeName, beanInfo.readerFeatures, function, null, paramNames, fieldReaderArray, setterFieldReaders);
+        return (ObjectReader<T>) new ObjectReaderNoneDefaultConstrutor(
+                objectClass,
+                beanInfo.typeKey,
+                beanInfo.typeName,
+                beanInfo.readerFeatures,
+                function,
+                null,
+                paramNames,
+                fieldReaderArray,
+                setterFieldReaders);
     }
 
     public <T> ObjectReader<T> createObjectReader(
@@ -626,6 +635,7 @@ public class ObjectReaderCreator {
                 FieldReader[] paramFieldReaders = createFieldReaders(creatorConstructor.getParameters(), parameterNames);
                 return new ObjectReaderNoneDefaultConstrutor(
                         objectClass
+                        , beanInfo.typeKey
                         , beanInfo.typeName
                         , beanInfo.readerFeatures
                         , function

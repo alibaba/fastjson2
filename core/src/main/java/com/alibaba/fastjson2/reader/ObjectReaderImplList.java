@@ -419,10 +419,9 @@ public final class ObjectReaderImplList implements ObjectReader {
             throw new JSONException("illegal input, offset " + jsonReader.getOffset() + ", " + str);
         }
 
-        if (ch != '[') {
+        if (!jsonReader.nextIfMatch('[')) {
             throw new JSONException("illegal input, offset " + jsonReader.getOffset() + ", char " + ch);
         }
-        jsonReader.next();
 
         for (; ; ) {
             if (jsonReader.nextIfMatch(']')) {
