@@ -75,6 +75,10 @@ public class JDKUtilsTest {
         }
     }
 
+    static BiFunction<byte[], Charset, String> stringCreatorJDK17 = null;
+    static Function<byte[], String> stringCreatorJDK11 = null;
+    static BiFunction<char[], Boolean, String> stringCreatorJDK8 = null;
+
     public String formatYYYYMMDD(Calendar calendar) throws Throwable {
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1;
@@ -94,11 +98,17 @@ public class JDKUtilsTest {
             byte[] bytes = new byte[]{y0, y1, y2, y3, m0, m1, d0, d1};
 
             if (JDKUtils.JVM_VERSION == 17) {
-                return JDKUtils.getStringCreatorJDK17().apply(bytes, StandardCharsets.US_ASCII);
+                if (stringCreatorJDK17 == null) {
+                    stringCreatorJDK17 = JDKUtils.getStringCreatorJDK17();
+                }
+                return stringCreatorJDK17.apply(bytes, StandardCharsets.US_ASCII);
             }
 
             if (JDKUtils.JVM_VERSION <= 11) {
-                return JDKUtils.getStringCreatorJDK11().apply(bytes);
+                if (stringCreatorJDK11 == null) {
+                    stringCreatorJDK11 = JDKUtils.getStringCreatorJDK11();
+                }
+                return stringCreatorJDK11.apply(bytes);
             }
 
             return new String(bytes, StandardCharsets.US_ASCII);
@@ -116,7 +126,10 @@ public class JDKUtilsTest {
         };
 
         if (JDKUtils.JVM_VERSION == 8) {
-            return JDKUtils.getStringCreatorJDK8().apply(chars, true);
+            if (stringCreatorJDK8 == null) {
+                stringCreatorJDK8 = JDKUtils.getStringCreatorJDK8();
+            }
+            return stringCreatorJDK8.apply(chars, true);
         }
 
         return new String(chars);
