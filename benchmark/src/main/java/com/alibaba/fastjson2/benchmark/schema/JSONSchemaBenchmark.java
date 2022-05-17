@@ -12,6 +12,7 @@ public class JSONSchemaBenchmark {
     final static JSONSchema SCHEMA_DATE = JSONObject.of("type", "string", "format", "date").to(JSONSchema::of);
     final static JSONSchema SCHEMA_TIME = JSONObject.of("type", "string", "format", "time").to(JSONSchema::of);
     final static JSONSchema SCHEMA_NUMBER = JSONObject.of("type", "number", "minimum", 10).to(JSONSchema::of);
+    final static JSONSchema SCHEMA_INTEGER = JSONObject.of("type", "integer", "minimum", 10).to(JSONSchema::of);
 
     @Benchmark
     public void format_uuid(Blackhole bh) {
@@ -43,12 +44,17 @@ public class JSONSchemaBenchmark {
 
     public static void format_perf() {
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000 * 10; ++i) {
+        for (int i = 0; i < 1000 * 1000 * 100; ++i) {
 //            SCHEMA_UUID.isValid("a7f41390-39a9-4ca6-a13b-88cf07a41108");
 //            SCHEMA_DATETIME.isValid("2017-07-21 12:13:14"); // 123
 //            SCHEMA_DATE.isValid("2017-07-21"); // 48
 //            SCHEMA_TIME.isValid("12:13:14"); //
-            SCHEMA_NUMBER.isValid(9); //
+//            SCHEMA_NUMBER.isValid(9); // 42
+//            SCHEMA_NUMBER.isValid(11); // 302 120
+//            SCHEMA_NUMBER.isValid(11D); //
+            SCHEMA_NUMBER.isValid(9D); //
+//            SCHEMA_INTEGER.isValid(9); // 87
+//            SCHEMA_INTEGER.isValid(11); //
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("millis : " + millis);

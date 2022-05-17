@@ -34,6 +34,10 @@ final class FieldReaderFloatValueMethod<T> extends FieldReaderObjectMethod<T> {
             value = 0F;
         }
 
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             method.invoke(object, value);
         } catch (Exception e) {
@@ -43,6 +47,10 @@ final class FieldReaderFloatValueMethod<T> extends FieldReaderObjectMethod<T> {
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             method.invoke(object, (float) value);
         } catch (Exception e) {

@@ -181,6 +181,26 @@ public abstract class JSONSchema {
                 .isSuccess();
     }
 
+    public boolean isValid(double value) {
+        return validate(value)
+                .isSuccess();
+    }
+
+    public boolean isValid(Double value) {
+        return validate(value)
+                .isSuccess();
+    }
+
+    public boolean isValid(float value) {
+        return validate(value)
+                .isSuccess();
+    }
+
+    public boolean isValid(Float value) {
+        return validate(value)
+                .isSuccess();
+    }
+
     public boolean isValid(Integer value) {
         return validate(value)
                 .isSuccess();
@@ -193,6 +213,18 @@ public abstract class JSONSchema {
 
     public ValidateResult validate(long value) {
         return validate((Object) Long.valueOf(value));
+    }
+
+    public ValidateResult validate(double value) {
+        return validate((Object) Double.valueOf(value));
+    }
+
+    public ValidateResult validate(Float value) {
+        return validate((Object) value);
+    }
+
+    public ValidateResult validate(Double value) {
+        return validate((Object) value);
     }
 
     public ValidateResult validate(Integer value) {
@@ -227,7 +259,31 @@ public abstract class JSONSchema {
         throw new JSONSchemaValidException(result.getMessage());
     }
 
+    public void assertValidate(Double value) {
+        ValidateResult result = validate(value);
+        if (result.isSuccess()) {
+            return;
+        }
+        throw new JSONSchemaValidException(result.getMessage());
+    }
+
+    public void assertValidate(Float value) {
+        ValidateResult result = validate(value);
+        if (result.isSuccess()) {
+            return;
+        }
+        throw new JSONSchemaValidException(result.getMessage());
+    }
+
     public void assertValidate(long value) {
+        ValidateResult result = validate(value);
+        if (result.isSuccess()) {
+            return;
+        }
+        throw new JSONSchemaValidException(result.getMessage());
+    }
+
+    public void assertValidate(double value) {
         ValidateResult result = validate(value);
         if (result.isSuccess()) {
             return;
@@ -774,35 +830,44 @@ public abstract class JSONSchema {
     }
 
     static final class IntegerSchema extends JSONSchema {
-        final Long minimum;
-        final Long exclusiveMinimum;
-        final Long maximum;
-        final Long exclusiveMaximum;
-        final Long multipleOf;
+        final long minimum;
+        final boolean exclusiveMinimum;
+
+        final long maximum;
+        final boolean exclusiveMaximum;
+
+        final long multipleOf;
 
         IntegerSchema(JSONObject input) {
             super(input);
             Object exclusiveMinimum = input.get("exclusiveMinimum");
-            Long minimum = input.getLong("minimum");
+
+            long minimum = input.getLongValue("minimum", Long.MIN_VALUE);
             if (exclusiveMinimum == Boolean.TRUE) {
-                this.minimum = null;
-                this.exclusiveMinimum = minimum;
+                this.exclusiveMinimum = true;
+                this.minimum = minimum;
+            } else if (exclusiveMinimum instanceof Number) {
+                this.exclusiveMinimum = true;
+                this.minimum = input.getLongValue("exclusiveMinimum");
             } else {
                 this.minimum = minimum;
-                this.exclusiveMinimum = input.getLong("exclusiveMinimum");;
+                this.exclusiveMinimum = false;
             }
 
-            Long maximum = input.getLong("maximum");
+            long maximum = input.getLongValue("maximum", Long.MIN_VALUE);
             Object exclusiveMaximum = input.get("exclusiveMaximum");
             if (exclusiveMaximum == Boolean.TRUE) {
-                this.maximum = null;
-                this.exclusiveMaximum = maximum;
-            } else {
+                this.exclusiveMaximum = true;
                 this.maximum = maximum;
-                this.exclusiveMaximum = input.getLong("exclusiveMaximum");
+            } else if (exclusiveMaximum instanceof Number) {
+                this.exclusiveMaximum = true;
+                this.maximum = input.getLongValue("exclusiveMaximum");
+            } else {
+                this.exclusiveMaximum = false;
+                this.maximum = maximum;
             }
 
-            this.multipleOf = input.getLong("multipleOf");
+            this.multipleOf = input.getLongValue("multipleOf", 0);
         }
 
         @Override
@@ -825,37 +890,23 @@ public abstract class JSONSchema {
                     || valueClass == AtomicInteger.class
                     || valueClass == AtomicLong.class
             ) {
-                if (minimum != null) {
+                if (minimum != Long.MIN_VALUE) {
                     long longValue = ((Number) value).longValue();
-                    if (longValue < minimum.longValue()) {
-                        return new MinimumFail(minimum , value, false);
+                    if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
+                        return new MinimumFail(minimum , value, exclusiveMinimum);
                     }
                 }
 
-                if (exclusiveMinimum != null) {
+                if (maximum != Long.MIN_VALUE) {
                     long longValue = ((Number) value).longValue();
-                    if (longValue <= exclusiveMinimum.longValue()) {
-                        return new MinimumFail(exclusiveMinimum , value, true);
+                    if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
+                        return new MaximumFail(maximum , value, exclusiveMaximum);
                     }
                 }
 
-                if (maximum != null) {
+                if (multipleOf != 0) {
                     long longValue = ((Number) value).longValue();
-                    if (longValue > maximum.longValue()) {
-                        return new MaximumFail(maximum , value, false);
-                    }
-                }
-
-                if (exclusiveMaximum != null) {
-                    long longValue = ((Number) value).longValue();
-                    if (longValue >= exclusiveMaximum.longValue()) {
-                        return new MaximumFail(exclusiveMaximum , value, true);
-                    }
-                }
-
-                if (multipleOf != null) {
-                    long longValue = ((Number) value).longValue();
-                    if (longValue % multipleOf.longValue() != 0) {
+                    if (longValue % multipleOf != 0) {
                         return new MultipleOfFail(multipleOf, (Number) value);
                     }
                 }
@@ -867,32 +918,20 @@ public abstract class JSONSchema {
 
         @Override
         public ValidateResult validate(long longValue) {
-            if (minimum != null) {
-                if (longValue < minimum.longValue()) {
-                    return new MinimumFail(minimum , longValue, false);
+            if (minimum != Long.MIN_VALUE) {
+                if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
+                    return new MinimumFail(minimum , longValue, exclusiveMinimum);
                 }
             }
 
-            if (exclusiveMinimum != null) {
-                if (longValue <= exclusiveMinimum.longValue()) {
-                    return new MinimumFail(exclusiveMinimum , longValue, true);
+            if (maximum != Long.MIN_VALUE) {
+                if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
+                    return new MaximumFail(maximum , longValue, exclusiveMaximum);
                 }
             }
 
-            if (maximum != null) {
-                if (longValue > maximum.longValue()) {
-                    return new MaximumFail(maximum , longValue, false);
-                }
-            }
-
-            if (exclusiveMaximum != null) {
-                if (longValue >= exclusiveMaximum.longValue()) {
-                    return new MaximumFail(exclusiveMaximum , longValue, true);
-                }
-            }
-
-            if (multipleOf != null) {
-                if (longValue % multipleOf.longValue() != 0) {
+            if (multipleOf != 0) {
+                if (longValue % multipleOf != 0) {
                     return new MultipleOfFail(multipleOf, longValue);
                 }
             }
@@ -906,32 +945,20 @@ public abstract class JSONSchema {
             }
 
             long longValue = value.longValue();
-            if (minimum != null) {
-                if (longValue < minimum.longValue()) {
-                    return new MinimumFail(minimum , value, false);
+            if (minimum != Long.MIN_VALUE) {
+                if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
+                    return new MinimumFail(minimum , value, exclusiveMinimum);
                 }
             }
 
-            if (exclusiveMinimum != null) {
-                if (longValue <= exclusiveMinimum.longValue()) {
-                    return new MinimumFail(exclusiveMinimum , value, true);
+            if (maximum != Long.MIN_VALUE) {
+                if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
+                    return new MaximumFail(maximum , value, exclusiveMaximum);
                 }
             }
 
-            if (maximum != null) {
-                if (longValue > maximum.longValue()) {
-                    return new MaximumFail(maximum , value, false);
-                }
-            }
-
-            if (exclusiveMaximum != null) {
-                if (longValue >= exclusiveMaximum.longValue()) {
-                    return new MaximumFail(exclusiveMaximum , value, true);
-                }
-            }
-
-            if (multipleOf != null) {
-                if (longValue % multipleOf.longValue() != 0) {
+            if (multipleOf != 0) {
+                if (longValue % multipleOf != 0) {
                     return new MultipleOfFail(multipleOf, longValue);
                 }
             }
@@ -945,32 +972,20 @@ public abstract class JSONSchema {
             }
 
             long longValue = value.longValue();
-            if (minimum != null) {
-                if (longValue < minimum.longValue()) {
-                    return new MinimumFail(minimum , value, false);
+            if (minimum != Long.MIN_VALUE) {
+                if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
+                    return new MinimumFail(minimum , value, exclusiveMinimum);
                 }
             }
 
-            if (exclusiveMinimum != null) {
-                if (longValue <= exclusiveMinimum.longValue()) {
-                    return new MinimumFail(exclusiveMinimum , value, true);
+            if (maximum != Long.MIN_VALUE) {
+                if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
+                    return new MaximumFail(maximum , value, exclusiveMaximum);
                 }
             }
 
-            if (maximum != null) {
-                if (longValue > maximum.longValue()) {
-                    return new MaximumFail(maximum , value, false);
-                }
-            }
-
-            if (exclusiveMaximum != null) {
-                if (longValue >= exclusiveMaximum.longValue()) {
-                    return new MaximumFail(exclusiveMaximum , value, true);
-                }
-            }
-
-            if (multipleOf != null) {
-                if (longValue % multipleOf.longValue() != 0) {
+            if (multipleOf != 0) {
+                if (longValue % multipleOf != 0) {
                     return new MultipleOfFail(multipleOf, longValue);
                 }
             }
@@ -1000,9 +1015,13 @@ public abstract class JSONSchema {
 
     static final class NumberSchema extends JSONSchema {
         final BigDecimal minimum;
-        final BigDecimal exclusiveMinimum;
+        final long minimumLongValue;
+        final boolean exclusiveMinimum;
+
         final BigDecimal maximum;
-        final BigDecimal exclusiveMaximum;
+        final long maximumLongValue;
+        final boolean exclusiveMaximum;
+
         final BigInteger multipleOf;
 
         NumberSchema(JSONObject input) {
@@ -1011,22 +1030,41 @@ public abstract class JSONSchema {
             Object exclusiveMinimum = input.get("exclusiveMinimum");
             BigDecimal minimum = input.getBigDecimal("minimum");
             if (exclusiveMinimum == Boolean.TRUE) {
-                this.minimum = null;
-                this.exclusiveMinimum = minimum;
+                this.minimum = minimum;
+                this.exclusiveMinimum = true;
+            } else if (exclusiveMinimum instanceof Number) {
+                this.minimum = input.getBigDecimal("exclusiveMinimum");
+                this.exclusiveMinimum = true;
             } else {
                 this.minimum = minimum;
-                this.exclusiveMinimum = input.getBigDecimal("exclusiveMinimum");;
+                this.exclusiveMinimum = false;
+            }
+
+            if (this.minimum == null || !this.minimum.equals(BigDecimal.valueOf(this.minimum.longValue()))) {
+                minimumLongValue = Long.MIN_VALUE;
+            } else {
+                minimumLongValue = this.minimum.longValue();
             }
 
             BigDecimal maximum = input.getBigDecimal("maximum");
             Object exclusiveMaximum = input.get("exclusiveMaximum");
             if (exclusiveMaximum == Boolean.TRUE) {
-                this.maximum = null;
-                this.exclusiveMaximum = maximum;
+                this.maximum = maximum;
+                this.exclusiveMaximum = true;
+            } else if (exclusiveMaximum instanceof Number) {
+                this.maximum = input.getBigDecimal("exclusiveMaximum");
+                this.exclusiveMaximum = true;
             } else {
                 this.maximum = maximum;
-                this.exclusiveMaximum = input.getBigDecimal("exclusiveMaximum");
+                this.exclusiveMaximum = false;
             }
+
+            if (this.maximum == null || !this.maximum.equals(BigDecimal.valueOf(this.maximum.longValue()))) {
+                maximumLongValue = Long.MIN_VALUE;
+            } else {
+                maximumLongValue = this.maximum.longValue();
+            }
+
             this.multipleOf = input.getBigInteger("multipleOf");
         }
 
@@ -1044,12 +1082,17 @@ public abstract class JSONSchema {
             if (value instanceof Number) {
                 Number number = (Number) value;
 
-                BigDecimal decimalValue;
+
                 if (number instanceof Byte || number instanceof Short || number instanceof Integer || number instanceof Long) {
-                    decimalValue = BigDecimal.valueOf(number.longValue());
-                } else if (number instanceof Float || number instanceof Double) {
-                    decimalValue = BigDecimal.valueOf((double) number.doubleValue());
-                } else if (number instanceof BigInteger) {
+                    return validate(number.longValue());
+                }
+
+                if (number instanceof Float || number instanceof Double) {
+                    return validate(number.doubleValue());
+                }
+
+                BigDecimal decimalValue;
+                if (number instanceof BigInteger) {
                     decimalValue = new BigDecimal((BigInteger) number);
                 } else if (number instanceof BigDecimal) {
                     decimalValue = (BigDecimal) number;
@@ -1058,39 +1101,142 @@ public abstract class JSONSchema {
                 }
 
                 if (minimum != null) {
-                    if (minimum.compareTo(decimalValue) > 0) {
-                        return new MinimumFail(minimum, number, false);
-                    }
-                }
-
-                if (exclusiveMinimum != null) {
-                    if (exclusiveMinimum.compareTo(decimalValue) >= 0) {
-                        return new MinimumFail(exclusiveMinimum, number, true);
+                    if (exclusiveMinimum
+                            ? minimum.compareTo(decimalValue) >= 0
+                            : minimum.compareTo(decimalValue) > 0) {
+                        return new MinimumFail(minimum, decimalValue, exclusiveMinimum);
                     }
                 }
 
                 if (maximum != null) {
-                    if (maximum.compareTo(decimalValue) < 0) {
-                        return new MaximumFail(maximum , minimum, false);
-                    }
-                }
-
-                if (exclusiveMaximum != null) {
-                    if (exclusiveMaximum.compareTo(decimalValue) <= 0) {
-                        return new MaximumFail(exclusiveMaximum , minimum, true);
+                    if (exclusiveMaximum
+                            ? maximum.compareTo(decimalValue) <= 0
+                            : maximum.compareTo(decimalValue) < 0) {
+                        return new MaximumFail(maximum, decimalValue, exclusiveMaximum);
                     }
                 }
 
                 if (multipleOf != null) {
                     BigInteger bigInteger = decimalValue.toBigInteger();
                     if (!decimalValue.equals(new BigDecimal(bigInteger)) || !bigInteger.mod(multipleOf).equals(BigInteger.ZERO)) {
-                        return new MultipleOfFail(multipleOf, number);
+                        return new MultipleOfFail(multipleOf, decimalValue);
                     }
                 }
                 return SUCCESS;
             }
 
             return new TypeNotMatchFail(Type.Number, value.getClass());
+        }
+
+        @Override
+        public ValidateResult validate(Integer value) {
+            if (value == null) {
+                return FAIL_INPUT_NULL;
+            }
+
+            return validate(value.longValue());
+        }
+
+        public ValidateResult validate(Float value) {
+            if (value == null) {
+                return FAIL_INPUT_NULL;
+            }
+
+            return validate(value.doubleValue());
+        }
+
+        public ValidateResult validate(Double value) {
+            if (value == null) {
+                return FAIL_INPUT_NULL;
+            }
+
+            return validate(value.doubleValue());
+        }
+
+        @Override
+        public ValidateResult validate(Long value) {
+            if (value == null) {
+                return FAIL_INPUT_NULL;
+            }
+
+            return validate(value.longValue());
+        }
+
+        @Override
+        public ValidateResult validate(long value) {
+            BigDecimal decimalValue = BigDecimal.valueOf(value);
+
+            if (minimum != null) {
+                if (minimumLongValue != Long.MIN_VALUE) {
+                    if (exclusiveMinimum ? value <= minimumLongValue : value < minimumLongValue) {
+                        return new MinimumFail(minimum, decimalValue, exclusiveMinimum);
+                    }
+                } else {
+                    if (exclusiveMinimum
+                            ? minimum.compareTo(decimalValue) >= 0
+                            : minimum.compareTo(decimalValue) > 0) {
+                        return new MinimumFail(minimum, decimalValue, exclusiveMaximum);
+                    }
+                }
+            }
+
+            if (maximum != null) {
+                if (maximumLongValue != Long.MIN_VALUE) {
+                    if (exclusiveMaximum ? value >= maximumLongValue : value > maximumLongValue) {
+                        return new MaximumFail(maximum, minimum, exclusiveMinimum);
+                    }
+                } else if (exclusiveMaximum
+                        ? maximum.compareTo(decimalValue) <= 0
+                        : maximum.compareTo(decimalValue) < 0) {
+                    return new MaximumFail(maximum, minimum, exclusiveMaximum);
+                }
+            }
+
+            if (multipleOf != null) {
+                BigInteger bigInteger = decimalValue.toBigInteger();
+                if (!decimalValue.equals(new BigDecimal(bigInteger)) || !bigInteger.mod(multipleOf).equals(BigInteger.ZERO)) {
+                    return new MultipleOfFail(multipleOf, decimalValue);
+                }
+            }
+            return SUCCESS;
+        }
+
+        @Override
+        public ValidateResult validate(double value) {
+
+            if (minimum != null) {
+                if (minimumLongValue != Long.MIN_VALUE) {
+                    if (exclusiveMinimum ? value <= minimumLongValue : value < minimumLongValue) {
+                        return new MinimumFail(minimum, value, exclusiveMinimum);
+                    }
+                } else {
+                    double minimumDoubleValue = minimum.doubleValue();
+                    if (exclusiveMinimum ? value <= minimumDoubleValue : value < minimumDoubleValue) {
+                        return new MinimumFail(minimum, value, exclusiveMinimum);
+                    }
+                }
+            }
+
+            if (maximum != null) {
+                if (maximumLongValue != Long.MIN_VALUE) {
+                    if (exclusiveMaximum ? value >= maximumLongValue : value > maximumLongValue) {
+                        return new MaximumFail(maximum, value, exclusiveMinimum);
+                    }
+                } else {
+                    double maximumDoubleValue = maximum.doubleValue();
+                    if (exclusiveMaximum ? value >= maximumDoubleValue : value > maximumDoubleValue) {
+                        return new MaximumFail(maximum, value, exclusiveMinimum);
+                    }
+                }
+            }
+
+            if (multipleOf != null) {
+                long multipleOfLongValue = multipleOf.longValue();
+                if (value % multipleOfLongValue != 0) {
+                    return new MultipleOfFail(multipleOf, value);
+                }
+            }
+            return SUCCESS;
         }
 
         @Override
