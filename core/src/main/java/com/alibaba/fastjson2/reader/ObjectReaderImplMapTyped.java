@@ -30,6 +30,10 @@ class ObjectReaderImplMapTyped implements ObjectReader {
     ObjectReader keyObjectReader = null;
 
     public ObjectReaderImplMapTyped(Class mapType, Class instanceType, Type keyType, Type valueType, long features, Function builder) {
+        if (keyType == Object.class) {
+            keyType = null;
+        }
+
         this.mapType = mapType;
         this.instanceType = instanceType;
         this.keyType = keyType;
@@ -223,7 +227,13 @@ class ObjectReaderImplMapTyped implements ObjectReader {
                 break;
             }
 
-            Object name = jsonReader.readFieldName();
+            Object name;
+            if (keyType == String.class) {
+                name = jsonReader.readFieldName();
+            } else {
+                name = jsonReader.read(keyType);
+                jsonReader.nextIfMatch(':');
+            }
             if (valueObjectReader == null) {
                 valueObjectReader = jsonReader.getObjectReader(valueType);
             }
