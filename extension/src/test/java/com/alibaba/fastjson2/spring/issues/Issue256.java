@@ -1,7 +1,7 @@
-package com.alibaba.fastjson2.issues;
+package com.alibaba.fastjson2.spring.issues;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.support.spring.mongodb.GeoJsonReaderModule;
+import com.alibaba.fastjson2.support.spring.data.mongodb.GeoJsonReaderModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.geo.Point;
