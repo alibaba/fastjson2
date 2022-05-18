@@ -116,10 +116,10 @@ public class Issue239 {
     @JSONType(schema = "{'properties':{'longitude':{'type':'number','minimum':-180,'maximum':180},'latitude':{'type':'number','minimum':-90,'maximum':90}}}")
     public static class Point2 {
         @JSONField(schema = "{'minimum':-180,'maximum':180}")
-        public double longitude;
+        public float longitude;
 
 
         @JSONField(schema = "{'minimum':-90,'maximum':90}")
-        public double latitude;
+        public float latitude;
     }
 }
