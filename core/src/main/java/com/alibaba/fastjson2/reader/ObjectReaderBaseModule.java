@@ -1520,7 +1520,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     }
 
     public static ObjectReader typedMap(Class mapType, Class instanceType, Type keyType, Type valueType) {
-        if (valueType == String.class) {
+        if ((keyType == null || keyType == String.class) && valueType == String.class) {
             return new ObjectReaderImplMapString(mapType, instanceType, 0);
         }
         return new ObjectReaderImplMapTyped(mapType, instanceType, keyType, valueType, 0, null);
