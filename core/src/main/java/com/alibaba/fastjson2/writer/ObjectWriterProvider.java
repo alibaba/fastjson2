@@ -70,6 +70,8 @@ public class ObjectWriterProvider {
             }
         }
 
+        module.init(this);
+
         modules.add(0, module);
         return true;
     }
