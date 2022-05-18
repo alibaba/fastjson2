@@ -644,6 +644,14 @@ public abstract class JSONWriter implements Closeable {
 
     public abstract void writeDouble(double value);
 
+    public void writeDoubleArray(double value0, double value1) {
+        startArray();
+        writeDouble(value0);
+        writeComma();
+        writeDouble(value1);
+        endArray();
+    }
+
     public void writeDouble(double[] value) {
         if (value == null) {
             writeNull();

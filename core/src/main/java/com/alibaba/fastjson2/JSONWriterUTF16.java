@@ -881,6 +881,41 @@ class JSONWriterUTF16 extends JSONWriter {
         }
     }
 
+    public void writeDoubleArray(double value0, double value1) {
+        boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int minCapacity = off + 48 + 3;
+        if (writeNonStringValueAsString) {
+            minCapacity += 2;
+        }
+
+        ensureCapacity(minCapacity);
+
+        chars[off++] = '[';
+
+        if (writeNonStringValueAsString) {
+            chars[off++] = '"';
+        }
+        int len0 = RyuDouble.toString(value0, chars, off);
+        off += len0;
+        if (writeNonStringValueAsString) {
+            chars[off++] = '"';
+        }
+
+        chars[off++] = ',';
+
+        if (writeNonStringValueAsString) {
+            chars[off++] = '"';
+        }
+        int len1 = RyuDouble.toString(value1, chars, off);
+        off += len1;
+        if (writeNonStringValueAsString) {
+            chars[off++] = '"';
+        }
+
+        chars[off++] = ']';
+    }
+
     @Override
     public void writeDouble(double[] value) {
         if (value == null) {
