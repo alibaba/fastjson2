@@ -26,7 +26,7 @@ public class GeoJsonPointReader implements ObjectReader<GeoJsonPoint> {
         jsonReader.nextIfObjectStart();
 
         double x = 0, y = 0;
-        for (;;) {
+        for (; ; ) {
             if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
