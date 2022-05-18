@@ -1069,20 +1069,20 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         if (type == ConcurrentMap.class || type == ConcurrentHashMap.class) {
-            return typedMap((Class) type, ConcurrentHashMap.class, Object.class);
+            return typedMap((Class) type, ConcurrentHashMap.class, null, Object.class);
         }
 
         if (type == ConcurrentNavigableMap.class
                 || type == ConcurrentSkipListMap.class
         ) {
-            return typedMap((Class) type, ConcurrentSkipListMap.class, Object.class);
+            return typedMap((Class) type, ConcurrentSkipListMap.class, null, Object.class);
         }
 
         if (type == SortedMap.class
                 || type == NavigableMap.class
                 || type == TreeMap.class
         ) {
-            return typedMap((Class) type, TreeMap.class, Object.class);
+            return typedMap((Class) type, TreeMap.class, null, Object.class);
         }
 
         if (type == Calendar.class || "javax.xml.datatype.XMLGregorianCalendar".equals(typeName)) {
@@ -1348,23 +1348,23 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                         || rawType == AbstractMap.class
                         || rawType == HashMap.class
                 ) {
-                    return typedMap((Class) rawType, HashMap.class, actualTypeParam1);
+                    return typedMap((Class) rawType, HashMap.class, actualTypeParam0, actualTypeParam1);
                 }
 
                 if (rawType == ConcurrentMap.class
                         || rawType == ConcurrentHashMap.class
                 ) {
-                    return typedMap((Class) rawType, ConcurrentHashMap.class, actualTypeParam1);
+                    return typedMap((Class) rawType, ConcurrentHashMap.class, actualTypeParam0, actualTypeParam1);
                 }
 
                 if (rawType == ConcurrentNavigableMap.class
                         || rawType == ConcurrentSkipListMap.class
                 ) {
-                    return typedMap((Class) rawType, ConcurrentSkipListMap.class, actualTypeParam1);
+                    return typedMap((Class) rawType, ConcurrentSkipListMap.class, actualTypeParam0, actualTypeParam1);
                 }
 
                 if (rawType == LinkedHashMap.class || rawType == TreeMap.class) {
-                    return typedMap((Class) rawType, (Class) rawType, actualTypeParam1);
+                    return typedMap((Class) rawType, (Class) rawType, actualTypeParam0, actualTypeParam1);
                 }
 
                 if (rawType == Map.Entry.class) {
@@ -1519,11 +1519,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         return null;
     }
 
-    public static ObjectReader typedMap(Class mapType, Class instanceType, Type valueType) {
+    public static ObjectReader typedMap(Class mapType, Class instanceType, Type keyType, Type valueType) {
         if (valueType == String.class) {
             return new ObjectReaderImplMapString(mapType, instanceType, 0);
         }
-        return new ObjectReaderImplMapTyped(mapType, instanceType, null, valueType, 0, null);
+        return new ObjectReaderImplMapTyped(mapType, instanceType, keyType, valueType, 0, null);
     }
 
     static abstract class PrimitiveImpl<T> implements ObjectReader<T> {
