@@ -90,10 +90,33 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         {
-            provider.registerTypeConvert(double.class, Double.class, NUMBER_TO_DOUBLE);
-            provider.registerTypeConvert(Byte.class, Double.class, NUMBER_TO_DOUBLE);
+            provider.registerTypeConvert(float.class, Float.class, NUMBER_TO_FLOAT);
+            provider.registerTypeConvert(Byte.class, Float.class, NUMBER_TO_FLOAT);
+            provider.registerTypeConvert(Short.class, Float.class, NUMBER_TO_FLOAT);
+            provider.registerTypeConvert(Integer.class, Float.class, NUMBER_TO_FLOAT);
+            provider.registerTypeConvert(Long.class, Float.class, NUMBER_TO_FLOAT);
+            provider.registerTypeConvert(Float.class, Float.class, NUMBER_TO_FLOAT);
+            provider.registerTypeConvert(Double.class, Float.class, NUMBER_TO_FLOAT);
         }
 
+        {
+            provider.registerTypeConvert(Byte.class, float.class, NUMBER_TO_FLOAT_VALUE);
+            provider.registerTypeConvert(Short.class, float.class, NUMBER_TO_FLOAT_VALUE);
+            provider.registerTypeConvert(Integer.class, float.class, NUMBER_TO_FLOAT_VALUE);
+            provider.registerTypeConvert(Long.class, float.class, NUMBER_TO_FLOAT_VALUE);
+            provider.registerTypeConvert(Float.class, float.class, NUMBER_TO_FLOAT_VALUE);
+            provider.registerTypeConvert(Double.class, float.class, NUMBER_TO_FLOAT_VALUE);
+        }
+
+        {
+            provider.registerTypeConvert(double.class, Double.class, NUMBER_TO_DOUBLE);
+            provider.registerTypeConvert(Byte.class, Double.class, NUMBER_TO_DOUBLE);
+            provider.registerTypeConvert(Short.class, Double.class, NUMBER_TO_DOUBLE);
+            provider.registerTypeConvert(Integer.class, Double.class, NUMBER_TO_DOUBLE);
+            provider.registerTypeConvert(Long.class, Double.class, NUMBER_TO_DOUBLE);
+            provider.registerTypeConvert(Float.class, Double.class, NUMBER_TO_DOUBLE);
+            provider.registerTypeConvert(Double.class, Double.class, NUMBER_TO_DOUBLE);
+        }
 
         {
             provider.registerTypeConvert(Byte.class, double.class, NUMBER_TO_DOUBLE_VALUE);
