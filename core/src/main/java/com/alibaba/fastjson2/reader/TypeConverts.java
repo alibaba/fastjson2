@@ -15,6 +15,8 @@ public class TypeConverts {
     public static final Function<Number, Integer> NUMBER_TO_INTEGER = o -> o == null ? null : o.intValue();
     public static final Function<Number, Integer> NUMBER_TO_INTEGER_VALUE = o -> o == null ? 0 : ((Number) o).intValue();
     public static final Function<Number, Long> NUMBER_TO_LONG = o -> o == null ? 0 : o.longValue();
+    public static final Function<Number, Double> NUMBER_TO_DOUBLE = o -> o == null ? null : o.doubleValue();
+    public static final Function<Number, Double> NUMBER_TO_DOUBLE_VALUE = o -> o == null ? 0D : o.doubleValue();
     public static final Function<BigDecimal, Integer> DECIMAL_TO_INTEGER = o -> o == null ? null : ((BigDecimal) o).intValueExact();
 
     static class StringToAny implements Function {
