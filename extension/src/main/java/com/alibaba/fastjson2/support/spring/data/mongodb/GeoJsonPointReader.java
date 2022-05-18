@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.support.spring.mongodb;
+package com.alibaba.fastjson2.support.spring.data.mongodb;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
@@ -26,7 +26,7 @@ public class GeoJsonPointReader implements ObjectReader<GeoJsonPoint> {
         jsonReader.nextIfObjectStart();
 
         double x = 0, y = 0;
-        for (;;) {
+        for (; ; ) {
             if (jsonReader.nextIfObjectEnd()) {
                 break;
             }

@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.support.spring.mongodb;
+package com.alibaba.fastjson2.support.spring.data.mongodb;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.util.Fnv;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonLineString;
-import org.springframework.data.mongodb.core.geo.GeoJsonMultiPoint;
 import org.springframework.data.mongodb.core.geo.GeoJsonPolygon;
 
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public class GeoJsonPolygonReader implements ObjectReader<GeoJsonPolygon> {
 
         List<Point> points = new ArrayList<>();
 
-        for (;;) {
+        for (; ; ) {
             if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
