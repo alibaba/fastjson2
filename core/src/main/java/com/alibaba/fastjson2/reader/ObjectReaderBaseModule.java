@@ -222,6 +222,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                     case "com.alibaba.fastjson.annotation.JSONType":
                         getBeanInfo1x(beanInfo, annotation);
                         break;
+                    case "kotlin.Metadata":
+                        beanInfo.kotlin = true;
+                        break;
                     default:
                         break;
                 }
@@ -234,6 +237,10 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             BeanUtils.constructor(objectClass, constructor ->
                     getCreator(beanInfo, objectClass, constructor)
             );
+
+            if (beanInfo.creatorConstructor == null && beanInfo.kotlin) {
+                beanInfo.creatorConstructor = BeanUtils.getKotlinConstructor(objectClass, beanInfo.createParameterNames);
+            }
         }
 
         private void getBeanInfo(BeanInfo beanInfo, Annotation[] annotations) {
