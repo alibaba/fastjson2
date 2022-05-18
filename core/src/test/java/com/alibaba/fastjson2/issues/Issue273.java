@@ -8,21 +8,31 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue273 {
     @Test
     public void test() {
-        Map<Integer, Long> map = new HashMap<>();
-        map.put(1, 111L);
-        map.put(2, 222L);
-        String json = JSON.toJSONString(map, JSONWriter.Feature.WriteNonStringValueAsString);
+        Map<Integer, Long> map0 = new HashMap<>();
+        map0.put(1, 111L);
+        map0.put(2, 222L);
+        String json = JSON.toJSONString(map0);
 
-        Type type = new TypeReference<HashMap<Integer, Long>>() {}.getType();
-        Map<Integer, Long> parseObject = JSON.parseObject(json, type);
+        Type type1 = new TypeReference<HashMap<Integer, Long>>() {}.getType();
+        Map<Integer, Long> map1 = JSON.parseObject(json, type1);
+        assertEquals(111L, map1.get(1));
+        assertEquals(222L, map1.get(2));
 
-        assertEquals(111L, parseObject.get(1));
-        assertEquals(222L, parseObject.get(2));
+        Type type2 = new TypeReference<Map<Integer, String>>() {}.getType();
+        Map<Integer, String> map2 = JSON.parseObject(json, type2);
+        assertEquals("111", map2.get(1));
+        assertEquals("222", map2.get(2));
+
+        Type type3 = new TypeReference<TreeMap<Long, Short>>() {}.getType();
+        TreeMap<Integer, String> map3 = JSON.parseObject(json, type3);
+        assertEquals((short) 111, map3.get(1L));
+        assertEquals((short) 222, map3.get(2L));
     }
 }
