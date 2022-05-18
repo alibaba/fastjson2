@@ -527,7 +527,7 @@ public class ObjectReaderCreator {
             fieldBased = false;
         }
 
-        JSONSchema jsonSchema = JSONSchema.of(JSON.parseObject(beanInfo.schema), objectClass);
+
 
         FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType, beanInfo, fieldBased, modules);
 
@@ -665,6 +665,7 @@ public class ObjectReaderCreator {
             );
         }
 
+        JSONSchema jsonSchema = JSONSchema.of(JSON.parseObject(beanInfo.schema), objectClass);
         return createObjectReader(
                 objectClass
                 , beanInfo.typeKey

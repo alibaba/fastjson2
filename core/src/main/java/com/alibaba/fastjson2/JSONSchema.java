@@ -119,6 +119,12 @@ public abstract class JSONSchema {
         }
     }
 
+    public static JSONSchema of(String schema) {
+        return of(
+                JSON.parseObject(schema)
+        );
+    }
+
     public static JSONSchema of(JSONObject input) {
         Type type = input.getObject("type", Type.class);
         if (type == null) {
@@ -1889,6 +1895,26 @@ public abstract class JSONSchema {
                         }
                     }
                     return new RequiredFail(fieldName);
+                }
+            }
+
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
+                String key = entry.getKey();
+                long keyHash = Fnv.hashCode64(key);
+
+                JSONSchema schema = (JSONSchema) entry.getValue();
+
+                FieldWriter fieldWriter = objectWriter.getFieldWriter(keyHash);
+                if (fieldWriter != null) {
+                    Object propertyValue = fieldWriter.getFieldValue(value);
+                    if (propertyValue == null) {
+                        continue;
+                    }
+
+                    ValidateResult result = schema.validate(propertyValue);
+                    if (!result.isSuccess()) {
+                        return result;
+                    }
                 }
             }
 

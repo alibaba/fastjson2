@@ -90,6 +90,21 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         {
+            provider.registerTypeConvert(double.class, Double.class, NUMBER_TO_DOUBLE);
+            provider.registerTypeConvert(Byte.class, Double.class, NUMBER_TO_DOUBLE);
+        }
+
+
+        {
+            provider.registerTypeConvert(Byte.class, double.class, NUMBER_TO_DOUBLE_VALUE);
+            provider.registerTypeConvert(Short.class, double.class, NUMBER_TO_DOUBLE_VALUE);
+            provider.registerTypeConvert(Integer.class, double.class, NUMBER_TO_DOUBLE_VALUE);
+            provider.registerTypeConvert(Long.class, double.class, NUMBER_TO_DOUBLE_VALUE);
+            provider.registerTypeConvert(Float.class, double.class, NUMBER_TO_DOUBLE_VALUE);
+            provider.registerTypeConvert(Double.class, double.class, NUMBER_TO_DOUBLE_VALUE);
+        }
+
+        {
             // cast to BigInteger
             provider.registerTypeConvert(Long.class, BigInteger.class, o -> o == null ? null : BigInteger.valueOf(((Long) o).longValue()));
             provider.registerTypeConvert(Integer.class, BigInteger.class, o -> o == null ? null : BigInteger.valueOf(((Integer) o).intValue()));
