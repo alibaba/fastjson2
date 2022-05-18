@@ -631,10 +631,7 @@ public class ObjectReaderProvider {
         for (ObjectReaderModule module : modules) {
             objectReader = module.getObjectReader(this, objectType);
             if (objectReader != null) {
-                ObjectReader previous = fieldBased
-                        ? cacheFieldBased.putIfAbsent(objectType, objectReader)
-                        : cache.putIfAbsent(objectType, objectReader);
-
+                ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, objectReader);
                 if (previous != null) {
                     objectReader = previous;
                 }
