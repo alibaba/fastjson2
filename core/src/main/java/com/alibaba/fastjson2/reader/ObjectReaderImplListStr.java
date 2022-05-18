@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
@@ -34,6 +35,33 @@ public final class ObjectReaderImplListStr implements ObjectReader {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new JSONException("create list error, type " + instanceType);
         }
+    }
+
+    public Object createInstance(Collection collection) {
+        if (listType.isInstance(collection)) {
+            boolean typeMatch = true;
+            for (Object item : collection) {
+                if (!(item instanceof String)) {
+                    typeMatch = false;
+                    break;
+                }
+            }
+            if (typeMatch) {
+                return collection;
+            }
+        }
+
+        Collection typedList = (Collection) createInstance(0L);
+        for (Object item : collection) {
+            if (item == null || item instanceof String) {
+                typedList.add(item);
+                continue;
+            }
+            typedList.add(
+                    JSON.toJSONString(item)
+            );
+        }
+        return typedList;
     }
 
     @Override
