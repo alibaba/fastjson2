@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.support.spring.mongodb;
+package com.alibaba.fastjson2.support.spring.data.mongodb;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
