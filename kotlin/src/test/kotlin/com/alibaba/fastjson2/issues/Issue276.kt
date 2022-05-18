@@ -3,11 +3,32 @@ package com.alibaba.fastjson2.issues
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 
+import java.io.Serializable;
 import com.alibaba.fastjson2.*
 import com.alibaba.fastjson2.annotation.JSONField
-import com.alibaba.fastjson2.toJSONString
 
 class Issue276 {
+    @Test
+    fun test0() {
+        val json = """
+        {"access_token":"MTUZNGNKNMITZTVMMC0ZYTY0LWFIZJCTMZJLMDIYMMY4OGUW","scope":""}
+    """.trimIndent()
+        val accessTokenResponse = JSON.parseObject(json, AccessTokenResponse0::class.java)
+        assertEquals("MTUZNGNKNMITZTVMMC0ZYTY0LWFIZJCTMZJLMDIYMMY4OGUW", accessTokenResponse.accessToken)
+
+        assertEquals("{\"access_token\":\"MTUZNGNKNMITZTVMMC0ZYTY0LWFIZJCTMZJLMDIYMMY4OGUW\",\"scope\":\"\"}", JSON.toJSONString(accessTokenResponse));
+    }
+
+    data class AccessTokenResponse0 (
+        @JSONField(name = "access_token")
+        var accessToken: String? = null,
+        @JSONField(name = "expires_in")
+        var expiresIn: Int? = null,
+        @JSONField(name = "scope")
+        var scope: String? = null,
+        @JSONField(name = "token_type")
+        var tokenType: String? = null
+    ): Serializable
 
     @Test
     fun test() {

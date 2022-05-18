@@ -201,7 +201,7 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
                         if (annotationProcessor == null) {
                             continue;
                         }
-                        annotationProcessor.getFieldInfo(fieldInfo, objectClass, method);
+                        annotationProcessor.getFieldInfo(beanInfo, fieldInfo, objectClass, method);
                     }
                     if (fieldInfo.ignore) {
                         return;

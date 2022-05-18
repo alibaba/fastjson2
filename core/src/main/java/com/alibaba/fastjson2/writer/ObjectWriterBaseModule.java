@@ -63,6 +63,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     case "com.fasterxml.jackson.annotation.JsonIgnoreProperties":
                         processJacksonJsonIgnoreProperties(beanInfo, annotation);
                         break;
+                    case "kotlin.Metadata":
+                        beanInfo.kotlin = true;
+                        beanInfo.creatorConstructor = BeanUtils.getKotlinConstructor(objectClass, null);
+                        beanInfo.createParameterNames = BeanUtils.getKotlinConstructorParameters(objectClass);
+                        break;
                     default:
                         break;
                 }
@@ -168,7 +173,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
         }
 
         @Override
-        public void getFieldInfo(FieldInfo fieldInfo, Class objectType, Field field) {
+        public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectType, Field field) {
             Class mixInSource = provider.mixInCache.get(objectType);
             if (objectType != null) {
                 String typeName = objectType.getName();
@@ -189,7 +194,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 }
 
                 if (mixInField != null) {
-                    getFieldInfo(fieldInfo, mixInSource, mixInField);
+                    getFieldInfo(beanInfo, fieldInfo, mixInSource, mixInField);
                 }
             }
 
@@ -399,7 +404,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
         }
 
         @Override
-        public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method) {
+        public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectClass, Method method) {
             Class mixInSource = provider.mixInCache.get(objectClass);
             String methodName = method.getName();
 
@@ -411,7 +416,7 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 }
 
                 if (mixInMethod != null) {
-                    getFieldInfo(fieldInfo, mixInSource, mixInMethod);
+                    getFieldInfo(beanInfo, fieldInfo, mixInSource, mixInMethod);
                 }
             }
 
@@ -424,13 +429,43 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                 fieldInfo.ignore = true;
             }
 
-            JSONField jsonField = null;
             Annotation[] annotations = method.getAnnotations();
+            processAnnotations(fieldInfo, annotations);
+
+
+            if (!objectClass.getName().startsWith("java.lang") && !BeanUtils.isRecord(objectClass)) {
+                String fieldName = BeanUtils.getterName(methodName, null);
+
+                BeanUtils.declaredFields(objectClass, field -> {
+                    if (field.getName().equals(fieldName)) {
+                        int modifiers = field.getModifiers();
+                        if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
+                            getFieldInfo(beanInfo, fieldInfo, objectClass, field);
+                        }
+                    }
+                });
+            }
+
+            if (beanInfo.kotlin && beanInfo.createParameterNames != null) {
+                String fieldName = BeanUtils.getterName(methodName, null);
+                for (int i = 0; i < beanInfo.createParameterNames.length; i++) {
+                    if (fieldName.equals(beanInfo.createParameterNames[i])) {
+                        Annotation[] parameterAnnotations = beanInfo.creatorConstructor.getParameterAnnotations()[i];
+                        processAnnotations(fieldInfo, parameterAnnotations);
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void processAnnotations(FieldInfo fieldInfo, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
                 if (annotationType == JSONField.class) {
-                    jsonField = (JSONField) annotation;
+                    loadFieldInfo(fieldInfo, (JSONField) annotation);
+                    continue;
                 }
+
                 String annotationTypeName = annotationType.getName();
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
@@ -452,23 +487,6 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     default:
                         break;
                 }
-            }
-
-            if (jsonField != null) {
-                loadFieldInfo(fieldInfo, jsonField);
-            }
-
-            if (!objectClass.getName().startsWith("java.lang") && !BeanUtils.isRecord(objectClass)) {
-                String fieldName = BeanUtils.getterName(methodName, null);
-
-                BeanUtils.declaredFields(objectClass, field -> {
-                    if (field.getName().equals(fieldName)) {
-                        int modifiers = field.getModifiers();
-                        if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
-                            getFieldInfo(fieldInfo, objectClass, field);
-                        }
-                    }
-                });
             }
         }
 

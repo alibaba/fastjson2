@@ -76,7 +76,7 @@ public class ObjectWriterCreator {
             if (annotationProcessor == null) {
                 continue;
             }
-            annotationProcessor.getFieldInfo(fieldInfo, objectClass, field);
+            annotationProcessor.getFieldInfo(beanInfo, fieldInfo, objectClass, field);
         }
 
         if (fieldInfo.ignore) {
@@ -229,7 +229,7 @@ public class ObjectWriterCreator {
                         if (annotationProcessor == null) {
                             continue;
                         }
-                        annotationProcessor.getFieldInfo(fieldInfo, objectClass, method);
+                        annotationProcessor.getFieldInfo(beanInfo, fieldInfo, objectClass, method);
                     }
                     if (fieldInfo.ignore) {
                         return;

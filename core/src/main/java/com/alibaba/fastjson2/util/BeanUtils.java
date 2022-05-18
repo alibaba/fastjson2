@@ -32,6 +32,7 @@ public abstract class BeanUtils {
     private static volatile Method RECORD_COMPONENT_GET_NAME;
     private static volatile Method RECORD_COMPONENT_GET_TYPE;
 
+
     public static String[] getRecordFieldNames(Class<?> recordType) {
         if (JDKUtils.JVM_VERSION < 14) {
             return new String[0];
@@ -60,6 +61,114 @@ public abstract class BeanUtils {
                     "Failed to access Methods needed to support `java.lang.Record`: (%s) %s",
                     e.getClass().getName(), e.getMessage()), e);
         }
+    }
+
+    // public static void constructor(Class objectClass
+    public static Constructor getKotlinConstructor(Class objectClass, String[] paramNames) {
+        Constructor[] constructors = constructorCache.get(objectClass);
+        if (constructors == null) {
+            constructors = objectClass.getDeclaredConstructors();
+            constructorCache.putIfAbsent(objectClass, constructors);
+        }
+
+        Constructor creatorConstructor = null;
+        for (Constructor<?> constructor : constructors) {
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            if (paramNames != null && parameterTypes.length != paramNames.length) {
+                continue;
+            }
+
+            if (parameterTypes.length > 0 && parameterTypes[parameterTypes.length - 1].getName().equals("kotlin.jvm.internal.DefaultConstructorMarker")) {
+                continue;
+            }
+            if (creatorConstructor != null && creatorConstructor.getParameterTypes().length >= parameterTypes.length) {
+                continue;
+            }
+            creatorConstructor = constructor;
+        }
+        return creatorConstructor;
+    }
+
+    private static volatile boolean kotlin_class_klass_error;
+    private static volatile Constructor kotlin_kclass_constructor;
+    private static volatile Method kotlin_kclass_getConstructors;
+    private static volatile Method kotlin_kfunction_getParameters;
+    private static volatile Method kotlin_kparameter_getName;
+    private static volatile boolean kotlin_error;
+
+    public static String[] getKotlinConstructorParameters(Class clazz) {
+        if (kotlin_kclass_constructor == null && !kotlin_class_klass_error) {
+            try {
+                Class class_kotlin_kclass = Class.forName("kotlin.reflect.jvm.internal.KClassImpl");
+                kotlin_kclass_constructor = class_kotlin_kclass.getConstructor(Class.class);
+            } catch (Throwable e) {
+                kotlin_class_klass_error = true;
+            }
+        }
+        if (kotlin_kclass_constructor == null) {
+            return null;
+        }
+
+        if (kotlin_kclass_getConstructors == null && !kotlin_class_klass_error) {
+            try {
+                Class class_kotlin_kclass = Class.forName("kotlin.reflect.jvm.internal.KClassImpl");
+                kotlin_kclass_getConstructors = class_kotlin_kclass.getMethod("getConstructors");
+            } catch (Throwable e) {
+                kotlin_class_klass_error = true;
+            }
+        }
+
+        if (kotlin_kfunction_getParameters == null && !kotlin_class_klass_error) {
+            try {
+                Class class_kotlin_kfunction = Class.forName("kotlin.reflect.KFunction");
+                kotlin_kfunction_getParameters = class_kotlin_kfunction.getMethod("getParameters");
+            } catch (Throwable e) {
+                kotlin_class_klass_error = true;
+            }
+        }
+
+        if (kotlin_kparameter_getName == null && !kotlin_class_klass_error) {
+            try {
+                Class class_kotlinn_kparameter = Class.forName("kotlin.reflect.KParameter");
+                kotlin_kparameter_getName = class_kotlinn_kparameter.getMethod("getName");
+            } catch (Throwable e) {
+                kotlin_class_klass_error = true;
+            }
+        }
+
+        if (kotlin_error) {
+            return null;
+        }
+
+        try {
+            Object constructor = null;
+            Object kclassImpl = kotlin_kclass_constructor.newInstance(clazz);
+            Iterable it = (Iterable) kotlin_kclass_getConstructors.invoke(kclassImpl);
+            for (Iterator iterator = it.iterator(); iterator.hasNext(); iterator.hasNext()) {
+                Object item = iterator.next();
+                List parameters = (List) kotlin_kfunction_getParameters.invoke(item);
+                if (constructor != null && parameters.size() == 0) {
+                    continue;
+                }
+                constructor = item;
+            }
+
+            if (constructor == null) {
+                return null;
+            }
+
+            List parameters = (List) kotlin_kfunction_getParameters.invoke(constructor);
+            String[] names = new String[parameters.size()];
+            for (int i = 0; i < parameters.size(); i++) {
+                Object param = parameters.get(i);
+                names[i] = (String) kotlin_kparameter_getName.invoke(param);
+            }
+            return names;
+        } catch (Throwable e) {
+            e.printStackTrace();
+            kotlin_error = true;
+        }
+        return null;
     }
 
     public static void fields(Class objectClass, Consumer<Field> fieldReaders) {
