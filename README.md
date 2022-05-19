@@ -21,6 +21,8 @@
 - 支持全量解析和部分解析。
 - 支持`Java`服务端、客户端`Android`、大数据场景。
 - 支持`kotlin`
+- 支持 `android` (2.0.3.android)
+- 支持 `Graal Native-Image` (2.0.3.graal)
 
 ![fastjson](docs/logo.jpg "fastjson")
 
