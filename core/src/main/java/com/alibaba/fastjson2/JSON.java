@@ -1420,8 +1420,8 @@ public interface JSON {
         return JSONFactory.getDefaultObjectReaderProvider().register(objectReaderModule);
     }
 
-    static boolean register(ObjectWriterModule objectReaderModule) {
-        return JSONFactory.getDefaultObjectWriterProvider().register(objectReaderModule);
+    static boolean register(ObjectWriterModule objectWriterModule) {
+        return JSONFactory.getDefaultObjectWriterProvider().register(objectWriterModule);
     }
 
     /**
