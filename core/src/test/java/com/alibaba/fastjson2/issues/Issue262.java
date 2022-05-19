@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONSchema;
+import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 

@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -11,7 +10,7 @@ import java.time.ZonedDateTime;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import static com.alibaba.fastjson2.JSONFactory.UUIDUtils.parse4Nibbles;
+import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 final class JSONReaderStr extends JSONReader {
     protected final String str;

@@ -1,13 +1,14 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.schema.ObjectSchema;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,8 +18,8 @@ public class JSONSchemaTest {
         URL url = JSONSchemaTest.class.getClassLoader().getResource("schema/schema_01.json");
         JSONObject object = JSON.parseObject(url, JSONObject.class);
 
-        JSONSchema.ObjectSchema schema = (JSONSchema.ObjectSchema) JSONSchema.of(object);
-        JSONSchema.ObjectSchema schema1 = (JSONSchema.ObjectSchema) JSON.parseObject(url, JSONSchema::of);
+        ObjectSchema schema = (ObjectSchema) JSONSchema.of(object);
+        ObjectSchema schema1 = (ObjectSchema) JSON.parseObject(url, JSONSchema::of);
         assertEquals(schema.hashCode(), schema1.hashCode());
         assertEquals(schema, schema1);
 

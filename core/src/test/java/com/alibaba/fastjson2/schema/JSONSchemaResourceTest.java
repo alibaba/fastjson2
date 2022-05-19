@@ -45,7 +45,7 @@ public class JSONSchemaResourceTest {
                 String description = test.getString("description");
                 boolean valid = test.getBooleanValue("valid");
                 Object data = test.get("data");
-                JSONSchema.ValidateResult result = schema.validate(data);
+                ValidateResult result = schema.validate(data);
                 if (result.isSuccess() != valid) {
                     throw new JSONSchemaValidException("schema " + i + ", test " + j + " valid not match, " + description + ", cause " + result.getMessage());
                 }
