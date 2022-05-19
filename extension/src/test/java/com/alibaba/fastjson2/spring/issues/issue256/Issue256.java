@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.spring.issues;
+package com.alibaba.fastjson2.spring.issues.issue256;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.support.spring.data.mongodb.GeoJsonReaderModule;
