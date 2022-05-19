@@ -1,5 +1,8 @@
 package com.alibaba.fastjson2;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.UUID;
@@ -189,6 +192,16 @@ final class JSONWriterPretty extends JSONWriter {
     @Override
     public byte[] getBytes() {
         return jsonWriter.getBytes();
+    }
+
+    @Override
+    public void flushTo(Writer to) {
+        jsonWriter.flushTo(to);
+    }
+
+    @Override
+    public int flushTo(OutputStream to) throws IOException {
+        return jsonWriter.flushTo(to);
     }
 
     @Override
