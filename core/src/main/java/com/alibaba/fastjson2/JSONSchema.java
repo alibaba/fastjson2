@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONCreator;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.util.DomainValidator;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.InetAddressValidator;
@@ -224,6 +222,23 @@ public abstract class JSONSchema {
         }
     }
 
+    static class Any extends JSONSchema {
+        public final static Any INSTANCE = new Any();
+        public Any() {
+            super(null, null);
+        }
+
+        @Override
+        public Type getType() {
+            return Type.Any;
+        }
+
+        @Override
+        public ValidateResult validate(Object value) {
+            return SUCCESS;
+        }
+    }
+
     static class AnyOf extends JSONSchema {
         final JSONSchema[] items;
 
@@ -374,6 +389,24 @@ public abstract class JSONSchema {
 
             if (input.containsKey("not")) {
                 return ofNot(input, null);
+            }
+
+            if (input.get("maximum") instanceof Number
+                    || input.get("minimum") instanceof Number) {
+                return new NumberSchema(input);
+            }
+
+            if (input.containsKey("maxItems")
+                    || input.containsKey("minItems")
+                    || input.containsKey("additionalItems")
+                    || input.containsKey("items")
+                    || input.containsKey("prefixItems")
+            ) {
+                return new ArraySchema(input);
+            }
+
+            if (input.isEmpty()) {
+                return Any.INSTANCE;
             }
 
             throw new JSONException("type required");
@@ -584,6 +617,7 @@ public abstract class JSONSchema {
         Enum,
         Const,
         AllOf,
+        Any,
     }
 
     static abstract class FormatValidator {
@@ -1660,6 +1694,7 @@ public abstract class JSONSchema {
         final JSONSchema itemSchema;
         final JSONSchema[] prefixItems;
         final boolean additionalItems;
+        final JSONSchema additionalItem;
         final JSONSchema contains;
         final int minContains;
         final int maxContains;
@@ -1671,16 +1706,32 @@ public abstract class JSONSchema {
             this.maxLength = input.getIntValue("maxItems", -1);
 
             Object items = input.get("items");
+            Object additionalItems = input.get("additionalItems");
+
+            boolean additionalItemsSupport = false;
             if (items == null) {
-                this.additionalItems = true;
+                additionalItemsSupport = true;
                 this.itemSchema = null;
             } else if (items instanceof Boolean) {
-                this.additionalItems = ((Boolean) items).booleanValue();
+                additionalItemsSupport = ((Boolean) items).booleanValue();
                 this.itemSchema = null;
+            } else if (items instanceof JSONArray) {
+                throw new JSONException("schema error, items : " + items);
             } else {
-                this.additionalItems = true;
+                additionalItemsSupport = true;
                 this.itemSchema = JSONSchema.of((JSONObject) items);
             }
+
+            if (additionalItems instanceof JSONObject) {
+                additionalItem = JSONSchema.of((JSONObject) additionalItems);
+                additionalItemsSupport = true;
+            } else if (additionalItems instanceof Boolean) {
+                additionalItemsSupport = ((Boolean) additionalItems).booleanValue();
+                this.additionalItem = null;
+            } else {
+                this.additionalItem = null;
+            }
+            this.additionalItems = additionalItemsSupport;
 
             JSONArray prefixItems = input.getJSONArray("prefixItems");
             if (prefixItems == null) {
@@ -1860,7 +1911,7 @@ public abstract class JSONSchema {
                 }
 
                 if (!additionalItems) {
-                    if (size > prefixItems.length) {
+                    if (size >= prefixItems.length) {
                         return new AdditionalItemsFail(prefixItems.length, size);
                     }
                 }
@@ -1879,6 +1930,11 @@ public abstract class JSONSchema {
 
                     if (index < prefixItems.length) {
                         ValidateResult result = prefixItems[index].validate(item);
+                        if (!result.isSuccess()) {
+                            return result;
+                        }
+                    } else if (additionalItem != null) {
+                        ValidateResult result = additionalItem.validate(item);
                         if (!result.isSuccess()) {
                             return result;
                         }

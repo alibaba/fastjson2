@@ -775,6 +775,39 @@ public interface JSON {
     }
 
     /**
+     * Parse JSON {@link String} into {@link JSONArray}
+     *
+     * @param url     the JSON {@link URL} to be parsed
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static JSONArray parseArray(URL url, JSONReader.Feature... features) {
+        if (url == null) {
+            return null;
+        }
+
+        try (InputStream is = url.openStream()){
+           return parseArray(is, features);
+        } catch (IOException e) {
+            throw new JSONException("parseArray error", e);
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link JSONArray}
+     *
+     * @param in     the JSON {@link InputStream} to be parsed
+     * @param features features to be enabled in parsing
+     */
+    static JSONArray parseArray(InputStream in, JSONReader.Feature... features) {
+        try (JSONReader reader = JSONReader.of(in, StandardCharsets.UTF_8)) {
+            reader.context.config(features);
+            ObjectReader<JSONArray> objectReader = reader.getObjectReader(JSONArray.class);
+            return objectReader.readObject(reader, 0);
+        }
+    }
+
+    /**
      * Parse JSON {@link String} into {@link List}
      *
      * @param text the JSON {@link String} to be parsed
