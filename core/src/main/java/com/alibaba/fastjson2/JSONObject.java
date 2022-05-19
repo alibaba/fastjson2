@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class JSONObject extends LinkedHashMap implements InvocationHandler {
+public class JSONObject extends LinkedHashMap<String, Object> implements InvocationHandler {
 
     private static final long serialVersionUID = 1L;
 
@@ -103,24 +103,6 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
         }
 
         return super.get(key);
-    }
-
-    /**
-     * Returns a set view of the mappings contained in this map
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public Set<Map.Entry<String, Object>> entrySet() {
-        return super.entrySet();
-    }
-
-    /**
-     * Returns a set view of the keys contained in this map
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public Set<String> keySet() {
-        return super.keySet();
     }
 
     /**
@@ -1534,22 +1516,6 @@ public class JSONObject extends LinkedHashMap implements InvocationHandler {
                 }
             }
         }
-    }
-
-    /**
-     * addition of elements
-     *
-     * <pre>
-     * JSONObject object = new JSONObject();
-     * object.put("a", 1);
-     * </pre>
-     *
-     * @param key   key with which the specified value is to be associated
-     * @param value value to be associated with the specified key
-     */
-    @SuppressWarnings("unchecked")
-    public Object put(String key, Object value) {
-        return super.put(key, value);
     }
 
     /**
