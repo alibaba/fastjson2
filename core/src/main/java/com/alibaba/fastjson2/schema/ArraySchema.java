@@ -27,7 +27,7 @@ public final class ArraySchema extends JSONSchema {
         Object items = input.get("items");
         Object additionalItems = input.get("additionalItems");
 
-        boolean additionalItemsSupport = false;
+        boolean additionalItemsSupport;
         if (items == null) {
             additionalItemsSupport = true;
             this.itemSchema = null;
@@ -230,7 +230,7 @@ public final class ArraySchema extends JSONSchema {
             }
 
             if (!additionalItems) {
-                if (size >= prefixItems.length) {
+                if (size > prefixItems.length) {
                     return new ValidateResult.AdditionalItemsFail(prefixItems.length, size);
                 }
             }
