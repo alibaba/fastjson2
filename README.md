@@ -20,9 +20,9 @@
 - 支持`JSON/JSONB`两种协议，`JSONPath`是一等公民。
 - 支持全量解析和部分解析。
 - 支持`Java`服务端、客户端`Android`、大数据场景。
-- 支持`kotlin`
-- 支持 `android` (2.0.3.android)
-- 支持 `Graal Native-Image` (2.0.3.graal)
+- 支持`Kotlin`
+- 支持`Android` (2.0.3.android)
+- 支持`Graal Native-Image` (2.0.3.graal)
 
 ![fastjson](docs/logo.jpg "fastjson")
 
@@ -39,7 +39,8 @@
 
 在`fastjson v2`中，`groupId`和`1.x`不一样，是`com.alibaba.fastjson2`：
 
-Maven:
+`Maven`:
+
 ```xml
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
@@ -48,7 +49,8 @@ Maven:
 </dependency>
 ```
 
-Gradle:
+`Gradle`:
+
 ```groovy
 dependencies {
     implementation 'com.alibaba.fastjson2:fastjson2:2.0.3'
@@ -57,13 +59,14 @@ dependencies {
 
 可以在 [maven.org](https://search.maven.org/artifact/com.alibaba.fastjson2/fastjson2) 查看最新可用的版本。
 
-## 1.2 其他兼容
+## 1.2 其他模块
 
-### fastjson v1 兼容模块
+### `Fastjson v1`兼容模块
 
 如果原来使用`fastjson 1.2.x`版本，可以使用兼容包，兼容包不能保证100%兼容，请仔细测试验证，发现问题请及时反馈。
 
-Maven:
+`Maven`:
+
 ```xml
 <dependency>
     <groupId>com.alibaba</groupId>
@@ -72,18 +75,20 @@ Maven:
 </dependency>
 ```
 
-Gradle:
+`Gradle`:
+
 ```groovy
 dependencies {
     implementation 'com.alibaba:fastjson:2.0.3'
 }
 ```
 
-### fastjson kotlin 兼容模块
+### `Fastjson Kotlin`集成模块
 
-如果项目使用`kotlin`，可以使用`fastjson-kotlin`模块，使用方式上采用`kotlin`的特性。
+如果项目使用`Kotlin`，可以使用`fastjson-kotlin`模块，使用方式上采用`kotlin`的特性。
 
-Maven:
+`Maven`:
+
 ```xml
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
@@ -92,7 +97,8 @@ Maven:
 </dependency>
 ```
 
-Kotlin Gradle:
+`Gradle`:
+
 ```kotlin
 dependencies {
     implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.3")
@@ -105,7 +111,8 @@ dependencies {
 
 ### 2.1 将`JSON`解析为`JSONObject`
 
-Java:
+`Java`:
+
 ```java
 String text = "...";
 JSONObject data = JSON.parseObject(text);
@@ -114,7 +121,8 @@ byte[] bytes = ...;
 JSONObject data = JSON.parseObject(bytes);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 import com.alibaba.fastjson2.*
 
@@ -127,13 +135,15 @@ val data = bytes.parseObject() // JSONObject
 
 ### 2.2 将`JSON`解析为`JSONArray`
 
-Java:
+`Java`:
+
 ```java
 String text = "...";
 JSONArray data = JSON.parseArray(text);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 import com.alibaba.fastjson2.*
 
@@ -141,15 +151,17 @@ val text = ... // String
 val data = text.parseArray() // JSONArray
 ```
 
-### 2.3 将`JSON`解析为Java对象
+### 2.3 将`JSON`解析为`Java`对象
 
-Java:
+`Java`:
+
 ```java
 String text = "...";
 User data = JSON.parseObject(text, User.class);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 import com.alibaba.fastjson2.*
 
@@ -158,16 +170,18 @@ val data = text.to<User>() // User
 val data = text.parseObject<User>() // User
 ```
 
-### 2.4 将Java对象序列化为`JSON`
+### 2.4 将`Java`对象序列化为`JSON`
 
-Java:
+`Java`:
+
 ```java
 Object data = "...";
 String text = JSON.toJSONString(data);
 byte[] text = JSON.toJSONBytes(data);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 import com.alibaba.fastjson2.*
 
@@ -196,9 +210,10 @@ int id = array.getIntValue(0);
 String name = array.getString(1);
 ```
 
-#### 2.5.2 读取JavaBean
+#### 2.5.2 读取`JavaBean`
 
-Java:
+`Java`:
+
 ```java
 JSONArray array = ...
 JSONObject obj = ...
@@ -207,7 +222,8 @@ User user = array.getObject(0, User.class);
 User user = obj.getObject("key", User.class);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 val array = ... // JSONArray
 val obj = ... // JSONObject
@@ -216,9 +232,10 @@ val user = array.getObject<User>(0)
 val user = obj.getObject<User>("key")
 ```
 
-#### 2.5.3 转为JavaBean
+#### 2.5.3 转为`JavaBean`
 
-Java:
+`Java`:
+
 ```java
 JSONArray array = ...
 JSONObject obj = ...
@@ -227,7 +244,8 @@ User user = obj.toJavaObject(User.class);
 List<User> users = array.toJavaList(User.class);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 val array = ... // JSONArray
 val obj = ... // JSONObject
@@ -238,7 +256,8 @@ val users = array.toList<User>() // List<User>
 
 ### 2.6 将`JavaBean`对象序列化为`JSON`
 
-Java:
+`Java`:
+
 ```java
 class User {
     public int id;
@@ -253,7 +272,8 @@ String text = JSON.toJSONString(user);
 byte[] bytes = JSON.toJSONBytes(user);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 class User(
     var id: Int,
@@ -269,6 +289,7 @@ val bytes = user.toJSONByteArray() // ByteArray
 ```
 
 序列化结果:
+
 ```json
 {
     "id"   : 2,
