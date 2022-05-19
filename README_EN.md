@@ -15,7 +15,7 @@
 
 # FASTJSON v2
 
-`FASTJSONv2` is an upgrade of the `FASTJSON`, with the goal of providing a highly optimized `JSON` librarray for the next ten years.
+`FASTJSON v2` is an upgrade of the `FASTJSON`, with the goal of providing a highly optimized `JSON` librarray for the next ten years.
 
 - Supports the JSON and JSONB Protocols.
 - Supports full parsing and partial parsing.
@@ -39,7 +39,8 @@ Related Documents:
 
 `FASTJSONv2`'s groupId is different from versions `1.x`, it is instead `com.alibaba.fastjson2`:
 
-Maven:
+`Maven`:
+
 ```xml
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
@@ -48,7 +49,8 @@ Maven:
 </dependency>
 ```
 
-Gradle:
+`Gradle`:
+
 ```groovy
 dependencies {
     implementation 'com.alibaba.fastjson2:fastjson2:2.0.3'
@@ -57,11 +59,13 @@ dependencies {
 
 Find the latest version of `FASTJSONv2` at [maven.org](https://search.maven.org/artifact/com.alibaba.fastjson2/fastjson2).
 
-## 1.2 Compatible
+## 1.2 Other modules
 
 ### Compatible dependence of fastjson-v1
 
 If you are using `fastjson 1.2.x`, you can use the compatibility package. The compatibility package cannot guarantee 100% compatibility. Please test  it yourself and report any problems.
+
+`Maven`:
 
 ```xml
 <dependency>
@@ -71,18 +75,20 @@ If you are using `fastjson 1.2.x`, you can use the compatibility package. The co
 </dependency>
 ```
 
-Gradle:
+`Gradle`:
+
 ```groovy
 dependencies {
     implementation 'com.alibaba:fastjson:2.0.3'
 }
 ```
 
-### Compatible dependence of fastjson-kotlin
+### `Kotlin` integration module `fastjson-kotlin`
 
 If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use the characteristics of `kotlin`.
 
-Maven:
+`Maven`:
+
 ```xml
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
@@ -91,7 +97,8 @@ Maven:
 </dependency>
 ```
 
-Kotlin Gradle:
+`Gradle`:
+
 ```kotlin
 dependencies {
     implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.3")
@@ -104,7 +111,8 @@ The package name of `fastjson v2` is different from `fastjson v1`. It is `com.al
 
 ### 2.1 Parse `JSON` into `JSONObject`
 
-Java:
+`Java`:
+
 ```java
 String text = "...";
 JSONObject data = JSON.parseObject(text);
@@ -113,7 +121,8 @@ byte[] bytes = ...;
 JSONObject data = JSON.parseObject(bytes);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 import com.alibaba.fastjson2.*
 
@@ -126,13 +135,15 @@ val data = bytes.parseObject() // JSONObject
 
 ### 2.2 Parse `JSON` into `JSONArray`
 
-Java:
+`Java`:
+
 ```java
 String text = "...";
 JSONArray data = JSON.parseArray(text);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 import com.alibaba.fastjson2.*
 
@@ -142,13 +153,15 @@ val data = text.parseArray() // JSONArray
 
 ### 2.3 Parse `JSON` into a Java Object
 
-Java:
+`Java`:
+
 ```java
 String text = "...";
 User data = JSON.parseObject(text, User.class);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 import com.alibaba.fastjson2.*
 
@@ -159,14 +172,16 @@ val data = text.parseObject<User>() // User
 
 ### 2.4 Serialization Java Object to `JSON`
 
-Java:
+`Java`:
+
 ```java
 Object data = "...";
 String text = JSON.toJSONString(data);
 byte[] text = JSON.toJSONBytes(data);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 import com.alibaba.fastjson2.*
 
@@ -175,7 +190,7 @@ val text = text.toJSONString() // String
 val bytes = text.toJSONByteArray() // ByteArray
 ```
 
-### 2.5 Use `JSONObject`、`JSONArray`
+### 2.5 Use `JSONObject`, `JSONArray`
 
 #### 2.5.1 Get simple property
 
@@ -197,7 +212,8 @@ String name = array.getString(1);
 
 #### 2.5.2 Get JavaBean
 
-Java:
+`Java`:
+
 ```java
 JSONArray array = ...
 JSONObject obj = ...
@@ -206,7 +222,8 @@ User user = array.getObject(0, User.class);
 User user = obj.getObject("key", User.class);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 val array = ... // JSONArray
 val obj = ... // JSONObject
@@ -217,7 +234,8 @@ val user = obj.getObject<User>("key")
 
 #### 2.5.3 Convert to JavaBean
 
-Java:
+`Java`:
+
 ```java
 JSONArray array = ...
 JSONObject obj = ...
@@ -226,7 +244,8 @@ User user = obj.toJavaObject(User.class);
 List<User> users = array.toJavaList(User.class);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 val array = ... // JSONArray
 val obj = ... // JSONObject
@@ -237,7 +256,8 @@ val users = array.toList<User>() // List<User>
 
 ### 2.6 Serialize `JavaBean` to `JSON`
 
-Java:
+`Java`:
+
 ```java
 class User {
     public int id;
@@ -252,7 +272,8 @@ String text = JSON.toJSONString(user);
 byte[] bytes = JSON.toJSONBytes(user);
 ```
 
-Kotlin:
+`Kotlin`:
+
 ```kotlin
 class User(
     var id: Int,
