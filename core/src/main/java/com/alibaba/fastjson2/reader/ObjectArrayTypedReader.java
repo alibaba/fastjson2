@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.function.Function;
 
 final class ObjectArrayTypedReader extends ObjectReaderBaseModule.PrimitiveImpl {
@@ -151,7 +152,19 @@ final class ObjectArrayTypedReader extends ObjectReaderBaseModule.PrimitiveImpl 
                     }
                 }
             }
-            values[index++] = item;
+
+            if (componentType.isInstance(item)) {
+                values[index++] = item;
+            }  else {
+                ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(componentType);
+                if (item instanceof Map) {
+                    item = objectReader.createInstance((Map) item);
+                } else if (item != null) {
+                    throw new JSONException("component type not match, expect " + componentType.getName() + ", but " + item.getClass());
+                }
+                values[index++] = item;
+            }
+
         }
         return values;
     }

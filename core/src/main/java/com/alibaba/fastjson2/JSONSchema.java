@@ -1,5 +1,8 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.annotation.JSONCreator;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.util.DomainValidator;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.InetAddressValidator;
@@ -44,7 +47,7 @@ public abstract class JSONSchema {
             return null;
         }
 
-        if (objectClass == null) {
+        if (objectClass == null || objectClass == Object.class) {
             return of(input);
         }
 
@@ -60,6 +63,22 @@ public abstract class JSONSchema {
                 || objectClass == AtomicInteger.class
                 || objectClass == AtomicLong.class
         ) {
+            if (input.containsKey("AnyOf")) {
+                return anyOf(input, objectClass);
+            }
+
+            if (input.containsKey("anyOf")) {
+                return anyOf(input, objectClass);
+            }
+
+            if (input.containsKey("oneOf")) {
+                return oneOf(input, objectClass);
+            }
+
+            if (input.containsKey("not")) {
+                return ofNot(input, objectClass);
+            }
+
             return new IntegerSchema(input);
         }
 
@@ -70,6 +89,22 @@ public abstract class JSONSchema {
                 || objectClass == Double.class
                 || objectClass == Number.class
         ) {
+            if (input.containsKey("AnyOf")) {
+                return anyOf(input, objectClass);
+            }
+
+            if (input.containsKey("anyOf")) {
+                return anyOf(input, objectClass);
+            }
+
+            if (input.containsKey("oneOf")) {
+                return oneOf(input, objectClass);
+            }
+
+            if (input.containsKey("not")) {
+                return ofNot(input, objectClass);
+            }
+
             return new NumberSchema(input);
         }
 
@@ -82,7 +117,7 @@ public abstract class JSONSchema {
             return new StringSchema(input);
         }
 
-        if (Iterable.class.isAssignableFrom(objectClass)) {
+        if (Collection.class.isAssignableFrom(objectClass)) {
             return new ArraySchema(input);
         }
 
@@ -119,12 +154,191 @@ public abstract class JSONSchema {
         }
     }
 
+    static class AllOf extends JSONSchema {
+        final JSONSchema[] items;
+
+        public AllOf(JSONSchema[] items) {
+            super(null, null);
+            this.items = items;
+        }
+
+        public AllOf(JSONObject input) {
+            super(input);
+            JSONArray items = input.getJSONArray("allOf");
+            if (items == null || items.isEmpty()) {
+                throw new JSONException("allOf not found");
+            }
+
+            this.items = new JSONSchema[items.size()];
+            Type type = null;
+            for (int i = 0; i < this.items.length; i++) {
+                JSONObject itemObject = items.getJSONObject(i);
+                JSONSchema item = null;
+                if (!itemObject.containsKey("type") && type != null) {
+                    switch (type) {
+                        case String:
+                            item = new StringSchema(itemObject);
+                            break;
+                        case Integer:
+                            item = new IntegerSchema(itemObject);
+                            break;
+                        case Number:
+                            item = new NumberSchema(itemObject);
+                            break;
+                        case Boolean:
+                            item = new BooleanSchema(itemObject);
+                            break;
+                        case Array:
+                            item = new ArraySchema(itemObject);
+                            break;
+                        case Object:
+                            item = new ObjectSchema(itemObject);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                if (item == null) {
+                    item = JSONSchema.of(itemObject);
+                }
+                type = item.getType();
+                this.items[i] = item;
+            }
+        }
+
+        @Override
+        public Type getType() {
+            return Type.AllOf;
+        }
+
+        @Override
+        public ValidateResult validate(Object value) {
+            for (JSONSchema item : items) {
+                ValidateResult result = item.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+            return SUCCESS;
+        }
+    }
+
+    static class AnyOf extends JSONSchema {
+        final JSONSchema[] items;
+
+        public AnyOf(JSONSchema[] items) {
+            super(null, null);
+            this.items = items;
+        }
+
+        public AnyOf(JSONObject input) {
+            super(input);
+            JSONArray items = input.getJSONArray("anyOf");
+            if (items == null || items.isEmpty()) {
+                throw new JSONException("anyOf not found");
+            }
+
+            this.items = new JSONSchema[items.size()];
+            for (int i = 0; i < this.items.length; i++) {
+                this.items[i] = items.getObject(i, JSONSchema::of);
+            }
+        }
+
+        @Override
+        public Type getType() {
+            return Type.AllOf;
+        }
+
+        @Override
+        public ValidateResult validate(Object value) {
+            for (JSONSchema item : items) {
+                ValidateResult result = item.validate(value);
+                if (result.isSuccess()) {
+                    return SUCCESS;
+                }
+            }
+            return FAIL_ANY_OF;
+        }
+    }
+
+    static class OneOf extends JSONSchema {
+        final JSONSchema[] items;
+
+        public OneOf(JSONSchema[] items) {
+            super(null, null);
+            this.items = items;
+        }
+
+        public OneOf(JSONObject input) {
+            super(input);
+            JSONArray items = input.getJSONArray("oneOf");
+            if (items == null || items.isEmpty()) {
+                throw new JSONException("oneOf not found");
+            }
+
+            this.items = new JSONSchema[items.size()];
+            for (int i = 0; i < this.items.length; i++) {
+                this.items[i] = items.getObject(i, JSONSchema::of);
+            }
+        }
+
+        @Override
+        public Type getType() {
+            return Type.AllOf;
+        }
+
+        @Override
+        public ValidateResult validate(Object value) {
+            int count = 0;
+            for (JSONSchema item : items) {
+                ValidateResult result = item.validate(value);
+                if (result.isSuccess()) {
+                    count++;
+                    if (count > 1) {
+                        return FAIL_ONE_OF;
+                    }
+                }
+            }
+            return count != 1 ? FAIL_ONE_OF : SUCCESS;
+        }
+    }
+
+    static Not ofNot(JSONObject input, Class type) {
+        JSONObject object = input.getJSONObject("not");
+        JSONSchema schema = of(object, type);
+        return new Not(schema);
+    }
+
+    static class Not extends JSONSchema {
+        JSONSchema schema;
+
+        public Not(JSONSchema schema) {
+            super(null, null);
+            this.schema = schema;
+        }
+
+        @Override
+        public Type getType() {
+            return Type.AllOf;
+        }
+
+        @Override
+        public ValidateResult validate(Object value) {
+            if (schema.validate(value).isSuccess()) {
+                return FAIL_NOT;
+            }
+            return SUCCESS;
+        }
+    }
+
     public static JSONSchema of(String schema) {
         return of(
                 JSON.parseObject(schema)
         );
     }
 
+    @JSONCreator
     public static JSONSchema of(JSONObject input) {
         Type type = input.getObject("type", Type.class);
         if (type == null) {
@@ -138,8 +352,28 @@ public abstract class JSONSchema {
                 return new ConstString((String) constValue);
             }
 
-            if (input.containsKey("properties")) {
+            if (input.containsKey("properties") || input.containsKey("dependentSchemas") || input.containsKey("if") || input.containsKey("required")) {
                 return new ObjectSchema(input);
+            }
+
+            if (input.containsKey("pattern")) {
+                return new StringSchema(input);
+            }
+
+            if (input.containsKey("allOf")) {
+                return new AllOf(input);
+            }
+
+            if (input.containsKey("anyOf")) {
+                return new AnyOf(input);
+            }
+
+            if (input.containsKey("oneOf")) {
+                return new OneOf(input);
+            }
+
+            if (input.containsKey("not")) {
+                return ofNot(input, null);
             }
 
             throw new JSONException("type required");
@@ -163,6 +397,46 @@ public abstract class JSONSchema {
             default:
                 throw new JSONException("not support type : " + type);
         }
+    }
+
+    static AnyOf anyOf(JSONObject input, Class type) {
+        JSONArray array = input.getJSONArray("anyOf");
+        if (array == null || array.isEmpty()) {
+            return null;
+        }
+        JSONSchema[] items = new JSONSchema[array.size()];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = JSONSchema.of(array.getJSONObject(i), type);
+        }
+        AnyOf anyOf = new AnyOf(items);
+
+        return anyOf;
+    }
+
+    static AllOf allOf(JSONObject input, Class type) {
+        JSONArray array = input.getJSONArray("allOf");
+        if (array == null || array.isEmpty()) {
+            return null;
+        }
+
+        JSONSchema[] items = new JSONSchema[array.size()];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = JSONSchema.of(array.getJSONObject(i), type);
+        }
+        return new AllOf(items);
+    }
+
+    static OneOf oneOf(JSONObject input, Class type) {
+        JSONArray array = input.getJSONArray("oneOf");
+        if (array == null || array.isEmpty()) {
+            return null;
+        }
+
+        JSONSchema[] items = new JSONSchema[array.size()];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = JSONSchema.of(array.getJSONObject(i), type);
+        }
+        return new OneOf(items);
     }
 
     public String getTitle() {
@@ -309,6 +583,7 @@ public abstract class JSONSchema {
         Integer,
         Enum,
         Const,
+        AllOf,
     }
 
     static abstract class FormatValidator {
@@ -1670,7 +1945,7 @@ public abstract class JSONSchema {
     }
 
     static final class ObjectSchema extends JSONSchema {
-        final JSONObject properties;
+        final Map<String, JSONSchema> properties;
         final Set<String> required;
         final boolean additionalProperties;
         final JSONSchema additionalPropertySchema;
@@ -1681,9 +1956,22 @@ public abstract class JSONSchema {
         final int minProperties;
         final int maxProperties;
 
+        final Map<String, String[]> dependentRequired;
+        final Map<Long, long[]> dependentRequiredHashCodes;
+
+        final Map<String, JSONSchema> dependentSchemas;
+        final Map<Long, JSONSchema> dependentSchemasHashMapping;
+
+        final JSONSchema ifSchema;
+        final JSONSchema thenSchema;
+        final JSONSchema elseSchema;
+        final AllOf allOf;
+        final AnyOf anyOf;
+        final OneOf oneOf;
+
         public ObjectSchema(JSONObject input) {
             super(input);
-            this.properties = new JSONObject();
+            this.properties = new LinkedHashMap<>();
 
             JSONObject properties = input.getJSONObject("properties");
             if (properties != null) {
@@ -1760,11 +2048,217 @@ public abstract class JSONSchema {
 
             this.minProperties = input.getIntValue("minProperties", -1);
             this.maxProperties = input.getIntValue("maxProperties", -1);
+
+            JSONObject dependentRequired = input.getJSONObject("dependentRequired");
+            if (dependentRequired != null && !dependentRequired.isEmpty()) {
+                this.dependentRequired = new LinkedHashMap<>(dependentRequired.size());
+                this.dependentRequiredHashCodes = new LinkedHashMap<>(dependentRequired.size());
+                Set<String> keys = dependentRequired.keySet();
+                for (String key : keys) {
+                    String[] dependentRequiredProperties = dependentRequired.getObject(key, String[].class);
+                    long[] dependentRequiredPropertiesHash = new long[dependentRequiredProperties.length];
+                    for (int i = 0; i < dependentRequiredProperties.length; i++) {
+                        dependentRequiredPropertiesHash[i] = Fnv.hashCode64(dependentRequiredProperties[i]);
+                    }
+                    this.dependentRequired.put(key, dependentRequiredProperties);
+                    this.dependentRequiredHashCodes.put(Fnv.hashCode64(key), dependentRequiredPropertiesHash);
+                }
+            } else {
+                this.dependentRequired = null;
+                this.dependentRequiredHashCodes = null;
+            }
+
+            JSONObject dependentSchemas = input.getJSONObject("dependentSchemas");
+            if (dependentSchemas != null && !dependentSchemas.isEmpty()) {
+                this.dependentSchemas = new LinkedHashMap<>(dependentSchemas.size());
+                this.dependentSchemasHashMapping = new LinkedHashMap<>(dependentSchemas.size());
+                Set<String> keys = dependentSchemas.keySet();
+                for (String key : keys) {
+                    JSONSchema dependentSchema = dependentSchemas.getObject(key, JSONSchema::of);
+                    this.dependentSchemas.put(key, dependentSchema);
+                    this.dependentSchemasHashMapping.put(Fnv.hashCode64(key), dependentSchema);
+                }
+            } else {
+                this.dependentSchemas = null;
+                this.dependentSchemasHashMapping = null;
+            }
+
+            this.ifSchema = input.getObject("if", JSONSchema::of);
+            this.elseSchema = input.getObject("else", JSONSchema::of);
+            this.thenSchema = input.getObject("then", JSONSchema::of);
+
+            allOf = allOf(input, null);
+            anyOf = anyOf(input, null);
+            oneOf = oneOf(input, null);
         }
 
         @Override
         public Type getType() {
             return Type.Object;
+        }
+
+        public ValidateResult validate(Map map) {
+            for (String item : required) {
+                if (map.get(item) == null) {
+                    return new RequiredFail(item);
+                }
+            }
+
+            for (Map.Entry<String, JSONSchema> entry : properties.entrySet()) {
+                String key = entry.getKey();
+                JSONSchema schema = entry.getValue();
+
+                Object propertyValue = map.get(key);
+                if (propertyValue == null && !map.containsKey(key)) {
+                    continue;
+                }
+
+                ValidateResult result = schema.validate(propertyValue);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            for (PatternProperty patternProperty : patternProperties) {
+                for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
+                    Map.Entry entry = it.next();
+                    Object entryKey = entry.getKey();
+                    if (entryKey instanceof String) {
+                        String strKey = (String) entryKey;
+                        if (patternProperty.pattern.matcher(strKey).find()) {
+                            ValidateResult result = patternProperty.schema.validate(entry.getValue());
+                            if (!result.isSuccess()) {
+                                return result;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!additionalProperties) {
+                for_:
+                for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
+                    Map.Entry entry = it.next();
+                    Object key = entry.getKey();
+
+                    if (properties.containsKey(key)) {
+                        continue;
+                    }
+
+                    for (PatternProperty patternProperty : patternProperties) {
+                        if (key instanceof String) {
+                            String strKey = (String) key;
+                            if (patternProperty.pattern.matcher(strKey).find()) {
+                                continue for_;
+                            }
+                        }
+                    }
+
+                    if (additionalPropertySchema != null) {
+                        ValidateResult result = additionalPropertySchema.validate(entry.getValue());
+                        if (!result.isSuccess()) {
+                            return result;
+                        }
+                        continue;
+                    }
+
+                    return new AdditionalPropertiesFail(key);
+                }
+            }
+
+            if (propertyNamesPattern != null) {
+                for (Object key : map.keySet()) {
+                    String strKey = key.toString();
+                    if (!propertyNamesPattern.matcher(strKey).find()) {
+                        return new PropertyPatternFail( propertyNamesPattern.pattern(), strKey);
+                    }
+                }
+            }
+
+            if (minProperties >= 0) {
+                if (map.size() < minProperties) {
+                    return new MinPropertiesFail(minProperties, map.size());
+                }
+            }
+
+            if (maxProperties >= 0) {
+                if (map.size() > maxProperties) {
+                    return new MaxPropertiesFail(maxProperties, map.size());
+                }
+            }
+
+            if (dependentRequired != null) {
+                for (Map.Entry<String, String[]> entry : dependentRequired.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = map.get(key);
+                    if (value != null) {
+                        String[] dependentRequiredProperties = entry.getValue();
+                        for (String dependentRequiredProperty : dependentRequiredProperties) {
+                            if (!map.containsKey(dependentRequiredProperty)) {
+                                return new DependentRequiredPropertyFail(key, dependentRequiredProperty);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (dependentSchemas != null) {
+                for (Map.Entry<String, JSONSchema> entry : dependentSchemas.entrySet()) {
+                    String key = entry.getKey();
+                    Object fieldValue = map.get(key);
+                    if (fieldValue == null) {
+                        continue;
+                    }
+
+                    JSONSchema schema = entry.getValue();
+                    ValidateResult result = schema.validate(map);
+                    if (!result.isSuccess()) {
+                        return result;
+                    }
+                }
+            }
+
+            if (ifSchema != null) {
+                ValidateResult ifResult = ifSchema.validate(map);
+                if (ifResult.isSuccess()) {
+                    if (thenSchema != null) {
+                        ValidateResult thenResult = thenSchema.validate(map);
+                        if (!thenResult.isSuccess()) {
+                            return thenResult;
+                        }
+                    }
+                } else {
+                    if (elseSchema != null) {
+                        ValidateResult elseResult = elseSchema.validate(map);
+                        if (!elseResult.isSuccess()) {
+                            return elseResult;
+                        }
+                    }
+                }
+            }
+
+            if (allOf != null) {
+                ValidateResult result = allOf.validate(map);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (anyOf != null) {
+                ValidateResult result = anyOf.validate(map);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (oneOf != null) {
+                ValidateResult result = oneOf.validate(map);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            return SUCCESS;
         }
 
         @Override
@@ -1774,98 +2268,7 @@ public abstract class JSONSchema {
             }
 
             if (value instanceof Map) {
-                Map map = (Map) value;
-
-                for (String item : required) {
-                    if (map.get(item) == null) {
-                        return new RequiredFail(item);
-                    }
-                }
-
-                for (Map.Entry<String, Object> entry : properties.entrySet()) {
-                    String key = entry.getKey();
-                    JSONSchema schema = (JSONSchema) entry.getValue();
-
-                    Object propertyValue = map.get(key);
-                    if (propertyValue == null && !map.containsKey(key)) {
-                        continue;
-                    }
-
-                    ValidateResult result = schema.validate(propertyValue);
-                    if (!result.isSuccess()) {
-                        return result;
-                    }
-                }
-
-                for (PatternProperty patternProperty : patternProperties) {
-                    for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
-                        Map.Entry entry = it.next();
-                        Object entryKey = entry.getKey();
-                        if (entryKey instanceof String) {
-                            String strKey = (String) entryKey;
-                            if (patternProperty.pattern.matcher(strKey).find()) {
-                                ValidateResult result = patternProperty.schema.validate(entry.getValue());
-                                if (!result.isSuccess()) {
-                                    return result;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (!additionalProperties) {
-                    for_:
-                    for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
-                        Map.Entry entry = it.next();
-                        Object key = entry.getKey();
-
-                        if (properties.containsKey(key)) {
-                            continue;
-                        }
-
-                        for (PatternProperty patternProperty : patternProperties) {
-                            if (key instanceof String) {
-                                String strKey = (String) key;
-                                if (patternProperty.pattern.matcher(strKey).find()) {
-                                    continue for_;
-                                }
-                            }
-                        }
-
-                        if (additionalPropertySchema != null) {
-                            ValidateResult result = additionalPropertySchema.validate(entry.getValue());
-                            if (!result.isSuccess()) {
-                                return result;
-                            }
-                            continue;
-                        }
-
-                        return new AdditionalPropertiesFail(key);
-                    }
-                }
-
-                if (propertyNamesPattern != null) {
-                    for (Object key : map.keySet()) {
-                        String strKey = key.toString();
-                        if (!propertyNamesPattern.matcher(strKey).find()) {
-                            return new PropertyPatternFail( propertyNamesPattern.pattern(), strKey);
-                        }
-                    }
-                }
-
-                if (minProperties >= 0) {
-                    if (map.size() < minProperties) {
-                        return new MinPropertiesFail(minProperties, map.size());
-                    }
-                }
-
-                if (maxProperties >= 0) {
-                    if (map.size() > maxProperties) {
-                        return new MaxPropertiesFail(maxProperties, map.size());
-                    }
-                }
-
-                return SUCCESS;
+                return validate((Map) value);
             }
 
             Class valueClass = value.getClass();
@@ -1898,11 +2301,11 @@ public abstract class JSONSchema {
                 }
             }
 
-            for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            for (Map.Entry<String, JSONSchema> entry : properties.entrySet()) {
                 String key = entry.getKey();
                 long keyHash = Fnv.hashCode64(key);
 
-                JSONSchema schema = (JSONSchema) entry.getValue();
+                JSONSchema schema = entry.getValue();
 
                 FieldWriter fieldWriter = objectWriter.getFieldWriter(keyHash);
                 if (fieldWriter != null) {
@@ -1941,6 +2344,99 @@ public abstract class JSONSchema {
                 }
             }
 
+            if (dependentRequiredHashCodes != null) {
+                int propertyIndex = 0;
+                for (Map.Entry<Long, long[]> entry : dependentRequiredHashCodes.entrySet()) {
+                    Long keyHash = entry.getKey();
+                    long[] dependentRequiredProperties = entry.getValue();
+
+                    FieldWriter fieldWriter = objectWriter.getFieldWriter(keyHash);
+                    Object fieldValue = fieldWriter.getFieldValue(value);
+                    if (fieldValue == null) {
+                        propertyIndex++;
+                        continue;
+                    }
+
+                    for (int requiredIndex = 0; requiredIndex < dependentRequiredProperties.length; requiredIndex++) {
+                        long dependentRequiredHash = dependentRequiredProperties[requiredIndex];
+                        FieldWriter dependentFieldWriter = objectWriter.getFieldWriter(dependentRequiredHash);
+
+                        if (dependentFieldWriter == null || dependentFieldWriter.getFieldValue(value) == null) {
+                            int i = 0;
+                            String property = null, dependentRequiredProperty = null;
+                            for (Iterator<Map.Entry<String, String[]>> it = this.dependentRequired.entrySet().iterator(); it.hasNext();++i) {
+                                if (propertyIndex == i) {
+                                    Map.Entry<String, String[]> dependentRequiredEntry = it.next();
+                                    property = dependentRequiredEntry.getKey();
+                                    dependentRequiredProperty = dependentRequiredEntry.getValue()[requiredIndex];
+                                }
+                            }
+                            return new DependentRequiredPropertyFail(property, dependentRequiredProperty);
+                        }
+                    }
+
+                    propertyIndex++;
+                }
+            }
+
+            if (dependentSchemasHashMapping != null) {
+                for (Map.Entry<Long, JSONSchema> entry : dependentSchemasHashMapping.entrySet()) {
+                    Long keyHash = entry.getKey();
+
+                    FieldWriter fieldWriter = objectWriter.getFieldWriter(keyHash);
+                    if (fieldWriter == null || fieldWriter.getFieldValue(value) == null) {
+                        continue;
+                    }
+
+                    JSONSchema schema = entry.getValue();
+                    ValidateResult result = schema.validate(value);
+                    if (!result.isSuccess()) {
+                        return result;
+                    }
+                }
+            }
+
+            if (ifSchema != null) {
+                ValidateResult ifResult = ifSchema.validate(value);
+                if (ifResult.isSuccess()) {
+                    if (thenSchema != null) {
+                        ValidateResult thenResult = thenSchema.validate(value);
+                        if (!thenResult.isSuccess()) {
+                            return thenResult;
+                        }
+                    }
+                } else {
+                    if (elseSchema != null) {
+                        ValidateResult elseResult = elseSchema.validate(value);
+                        if (!elseResult.isSuccess()) {
+                            return elseResult;
+                        }
+                    }
+                }
+            }
+
+
+            if (allOf != null) {
+                ValidateResult result = allOf.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (anyOf != null) {
+                ValidateResult result = anyOf.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (oneOf != null) {
+                ValidateResult result = oneOf.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
             return SUCCESS;
         }
 
@@ -1949,7 +2445,7 @@ public abstract class JSONSchema {
         }
 
         public JSONSchema getProperty(String key) {
-            return (JSONSchema) properties.get(key);
+            return properties.get(key);
         }
 
         public Set<String> getRequired() {
@@ -1979,6 +2475,9 @@ public abstract class JSONSchema {
 
     static final Success SUCCESS = new Success();
     static final Fail FAIL_INPUT_NULL = new Fail("input null");
+    static final Fail FAIL_ANY_OF = new Fail("anyOf fail");
+    static final Fail FAIL_ONE_OF = new Fail("oneOf fail");
+    static final Fail FAIL_NOT = new Fail("not fail");
 
     private static final class Success implements ValidateResult {
         @Override
@@ -2482,7 +2981,7 @@ public abstract class JSONSchema {
             if (message != null) {
                 return message;
             }
-            return message = "requried property '" + property + "'";
+            return message = "required property '" + property + "'";
         }
 
         @Override
@@ -2490,6 +2989,37 @@ public abstract class JSONSchema {
             return null;
         }
     }
+
+
+    static class DependentRequiredPropertyFail implements ValidateResult {
+        final String property;
+        final String dependentRequiredProperty;
+        private String message;
+
+        public DependentRequiredPropertyFail(String property, String dependentRequiredProperty) {
+            this.property = property;
+            this.dependentRequiredProperty = dependentRequiredProperty;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            if (message != null) {
+                return message;
+            }
+            return message = "property '" + property + "', dependentRequired property '" + dependentRequiredProperty + "'";
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
 
     final static Fail CONTAINS_NOT_MATCH = new Fail("contains not match");
     final static Fail UNIQUE_ITEMS_NOT_MATCH = new Fail("uniqueItems not match");
