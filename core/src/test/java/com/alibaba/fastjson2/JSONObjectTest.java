@@ -1009,13 +1009,6 @@ public class JSONObjectTest {
     }
 
     @Test
-    public void test_obj_key() {
-        JSONObject object = new JSONObject();
-        Object key = "id";
-        object.put(key, 101);
-    }
-
-    @Test
     public void test_invoke() {
         JSONObject object = new JSONObject(3);
         User proxy = (User) Proxy.newProxyInstance(
