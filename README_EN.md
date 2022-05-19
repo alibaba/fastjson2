@@ -21,6 +21,8 @@
 - Supports full parsing and partial parsing.
 - Supports Java servers and Android Clients, and has big data applications.
 - Supports Kotlin
+- Supports Android (2.0.3.android)
+- Supports Graal Native-Image (2.0.3.graal)
 
 ![fastjson](docs/logo.jpg "fastjson")
 
