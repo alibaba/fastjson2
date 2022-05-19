@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.benchmark.schema;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONSchema;
+import com.alibaba.fastjson2.schema.JSONSchema;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.RunnerException;

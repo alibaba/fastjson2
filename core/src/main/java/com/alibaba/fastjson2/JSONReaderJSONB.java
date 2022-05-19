@@ -20,7 +20,7 @@ import static com.alibaba.fastjson2.JSONB.*;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.JSONFactory.UUIDUtils.*;
+import static com.alibaba.fastjson2.util.UUIDUtils.*;
 
 final class JSONReaderJSONB extends JSONReader {
     private final byte[] bytes;

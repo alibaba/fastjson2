@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONSchema;
+import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.util.function.Function;
 import java.util.function.Supplier;

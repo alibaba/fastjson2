@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONSchema;
+import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;

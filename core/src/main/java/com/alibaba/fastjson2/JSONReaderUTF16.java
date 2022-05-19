@@ -8,7 +8,7 @@ import java.time.*;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import static com.alibaba.fastjson2.JSONFactory.UUIDUtils.*;
+import static com.alibaba.fastjson2.util.UUIDUtils.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 final class JSONReaderUTF16 extends JSONReader {

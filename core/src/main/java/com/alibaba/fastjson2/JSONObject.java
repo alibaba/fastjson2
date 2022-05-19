@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
 import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
+import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.writer.ObjectWriter;
