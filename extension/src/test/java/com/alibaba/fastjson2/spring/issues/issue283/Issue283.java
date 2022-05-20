@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 import lombok.Data;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -98,7 +101,24 @@ public class Issue283 {
             fastConverter.setFastJsonConfig(fastJsonConfig);
             fastConverter.setDefaultCharset(StandardCharsets.UTF_8);
             fastConverter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
+            JSON.register(BigInteger.class, ToStringObjectWriter.INSTANCE);
+            JSON.register(Long.class, ToStringObjectWriter.INSTANCE);
             converters.add(0, fastConverter);
+        }
+    }
+
+    public static class ToStringObjectWriter implements ObjectWriter<Object> {
+
+        public final static ToStringObjectWriter INSTANCE = new ToStringObjectWriter();
+
+        @Override
+        public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+            if (object == null) {
+                jsonWriter.writeNull();
+            } else {
+                String strVal = object.toString();
+                jsonWriter.writeString(strVal);
+            }
         }
     }
 
