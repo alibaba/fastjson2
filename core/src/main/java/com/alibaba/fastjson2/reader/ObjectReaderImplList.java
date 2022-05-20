@@ -160,7 +160,7 @@ public final class ObjectReaderImplList implements ObjectReader {
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
-        List list = (List) createInstance(0L);
+        Set list = (Set) createInstance(0L);
         for (Object item : collection) {
             Object value = item;
             Class<?> valueClass = value.getClass();
@@ -179,6 +179,8 @@ public final class ObjectReaderImplList implements ObjectReader {
                         itemObjectReader = provider.getObjectReader(itemType);
                     }
                     value = itemObjectReader.createInstance((Collection) value);
+                } else if (itemClass.isInstance(value)) {
+                    // skip
                 } else {
                     throw new JSONException("can not convert from " + valueClass + " to " + itemType);
                 }
