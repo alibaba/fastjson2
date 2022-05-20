@@ -22,6 +22,16 @@ public class JSONSchemaResourceTest {
     }
 
     @Test
+    public void test_draft2020_boolean_schema() {
+        runTest("schema/draft2020-12/boolean_schema.json");
+    }
+//
+//    @Test
+//    public void test_draft2020_const() {
+//        runTest("schema/draft2020-12/const.json");
+//    }
+
+    @Test
     public void test_draft2020_items() {
         runTest("schema/draft2020-12/items.json");
     }
@@ -77,11 +87,12 @@ public class JSONSchemaResourceTest {
 
     private void validate(JSONArray array, int i) {
         JSONObject item = array.getJSONObject(i);
-        JSONObject object = item.getJSONObject("schema");
+        Object object = item.get("schema");
 
         JSONSchema schema;
         try {
-            schema = JSONSchema.of(object);
+            schema = JSONSchema.parseSchema(
+                    JSON.toJSONString(object));
         } catch (Exception ex) {
             throw new IllegalStateException("parse schema " + i + " error : " + object, ex);
         }
@@ -92,7 +103,7 @@ public class JSONSchemaResourceTest {
         }
     }
 
-    private void validate(int i, int j, JSONObject object, JSONSchema schema, JSONArray tests) {
+    private void validate(int i, int j, Object object, JSONSchema schema, JSONArray tests) {
         JSONObject test = tests.getJSONObject(j);
 
         String description = test.getString("description");

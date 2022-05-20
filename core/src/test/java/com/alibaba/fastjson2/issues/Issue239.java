@@ -14,7 +14,7 @@ public class Issue239 {
     @Test
     public void test() {
         // 定义必须包含longitude和latitude两个属性，其中longitude的取值范围是[-180 ~ 180]，latitude的取值范围是[-90, 90]
-        JSONSchema schema = JSONSchema.of("{\n" +
+        JSONSchema schema = JSONSchema.parseSchema("{\n" +
                 "  \"type\": \"object\",\n" +
                 "  \"properties\": {\n" +
                 "    \"longitude\": { \"type\": \"number\", \"minimum\":-180, \"maximum\":180},\n" +

@@ -149,10 +149,17 @@ public abstract class JSONSchema {
         return new Not(schema, null, null);
     }
 
-    public static JSONSchema of(String schema) {
-        return of(
-                JSON.parseObject(schema)
-        );
+    public static JSONSchema parseSchema(String schema) {
+        Object input = JSON.parse(schema);
+        if (input instanceof JSONObject) {
+            return of((JSONObject) input);
+        }
+
+        if (input instanceof Boolean) {
+            return ((Boolean) input).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+        }
+
+        return null;
     }
 
     @JSONCreator
@@ -175,6 +182,8 @@ public abstract class JSONSchema {
             Object constValue = input.get("const");
             if (constValue instanceof String) {
                 return new ConstString((String) constValue);
+            } else if (constValue instanceof Integer || constValue instanceof Long) {
+                return new ConstInteger(((Number) constValue).longValue());
             }
 
             if (input.size() == 1) {
