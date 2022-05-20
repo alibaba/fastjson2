@@ -6,30 +6,19 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.function.Function;
 
-final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.PrimitiveImpl {
-    static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray();
-
-    @Override
-    public Class getObjectClass() {
-        return int[].class;
-    }
+final class ObjectReaderImplFloatArray extends ObjectReaderBaseModule.PrimitiveImpl {
+    static final ObjectReaderImplFloatArray INSTANCE = new ObjectReaderImplFloatArray();
 
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
-        if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, features);
-        }
-
         if (jsonReader.readIfNull()) {
             return null;
         }
 
         if (jsonReader.nextIfMatch('[')) {
-
-            int[] values = new int[16];
+            Float[] values = new Float[16];
             int size = 0;
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
@@ -47,7 +36,7 @@ final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.Primi
                     values = Arrays.copyOf(values, newCapacity);
                 }
 
-                values[size++] = jsonReader.readInt32Value();
+                values[size++] = jsonReader.readFloat();
             }
             jsonReader.nextIfMatch(',');
 
@@ -64,28 +53,28 @@ final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.Primi
         if (entryCnt == -1) {
             return null;
         }
-        int[] array = new int[entryCnt];
+        Float[] array = new Float[entryCnt];
         for (int i = 0; i < entryCnt; i++) {
-            array[i] = jsonReader.readInt32Value();
+            array[i] = jsonReader.readFloat();
         }
         return array;
     }
 
     public Object createInstance(Collection collection) {
-        int[] array = new int[collection.size()];
+        Float[] array = new Float[collection.size()];
         int i = 0;
         for (Object item : collection) {
-            int value;
+            Float value;
             if (item == null) {
-                value = 0;
+                value = null;
             } else if (item instanceof Number) {
-                value = ((Number) item).intValue();
+                value = ((Number) item).floatValue();
             } else {
-                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), int.class);
+                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), Float.class);
                 if (typeConvert == null) {
-                    throw new JSONException("can not cast to int " + item.getClass());
+                    throw new JSONException("can not cast to Float " + item.getClass());
                 }
-                value = (Integer) typeConvert.apply(item);
+                value = (Float) typeConvert.apply(item);
             }
             array[i++] = value;
         }

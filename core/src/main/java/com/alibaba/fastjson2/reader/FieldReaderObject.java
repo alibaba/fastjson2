@@ -33,7 +33,7 @@ public interface FieldReaderObject<T, V> extends FieldReader<T> {
                     return JdbcSupport.createDateReader(format, locale);
                 case "byte[]":
                 case "[B":
-                    return new ObjectReaderBaseModule.Inte8ArrayImpl(format);
+                    return new ObjectReaderImplInt8Array(format);
                 default:
                     if (Calendar.class.isAssignableFrom(fieldClass)) {
                         return ObjectReaderImplCalendar.of(format, locale);

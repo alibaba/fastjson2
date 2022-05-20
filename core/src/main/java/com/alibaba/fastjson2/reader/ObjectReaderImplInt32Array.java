@@ -1,9 +1,12 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.function.Function;
 
 final class ObjectReaderImplInt32Array extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplInt32Array INSTANCE = new ObjectReaderImplInt32Array();
@@ -11,6 +14,27 @@ final class ObjectReaderImplInt32Array extends ObjectReaderBaseModule.PrimitiveI
     @Override
     public Class getObjectClass() {
         return Integer[].class;
+    }
+
+    public Object createInstance(Collection collection) {
+        Integer[] array = new Integer[collection.size()];
+        int i = 0;
+        for (Object item : collection) {
+            Integer value;
+            if (item == null) {
+                value = null;
+            } else if (item instanceof Number) {
+                value = ((Number) item).intValue();
+            } else {
+                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), Integer.class);
+                if (typeConvert == null) {
+                    throw new JSONException("can not cast to Integer " + item.getClass());
+                }
+                value = (Integer) typeConvert.apply(item);
+            }
+            array[i++] = value;
+        }
+        return array;
     }
 
     @Override

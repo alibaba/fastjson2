@@ -30,7 +30,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.Function;
-import java.util.zip.GZIPInputStream;
 
 import static com.alibaba.fastjson2.reader.TypeConverts.*;
 
@@ -160,6 +159,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             provider.registerTypeConvert(String.class, Long.class, new StringToAny(Long.class, null));
             provider.registerTypeConvert(String.class, BigDecimal.class, new StringToAny(BigDecimal.class, null));
             provider.registerTypeConvert(String.class, BigInteger.class, new StringToAny(BigInteger.class, null));
+            provider.registerTypeConvert(String.class, Number.class, new StringToAny(BigDecimal.class, null));
             provider.registerTypeConvert(String.class, Collection.class, new StringToAny(Collection.class, null));
             provider.registerTypeConvert(String.class, List.class, new StringToAny(List.class, null));
             provider.registerTypeConvert(String.class, JSONArray.class, new StringToAny(JSONArray.class, null));
@@ -1183,7 +1183,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         if (type == double[].class) {
-            return DoubleValueArrayImpl.INSTANCE;
+            return ObjectReaderImplDoubleValueArray.INSTANCE;
         }
 
         if (type == boolean[].class) {
@@ -1191,11 +1191,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         if (type == byte[].class) {
-            return Inte8ValueArrayImpl.INSTANCE;
+            return ObjectReaderImplInt8ValueArray.INSTANCE;
         }
 
         if (type == short[].class) {
-            return Inte16ValueArrayImpl.INSTANCE;
+            return ObjectReaderImplInt16ValueArray.INSTANCE;
         }
 
         if (type == int[].class) {
@@ -1207,11 +1207,11 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         if (type == Byte[].class) {
-            return Inte8ArrayImpl.INSTANCE;
+            return ObjectReaderImplInt8Array.INSTANCE;
         }
 
         if (type == Short[].class) {
-            return Inte16ArrayImpl.INSTANCE;
+            return ObjectReaderImplInt16Array.INSTANCE;
         }
 
         if (type == Integer[].class) {
@@ -1223,15 +1223,15 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         if (type == Float[].class) {
-            return FloatArrayImpl.INSTANCE;
+            return ObjectReaderImplFloatArray.INSTANCE;
         }
 
         if (type == Double[].class) {
-            return DoubleArrayImpl.INSTANCE;
+            return ObjectReaderImplDoubleArray.INSTANCE;
         }
 
         if (type == Number[].class) {
-            return NumberArrayImpl.INSTANCE;
+            return ObjectReaderImplNumberArray.INSTANCE;
         }
 
         if (type == AtomicInteger.class) {
@@ -2082,270 +2082,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class Inte8ValueArrayImpl extends PrimitiveImpl {
-        static final Inte8ValueArrayImpl INSTANCE = new Inte8ValueArrayImpl(null);
-
-        final String format;
-
-        Inte8ValueArrayImpl(String format) {
-            this.format = format;
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (jsonReader.nextIfMatch('[')) {
-                byte[] values = new byte[16];
-                int size = 0;
-                for (; ; ) {
-                    if (jsonReader.nextIfMatch(']')) {
-                        break;
-                    }
-
-                    int minCapacity = size + 1;
-                    if (minCapacity - values.length > 0) {
-                        int oldCapacity = values.length;
-                        int newCapacity = oldCapacity + (oldCapacity >> 1);
-                        if (newCapacity - minCapacity < 0) {
-                            newCapacity = minCapacity;
-                        }
-
-                        values = Arrays.copyOf(values, newCapacity);
-                    }
-
-                    values[size++] = (byte) jsonReader.readInt32Value();
-                }
-                jsonReader.nextIfMatch(',');
-
-                return Arrays.copyOf(values, size);
-            }
-
-            if (jsonReader.isString()) {
-                return jsonReader.readBinary();
-            }
-
-            throw new JSONException("TODO");
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            if (jsonReader.isBinary()) {
-                return jsonReader.readBinary();
-            }
-
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt == -1) {
-                return null;
-            }
-            byte[] array = new byte[entryCnt];
-            for (int i = 0; i < entryCnt; i++) {
-                array[i] = (byte) jsonReader.readInt32Value();
-            }
-            return array;
-        }
-    }
-
-    static class Inte16ValueArrayImpl extends PrimitiveImpl {
-        static final Inte16ValueArrayImpl INSTANCE = new Inte16ValueArrayImpl();
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (jsonReader.nextIfMatch('[')) {
-                short[] values = new short[16];
-                int size = 0;
-                for (; ; ) {
-                    if (jsonReader.nextIfMatch(']')) {
-                        break;
-                    }
-
-                    int minCapacity = size + 1;
-                    if (minCapacity - values.length > 0) {
-                        int oldCapacity = values.length;
-                        int newCapacity = oldCapacity + (oldCapacity >> 1);
-                        if (newCapacity - minCapacity < 0) {
-                            newCapacity = minCapacity;
-                        }
-
-                        values = Arrays.copyOf(values, newCapacity);
-                    }
-
-                    values[size++] = (short) jsonReader.readInt32Value();
-                }
-
-                jsonReader.nextIfMatch(',');
-
-                return Arrays.copyOf(values, size);
-            }
-
-            throw new JSONException("TODO");
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt == -1) {
-                return null;
-            }
-            short[] array = new short[entryCnt];
-            for (int i = 0; i < entryCnt; i++) {
-                array[i] = (short) jsonReader.readInt32Value();
-            }
-            return array;
-        }
-    }
-
-    static class Inte8ArrayImpl extends PrimitiveImpl {
-        static final Inte8ArrayImpl INSTANCE = new Inte8ArrayImpl(null);
-
-        final String format;
-        public Inte8ArrayImpl(String format) {
-            this.format = format;
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (jsonReader.nextIfMatch('[')) {
-                Byte[] values = new Byte[16];
-                int size = 0;
-                for (; ; ) {
-                    if (jsonReader.nextIfMatch(']')) {
-                        break;
-                    }
-
-                    int minCapacity = size + 1;
-                    if (minCapacity - values.length > 0) {
-                        int oldCapacity = values.length;
-                        int newCapacity = oldCapacity + (oldCapacity >> 1);
-                        if (newCapacity - minCapacity < 0) {
-                            newCapacity = minCapacity;
-                        }
-
-                        values = Arrays.copyOf(values, newCapacity);
-                    }
-
-                    Integer i = jsonReader.readInt32();
-                    values[size++] = i == null ? null : i.byteValue();
-                }
-                jsonReader.nextIfMatch(',');
-
-                return Arrays.copyOf(values, size);
-            }
-
-            if (jsonReader.isString()) {
-                String strVal = jsonReader.readString();
-                if ("base64".equals(format)) {
-                    return Base64.getDecoder().decode(strVal);
-                }
-
-                if ("gzip,base64".equals(format)) {
-                    byte[] bytes = Base64.getDecoder().decode(strVal);
-
-                    GZIPInputStream gzipIn = null;
-                    try {
-                        gzipIn = new GZIPInputStream(new ByteArrayInputStream(bytes));
-
-                        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-                        for (;;) {
-                            byte[] buf = new byte[1024];
-                            int len = gzipIn.read(buf);
-                            if (len == -1) {
-                                break;
-                            }
-                            if (len > 0) {
-                                byteOut.write(buf, 0, len);
-                            }
-                        }
-                        return byteOut.toByteArray();
-
-                    } catch (IOException ex) {
-                        throw new JSONException("unzip bytes error.", ex);
-                    }
-                }
-            }
-
-            throw new JSONException("TODO");
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt == -1) {
-                return null;
-            }
-            Byte[] array = new Byte[entryCnt];
-            for (int i = 0; i < entryCnt; i++) {
-                Integer integer = jsonReader.readInt32();
-                array[i] = integer == null ? null : integer.byteValue();
-            }
-            return array;
-        }
-    }
-
-    static class Inte16ArrayImpl extends PrimitiveImpl {
-        static final Inte16ArrayImpl INSTANCE = new Inte16ArrayImpl();
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (jsonReader.nextIfMatch('[')) {
-                Short[] values = new Short[16];
-                int size = 0;
-                for (; ; ) {
-                    if (jsonReader.nextIfMatch(']')) {
-                        break;
-                    }
-
-                    int minCapacity = size + 1;
-                    if (minCapacity - values.length > 0) {
-                        int oldCapacity = values.length;
-                        int newCapacity = oldCapacity + (oldCapacity >> 1);
-                        if (newCapacity - minCapacity < 0) {
-                            newCapacity = minCapacity;
-                        }
-
-                        values = Arrays.copyOf(values, newCapacity);
-                    }
-
-                    Integer i = jsonReader.readInt32();
-                    values[size++] = i == null ? 0 : i.shortValue();
-                }
-                jsonReader.nextIfMatch(',');
-
-                return Arrays.copyOf(values, size);
-            }
-
-            throw new JSONException("TODO");
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt == -1) {
-                return null;
-            }
-            Short[] array = new Short[entryCnt];
-            for (int i = 0; i < entryCnt; i++) {
-                Integer integer = jsonReader.readInt32();
-                array[i] = integer == null ? null : integer.shortValue();
-            }
-            return array;
-        }
-    }
-
     static class FloatValueArrayImpl extends PrimitiveImpl {
         static final FloatValueArrayImpl INSTANCE = new FloatValueArrayImpl();
 
@@ -2400,218 +2136,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class FloatArrayImpl extends PrimitiveImpl {
-        static final FloatArrayImpl INSTANCE = new FloatArrayImpl();
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (jsonReader.nextIfMatch('[')) {
-                Float[] values = new Float[16];
-                int size = 0;
-                for (; ; ) {
-                    if (jsonReader.nextIfMatch(']')) {
-                        break;
-                    }
-
-                    int minCapacity = size + 1;
-                    if (minCapacity - values.length > 0) {
-                        int oldCapacity = values.length;
-                        int newCapacity = oldCapacity + (oldCapacity >> 1);
-                        if (newCapacity - minCapacity < 0) {
-                            newCapacity = minCapacity;
-                        }
-
-                        values = Arrays.copyOf(values, newCapacity);
-                    }
-
-                    values[size++] = jsonReader.readFloat();
-                }
-                jsonReader.nextIfMatch(',');
-
-                return Arrays.copyOf(values, size);
-            }
-
-
-            throw new JSONException("TODO");
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt == -1) {
-                return null;
-            }
-            Float[] array = new Float[entryCnt];
-            for (int i = 0; i < entryCnt; i++) {
-                array[i] = jsonReader.readFloat();
-            }
-            return array;
-        }
-    }
-
-    static class DoubleValueArrayImpl extends PrimitiveImpl {
-        static final DoubleValueArrayImpl INSTANCE = new DoubleValueArrayImpl();
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (jsonReader.nextIfMatch('[')) {
-                double[] values = new double[16];
-                int size = 0;
-                for (; ; ) {
-                    if (jsonReader.nextIfMatch(']')) {
-                        break;
-                    }
-
-                    int minCapacity = size + 1;
-                    if (minCapacity - values.length > 0) {
-                        int oldCapacity = values.length;
-                        int newCapacity = oldCapacity + (oldCapacity >> 1);
-                        if (newCapacity - minCapacity < 0) {
-                            newCapacity = minCapacity;
-                        }
-
-                        values = Arrays.copyOf(values, newCapacity);
-                    }
-
-                    values[size++] = jsonReader.readDoubleValue();
-                }
-                jsonReader.nextIfMatch(',');
-
-                return Arrays.copyOf(values, size);
-            }
-
-
-            throw new JSONException("TODO");
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt == -1) {
-                return null;
-            }
-            double[] array = new double[entryCnt];
-            for (int i = 0; i < entryCnt; i++) {
-                array[i] = jsonReader.readDoubleValue();
-            }
-            return array;
-        }
-    }
-
-    static class DoubleArrayImpl extends PrimitiveImpl {
-        static final DoubleArrayImpl INSTANCE = new DoubleArrayImpl();
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (jsonReader.nextIfMatch('[')) {
-                Double[] values = new Double[16];
-                int size = 0;
-                for (; ; ) {
-                    if (jsonReader.nextIfMatch(']')) {
-                        break;
-                    }
-
-                    int minCapacity = size + 1;
-                    if (minCapacity - values.length > 0) {
-                        int oldCapacity = values.length;
-                        int newCapacity = oldCapacity + (oldCapacity >> 1);
-                        if (newCapacity - minCapacity < 0) {
-                            newCapacity = minCapacity;
-                        }
-
-                        values = Arrays.copyOf(values, newCapacity);
-                    }
-
-                    values[size++] = jsonReader.readDouble();
-                }
-                jsonReader.nextIfMatch(',');
-
-                return Arrays.copyOf(values, size);
-            }
-
-
-            throw new JSONException("TODO");
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt == -1) {
-                return null;
-            }
-            Double[] array = new Double[entryCnt];
-            for (int i = 0; i < entryCnt; i++) {
-                array[i] = jsonReader.readDouble();
-            }
-            return array;
-        }
-    }
-
-
-    static class NumberArrayImpl extends PrimitiveImpl {
-        static final NumberArrayImpl INSTANCE = new NumberArrayImpl();
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (jsonReader.nextIfMatch('[')) {
-                Number[] values = new Number[16];
-                int size = 0;
-                for (; ; ) {
-                    if (jsonReader.nextIfMatch(']')) {
-                        break;
-                    }
-
-                    int minCapacity = size + 1;
-                    if (minCapacity - values.length > 0) {
-                        int oldCapacity = values.length;
-                        int newCapacity = oldCapacity + (oldCapacity >> 1);
-                        if (newCapacity - minCapacity < 0) {
-                            newCapacity = minCapacity;
-                        }
-
-                        values = Arrays.copyOf(values, newCapacity);
-                    }
-
-                    values[size++] = jsonReader.readNumber();
-                }
-                jsonReader.nextIfMatch(',');
-
-                return Arrays.copyOf(values, size);
-            }
-
-
-            throw new JSONException("TODO");
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt == -1) {
-                return null;
-            }
-            Number[] array = new Number[entryCnt];
-            for (int i = 0; i < entryCnt; i++) {
-                array[i] = jsonReader.readNumber();
-            }
-            return array;
-        }
-    }
 
     static class InterfaceImpl extends PrimitiveImpl {
         final Type interfaceType;

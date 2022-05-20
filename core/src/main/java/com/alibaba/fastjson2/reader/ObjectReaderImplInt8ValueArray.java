@@ -6,30 +6,25 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.function.Function;
 
-final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.PrimitiveImpl {
-    static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray();
+class ObjectReaderImplInt8ValueArray extends ObjectReaderBaseModule.PrimitiveImpl {
+    static final ObjectReaderImplInt8ValueArray INSTANCE = new ObjectReaderImplInt8ValueArray(null);
 
-    @Override
-    public Class getObjectClass() {
-        return int[].class;
+    final String format;
+
+    ObjectReaderImplInt8ValueArray(String format) {
+        this.format = format;
     }
 
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
-        if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, features);
-        }
-
         if (jsonReader.readIfNull()) {
             return null;
         }
 
         if (jsonReader.nextIfMatch('[')) {
-
-            int[] values = new int[16];
+            byte[] values = new byte[16];
             int size = 0;
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
@@ -47,45 +42,52 @@ final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.Primi
                     values = Arrays.copyOf(values, newCapacity);
                 }
 
-                values[size++] = jsonReader.readInt32Value();
+                values[size++] = (byte) jsonReader.readInt32Value();
             }
             jsonReader.nextIfMatch(',');
 
             return Arrays.copyOf(values, size);
         }
 
+        if (jsonReader.isString()) {
+            return jsonReader.readBinary();
+        }
 
         throw new JSONException("TODO");
     }
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
+        if (jsonReader.isBinary()) {
+            return jsonReader.readBinary();
+        }
+
         int entryCnt = jsonReader.startArray();
         if (entryCnt == -1) {
             return null;
         }
-        int[] array = new int[entryCnt];
+        byte[] array = new byte[entryCnt];
         for (int i = 0; i < entryCnt; i++) {
-            array[i] = jsonReader.readInt32Value();
+            array[i] = (byte) jsonReader.readInt32Value();
         }
         return array;
     }
 
     public Object createInstance(Collection collection) {
-        int[] array = new int[collection.size()];
+        byte[] array = new byte[collection.size()];
         int i = 0;
         for (Object item : collection) {
-            int value;
+            byte value;
             if (item == null) {
                 value = 0;
             } else if (item instanceof Number) {
-                value = ((Number) item).intValue();
+                value = ((Number) item).byteValue();
             } else {
-                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), int.class);
+                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), byte.class);
                 if (typeConvert == null) {
-                    throw new JSONException("can not cast to int " + item.getClass());
+                    throw new JSONException("can not cast to byte " + item.getClass());
                 }
-                value = (Integer) typeConvert.apply(item);
+                value = (Byte) typeConvert.apply(item);
             }
             array[i++] = value;
         }
