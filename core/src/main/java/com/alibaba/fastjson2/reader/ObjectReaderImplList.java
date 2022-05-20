@@ -160,7 +160,7 @@ public final class ObjectReaderImplList implements ObjectReader {
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
-        Set list = (Set) createInstance(0L);
+        Collection list = (Collection) createInstance(0L);
         for (Object item : collection) {
             Object value = item;
             Class<?> valueClass = value.getClass();
