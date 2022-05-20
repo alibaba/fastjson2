@@ -1066,8 +1066,24 @@ public class JSONSchemaTest {
     }
 
     @Test
+    public void testConstant1() {
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\"const\": 2}");
+
+        assertTrue(jsonSchema.isValid(2));
+        assertTrue(jsonSchema.isValid(2F));
+        assertTrue(jsonSchema.isValid(2D));
+        assertTrue(jsonSchema.isValid(new BigDecimal("2.0")));
+        assertTrue(jsonSchema.isValid(new BigInteger("2")));
+        assertFalse(jsonSchema.isValid(3));
+        assertFalse(jsonSchema.isValid(3.0F));
+        assertFalse(jsonSchema.isValid(3.0D));
+        assertFalse(jsonSchema.isValid(new BigDecimal("3.0")));
+        assertFalse(jsonSchema.isValid(new BigInteger("3")));
+    }
+
+    @Test
     public void test_dependentRequired() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "  \"type\": \"object\",\n" +
                 "\n" +
                 "  \"properties\": {\n" +
@@ -1160,7 +1176,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_dependentRequired1() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "  \"type\": \"object\",\n" +
                 "\n" +
                 "  \"properties\": {\n" +
@@ -1210,7 +1226,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_dependentSchemas0() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "  \"type\": \"object\",\n" +
                 "\n" +
                 "  \"properties\": {\n" +
@@ -1309,7 +1325,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_if0() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "  \"type\": \"object\",\n" +
                 "  \"properties\": {\n" +
                 "    \"street_address\": {\n" +
@@ -1422,7 +1438,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_if1() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "  \"type\": \"object\",\n" +
                 "  \"properties\": {\n" +
                 "    \"street_address\": {\n" +
@@ -1519,7 +1535,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_allOf() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "  \"allOf\": [\n" +
                 "    { \"type\": \"string\" },\n" +
                 "    { \"maxLength\": 5 }\n" +
@@ -1540,7 +1556,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_allOf_1() {
-        JSONSchema jsonSchema = JSONSchema.of("{\"allOf\":[true,true]}");
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\"allOf\":[true,true]}");
 
         assertTrue(
                 jsonSchema.isValid(
@@ -1553,7 +1569,7 @@ public class JSONSchemaTest {
     public void test_allOf_2() {
         // "allOf: true, anyOf: false, oneOf: false",
         JSONSchema jsonSchema = JSONSchema
-                .of("{\"allOf\":[{\"multipleOf\":2}],\"anyOf\":[{\"multipleOf\":3}],\"oneOf\":[{\"multipleOf\":5}]}");
+                .parseSchema("{\"allOf\":[{\"multipleOf\":2}],\"anyOf\":[{\"multipleOf\":3}],\"oneOf\":[{\"multipleOf\":5}]}");
 
         assertFalse(
                 jsonSchema.isValid(
@@ -1566,7 +1582,7 @@ public class JSONSchemaTest {
     public void test_anyOf_1() {
         // "allOf: true, anyOf: false, oneOf: false",
         JSONSchema jsonSchema = JSONSchema
-                .of("{\"type\":\"string\",\"anyOf\":[{\"maxLength\":2},{\"minLength\":4}]}");
+                .parseSchema("{\"type\":\"string\",\"anyOf\":[{\"maxLength\":2},{\"minLength\":4}]}");
 
         assertFalse(
                 jsonSchema.isValid(
@@ -1577,7 +1593,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_anyOf() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "  \"anyOf\": [\n" +
                 "    { \"type\": \"string\", \"maxLength\": 5 },\n" +
                 "    { \"type\": \"number\", \"minimum\": 0 }\n" +
@@ -1625,7 +1641,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_oneOf() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "  \"oneOf\": [\n" +
                 "    { \"type\": \"number\", \"multipleOf\": 5 },\n" +
                 "    { \"type\": \"number\", \"multipleOf\": 3 }\n" +
@@ -1690,7 +1706,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_not() {
-        JSONSchema jsonSchema = JSONSchema.of("{ \"not\": { \"type\": \"string\" } }");
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{ \"not\": { \"type\": \"string\" } }");
 
         assertTrue(
                 jsonSchema.isValid(
@@ -1743,7 +1759,7 @@ public class JSONSchemaTest {
 
     @Test
     public void testImplication() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "  \"type\": \"object\",\n" +
                 "  \"properties\": {\n" +
                 "    \"restaurantType\": { \"enum\": [\"fast-food\", \"sit-down\"] },\n" +
@@ -1826,7 +1842,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_additionalItems_0() {
-        JSONSchema jsonSchema = JSONSchema.of("{\"additionalItems\": false}");
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\"additionalItems\": false}");
 
         assertTrue(
                 jsonSchema.isValid(
@@ -1837,7 +1853,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_additionalItems_1() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "            \"items\": {},\n" +
                 "            \"additionalItems\": false\n" +
                 "        }");
@@ -1851,7 +1867,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_additionalItems_2() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "            \"allOf\": [\n" +
                 "                { \"items\": [ { \"type\": \"integer\" }, { \"type\": \"string\" } ] }\n" +
                 "            ],\n" +
@@ -1868,7 +1884,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_additionalItems_3() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "            \"allOf\": [\n" +
                 "                { \"items\": [ { \"type\": \"integer\" } ] }\n" +
                 "            ],\n" +
@@ -1884,7 +1900,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_items_0() {
-        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
                 "            \"definitions\": {\n" +
                 "                \"sub-item\": {\n" +
                 "                    \"type\": \"object\",\n" +
@@ -1921,7 +1937,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_items_1() {
-        JSONSchema jsonSchema = JSONSchema.of("{\"items\": false}");
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\"items\": false}");
 
         assertFalse(
                 jsonSchema.isValid(
@@ -1932,7 +1948,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_items_2() {
-        JSONSchema jsonSchema = JSONSchema.of("{\"prefixItems\":[{\"type\":\"string\"}],\"items\":{\"type\":\"integer\"}}");
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\"prefixItems\":[{\"type\":\"string\"}],\"items\":{\"type\":\"integer\"}}");
 
         assertTrue(
                 jsonSchema.isValid(
@@ -1943,7 +1959,7 @@ public class JSONSchemaTest {
 
     @Test
     public void test_type_0() {
-        JSONSchema jsonSchema = JSONSchema.of("{\"type\":[\"integer\",\"string\"]}");
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\"type\":[\"integer\",\"string\"]}");
 
         assertFalse(
                 jsonSchema.isValid(
