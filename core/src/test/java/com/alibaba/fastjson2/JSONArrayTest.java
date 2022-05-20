@@ -1171,6 +1171,34 @@ public class JSONArrayTest {
         );
     }
 
+    @Test
+    public void test_toList() {
+        {
+            Set set = JSONArray
+                    .of(1, 2, 3)
+                    .to(Set.class);
+            assertEquals(3, set.size());
+        }
+        {
+            Set<Integer> set = JSONArray
+                    .of("1", "2", "3")
+                    .to(new TypeReference<Set<Integer>>() {}.getType());
+            assertEquals(3, set.size());
+            assertTrue(set.contains(1));
+            assertTrue(set.contains(2));
+            assertTrue(set.contains(3));
+        }
+        {
+            TreeSet<Integer> set = JSONArray
+                    .of("1", "2", "3")
+                    .to(new TypeReference<TreeSet<Integer>>() {}.getType());
+            assertEquals(3, set.size());
+            assertTrue(set.contains(1));
+            assertTrue(set.contains(2));
+            assertTrue(set.contains(3));
+        }
+    }
+
     public static class Bean {
 
     }
