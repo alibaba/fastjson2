@@ -5,9 +5,15 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.util.*;
 
 public final class ArraySchema extends JSONSchema {
+    final Map<String, JSONSchema> definitions;
+    final Map<String, JSONSchema> defs;
+
+    final boolean typed;
+
     final int maxLength;
     final int minLength;
     final JSONSchema itemSchema;
@@ -19,13 +25,45 @@ public final class ArraySchema extends JSONSchema {
     final int maxContains;
     final boolean uniqueItems;
 
-    public ArraySchema(JSONObject input) {
+    final AllOf allOf;
+    final AnyOf anyOf;
+    final OneOf oneOf;
+
+    public ArraySchema(JSONObject input, JSONSchema root) {
         super(input);
+
+        this.typed = "array".equals(input.get("type"));
+        this.definitions = new LinkedHashMap<>();
+        this.defs = new LinkedHashMap<>();
+
+        JSONObject definitions = input.getJSONObject("definitions");
+        if (definitions != null) {
+            for (Iterator<Map.Entry<String, Object>> it = definitions.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<String, Object> entry = it.next();
+                String entryKey = entry.getKey();
+                JSONObject entryValue = (JSONObject) entry.getValue();
+                JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
+                this.definitions.put(entryKey, schema);
+            }
+        }
+
+        JSONObject defs = input.getJSONObject("$defs");
+        if (defs != null) {
+            for (Iterator<Map.Entry<String, Object>> it = defs.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<String, Object> entry = it.next();
+                String entryKey = entry.getKey();
+                JSONObject entryValue = (JSONObject) entry.getValue();
+                JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
+                this.defs.put(entryKey, schema);
+            }
+        }
+
         this.minLength = input.getIntValue("minItems", -1);
         this.maxLength = input.getIntValue("maxItems", -1);
 
         Object items = input.get("items");
         Object additionalItems = input.get("additionalItems");
+        JSONArray prefixItems = input.getJSONArray("prefixItems");
 
         boolean additionalItemsSupport;
         if (items == null) {
@@ -35,14 +73,20 @@ public final class ArraySchema extends JSONSchema {
             additionalItemsSupport = ((Boolean) items).booleanValue();
             this.itemSchema = null;
         } else if (items instanceof JSONArray) {
-            throw new JSONException("schema error, items : " + items);
+            if (prefixItems == null) {
+                prefixItems = (JSONArray) items;
+            } else {
+                throw new JSONException("schema error, items : " + items);
+            }
+            this.itemSchema = null;
+            additionalItemsSupport = true;
         } else {
             additionalItemsSupport = true;
-            this.itemSchema = JSONSchema.of((JSONObject) items);
+            this.itemSchema = JSONSchema.of((JSONObject) items, root);
         }
 
         if (additionalItems instanceof JSONObject) {
-            additionalItem = JSONSchema.of((JSONObject) additionalItems);
+            additionalItem = JSONSchema.of((JSONObject) additionalItems, root == null ? this : root);
             additionalItemsSupport = true;
         } else if (additionalItems instanceof Boolean) {
             additionalItemsSupport = ((Boolean) additionalItems).booleanValue();
@@ -50,15 +94,26 @@ public final class ArraySchema extends JSONSchema {
         } else {
             this.additionalItem = null;
         }
+//        ((itemSchema != null && !(itemSchema instanceof Any))
+//                || this.prefixItems.length > 0)
+        if (itemSchema != null && !(itemSchema instanceof Any)) {
+            additionalItemsSupport = true;
+        } else if (prefixItems == null && !(items instanceof Boolean)) {
+            additionalItemsSupport = true;
+        } else if (itemSchema == null && prefixItems == null) {
+
+        }
         this.additionalItems = additionalItemsSupport;
 
-        JSONArray prefixItems = input.getJSONArray("prefixItems");
+
         if (prefixItems == null) {
             this.prefixItems = new JSONSchema[0];
         } else {
             this.prefixItems = new JSONSchema[prefixItems.size()];
             for (int i = 0; i < prefixItems.size(); i++) {
-                this.prefixItems[i] = prefixItems.getObject(i, JSONSchema::of);
+                JSONObject jsonObject = prefixItems.getJSONObject(i);
+                JSONSchema schema = JSONSchema.of(jsonObject, root == null ? this : root);
+                this.prefixItems[i] = schema;
             }
         }
 
@@ -67,6 +122,10 @@ public final class ArraySchema extends JSONSchema {
         this.maxContains = input.getIntValue("maxContains", -1);
 
         this.uniqueItems = input.getBooleanValue("uniqueItems");
+
+        allOf = allOf(input, null);
+        anyOf = anyOf(input, null);
+        oneOf = oneOf(input, null);
     }
 
     @Override
@@ -77,7 +136,7 @@ public final class ArraySchema extends JSONSchema {
     @Override
     public ValidateResult validate(Object value) {
         if (value == null) {
-            return FAIL_INPUT_NULL;
+            return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
 
         Set uniqueItemsSet = null;
@@ -100,15 +159,17 @@ public final class ArraySchema extends JSONSchema {
             for (int index = 0; index < array.length; index++) {
                 Object item = array[index];
 
-                if (itemSchema != null) {
-                    ValidateResult result = itemSchema.validate(item);
+                boolean prefixMatch = false;
+                if (index < prefixItems.length) {
+                    ValidateResult result = prefixItems[index].validate(item);
                     if (!result.isSuccess()) {
                         return result;
                     }
+                    prefixMatch = true;
                 }
 
-                if (index < prefixItems.length) {
-                    ValidateResult result = prefixItems[index].validate(item);
+                if (!prefixMatch && itemSchema != null) {
+                    ValidateResult result = itemSchema.validate(item);
                     if (!result.isSuccess()) {
                         return result;
                     }
@@ -116,7 +177,7 @@ public final class ArraySchema extends JSONSchema {
 
                 if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
                     ValidateResult result = this.contains.validate(item);
-                    if (result.isSuccess()) {
+                    if (result == SUCCESS) {
                         containsCount++;
                     }
                 }
@@ -124,6 +185,10 @@ public final class ArraySchema extends JSONSchema {
                 if (uniqueItems) {
                     if (uniqueItemsSet == null) {
                         uniqueItemsSet = new HashSet(size);
+                    }
+
+                    if (item instanceof BigDecimal) {
+                        item = ((BigDecimal) item).stripTrailingZeros();
                     }
 
                     if (!uniqueItemsSet.add(item)) {
@@ -149,8 +214,31 @@ public final class ArraySchema extends JSONSchema {
                     return new ValidateResult.AdditionalItemsFail(prefixItems.length, size);
                 }
             }
+
+            if (allOf != null) {
+                ValidateResult result = allOf.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (anyOf != null) {
+                ValidateResult result = anyOf.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (oneOf != null) {
+                ValidateResult result = oneOf.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
             return SUCCESS;
         }
+
         if (value.getClass().isArray()) {
             final int size = Array.getLength(value);
 
@@ -168,15 +256,17 @@ public final class ArraySchema extends JSONSchema {
             for (int index = 0; index < size; index++) {
                 Object item = Array.get(value, index);
 
-                if (itemSchema != null) {
-                    ValidateResult result = itemSchema.validate(item);
+                boolean prefixMatch = false;
+                if (index < prefixItems.length) {
+                    ValidateResult result = prefixItems[index].validate(item);
                     if (!result.isSuccess()) {
                         return result;
                     }
+                    prefixMatch = true;
                 }
 
-                if (index < prefixItems.length) {
-                    ValidateResult result = prefixItems[index].validate(item);
+                if (!prefixMatch && itemSchema != null) {
+                    ValidateResult result = itemSchema.validate(item);
                     if (!result.isSuccess()) {
                         return result;
                     }
@@ -184,7 +274,7 @@ public final class ArraySchema extends JSONSchema {
 
                 if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
                     ValidateResult result = this.contains.validate(item);
-                    if (result.isSuccess()) {
+                    if (result == SUCCESS) {
                         containsCount++;
                     }
                 }
@@ -192,6 +282,10 @@ public final class ArraySchema extends JSONSchema {
                 if (uniqueItems) {
                     if (uniqueItemsSet == null) {
                         uniqueItemsSet = new HashSet(size);
+                    }
+
+                    if (item instanceof BigDecimal) {
+                        item = ((BigDecimal) item).stripTrailingZeros();
                     }
 
                     if (!uniqueItemsSet.add(item)) {
@@ -214,6 +308,28 @@ public final class ArraySchema extends JSONSchema {
                     return new ValidateResult.AdditionalItemsFail(prefixItems.length, size);
                 }
             }
+
+            if (allOf != null) {
+                ValidateResult result = allOf.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (anyOf != null) {
+                ValidateResult result = anyOf.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (oneOf != null) {
+                ValidateResult result = oneOf.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
             return SUCCESS;
         }
 
@@ -240,20 +356,22 @@ public final class ArraySchema extends JSONSchema {
             for (Iterator it = ((Iterable) value).iterator(); it.hasNext(); index++) {
                 Object item = it.next();
 
-                if (itemSchema != null) {
-                    ValidateResult result = itemSchema.validate(item);
-                    if (!result.isSuccess()) {
-                        return result;
-                    }
-                }
-
+                boolean prefixMatch = false;
                 if (index < prefixItems.length) {
                     ValidateResult result = prefixItems[index].validate(item);
                     if (!result.isSuccess()) {
                         return result;
                     }
-                } else if (additionalItem != null) {
+                    prefixMatch = true;
+                } else if (itemSchema == null && additionalItem != null) {
                     ValidateResult result = additionalItem.validate(item);
+                    if (!result.isSuccess()) {
+                        return result;
+                    }
+                }
+
+                if (!prefixMatch && itemSchema != null) {
+                    ValidateResult result = itemSchema.validate(item);
                     if (!result.isSuccess()) {
                         return result;
                     }
@@ -261,7 +379,7 @@ public final class ArraySchema extends JSONSchema {
 
                 if (this.contains != null && (minContains > 0 || maxContains > 0 || containsCount == 0)) {
                     ValidateResult result = this.contains.validate(item);
-                    if (result.isSuccess()) {
+                    if (result == SUCCESS) {
                         containsCount++;
                     }
                 }
@@ -269,6 +387,10 @@ public final class ArraySchema extends JSONSchema {
                 if (uniqueItems) {
                     if (uniqueItemsSet == null) {
                         uniqueItemsSet = new HashSet();
+                    }
+
+                    if (item instanceof BigDecimal) {
+                        item = ((BigDecimal) item).stripTrailingZeros();
                     }
 
                     if (!uniqueItemsSet.add(item)) {
@@ -289,10 +411,31 @@ public final class ArraySchema extends JSONSchema {
                 return new ValidateResult.MaxContainsFail(maxContains, containsCount);
             }
 
+            if (allOf != null) {
+                ValidateResult result = allOf.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (anyOf != null) {
+                ValidateResult result = anyOf.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (oneOf != null) {
+                ValidateResult result = oneOf.validate(value);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
             return SUCCESS;
         }
 
-        return new ValidateResult.TypeNotMatchFail(Type.Array, value.getClass());
+        return typed ? FAIL_TYPE_NOT_MATCH : SUCCESS;
     }
 
     @Override

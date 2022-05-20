@@ -5,13 +5,17 @@ import com.alibaba.fastjson2.annotation.JSONCreator;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 public abstract class JSONSchema {
+    final static Map<String, JSONSchema> CACHE = new ConcurrentHashMap<>();
+
     final String title;
     final String description;
 
@@ -103,24 +107,46 @@ public abstract class JSONSchema {
         }
 
         if (Collection.class.isAssignableFrom(objectClass)) {
-            return new ArraySchema(input);
+            return new ArraySchema(input, null);
         }
 
         if (objectClass.isArray()) {
-            return new ArraySchema(input);
+            return new ArraySchema(input, null);
         }
 
         if (Map.class.isAssignableFrom(objectClass)) {
-            return new ObjectSchema(input);
+            return new ObjectSchema(input, null);
         }
 
-        return new ObjectSchema(input);
+        return new ObjectSchema(input, null);
     }
 
-    static Not ofNot(JSONObject input, Class type) {
-        JSONObject object = input.getJSONObject("not");
-        JSONSchema schema = of(object, type);
-        return new Not(schema);
+    static Not ofNot(JSONObject input, Class objectClass) {
+        Object not = input.get("not");
+        if (not instanceof Boolean) {
+            return new Not(null, null, (Boolean) not);
+        }
+
+        JSONObject object = (JSONObject) not;
+
+        if (object != null && object.isEmpty()) {
+            return new Not(null, new Type[] {Type.Any}, null);
+        }
+
+        if (object.size() == 1) {
+            Object type = object.get("type");
+            if (type instanceof JSONArray) {
+                JSONArray array = (JSONArray) type;
+                Type[] types = new Type[array.size()];
+                for (int i = 0; i < array.size(); i++) {
+                    types[i] = array.getObject(i, Type.class);
+                }
+                return new Not(null, types, null);
+            }
+        }
+
+        JSONSchema schema = of(object, objectClass);
+        return new Not(schema, null, null);
     }
 
     public static JSONSchema of(String schema) {
@@ -131,7 +157,15 @@ public abstract class JSONSchema {
 
     @JSONCreator
     public static JSONSchema of(JSONObject input) {
-        Type type = input.getObject("type", Type.class);
+        return of(input, (JSONSchema) null);
+    }
+
+    @JSONCreator
+    public static JSONSchema of(JSONObject input, JSONSchema parent) {
+        Type type = Type.of(
+                input.getString("type")
+        );
+
         if (type == null) {
             String[] enums = input.getObject("enum", String[].class);
             if (enums != null) {
@@ -143,33 +177,67 @@ public abstract class JSONSchema {
                 return new ConstString((String) constValue);
             }
 
-            if (input.containsKey("properties") || input.containsKey("dependentSchemas") || input.containsKey("if") || input.containsKey("required")) {
-                return new ObjectSchema(input);
+            if (input.size() == 1) {
+                String ref = input.getString("$ref");
+                if (ref != null && !ref.isEmpty()) {
+                    if ("http://json-schema.org/draft-04/schema#".equals(ref)) {
+                        JSONSchema schema = CACHE.get(ref);
+                        if (schema == null) {
+                            URL draf4Resource = JSONSchema.class.getClassLoader().getResource("schema/draft-04.json");
+                            schema = JSONSchema.of(
+                                    JSON.parseObject(draf4Resource),
+                                    (JSONSchema) null
+                            );
+                            JSONSchema origin = CACHE.putIfAbsent(ref, schema);
+                            if (origin != null) {
+                                schema = origin;
+                            }
+                        }
+                        return schema;
+                    }
+
+                    if ("#".equals(ref)) {
+                        return parent;
+                    }
+
+                    Map<String, JSONSchema> definitions = null, defs = null;
+                    if (parent instanceof ObjectSchema) {
+                        definitions = ((ObjectSchema) parent).definitions;
+                        defs = ((ObjectSchema) parent).defs;
+                    } else if (parent instanceof ArraySchema) {
+                        definitions = ((ArraySchema) parent).definitions;
+                        defs = ((ArraySchema) parent).defs;
+                    }
+
+                    if (definitions != null) {
+                        if (ref.startsWith("#/definitions/")) {
+                            final int PREFIX_LEN = 14; // "#/definitions/".length();
+                            String refName = ref.substring(PREFIX_LEN);
+                            JSONSchema refSchema = definitions.get(refName);
+                            return refSchema;
+                        }
+                    }
+
+                    if (defs != null) {
+                        if (ref.startsWith("#/$defs/")) {
+                            final int PREFIX_LEN = 8; // "#/$defs/".length();
+                            String refName = ref.substring(PREFIX_LEN);
+                            JSONSchema refSchema = defs.get(refName);
+                            return refSchema;
+                        }
+                    }
+                }
             }
 
-            if (input.containsKey("pattern")) {
-                return new StringSchema(input);
-            }
-
-            if (input.containsKey("allOf")) {
-                return new AllOf(input);
-            }
-
-            if (input.containsKey("anyOf")) {
-                return new AnyOf(input);
-            }
-
-            if (input.containsKey("oneOf")) {
-                return new OneOf(input);
-            }
-
-            if (input.containsKey("not")) {
-                return ofNot(input, null);
-            }
-
-            if (input.get("maximum") instanceof Number
-                    || input.get("minimum") instanceof Number) {
-                return new NumberSchema(input);
+            if (input.containsKey("properties")
+                    || input.containsKey("dependentSchemas")
+                    || input.containsKey("if")
+                    || input.containsKey("required")
+                    || input.containsKey("patternProperties")
+                    || input.containsKey("additionalProperties")
+                    || input.containsKey("$ref")
+            ) {
+                return new ObjectSchema(input, parent);
             }
 
             if (input.containsKey("maxItems")
@@ -177,12 +245,99 @@ public abstract class JSONSchema {
                     || input.containsKey("additionalItems")
                     || input.containsKey("items")
                     || input.containsKey("prefixItems")
+                    || input.containsKey("uniqueItems")
             ) {
-                return new ArraySchema(input);
+                return new ArraySchema(input, parent);
+            }
+
+            if (input.containsKey("pattern")) {
+                return new StringSchema(input);
+            }
+
+            boolean allOf = input.containsKey("allOf");
+            boolean anyOf = input.containsKey("anyOf");
+            boolean oneOf = input.containsKey("oneOf");
+
+            if (allOf || anyOf || oneOf) {
+                int count = (allOf ? 1 : 0) + (anyOf ? 1 : 0) + (oneOf ? 1 : 0);
+                if (count == 1) {
+                    if (allOf) {
+                        return new AllOf(input, parent);
+                    }
+
+                    if (anyOf) {
+                        return new AnyOf(input, parent);
+                    }
+
+                    if (oneOf) {
+                        return new OneOf(input, parent);
+                    }
+                }
+                JSONSchema[] items = new JSONSchema[count];
+                int index = 0;
+                if (allOf) {
+                    items[index++] = new AllOf(input, parent);
+                }
+                if (anyOf) {
+                    items[index++] = new AnyOf(input, parent);
+                }
+                if (oneOf) {
+                    items[index++] = new OneOf(input, parent);
+                }
+                return new AllOf(items);
+            }
+
+            if (input.containsKey("not")) {
+                return ofNot(input, null);
+            }
+
+            if (input.get("maximum") instanceof Number
+                    || input.get("minimum") instanceof Number
+                    || input.containsKey("multipleOf")
+            ) {
+                return new NumberSchema(input);
             }
 
             if (input.isEmpty()) {
                 return Any.INSTANCE;
+            }
+
+            if (input.size() == 1) {
+                Object propertyType = input.get("type");
+                if (propertyType instanceof JSONArray) {
+                    JSONObject empty = new JSONObject();
+                    JSONArray array = (JSONArray) propertyType;
+                    JSONSchema[] typeSchemas = new JSONSchema[array.size()];
+                    for (int i = 0; i < array.size(); i++) {
+                        Type itemType = Type.of(array.getString(i));
+                        switch (itemType) {
+                            case String:
+                                typeSchemas[i] = new StringSchema(JSONObject.of("type", "string"));
+                                break;
+                            case Integer:
+                                typeSchemas[i] = new IntegerSchema(JSONObject.of("type", "integer"));
+                                break;
+                            case Number:
+                                typeSchemas[i] = new NumberSchema(JSONObject.of("type", "number"));
+                                break;
+                            case Boolean:
+                                typeSchemas[i] = new BooleanSchema(JSONObject.of("type", "boolean"));
+                                break;
+                            case Null:
+                                typeSchemas[i] =  new NullSchema(JSONObject.of("type", "null"));
+                                break;
+                            case Object:
+                                typeSchemas[i] =  new ObjectSchema(JSONObject.of("type", "object"));
+                                break;
+                            case Array:
+                                typeSchemas[i] =  new ArraySchema(JSONObject.of("type", "array"), null);
+                                break;
+                            default:
+                                throw new JSONException("not support type : " + itemType);
+                        }
+                    }
+                    return new AnyOf(typeSchemas);
+                }
             }
 
             throw new JSONException("type required");
@@ -200,9 +355,9 @@ public abstract class JSONSchema {
             case Null:
                 return new NullSchema(input);
             case Object:
-                return new ObjectSchema(input);
+                return new ObjectSchema(input, parent);
             case Array:
-                return new ArraySchema(input);
+                return new ArraySchema(input, parent);
             default:
                 throw new JSONException("not support type : " + type);
         }
@@ -210,6 +365,20 @@ public abstract class JSONSchema {
 
     static AnyOf anyOf(JSONObject input, Class type) {
         JSONArray array = input.getJSONArray("anyOf");
+        if (array == null || array.isEmpty()) {
+            return null;
+        }
+        JSONSchema[] items = new JSONSchema[array.size()];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = JSONSchema.of(array.getJSONObject(i), type);
+        }
+        AnyOf anyOf = new AnyOf(items);
+
+        return anyOf;
+    }
+
+
+    static AnyOf anyOf(JSONArray array, Class type) {
         if (array == null || array.isEmpty()) {
             return null;
         }
@@ -393,14 +562,49 @@ public abstract class JSONSchema {
         Enum,
         Const,
         AllOf,
-        Any,
+        Any;
+
+        public static Type of(String typeStr) {
+            if (typeStr == null) {
+                return null;
+            }
+
+            switch (typeStr) {
+                case "Null":
+                case "null":
+                    return Type.Null;
+                case "String":
+                case "string":
+                    return Type.String;
+                case "Integer":
+                case "integer":
+                    return Type.Integer;
+                case "Number":
+                case "number":
+                    return Type.Number;
+                case "Boolean":
+                case "boolean":
+                    return Type.Boolean;
+                case "Object":
+                case "object":
+                    return Type.Object;
+                case "Array":
+                case "array":
+                    return Type.Array;
+                default:
+                    return null;
+            }
+        }
     }
 
     static final ValidateResult.Success SUCCESS = new ValidateResult.Success();
+    static final ValidateResult.SuccessNull SUCCESS_NULL = new ValidateResult.SuccessNull();
+    static final ValidateResult.SuccessTypeNotMatch SUCCESS_TYPENOT_MATCH = new ValidateResult.SuccessTypeNotMatch();
     static final ValidateResult.Fail FAIL_INPUT_NULL = new ValidateResult.Fail("input null");
     static final ValidateResult.Fail FAIL_ANY_OF = new ValidateResult.Fail("anyOf fail");
     static final ValidateResult.Fail FAIL_ONE_OF = new ValidateResult.Fail("oneOf fail");
     static final ValidateResult.Fail FAIL_NOT = new ValidateResult.Fail("not fail");
+    static final ValidateResult.Fail FAIL_TYPE_NOT_MATCH = new ValidateResult.Fail("type not match");
 
 
     final static ValidateResult.Fail CONTAINS_NOT_MATCH = new ValidateResult.Fail("contains not match");

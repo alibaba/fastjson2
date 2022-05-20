@@ -2,12 +2,14 @@ package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.JSONObject;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 final class IntegerSchema extends JSONSchema {
+    final boolean typed;
     final long minimum;
     final boolean exclusiveMinimum;
 
@@ -18,6 +20,8 @@ final class IntegerSchema extends JSONSchema {
 
     IntegerSchema(JSONObject input) {
         super(input);
+        this.typed = "integer".equalsIgnoreCase(input.getString("type"));
+
         Object exclusiveMinimum = input.get("exclusiveMinimum");
 
         long minimum = input.getLongValue("minimum", Long.MIN_VALUE);
@@ -56,7 +60,7 @@ final class IntegerSchema extends JSONSchema {
     @Override
     public ValidateResult validate(Object value) {
         if (value == null) {
-            return FAIL_INPUT_NULL;
+            return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
 
         Class valueClass = value.getClass();
@@ -91,7 +95,14 @@ final class IntegerSchema extends JSONSchema {
             return SUCCESS;
         }
 
-        return new ValidateResult.TypeNotMatchFail(Type.Integer, valueClass);
+        if (value instanceof BigDecimal) {
+            BigDecimal decimal = (BigDecimal) value;
+            if (decimal.compareTo(new BigDecimal(decimal.toBigInteger())) == 0) {
+                return SUCCESS;
+            }
+        }
+
+        return typed ? new ValidateResult.TypeNotMatchFail(Type.Integer, valueClass) : SUCCESS;
     }
 
     @Override
@@ -119,7 +130,7 @@ final class IntegerSchema extends JSONSchema {
     @Override
     public ValidateResult validate(Long value) {
         if (value == null) {
-            return FAIL_INPUT_NULL;
+            return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
 
         long longValue = value.longValue();
@@ -146,7 +157,7 @@ final class IntegerSchema extends JSONSchema {
     @Override
     public ValidateResult validate(Integer value) {
         if (value == null) {
-            return FAIL_INPUT_NULL;
+            return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
 
         long longValue = value.longValue();

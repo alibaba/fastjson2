@@ -12,7 +12,7 @@ class AllOf extends JSONSchema {
         this.items = items;
     }
 
-    public AllOf(JSONObject input) {
+    public AllOf(JSONObject input, JSONSchema parent) {
         super(input);
         JSONArray items = input.getJSONArray("allOf");
         if (items == null || items.isEmpty()) {
@@ -22,38 +22,44 @@ class AllOf extends JSONSchema {
         this.items = new JSONSchema[items.size()];
         Type type = null;
         for (int i = 0; i < this.items.length; i++) {
-            JSONObject itemObject = items.getJSONObject(i);
-            JSONSchema item = null;
-            if (!itemObject.containsKey("type") && type != null) {
-                switch (type) {
-                    case String:
-                        item = new StringSchema(itemObject);
-                        break;
-                    case Integer:
-                        item = new IntegerSchema(itemObject);
-                        break;
-                    case Number:
-                        item = new NumberSchema(itemObject);
-                        break;
-                    case Boolean:
-                        item = new BooleanSchema(itemObject);
-                        break;
-                    case Array:
-                        item = new ArraySchema(itemObject);
-                        break;
-                    case Object:
-                        item = new ObjectSchema(itemObject);
-                        break;
-                    default:
-                        break;
+            JSONSchema itemSchema = null;
+
+            Object item = items.get(i);
+            if (item instanceof Boolean) {
+                itemSchema = ((Boolean) item).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+            } else {
+                JSONObject itemObject = (JSONObject) item;
+                if (!itemObject.containsKey("type") && type != null) {
+                    switch (type) {
+                        case String:
+                            itemSchema = new StringSchema(itemObject);
+                            break;
+                        case Integer:
+                            itemSchema = new IntegerSchema(itemObject);
+                            break;
+                        case Number:
+                            itemSchema = new NumberSchema(itemObject);
+                            break;
+                        case Boolean:
+                            itemSchema = new BooleanSchema(itemObject);
+                            break;
+                        case Array:
+                            itemSchema = new ArraySchema(itemObject, null);
+                            break;
+                        case Object:
+                            itemSchema = new ObjectSchema(itemObject);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                if (itemSchema == null) {
+                    itemSchema = JSONSchema.of(itemObject, parent);
                 }
             }
 
-            if (item == null) {
-                item = JSONSchema.of(itemObject);
-            }
-            type = item.getType();
-            this.items[i] = item;
+            type = itemSchema.getType();
+            this.items[i] = itemSchema;
         }
     }
 
@@ -64,7 +70,8 @@ class AllOf extends JSONSchema {
 
     @Override
     public ValidateResult validate(Object value) {
-        for (JSONSchema item : items) {
+        for (int i = 0; i < items.length; i++) {
+            JSONSchema item = items[i];
             ValidateResult result = item.validate(value);
             if (!result.isSuccess()) {
                 return result;

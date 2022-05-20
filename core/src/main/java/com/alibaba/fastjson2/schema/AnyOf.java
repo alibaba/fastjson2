@@ -12,7 +12,7 @@ class AnyOf extends JSONSchema {
         this.items = items;
     }
 
-    public AnyOf(JSONObject input) {
+    public AnyOf(JSONObject input, JSONSchema parent) {
         super(input);
         JSONArray items = input.getJSONArray("anyOf");
         if (items == null || items.isEmpty()) {
@@ -21,7 +21,12 @@ class AnyOf extends JSONSchema {
 
         this.items = new JSONSchema[items.size()];
         for (int i = 0; i < this.items.length; i++) {
-            this.items[i] = items.getObject(i, JSONSchema::of);
+            Object item = items.get(i);
+            if (item instanceof Boolean) {
+                this.items[i] = ((Boolean) item).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+            } else {
+                this.items[i] = JSONSchema.of((JSONObject) item, parent);
+            }
         }
     }
 
@@ -34,7 +39,7 @@ class AnyOf extends JSONSchema {
     public ValidateResult validate(Object value) {
         for (JSONSchema item : items) {
             ValidateResult result = item.validate(value);
-            if (result.isSuccess()) {
+            if (result == SUCCESS) {
                 return SUCCESS;
             }
         }

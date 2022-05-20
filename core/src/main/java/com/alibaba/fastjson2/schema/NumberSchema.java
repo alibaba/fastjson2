@@ -15,10 +15,14 @@ final class NumberSchema extends JSONSchema {
     final long maximumLongValue;
     final boolean exclusiveMaximum;
 
-    final BigInteger multipleOf;
+    final BigDecimal multipleOf;
+    final long multipleOfLongValue;
+    final boolean typed;
 
     NumberSchema(JSONObject input) {
         super(input);
+
+        this.typed = "number".equals(input.get("type"));
 
         Object exclusiveMinimum = input.get("exclusiveMinimum");
         BigDecimal minimum = input.getBigDecimal("minimum");
@@ -58,7 +62,17 @@ final class NumberSchema extends JSONSchema {
             maximumLongValue = this.maximum.longValue();
         }
 
-        this.multipleOf = input.getBigInteger("multipleOf");
+        this.multipleOf = input.getBigDecimal("multipleOf");
+        if (this.multipleOf == null) {
+            this.multipleOfLongValue = Long.MIN_VALUE;
+        } else {
+            long longValue = multipleOf.longValue();
+            if (multipleOf.equals(BigDecimal.valueOf(longValue))) {
+                this.multipleOfLongValue = longValue;
+            } else {
+                this.multipleOfLongValue = Long.MIN_VALUE;
+            }
+        }
     }
 
     @Override
@@ -69,7 +83,7 @@ final class NumberSchema extends JSONSchema {
     @Override
     public ValidateResult validate(Object value) {
         if (value == null) {
-            return FAIL_INPUT_NULL;
+            return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
 
         if (value instanceof Number) {
@@ -110,21 +124,21 @@ final class NumberSchema extends JSONSchema {
             }
 
             if (multipleOf != null) {
-                BigInteger bigInteger = decimalValue.toBigInteger();
-                if (!decimalValue.equals(new BigDecimal(bigInteger)) || !bigInteger.mod(multipleOf).equals(BigInteger.ZERO)) {
+                if (decimalValue.divideAndRemainder(multipleOf)[1].abs().compareTo(BigDecimal.ZERO) > 0) {
                     return new ValidateResult.MultipleOfFail(multipleOf, decimalValue);
                 }
             }
+
             return SUCCESS;
         }
 
-        return new ValidateResult.TypeNotMatchFail(Type.Number, value.getClass());
+        return typed ? FAIL_TYPE_NOT_MATCH : SUCCESS;
     }
 
     @Override
     public ValidateResult validate(Integer value) {
         if (value == null) {
-            return FAIL_INPUT_NULL;
+            return SUCCESS;
         }
 
         return validate(value.longValue());
@@ -132,7 +146,7 @@ final class NumberSchema extends JSONSchema {
 
     public ValidateResult validate(Float value) {
         if (value == null) {
-            return FAIL_INPUT_NULL;
+            return SUCCESS;
         }
 
         return validate(value.doubleValue());
@@ -140,7 +154,7 @@ final class NumberSchema extends JSONSchema {
 
     public ValidateResult validate(Double value) {
         if (value == null) {
-            return FAIL_INPUT_NULL;
+            return SUCCESS;
         }
 
         return validate(value.doubleValue());
@@ -149,7 +163,7 @@ final class NumberSchema extends JSONSchema {
     @Override
     public ValidateResult validate(Long value) {
         if (value == null) {
-            return FAIL_INPUT_NULL;
+            return SUCCESS;
         }
 
         return validate(value.longValue());
@@ -157,14 +171,17 @@ final class NumberSchema extends JSONSchema {
 
     @Override
     public ValidateResult validate(long value) {
-        BigDecimal decimalValue = BigDecimal.valueOf(value);
+        BigDecimal decimalValue = null;
 
         if (minimum != null) {
             if (minimumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMinimum ? value <= minimumLongValue : value < minimumLongValue) {
-                    return new ValidateResult.MinimumFail(minimum, decimalValue, exclusiveMinimum);
+                    return new ValidateResult.MinimumFail(minimum, value, exclusiveMinimum);
                 }
             } else {
+                if (decimalValue == null) {
+                    decimalValue = BigDecimal.valueOf(value);
+                }
                 if (exclusiveMinimum
                         ? minimum.compareTo(decimalValue) >= 0
                         : minimum.compareTo(decimalValue) > 0) {
@@ -178,19 +195,35 @@ final class NumberSchema extends JSONSchema {
                 if (exclusiveMaximum ? value >= maximumLongValue : value > maximumLongValue) {
                     return new ValidateResult.MaximumFail(maximum, minimum, exclusiveMinimum);
                 }
-            } else if (exclusiveMaximum
-                    ? maximum.compareTo(decimalValue) <= 0
-                    : maximum.compareTo(decimalValue) < 0) {
-                return new ValidateResult.MaximumFail(maximum, minimum, exclusiveMaximum);
+            } else {
+                if (decimalValue == null) {
+                    decimalValue = BigDecimal.valueOf(value);
+                }
+
+                if (exclusiveMaximum
+                        ? maximum.compareTo(decimalValue) <= 0
+                        : maximum.compareTo(decimalValue) < 0) {
+                    return new ValidateResult.MaximumFail(maximum, minimum, exclusiveMaximum);
+                }
             }
         }
 
         if (multipleOf != null) {
-            BigInteger bigInteger = decimalValue.toBigInteger();
-            if (!decimalValue.equals(new BigDecimal(bigInteger)) || !bigInteger.mod(multipleOf).equals(BigInteger.ZERO)) {
-                return new ValidateResult.MultipleOfFail(multipleOf, decimalValue);
+            if (multipleOfLongValue != Long.MIN_VALUE) {
+                if (value % multipleOfLongValue != 0) {
+                    return new ValidateResult.MultipleOfFail(multipleOf, decimalValue);
+                }
+            }
+
+            if (decimalValue == null) {
+                decimalValue = BigDecimal.valueOf(value);
+            }
+
+            if (decimalValue.divideAndRemainder(multipleOf)[1].abs().compareTo(BigDecimal.ZERO) > 0) {
+                return new ValidateResult.MultipleOfFail(multipleOf, value);
             }
         }
+
         return SUCCESS;
     }
 
@@ -224,9 +257,15 @@ final class NumberSchema extends JSONSchema {
         }
 
         if (multipleOf != null) {
-            long multipleOfLongValue = multipleOf.longValue();
-            if (value % multipleOfLongValue != 0) {
-                return new ValidateResult.MultipleOfFail(multipleOf, value);
+            if (multipleOfLongValue != Long.MIN_VALUE) {
+                if (value % multipleOfLongValue != 0) {
+                    return new ValidateResult.MultipleOfFail(multipleOf, value);
+                }
+            }
+
+            BigDecimal decimalValue = BigDecimal.valueOf(value);
+            if (decimalValue.divideAndRemainder(multipleOf)[1].abs().compareTo(BigDecimal.ZERO) > 0) {
+                return new ValidateResult.MultipleOfFail(multipleOf, decimalValue);
             }
         }
         return SUCCESS;
