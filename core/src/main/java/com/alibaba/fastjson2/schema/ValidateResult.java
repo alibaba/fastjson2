@@ -229,6 +229,40 @@ public interface ValidateResult {
         }
     }
 
+    final class SuccessNull implements ValidateResult {
+        @Override
+        public boolean isSuccess() {
+            return true;
+        }
+
+        @Override
+        public String getMessage() {
+            return "success";
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
+    final class SuccessTypeNotMatch implements ValidateResult {
+        @Override
+        public boolean isSuccess() {
+            return true;
+        }
+
+        @Override
+        public String getMessage() {
+            return "success";
+        }
+
+        @Override
+        public ValidateResult getCause() {
+            return null;
+        }
+    }
+
     final class MaximumFail implements ValidateResult {
         final Object maximum;
         final Object value;

@@ -1,8 +1,10 @@
-package com.alibaba.fastjson2;
+package com.alibaba.fastjson2.schema;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.schema.ObjectSchema;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -82,7 +84,8 @@ public class JSONSchemaTest {
                 )
         );
 
-        assertFalse(schema.isValid(JSONObject
+        assertFalse(
+                schema.isValid(JSONObject
                         .of(
                                 "id", 1,
                                 "name", "",
@@ -98,7 +101,7 @@ public class JSONSchemaTest {
                 .of("type", "String", "maxLength", 3)
                 .to(JSONSchema::of);
         assertTrue(jsonSchema.isValid("aa"));
-        assertTrue(jsonSchema.validate((Object) null).isSuccess());
+        assertFalse(jsonSchema.validate((Object) null).isSuccess());
 
         assertFalse(jsonSchema.validate("a123").isSuccess());
     }
@@ -358,9 +361,9 @@ public class JSONSchemaTest {
                 .of("type", "Number")
                 .to(JSONSchema::of);
 
-        assertFalse(jsonSchema.isValid("a"));
+        assertTrue(jsonSchema.isValid("a"));
 
-        assertFalse(
+        assertTrue(
                 jsonSchema.isValid(
                         (Object) null));
         assertTrue(
@@ -539,11 +542,11 @@ public class JSONSchemaTest {
         assertEquals(jsonSchema, jsonSchema1);
         assertEquals(jsonSchema.getType(), jsonSchema1.getType());
 
-        assertFalse(
+        assertTrue(
                 jsonSchema.isValid((Integer) null));
         assertTrue(
                 jsonSchema.isValid(new Object[0]));
-        assertFalse(
+        assertTrue(
                 jsonSchema.isValid(1));
     }
 
@@ -577,8 +580,9 @@ public class JSONSchemaTest {
         assertTrue(jsonSchema.isValid(JSON.parse("[3, \"different\", { \"types\" : \"of values\" }]")));
         assertTrue(JSON.parseArray("[1, 2, 3, 4, 5]").isValid(jsonSchema));
 
-        assertFalse(jsonSchema.isValid(
-                JSON.parse("{\"Not\": \"an array\"}")
+        assertFalse (
+                jsonSchema.isValid(
+                    JSON.parse("{\"Not\": \"an array\"}")
         ));
     }
 
@@ -870,9 +874,11 @@ public class JSONSchemaTest {
                 .parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\", \"direction\": \"NW\" }")
                 .isValid(jsonSchema));
 
-        assertFalse(jsonSchema.validate(
-                JSON.parseObject("{ \"number\": \"1600\", \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\" }")
-        ).isSuccess());
+        assertFalse(
+                jsonSchema.validate(
+                    JSON.parseObject("{ \"number\": \"1600\", \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\" }")
+                ).isSuccess()
+        );
     }
 
     @Test
@@ -1533,6 +1539,43 @@ public class JSONSchemaTest {
     }
 
     @Test
+    public void test_allOf_1() {
+        JSONSchema jsonSchema = JSONSchema.of("{\"allOf\":[true,true]}");
+
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("\"foo\"")
+                )
+        );
+    }
+
+    @Test
+    public void test_allOf_2() {
+        // "allOf: true, anyOf: false, oneOf: false",
+        JSONSchema jsonSchema = JSONSchema
+                .of("{\"allOf\":[{\"multipleOf\":2}],\"anyOf\":[{\"multipleOf\":3}],\"oneOf\":[{\"multipleOf\":5}]}");
+
+        assertFalse(
+                jsonSchema.isValid(
+                        JSON.parse("2")
+                )
+        );
+    }
+
+    @Test
+    public void test_anyOf_1() {
+        // "allOf: true, anyOf: false, oneOf: false",
+        JSONSchema jsonSchema = JSONSchema
+                .of("{\"type\":\"string\",\"anyOf\":[{\"maxLength\":2},{\"minLength\":4}]}");
+
+        assertFalse(
+                jsonSchema.isValid(
+                        JSON.parse("\"foo\"")
+                )
+        );
+    }
+
+    @Test
     public void test_anyOf() {
         JSONSchema jsonSchema = JSONSchema.of("{\n" +
                 "  \"anyOf\": [\n" +
@@ -1571,8 +1614,8 @@ public class JSONSchemaTest {
     @Test
     public void test_anyOf1() {
         JSON.parseObject("{\"value\":\"short\"}", BeanAnyOf.class);
-        assertThrows(JSONSchemaValidException.class, () ->
-            JSON.parseObject("{\"value\":\"too long\"}", BeanAnyOf.class)
+        assertThrows(JSONSchemaValidException.class, ()
+                -> JSON.parseObject("{\"value\":\"too long\"}", BeanAnyOf.class)
         );
         JSON.parseObject("{\"value\":12}", BeanAnyOf.class);
         assertThrows(JSONSchemaValidException.class, () ->
@@ -1777,6 +1820,134 @@ public class JSONSchemaTest {
         assertTrue(
                 jsonSchema.isValid(
                         JSON.parseObject("{ \"total\": 5.25 }", Bean4.class)
+                )
+        );
+    }
+
+    @Test
+    public void test_additionalItems_0() {
+        JSONSchema jsonSchema = JSONSchema.of("{\"additionalItems\": false}");
+
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[ 1, 2, 3, 4, 5 ]")
+                )
+        );
+    }
+
+    @Test
+    public void test_additionalItems_1() {
+        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+                "            \"items\": {},\n" +
+                "            \"additionalItems\": false\n" +
+                "        }");
+
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[ 1, 2, 3, 4, 5 ]")
+                )
+        );
+    }
+
+    @Test
+    public void test_additionalItems_2() {
+        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+                "            \"allOf\": [\n" +
+                "                { \"items\": [ { \"type\": \"integer\" }, { \"type\": \"string\" } ] }\n" +
+                "            ],\n" +
+                "            \"items\": [ {\"type\": \"integer\" } ],\n" +
+                "            \"additionalItems\": { \"type\": \"boolean\" }\n" +
+                "        }");
+
+        assertFalse(
+                jsonSchema.isValid(
+                        JSON.parse("[ 1, \"hello\" ]")
+                )
+        );
+    }
+
+    @Test
+    public void test_additionalItems_3() {
+        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+                "            \"allOf\": [\n" +
+                "                { \"items\": [ { \"type\": \"integer\" } ] }\n" +
+                "            ],\n" +
+                "            \"additionalItems\": { \"type\": \"boolean\" }\n" +
+                "        }");
+
+        assertFalse(
+                jsonSchema.isValid(
+                        JSON.parse("[ 1, null ]")
+                )
+        );
+    }
+
+    @Test
+    public void test_items_0() {
+        JSONSchema jsonSchema = JSONSchema.of("{\n" +
+                "            \"definitions\": {\n" +
+                "                \"sub-item\": {\n" +
+                "                    \"type\": \"object\",\n" +
+                "                    \"required\": [\"foo\"]\n" +
+                "                },\n" +
+                "                \"item\": {\n" +
+                "                    \"type\": \"array\",\n" +
+                "                    \"additionalItems\": false,\n" +
+                "                    \"items\": [\n" +
+                "                        { \"$ref\": \"#/definitions/sub-item\" },\n" +
+                "                        { \"$ref\": \"#/definitions/sub-item\" }\n" +
+                "                    ]\n" +
+                "                }\n" +
+                "            },\n" +
+                "            \"type\": \"array\",\n" +
+                "            \"additionalItems\": false,\n" +
+                "            \"items\": [\n" +
+                "                { \"$ref\": \"#/definitions/item\" },\n" +
+                "                { \"$ref\": \"#/definitions/item\" },\n" +
+                "                { \"$ref\": \"#/definitions/item\" }\n" +
+                "            ]\n" +
+                "        }");
+
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[\n" +
+                                "                    [ {\"foo\": null}, {\"foo\": null} ],\n" +
+                                "                    [ {\"foo\": null}, {\"foo\": null} ],\n" +
+                                "                    [ {\"foo\": null}, {\"foo\": null} ]\n" +
+                                "                ]")
+                )
+        );
+    }
+
+    @Test
+    public void test_items_1() {
+        JSONSchema jsonSchema = JSONSchema.of("{\"items\": false}");
+
+        assertFalse(
+                jsonSchema.isValid(
+                        JSON.parse("[ 1, \"foo\", true ]")
+                )
+        );
+    }
+
+    @Test
+    public void test_items_2() {
+        JSONSchema jsonSchema = JSONSchema.of("{\"prefixItems\":[{\"type\":\"string\"}],\"items\":{\"type\":\"integer\"}}");
+
+        assertTrue(
+                jsonSchema.isValid(
+                        JSON.parse("[\"x\",2,3]")
+                )
+        );
+    }
+
+    @Test
+    public void test_type_0() {
+        JSONSchema jsonSchema = JSONSchema.of("{\"type\":[\"integer\",\"string\"]}");
+
+        assertFalse(
+                jsonSchema.isValid(
+                        JSON.parse("1.1")
                 )
         );
     }

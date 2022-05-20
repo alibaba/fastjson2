@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.schema;
 
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 
 import java.util.Objects;
@@ -8,21 +9,29 @@ import java.util.regex.Pattern;
 public final class StringSchema extends JSONSchema {
     final int maxLength;
     final int minLength;
-    final boolean required;
     final String format;
     final String patternFormat;
     final Pattern pattern;
+    final boolean typed;
+    final AnyOf anyOf;
 
     final FormatValidator formatValidator;
 
     StringSchema(JSONObject input) {
         super(input);
+        this.typed = "string".equalsIgnoreCase(input.getString("type"));
         this.minLength = input.getIntValue("minLength", -1);
         this.maxLength = input.getIntValue("maxLength", -1);
-        this.required = input.getBooleanValue("required");
         this.patternFormat = input.getString("pattern");
         this.pattern = patternFormat == null ? null : Pattern.compile(patternFormat);
         this.format = input.getString("format");
+
+        Object anyOf = input.get("anyOf");
+        if (anyOf instanceof JSONArray) {
+            this.anyOf = anyOf((JSONArray) anyOf, String.class);
+        } else {
+            this.anyOf = null;
+        }
 
         if (format == null) {
             formatValidator = null;
@@ -70,7 +79,7 @@ public final class StringSchema extends JSONSchema {
     @Override
     public ValidateResult validate(Object value) {
         if (value == null) {
-            if (required) {
+            if (typed) {
                 return REQUIRED_NOT_MATCH;
             }
             return SUCCESS;
@@ -98,6 +107,17 @@ public final class StringSchema extends JSONSchema {
                 }
             }
 
+            if (anyOf != null) {
+                ValidateResult result = anyOf.validate(str);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            return SUCCESS;
+        }
+
+        if (!typed) {
             return SUCCESS;
         }
 
@@ -106,19 +126,26 @@ public final class StringSchema extends JSONSchema {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        com.alibaba.fastjson2.schema.StringSchema that = (com.alibaba.fastjson2.schema.StringSchema) o;
-        return Objects.equals(title, that.title)
-                && Objects.equals(description, that.description)
-                && Objects.equals(minLength, that.minLength)
-                && Objects.equals(maxLength, that.maxLength)
-                && Objects.equals(required, that.required)
-                ;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        StringSchema that = (StringSchema) o;
+        return maxLength == that.maxLength
+                && minLength == that.minLength
+                && typed == that.typed
+                && Objects.equals(format, that.format)
+                && Objects.equals(patternFormat, that.patternFormat)
+                && Objects.equals(pattern, that.pattern)
+                && Objects.equals(formatValidator, that.formatValidator);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, description, minLength, maxLength, required);
+        return Objects.hash(maxLength, minLength, format, patternFormat, pattern, typed, formatValidator);
     }
 }

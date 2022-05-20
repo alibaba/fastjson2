@@ -19,9 +19,9 @@
                 "valid": false
             },
             {
-                "description": "type not match",
+                "description": "ignores non-arrays",
                 "data": "foobar",
-                "valid": false
+                "valid": true
             }
         ]
     }

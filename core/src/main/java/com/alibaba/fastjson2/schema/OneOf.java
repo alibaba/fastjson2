@@ -12,7 +12,7 @@ class OneOf extends JSONSchema {
         this.items = items;
     }
 
-    public OneOf(JSONObject input) {
+    public OneOf(JSONObject input, JSONSchema parent) {
         super(input);
         JSONArray items = input.getJSONArray("oneOf");
         if (items == null || items.isEmpty()) {
@@ -21,7 +21,10 @@ class OneOf extends JSONSchema {
 
         this.items = new JSONSchema[items.size()];
         for (int i = 0; i < this.items.length; i++) {
-            this.items[i] = items.getObject(i, JSONSchema::of);
+            this.items[i] = JSONSchema.of(
+                    items.getJSONObject(i),
+                    parent
+            );
         }
     }
 

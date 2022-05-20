@@ -12,6 +12,9 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public final class ObjectSchema extends JSONSchema {
+    final boolean typed;
+    final Map<String, JSONSchema> definitions;
+    final Map<String, JSONSchema> defs;
     final Map<String, JSONSchema> properties;
     final Set<String> required;
     final boolean additionalProperties;
@@ -37,8 +40,38 @@ public final class ObjectSchema extends JSONSchema {
     final OneOf oneOf;
 
     public ObjectSchema(JSONObject input) {
+        this(input, null);
+    }
+
+    public ObjectSchema(JSONObject input, JSONSchema root) {
         super(input);
+
+        this.typed = "object".equalsIgnoreCase(input.getString("type"));
         this.properties = new LinkedHashMap<>();
+        this.definitions = new LinkedHashMap<>();
+        this.defs = new LinkedHashMap<>();
+
+        JSONObject definitions = input.getJSONObject("definitions");
+        if (definitions != null) {
+            for (Iterator<Map.Entry<String, Object>> it = definitions.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<String, Object> entry = it.next();
+                String entryKey = entry.getKey();
+                JSONObject entryValue = (JSONObject) entry.getValue();
+                JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
+                this.definitions.put(entryKey, schema);
+            }
+        }
+
+        JSONObject defs = input.getJSONObject("$defs");
+        if (defs != null) {
+            for (Iterator<Map.Entry<String, Object>> it = defs.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<String, Object> entry = it.next();
+                String entryKey = entry.getKey();
+                JSONObject entryValue = (JSONObject) entry.getValue();
+                JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
+                this.defs.put(entryKey, schema);
+            }
+        }
 
         JSONObject properties = input.getJSONObject("properties");
         if (properties != null) {
@@ -46,7 +79,7 @@ public final class ObjectSchema extends JSONSchema {
                 Map.Entry<String, Object> entry = it.next();
                 String entryKey = entry.getKey();
                 JSONObject entryValue = (JSONObject) entry.getValue();
-                JSONSchema schema = JSONSchema.of(entryValue);
+                JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
                 this.properties.put(entryKey, schema);
             }
         }
@@ -59,8 +92,14 @@ public final class ObjectSchema extends JSONSchema {
             for (Iterator<Map.Entry<String, Object>> it = patternProperties.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<String, Object> entry = it.next();
                 String entryKey = entry.getKey();
-                JSONObject entryValue = (JSONObject) entry.getValue();
-                JSONSchema schema = JSONSchema.of(entryValue);
+                Object value = entry.getValue();
+                JSONSchema schema;
+                if (value instanceof Boolean) {
+                    schema = ((Boolean) value).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+                } else {
+                    schema = JSONSchema.of((JSONObject) value);
+                }
+
                 this.patternProperties[index++] = new PatternProperty(Pattern.compile(entryKey), schema);
             }
         } else {
@@ -93,7 +132,7 @@ public final class ObjectSchema extends JSONSchema {
             this.additionalProperties = ((Boolean) additionalProperties).booleanValue();
         } else {
             if (additionalProperties instanceof JSONObject) {
-                this.additionalPropertySchema = JSONSchema.of((JSONObject) additionalProperties);
+                this.additionalPropertySchema = JSONSchema.of((JSONObject) additionalProperties, root);
                 this.additionalProperties = false;
             } else {
                 this.additionalPropertySchema = null;
@@ -166,8 +205,8 @@ public final class ObjectSchema extends JSONSchema {
 
     public ValidateResult validate(Map map) {
         for (String item : required) {
-            if (map.get(item) == null) {
-                return new ValidateResult.RequiredFail(item);
+            if (!map.containsKey(item)) {
+                return REQUIRED_NOT_MATCH;
             }
         }
 
@@ -287,7 +326,7 @@ public final class ObjectSchema extends JSONSchema {
 
         if (ifSchema != null) {
             ValidateResult ifResult = ifSchema.validate(map);
-            if (ifResult.isSuccess()) {
+            if (ifResult == SUCCESS) {
                 if (thenSchema != null) {
                     ValidateResult thenResult = thenSchema.validate(map);
                     if (!thenResult.isSuccess()) {
@@ -331,7 +370,7 @@ public final class ObjectSchema extends JSONSchema {
     @Override
     public ValidateResult validate(Object value) {
         if (value == null) {
-            return FAIL_INPUT_NULL;
+            return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
 
         if (value instanceof Map) {
@@ -342,7 +381,7 @@ public final class ObjectSchema extends JSONSchema {
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
 
         if (!(objectWriter instanceof ObjectWriterAdapter)) {
-            return new ValidateResult.TypeNotMatchFail(Type.Object, valueClass);
+            return typed ? new ValidateResult.TypeNotMatchFail(Type.Object, valueClass) : SUCCESS;
         }
 
         for (int i = 0; i < this.requiredHashCode.length; i++) {
@@ -504,7 +543,11 @@ public final class ObjectSchema extends JSONSchema {
             }
         }
 
-        return SUCCESS;
+        if (objectWriter instanceof ObjectWriterAdapter) {
+            return SUCCESS;
+        }
+
+        return typed ? FAIL_TYPE_NOT_MATCH : SUCCESS;
     }
 
     public Map<String, JSONSchema> getProperties() {

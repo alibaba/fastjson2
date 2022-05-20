@@ -140,6 +140,41 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into {@link JSONObject}
      *
+     * @param in    the JSON {@link InputStream} to be parsed
+     * @return JSONObject
+     */
+    static JSONObject parseObject(InputStream in, Charset charset) {
+        if (in == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(in, charset)) {
+            ObjectReader<JSONObject> objectReader = reader.getObjectReader(JSONObject.class);
+            return objectReader.readObject(reader, 0);
+        }
+    }
+
+    /**
+     * Parse UTF8 encoded JSON byte array into {@link JSONObject}
+     *
+     * @param url      the JSON {@link URL} to be parsed
+     * @return JSONObject
+     */
+    static JSONObject parseObject(URL url) {
+        if (url == null) {
+            return null;
+        }
+
+        try (InputStream is = url.openStream()){
+            return parseObject(is, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new JSONException("parseObject error", e);
+        }
+    }
+
+    /**
+     * Parse UTF8 encoded JSON byte array into {@link JSONObject}
+     *
      * @param bytes    UTF8 encoded JSON byte array to parse
      * @param features features to be enabled in parsing
      * @return JSONObject

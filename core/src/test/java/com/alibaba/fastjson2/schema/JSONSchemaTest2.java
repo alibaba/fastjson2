@@ -1,7 +1,11 @@
-package com.alibaba.fastjson2;
+package com.alibaba.fastjson2.schema;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -16,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class JSONSchemaTest2 {
     @Test
     public void test0() {
-        assertEquals(
+        Assertions.assertEquals(
                 123,
                 JSON.parseObject("{\"value\":123}", Bean.class).value
         );
