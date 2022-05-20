@@ -5,10 +5,10 @@ import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-class ConstInteger extends JSONSchema {
+final class ConstLong extends JSONSchema {
     final long value;
 
-    ConstInteger(long value) {
+    ConstLong(long value) {
         super(null, null);
         this.value = value;
     }
