@@ -1197,6 +1197,160 @@ public class JSONArrayTest {
             assertTrue(set.contains(2));
             assertTrue(set.contains(3));
         }
+
+        {
+            Object[] array = JSONArray
+                    .of("1", "2", "3")
+                    .to(Object[].class);
+            assertEquals(3, array.length);
+            assertEquals("1", array[0]);
+            assertEquals("2", array[1]);
+            assertEquals("3", array[2]);
+        }
+        {
+            Integer[] array = JSONArray
+                    .of("1", "2", "3")
+                    .to(Integer[].class);
+            assertEquals(3, array.length);
+            assertEquals(1, array[0]);
+            assertEquals(2, array[1]);
+            assertEquals(3, array[2]);
+        }
+        {
+            int[] array = JSONArray
+                    .of("1", 2, 3L, null)
+                    .to(int[].class);
+            assertEquals(4, array.length);
+            assertEquals((int) 1, array[0]);
+            assertEquals((int) 2, array[1]);
+            assertEquals((int) 3, array[2]);
+            assertEquals(0, array[3]);
+        }
+        {
+            Long[] array = JSONArray
+                    .of("1", 2, "3")
+                    .to(Long[].class);
+            assertEquals(3, array.length);
+            assertEquals(1L, array[0]);
+            assertEquals(2L, array[1]);
+            assertEquals(3L, array[2]);
+        }
+        {
+            long[] array = JSONArray
+                    .of("1", 2, "3", null)
+                    .to(long[].class);
+            assertEquals(4, array.length);
+            assertEquals((long) 1, array[0]);
+            assertEquals((long) 2, array[1]);
+            assertEquals((long) 3, array[2]);
+            assertEquals(0, array[3]);
+        }
+        {
+            BigDecimal[] array = JSONArray
+                    .of("1", 2L, "3", null)
+                    .to(BigDecimal[].class);
+            assertEquals(4, array.length);
+            assertEquals(BigDecimal.valueOf(1), array[0]);
+            assertEquals(BigDecimal.valueOf(2), array[1]);
+            assertEquals(BigDecimal.valueOf(3), array[2]);
+            assertNull(array[3]);
+        }
+        {
+            Short[] array = JSONArray
+                    .of(1L, 2, "3", null)
+                    .to(Short[].class);
+            assertEquals(4, array.length);
+            assertEquals((short) 1, array[0]);
+            assertEquals((short) 2, array[1]);
+            assertEquals((short) 3, array[2]);
+            assertNull(array[3]);
+        }
+        {
+            short[] array = JSONArray
+                    .of("1", 2L, "3", null)
+                    .to(short[].class);
+            assertEquals(4, array.length);
+            assertEquals((short) 1, array[0]);
+            assertEquals((short) 2, array[1]);
+            assertEquals((short) 3, array[2]);
+            assertEquals((short) 0, array[3]);
+        }
+
+        {
+            Byte[] array = JSONArray
+                    .of("1", 2L, "3", null)
+                    .to(Byte[].class);
+            assertEquals(4, array.length);
+            assertEquals((byte) 1, array[0]);
+            assertEquals((byte) 2, array[1]);
+            assertEquals((byte) 3, array[2]);
+            assertNull(array[3]);
+        }
+        {
+            byte[] array = JSONArray
+                    .of("1", 2L, "3", null)
+                    .to(byte[].class);
+            assertEquals(4, array.length);
+            assertEquals((byte) 1, array[0]);
+            assertEquals((byte) 2, array[1]);
+            assertEquals((byte) 3, array[2]);
+            assertEquals((byte) 0, array[3]);
+        }
+
+        {
+            Double[] array = JSONArray
+                    .of("1", 2, "3", null)
+                    .to(Double[].class);
+            assertEquals(4, array.length);
+            assertEquals((double) 1, array[0]);
+            assertEquals((double) 2, array[1]);
+            assertEquals((double) 3, array[2]);
+            assertNull(array[3]);
+        }
+        {
+            double[] array = JSONArray
+                    .of("1", 2L, "3", null)
+                    .to(double[].class);
+            assertEquals(4, array.length);
+            assertEquals((double) 1, array[0]);
+            assertEquals((double) 2, array[1]);
+            assertEquals((double) 3, array[2]);
+            assertEquals((double) 0, array[3]);
+        }
+
+        {
+            Float[] array = JSONArray
+                    .of("1", 2, "3", null)
+                    .to(Float[].class);
+            assertEquals(4, array.length);
+            assertEquals((float) 1, array[0]);
+            assertEquals((float) 2, array[1]);
+            assertEquals((float) 3, array[2]);
+            assertNull(array[3]);
+        }
+        {
+            short[] array = JSONArray
+                    .of(1D, 2L, "3", null)
+                    .to(short[].class);
+            assertEquals(4, array.length);
+            assertEquals((short) 1, array[0]);
+            assertEquals((short) 2, array[1]);
+            assertEquals((short) 3, array[2]);
+            assertEquals((short) 0, array[3]);
+        }
+
+        {
+            Number[] array = JSONArray
+                    .of(1L, 2, 3D, "4", 5F, null)
+                    .to(Number[].class);
+            assertEquals(6, array.length);
+            assertEquals(Long.valueOf(1), array[0]);
+            assertEquals(Integer.valueOf(2), array[1]);
+            assertEquals(Double.valueOf(3), array[2]);
+            assertEquals(new BigDecimal("4"), array[3]);
+            assertEquals(Float.valueOf(5), array[4]);
+            assertNull(array[5]);
+        }
     }
 
     public static class Bean {

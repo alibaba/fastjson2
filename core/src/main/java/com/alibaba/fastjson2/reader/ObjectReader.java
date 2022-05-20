@@ -34,7 +34,7 @@ public interface ObjectReader<T> {
      * @throws UnsupportedOperationException If the method is not overloaded or otherwise
      */
     default T createInstance(Collection collection) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(this.getClass().getName());
     }
 
     default T createInstance(Map map, JSONReader.Feature... features) {

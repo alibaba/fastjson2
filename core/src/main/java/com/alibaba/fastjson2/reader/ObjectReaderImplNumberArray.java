@@ -6,30 +6,19 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.function.Function;
 
-final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.PrimitiveImpl {
-    static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray();
-
-    @Override
-    public Class getObjectClass() {
-        return int[].class;
-    }
+class ObjectReaderImplNumberArray extends ObjectReaderBaseModule.PrimitiveImpl {
+    static final ObjectReaderImplNumberArray INSTANCE = new ObjectReaderImplNumberArray();
 
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
-        if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, features);
-        }
-
         if (jsonReader.readIfNull()) {
             return null;
         }
 
         if (jsonReader.nextIfMatch('[')) {
-
-            int[] values = new int[16];
+            Number[] values = new Number[16];
             int size = 0;
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
@@ -47,7 +36,7 @@ final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.Primi
                     values = Arrays.copyOf(values, newCapacity);
                 }
 
-                values[size++] = jsonReader.readInt32Value();
+                values[size++] = jsonReader.readNumber();
             }
             jsonReader.nextIfMatch(',');
 
@@ -64,28 +53,27 @@ final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.Primi
         if (entryCnt == -1) {
             return null;
         }
-        int[] array = new int[entryCnt];
+        Number[] array = new Number[entryCnt];
         for (int i = 0; i < entryCnt; i++) {
-            array[i] = jsonReader.readInt32Value();
+            array[i] = jsonReader.readNumber();
         }
         return array;
     }
 
     public Object createInstance(Collection collection) {
-        int[] array = new int[collection.size()];
+        Number[] array = new Number[collection.size()];
         int i = 0;
         for (Object item : collection) {
-            int value;
-            if (item == null) {
-                value = 0;
-            } else if (item instanceof Number) {
-                value = ((Number) item).intValue();
+            Number value;
+            if (item == null || item instanceof Number) {
+                value = (Number) item;
+
             } else {
-                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), int.class);
+                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), Number.class);
                 if (typeConvert == null) {
-                    throw new JSONException("can not cast to int " + item.getClass());
+                    throw new JSONException("can not cast to Number " + item.getClass());
                 }
-                value = (Integer) typeConvert.apply(item);
+                value = (Number) typeConvert.apply(item);
             }
             array[i++] = value;
         }

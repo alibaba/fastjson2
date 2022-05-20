@@ -6,30 +6,19 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.function.Function;
 
-final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.PrimitiveImpl {
-    static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray();
-
-    @Override
-    public Class getObjectClass() {
-        return int[].class;
-    }
+final class ObjectReaderImplDoubleArray extends ObjectReaderBaseModule.PrimitiveImpl {
+    static final ObjectReaderImplDoubleArray INSTANCE = new ObjectReaderImplDoubleArray();
 
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
-        if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, features);
-        }
-
         if (jsonReader.readIfNull()) {
             return null;
         }
 
         if (jsonReader.nextIfMatch('[')) {
-
-            int[] values = new int[16];
+            Double[] values = new Double[16];
             int size = 0;
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
@@ -47,7 +36,7 @@ final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.Primi
                     values = Arrays.copyOf(values, newCapacity);
                 }
 
-                values[size++] = jsonReader.readInt32Value();
+                values[size++] = jsonReader.readDouble();
             }
             jsonReader.nextIfMatch(',');
 
@@ -64,28 +53,28 @@ final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.Primi
         if (entryCnt == -1) {
             return null;
         }
-        int[] array = new int[entryCnt];
+        Double[] array = new Double[entryCnt];
         for (int i = 0; i < entryCnt; i++) {
-            array[i] = jsonReader.readInt32Value();
+            array[i] = jsonReader.readDouble();
         }
         return array;
     }
 
     public Object createInstance(Collection collection) {
-        int[] array = new int[collection.size()];
+        Double[] array = new Double[collection.size()];
         int i = 0;
         for (Object item : collection) {
-            int value;
+            Double value;
             if (item == null) {
-                value = 0;
+                value = null;
             } else if (item instanceof Number) {
-                value = ((Number) item).intValue();
+                value = ((Number) item).doubleValue();
             } else {
-                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), int.class);
+                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), Double.class);
                 if (typeConvert == null) {
-                    throw new JSONException("can not cast to int " + item.getClass());
+                    throw new JSONException("can not cast to Double " + item.getClass());
                 }
-                value = (Integer) typeConvert.apply(item);
+                value = (Double) typeConvert.apply(item);
             }
             array[i++] = value;
         }

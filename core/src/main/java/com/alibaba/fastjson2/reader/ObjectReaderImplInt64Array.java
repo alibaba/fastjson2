@@ -1,9 +1,12 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.function.Function;
 
 final class ObjectReaderImplInt64Array extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplInt64Array INSTANCE = new ObjectReaderImplInt64Array();
@@ -11,6 +14,27 @@ final class ObjectReaderImplInt64Array extends ObjectReaderBaseModule.PrimitiveI
     @Override
     public Class getObjectClass() {
         return Long[].class;
+    }
+
+    public Object createInstance(Collection collection) {
+        Long[] array = new Long[collection.size()];
+        int i = 0;
+        for (Object item : collection) {
+            Long value;
+            if (item == null) {
+                value = null;
+            } else if (item instanceof Number) {
+                value = ((Number) item).longValue();
+            } else {
+                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), Long.class);
+                if (typeConvert == null) {
+                    throw new JSONException("can not cast to Integer " + item.getClass());
+                }
+                value = (Long) typeConvert.apply(item);
+            }
+            array[i++] = value;
+        }
+        return array;
     }
 
     @Override
