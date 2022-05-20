@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.schema;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -10,8 +11,11 @@ final class EnumSchema extends JSONSchema {
     EnumSchema(Object[] items) {
         super(null, null);
         this.items = new LinkedHashSet<>(items.length);
-        for (Object name : items) {
-            this.items.add(name);
+        for (Object item : items) {
+            if (item instanceof BigDecimal) {
+                item = ((BigDecimal) item).stripTrailingZeros();
+            }
+            this.items.add(item);
         }
     }
 
@@ -22,11 +26,24 @@ final class EnumSchema extends JSONSchema {
 
     @Override
     public ValidateResult validate(Object value) {
-        if (value == null) {
-            return FAIL_INPUT_NULL;
+        if (value instanceof BigDecimal) {
+            value = ((BigDecimal) value).stripTrailingZeros();
+
+            long longValue = ((BigDecimal) value).longValue();
+            if (((BigDecimal) value).compareTo(BigDecimal.valueOf(longValue)) == 0) {
+                if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
+                    value = (int) longValue;
+                } else {
+                    value = longValue;
+                }
+            }
         }
 
         if (!items.contains(value)) {
+            if (value == null) {
+                return FAIL_INPUT_NULL;
+            }
+
             return new ValidateResult.TypeNotMatchFail(Type.Enum, value.getClass());
         }
 

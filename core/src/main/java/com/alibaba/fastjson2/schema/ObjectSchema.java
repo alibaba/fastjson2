@@ -22,7 +22,7 @@ public final class ObjectSchema extends JSONSchema {
     final long[] requiredHashCode;
 
     final PatternProperty[] patternProperties;
-    final Pattern propertyNamesPattern;
+    final JSONSchema propertyNames;
     final int minProperties;
     final int maxProperties;
 
@@ -78,8 +78,13 @@ public final class ObjectSchema extends JSONSchema {
             for (Iterator<Map.Entry<String, Object>> it = properties.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<String, Object> entry = it.next();
                 String entryKey = entry.getKey();
-                JSONObject entryValue = (JSONObject) entry.getValue();
-                JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
+                Object entryValue = entry.getValue();
+                JSONSchema schema;
+                if (entryValue instanceof Boolean) {
+                    schema = ((Boolean) entryValue).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+                } else {
+                    schema = JSONSchema.of((JSONObject) entryValue, root == null ? this : root);
+                }
                 this.properties.put(entryKey, schema);
             }
         }
@@ -92,12 +97,12 @@ public final class ObjectSchema extends JSONSchema {
             for (Iterator<Map.Entry<String, Object>> it = patternProperties.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<String, Object> entry = it.next();
                 String entryKey = entry.getKey();
-                Object value = entry.getValue();
+                Object entryValue = entry.getValue();
                 JSONSchema schema;
-                if (value instanceof Boolean) {
-                    schema = ((Boolean) value).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+                if (entryValue instanceof Boolean) {
+                    schema = ((Boolean) entryValue).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
                 } else {
-                    schema = JSONSchema.of((JSONObject) value);
+                    schema = JSONSchema.of((JSONObject) entryValue, root == null ? this : root);
                 }
 
                 this.patternProperties[index++] = new PatternProperty(Pattern.compile(entryKey), schema);
@@ -140,16 +145,13 @@ public final class ObjectSchema extends JSONSchema {
             }
         }
 
-        JSONObject propertyNames = input.getJSONObject("propertyNames");
+        Object propertyNames = input.get("propertyNames");
         if (propertyNames == null) {
-            this.propertyNamesPattern = null;
+            this.propertyNames = null;
+        } else if (propertyNames instanceof Boolean) {
+            this.propertyNames = ((Boolean) propertyNames).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
         } else {
-            String pattern = propertyNames.getString("pattern");
-            if (pattern == null) {
-                this.propertyNamesPattern = null;
-            } else {
-                this.propertyNamesPattern = Pattern.compile(pattern);
-            }
+            this.propertyNames = new StringSchema((JSONObject) propertyNames);
         }
 
         this.minProperties = input.getIntValue("minProperties", -1);
@@ -272,11 +274,11 @@ public final class ObjectSchema extends JSONSchema {
             }
         }
 
-        if (propertyNamesPattern != null) {
+        if (propertyNames != null) {
             for (Object key : map.keySet()) {
-                String strKey = key.toString();
-                if (!propertyNamesPattern.matcher(strKey).find()) {
-                    return new ValidateResult.PropertyPatternFail(propertyNamesPattern.pattern(), strKey);
+                ValidateResult result = propertyNames.validate(key);
+                if (!result.isSuccess()) {
+                    return FAIL_PROPERTY_NAME;
                 }
             }
         }

@@ -1967,4 +1967,25 @@ public class JSONSchemaTest {
                 )
         );
     }
+    @Test
+    public void test_ref_0() {
+        JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +
+                "            \"$defs\": {\n" +
+                "                \"tilde~field\": {\"type\": \"integer\"},\n" +
+                "                \"slash/field\": {\"type\": \"integer\"},\n" +
+                "                \"percent%field\": {\"type\": \"integer\"}\n" +
+                "            },\n" +
+                "            \"properties\": {\n" +
+                "                \"tilde\": {\"$ref\": \"#/$defs/tilde~0field\"},\n" +
+                "                \"slash\": {\"$ref\": \"#/$defs/slash~1field\"},\n" +
+                "                \"percent\": {\"$ref\": \"#/$defs/percent%25field\"}\n" +
+                "            }\n" +
+                "        }");
+
+        assertFalse(
+                jsonSchema.isValid(
+                        JSON.parse("{\"percent\": \"aoeu\"}")
+                )
+        );
+    }
 }
