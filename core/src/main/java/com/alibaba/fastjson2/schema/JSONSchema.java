@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.annotation.JSONCreator;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -174,7 +175,7 @@ public abstract class JSONSchema {
         );
 
         if (type == null) {
-            String[] enums = input.getObject("enum", String[].class);
+            Object[] enums = input.getObject("enum", Object[].class);
             if (enums != null) {
                 return new EnumSchema(enums);
             }
@@ -209,10 +210,13 @@ public abstract class JSONSchema {
                         return parent;
                     }
 
-                    Map<String, JSONSchema> definitions = null, defs = null;
+                    Map<String, JSONSchema> definitions = null, defs = null, properties = null;
                     if (parent instanceof ObjectSchema) {
-                        definitions = ((ObjectSchema) parent).definitions;
-                        defs = ((ObjectSchema) parent).defs;
+                        ObjectSchema objectSchema = (ObjectSchema) parent;
+
+                        definitions = objectSchema.definitions;
+                        defs = objectSchema.defs;
+                        properties = objectSchema.properties;
                     } else if (parent instanceof ArraySchema) {
                         definitions = ((ArraySchema) parent).definitions;
                         defs = ((ArraySchema) parent).defs;
@@ -231,10 +235,43 @@ public abstract class JSONSchema {
                         if (ref.startsWith("#/$defs/")) {
                             final int PREFIX_LEN = 8; // "#/$defs/".length();
                             String refName = ref.substring(PREFIX_LEN);
+                            refName = URLDecoder.decode(refName);
                             JSONSchema refSchema = defs.get(refName);
+                            if (refSchema == null) {
+                                refSchema = Any.NOT_ANY;
+                            }
                             return refSchema;
                         }
                     }
+
+                    if (properties != null) {
+                        if (ref.startsWith("#/properties/")) {
+                            final int PREFIX_LEN = 13; // "#/properties/".length();
+                            String refName = ref.substring(PREFIX_LEN);
+                            JSONSchema refSchema = properties.get(refName);
+                            return refSchema;
+                        }
+                    }
+
+                    if (ref.startsWith("#/prefixItems/") && parent instanceof ArraySchema) {
+                        final int PREFIX_LEN = 14; // "#/properties/".length();
+                        int index = Integer.parseInt(ref.substring(PREFIX_LEN));
+                        JSONSchema refSchema = ((ArraySchema) parent).prefixItems[index];
+                        return refSchema;
+                    }
+                }
+
+                Object exclusiveMaximum = input.get("exclusiveMaximum");
+                Object exclusiveMinimum = input.get("exclusiveMinimum");
+                if (exclusiveMaximum instanceof Integer
+                        || exclusiveMinimum instanceof Integer
+                        || exclusiveMaximum instanceof Long
+                        || exclusiveMinimum instanceof Long) {
+                    return new IntegerSchema(input);
+                }
+
+                if (exclusiveMaximum instanceof Number || exclusiveMinimum instanceof Number) {
+                    return new NumberSchema(input);
                 }
             }
 
@@ -244,6 +281,9 @@ public abstract class JSONSchema {
                     || input.containsKey("required")
                     || input.containsKey("patternProperties")
                     || input.containsKey("additionalProperties")
+                    || input.containsKey("minProperties")
+                    || input.containsKey("maxProperties")
+                    || input.containsKey("propertyNames")
                     || input.containsKey("$ref")
             ) {
                 return new ObjectSchema(input, parent);
@@ -255,11 +295,17 @@ public abstract class JSONSchema {
                     || input.containsKey("items")
                     || input.containsKey("prefixItems")
                     || input.containsKey("uniqueItems")
+                    || input.containsKey("maxContains")
+                    || input.containsKey("minContains")
             ) {
                 return new ArraySchema(input, parent);
             }
 
-            if (input.containsKey("pattern")) {
+            if (input.containsKey("pattern")
+                    || input.containsKey("format")
+                    || input.containsKey("minLength")
+                    || input.containsKey("maxLength")
+            ) {
                 return new StringSchema(input);
             }
 
@@ -386,7 +432,6 @@ public abstract class JSONSchema {
         return anyOf;
     }
 
-
     static AnyOf anyOf(JSONArray array, Class type) {
         if (array == null || array.isEmpty()) {
             return null;
@@ -415,6 +460,18 @@ public abstract class JSONSchema {
 
     static OneOf oneOf(JSONObject input, Class type) {
         JSONArray array = input.getJSONArray("oneOf");
+        if (array == null || array.isEmpty()) {
+            return null;
+        }
+
+        JSONSchema[] items = new JSONSchema[array.size()];
+        for (int i = 0; i < items.length; i++) {
+            items[i] = JSONSchema.of(array.getJSONObject(i), type);
+        }
+        return new OneOf(items);
+    }
+
+    static OneOf oneOf(JSONArray array, Class type) {
         if (array == null || array.isEmpty()) {
             return null;
         }
@@ -614,6 +671,7 @@ public abstract class JSONSchema {
     static final ValidateResult.Fail FAIL_ONE_OF = new ValidateResult.Fail("oneOf fail");
     static final ValidateResult.Fail FAIL_NOT = new ValidateResult.Fail("not fail");
     static final ValidateResult.Fail FAIL_TYPE_NOT_MATCH = new ValidateResult.Fail("type not match");
+    static final ValidateResult.Fail FAIL_PROPERTY_NAME = new ValidateResult.Fail("propertyName not match");
 
 
     final static ValidateResult.Fail CONTAINS_NOT_MATCH = new ValidateResult.Fail("contains not match");

@@ -14,6 +14,7 @@ final class StringSchema extends JSONSchema {
     final Pattern pattern;
     final boolean typed;
     final AnyOf anyOf;
+    final OneOf oneOf;
 
     final FormatValidator formatValidator;
 
@@ -31,6 +32,13 @@ final class StringSchema extends JSONSchema {
             this.anyOf = anyOf((JSONArray) anyOf, String.class);
         } else {
             this.anyOf = null;
+        }
+
+        Object oneOf = input.get("oneOf");
+        if (oneOf instanceof JSONArray) {
+            this.oneOf = oneOf((JSONArray) oneOf, String.class);
+        } else {
+            this.oneOf = null;
         }
 
         if (format == null) {
@@ -87,12 +95,16 @@ final class StringSchema extends JSONSchema {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (minLength >= 0 && str.length() < minLength) {
-                return new ValidateResult.MinLengthFail(minLength, str.length());
-            }
 
-            if (maxLength >= 0 && str.length() > maxLength) {
-                return new ValidateResult.MaxLengthFail(minLength, str.length());
+            if (minLength >= 0 || maxLength >= 0) {
+                int count = str.codePointCount(0, str.length());
+                if (minLength >= 0 && count < minLength) {
+                    return new ValidateResult.MinLengthFail(minLength, str.length());
+                }
+
+                if (maxLength >= 0 && count > maxLength) {
+                    return new ValidateResult.MaxLengthFail(minLength, str.length());
+                }
             }
 
             if (pattern != null) {
@@ -109,6 +121,13 @@ final class StringSchema extends JSONSchema {
 
             if (anyOf != null) {
                 ValidateResult result = anyOf.validate(str);
+                if (!result.isSuccess()) {
+                    return result;
+                }
+            }
+
+            if (oneOf != null) {
+                ValidateResult result = oneOf.validate(str);
                 if (!result.isSuccess()) {
                     return result;
                 }

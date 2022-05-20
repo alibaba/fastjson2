@@ -111,8 +111,16 @@ public final class ArraySchema extends JSONSchema {
         } else {
             this.prefixItems = new JSONSchema[prefixItems.size()];
             for (int i = 0; i < prefixItems.size(); i++) {
-                JSONObject jsonObject = prefixItems.getJSONObject(i);
-                JSONSchema schema = JSONSchema.of(jsonObject, root == null ? this : root);
+                JSONSchema schema;
+
+                Object prefixItem = prefixItems.get(i);
+                if (prefixItem instanceof Boolean) {
+                    schema = ((Boolean) prefixItem).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+                } else {
+                    JSONObject jsonObject = (JSONObject) prefixItem;
+                    schema = JSONSchema.of(jsonObject, root == null ? this : root);
+                }
+
                 this.prefixItems[i] = schema;
             }
         }
@@ -399,17 +407,21 @@ public final class ArraySchema extends JSONSchema {
                 }
             }
 
-            if (this.contains != null && containsCount == 0) {
-                return CONTAINS_NOT_MATCH;
+            if (this.contains != null) {
+                if (minContains >= 0 && containsCount < minContains) {
+                    return new ValidateResult.MinContainsFail(minContains, containsCount);
+                } else {
+                    if (containsCount == 0 && minContains != 0) {
+                        return CONTAINS_NOT_MATCH;
+                    }
+                }
+
+                if (maxContains >= 0 && containsCount > maxContains) {
+                    return new ValidateResult.MaxContainsFail(maxContains, containsCount);
+                }
             }
 
-            if (minContains >= 0 && containsCount < minContains) {
-                return new ValidateResult.MinContainsFail(minContains, containsCount);
-            }
 
-            if (maxContains >= 0 && containsCount > maxContains) {
-                return new ValidateResult.MaxContainsFail(maxContains, containsCount);
-            }
 
             if (allOf != null) {
                 ValidateResult result = allOf.validate(value);

@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
@@ -15,6 +16,15 @@ public final class ObjectArrayReader extends ObjectReaderBaseModule.PrimitiveImp
     @Override
     public Class getObjectClass() {
         return Object[].class;
+    }
+
+    public Object[] createInstance(Collection collection) {
+        Object[] array = new Object[collection.size()];
+        int i = 0;
+        for (Object item : collection) {
+            array[i++] = item;
+        }
+        return array;
     }
 
     @Override
