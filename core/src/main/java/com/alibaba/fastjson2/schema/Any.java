@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.schema;
 
-class Any extends JSONSchema {
+final class Any extends JSONSchema {
     public final static com.alibaba.fastjson2.schema.Any INSTANCE = new com.alibaba.fastjson2.schema.Any();
     public final static com.alibaba.fastjson2.schema.JSONSchema NOT_ANY = new Not(INSTANCE, null, null);
 

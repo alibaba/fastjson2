@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSONObject;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public final class StringSchema extends JSONSchema {
+final class StringSchema extends JSONSchema {
     final int maxLength;
     final int minLength;
     final String format;

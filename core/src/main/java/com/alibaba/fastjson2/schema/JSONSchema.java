@@ -183,7 +183,7 @@ public abstract class JSONSchema {
             if (constValue instanceof String) {
                 return new ConstString((String) constValue);
             } else if (constValue instanceof Integer || constValue instanceof Long) {
-                return new ConstInteger(((Number) constValue).longValue());
+                return new ConstLong(((Number) constValue).longValue());
             }
 
             if (input.size() == 1) {

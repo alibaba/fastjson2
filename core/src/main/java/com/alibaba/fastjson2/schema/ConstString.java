@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.schema;
 
-class ConstString extends JSONSchema {
+final class ConstString extends JSONSchema {
     final String value;
 
     ConstString(String value) {
