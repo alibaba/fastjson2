@@ -20,8 +20,8 @@
 - 支持`JSON/JSONB`两种协议，[`JSONPath`](https://alibaba.github.io/fastjson2/jsonpath_cn) 是一等公民。
 - 支持全量解析和部分解析。
 - 支持`Java`服务端、客户端`Android`、大数据场景。
-- 支持`Kotlin`
-- 支持 `JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
+- 支持`Kotlin` [https://alibaba.github.io/fastjson2/kotlin_cn](https://alibaba.github.io/fastjson2/kotlin_cn)
+- 支持`JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
 - 支持`Android` [(2.0.4.android)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.graal/)
 - 支持`Graal Native-Image` [(2.0.4.graal)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.graal/)
 
@@ -29,7 +29,7 @@
 
 相关文档：
 
-- `JSONB`格式文档：  
+- `JSONB`格式文档：
   [https://alibaba.github.io/fastjson2/jsonb_format_cn](https://alibaba.github.io/fastjson2/jsonb_format_cn)
 - `FASTJSON v2`性能有了很大提升，具体性能数据看这里：  
   [https://alibaba.github.io/fastjson2/benchmark_cn](https://alibaba.github.io/fastjson2/benchmark_cn)
