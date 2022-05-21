@@ -13,7 +13,7 @@ package com.alibaba.fastjson2
  */
 @Suppress("HasPlatformType")
 inline fun <reified T> JSONArray.to() =
-    to<T>(T::class.java)
+    to(T::class.java)
 
 /**
  * Implemented using [TypeReference]

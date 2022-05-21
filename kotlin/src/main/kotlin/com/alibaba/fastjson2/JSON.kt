@@ -110,7 +110,7 @@ inline fun <reified T> URL?.to(
  * E.g.
  * ```
  *   val url = ...
- *   val data = in.url<User>()
+ *   val data = in.into<User>()
  * ```
  *
  * @return [T]?
