@@ -23,16 +23,16 @@
 - Supports Kotlin
 - Supports Android  [(2.0.4.android)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.graal/)
 - Supports `Graal Native-Image` [(2.0.4.graal)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.graal/)
-- Supports `JSON Schema` https://github.com/alibaba/fastjson2/wiki/json_schema_cn
+- Supports `JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
 
 ![fastjson](docs/logo.jpg "fastjson")
 
 Related Documents:
 
 - `JSONB` format documentation:  
-  https://github.com/alibaba/fastjson2/wiki/jsonb_format_cn
+  [https://alibaba.github.io/fastjson2/jsonb_format_cn](https://alibaba.github.io/fastjson2/jsonb_format_cn)
 - `FASTJSON v2`'s performance has been significantly improved. For the benchmark, see here:  
-  https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark
+  [https://alibaba.github.io/fastjson2/benchmark_cn](https://alibaba.github.io/fastjson2/benchmark_cn)
 
 # 1. Prepare
 
