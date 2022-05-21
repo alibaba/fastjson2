@@ -106,7 +106,7 @@ dependencies {
 }
 ```
 
-# 2 Usage
+# 2. Usage
 
 The package name of `fastjson v2` is different from `fastjson v1`. It is `com.alibaba.fastjson2`. If you used `fastjson v1` before, simply change the package name.
 
@@ -229,8 +229,8 @@ User user = obj.getObject("key", User.class);
 val array = ... // JSONArray
 val obj = ... // JSONObject
 
-val user = array.getObject<User>(0)
-val user = obj.getObject<User>("key")
+val user = array.to<User>(0)
+val user = obj.to<User>("key")
 ```
 
 #### 2.5.3 Convert to JavaBean
@@ -251,7 +251,7 @@ List<User> users = array.toJavaList(User.class);
 val array = ... // JSONArray
 val obj = ... // JSONObject
 
-val user = obj.toObject<User>() // User
+val user = obj.to<User>() // User
 val users = array.toList<User>() // List<User>
 ```
 
