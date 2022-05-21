@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.IdentityHashMap;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 /**
  * x91			# binary len_int32 bytes
@@ -544,52 +543,6 @@ public interface JSONB {
     static byte[] toBytes(String str) {
         if (str == null) {
             return new byte[]{BC_NULL};
-        }
-
-        if (JDKUtils.JVM_VERSION == 8) {
-            char[] chars = JDKUtils.getCharArray(str);
-            int strlen = chars.length;
-            if (strlen <= STR_ASCII_FIX_LEN) {
-                boolean ascii = true;
-                for (int i = 0; i < strlen; ++i) {
-                    if (chars[i] > 0x007F) {
-                        ascii = false;
-                        break;
-                    }
-                }
-
-                if (ascii) {
-                    byte[] bytes = new byte[chars.length + 1];
-                    bytes[0] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                    for (int i = 0; i < strlen; ++i) {
-                        bytes[i + 1] = (byte) chars[i];
-                    }
-                    return bytes;
-                }
-            }
-        } else if (JDKUtils.STRING_BYTES_INTERNAL_API) {
-            if (CODER_FUNCTION == null && !CODER_FUNCTION_ERROR) {
-                try {
-                    CODER_FUNCTION = JDKUtils.getStringCode11();
-                    VALUE_FUNCTION = JDKUtils.getStringValue11();
-                } catch (Throwable ignored) {
-                    CODER_FUNCTION_ERROR = true;
-                }
-            }
-
-            if (CODER_FUNCTION != null && VALUE_FUNCTION != null) {
-                int coder = CODER_FUNCTION.applyAsInt(str);
-                if (coder == 0) {
-                    byte[] value = VALUE_FUNCTION.apply(str);
-                    int strlen = value.length;
-                    if (strlen <= STR_ASCII_FIX_LEN) {
-                        byte[] bytes = new byte[value.length + 1];
-                        bytes[0] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                        System.arraycopy(value, 0, bytes, 1, value.length);
-                        return bytes;
-                    }
-                }
-            }
         }
 
         try (JSONWriter writer = new JSONWriterJSONB(

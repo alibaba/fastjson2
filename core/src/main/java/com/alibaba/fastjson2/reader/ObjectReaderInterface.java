@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 
@@ -28,14 +29,12 @@ public final class ObjectReaderInterface<T> extends ObjectReaderAdapter<T> {
             return (T) autoTypeReader.readJSONBObject(jsonReader, features);
         }
 
-        JSONObject object = jsonReader.read(JSONObject.class);
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        throw new JSONException("graal not support proxy");
     }
 
     @Override
     public T createInstance(long features) {
-        JSONObject object = new JSONObject();
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        throw new JSONException("graal not support proxy");
     }
 
     @Override
@@ -46,6 +45,6 @@ public final class ObjectReaderInterface<T> extends ObjectReaderAdapter<T> {
         } else {
             object = new JSONObject(map);
         }
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        throw new JSONException("graal not support proxy");
     }
 }

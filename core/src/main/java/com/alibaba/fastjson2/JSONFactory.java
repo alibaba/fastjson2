@@ -31,16 +31,6 @@ public final class JSONFactory {
         return DEFAULT_PROPERTIES.getProperty(key);
     }
 
-    static final class Utils {
-        static volatile ToIntFunction<String> CODER_FUNCTION;
-        static volatile Function<String, byte[]> VALUE_FUNCTION;
-        static volatile boolean CODER_FUNCTION_ERROR;
-        static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
-        static Function<byte[], String> STRING_CREATOR_JDK11;
-        static BiFunction<byte[], Charset, String> STRING_CREATOR_JDK17;
-        static volatile boolean STRING_CREATOR_ERROR = false;
-    }
-
     static final BigDecimal LOW = BigDecimal.valueOf(-9007199254740991L);
     static final BigDecimal HIGH = BigDecimal.valueOf(9007199254740991L);
     static final BigInteger LOW_BIGINT = BigInteger.valueOf(-9007199254740991L);

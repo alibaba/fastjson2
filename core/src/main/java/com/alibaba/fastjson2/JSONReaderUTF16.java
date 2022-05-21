@@ -9,7 +9,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import static com.alibaba.fastjson2.util.UUIDUtils.*;
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 final class JSONReaderUTF16 extends JSONReader {
     private final String str;
@@ -1399,22 +1398,7 @@ final class JSONReaderUTF16 extends JSONReader {
                     offset++;
                 }
 
-                if (JDKUtils.JVM_VERSION == 8) {
-                    if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
-                        try {
-                            STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                        } catch (Throwable e) {
-                            STRING_CREATOR_ERROR = true;
-                        }
-                    }
-                    if (STRING_CREATOR_JDK8 != null) {
-                        str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                    } else {
-                        str = new String(chars);
-                    }
-                } else {
-                    str = new String(chars);
-                }
+                str = new String(chars);
             } else {
                 if (this.str != null && JDKUtils.JVM_VERSION > 8) {
                     str = this.str.substring(this.offset, offset);

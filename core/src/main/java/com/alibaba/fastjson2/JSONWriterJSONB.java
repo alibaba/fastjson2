@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 
 final class JSONWriterJSONB extends JSONWriter {
@@ -484,104 +483,7 @@ final class JSONWriterJSONB extends JSONWriter {
             return;
         }
 
-        if (JDKUtils.STRING_BYTES_INTERNAL_API) {
-            if (CODER_FUNCTION == null && !CODER_FUNCTION_ERROR) {
-                try {
-                    CODER_FUNCTION = JDKUtils.getStringCode11();
-                    VALUE_FUNCTION = JDKUtils.getStringValue11();
-                } catch (Throwable ignored) {
-                    CODER_FUNCTION_ERROR = true;
-                }
-            }
-        }
-
-        if (CODER_FUNCTION != null && VALUE_FUNCTION != null) {
-            int coder = CODER_FUNCTION.applyAsInt(str);
-            byte[] value = VALUE_FUNCTION.apply(str);
-
-            if (coder == 0) {
-                int minCapacity = value.length
-                        + off
-                        + 5 /*max str len*/
-                        + 1;
-
-                if (minCapacity - bytes.length > 0) {
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    bytes = Arrays.copyOf(bytes, newCapacity);
-                }
-
-                int strlen = value.length;
-                if (strlen <= STR_ASCII_FIX_LEN) {
-                    bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                } else {
-                    bytes[off++] = BC_STR_ASCII;
-                    writeInt32(strlen);
-                }
-                System.arraycopy(value, 0, bytes, off, strlen);
-                off += strlen;
-                return;
-            } else {
-                int check_cnt = 32;
-                if (check_cnt > value.length) {
-                    check_cnt = value.length;
-                }
-                if ((check_cnt & 1) == 1) {
-                    check_cnt -= 1;
-                }
-
-                int asciiCount = 0;
-                for (int i = 0; i + 2 < check_cnt; i += 2) {
-                    byte b0 = value[i];
-                    byte b1 = value[i + 1];
-                    if (b0 == 0 || b1 == 0) {
-                        asciiCount++;
-                    }
-                }
-
-                boolean utf16 = asciiCount == 0 || (check_cnt >> 1) / asciiCount >= 3; // utf16字符占比>=1/3
-
-                if (!utf16) {
-                    int maxSize = value.length * 3;
-                    int lenByteCnt = sizeOfInt(maxSize);
-                    ensureCapacity(off + maxSize + lenByteCnt + 1);
-                    int result = IOUtils.encodeUTF8(value, 0, value.length, bytes, off + lenByteCnt + 1);
-
-                    int utf8len = result - off - lenByteCnt - 1;
-                    if (utf8len > value.length) {
-                        utf16 = true;
-                    } else if (result != -1) {
-                        int utf8lenByteCnt = sizeOfInt(utf8len);
-                        if (lenByteCnt != utf8lenByteCnt) {
-                            System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
-                        }
-                        bytes[off++] = BC_STR_UTF8;
-                        writeInt32(utf8len);
-                        off += utf8len;
-                        return;
-                    }
-                }
-
-                if (utf16 && (JDKUtils.BIG_ENDIAN == 1 || JDKUtils.BIG_ENDIAN == 0)) {
-                    ensureCapacity(off + 5 + value.length);
-                    bytes[off++] = JDKUtils.BIG_ENDIAN == 1 ? BC_STR_UTF16BE : BC_STR_UTF16LE;
-                    writeInt32(value.length);
-                    System.arraycopy(value, 0, bytes, off, value.length);
-                    off += value.length;
-                    return;
-                }
-            }
-        }
-
-        char[] chars = JDKUtils.getCharArray(str);
+        char[] chars = str.toCharArray();
 
         boolean ascii = true;
         for (int i = 0; i < chars.length; ++i) {

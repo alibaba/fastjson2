@@ -96,20 +96,6 @@ public class JSONObjectTest2 {
         }
     }
 
-    @Test
-    public void testInterface() {
-        BeanInterface bean =
-                JSONObject
-                        .of("id", 123)
-                        .toJavaObject(BeanInterface.class);
-        assertEquals(123, bean.getId());
-    }
-
-    public interface BeanInterface {
-        int getId();
-        void setId(String id);
-    }
-
     public static class Bean<T> {
         public T date;
     }

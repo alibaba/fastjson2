@@ -940,7 +940,7 @@ public interface JSON {
         JSONWriter.Context writeContext = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
 
         boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
-        JSONWriterUTF16 jsonWriter = JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF16(writeContext);
+        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(writeContext);
 
         try (JSONWriter writer = pretty ?
             new JSONWriterPretty(jsonWriter) : jsonWriter) {

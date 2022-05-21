@@ -24,14 +24,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 public abstract class JSONReader implements Closeable {
     static final int MAX_EXP = 512;
 
     static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
     static final ZoneId UTC = ZoneId.of("UTC");
-    static final ZoneId SHANGHAI = ZoneId.of("Asia/Shanghai");
     static final long LONG_MASK = 0XFFFFFFFFL;
 
     static final byte JSON_TYPE_INT = 1;
@@ -1876,32 +1874,6 @@ public abstract class JSONReader implements Closeable {
         }
 
         Context ctx = JSONFactory.createReadContext();
-
-        if (JDKUtils.STRING_BYTES_INTERNAL_API) {
-            if (CODER_FUNCTION == null && !CODER_FUNCTION_ERROR) {
-                try {
-                    CODER_FUNCTION = JDKUtils.getStringCode11();
-                    VALUE_FUNCTION = JDKUtils.getStringValue11();
-                } catch (Throwable ignored) {
-                    CODER_FUNCTION_ERROR = true;
-                }
-            }
-        }
-
-        if (CODER_FUNCTION != null && VALUE_FUNCTION != null) {
-            int coder = CODER_FUNCTION.applyAsInt(str);
-            if (coder == 0) {
-                byte[] value = VALUE_FUNCTION.apply(str);
-                return new JSONReaderASCII(
-                        ctx
-                        , str
-                        , value
-                        , 0
-                        , value.length
-                );
-            }
-        }
-
         if (JDKUtils.JVM_VERSION > 8) {
             try {
                 byte coder = UnsafeUtils.getStringCoder(str);
