@@ -47,12 +47,15 @@
     </dependencies>
 
     <build>
+        <sourceDirectory>src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <includes>
                         <include>com/alibaba/fastjson2/**/*.java</include>
+                        <include>com/alibaba/fastjson2/**/*.kt</include>
                     </includes>
                     <systemPropertyVariables>
                         <user.timezone>Asia/Shanghai</user.timezone>
