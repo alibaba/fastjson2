@@ -11,9 +11,9 @@
     </parent>
 
     <artifactId>fastjson2-extension</artifactId>
-    <packaging>jar</packaging>
     <name>fastjson2-extension</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
+    <packaging>jar</packaging>
     <url>https://github.com/alibaba/fastjson2</url>
     <inceptionYear>2022</inceptionYear>
 
@@ -90,16 +90,6 @@
             so the scope of these libs is provided.
         -->
         <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>retrofit</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.aliyun.odps</groupId>
             <artifactId>odps-sdk-udf</artifactId>
             <scope>provided</scope>
@@ -115,13 +105,24 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>retrofit</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>io.airlift</groupId>
             <artifactId>slice</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-websocket</artifactId>
+            <artifactId>spring-messaging</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -131,17 +132,17 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-messaging</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-redis</artifactId>
+            <artifactId>spring-websocket</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-mongodb</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
             <scope>provided</scope>
         </dependency>
 
