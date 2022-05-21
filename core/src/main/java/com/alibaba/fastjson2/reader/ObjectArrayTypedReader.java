@@ -161,8 +161,20 @@ final class ObjectArrayTypedReader extends ObjectReaderBaseModule.PrimitiveImpl 
                     item = objectReader.createInstance((Map) item);
                 } else if (item instanceof Collection) {
                     item = objectReader.createInstance((Collection) item);
+                } else if (item instanceof Object[]) {
+                    item = objectReader.createInstance(JSONArray.of((Object[]) item));
                 } else if (item != null) {
-                    throw new JSONException("component type not match, expect " + componentType.getName() + ", but " + item.getClass());
+                    Class<?> itemClass = item.getClass();
+                    if (itemClass.isArray()) {
+                        int length = Array.getLength(item);
+                        JSONArray array = new JSONArray(length);
+                        for (int i = 0; i < length; i++) {
+                            array.add(Array.get(item, i));
+                        }
+                        item = objectReader.createInstance(array);
+                    } else {
+                        throw new JSONException("component type not match, expect " + componentType.getName() + ", but " + itemClass);
+                    }
                 }
                 values[index++] = item;
             }

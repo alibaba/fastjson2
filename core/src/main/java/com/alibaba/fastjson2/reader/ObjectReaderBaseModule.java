@@ -66,12 +66,17 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 AtomicLong.class,
         };
 
+        Function<Object, String> TO_STRING = new ToString();
         for (Class type : numberTypes) {
             provider.registerTypeConvert(type, String.class, TO_STRING);
         }
+
+        Function<Object, BigDecimal> TO_DECIMAL = new ToBigDecimal();
         for (Class type : numberTypes) {
             provider.registerTypeConvert(type, BigDecimal.class, TO_DECIMAL);
         }
+
+        Function<Object, BigInteger> TO_BIGINT = new ToBigInteger();
         for (Class type : numberTypes) {
             provider.registerTypeConvert(type, BigInteger.class, TO_BIGINT);
         }
