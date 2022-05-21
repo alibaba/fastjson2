@@ -270,7 +270,7 @@ public final class ObjectSchema extends JSONSchema {
                     continue;
                 }
 
-                return new ValidateResult.AdditionalPropertiesFail(key);
+                return ValidateResult.fail("add additionalProperties %s", key);
             }
         }
 
@@ -285,13 +285,13 @@ public final class ObjectSchema extends JSONSchema {
 
         if (minProperties >= 0) {
             if (map.size() < minProperties) {
-                return new ValidateResult.MinPropertiesFail(minProperties, map.size());
+                return ValidateResult.fail("minProperties not match, expect %s, but %s", minProperties, map.size());
             }
         }
 
         if (maxProperties >= 0) {
             if (map.size() > maxProperties) {
-                return new ValidateResult.MaxPropertiesFail(maxProperties, map.size());
+                return ValidateResult.fail("maxProperties not match, expect %s, but %s", maxProperties, map.size());
             }
         }
 
@@ -303,7 +303,7 @@ public final class ObjectSchema extends JSONSchema {
                     String[] dependentRequiredProperties = entry.getValue();
                     for (String dependentRequiredProperty : dependentRequiredProperties) {
                         if (!map.containsKey(dependentRequiredProperty)) {
-                            return new ValidateResult.DependentRequiredPropertyFail(key, dependentRequiredProperty);
+                            return ValidateResult.fail("property %s, dependentRequired property %s", key, dependentRequiredProperty);
                         }
                     }
                 }
@@ -383,7 +383,7 @@ public final class ObjectSchema extends JSONSchema {
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
 
         if (!(objectWriter instanceof ObjectWriterAdapter)) {
-            return typed ? new ValidateResult.TypeNotMatchFail(Type.Object, valueClass) : SUCCESS;
+            return typed ? ValidateResult.fail("expect type %s, but %s", Type.Object, valueClass) : SUCCESS;
         }
 
         for (int i = 0; i < this.requiredHashCode.length; i++) {
@@ -405,7 +405,7 @@ public final class ObjectSchema extends JSONSchema {
                         fieldName = itemName;
                     }
                 }
-                return new ValidateResult.RequiredFail(fieldName);
+                return ValidateResult.fail("required property %s", fieldName);
             }
         }
 
@@ -441,13 +441,13 @@ public final class ObjectSchema extends JSONSchema {
 
             if (minProperties >= 0) {
                 if (fieldValueCount < minProperties) {
-                    return new ValidateResult.MinPropertiesFail(minProperties, fieldValueCount);
+                    return ValidateResult.fail("minProperties not match, expect %s, but %s", minProperties, fieldValueCount);
                 }
             }
 
             if (maxProperties >= 0) {
                 if (fieldValueCount > maxProperties) {
-                    return new ValidateResult.MaxPropertiesFail(maxProperties, fieldValueCount);
+                    return ValidateResult.fail("maxProperties not match, expect %s, but %s", maxProperties, fieldValueCount);
                 }
             }
         }
@@ -479,7 +479,7 @@ public final class ObjectSchema extends JSONSchema {
                                 dependentRequiredProperty = dependentRequiredEntry.getValue()[requiredIndex];
                             }
                         }
-                        return new ValidateResult.DependentRequiredPropertyFail(property, dependentRequiredProperty);
+                        return ValidateResult.fail("property %s, dependentRequired property %s", property, dependentRequiredProperty);
                     }
                 }
 

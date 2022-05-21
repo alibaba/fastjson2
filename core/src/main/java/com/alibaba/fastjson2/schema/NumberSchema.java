@@ -104,14 +104,14 @@ final class NumberSchema extends JSONSchema {
             } else if (number instanceof BigDecimal) {
                 decimalValue = (BigDecimal) number;
             } else {
-                return new ValidateResult.TypeNotMatchFail(Type.Number, value.getClass());
+                return ValidateResult.fail("expect type %s, but %s", Type.Number, value.getClass());
             }
 
             if (minimum != null) {
                 if (exclusiveMinimum
                         ? minimum.compareTo(decimalValue) >= 0
                         : minimum.compareTo(decimalValue) > 0) {
-                    return new ValidateResult.MinimumFail(minimum, decimalValue, exclusiveMinimum);
+                    return ValidateResult.fail(exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             }
 
@@ -119,13 +119,13 @@ final class NumberSchema extends JSONSchema {
                 if (exclusiveMaximum
                         ? maximum.compareTo(decimalValue) <= 0
                         : maximum.compareTo(decimalValue) < 0) {
-                    return new ValidateResult.MaximumFail(maximum, decimalValue, exclusiveMaximum);
+                    return ValidateResult.fail(exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
                 }
             }
 
             if (multipleOf != null) {
                 if (decimalValue.divideAndRemainder(multipleOf)[1].abs().compareTo(BigDecimal.ZERO) > 0) {
-                    return new ValidateResult.MultipleOfFail(multipleOf, decimalValue);
+                    return ValidateResult.fail("multipleOf not match, expect multipleOf %s, but %s", multipleOf, decimalValue);
                 }
             }
 
@@ -176,7 +176,7 @@ final class NumberSchema extends JSONSchema {
         if (minimum != null) {
             if (minimumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMinimum ? value <= minimumLongValue : value < minimumLongValue) {
-                    return new ValidateResult.MinimumFail(minimum, value, exclusiveMinimum);
+                    return ValidateResult.fail(exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             } else {
                 if (decimalValue == null) {
@@ -185,7 +185,7 @@ final class NumberSchema extends JSONSchema {
                 if (exclusiveMinimum
                         ? minimum.compareTo(decimalValue) >= 0
                         : minimum.compareTo(decimalValue) > 0) {
-                    return new ValidateResult.MinimumFail(minimum, decimalValue, exclusiveMaximum);
+                    return ValidateResult.fail(exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             }
         }
@@ -193,7 +193,7 @@ final class NumberSchema extends JSONSchema {
         if (maximum != null) {
             if (maximumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMaximum ? value >= maximumLongValue : value > maximumLongValue) {
-                    return new ValidateResult.MaximumFail(maximum, minimum, exclusiveMinimum);
+                    return ValidateResult.fail(exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
                 }
             } else {
                 if (decimalValue == null) {
@@ -203,7 +203,7 @@ final class NumberSchema extends JSONSchema {
                 if (exclusiveMaximum
                         ? maximum.compareTo(decimalValue) <= 0
                         : maximum.compareTo(decimalValue) < 0) {
-                    return new ValidateResult.MaximumFail(maximum, minimum, exclusiveMaximum);
+                    return ValidateResult.fail(exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
                 }
             }
         }
@@ -211,7 +211,7 @@ final class NumberSchema extends JSONSchema {
         if (multipleOf != null) {
             if (multipleOfLongValue != Long.MIN_VALUE) {
                 if (value % multipleOfLongValue != 0) {
-                    return new ValidateResult.MultipleOfFail(multipleOf, decimalValue);
+                    return ValidateResult.fail("multipleOf not match, expect multipleOf %s, but %s", multipleOf, decimalValue);
                 }
             }
 
@@ -220,7 +220,7 @@ final class NumberSchema extends JSONSchema {
             }
 
             if (decimalValue.divideAndRemainder(multipleOf)[1].abs().compareTo(BigDecimal.ZERO) > 0) {
-                return new ValidateResult.MultipleOfFail(multipleOf, value);
+                return ValidateResult.fail("multipleOf not match, expect multipleOf %s, but %s", multipleOf, value);
             }
         }
 
@@ -233,12 +233,12 @@ final class NumberSchema extends JSONSchema {
         if (minimum != null) {
             if (minimumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMinimum ? value <= minimumLongValue : value < minimumLongValue) {
-                    return new ValidateResult.MinimumFail(minimum, value, exclusiveMinimum);
+                    return ValidateResult.fail(exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             } else {
                 double minimumDoubleValue = minimum.doubleValue();
                 if (exclusiveMinimum ? value <= minimumDoubleValue : value < minimumDoubleValue) {
-                    return new ValidateResult.MinimumFail(minimum, value, exclusiveMinimum);
+                    return ValidateResult.fail(exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             }
         }
@@ -246,12 +246,12 @@ final class NumberSchema extends JSONSchema {
         if (maximum != null) {
             if (maximumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMaximum ? value >= maximumLongValue : value > maximumLongValue) {
-                    return new ValidateResult.MaximumFail(maximum, value, exclusiveMinimum);
+                    return ValidateResult.fail(exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
                 }
             } else {
                 double maximumDoubleValue = maximum.doubleValue();
                 if (exclusiveMaximum ? value >= maximumDoubleValue : value > maximumDoubleValue) {
-                    return new ValidateResult.MaximumFail(maximum, value, exclusiveMinimum);
+                    return ValidateResult.fail(exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
                 }
             }
         }
@@ -259,13 +259,13 @@ final class NumberSchema extends JSONSchema {
         if (multipleOf != null) {
             if (multipleOfLongValue != Long.MIN_VALUE) {
                 if (value % multipleOfLongValue != 0) {
-                    return new ValidateResult.MultipleOfFail(multipleOf, value);
+                    return ValidateResult.fail("multipleOf not match, expect multipleOf %s, but %s", multipleOf, value);
                 }
             }
 
             BigDecimal decimalValue = BigDecimal.valueOf(value);
             if (decimalValue.divideAndRemainder(multipleOf)[1].abs().compareTo(BigDecimal.ZERO) > 0) {
-                return new ValidateResult.MultipleOfFail(multipleOf, decimalValue);
+                return ValidateResult.fail("multipleOf not match, expect multipleOf %s, but %s", multipleOf, decimalValue);
             }
         }
         return SUCCESS;
