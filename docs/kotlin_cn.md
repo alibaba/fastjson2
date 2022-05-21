@@ -107,7 +107,7 @@ val data = "..." // Any
 val text = text.toJSONString() // String
 ```
 
-序列化为字节数据:
+序列化为字节数组:
 
 ```kotlin
 val data = "..." // Any
@@ -168,4 +168,30 @@ val array = ... // JSONArray
 
 val user = obj.into<HashMap<String, User>>() // HashMap<String, User>
 val users = array.into<ArrayList<User>>() // ArrayList<User>
+```
+
+### 2.5 `URL`、`InputStream`转为实例对象
+
+无泛型实例:
+
+```kotlin
+val url = ... // URL
+val data = url.to<User>()
+```
+
+```kotlin
+val input = ... // InputStream
+val data = input.to<User>()
+```
+
+含泛型实例:
+
+```kotlin
+val url = ... // URL
+val data = url.into<List<User>>()
+```
+
+```kotlin
+val input = ... // InputStream
+val data = input.into<List<User>>()
 ```
