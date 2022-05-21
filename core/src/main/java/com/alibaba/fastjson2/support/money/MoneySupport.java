@@ -4,11 +4,11 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
+import com.alibaba.fastjson2.writer.ObjectWriters;
 
-import javax.money.CurrencyUnit;
-import javax.money.Monetary;
-import javax.money.MonetaryAmountFactory;
-import javax.money.NumberValue;
+import javax.money.*;
+import java.util.Arrays;
 
 public class MoneySupport {
     public static ObjectReader createCurrencyUnitReader() {
@@ -30,7 +30,10 @@ public class MoneySupport {
     }
 
     public static ObjectWriter createMonetaryAmountWriter() {
-        return new MonetaryAmountWriter();
+        return new ObjectWriterAdapter(javax.money.MonetaryAmount.class, Arrays.asList(
+                ObjectWriters.fieldWriter("currency", CurrencyUnit.class, MonetaryAmount::getCurrency),
+                ObjectWriters.fieldWriter("number", NumberValue.class, MonetaryAmount::getNumber)
+        ));
     }
 
     public static ObjectWriter createNumberValueWriter() {
