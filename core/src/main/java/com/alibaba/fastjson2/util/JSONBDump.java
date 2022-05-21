@@ -234,13 +234,6 @@ public class JSONBDump {
                 jsonWriter.writeString(str);
                 return;
             }
-            case BC_STR_GB18030: {
-                int strlen = readLength();
-                String str = new String(bytes, offset, strlen, IOUtils.GB18030);
-                offset += strlen;
-                jsonWriter.writeString(str);
-                return;
-            }
             case BC_SYMBOL: {
                 int symbol;
                 if (isInt()) {
