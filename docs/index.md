@@ -10,7 +10,7 @@
 - 支持`Android` [(2.0.4.android)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.graal/)
 - 支持`Graal Native-Image` [(2.0.4.graal)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.graal/)
 
-![fastjson](docs/logo.jpg "fastjson")
+![fastjson](logo.jpg "fastjson")
 
 相关文档：
 
