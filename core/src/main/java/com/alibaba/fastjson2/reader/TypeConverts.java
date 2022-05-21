@@ -20,6 +20,17 @@ public class TypeConverts {
     public static final Function<Number, Float> NUMBER_TO_FLOAT = o -> o == null ? null : o.floatValue();
     public static final Function<Number, Float> NUMBER_TO_FLOAT_VALUE = o -> o == null ? 0F : o.floatValue();
     public static final Function<BigDecimal, Integer> DECIMAL_TO_INTEGER = o -> o == null ? null : ((BigDecimal) o).intValueExact();
+    public static final Function<Object, String> TO_STRING = new ToString();
+
+    static class ToString implements Function {
+        @Override
+        public Object apply(Object o) {
+            if (o == null) {
+                return null;
+            }
+            return o.toString();
+        }
+    }
 
     static class StringToAny implements Function {
         final Object defaultValue;

@@ -942,6 +942,12 @@ public class JSONArray extends ArrayList<Object> {
         return objectReader.createInstance(this);
     }
 
+    public <T> T to(Class<T> type) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReader<T> objectReader = provider.getObjectReader(type);
+        return objectReader.createInstance(this);
+    }
+
     /**
      * Convert this {@link JSONArray} to the specified Object
      *
@@ -984,13 +990,25 @@ public class JSONArray extends ArrayList<Object> {
         List<T> list = new ArrayList<>(size());
         for (int i = 0; i < this.size(); i++) {
             Object item = this.get(i);
-            T classItem;
 
+            T classItem;
             if (item instanceof JSONObject) {
                 classItem = (T) objectReader.createInstance((Map) item, featuresValue);
             } else if (item instanceof Map) {
                 classItem = (T) objectReader.createInstance((Map) item, featuresValue);
             } else {
+                if (item == null) {
+                    list.add(null);
+                    continue;
+                }
+
+                Function typeConvert = provider.getTypeConvert(item.getClass(), clazz);
+                if (typeConvert != null) {
+                    Object converted = typeConvert.apply(item);
+                    list.add((T) converted);
+                    continue;
+                }
+
                 throw new JSONException(
                         (item == null ? "null" : item.getClass()) + " cannot be converted to " + clazz
                 );

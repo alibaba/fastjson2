@@ -14,7 +14,6 @@ import java.util.*;
 import java.util.function.Function;
 
 public class JSONArray extends JSON implements List {
-    static ObjectWriter<JSONArray> arrayWriter;
     static ObjectReader<JSONArray> arrayReader;
     static ObjectReader<JSONObject> objectReader;
 
@@ -800,7 +799,21 @@ public class JSONArray extends JSON implements List {
             if (item instanceof Map) {
                 classItem = (T) objectReader.createInstance((Map) item, 0L);
             } else {
-                throw new JSONException("TODO");
+                if (item == null) {
+                    list.add(null);
+                    continue;
+                }
+
+                Function typeConvert = provider.getTypeConvert(item.getClass(), clazz);
+                if (typeConvert != null) {
+                    Object converted = typeConvert.apply(item);
+                    list.add((T) converted);
+                    continue;
+                }
+
+                throw new com.alibaba.fastjson2.JSONException(
+                        (item == null ? "null" : item.getClass()) + " cannot be converted to " + clazz
+                );
             }
             list.add(classItem);
         }
@@ -814,7 +827,9 @@ public class JSONArray extends JSON implements List {
     }
 
     public <T> T toJavaObject(Class<T> clazz) {
-        return com.alibaba.fastjson2.JSON.toJavaObject(this, clazz);
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReader<T> objectReader = provider.getObjectReader(clazz);
+        return objectReader.createInstance(this);
     }
 
     @Override

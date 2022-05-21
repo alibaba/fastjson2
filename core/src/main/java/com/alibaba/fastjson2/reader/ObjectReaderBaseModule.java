@@ -136,6 +136,21 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         {
             // cast to char
             provider.registerTypeConvert(Character.class, char.class, o -> o);
+
+            Class[] classes = new Class[] {
+                    Byte.class,
+                    Short.class,
+                    Integer.class,
+                    Long.class,
+                    Number.class,
+                    Float.class,
+                    Double.class,
+                    BigInteger.class,
+                    BigDecimal.class,
+            };
+            for (Class type : classes) {
+                provider.registerTypeConvert(type, String.class, TO_STRING);
+            }
         }
 
         {
