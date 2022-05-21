@@ -142,7 +142,7 @@ class ObjectReaderNoneDefaultConstrutor<T>
         T object = createInstanceNoneDefaultConstructor(args);
         if (setterFieldReaders != null) {
             for (FieldReader fieldReader : setterFieldReaders) {
-                Object fieldValue = valueMap.get(fieldReader.getFieldNameHash());
+                Object fieldValue = args.get(fieldReader.getFieldNameHash());
                 fieldReader.accept(object, fieldValue);
             }
         }
