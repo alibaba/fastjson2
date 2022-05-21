@@ -16,11 +16,11 @@ final class ConstString extends JSONSchema {
     @Override
     public ValidateResult validate(Object value) {
         if (value == null) {
-            return SUCCESS_NULL;
+            return SUCCESS;
         }
 
         if (!this.value.equals(value)) {
-            return new ValidateResult.ConstFail(this.value, value);
+            return ValidateResult.fail("const not match, expect %s, but %s", this.value, value);
         }
 
         return SUCCESS;

@@ -21,7 +21,7 @@ final class ConstLong extends JSONSchema {
     @Override
     public ValidateResult validate(Object value) {
         if (value == null) {
-            return SUCCESS_NULL;
+            return SUCCESS;
         }
 
         if (value instanceof Byte
@@ -33,25 +33,25 @@ final class ConstLong extends JSONSchema {
                 || value instanceof AtomicLong
         ) {
             if (this.value != ((Number) value).longValue()) {
-                return new ValidateResult.ConstFail(this.value, value);
+                return ValidateResult.fail("const not match, expect %s, but %s", this.value, value);
             }
         } else if (value instanceof BigDecimal) {
             BigDecimal decimal = (BigDecimal) value;
             if (decimal.compareTo(BigDecimal.valueOf(this.value)) != 0) {
-                return new ValidateResult.ConstFail(this.value, value);
+                return ValidateResult.fail("const not match, expect %s, but %s", this.value, value);
             }
         } else if (value instanceof Float) {
             float floatValue = ((Float) value).floatValue();
             if (this.value != floatValue) {
-                return new ValidateResult.ConstFail(this.value, value);
+                return ValidateResult.fail("const not match, expect %s, but %s", this.value, value);
             }
         } else if (value instanceof Double) {
             double doubleValue = ((Double) value).doubleValue();
             if (this.value != doubleValue) {
-                return new ValidateResult.ConstFail(this.value, value);
+                return ValidateResult.fail("const not match, expect %s, but %s", this.value, value);
             }
         } else {
-            return new ValidateResult.ConstFail(this.value, value);
+            return ValidateResult.fail("const not match, expect %s, but %s", this.value, value);
         }
 
         return SUCCESS;

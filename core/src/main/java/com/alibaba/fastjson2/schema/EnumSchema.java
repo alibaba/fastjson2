@@ -44,7 +44,7 @@ final class EnumSchema extends JSONSchema {
                 return FAIL_INPUT_NULL;
             }
 
-            return new ValidateResult.TypeNotMatchFail(Type.Enum, value.getClass());
+            return ValidateResult.fail("expect type %s, but %s", Type.Enum, value.getClass());
         }
 
         return SUCCESS;

@@ -663,19 +663,17 @@ public abstract class JSONSchema {
         }
     }
 
-    static final ValidateResult.Success SUCCESS = new ValidateResult.Success();
-    static final ValidateResult.SuccessNull SUCCESS_NULL = new ValidateResult.SuccessNull();
-    static final ValidateResult.SuccessTypeNotMatch SUCCESS_TYPENOT_MATCH = new ValidateResult.SuccessTypeNotMatch();
-    static final ValidateResult.Fail FAIL_INPUT_NULL = new ValidateResult.Fail("input null");
-    static final ValidateResult.Fail FAIL_ANY_OF = new ValidateResult.Fail("anyOf fail");
-    static final ValidateResult.Fail FAIL_ONE_OF = new ValidateResult.Fail("oneOf fail");
-    static final ValidateResult.Fail FAIL_NOT = new ValidateResult.Fail("not fail");
-    static final ValidateResult.Fail FAIL_TYPE_NOT_MATCH = new ValidateResult.Fail("type not match");
-    static final ValidateResult.Fail FAIL_PROPERTY_NAME = new ValidateResult.Fail("propertyName not match");
+    static final ValidateResult SUCCESS = new ValidateResult(true);
+    static final ValidateResult FAIL_INPUT_NULL = ValidateResult.fail("input null");
+    static final ValidateResult FAIL_ANY_OF = ValidateResult.fail("anyOf fail");
+    static final ValidateResult FAIL_ONE_OF = ValidateResult.fail("oneOf fail");
+    static final ValidateResult FAIL_NOT = ValidateResult.fail("not fail");
+    static final ValidateResult FAIL_TYPE_NOT_MATCH = ValidateResult.fail("type not match");
+    static final ValidateResult FAIL_PROPERTY_NAME = ValidateResult.fail("propertyName not match");
 
 
-    final static ValidateResult.Fail CONTAINS_NOT_MATCH = new ValidateResult.Fail("contains not match");
-    final static ValidateResult.Fail UNIQUE_ITEMS_NOT_MATCH = new ValidateResult.Fail("uniqueItems not match");
-    final static ValidateResult.Fail REQUIRED_NOT_MATCH = new ValidateResult.Fail("required");
+    final static ValidateResult CONTAINS_NOT_MATCH = ValidateResult.fail("contains not match");
+    final static ValidateResult UNIQUE_ITEMS_NOT_MATCH = ValidateResult.fail("uniqueItems not match");
+    final static ValidateResult REQUIRED_NOT_MATCH = ValidateResult.fail("required");
 
 }

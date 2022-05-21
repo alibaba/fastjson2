@@ -20,7 +20,7 @@ final class NullSchema extends JSONSchema {
             return SUCCESS;
         }
 
-        return new ValidateResult.TypeNotMatchFail(Type.Null, value.getClass());
+        return ValidateResult.fail("expect type %s, but %s", Type.Null, value.getClass());
     }
 
     @Override
