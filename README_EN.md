@@ -21,8 +21,8 @@
 - Supports full parsing and partial parsing.
 - Supports Java servers and Android Clients, and has big data applications.
 - Supports Kotlin
-- Supports Android (2.0.3.android)
-- Supports Graal Native-Image (2.0.3.graal)
+- Supports Android (2.0.4.android)
+- Supports Graal Native-Image (2.0.4.graal)
 
 ![fastjson](docs/logo.jpg "fastjson")
 
@@ -45,7 +45,7 @@ Related Documents:
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.3</version>
+    <version>2.0.4</version>
 </dependency>
 ```
 
@@ -53,7 +53,7 @@ Related Documents:
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.3'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.4'
 }
 ```
 
@@ -71,7 +71,7 @@ If you are using `fastjson 1.2.x`, you can use the compatibility package. The co
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.3</version>
+    <version>2.0.4</version>
 </dependency>
 ```
 
@@ -79,7 +79,7 @@ If you are using `fastjson 1.2.x`, you can use the compatibility package. The co
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba:fastjson:2.0.3'
+    implementation 'com.alibaba:fastjson:2.0.4'
 }
 ```
 
@@ -93,7 +93,7 @@ If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.3</version>
+    <version>2.0.4</version>
 </dependency>
 ```
 
@@ -101,7 +101,7 @@ If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.3")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.4")
 }
 ```
 

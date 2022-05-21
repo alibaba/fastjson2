@@ -21,8 +21,8 @@
 - 支持全量解析和部分解析。
 - 支持`Java`服务端、客户端`Android`、大数据场景。
 - 支持`Kotlin`
-- 支持`Android` (2.0.3.android)
-- 支持`Graal Native-Image` (2.0.3.graal)
+- 支持`Android` (2.0.4.android)
+- 支持`Graal Native-Image` (2.0.4.graal)
 
 ![fastjson](docs/logo.jpg "fastjson")
 
@@ -45,7 +45,7 @@
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.3</version>
+    <version>2.0.4</version>
 </dependency>
 ```
 
@@ -53,7 +53,7 @@
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.3'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.4'
 }
 ```
 
@@ -71,7 +71,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.3</version>
+    <version>2.0.4</version>
 </dependency>
 ```
 
@@ -79,7 +79,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba:fastjson:2.0.3'
+    implementation 'com.alibaba:fastjson:2.0.4'
 }
 ```
 
@@ -93,7 +93,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.3</version>
+    <version>2.0.4</version>
 </dependency>
 ```
 
@@ -101,7 +101,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.3")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.4")
 }
 ```
 
