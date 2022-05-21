@@ -106,7 +106,7 @@ dependencies {
 }
 ```
 
-# 2 简单使用
+# 2. 简单使用
 
 在`fastjson v2`中，`package`和`1.x`不一样，是`com.alibaba.fastjson2`。如果你之前用的是`fastjson1`，大多数情况直接更包名就即可。
 
@@ -229,8 +229,8 @@ User user = obj.getObject("key", User.class);
 val array = ... // JSONArray
 val obj = ... // JSONObject
 
-val user = array.getObject<User>(0)
-val user = obj.getObject<User>("key")
+val user = array.to<User>(0)
+val user = obj.to<User>("key")
 ```
 
 #### 2.5.3 转为`JavaBean`
@@ -251,7 +251,7 @@ List<User> users = array.toJavaList(User.class);
 val array = ... // JSONArray
 val obj = ... // JSONObject
 
-val user = obj.toObject<User>() // User
+val user = obj.to<User>() // User
 val users = array.toList<User>() // List<User>
 ```
 
