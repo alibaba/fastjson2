@@ -2,7 +2,19 @@
 
 在fastjson 2.0.4版本之后，提供了JSONSchema的支持，具体JSON Schema的规范，参考 https://json-schema.org/
 
-## 1. 通过构造JSONSchema对象直接校验
+## 1. FASTJSON2 JSONSchema的性能
+一贯如此，FASTJSON2 JSONSchema性能非常出色，远超竞品。如下的测试表名，fastjson2性能是networknt的9倍，everit的6倍。
+
+```java
+Benchmark                       Mode  Cnt   Score   Error   Units
+JSONSchemaBenchmark.everit     thrpt    5   3.182 ± 0.018  ops/ms
+JSONSchemaBenchmark.fastjson2  thrpt    5  21.408 ± 0.147  ops/ms
+JSONSchemaBenchmark.networknt  thrpt    5   2.337 ± 0.007  ops/ms
+```
+
+* 测试代码 https://github.com/alibaba/fastjson2/blob/main/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/jsonschema/JSONSchemaBenchmark.java
+
+## 2. 通过构造JSONSchema对象直接校验
 
 ```java
 @Test
