@@ -21,8 +21,9 @@
 - Supports full parsing and partial parsing.
 - Supports Java servers and Android Clients, and has big data applications.
 - Supports Kotlin
-- Supports Android (2.0.4.android)
-- Supports Graal Native-Image (2.0.4.graal)
+- Supports Android  [(2.0.4.android)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.graal/)
+- Supports `Graal Native-Image` [(2.0.4.graal)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.graal/)
+- Supports `JSON Schema` https://github.com/alibaba/fastjson2/wiki/json_schema_cn
 
 ![fastjson](docs/logo.jpg "fastjson")
 
