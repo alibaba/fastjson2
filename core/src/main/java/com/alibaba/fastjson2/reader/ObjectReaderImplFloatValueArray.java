@@ -73,7 +73,7 @@ class ObjectReaderImplFloatValueArray extends ObjectReaderBaseModule.PrimitiveIm
             } else {
                 Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), float.class);
                 if (typeConvert == null) {
-                    throw new JSONException("can not cast to int " + item.getClass());
+                    throw new JSONException("can not cast to float " + item.getClass());
                 }
                 value = (Float) typeConvert.apply(item);
             }

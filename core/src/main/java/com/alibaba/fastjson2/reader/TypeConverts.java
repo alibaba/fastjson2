@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 public class TypeConverts {
@@ -21,6 +23,183 @@ public class TypeConverts {
     public static final Function<Number, Float> NUMBER_TO_FLOAT_VALUE = o -> o == null ? 0F : o.floatValue();
     public static final Function<BigDecimal, Integer> DECIMAL_TO_INTEGER = o -> o == null ? null : ((BigDecimal) o).intValueExact();
     public static final Function<Object, String> TO_STRING = new ToString();
+    public static final Function<Object, BigDecimal> TO_DECIMAL = new ToBigDecimal();
+    public static final Function<Object, BigInteger> TO_BIGINT = new ToBigInteger();
+
+    static class ToNumber implements Function {
+        final Number defaultValue;
+
+        ToNumber(Number defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            if (o == null) {
+                return defaultValue;
+            }
+
+            if (o instanceof Boolean) {
+                return ((Boolean) o).booleanValue() ? 1 : 0;
+            }
+
+            if (o instanceof Number) {
+                return o;
+            }
+
+            throw new JSONException("can not cast to Number " + o.getClass());
+        }
+    }
+
+    static class ToByte implements Function {
+        final Byte defaultValue;
+
+        ToByte(Byte defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            if (o == null) {
+                return defaultValue;
+            }
+
+            if (o instanceof Boolean) {
+                return ((Boolean) o).booleanValue() ? (byte) 1 : (byte) 0;
+            }
+
+            if (o instanceof Number) {
+                return ((Number) o).byteValue();
+            }
+
+            throw new JSONException("can not cast to BigInteger " + o.getClass());
+        }
+    }
+
+    static class ToShort implements Function {
+        final Short defaultValue;
+
+        ToShort(Short defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            if (o == null) {
+                return defaultValue;
+            }
+
+            if (o instanceof Boolean) {
+                return ((Boolean) o).booleanValue() ? (short) 1 : (short) 0;
+            }
+
+            if (o instanceof Number) {
+                return ((Number) o).shortValue();
+            }
+
+            throw new JSONException("can not cast to Short " + o.getClass());
+        }
+    }
+
+    static class ToInteger implements Function {
+        final Integer defaultValue;
+
+        ToInteger(Integer defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            if (o == null) {
+                return defaultValue;
+            }
+
+            if (o instanceof Boolean) {
+                return ((Boolean) o).booleanValue() ? 1 : 0;
+            }
+
+            if (o instanceof Number) {
+                return ((Number) o).intValue();
+            }
+
+            throw new JSONException("can not cast to Integer " + o.getClass());
+        }
+    }
+
+    static class ToLong implements Function {
+        final Long defaultValue;
+
+        ToLong(Long defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            if (o == null) {
+                return defaultValue;
+            }
+
+            if (o instanceof Boolean) {
+                return ((Boolean) o).booleanValue() ? 1L : 0L;
+            }
+
+            if (o instanceof Number) {
+                return ((Number) o).longValue();
+            }
+
+            throw new JSONException("can not cast to Long " + o.getClass());
+        }
+    }
+
+    static class ToFloat implements Function {
+        final Float defaultValue;
+
+        ToFloat(Float defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            if (o == null) {
+                return defaultValue;
+            }
+
+            if (o instanceof Boolean) {
+                return ((Boolean) o).booleanValue() ? 1F : 0F;
+            }
+
+            if (o instanceof Number) {
+                return ((Number) o).floatValue();
+            }
+
+            throw new JSONException("can not cast to Float " + o.getClass());
+        }
+    }
+
+    static class ToDouble implements Function {
+        final Double defaultValue;
+
+        ToDouble(Double defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            if (o == null) {
+                return defaultValue;
+            }
+
+            if (o instanceof Boolean) {
+                return ((Boolean) o).booleanValue() ? 1D : 0D;
+            }
+
+            if (o instanceof Number) {
+                return ((Number) o).doubleValue();
+            }
+
+            throw new JSONException("can not cast to Float " + o.getClass());
+        }
+    }
 
     static class ToString implements Function {
         @Override
@@ -29,6 +208,70 @@ public class TypeConverts {
                 return null;
             }
             return o.toString();
+        }
+    }
+
+    static class ToBigInteger implements Function {
+        @Override
+        public Object apply(Object o) {
+            if (o == null) {
+                return null;
+            }
+
+            if (o instanceof Boolean) {
+                return ((Boolean) o).booleanValue() ? BigInteger.ONE : BigInteger.ZERO;
+            }
+
+            if (o instanceof Byte
+                    || o instanceof Short
+                    || o instanceof Integer
+                    || o instanceof Long
+                    || o instanceof AtomicInteger
+                    || o instanceof AtomicLong
+                    || o instanceof Float
+                    || o instanceof Double
+            ) {
+                return BigInteger.valueOf(((Number) o).longValue());
+            }
+
+            if (o instanceof BigDecimal) {
+                return ((BigDecimal) o).toBigInteger();
+            }
+
+            throw new JSONException("can not cast to BigInteger " + o.getClass());
+        }
+    }
+
+    static class ToBigDecimal implements Function {
+        @Override
+        public Object apply(Object o) {
+            if (o == null) {
+                return null;
+            }
+
+            if (o instanceof Boolean) {
+                return ((Boolean) o).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
+            }
+
+            if (o instanceof Byte
+                    || o instanceof Short
+                    || o instanceof Integer
+                    || o instanceof Long
+                    || o instanceof AtomicInteger
+                    || o instanceof AtomicLong
+            ) {
+                return BigDecimal.valueOf(((Number) o).longValue());
+            }
+
+            if (o instanceof Float || o instanceof Double) {
+                return BigDecimal.valueOf(((Number) o).doubleValue());
+            }
+
+            if (o instanceof BigInteger) {
+                return new BigDecimal((BigInteger) o);
+            }
+
+            throw new JSONException("can not cast to BigDecimal " + o.getClass());
         }
     }
 
