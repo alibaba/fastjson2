@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2_vo.Integer1;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
