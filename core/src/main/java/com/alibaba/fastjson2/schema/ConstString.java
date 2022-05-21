@@ -20,7 +20,7 @@ final class ConstString extends JSONSchema {
         }
 
         if (!this.value.equals(value)) {
-            return ValidateResult.fail("const not match, expect %s, but %s", this.value, value);
+            return new ValidateResult(false, "const not match, expect %s, but %s", this.value, value);
         }
 
         return SUCCESS;

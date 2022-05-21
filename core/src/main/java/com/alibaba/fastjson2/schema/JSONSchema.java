@@ -663,17 +663,17 @@ public abstract class JSONSchema {
         }
     }
 
-    static final ValidateResult SUCCESS = new ValidateResult(true);
-    static final ValidateResult FAIL_INPUT_NULL = ValidateResult.fail("input null");
-    static final ValidateResult FAIL_ANY_OF = ValidateResult.fail("anyOf fail");
-    static final ValidateResult FAIL_ONE_OF = ValidateResult.fail("oneOf fail");
-    static final ValidateResult FAIL_NOT = ValidateResult.fail("not fail");
-    static final ValidateResult FAIL_TYPE_NOT_MATCH = ValidateResult.fail("type not match");
-    static final ValidateResult FAIL_PROPERTY_NAME = ValidateResult.fail("propertyName not match");
+    static final ValidateResult SUCCESS = new ValidateResult(true, "success");
+    static final ValidateResult FAIL_INPUT_NULL = new ValidateResult(false, "input null");
+    static final ValidateResult FAIL_ANY_OF = new ValidateResult(false, "anyOf fail");
+    static final ValidateResult FAIL_ONE_OF = new ValidateResult(false, "oneOf fail");
+    static final ValidateResult FAIL_NOT = new ValidateResult(false, "not fail");
+    static final ValidateResult FAIL_TYPE_NOT_MATCH = new ValidateResult(false, "type not match");
+    static final ValidateResult FAIL_PROPERTY_NAME = new ValidateResult(false, "propertyName not match");
 
 
-    final static ValidateResult CONTAINS_NOT_MATCH = ValidateResult.fail("contains not match");
-    final static ValidateResult UNIQUE_ITEMS_NOT_MATCH = ValidateResult.fail("uniqueItems not match");
-    final static ValidateResult REQUIRED_NOT_MATCH = ValidateResult.fail("required");
+    final static ValidateResult CONTAINS_NOT_MATCH = new ValidateResult(false, "contains not match");
+    final static ValidateResult UNIQUE_ITEMS_NOT_MATCH = new ValidateResult(false, "uniqueItems not match");
+    final static ValidateResult REQUIRED_NOT_MATCH = new ValidateResult(false, "required");
 
 }

@@ -154,12 +154,12 @@ public final class ArraySchema extends JSONSchema {
             final int size = array.length;
 
             if (minLength >= 0 && size < minLength) {
-                return ValidateResult.fail("minLength not match, expect >= %s, but %s", minLength, size);
+                return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
             }
 
             if (maxLength >= 0) {
                 if (maxLength >= 0 && size > maxLength) {
-                    return ValidateResult.fail("maxLength not match, expect <= %s, but %s", maxLength, size);
+                    return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
                 }
             }
 
@@ -210,16 +210,16 @@ public final class ArraySchema extends JSONSchema {
             }
 
             if (minContains >= 0 && containsCount < minContains) {
-                return ValidateResult.fail("minContains not match, expect %s, but %s", minContains, containsCount);
+                return new ValidateResult(false, "minContains not match, expect %s, but %s", minContains, containsCount);
             }
 
             if (maxContains >= 0 && containsCount > maxContains) {
-                return ValidateResult.fail("maxContains not match, expect %s, but %s", maxContains, containsCount);
+                return new ValidateResult(false, "maxContains not match, expect %s, but %s", maxContains, containsCount);
             }
 
             if (!additionalItems) {
                 if (size > prefixItems.length) {
-                    return ValidateResult.fail("additional items not match, max size %s, but %s", prefixItems.length, size);
+                    return new ValidateResult(false, "additional items not match, max size %s, but %s", prefixItems.length, size);
                 }
             }
 
@@ -251,12 +251,12 @@ public final class ArraySchema extends JSONSchema {
             final int size = Array.getLength(value);
 
             if (minLength >= 0 && size < minLength) {
-                return ValidateResult.fail("minLength not match, expect >= %s, but %s", minLength, size);
+                return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
             }
 
             if (maxLength >= 0) {
                 if (maxLength >= 0 && size > maxLength) {
-                    return ValidateResult.fail("maxLength not match, expect <= %s, but %s", maxLength, size);
+                    return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
                 }
             }
 
@@ -306,16 +306,16 @@ public final class ArraySchema extends JSONSchema {
             }
 
             if (minContains >= 0 && containsCount < minContains) {
-                return ValidateResult.fail("minContains not match, expect %s, but %s", minContains, containsCount);
+                return new ValidateResult(false, "minContains not match, expect %s, but %s", minContains, containsCount);
             }
 
             if (maxContains >= 0 && containsCount > maxContains) {
-                return ValidateResult.fail("maxContains not match, expect %s, but %s", maxContains, containsCount);
+                return new ValidateResult(false, "maxContains not match, expect %s, but %s", maxContains, containsCount);
             }
 
             if (!additionalItems) {
                 if (size > prefixItems.length) {
-                    return ValidateResult.fail("additional items not match, max size %s, but %s", prefixItems.length, size);
+                    return new ValidateResult(false, "additional items not match, max size %s, but %s", prefixItems.length, size);
                 }
             }
 
@@ -346,18 +346,18 @@ public final class ArraySchema extends JSONSchema {
         if (value instanceof Collection) {
             int size = ((Collection<?>) value).size();
             if (minLength >= 0 && size < minLength) {
-                return ValidateResult.fail("minLength not match, expect >= %s, but %s", minLength, size);
+                return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
             }
 
             if (maxLength >= 0) {
                 if (maxLength >= 0 && size > maxLength) {
-                    return ValidateResult.fail("maxLength not match, expect <= %s, but %s", maxLength, size);
+                    return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
                 }
             }
 
             if (!additionalItems) {
                 if (size > prefixItems.length) {
-                    return ValidateResult.fail("additional items not match, max size %s, but %s", prefixItems.length, size);
+                    return new ValidateResult(false, "additional items not match, max size %s, but %s", prefixItems.length, size);
                 }
             }
 
@@ -411,7 +411,7 @@ public final class ArraySchema extends JSONSchema {
 
             if (this.contains != null) {
                 if (minContains >= 0 && containsCount < minContains) {
-                    return ValidateResult.fail("minContains not match, expect %s, but %s",  minContains, containsCount);
+                    return new ValidateResult(false, "minContains not match, expect %s, but %s",  minContains, containsCount);
                 } else {
                     if (containsCount == 0 && minContains != 0) {
                         return CONTAINS_NOT_MATCH;
@@ -419,7 +419,7 @@ public final class ArraySchema extends JSONSchema {
                 }
 
                 if (maxContains >= 0 && containsCount > maxContains) {
-                    return ValidateResult.fail("maxContains not match, expect %s, but %s", maxContains, containsCount);
+                    return new ValidateResult(false, "maxContains not match, expect %s, but %s", maxContains, containsCount);
                 }
             }
 
