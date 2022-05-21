@@ -27,8 +27,7 @@ String jsonString = JSON.toJSONString(bean, JSONWriter.Feature.WriteClassName, J
 
 ### 3.2 反序列化打开AutoType功能支持自动类型
 ```java
-Bean bean = (Bean) JSON.parseObject(jsonString, Object.class, JSONReader.Feature.SupportAutoType);pa
-
+Bean bean = (Bean) JSON.parseObject(jsonString, Object.class, JSONReader.Feature.SupportAutoType);
 ```
 
 ## 4. 配置safeMode

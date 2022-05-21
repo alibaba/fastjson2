@@ -140,7 +140,7 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into {@link JSONObject}
      *
-     * @param in    the JSON {@link InputStream} to be parsed
+     * @param in the JSON {@link InputStream} to be parsed
      * @return JSONObject
      */
     static JSONObject parseObject(InputStream in, Charset charset) {
@@ -157,7 +157,7 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into {@link JSONObject}
      *
-     * @param url      the JSON {@link URL} to be parsed
+     * @param url the JSON {@link URL} to be parsed
      * @return JSONObject
      */
     static JSONObject parseObject(URL url) {
@@ -165,7 +165,7 @@ public interface JSON {
             return null;
         }
 
-        try (InputStream is = url.openStream()){
+        try (InputStream is = url.openStream()) {
             return parseObject(is, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new JSONException("parseObject error", e);
@@ -196,8 +196,8 @@ public interface JSON {
      * Parse UTF8 encoded JSON byte array into {@link JSONObject}
      *
      * @param bytes    UTF8 encoded JSON byte array to parse
-     * @param offset  the index of the first byte to parse
-     * @param length  the number of bytes to parse
+     * @param offset   the index of the first byte to parse
+     * @param length   the number of bytes to parse
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
@@ -218,9 +218,9 @@ public interface JSON {
      * Parse UTF8 encoded JSON byte array into {@link JSONObject}
      *
      * @param bytes    UTF8 encoded JSON byte array to parse
-     * @param offset  the index of the first byte to parse
-     * @param length  the number of bytes to parse
-     * @param charset specify {@link Charset} to parse
+     * @param offset   the index of the first byte to parse
+     * @param length   the number of bytes to parse
+     * @param charset  specify {@link Charset} to parse
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
@@ -262,9 +262,9 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into Java Object
      *
-     * @param text  the JSON {@link String} to be parsed
-     * @param clazz specify the Class to be converted
-     * @param filter specify filter to be enabled
+     * @param text     the JSON {@link String} to be parsed
+     * @param clazz    specify the Class to be converted
+     * @param filter   specify filter to be enabled
      * @param features features to be enabled in parsing
      * @return Class
      */
@@ -313,7 +313,7 @@ public interface JSON {
      * @param typeReference specify the {@link TypeReference} to be converted
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static <T> T parseObject(String text, TypeReference typeReference, JSONReader.Feature ... features) {
+    static <T> T parseObject(String text, TypeReference typeReference, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
         }
@@ -536,7 +536,7 @@ public interface JSON {
             return null;
         }
 
-        try (InputStream is = url.openStream()){
+        try (InputStream is = url.openStream()) {
             return parseObject(is, type, features);
         } catch (IOException e) {
             throw new JSONException("parseObject error", e);
@@ -557,7 +557,7 @@ public interface JSON {
             return null;
         }
 
-        try (InputStream is = url.openStream()){
+        try (InputStream is = url.openStream()) {
             JSONObject object = parseObject(is, features);
             if (object == null) {
                 return null;
@@ -703,7 +703,7 @@ public interface JSON {
                         }
 
                         consumer.accept(
-                            objectReader.readObject(jsonReader)
+                                objectReader.readObject(jsonReader)
                         );
                         start = end + 1;
                     }
@@ -757,7 +757,7 @@ public interface JSON {
                         }
 
                         consumer.accept(
-                            objectReader.readObject(jsonReader)
+                                objectReader.readObject(jsonReader)
                         );
                         start = end + 1;
                     }
@@ -812,7 +812,7 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONArray}
      *
-     * @param url     the JSON {@link URL} to be parsed
+     * @param url      the JSON {@link URL} to be parsed
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -821,8 +821,8 @@ public interface JSON {
             return null;
         }
 
-        try (InputStream is = url.openStream()){
-           return parseArray(is, features);
+        try (InputStream is = url.openStream()) {
+            return parseArray(is, features);
         } catch (IOException e) {
             throw new JSONException("parseArray error", e);
         }
@@ -831,7 +831,7 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONArray}
      *
-     * @param in     the JSON {@link InputStream} to be parsed
+     * @param in       the JSON {@link InputStream} to be parsed
      * @param features features to be enabled in parsing
      */
     static JSONArray parseArray(InputStream in, JSONReader.Feature... features) {
@@ -845,8 +845,8 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link List}
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param type specify the {@link Type} to be converted
+     * @param text     the JSON {@link String} to be parsed
+     * @param type     specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
     static <T> List<T> parseArray(String text, Type type, JSONReader.Feature... features) {
@@ -864,8 +864,8 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link List}
      *
-     * @param text  the JSON {@link String} to be parsed
-     * @param types specify some {@link Type}s to be converted
+     * @param text     the JSON {@link String} to be parsed
+     * @param types    specify some {@link Type}s to be converted
      * @param features features to be enabled in parsing
      */
     static <T> List<T> parseArray(String text, Type[] types, JSONReader.Feature... features) {
@@ -880,7 +880,7 @@ public interface JSON {
             reader.startArray();
             for (Type itemType : types) {
                 array.add(
-                    reader.read(itemType)
+                        reader.read(itemType)
                 );
             }
             reader.endArray();
@@ -943,7 +943,7 @@ public interface JSON {
         JSONWriterUTF16 jsonWriter = JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF16(writeContext);
 
         try (JSONWriter writer = pretty ?
-            new JSONWriterPretty(jsonWriter) : jsonWriter) {
+                new JSONWriterPretty(jsonWriter) : jsonWriter) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -1484,10 +1484,22 @@ public interface JSON {
         return JSONFactory.getDefaultObjectReaderProvider().register(type, objectReader);
     }
 
+    /**
+     * Register an {@link ObjectReaderModule} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     *
+     * @see JSONFactory#getDefaultObjectReaderProvider()
+     * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(ObjectReaderModule)
+     */
     static boolean register(ObjectReaderModule objectReaderModule) {
         return JSONFactory.getDefaultObjectReaderProvider().register(objectReaderModule);
     }
 
+    /**
+     * Register an {@link ObjectWriterModule} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     *
+     * @see JSONFactory#getDefaultObjectWriterProvider()
+     * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(ObjectWriterModule)
+     */
     static boolean register(ObjectWriterModule objectWriterModule) {
         return JSONFactory.getDefaultObjectWriterProvider().register(objectWriterModule);
     }
@@ -1495,11 +1507,11 @@ public interface JSON {
     /**
      * Register an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
      *
-     * @see JSONFactory#getDefaultObjectReaderProvider()
+     * @see JSONFactory#getDefaultObjectWriterProvider()
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
      * @since 2.0.2
      */
     static boolean register(Type type, ObjectWriter<?> objectWriter) {
-        return JSONFactory.defaultObjectWriterProvider.register(type, objectWriter);
+        return JSONFactory.getDefaultObjectWriterProvider().register(type, objectWriter);
     }
 }
