@@ -68,7 +68,7 @@ public static class VO {
 ```
 
 ### 1.5 配置序列化Features
-可以通过JSONField.serializeFeatures来指定序列化的Feature。更多配置Features参考 https://github.com/alibaba/fastjson2/wiki/Features_cn
+可以通过JSONField.serializeFeatures来指定序列化的Feature。更多配置Features参考 [https://alibaba.github.io/fastjson2/features_cn](https://alibaba.github.io/fastjson2/features_cn)
 ```java
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter.Feature;
@@ -113,4 +113,4 @@ public static class Bean {
 
 # 3. 基于mixin机制注入Annotation
 当你需要定制化序列化一些LIB里面的类，你无法修改这些类的代码，你可以使用FASTJSON2的Minxin功能注入Annotation。
-具体使用介绍参考这里： https://github.com/alibaba/fastjson2/wiki/mixin_cn
+具体使用介绍参考这里： [https://alibaba.github.io/fastjson2/mixin_cn](https://alibaba.github.io/fastjson2/mixin_cn)
