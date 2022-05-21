@@ -51,6 +51,7 @@ class Model {
 | ErrorOnEnumNotMatch | 默认Enum的name不匹配时会忽略，打开后不匹配会抛异常 |
 
 # 5. JSONWrier.Feature介绍
+
 |  JSONWrier.Feature |  介绍 |
 | --- | --- |
 |  FieldBased |  基于字段反序列化，如果不配置，会默认基于public的field和getter方法序列化。配置后，会基于非static的field（包括private）做反序列化。|
