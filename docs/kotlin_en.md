@@ -195,3 +195,17 @@ val data = url.into<List<User>>()
 val input = ... // InputStream
 val data = input.into<List<User>>()
 ```
+
+# 3. Advanced usage
+
+### 3.1 Use `JSONPath`
+
+#### 3.1.1 Use `JSONPath` to read specified data
+
+```kotlin
+val text = "..."
+val path = "$.id".toPath() // JSONPath
+
+val parser = JSONReader.of(text)
+val result = path.extract(parser)
+```
