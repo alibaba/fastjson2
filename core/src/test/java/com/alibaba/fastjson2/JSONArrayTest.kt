@@ -3,17 +3,17 @@ package com.alibaba.fastjson2
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class JSONObjectKtTest {
+class JSONArrayKtTest {
 
     @Test
     fun test_getObject() {
         // JSONObject
-        val data = JSON.parseObject(
-            """{"key":{"id":1,"name":"kraity"}}"""
+        val data = JSON.parseArray(
+            """[{"id":1,"name":"kraity"}]"""
         )
 
         val user = data.getObject(
-            "key", User::class.java
+            0, User::class.java
         )
 
         assertEquals(1, user.id)
