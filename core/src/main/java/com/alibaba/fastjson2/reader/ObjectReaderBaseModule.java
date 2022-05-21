@@ -1194,7 +1194,7 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
 
         if (type == float[].class) {
-            return FloatValueArrayImpl.INSTANCE;
+            return ObjectReaderImplFloatValueArray.INSTANCE;
         }
 
         if (type == double[].class) {
@@ -2092,60 +2092,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             boolean[] array = new boolean[entryCnt];
             for (int i = 0; i < entryCnt; i++) {
                 array[i] = jsonReader.readBoolValue();
-            }
-            return array;
-        }
-    }
-
-    static class FloatValueArrayImpl extends PrimitiveImpl {
-        static final FloatValueArrayImpl INSTANCE = new FloatValueArrayImpl();
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (jsonReader.nextIfMatch('[')) {
-
-                float[] values = new float[16];
-                int size = 0;
-                for (; ; ) {
-                    if (jsonReader.nextIfMatch(']')) {
-                        break;
-                    }
-
-                    int minCapacity = size + 1;
-                    if (minCapacity - values.length > 0) {
-                        int oldCapacity = values.length;
-                        int newCapacity = oldCapacity + (oldCapacity >> 1);
-                        if (newCapacity - minCapacity < 0) {
-                            newCapacity = minCapacity;
-                        }
-
-                        values = Arrays.copyOf(values, newCapacity);
-                    }
-
-                    values[size++] = jsonReader.readFloatValue();
-                }
-                jsonReader.nextIfMatch(',');
-
-                return Arrays.copyOf(values, size);
-            }
-
-
-            throw new JSONException("TODO");
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt == -1) {
-                return null;
-            }
-            float[] array = new float[entryCnt];
-            for (int i = 0; i < entryCnt; i++) {
-                array[i] = jsonReader.readFloatValue();
             }
             return array;
         }
