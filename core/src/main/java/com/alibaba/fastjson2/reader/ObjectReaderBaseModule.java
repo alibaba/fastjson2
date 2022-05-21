@@ -49,108 +49,96 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
 
     @Override
     public void init(ObjectReaderProvider provider) {
-        {
-            // cast to BigDecimal
-            provider.registerTypeConvert(Byte.class, BigDecimal.class, NUMBER_TO_DECIMAL);
-            provider.registerTypeConvert(Short.class, BigDecimal.class, NUMBER_TO_DECIMAL);
-            provider.registerTypeConvert(Integer.class, BigDecimal.class, NUMBER_TO_DECIMAL);
-            provider.registerTypeConvert(Long.class, BigDecimal.class, NUMBER_TO_DECIMAL);
+        provider.registerTypeConvert(Character.class, char.class, o -> o);
+
+        Class[] numberTypes = new Class[]{
+                Boolean.class,
+                Byte.class,
+                Short.class,
+                Integer.class,
+                Long.class,
+                Number.class,
+                Float.class,
+                Double.class,
+                BigInteger.class,
+                BigDecimal.class,
+                AtomicInteger.class,
+                AtomicLong.class,
+        };
+
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, String.class, TO_STRING);
+        }
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, BigDecimal.class, TO_DECIMAL);
+        }
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, BigInteger.class, TO_BIGINT);
         }
 
-        {
-            // cast to Integer
-            provider.registerTypeConvert(Byte.class, Integer.class, NUMBER_TO_INTEGER);
-            provider.registerTypeConvert(Short.class, Integer.class, NUMBER_TO_INTEGER);
-            provider.registerTypeConvert(Long.class, Integer.class, NUMBER_TO_INTEGER);
-            provider.registerTypeConvert(BigDecimal.class, Integer.class, DECIMAL_TO_INTEGER);
+        Function<Object, Byte> TO_BYTE = new ToByte(null);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, Byte.class, TO_BYTE);
         }
 
-        {
-            // cast to int
-            provider.registerTypeConvert(Byte.class, int.class, NUMBER_TO_INTEGER_VALUE);
-            provider.registerTypeConvert(Short.class, int.class, NUMBER_TO_INTEGER_VALUE);
-            provider.registerTypeConvert(Integer.class, int.class, NUMBER_TO_INTEGER_VALUE);
-            provider.registerTypeConvert(Long.class, int.class, NUMBER_TO_INTEGER_VALUE);
-            provider.registerTypeConvert(Long.class, int.class, NUMBER_TO_INTEGER_VALUE);
-            provider.registerTypeConvert(Long.class, Integer.class, NUMBER_TO_INTEGER_VALUE);
-            provider.registerTypeConvert(BigDecimal.class, int.class, o -> o == null ? 0 : ((BigDecimal) o).intValueExact());
-            provider.registerTypeConvert(Boolean.class, int.class, o -> o == null ? 0 : ((Boolean) o).booleanValue() ? 1 : 0);
+        Function<Object, Byte> TO_BYTE_VALUE = new ToByte((byte) 0);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, byte.class, TO_BYTE_VALUE);
         }
 
-        {
-            // cast to long
-            provider.registerTypeConvert(Byte.class, long.class, NUMBER_TO_LONG);
-            provider.registerTypeConvert(Short.class, long.class, NUMBER_TO_LONG);
-            provider.registerTypeConvert(Integer.class, long.class, NUMBER_TO_LONG);
-            provider.registerTypeConvert(Long.class, long.class, NUMBER_TO_LONG);
-            provider.registerTypeConvert(Integer.class, Long.class, NUMBER_TO_LONG);
-            provider.registerTypeConvert(BigDecimal.class, long.class, o -> o == null ? 0 : ((BigDecimal) o).longValue());
-            provider.registerTypeConvert(Boolean.class, long.class, o -> o == null ? 0 : ((Boolean) o).booleanValue() ? 1L : 0L);
+        Function<Object, Short> TO_SHORT = new ToShort(null);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, Short.class, TO_SHORT);
         }
 
-        {
-            provider.registerTypeConvert(float.class, Float.class, NUMBER_TO_FLOAT);
-            provider.registerTypeConvert(Byte.class, Float.class, NUMBER_TO_FLOAT);
-            provider.registerTypeConvert(Short.class, Float.class, NUMBER_TO_FLOAT);
-            provider.registerTypeConvert(Integer.class, Float.class, NUMBER_TO_FLOAT);
-            provider.registerTypeConvert(Long.class, Float.class, NUMBER_TO_FLOAT);
-            provider.registerTypeConvert(Float.class, Float.class, NUMBER_TO_FLOAT);
-            provider.registerTypeConvert(Double.class, Float.class, NUMBER_TO_FLOAT);
+        Function<Object, Short> TO_SHORT_VALUE = new ToShort((short) 0);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, short.class, TO_SHORT_VALUE);
         }
 
-        {
-            provider.registerTypeConvert(Byte.class, float.class, NUMBER_TO_FLOAT_VALUE);
-            provider.registerTypeConvert(Short.class, float.class, NUMBER_TO_FLOAT_VALUE);
-            provider.registerTypeConvert(Integer.class, float.class, NUMBER_TO_FLOAT_VALUE);
-            provider.registerTypeConvert(Long.class, float.class, NUMBER_TO_FLOAT_VALUE);
-            provider.registerTypeConvert(Float.class, float.class, NUMBER_TO_FLOAT_VALUE);
-            provider.registerTypeConvert(Double.class, float.class, NUMBER_TO_FLOAT_VALUE);
+        Function<Object, Integer> TO_INTEGER = new ToInteger(null);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, Integer.class, TO_INTEGER);
         }
 
-        {
-            provider.registerTypeConvert(double.class, Double.class, NUMBER_TO_DOUBLE);
-            provider.registerTypeConvert(Byte.class, Double.class, NUMBER_TO_DOUBLE);
-            provider.registerTypeConvert(Short.class, Double.class, NUMBER_TO_DOUBLE);
-            provider.registerTypeConvert(Integer.class, Double.class, NUMBER_TO_DOUBLE);
-            provider.registerTypeConvert(Long.class, Double.class, NUMBER_TO_DOUBLE);
-            provider.registerTypeConvert(Float.class, Double.class, NUMBER_TO_DOUBLE);
-            provider.registerTypeConvert(Double.class, Double.class, NUMBER_TO_DOUBLE);
+        Function<Object, Integer> TO_INT = new ToInteger(0);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, int.class, TO_INT);
         }
 
-        {
-            provider.registerTypeConvert(Byte.class, double.class, NUMBER_TO_DOUBLE_VALUE);
-            provider.registerTypeConvert(Short.class, double.class, NUMBER_TO_DOUBLE_VALUE);
-            provider.registerTypeConvert(Integer.class, double.class, NUMBER_TO_DOUBLE_VALUE);
-            provider.registerTypeConvert(Long.class, double.class, NUMBER_TO_DOUBLE_VALUE);
-            provider.registerTypeConvert(Float.class, double.class, NUMBER_TO_DOUBLE_VALUE);
-            provider.registerTypeConvert(Double.class, double.class, NUMBER_TO_DOUBLE_VALUE);
+        Function<Object, Long> TO_LONG = new ToLong(null);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, Long.class, TO_LONG);
         }
 
-        {
-            // cast to BigInteger
-            provider.registerTypeConvert(Long.class, BigInteger.class, o -> o == null ? null : BigInteger.valueOf(((Long) o).longValue()));
-            provider.registerTypeConvert(Integer.class, BigInteger.class, o -> o == null ? null : BigInteger.valueOf(((Integer) o).intValue()));
+        Function<Object, Long> TO_LONG_VALUE = new ToLong(0L);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, long.class, TO_LONG_VALUE);
         }
 
+        Function<Object, Float> TO_FLOAT = new ToFloat(null);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, Float.class, TO_FLOAT);
+        }
 
-        {
-            // cast to char
-            provider.registerTypeConvert(Character.class, char.class, o -> o);
+        Function<Object, Float> TO_FLOAT_VALUE = new ToFloat(0F);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, float.class, TO_FLOAT_VALUE);
+        }
 
-            Class[] classes = new Class[] {
-                    Byte.class,
-                    Short.class,
-                    Integer.class,
-                    Long.class,
-                    Number.class,
-                    Float.class,
-                    Double.class,
-                    BigInteger.class,
-                    BigDecimal.class,
-            };
-            for (Class type : classes) {
-                provider.registerTypeConvert(type, String.class, TO_STRING);
-            }
+        Function<Object, Double> TO_DOUBLE = new ToDouble(null);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, Double.class, TO_DOUBLE);
+        }
+
+        Function<Object, Double> TO_DOUBLE_VALUE = new ToDouble(0D);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, double.class, TO_DOUBLE_VALUE);
+        }
+
+        Function<Object, Number> TO_NUMBER = new ToNumber(0D);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, Number.class, TO_NUMBER);
         }
 
         {

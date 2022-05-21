@@ -159,6 +159,8 @@ final class ObjectArrayTypedReader extends ObjectReaderBaseModule.PrimitiveImpl 
                 ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(componentType);
                 if (item instanceof Map) {
                     item = objectReader.createInstance((Map) item);
+                } else if (item instanceof Collection) {
+                    item = objectReader.createInstance((Collection) item);
                 } else if (item != null) {
                     throw new JSONException("component type not match, expect " + componentType.getName() + ", but " + item.getClass());
                 }

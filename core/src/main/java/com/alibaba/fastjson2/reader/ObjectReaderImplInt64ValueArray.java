@@ -92,7 +92,7 @@ final class ObjectReaderImplInt64ValueArray extends ObjectReaderBaseModule.Primi
             } else {
                 Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), long.class);
                 if (typeConvert == null) {
-                    throw new JSONException("can not cast to byte " + item.getClass());
+                    throw new JSONException("can not cast to long " + item.getClass());
                 }
                 value = (Long) typeConvert.apply(item);
             }
