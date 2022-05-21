@@ -75,21 +75,21 @@ final class IntegerSchema extends JSONSchema {
             if (minimum != Long.MIN_VALUE) {
                 long longValue = ((Number) value).longValue();
                 if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
-                    return ValidateResult.fail(exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                    return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             }
 
             if (maximum != Long.MIN_VALUE) {
                 long longValue = ((Number) value).longValue();
                 if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
-                    return ValidateResult.fail(exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
+                    return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
                 }
             }
 
             if (multipleOf != 0) {
                 long longValue = ((Number) value).longValue();
                 if (longValue % multipleOf != 0) {
-                    return ValidateResult.fail("multipleOf not match, expect multipleOf %s, but %s", multipleOf, (Number) value);
+                    return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, (Number) value);
                 }
             }
             return SUCCESS;
@@ -102,26 +102,26 @@ final class IntegerSchema extends JSONSchema {
             }
         }
 
-        return typed ? ValidateResult.fail("expect type %s, but %s", Type.Integer, valueClass) : SUCCESS;
+        return typed ? new ValidateResult(false, "expect type %s, but %s", Type.Integer, valueClass) : SUCCESS;
     }
 
     @Override
     public ValidateResult validate(long longValue) {
         if (minimum != Long.MIN_VALUE) {
             if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
-                return ValidateResult.fail(exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, longValue);
+                return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, longValue);
             }
         }
 
         if (maximum != Long.MIN_VALUE) {
             if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
-                return ValidateResult.fail(exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, longValue);
+                return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, longValue);
             }
         }
 
         if (multipleOf != 0) {
             if (longValue % multipleOf != 0) {
-                return ValidateResult.fail("multipleOf not match, expect multipleOf %s, but %s", multipleOf, longValue);
+                return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, longValue);
             }
         }
         return SUCCESS;
@@ -136,19 +136,19 @@ final class IntegerSchema extends JSONSchema {
         long longValue = value.longValue();
         if (minimum != Long.MIN_VALUE) {
             if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
-                return ValidateResult.fail(exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
             }
         }
 
         if (maximum != Long.MIN_VALUE) {
             if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
-                return ValidateResult.fail(exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
+                return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
             }
         }
 
         if (multipleOf != 0) {
             if (longValue % multipleOf != 0) {
-                return ValidateResult.fail("multipleOf not match, expect multipleOf %s, but %s", multipleOf, longValue);
+                return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, longValue);
             }
         }
         return SUCCESS;
@@ -163,19 +163,19 @@ final class IntegerSchema extends JSONSchema {
         long longValue = value.longValue();
         if (minimum != Long.MIN_VALUE) {
             if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
-                return ValidateResult.fail(exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
+                return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
             }
         }
 
         if (maximum != Long.MIN_VALUE) {
             if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
-                return ValidateResult.fail(exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
+                return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
             }
         }
 
         if (multipleOf != 0) {
             if (longValue % multipleOf != 0) {
-                return ValidateResult.fail("multipleOf not match, expect multipleOf %s, but %s", multipleOf, longValue);
+                return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, longValue);
             }
         }
         return SUCCESS;

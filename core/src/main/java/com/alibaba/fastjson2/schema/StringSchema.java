@@ -99,23 +99,23 @@ final class StringSchema extends JSONSchema {
             if (minLength >= 0 || maxLength >= 0) {
                 int count = str.codePointCount(0, str.length());
                 if (minLength >= 0 && count < minLength) {
-                    return ValidateResult.fail("minLength not match, expect >= %s, but %s", minLength, str.length());
+                    return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, str.length());
                 }
 
                 if (maxLength >= 0 && count > maxLength) {
-                    return ValidateResult.fail("maxLength not match, expect <= %s, but %s", maxLength, str.length());
+                    return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, str.length());
                 }
             }
 
             if (pattern != null) {
                 if (!pattern.matcher(str).find()) {
-                    return ValidateResult.fail("pattern not match, expect %, but %s", patternFormat, str);
+                    return new ValidateResult(false, "pattern not match, expect %, but %s", patternFormat, str);
                 }
             }
 
             if (formatValidator != null) {
                 if (!formatValidator.isValid(str)) {
-                    return ValidateResult.fail("format not match, expect %, but %s", format, str);
+                    return new ValidateResult(false, "format not match, expect %, but %s", format, str);
                 }
             }
 
@@ -140,7 +140,7 @@ final class StringSchema extends JSONSchema {
             return SUCCESS;
         }
 
-        return ValidateResult.fail("expect type %s, but %s", Type.String, value.getClass());
+        return new ValidateResult(false, "expect type %s, but %s", Type.String, value.getClass());
     }
 
     @Override

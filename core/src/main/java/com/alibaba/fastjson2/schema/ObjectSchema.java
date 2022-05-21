@@ -270,7 +270,7 @@ public final class ObjectSchema extends JSONSchema {
                     continue;
                 }
 
-                return ValidateResult.fail("add additionalProperties %s", key);
+                return new ValidateResult(false, "add additionalProperties %s", key);
             }
         }
 
@@ -285,13 +285,13 @@ public final class ObjectSchema extends JSONSchema {
 
         if (minProperties >= 0) {
             if (map.size() < minProperties) {
-                return ValidateResult.fail("minProperties not match, expect %s, but %s", minProperties, map.size());
+                return new ValidateResult(false, "minProperties not match, expect %s, but %s", minProperties, map.size());
             }
         }
 
         if (maxProperties >= 0) {
             if (map.size() > maxProperties) {
-                return ValidateResult.fail("maxProperties not match, expect %s, but %s", maxProperties, map.size());
+                return new ValidateResult(false, "maxProperties not match, expect %s, but %s", maxProperties, map.size());
             }
         }
 
@@ -303,7 +303,7 @@ public final class ObjectSchema extends JSONSchema {
                     String[] dependentRequiredProperties = entry.getValue();
                     for (String dependentRequiredProperty : dependentRequiredProperties) {
                         if (!map.containsKey(dependentRequiredProperty)) {
-                            return ValidateResult.fail("property %s, dependentRequired property %s", key, dependentRequiredProperty);
+                            return new ValidateResult(false, "property %s, dependentRequired property %s", key, dependentRequiredProperty);
                         }
                     }
                 }
@@ -383,7 +383,7 @@ public final class ObjectSchema extends JSONSchema {
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
 
         if (!(objectWriter instanceof ObjectWriterAdapter)) {
-            return typed ? ValidateResult.fail("expect type %s, but %s", Type.Object, valueClass) : SUCCESS;
+            return typed ? new ValidateResult(false, "expect type %s, but %s", Type.Object, valueClass) : SUCCESS;
         }
 
         for (int i = 0; i < this.requiredHashCode.length; i++) {
@@ -405,7 +405,7 @@ public final class ObjectSchema extends JSONSchema {
                         fieldName = itemName;
                     }
                 }
-                return ValidateResult.fail("required property %s", fieldName);
+                return new ValidateResult(false, "required property %s", fieldName);
             }
         }
 
@@ -441,13 +441,13 @@ public final class ObjectSchema extends JSONSchema {
 
             if (minProperties >= 0) {
                 if (fieldValueCount < minProperties) {
-                    return ValidateResult.fail("minProperties not match, expect %s, but %s", minProperties, fieldValueCount);
+                    return new ValidateResult(false, "minProperties not match, expect %s, but %s", minProperties, fieldValueCount);
                 }
             }
 
             if (maxProperties >= 0) {
                 if (fieldValueCount > maxProperties) {
-                    return ValidateResult.fail("maxProperties not match, expect %s, but %s", maxProperties, fieldValueCount);
+                    return new ValidateResult(false, "maxProperties not match, expect %s, but %s", maxProperties, fieldValueCount);
                 }
             }
         }
@@ -479,7 +479,7 @@ public final class ObjectSchema extends JSONSchema {
                                 dependentRequiredProperty = dependentRequiredEntry.getValue()[requiredIndex];
                             }
                         }
-                        return ValidateResult.fail("property %s, dependentRequired property %s", property, dependentRequiredProperty);
+                        return new ValidateResult(false, "property %s, dependentRequired property %s", property, dependentRequiredProperty);
                     }
                 }
 

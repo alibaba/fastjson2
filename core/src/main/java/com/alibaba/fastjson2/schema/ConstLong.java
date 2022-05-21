@@ -33,25 +33,25 @@ final class ConstLong extends JSONSchema {
                 || value instanceof AtomicLong
         ) {
             if (this.value != ((Number) value).longValue()) {
-                return ValidateResult.fail("const not match, expect %s, but %s", this.value, value);
+                return new ValidateResult(false, "const not match, expect %s, but %s", this.value, value);
             }
         } else if (value instanceof BigDecimal) {
             BigDecimal decimal = (BigDecimal) value;
             if (decimal.compareTo(BigDecimal.valueOf(this.value)) != 0) {
-                return ValidateResult.fail("const not match, expect %s, but %s", this.value, value);
+                return new ValidateResult(false, "const not match, expect %s, but %s", this.value, value);
             }
         } else if (value instanceof Float) {
             float floatValue = ((Float) value).floatValue();
             if (this.value != floatValue) {
-                return ValidateResult.fail("const not match, expect %s, but %s", this.value, value);
+                return new ValidateResult(false, "const not match, expect %s, but %s", this.value, value);
             }
         } else if (value instanceof Double) {
             double doubleValue = ((Double) value).doubleValue();
             if (this.value != doubleValue) {
-                return ValidateResult.fail("const not match, expect %s, but %s", this.value, value);
+                return new ValidateResult(false, "const not match, expect %s, but %s", this.value, value);
             }
         } else {
-            return ValidateResult.fail("const not match, expect %s, but %s", this.value, value);
+            return new ValidateResult(false, "const not match, expect %s, but %s", this.value, value);
         }
 
         return SUCCESS;

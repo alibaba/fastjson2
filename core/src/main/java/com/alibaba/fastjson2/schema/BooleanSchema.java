@@ -24,7 +24,7 @@ final class BooleanSchema extends JSONSchema {
             return SUCCESS;
         }
 
-        return ValidateResult.fail("expect type %s, but %s", Type.Boolean, value.getClass());
+        return new ValidateResult(false, "expect type %s, but %s", Type.Boolean, value.getClass());
     }
 
     @Override
