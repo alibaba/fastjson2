@@ -6,7 +6,7 @@
 - 支持全量解析和部分解析。
 - 支持`Java`服务端、客户端`Android`、大数据场景。
 - 支持`Kotlin`
-- 支持 `JSON Schema` https://github.com/alibaba/fastjson2/wiki/json_schema_cn
+- 支持 `JSON Schema` https://alibaba.github.io/fastjson2/json_schema_cn
 - 支持`Android` [(2.0.4.android)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.graal/)
 - 支持`Graal Native-Image` [(2.0.4.graal)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.graal/)
 
@@ -15,9 +15,9 @@
 相关文档：
 
 - `JSONB`格式文档：  
-  https://github.com/alibaba/fastjson2/wiki/jsonb_format_cn
+  https://alibaba.github.io/fastjson2/jsonb_format_cn
 - `FASTJSON v2`性能有了很大提升，具体性能数据看这里：  
-  https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark
+  https://alibaba.github.io/fastjson2/fastjson_benchmark_cn
 
 # 1. 使用准备
 
