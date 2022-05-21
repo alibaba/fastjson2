@@ -17,37 +17,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AutoTypeTest42_guava {
-    @Test
-    public void test_0() {
-        ArrayListMultimap map = ArrayListMultimap.create();
-        map.putAll("a", Arrays.asList(101, 102, 101));
-        List value = map.get("a");
 
-        byte[] bytes = JSONB.toBytes(value
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
-        );
-
-        JSONBDump.dump(bytes);
-
-        List value2 = (List) JSONB.parseObject(
-                bytes,
-                Object.class,
-                JSONReader.Feature.SupportAutoType,
-                JSONReader.Feature.FieldBased,
-                JSONReader.Feature.UseNativeObject
-        );
-
-        assertEquals(value.getClass(), value2.getClass());
-        assertEquals(value.size(), value2.size());
-        assertEquals(value.get(0), value2.get(0));
-        assertEquals(value.get(1), value2.get(1));
-        assertEquals(value.get(2), value2.get(2));
-    }
 
     @Test
     public void test_0_json() {

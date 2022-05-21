@@ -393,15 +393,7 @@ public class ObjectReaderProvider {
     }
 
     public ObjectReaderProvider() {
-        switch (JSONFactory.CREATOR) {
-            case "reflect":
-                this.creator = ObjectReaderCreator.INSTANCE;
-                break;
-            case "lambda":
-            default:
-                this.creator = ObjectReaderCreatorLambda.INSTANCE;
-                break;
-        }
+        this.creator = ObjectReaderCreator.INSTANCE;
 
         modules.add(new ObjectReaderBaseModule(this));
         init();

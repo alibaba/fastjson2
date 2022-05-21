@@ -770,7 +770,7 @@ public class EishayTest {
 
     @Test
     public void test_read_gen_lambda() throws Exception {
-        ObjectReaderCreator creator = ObjectReaderCreatorLambda.INSTANCE;
+        ObjectReaderCreator creator = ObjectReaderCreator.INSTANCE;
 
         for (int i = 0; i < 5; ++i) {
             long start = System.currentTimeMillis();

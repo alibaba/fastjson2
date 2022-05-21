@@ -5,8 +5,6 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -139,12 +137,6 @@ final class ObjectReader4<T> extends ObjectReaderBean<T> {
         T object;
         if (defaultCreator != null) {
             object = defaultCreator.get();
-        } else if (JDKUtils.UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
-            try {
-                object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
-            } catch (InstantiationException e) {
-                throw new JSONException("create instance error", e);
-            }
         } else {
             object = null;
         }

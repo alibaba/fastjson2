@@ -363,10 +363,6 @@ final class JSONReaderASCII extends JSONReaderUTF8 {
             }
 
             if (chars != null) {
-                if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                    return JDKUtils.UNSAFE_ASCII_CREATOR.apply(chars);
-                }
-
                 return new String(chars, 0, chars.length, StandardCharsets.US_ASCII);
             }
         }

@@ -627,8 +627,7 @@ public class ObjectReaderCreator {
                 }
             }
 
-            if (!(fieldBased && JDKUtils.UNSAFE_SUPPORT)
-                    && !(Throwable.class.isAssignableFrom(objectClass))
+            if (!(Throwable.class.isAssignableFrom(objectClass))
                     && defaultConstructor == null
                     && matchCount != parameterNames.length) {
 
@@ -1426,34 +1425,10 @@ public class ObjectReaderCreator {
                     Class itemClass = TypeUtils.getMapping(itemType);
                     if (itemClass == String.class) {
                         if (finalField) {
-                            if (JDKUtils.UNSAFE_SUPPORT && (features & JSONReader.Feature.FieldBased.mask) != 0) {
-                                return new FieldReaderListStrFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
-                            }
-
                             return new FieldReaderCollectionFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
                         }
 
-                        if (JDKUtils.UNSAFE_SUPPORT) {
-                            return new FieldReaderListStrFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
-                        }
-
                         return new FieldReaderListStrField(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
-                    }
-
-                    if (JDKUtils.UNSAFE_SUPPORT) {
-                        return new FieldReaderListFieldUF(
-                                fieldName,
-                                fieldTypeResolved,
-                                fieldClassResolved,
-                                itemType,
-                                ordinal,
-                                features,
-                                format,
-                                locale,
-                                (Collection) defaultValue,
-                                jsonSchema,
-                                field
-                        );
                     }
 
                     return new FieldReaderListField(fieldName, fieldTypeResolved, fieldClassResolved, itemType, ordinal, features, format, locale, (Collection) defaultValue, jsonSchema, field);
@@ -1471,21 +1446,6 @@ public class ObjectReaderCreator {
                 itemType = Object.class;
             }
 
-            if (JDKUtils.UNSAFE_SUPPORT) {
-                return new FieldReaderListFieldUF(
-                        fieldName,
-                        fieldType,
-                        fieldClass,
-                        itemType,
-                        ordinal,
-                        features,
-                        format,
-                        locale,
-                        (Collection) defaultValue,
-                        jsonSchema,
-                        field
-                );
-            }
             return new FieldReaderListField(
                     fieldName,
                     fieldType,
@@ -1507,7 +1467,7 @@ public class ObjectReaderCreator {
                 Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
                 if (actualTypeArguments.length == 2) {
-                    if (finalField && (!JDKUtils.UNSAFE_SUPPORT || (features & JSONReader.Feature.FieldBased.mask) == 0)) {
+                    if (finalField) {
                         return new FielderReaderImplMapFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
                     }
                 }
@@ -1525,34 +1485,18 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClassResolved != null) {
-            if (JDKUtils.UNSAFE_SUPPORT) {
-                return new FieldReaderObjectFieldUF(
-                        fieldName
-                        , fieldTypeResolved
-                        , fieldClass
-                        , ordinal
-                        , features
-                        , format
-                        , defaultValue
-                        , jsonSchema
-                        , field);
-            } else {
-                return new FieldReaderObjectField(
-                        fieldName
-                        , fieldTypeResolved
-                        , fieldClass
-                        , ordinal
-                        , features
-                        , format
-                        , defaultValue
-                        , jsonSchema
-                        , field);
-            }
+            return new FieldReaderObjectField(
+                    fieldName
+                    , fieldTypeResolved
+                    , fieldClass
+                    , ordinal
+                    , features
+                    , format
+                    , defaultValue
+                    , jsonSchema
+                    , field);
         }
 
-        if (JDKUtils.UNSAFE_SUPPORT) {
-            return new FieldReaderObjectFieldUF(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
-        }
         return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
     }
 

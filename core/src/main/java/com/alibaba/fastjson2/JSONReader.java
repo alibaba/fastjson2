@@ -7,7 +7,6 @@ import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.ReferenceKey;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -1874,28 +1873,7 @@ public abstract class JSONReader implements Closeable {
         }
 
         Context ctx = JSONFactory.createReadContext();
-        if (JDKUtils.JVM_VERSION > 8) {
-            try {
-                byte coder = UnsafeUtils.getStringCoder(str);
-                if (coder == 0) {
-                    byte[] bytes = UnsafeUtils.getStringValue(str);
-                    return new JSONReaderASCII(ctx, str, bytes, 0, bytes.length);
-                }
-            } catch (Exception e) {
-                throw new JSONException("unsafe get String.coder error");
-            }
-
-            return new JSONReaderStr(ctx, str, 0, str.length());
-        } else {
-            char[] chars = JDKUtils.getCharArray(str);
-            return new JSONReaderUTF16(
-                    ctx
-                    , str
-                    , chars
-                    , 0
-                    , chars.length
-            );
-        }
+        return new JSONReaderStr(ctx, str, 0, str.length());
     }
 
     void bigInt(char[] chars, int off, int len) {

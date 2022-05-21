@@ -7,11 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ImmutableSetTest {
-    @Test
-    public void test_0() {
-        A a = JSON.parseObject("{\"values\":[1,2]}", A.class);
-        assertEquals(2, a.values.size());
-    }
 
     @Test
     public void test_1() {

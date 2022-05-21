@@ -26,16 +26,7 @@ public class ObjectWriterProvider {
     public ObjectWriterProvider() {
         init();
 
-        switch (JSONFactory.CREATOR) {
-            case "reflect":
-                this.creator = ObjectWriterCreator.INSTANCE;
-                break;
-            case "lambda":
-            default:
-                this.creator = ObjectWriterCreatorLambda.INSTANCE;
-                break;
-        }
-
+        this.creator = ObjectWriterCreator.INSTANCE;
     }
 
     public ObjectWriterProvider(ObjectWriterCreator creator) {

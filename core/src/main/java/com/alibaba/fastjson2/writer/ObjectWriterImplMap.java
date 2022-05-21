@@ -31,7 +31,6 @@ final class ObjectWriterImplMap extends ObjectWriterBaseModule.PrimitiveImpl {
 
     final boolean jsonObject1; // fastjson 1 JSONObject
     final Field jsonObject1InnerMap;
-    long jsonObject1InnerMapOffset = -1;
 
     public ObjectWriterImplMap(Class objectClass, long features) {
         this(null, null, objectClass, objectClass, features);
@@ -58,9 +57,6 @@ final class ObjectWriterImplMap extends ObjectWriterBaseModule.PrimitiveImpl {
             jsonObject1InnerMap = BeanUtils.getDeclaredField(objectClass, "map");
             if (jsonObject1InnerMap != null) {
                 jsonObject1InnerMap.setAccessible(true);
-                if (JDKUtils.UNSAFE_SUPPORT) {
-                    jsonObject1InnerMapOffset = UnsafeUtils.objectFieldOffset(jsonObject1InnerMap);
-                }
             }
         } else {
             jsonObject1InnerMap = null;
@@ -131,15 +127,10 @@ final class ObjectWriterImplMap extends ObjectWriterBaseModule.PrimitiveImpl {
         ) {
             boolean ordered = false;
             if (jsonObject1InnerMap != null) {
-                if (jsonObject1InnerMapOffset != -1) {
-                    Object innerMap = UnsafeUtils.UNSAFE.getObject(object, jsonObject1InnerMapOffset);
+                try {
+                    Object innerMap = jsonObject1InnerMap.get(object);
                     ordered = innerMap instanceof LinkedHashMap;
-                } else {
-                    try {
-                        Object innerMap = jsonObject1InnerMap.get(object);
-                        ordered = innerMap instanceof LinkedHashMap;
-                    } catch (IllegalAccessException ignored) {
-                    }
+                } catch (IllegalAccessException ignored) {
                 }
             }
 

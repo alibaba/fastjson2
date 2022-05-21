@@ -185,22 +185,6 @@ public final class ObjectReaderImplMap implements ObjectReader {
             return Collections.emptyNavigableMap();
         }
 
-        if (JDKUtils.UNSAFE_SUPPORT) {
-            String instanceTypeName = instanceType.getName();
-            switch (instanceTypeName) {
-                case "com.ali.com.google.common.collect.EmptyImmutableBiMap":
-                    return ((Supplier) () -> {
-                        try {
-                            return UnsafeUtils.UNSAFE.allocateInstance(instanceType);
-                        } catch (InstantiationException e) {
-                            throw new JSONException("create map error : " + instanceType);
-                        }
-                    }).get();
-                default:
-                    break;
-            }
-        }
-
         try {
             return instanceType.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
