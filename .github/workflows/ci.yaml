@@ -3,11 +3,14 @@ name: Java CI
 
 on:
   push:
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-excluding-paths
     paths-ignore:
       - 'docs/**'
+      - '**.md'
   pull_request:
     paths-ignore:
       - 'docs/**'
+      - '**.md'
 
 jobs:
   test:
