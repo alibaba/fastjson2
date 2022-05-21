@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
 class ObjectWriterBaseModule implements ObjectWriterModule {
+    static ObjectWriterAdapter STACK_TRACE_ELEMENT_WRITER;
+
     final ObjectWriterProvider provider;
     final WriterAnnotationProcessor annotationProcessor;
 
@@ -1001,7 +1003,17 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             }
 
             if (StackTraceElement.class == clazz) {
-                return ObjectWriterImplStackTraceElement.INSTANCE;
+                if (STACK_TRACE_ELEMENT_WRITER == null) {
+                    STACK_TRACE_ELEMENT_WRITER = new ObjectWriterAdapter(StackTraceElement.class, Arrays.asList(
+                            new FieldWriter[]{
+                                    ObjectWriters.fieldWriter("fileName", String.class, StackTraceElement::getFileName),
+                                    ObjectWriters.fieldWriter("lineNumber", StackTraceElement::getLineNumber),
+                                    ObjectWriters.fieldWriter("className", String.class, StackTraceElement::getClassName),
+                                    ObjectWriters.fieldWriter("methodName", String.class, StackTraceElement::getMethodName),
+                            }
+                    ));
+                }
+                return STACK_TRACE_ELEMENT_WRITER;
             }
 
             if (Class.class == clazz) {
