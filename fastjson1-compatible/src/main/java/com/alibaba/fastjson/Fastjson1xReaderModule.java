@@ -7,6 +7,8 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Collections;
 
 public class Fastjson1xReaderModule implements ObjectReaderModule {
     final ObjectReaderProvider provider;
@@ -34,6 +36,10 @@ public class Fastjson1xReaderModule implements ObjectReaderModule {
             }
 
             throw new JSONException("read json error");
+        }
+
+        public Object createInstance(Collection collection) {
+            return Collections.emptyList();
         }
     }
 }
