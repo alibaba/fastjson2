@@ -11,9 +11,9 @@
     </parent>
 
     <artifactId>fastjson2</artifactId>
-    <packaging>jar</packaging>
     <name>fastjson2</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
+    <packaging>jar</packaging>
     <url>https://github.com/alibaba/fastjson2</url>
     <inceptionYear>2022</inceptionYear>
 
@@ -90,13 +90,13 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
+            <groupId>javax.money</groupId>
+            <artifactId>money-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.money</groupId>
-            <artifactId>money-api</artifactId>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -116,6 +116,22 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>alibaba-dingtalk-service-sdk</artifactId>
+            <version>2.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun.odps</groupId>
+            <artifactId>odps-sdk-udf</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.caucho</groupId>
+            <artifactId>hessian</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <scope>test</scope>
@@ -130,23 +146,11 @@
             <artifactId>json-path</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.msgpack</groupId>
-            <artifactId>msgpack-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.caucho</groupId>
-            <artifactId>hessian</artifactId>
-            <scope>test</scope>
-        </dependency>
+
+
+
 
         <!-- test libs -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -158,13 +162,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.aliyun.odps</groupId>
-            <artifactId>odps-sdk-udf</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -173,11 +172,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.aliyun</groupId>
-            <artifactId>alibaba-dingtalk-service-sdk</artifactId>
-            <version>2.0.0</version>
+            <groupId>org.msgpack</groupId>
+            <artifactId>msgpack-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+
     </dependencies>
 
     <build>

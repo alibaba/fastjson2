@@ -11,9 +11,9 @@
     </parent>
 
     <artifactId>fastjson2-kotlin</artifactId>
-    <packaging>jar</packaging>
     <name>fastjson2-kotlin</name>
     <description>kotlin integration for Fastjson2</description>
+    <packaging>jar</packaging>
     <url>https://github.com/alibaba/fastjson2</url>
     <inceptionYear>2022</inceptionYear>
 

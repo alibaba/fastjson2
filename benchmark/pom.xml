@@ -11,9 +11,9 @@
     </parent>
 
     <artifactId>fastjson2-benchmark</artifactId>
-    <packaging>jar</packaging>
     <name>fastjson2-benchmark</name>
     <description>JMH Benchmark for Fastjson2</description>
+    <packaging>jar</packaging>
 
     <properties>
         <!--
@@ -37,16 +37,27 @@
             <version>${fastjson1x.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.caucho</groupId>
+            <artifactId>hessian</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.erosb</groupId>
+            <artifactId>everit-json-schema</artifactId>
+            <version>1.14.1</version>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.caucho</groupId>
-            <artifactId>hessian</artifactId>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <!-- <version>1.0.49</version> -->
+            <version>1.0.69</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -60,17 +71,8 @@
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.github.erosb</groupId>
-            <artifactId>everit-json-schema</artifactId>
-            <version>1.14.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.networknt</groupId>
-            <artifactId>json-schema-validator</artifactId>
-            <!-- <version>1.0.49</version> -->
-            <version>1.0.69</version>
-        </dependency>
+
+
     </dependencies>
 
     <build>
