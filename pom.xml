@@ -79,8 +79,6 @@
         <module>kotlin</module>
         <module>extension</module>
         <module>fastjson1-compatible</module>
-        <module>safemode-test</module>
-        <module>benchmark</module>
     </modules>
 
     <properties>
