@@ -16,7 +16,8 @@ public class Issue2240 {
         resultMap.setA(Collections.<Long, Integer>emptyMap());
         resultMap.setB(Collections.<Long, Integer>emptyMap());
         String json = JSON.toJSONString(resultMap);
-        assertTrue("{\"a\":{},\"b\":{}}".equals(json) || "{\"a\":{},\"b\":{\"$ref\":\"a\"}}".equals(json));
+        System.out.println(json);
+        assertTrue("{\"a\":{},\"b\":{}}".equals(json) || "{\"a\":{},\"b\":{\"$ref\":\"$.a\"}}".equals(json));
 
     }
 
