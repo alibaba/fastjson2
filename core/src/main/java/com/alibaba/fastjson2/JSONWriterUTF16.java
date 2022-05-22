@@ -877,6 +877,7 @@ class JSONWriterUTF16
         }
     }
 
+    @Override
     public void writeDoubleArray(double value0, double value1) {
         boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 

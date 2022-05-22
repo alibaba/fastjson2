@@ -80,6 +80,7 @@ final class ObjectReaderImplInt64ValueArray
         return array;
     }
 
+    @Override
     public Object createInstance(Collection collection) {
         long[] array = new long[collection.size()];
         int i = 0;

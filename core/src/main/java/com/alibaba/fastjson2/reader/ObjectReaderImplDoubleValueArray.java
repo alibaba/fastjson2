@@ -60,6 +60,7 @@ class ObjectReaderImplDoubleValueArray
         return array;
     }
 
+    @Override
     public Object createInstance(Collection collection) {
         double[] array = new double[collection.size()];
         int i = 0;

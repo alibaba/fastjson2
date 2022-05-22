@@ -37,6 +37,7 @@ public final class ObjectReaderImplListStr
         }
     }
 
+    @Override
     public Object createInstance(Collection collection) {
         if (listType.isInstance(collection)) {
             boolean typeMatch = true;
