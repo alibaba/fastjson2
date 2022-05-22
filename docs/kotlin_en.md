@@ -15,7 +15,7 @@ If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use
 </dependency>
 ```
 
-`Gradle`:
+`Kotlin Gradle`:
 
 ```kotlin
 dependencies {

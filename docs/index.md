@@ -107,9 +107,9 @@ dependencies {
 
 `Gradle`:
 
-```kotlin
+```groovy
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-extension:2.0.4")
+    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.4'
 }
 ```
 
