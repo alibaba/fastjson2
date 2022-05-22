@@ -387,7 +387,6 @@ final class ObjectWriterImplMap extends ObjectWriterBaseModule.PrimitiveImpl {
         jsonWriter.endObject();
     }
 
-
     @Override
     public void writeWithFilter(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         jsonWriter.startObject();

@@ -28,7 +28,6 @@ final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.Primi
         }
 
         if (jsonReader.nextIfMatch('[')) {
-
             int[] values = new int[16];
             int size = 0;
             for (; ; ) {
@@ -53,7 +52,6 @@ final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.Primi
 
             return Arrays.copyOf(values, size);
         }
-
 
         throw new JSONException("TODO");
     }

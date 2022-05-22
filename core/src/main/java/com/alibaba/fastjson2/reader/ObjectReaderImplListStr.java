@@ -160,7 +160,6 @@ public final class ObjectReaderImplListStr implements ObjectReader {
         }
         jsonReader.next();
 
-
         Collection list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
         for (; ; ) {
             if (jsonReader.nextIfMatch(']')) {

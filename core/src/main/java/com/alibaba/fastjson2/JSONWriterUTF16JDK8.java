@@ -63,7 +63,6 @@ final class JSONWriterUTF16JDK8 extends JSONWriterUTF16 {
             }
         }
 
-
         if (!special) {
             // inline ensureCapacity(off + strlen + 2);
             int minCapacity = off + strlen + 2;

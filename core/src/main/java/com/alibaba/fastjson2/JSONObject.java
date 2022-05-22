@@ -23,7 +23,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class JSONObject extends LinkedHashMap<String, Object> implements InvocationHandler {
-
     private static final long serialVersionUID = 1L;
 
     static ObjectReader<JSONArray> arrayReader;
@@ -1486,7 +1485,6 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
                     name = nameConsumer.name;
                 }
             }
-
         }
         return name;
     }

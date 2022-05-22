@@ -1592,7 +1592,6 @@ final class JSONWriterJSONB extends JSONWriter {
         long msb = value.getMostSignificantBits();
         long lsb = value.getLeastSignificantBits();
 
-
         ensureCapacity(off + 18);
         bytes[off++] = BC_BINARY;
         bytes[off++] = BC_INT32_NUM_16;
@@ -1615,7 +1614,6 @@ final class JSONWriterJSONB extends JSONWriter {
         bytes[off++] = (byte) (lsb >>> 8);
         bytes[off++] = (byte) lsb;
     }
-
 
     @Override
     public void writeBigInt(BigInteger value, long features) {
@@ -1769,7 +1767,6 @@ final class JSONWriterJSONB extends JSONWriter {
             int hour,
             int minute,
             int second) {
-
         ensureCapacity(off + 8);
 
         bytes[off++] = BC_LOCAL_DATETIME;

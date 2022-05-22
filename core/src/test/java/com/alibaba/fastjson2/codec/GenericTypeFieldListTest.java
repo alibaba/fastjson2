@@ -101,7 +101,6 @@ public class GenericTypeFieldListTest {
     }
 
     public static class P1 extends P<String> {
-
     }
 
     public static class P2<T extends String> extends P<T> {

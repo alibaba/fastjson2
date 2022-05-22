@@ -51,5 +51,4 @@ public class JSONExtractScalarTest {
         assertEquals("450"
                 , result.toString());
     }
-
 }

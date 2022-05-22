@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 public class JSONSchemaBenchmark {
     @State(Scope.Thread)
     public static class BenchmarkState {
-
         // everit
         private Schema jsonSchema_everit;
         private org.json.JSONObject schemas_everit;

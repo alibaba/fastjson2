@@ -64,5 +64,4 @@ public class ObjectWriters {
     public static <T, V> FieldWriter fieldWriter(String fieldName, Class<V> fieldClass, Function<T, V> function) {
         return INSTANCE.createFieldWriter(fieldName, fieldClass, function);
     }
-
 }

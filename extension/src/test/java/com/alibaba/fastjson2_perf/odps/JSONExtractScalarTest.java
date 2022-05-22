@@ -93,5 +93,4 @@ public class JSONExtractScalarTest {
             System.out.println("extract : " + millis); // 805 723 710
         }
     }
-
 }

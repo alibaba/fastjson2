@@ -18,7 +18,6 @@ import java.nio.charset.StandardCharsets;
  * @since 2.0.2
  */
 public class FastJsonConfig {
-
     /**
      * default charset
      */
@@ -192,5 +191,4 @@ public class FastJsonConfig {
     public void setSymbolTable(String... names) {
         this.symbolTable = JSONB.symbolTable(names);
     }
-
 }

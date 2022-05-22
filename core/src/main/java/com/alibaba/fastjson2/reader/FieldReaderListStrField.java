@@ -8,7 +8,6 @@ import java.lang.reflect.Type;
 class FieldReaderListStrField<T>
         extends FieldReaderObjectField<T>
         implements FieldReaderList<T, Object> {
-
     FieldReaderListStrField(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, null, schema, field);
     }

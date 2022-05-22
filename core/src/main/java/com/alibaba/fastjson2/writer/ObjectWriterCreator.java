@@ -24,7 +24,6 @@ public class ObjectWriterCreator {
     public static final ObjectWriterCreator INSTANCE = new ObjectWriterCreator();
 
     public ObjectWriterCreator() {
-
     }
 
     public ObjectWriter createObjectWriter(List<FieldWriter> fieldWriters) {
@@ -178,10 +177,8 @@ public class ObjectWriterCreator {
             fieldBased = false;
         }
 
-
         List<FieldWriter> fieldWriters;
         final FieldInfo fieldInfo = new FieldInfo();
-
 
         if (fieldBased) {
             Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
@@ -337,7 +334,6 @@ public class ObjectWriterCreator {
                         writerAdapter.setPropertyPreFilter((PropertyPreFilter) filter);
                     }
                 } catch (InstantiationException | IllegalAccessException ignored) {
-
                 }
             }
             // return super.createObjectWriter(objectClass, features, modules);
@@ -718,5 +714,4 @@ public class ObjectWriterCreator {
 
         return new FieldWriterObjectFunc(fieldName, ordinal, features, format, fieldType, fieldClass, null, function);
     }
-
 }

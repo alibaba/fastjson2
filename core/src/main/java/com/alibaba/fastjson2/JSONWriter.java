@@ -155,7 +155,6 @@ public abstract class JSONWriter implements Closeable {
         this.path = this.path.parent;
     }
 
-
     public boolean hasFilter() {
         return context.propertyPreFilter != null
                 || context.propertyFilter != null
@@ -1257,7 +1256,6 @@ public abstract class JSONWriter implements Closeable {
 
     @Override
     public void close() {
-
     }
 
     public byte[] getBytes() {

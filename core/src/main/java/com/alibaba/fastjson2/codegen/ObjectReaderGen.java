@@ -211,7 +211,6 @@ public class ObjectReaderGen {
                 member = fieldReader.getField();
             }
             readFieldValue(0, false, (short) i, fieldReader, member, fieldType, fieldClass);
-
         }
 
         println("\t\tif (!jsonReader.nextIfMatch(']')) {");
@@ -341,7 +340,6 @@ public class ObjectReaderGen {
 
         println(tabCnt, "\t\tString fieldName = jsonReader.getFieldName();");
         println(tabCnt, "\t\tthrow new JSONException(\"fieldReader not found, fieldName \" + fieldName);");
-
     }
 
     private void readFieldValue(int tabCnt, boolean jsonb, short index, FieldReader fieldReader, Member member, Type fieldType, Class fieldClass) {

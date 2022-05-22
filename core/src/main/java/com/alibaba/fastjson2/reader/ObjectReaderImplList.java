@@ -450,7 +450,6 @@ public final class ObjectReaderImplList implements ObjectReader {
 
         jsonReader.nextIfMatch(',');
 
-
         if (builder != null) {
             return builder.apply(list);
         }

@@ -117,7 +117,6 @@ public class ObjectReaderCreatorDynamicCompile extends ObjectReaderCreator {
     }
 
     public static class CharSequenceJavaFileObject extends SimpleJavaFileObject {
-
         public static final String CLASS_EXTENSION = ".class";
 
         public static final String JAVA_EXTENSION = ".java";
@@ -170,7 +169,6 @@ public class ObjectReaderCreatorDynamicCompile extends ObjectReaderCreator {
     }
 
     public static class JdkDynamicCompileClassLoader extends DynamicClassLoader {
-
         public static final String CLASS_EXTENSION = ".class";
 
         private final Map<String, JavaFileObject> javaFileObjectMap = new ConcurrentHashMap<>();
@@ -215,7 +213,6 @@ public class ObjectReaderCreatorDynamicCompile extends ObjectReaderCreator {
     }
 
     public static class JdkDynamicCompileJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> {
-
         private final JdkDynamicCompileClassLoader classLoader;
         private final Map<URI, JavaFileObject> javaFileObjectMap = new ConcurrentHashMap<>();
 

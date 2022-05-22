@@ -49,7 +49,6 @@ final class EmailValidator implements FormatValidator {
         return true;
     }
 
-
     protected static boolean isValidDomain(String domain) {
         // see if domain is an IP address in brackets
         Matcher ipDomainMatcher = IP_DOMAIN_PATTERN.matcher(domain);
@@ -64,7 +63,6 @@ final class EmailValidator implements FormatValidator {
     }
 
     protected static boolean isValidUser(String user) {
-
         if (user == null || user.length() > 64) {
             return false;
         }

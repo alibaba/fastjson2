@@ -2205,7 +2205,6 @@ final class JSONReaderJSONB extends JSONReader {
     public float readFloatValue() {
         byte type = bytes[offset++];
 
-
         switch (type) {
             case BC_NULL:
                 wasNull = true;
@@ -2461,7 +2460,6 @@ final class JSONReaderJSONB extends JSONReader {
                             + ((bytes[offset++] & 0xFF) << 8)
                             + (bytes[offset++] & 0xFF);
                 }
-
 
                 if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
                     return (long) INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
@@ -3409,7 +3407,6 @@ final class JSONReaderJSONB extends JSONReader {
             return null;
         }
 
-
         int dom;
         if (d0 >= '0' && d0 <= '9'
                 && d1 >= '0' && d1 <= '9'
@@ -3488,7 +3485,6 @@ final class JSONReaderJSONB extends JSONReader {
         } else {
             return null;
         }
-
 
         int dom;
         if (d0 >= '0' && d0 <= '9'
@@ -3591,7 +3587,6 @@ final class JSONReaderJSONB extends JSONReader {
         } else {
             return null;
         }
-
 
         int dom;
         if (d0 >= '0' && d0 <= '9'

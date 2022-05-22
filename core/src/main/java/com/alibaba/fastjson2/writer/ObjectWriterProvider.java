@@ -38,7 +38,6 @@ public class ObjectWriterProvider {
                 this.creator = ObjectWriterCreatorASM.INSTANCE;
                 break;
         }
-
     }
 
     public ObjectWriterProvider(ObjectWriterCreator creator) {

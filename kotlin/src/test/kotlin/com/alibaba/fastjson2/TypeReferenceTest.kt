@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class TypeReferenceTest {
-
     @Test
     fun test_reference1() {
         val referUser = reference<User>()

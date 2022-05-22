@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 
 public class ObjectReaderCreatorLambda extends ObjectReaderCreator {
-
     private static final Map<Class, Class> classFunctionMapping = new HashMap<>();
     private static final Map<Class, MethodType> methodTypeMapping = new HashMap<>();
     private static final MethodType METHODTYPE_BiFunction = MethodType.methodType(BiConsumer.class);

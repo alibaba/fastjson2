@@ -29,7 +29,6 @@ import java.lang.reflect.TypeVariable;
  * @since 2.0.2
  */
 public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<Object> implements GenericHttpMessageConverter<Object> {
-
     /**
      * with fastJson config
      */
@@ -39,7 +38,6 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
      * Can serialize/deserialize all types.
      */
     public FastJsonHttpMessageConverter() {
-
         super(MediaType.ALL);
     }
 
@@ -74,7 +72,6 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
 
     @Override
     public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
-
         return readType(getType(type, contextClass), inputMessage);
     }
 
@@ -86,12 +83,10 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
 
     @Override
     protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
-
         return readType(getType(clazz, null), inputMessage);
     }
 
     private Object readType(Type type, HttpInputMessage inputMessage) {
-
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             InputStream in = inputMessage.getBody();
 
@@ -119,21 +114,17 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
 
     @Override
     protected void writeInternal(Object object, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
-
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-
             HttpHeaders headers = outputMessage.getHeaders();
 
             int len = JSON.writeTo(baos, object, fastJsonConfig.getDateFormat(),
                     fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
 
             if (headers.getContentLength() < 0 && fastJsonConfig.isWriteContentLength()) {
-
                 headers.setContentLength(len);
             }
 
             baos.writeTo(outputMessage.getBody());
-
         } catch (JSONException ex) {
             throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
         } catch (IOException ex) {
@@ -147,7 +138,6 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
         }
         return type;
     }
-
 
     private static class Spring4TypeResolvableHelper {
         private static boolean hasClazzResolvableType;
@@ -164,7 +154,6 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
         private static boolean isSupport() {
             return hasClazzResolvableType;
         }
-
 
         private static Type getType(Type type, Class<?> contextClass) {
             if (contextClass != null) {
@@ -225,5 +214,4 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
             return ResolvableType.NONE;
         }
     }
-
 }

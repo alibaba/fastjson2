@@ -335,7 +335,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             classNameFull = className;
         }
 
-
         cw.visit(Opcodes.V1_8
                 , Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER
                 , classNameType
@@ -573,7 +572,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             , String classNameType
             , long features
     ) {
-
         MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
                 , "writeArrayMappingJSONB",
                 METHOD_DESC_WRITE
@@ -645,7 +643,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
                 || fieldClass.isEnum()
         ) {
             gwValue(mwc, fieldWriter, OBJECT);
-
         } else if (fieldClass == Date.class) {
             gwDate(mwc, fieldWriter, OBJECT, i);
         } else if (fieldWriter instanceof FieldWriterList) {
@@ -981,7 +978,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             , ClassWriter cw
             , String classNameType
     ) {
-
         MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
                 , methodName,
                 METHOD_DESC_WRITE
@@ -1290,7 +1286,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         mw.visitLabel(endIfListNull_);
     }
 
-
     private void gwFieldValue(
             MethodWriterContext mwc,
             FieldWriter fieldWriter,
@@ -1340,10 +1335,8 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             gwFieldValueArray(mwc, fieldWriter, OBJECT, i);
         } else if (fieldClass == Integer.class) {
             gwInt32(mwc, fieldWriter, OBJECT, i);
-
         } else if (fieldClass == Long.class) {
             gwInt64(mwc, fieldWriter, OBJECT, i);
-
         } else if (fieldClass == String.class) {
             gwFieldValueString(mwc, fieldWriter, OBJECT, i);
         } else if (fieldClass.isEnum()
@@ -1432,7 +1425,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         genGetObject(mwc, fieldWriter, OBJECT);
         mw.visitInsn(Opcodes.DUP);
         mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
-
 
         mw.visitJumpInsn(Opcodes.IFNULL, null_);
 
@@ -1675,12 +1667,10 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             gwValue(mwc, fieldWriter, OBJECT);
         } else if (fieldClass == double[].class) {
             gwFieldValueArray(mwc, fieldWriter, OBJECT, i);
-
         } else if (fieldClass == Integer.class) {
             gwInt32(mwc, fieldWriter, OBJECT, i);
         } else if (fieldClass == Long.class) {
             gwInt64(mwc, fieldWriter, OBJECT, i);
-
         } else if (fieldClass == String.class) {
             gwFieldValueString(mwc, fieldWriter, OBJECT, i);
         } else if (fieldClass.isEnum()) {
@@ -1690,7 +1680,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             gwFieldValueDate(mwc, fieldWriter, OBJECT, i);
         } else {
             gwFieldValueObjectJSONB(mwc, fieldWriter, OBJECT, i);
-
         }
     }
 
@@ -1887,7 +1876,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
             mw.visitJumpInsn(Opcodes.IF_ACMPNE, refSetPath_);
 
-
             gwFieldName(mwc, i);
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -1895,7 +1883,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeReference", "(Ljava/lang/String;)V", false);
 
             mw.visitJumpInsn(Opcodes.GOTO, endIfNull_);
-
 
             mw.visitLabel(refSetPath_);
 
@@ -2258,7 +2245,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         mw.visitLabel(endWriteValue_);
     }
 
-
     private void gwFieldValueBooleanV(
             MethodWriterContext mwc,
             FieldWriter fieldWriter,
@@ -2351,7 +2337,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
         mw.visitLabel(writeNull_);
         // writeFieldName(w);
         gwFieldName(mwc, i);
-
 
         if ((features & JSONWriter.Feature.NullAsDefaultValue.mask) == 0) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -2672,7 +2657,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
             , ClassWriter cw
             , String classNameType
             , ObjectWriterAdapter objectReaderAdapter) {
-
         MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
                 , "getFieldWriter",
                 "(J)" + DESC_FIELD_WRITER
@@ -2772,7 +2756,6 @@ public class ObjectWriterCreatorASM extends ObjectWriterCreator {
 
         mw.visitLabel(rtnlt);
         mw.visitInsn(Opcodes.ARETURN);
-
 
         mw.visitMaxs(5, 5);
         mw.visitEnd();

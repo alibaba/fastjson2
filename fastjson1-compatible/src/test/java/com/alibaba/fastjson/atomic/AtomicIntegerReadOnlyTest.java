@@ -36,6 +36,5 @@ public class AtomicIntegerReadOnlyTest {
         public AtomicInteger getValue() {
             return value;
         }
-
     }
 }

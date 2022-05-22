@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import java.lang.reflect.Type;
 
 public class JdbcReaderModule implements ObjectWriterModule {
-
     @Override
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         return null;

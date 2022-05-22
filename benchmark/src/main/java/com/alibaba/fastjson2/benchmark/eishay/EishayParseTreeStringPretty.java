@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-
 public class EishayParseTreeStringPretty {
     static String str;
     static ObjectMapper mapper = new ObjectMapper();
@@ -93,5 +92,4 @@ public class EishayParseTreeStringPretty {
                 .build();
         new Runner(options).run();
     }
-
 }

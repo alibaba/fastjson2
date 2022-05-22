@@ -28,7 +28,6 @@ import java.util.List;
  * }</pre>
  */
 public abstract class TypeReference<T> {
-
     protected final Type type;
     protected final Class<? super T> rawType;
 

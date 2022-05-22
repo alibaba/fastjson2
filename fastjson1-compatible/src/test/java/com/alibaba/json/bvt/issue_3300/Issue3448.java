@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class Issue3448 {
     public static class SelfTypeReference<T> {
-
     }
 
     @Test

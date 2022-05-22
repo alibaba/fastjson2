@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Issue256 {
-
     @BeforeEach
     public void init() {
         JSON.register(GeoJsonReaderModule.INSTANCE);

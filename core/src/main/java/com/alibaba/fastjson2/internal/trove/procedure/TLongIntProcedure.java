@@ -18,16 +18,10 @@
 
 package com.alibaba.fastjson2.internal.trove.procedure;
 
-//////////////////////////////////////////////////
-// THIS IS A GENERATED CLASS. DO NOT HAND EDIT! //
-//////////////////////////////////////////////////
-
-
 /**
  * Interface for procedures that take two parameters of type long and int.
  */
 public interface TLongIntProcedure {
-
     /**
      * Executes this procedure. A false return value indicates that
      * the application executing this procedure should not invoke this

@@ -4,7 +4,6 @@ package com.alibaba.fastjson2.internal.asm;
  * Created by wenshao on 05/08/2017.
  */
 public class MethodCollector {
-
     private final int paramCount;
 
     private final int ignoreCount;

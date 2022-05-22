@@ -184,7 +184,6 @@ public final class RyuDouble {
                 long bits10 = mHigh * ints[3];
                 long bits00 = mLow * ints[3];
 
-
                 dv = ((((((
                         ((bits00 >>> 31) + bits01 + bits10) >>> 31)
                         + bits02 + bits11) >>> 31)
@@ -689,7 +688,6 @@ public final class RyuDouble {
                 long bits01 = mLow * ints[2];
                 long bits10 = mHigh * ints[3];
                 long bits00 = mLow * ints[3];
-
 
                 dv = ((((((
                         ((bits00 >>> 31) + bits01 + bits10) >>> 31)

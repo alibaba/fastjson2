@@ -41,7 +41,6 @@ final class ObjectWriterImplCalendar extends DateTimeCodec implements ObjectWrit
         Calendar date = (Calendar) object;
         long millis = date.getTimeInMillis();
 
-
         if (formatUnixTime || ctx.isDateFormatUnixTime()) {
             jsonWriter.writeInt64(millis / 1000L);
             return;

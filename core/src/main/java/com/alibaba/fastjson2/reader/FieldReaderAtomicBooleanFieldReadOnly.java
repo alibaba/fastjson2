@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 final class FieldReaderAtomicBooleanFieldReadOnly<T>
         extends FieldReaderImpl<T> implements FieldReaderReadOnly<T> {
-
     final Field field;
 
     FieldReaderAtomicBooleanFieldReadOnly(String fieldName, Class fieldClass, int ordinal, String format, AtomicBoolean defaultValue, JSONSchema schema, Field field) {

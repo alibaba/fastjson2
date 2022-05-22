@@ -10,11 +10,9 @@ public interface ValueConsumer {
     }
 
     default void acceptNull() {
-
     }
 
     default void accept(boolean val) {
-
     }
 
     default void accept(int val) {
@@ -26,17 +24,14 @@ public interface ValueConsumer {
     }
 
     default void accept(Number val) {
-
     }
-    
+
     default void accept(String val) {
-
     }
-    default void accept(Map object) {
 
+    default void accept(Map object) {
     }
 
     default void accept(List array) {
-
     }
 }

@@ -90,7 +90,6 @@ public class TypeReference<T> {
         }
 
         type = cachedType;
-
     }
 
     private Type handlerParameterizedType(ParameterizedType type, Type[] actualTypeArguments, int actualIndex) {
@@ -125,5 +124,4 @@ public class TypeReference<T> {
     public Type getType() {
         return type;
     }
-
 }

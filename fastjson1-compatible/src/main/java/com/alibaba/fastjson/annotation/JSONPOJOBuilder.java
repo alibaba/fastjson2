@@ -36,5 +36,4 @@ public @interface JSONPOJOBuilder {
      * indicated by the argument; or one defined with annotations.
      */
     String withPrefix() default "with";
-
 }

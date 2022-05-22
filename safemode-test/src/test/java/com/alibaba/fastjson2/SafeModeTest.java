@@ -19,7 +19,6 @@ public class SafeModeTest {
     }
 
     public static class Bean {
-
     }
 
     @Test

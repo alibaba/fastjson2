@@ -23,7 +23,6 @@ import java.lang.reflect.Type;
  * @since 2.0.2
  */
 public class Retrofit2ConverterFactory extends Converter.Factory {
-
     private static final MediaType MEDIA_TYPE = MediaType.parse("application/json; charset=UTF-8");
 
     private FastJsonConfig fastJsonConfig;

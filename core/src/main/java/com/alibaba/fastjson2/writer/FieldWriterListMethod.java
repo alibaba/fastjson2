@@ -21,7 +21,6 @@ final class FieldWriterListMethod<T> extends FieldWriterList<T> {
             , Type fieldType
             , Class fieldClass
     ) {
-
         super(fieldName, itemType, ordinal, features, format, fieldType, fieldClass);
         this.method = method;
     }

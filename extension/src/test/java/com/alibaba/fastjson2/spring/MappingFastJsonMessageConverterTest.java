@@ -12,10 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 public class MappingFastJsonMessageConverterTest {
-
     @Test
     public void test_1() throws Exception {
-
         MappingFastJsonMessageConverter converter = new MappingFastJsonMessageConverter();
 
         assertNotNull(converter.getFastJsonConfig());
@@ -58,7 +56,6 @@ public class MappingFastJsonMessageConverterTest {
     }
 
     public static class TestMessage<T> implements Message<T> {
-
         private T payload;
 
         public TestMessage(T payload) {
@@ -77,7 +74,6 @@ public class MappingFastJsonMessageConverterTest {
     }
 
     public static class VO {
-
         private int id;
 
         public int getId() {
@@ -87,6 +83,5 @@ public class MappingFastJsonMessageConverterTest {
         public void setId(int id) {
             this.id = id;
         }
-
     }
 }

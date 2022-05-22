@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 public class FastJsonJSONBRedisSerializerTest {
-
     private FastJsonJSONBRedisSerializer<User> serializer;
 
     @BeforeEach
@@ -61,7 +60,6 @@ public class FastJsonJSONBRedisSerializerTest {
      */
     @Test
     public void test_6() {
-
         FastJsonConfig fastJsonConfig = new FastJsonConfig();
         fastJsonConfig.setReaderFeatures(JSONReader.Feature.SupportAutoType);
         fastJsonConfig.setWriterFeatures(JSONWriter.Feature.WriteClassName);

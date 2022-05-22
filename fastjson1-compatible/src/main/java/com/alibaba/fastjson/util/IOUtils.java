@@ -32,7 +32,6 @@ import java.util.Properties;
  * @author wenshao[szujobs@hotmail.com]
  */
 public class IOUtils {
-
     public static final String FASTJSON_PROPERTIES = "fastjson.properties";
     public static final String FASTJSON_COMPATIBLEWITHJAVABEAN = "fastjson.compatibleWithJavaBean";
     public static final String FASTJSON_COMPATIBLEWITHFIELDNAME = "fastjson.compatibleWithFieldName";
@@ -292,5 +291,4 @@ public class IOUtils {
 
         return dArr;
     }
-
 }

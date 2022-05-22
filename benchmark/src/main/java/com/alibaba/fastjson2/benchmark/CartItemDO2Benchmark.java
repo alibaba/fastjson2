@@ -49,5 +49,4 @@ public class CartItemDO2Benchmark {
                 , JSONWriter.Feature.BeanToArray
         );
     }
-
 }

@@ -162,7 +162,6 @@ public class InetAddresses {
                     for (int i = 0; i < partsSkipped; i++) {
                         rawBytes.putShort((short) 0);
                     }
-
                 } else {
                     rawBytes.putShort(parseHextet(ipString, start, end));
                 }

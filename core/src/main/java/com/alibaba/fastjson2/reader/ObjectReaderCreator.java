@@ -44,7 +44,6 @@ public class ObjectReaderCreator {
             Function<Map<Long, Object>, T> creator,
             FieldReader... fieldReaders
     ) {
-
         return new ObjectReaderNoneDefaultConstrutor(objectClass, null, null, 0, creator, null, null, fieldReaders, null);
     }
 
@@ -263,7 +262,6 @@ public class ObjectReaderCreator {
         Supplier instanceSupplier = createInstanceSupplier(builderClass);
         return createObjectReader(builderClass, 0, instanceSupplier, builderFunction, fieldReaderArray);
     }
-
 
     protected <T> ObjectReader<T> createObjectReaderWithCreator(
             Class<T> objectClass
@@ -528,8 +526,6 @@ public class ObjectReaderCreator {
             fieldBased = false;
         }
 
-
-
         FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType, beanInfo, fieldBased, modules);
 
         if (!fieldBased && Throwable.class.isAssignableFrom(objectClass)) {
@@ -575,7 +571,6 @@ public class ObjectReaderCreator {
         }
 
         Constructor creatorConstructor = beanInfo.creatorConstructor;
-
 
         final List<Constructor> alternateConstructors = new ArrayList<>();
         BeanUtils.constructor(objectClass, constructor -> {
@@ -631,7 +626,6 @@ public class ObjectReaderCreator {
                     && !(Throwable.class.isAssignableFrom(objectClass))
                     && defaultConstructor == null
                     && matchCount != parameterNames.length) {
-
                 Function<Map<Long, Object>, T> function = new ConstructorFunction(alternateConstructors, creatorConstructor, parameterNames);
                 FieldReader[] paramFieldReaders = createFieldReaders(creatorConstructor.getParameters(), parameterNames);
                 return new ObjectReaderNoneDefaultConstrutor(
@@ -1652,7 +1646,6 @@ public class ObjectReaderCreator {
         return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
     }
 
-
     protected ObjectReader createEnumReader(
             Class objectClass,
             Method createMethod,
@@ -1693,7 +1686,6 @@ public class ObjectReaderCreator {
                     }
                 }
             } catch (Exception ignored) {
-
             }
         }
 
@@ -1724,13 +1716,11 @@ public class ObjectReaderCreator {
                         try {
                             enumValueField = objectClass.getField(mixedValueField.getName());
                         } catch (NoSuchFieldException ignored) {
-
                         }
                     } else if (mixedValueField instanceof Method) {
                         try {
                             enumValueField = objectClass.getMethod(mixedValueField.getName());
                         } catch (NoSuchMethodException ignored) {
-
                         }
                     }
                 }
@@ -1763,5 +1753,4 @@ public class ObjectReaderCreator {
 
         return new ObjectReaderImplEnum(objectClass, createMethod, enumValueField, enums, ordinalEnums, enumNameHashCodes);
     }
-
 }

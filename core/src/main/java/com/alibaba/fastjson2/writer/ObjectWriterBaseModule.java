@@ -434,7 +434,6 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             Annotation[] annotations = method.getAnnotations();
             processAnnotations(fieldInfo, annotations);
 
-
             if (!objectClass.getName().startsWith("java.lang") && !BeanUtils.isRecord(objectClass)) {
                 String fieldName = BeanUtils.getterName(methodName, null);
 
@@ -720,7 +719,6 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
             if (rawType == List.class || rawType == ArrayList.class) {
                 if (actualTypeArguments.length == 1
                         && actualTypeArguments[0] == String.class) {
-
                     return ObjectWriterImplListStr.INSTANCE;
                 }
 
@@ -735,7 +733,6 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
         if (objectType == ArrayList.class
                 || objectType == List.class
                 || List.class.isAssignableFrom(objectClass)) {
-
             return ObjectWriterImplList.INSTANCE;
         }
 
@@ -855,13 +852,11 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                         try {
                             valueField = clazz.getField(mixedValueField.getName());
                         } catch (NoSuchFieldException ignored) {
-
                         }
                     } else if (mixedValueField instanceof Method) {
                         try {
                             valueField = clazz.getMethod(mixedValueField.getName());
                         } catch (NoSuchMethodException ignored) {
-
                         }
                     }
                 }
@@ -953,7 +948,6 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
                     || clazz == URL.class
                     || ZoneId.class.isAssignableFrom(clazz)
                     || Charset.class.isAssignableFrom(clazz)) {
-
                 return ObjectWriterImplToString.INSTANCE;
             }
 
@@ -1050,8 +1044,6 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
 
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-
         }
     }
-
 }

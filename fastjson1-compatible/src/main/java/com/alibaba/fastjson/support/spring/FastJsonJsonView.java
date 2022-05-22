@@ -27,7 +27,6 @@ import java.util.Set;
  */
 
 public class FastJsonJsonView extends AbstractView {
-
     /**
      * renderedAttributes
      */
@@ -52,7 +51,6 @@ public class FastJsonJsonView extends AbstractView {
      * Set default param.
      */
     public FastJsonJsonView() {
-
         setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
         setExposePathVariables(false);
     }
@@ -121,7 +119,6 @@ public class FastJsonJsonView extends AbstractView {
     @Override
     protected void prepareResponse(HttpServletRequest request, //
                                    HttpServletResponse response) {
-
         setResponseContentType(request, response);
         response.setCharacterEncoding(fastJsonConfig.getCharset().name());
         if (this.disableCaching) {
@@ -189,5 +186,4 @@ public class FastJsonJsonView extends AbstractView {
     protected void setResponseContentType(HttpServletRequest request, HttpServletResponse response) {
         super.setResponseContentType(request, response);
     }
-
 }

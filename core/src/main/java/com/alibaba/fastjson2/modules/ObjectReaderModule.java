@@ -7,7 +7,6 @@ import java.lang.reflect.Type;
 
 public interface ObjectReaderModule {
     default void init(ObjectReaderProvider provider) {
-
     }
 
     default ObjectReaderProvider getProvider() {

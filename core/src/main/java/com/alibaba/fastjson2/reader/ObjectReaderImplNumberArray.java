@@ -43,7 +43,6 @@ class ObjectReaderImplNumberArray extends ObjectReaderBaseModule.PrimitiveImpl {
             return Arrays.copyOf(values, size);
         }
 
-
         throw new JSONException("TODO");
     }
 
@@ -67,7 +66,6 @@ class ObjectReaderImplNumberArray extends ObjectReaderBaseModule.PrimitiveImpl {
             Number value;
             if (item == null || item instanceof Number) {
                 value = (Number) item;
-
             } else {
                 Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), Number.class);
                 if (typeConvert == null) {

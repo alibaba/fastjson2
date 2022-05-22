@@ -108,7 +108,6 @@ public class Issue283 {
     }
 
     public static class ToStringObjectWriter implements ObjectWriter<Object> {
-
         public final static ToStringObjectWriter INSTANCE = new ToStringObjectWriter();
 
         @Override
@@ -124,7 +123,6 @@ public class Issue283 {
 
     @Data
     public class SysLoginForm {
-
         private String username;
 
         private String password;
@@ -135,5 +133,4 @@ public class Issue283 {
 
         private boolean rememberMe;
     }
-
 }

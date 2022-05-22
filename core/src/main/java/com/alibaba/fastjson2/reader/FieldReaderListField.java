@@ -15,7 +15,6 @@ import java.util.function.Function;
 class FieldReaderListField<T>
         extends FieldReaderObjectField<T>
         implements FieldReaderList<T, Object> {
-
     private Type itemType;
     final long fieldClassHash;
     ObjectReader itemReader;
@@ -32,7 +31,6 @@ class FieldReaderListField<T>
             Collection defaultValue,
             JSONSchema schema,
             Field field) {
-
         super(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, schema, field);
         this.itemType = itemType;
         this.fieldClassHash = fieldClass == null ? 0 : Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));

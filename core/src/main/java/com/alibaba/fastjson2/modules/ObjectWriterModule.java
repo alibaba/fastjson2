@@ -20,7 +20,6 @@ public interface ObjectWriterModule {
             ObjectWriterCreator creator
             , Class objectType
             , List<FieldWriter> fieldWriters) {
-
         return false;
     }
 

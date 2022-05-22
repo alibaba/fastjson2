@@ -361,7 +361,6 @@ public class JSONBDump {
                 int month = bytes[offset++];
                 int dayOfMonth = bytes[offset++];
 
-
                 LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
                 jsonWriter.writeLocalDate(localDate);
                 break;

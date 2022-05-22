@@ -111,7 +111,6 @@ public final class FieldReaderListInt64 implements ObjectReader {
         }
         jsonReader.next();
 
-
         Collection list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
         for (; ; ) {
             if (jsonReader.nextIfMatch(']')) {

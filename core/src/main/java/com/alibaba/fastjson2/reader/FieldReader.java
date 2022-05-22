@@ -110,7 +110,6 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
             for (Class superClass = thisFieldDeclaringClass.getSuperclass();
                  superClass != null && superClass != Object.class;
                  superClass = superClass.getSuperclass()) {
-
                 if (superClass == otherFieldDeclaringClass) {
                     return 1;
                 }
@@ -119,7 +118,6 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
             for (Class superClass = otherFieldDeclaringClass.getSuperclass();
                  superClass != null && superClass != Object.class;
                  superClass = superClass.getSuperclass()) {
-
                 if (superClass == thisFieldDeclaringClass) {
                     return -1;
                 }
@@ -135,7 +133,6 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
             for (Class superClass = thisFieldDeclaringClass.getSuperclass();
                  superClass != null && superClass != Object.class;
                  superClass = superClass.getSuperclass()) {
-
                 if (superClass == otherFieldDeclaringClass) {
                     return 1;
                 }
@@ -144,7 +141,6 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
             for (Class superClass = otherFieldDeclaringClass.getSuperclass();
                  superClass != null && superClass != Object.class;
                  superClass = superClass.getSuperclass()) {
-
                 if (superClass == thisFieldDeclaringClass) {
                     return -1;
                 }
@@ -162,7 +158,6 @@ public interface FieldReader<T> extends Comparable<FieldReader> {
                     return -1;
                 }
             }
-
         }
 
         return cmp;

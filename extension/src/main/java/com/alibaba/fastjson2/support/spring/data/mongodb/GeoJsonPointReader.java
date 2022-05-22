@@ -14,7 +14,6 @@ public class GeoJsonPointReader implements ObjectReader<GeoJsonPoint> {
     final static long HASH_COORDINATES = Fnv.hashCode64("coordinates");
 
     public GeoJsonPointReader() {
-
     }
 
     @Override
@@ -53,7 +52,6 @@ public class GeoJsonPointReader implements ObjectReader<GeoJsonPoint> {
             } else {
                 jsonReader.skipValue();
             }
-
         }
 
         jsonReader.nextIfMatch(',');

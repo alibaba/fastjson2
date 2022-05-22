@@ -28,7 +28,6 @@ import java.util.Map;
  */
 
 public class FastJsonConfig {
-
     /**
      * default charset
      */
@@ -83,7 +82,6 @@ public class FastJsonConfig {
      * init param.
      */
     public FastJsonConfig() {
-
         this.charset = IOUtils.UTF8;
 
         this.serializeConfig = SerializeConfig.getGlobalInstance();
@@ -181,7 +179,6 @@ public class FastJsonConfig {
      */
     public void setClassSerializeFilters(
             Map<Class<?>, SerializeFilter> classSerializeFilters) {
-
         this.classSerializeFilters = classSerializeFilters;
     }
 

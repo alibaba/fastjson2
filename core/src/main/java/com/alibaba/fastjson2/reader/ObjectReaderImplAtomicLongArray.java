@@ -42,7 +42,6 @@ final class ObjectReaderImplAtomicLongArray extends ObjectReaderBaseModule.Primi
             return array;
         }
 
-
         throw new JSONException("TODO");
     }
 

@@ -36,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 @ContextConfiguration
 public class FastJsonHttpMessageConverterMockTest {
-
     @Autowired
     private WebApplicationContext wac;
 
@@ -65,11 +64,9 @@ public class FastJsonHttpMessageConverterMockTest {
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content("{\"id\": 1}")
                 )).andExpect(status().isOk()).andDo(print());
-
     }
 
     public static class AbstractController<ID extends Serializable, PO extends GenericEntity<ID>> {
-
         @PostMapping(path = "/typeVariableBean", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
         public PO save(@RequestBody PO dto) {
             //do something
@@ -80,7 +77,6 @@ public class FastJsonHttpMessageConverterMockTest {
     @RestController
     @RequestMapping()
     public static class BeanController extends AbstractController<Long, TypeVariableBean> {
-
         @PostMapping(path = "/parameterizedTypeBean", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
         public String parameterizedTypeBean(@RequestBody ParameterizedTypeBean<String> parameterizedTypeBean) {
             return parameterizedTypeBean.t;

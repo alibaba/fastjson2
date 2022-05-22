@@ -436,7 +436,6 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
             , ClassWriter cw
             , String classNameType
             , ObjectReaderAdapter objectReaderAdapter) {
-
         MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
                 , "getFieldReader",
                 "(J)" + DESC_FIELD_READER
@@ -537,7 +536,6 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
         mw.visitLabel(rtnlt);
         mw.visitInsn(Opcodes.ARETURN);
 
-
         mw.visitMaxs(5, 5);
         mw.visitEnd();
     }
@@ -547,7 +545,6 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
             , ClassWriter cw
             , String classNameType
             , ObjectReaderAdapter objectReaderAdapter) {
-
         MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
                 , "getFieldReaderLCase",
                 "(J)" + DESC_FIELD_READER
@@ -567,7 +564,6 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
                 mw.visitLdcInsn(hashCode64);
                 mw.visitInsn(Opcodes.LCMP);
                 mw.visitJumpInsn(Opcodes.IFNE, next_);
-
 
                 mw.visitLabel(get_);
                 mw.visitVarInsn(Opcodes.ALOAD, THIS);
@@ -649,7 +645,6 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
         mw.visitLabel(rtnlt);
         mw.visitInsn(Opcodes.ARETURN);
 
-
         mw.visitMaxs(5, 5);
         mw.visitEnd();
     }
@@ -699,7 +694,6 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
         }
     }
 
-
     private void genFields(FieldReader[] fieldReaderArray, ClassWriter cw) {
         for (int i = 0; i < fieldReaderArray.length; i++) {
             FieldWriter fv = cw.visitField(Opcodes.ACC_PUBLIC, fieldReader(i), DESC_FIELD_READER);
@@ -710,7 +704,6 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
             FieldWriter fv = cw.visitField(Opcodes.ACC_PUBLIC, fieldObjectReader(i), DESC_OBJECT_READER);
             fv.visitEnd();
         }
-
 
         for (int i = 0; i < fieldReaderArray.length; i++) {
             Class fieldClass = fieldReaderArray[i].getFieldClass();
@@ -1075,7 +1068,6 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
         mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
         mw.visitInsn(Opcodes.ARETURN);
 
-
         mw.visitMaxs(5, 10);
         mw.visitEnd();
     }
@@ -1086,7 +1078,6 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
             int JSON_READER,
             int FEATURES,
             int AUTO_TYPE_OBJECT_READER) {
-
         Label checkArrayAutoTypeNull_ = new Label();
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
@@ -1176,7 +1167,6 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
         mw.visitIntInsn(Opcodes.BIPUSH, '[');
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
 
-
         genCreateObject(mw, classNameType, TYPE_OBJECT, fieldBased);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
@@ -1225,7 +1215,6 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
 
         genCreateObject(mw, classNameType, TYPE_OBJECT, fieldBased);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
-
 
         // for (int i = 0; i < entry_cnt; ++i) {
         Label for_start_i_ = new Label(), for_end_i_ = new Label(), for_inc_i_ = new Label();
@@ -1575,31 +1564,24 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
         } else if (fieldClass == byte.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt32Value", "()I", false);
-
         } else if (fieldClass == short.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt32Value", "()I", false);
-
         } else if (fieldClass == int.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt32Value", "()I", false);
-
         } else if (fieldClass == long.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt64Value", "()J", false);
-
         } else if (fieldClass == float.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readFloatValue", "()F", false);
-
         } else if (fieldClass == double.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readDoubleValue", "()D", false);
-
         } else if (fieldClass == char.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readCharValue", "()C", false);
-
         } else if (fieldClass == String.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             Label null_ = new Label();
@@ -1612,35 +1594,27 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "trim", "()Ljava/lang/String;", false);
             }
             mw.visitLabel(null_);
-
         } else if (fieldClass == Integer.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt32", "()Ljava/lang/Integer;", false);
-
         } else if (fieldClass == Long.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt64", "()Ljava/lang/Long;", false);
-
         } else if (fieldClass == Float.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readFloat", "()Ljava/lang/Float;", false);
-
         } else if (fieldClass == Double.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readDouble", "()Ljava/lang/Double;", false);
-
         } else if (fieldClass == BigDecimal.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readBigDecimal", "()Ljava/math/BigDecimal;", false);
-
         } else if (fieldClass == BigInteger.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readBigInteger", "()Ljava/math/BigInteger;", false);
-
         } else if (fieldClass == UUID.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readUUID", "()Ljava/util/UUID;", false);
-
         } else {
             Label endObject_ = new Label();
 
@@ -1764,7 +1738,6 @@ public class ObjectReaderCreatorASM extends ObjectReaderCreator {
                     mw.visitInsn(Opcodes.DUP);
                     mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
                     mw.visitVarInsn(Opcodes.ASTORE, LIST);
-
                 } else {
                     Label match_ = new Label();
 

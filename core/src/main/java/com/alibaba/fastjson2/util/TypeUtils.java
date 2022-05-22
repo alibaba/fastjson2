@@ -943,20 +943,17 @@ public class TypeUtils {
             try {
                 return contextClassLoader.loadClass(className);
             } catch (ClassNotFoundException ignored) {
-
             }
         }
 
         try {
             return JSON.class.getClassLoader().loadClass(className);
         } catch (ClassNotFoundException ignored) {
-
         }
 
         try {
             return Class.forName(className);
         } catch (ClassNotFoundException ignored) {
-
         }
 
         return null;

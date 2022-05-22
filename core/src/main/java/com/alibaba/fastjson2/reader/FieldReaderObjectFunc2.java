@@ -19,7 +19,6 @@ final class FieldReaderObjectFunc2<T, U> implements FieldReaderObject<T, U> {
             , BiConsumer<T, U> function
             , Type fieldType
             , String fieldName) {
-
         this.fieldObjectReader = fieldObjectReader;
         this.function = function;
         this.fieldType = fieldType;

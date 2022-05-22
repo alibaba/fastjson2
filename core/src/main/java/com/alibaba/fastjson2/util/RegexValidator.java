@@ -111,7 +111,6 @@ public class RegexValidator {
         return null;
     }
 
-
     /**
      * Validate a value against the set of regular expressions
      * returning a String value of the aggregated groups.

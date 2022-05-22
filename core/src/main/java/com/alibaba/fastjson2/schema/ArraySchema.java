@@ -101,10 +101,8 @@ public final class ArraySchema extends JSONSchema {
         } else if (prefixItems == null && !(items instanceof Boolean)) {
             additionalItemsSupport = true;
         } else if (itemSchema == null && prefixItems == null) {
-
         }
         this.additionalItems = additionalItemsSupport;
-
 
         if (prefixItems == null) {
             this.prefixItems = new JSONSchema[0];
@@ -422,8 +420,6 @@ public final class ArraySchema extends JSONSchema {
                     return new ValidateResult(false, "maxContains not match, expect %s, but %s", maxContains, containsCount);
                 }
             }
-
-
 
             if (allOf != null) {
                 ValidateResult result = allOf.validate(value);

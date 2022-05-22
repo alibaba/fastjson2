@@ -55,5 +55,4 @@ public class EishayWriteString {
                 .build();
         new Runner(options).run();
     }
-
 }

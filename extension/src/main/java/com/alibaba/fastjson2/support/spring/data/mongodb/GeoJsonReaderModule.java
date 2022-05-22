@@ -30,7 +30,6 @@ public class GeoJsonReaderModule implements ObjectReaderModule {
     static class PointMixin {
         @JSONCreator(parameterNames = {"x", "y"})
         public PointMixin(double x, double y) {
-
         }
     }
 
@@ -39,10 +38,8 @@ public class GeoJsonReaderModule implements ObjectReaderModule {
             typeName = "MultiPoint",
             deserializeFeatures = JSONReader.Feature.SupportArrayToBean)
     static abstract class GeoJsonMultiPointMixin {
-
         @JSONCreator(parameterNames = "coordinates")
         public GeoJsonMultiPointMixin(List<Point> points) {
-
         }
 
         @JSONField(deserialize = false)
@@ -55,10 +52,8 @@ public class GeoJsonReaderModule implements ObjectReaderModule {
             deserializeFeatures = JSONReader.Feature.SupportArrayToBean
     )
     static abstract class GeoJsonLineStringMixin {
-
         @JSONCreator(parameterNames = "coordinates")
         public GeoJsonLineStringMixin(List<Point> points) {
-
         }
 
         @JSONField(deserialize = false)

@@ -68,7 +68,6 @@ public class InetAddressValidator {
             if (ipSegment.length() > 1 && ipSegment.startsWith("0")) {
                 return false;
             }
-
         }
 
         return true;

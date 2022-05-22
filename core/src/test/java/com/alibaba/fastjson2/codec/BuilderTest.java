@@ -18,7 +18,6 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 public class BuilderTest {
-
     @Test
     public void test_build() throws Exception {
         ObjectReaderCreator creator = TestUtils.READER_CREATOR;
@@ -246,7 +245,6 @@ public class BuilderTest {
         Long tag3;
 
         private VO() {
-
         }
     }
 

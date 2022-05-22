@@ -452,7 +452,6 @@ public class Differ {
 
             Object leftItem = leftIt.next();
 
-
             boolean result = rightSet.contains(leftItem);
             if (!result && !itemClass.isInstance(leftItem)) {
                 Object castedItem = TypeUtils.cast(leftItem, itemClass);
@@ -545,7 +544,6 @@ public class Differ {
                         return false;
                     }
                 }
-
             } catch (Throwable ignored) {
                 ignored.printStackTrace();
             }

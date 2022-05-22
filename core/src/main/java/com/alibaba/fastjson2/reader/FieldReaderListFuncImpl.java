@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 
 class FieldReaderListFuncImpl<T, V>
         implements FieldReaderList<T, V> {
-
     final Supplier<List<V>> listCreator;
     final ObjectReader<V> itemObjectReader;
     final BiConsumer<T, List<V>> function;
@@ -23,7 +22,6 @@ class FieldReaderListFuncImpl<T, V>
             , BiConsumer<T, List<V>> function
             , Type itemType
             , String fieldName) {
-
         this.listCreator = listCreator;
         this.itemObjectReader = itemObjectReader;
         this.function = function;

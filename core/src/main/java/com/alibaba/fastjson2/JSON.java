@@ -366,7 +366,6 @@ public interface JSON {
         }
 
         try (JSONReader reader = JSONReader.of(text)) {
-
             JSONReader.Context context = reader.context;
             if (format != null && !format.isEmpty()) {
                 context.setUtilDateFormat(format);

@@ -515,6 +515,43 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.1.2</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>9.2</version>
+                    </dependency>
+                    <!--  This version must match the Airbase version. It will be updated by  -->
+                    <!--  the Maven Release plugin. The "project.version" property cannot be  -->
+                    <!--  used here as it will resolve to the version of the child project.   -->
+                    <dependency>
+                        <groupId>io.airlift</groupId>
+                        <artifactId>airbase-policy</artifactId>
+                        <version>123</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>checkstyle</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <failOnViolation>true</failOnViolation>
+                            <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                            <configLocation>src/checkstyle/fastjson2-checks.xml</configLocation>
+                            <excludes>**/*Test*.java,**/*Issue*.java</excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.gaul</groupId>
                 <artifactId>modernizer-maven-plugin</artifactId>
                 <configuration>

@@ -111,7 +111,6 @@ public final class ObjectSchema extends JSONSchema {
             this.patternProperties = new PatternProperty[0];
         }
 
-
         JSONArray required = input.getJSONArray("required");
         if (required == null) {
             this.required = Collections.emptySet();
@@ -129,7 +128,6 @@ public final class ObjectSchema extends JSONSchema {
                 this.requiredHashCode[i++] = Fnv.hashCode64(item);
             }
         }
-
 
         Object additionalProperties = input.get("additionalProperties");
         if (additionalProperties instanceof Boolean) {
@@ -522,7 +520,6 @@ public final class ObjectSchema extends JSONSchema {
                 }
             }
         }
-
 
         if (allOf != null) {
             ValidateResult result = allOf.validate(value);

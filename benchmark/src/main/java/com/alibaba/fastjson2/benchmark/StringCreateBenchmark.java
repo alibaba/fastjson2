@@ -13,7 +13,6 @@ import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
-
 public class StringCreateBenchmark {
     static final BiFunction<char[], Boolean, String> STRING_CREATOR = getStringCreator();
     static final char[] chars = new char[128];

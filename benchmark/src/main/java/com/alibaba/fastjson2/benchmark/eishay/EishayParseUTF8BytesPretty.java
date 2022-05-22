@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-
 public class EishayParseUTF8BytesPretty {
     static byte[] utf8Bytes;
     static ObjectMapper mapper = new ObjectMapper();
@@ -72,5 +71,4 @@ public class EishayParseUTF8BytesPretty {
                 .build();
         new Runner(options).run();
     }
-
 }

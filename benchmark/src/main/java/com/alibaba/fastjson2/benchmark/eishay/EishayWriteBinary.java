@@ -80,5 +80,4 @@ public class EishayWriteBinary {
                 .build();
         new Runner(options).run();
     }
-
 }

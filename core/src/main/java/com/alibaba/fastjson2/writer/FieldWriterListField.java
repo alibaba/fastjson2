@@ -20,10 +20,8 @@ final class FieldWriterListField<T> extends FieldWriterList<T> {
             , Class fieldClass
             , Field field
     ) {
-
         super(fieldName, itemType, ordinal, features, format, fieldType, fieldClass);
         this.field = field;
-
     }
 
     @Override

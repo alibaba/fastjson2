@@ -34,7 +34,6 @@ import com.alibaba.fastjson2.JSONException;
  * @author Eugene Kuleshov
  */
 public final class MethodWriter {
-
     protected MethodWriter mv;
 
     /**
@@ -370,7 +369,6 @@ public final class MethodWriter {
         currentBasicBlock = label;
         // Here label.frame should be null.
         label.frame = new Frame(label);
-
     }
 //
 //  public void visitLdcInsn(final Object value) {

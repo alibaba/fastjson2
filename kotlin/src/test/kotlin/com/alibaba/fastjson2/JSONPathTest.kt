@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class JSONPathTest {
-
     @Test
     fun test_eval() {
         val user = User(

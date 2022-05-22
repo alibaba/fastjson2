@@ -15,7 +15,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-
 public class EishayParseString {
     static String str;
     static ObjectMapper mapper = new ObjectMapper();
@@ -92,5 +91,4 @@ public class EishayParseString {
                 .build();
         new Runner(options).run();
     }
-
 }

@@ -75,7 +75,6 @@ public class DynamicClassLoader extends ClassLoader {
                 return DynamicClassLoader.class.getProtectionDomain();
             }
         });
-
     }
 
     private final ClassLoader parent;
@@ -117,7 +116,6 @@ public class DynamicClassLoader extends ClassLoader {
     }
 
     public Class<?> defineClassPublic(String name, byte[] b, int off, int len) throws ClassFormatError {
-
         return defineClass(name, b, off, len, DOMAIN);
     }
 
