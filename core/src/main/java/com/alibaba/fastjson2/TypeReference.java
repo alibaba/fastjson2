@@ -243,10 +243,10 @@ public abstract class TypeReference<T> {
             // fix for openjdk and android env
             if (argTypes[i] instanceof GenericArrayType) {
                 Type componentType = argTypes[i];
-                StringBuilder sb = new StringBuilder();
 
+                int dimension = 0;
                 while (componentType instanceof GenericArrayType) {
-                    sb.append('[');
+                    dimension++;
                     componentType = ((GenericArrayType) componentType).getGenericComponentType();
                 }
 
@@ -254,30 +254,36 @@ public abstract class TypeReference<T> {
                     Class<?> cls = (Class<?>) componentType;
                     Loader:
                     if (cls.isPrimitive()) {
+                        final char ch;
                         if (cls == int.class) {
-                            sb.append('I');
+                            ch = 'I';
                         } else if (cls == long.class) {
-                            sb.append('J');
+                            ch = 'J';
                         } else if (cls == float.class) {
-                            sb.append('F');
+                            ch = 'F';
                         } else if (cls == double.class) {
-                            sb.append('D');
+                            ch = 'D';
                         } else if (cls == boolean.class) {
-                            sb.append('Z');
+                            ch = 'Z';
                         } else if (cls == char.class) {
-                            sb.append('C');
+                            ch = 'C';
                         } else if (cls == byte.class) {
-                            sb.append('B');
+                            ch = 'B';
                         } else if (cls == short.class) {
-                            sb.append('S');
+                            ch = 'S';
                         } else {
+                            ch = '\0';
                             break Loader;
                         }
 
                         try {
-                            argTypes[i] = Class.forName(
-                                sb.toString()
-                            );
+                            char[] chars = new char[dimension + 1];
+                            for (int j = 0; j < dimension; j++) {
+                                chars[j] = '[';
+                            }
+                            chars[dimension] = ch;
+                            String typeName = new String(chars);
+                            argTypes[i] = Class.forName(typeName);
                         } catch (ClassNotFoundException e) {
                             // nothing
                         }
