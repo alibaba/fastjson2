@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AtomicLongReadOnlyTest {
-
     @Test
     public void test_codec_null() {
         V0 v = new V0(123);
@@ -22,7 +21,6 @@ public class AtomicLongReadOnlyTest {
     }
 
     public static class V0 {
-
         private final AtomicLong value;
 
         public V0(){

@@ -30,7 +30,6 @@ public class Issue3131 {
         private List<T> orgs;
 
         public Orgs() {
-
         }
 
         public Orgs(String name, List<T> orgs)
@@ -67,14 +66,14 @@ public class Issue3131 {
         }
     }
 
-    public static class UserOrg extends Org implements Serializable{
-
+    public static class UserOrg
+            extends Org
+            implements Serializable{
         private String name;
 
         private String idcard;
 
         public UserOrg() {
-
         }
 
         public UserOrg(String name, String idcard)
@@ -105,12 +104,11 @@ public class Issue3131 {
         }
     }
 
-    public abstract static class Org implements Serializable{
-
+    public abstract static class Org
+            implements Serializable{
         private String name;
 
         public Org() {
-
         }
 
         public Org(String name)

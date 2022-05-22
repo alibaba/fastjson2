@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONPath_9 {
-
     @Test
     public void test_remove_error() throws Exception {
         Int1 vo = new Int1();
@@ -78,14 +77,5 @@ public class JSONPath_9 {
     public static class Model {
         public Integer f0;
         public Integer f1;
-
     }
-
-//    public void test_path_2() throws Exception {
-////        File file = new File("/Users/wenshao/Downloads/test");
-////        String json = FileUtils.readFileToString(file);
-//        String json = "{\"returnObj\":[{\"$ref\":\"$.subInvokes.com\\\\.alipay\\\\.cif\\\\.user\\\\.UserInfoQueryService\\\\@findUserInfosByCardNo\\\\(String[])[0].response[0]\"}]}";
-//        JSON.parseObject(json);
-//    }
-
 }

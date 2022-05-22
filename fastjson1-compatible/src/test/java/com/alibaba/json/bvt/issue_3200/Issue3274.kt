@@ -12,7 +12,6 @@ class TestFJ {
             {"data": {"id": "1", "name":"n1"}}
         """.trimIndent()
 
-
         val d1 = JSON.parseObject(str, Data2::class.java)
 
         val data = JSON.parseObject(str)

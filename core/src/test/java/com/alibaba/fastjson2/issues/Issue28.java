@@ -24,6 +24,5 @@ public class Issue28 {
     }
 
     public static class Result {
-
     }
 }

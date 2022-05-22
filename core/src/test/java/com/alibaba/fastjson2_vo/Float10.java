@@ -13,7 +13,6 @@ public class Float10 {
     private float v0009;
 
     public Float10() {
-
     }
 
     public float getV0000() {

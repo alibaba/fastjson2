@@ -36,6 +36,5 @@ public class RefTest6 {
     }
 
     public class C {
-
     }
 }

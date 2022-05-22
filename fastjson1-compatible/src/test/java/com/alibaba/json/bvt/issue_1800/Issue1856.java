@@ -21,7 +21,6 @@ public class Issue1856 {
     }
 
     public static class VO {
-
         private int    id;
         private String name;
         private String password;

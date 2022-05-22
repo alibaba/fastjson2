@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AtomicBooleanReadOnlyTest {
-
     @Test
     public void test_codec_null() {
         V0 v = new V0(true);
@@ -22,7 +21,6 @@ public class AtomicBooleanReadOnlyTest {
     }
 
     public static class V0 {
-
         private final AtomicBoolean value;
 
         public V0(){

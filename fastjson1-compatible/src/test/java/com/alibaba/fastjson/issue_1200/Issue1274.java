@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1274 {
     @Test
     public void test_for_issue() throws Exception {
-
         User user = new User();
         user.setId(1);
         user.setName("name");

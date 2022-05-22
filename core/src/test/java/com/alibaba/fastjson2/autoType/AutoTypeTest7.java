@@ -91,11 +91,11 @@ public class AutoTypeTest7 {
         }
     }
 
-    public static class C extends B {
+    public static class C
+            extends B {
         public int id;
 
         public C() {
-
         }
 
         public C(int id) {

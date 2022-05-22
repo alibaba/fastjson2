@@ -2,16 +2,10 @@ package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
-import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import org.junit.jupiter.api.Test;
-
-import java.lang.reflect.Type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -29,13 +23,13 @@ public class JSONType_deserializer {
         public int id;
     }
 
-    public static class BeanReader implements ObjectReader<Bean> {
-
+    public static class BeanReader
+            implements ObjectReader<Bean> {
         @Override
         public Bean readObject(JSONReader jsonReader, long features) {
             Bean bean = new Bean();
             jsonReader.nextIfObjectStart();
-            for (;;) {
+            for (; ; ) {
                 if (jsonReader.nextIfObjectEnd()) {
                     break;
                 }
@@ -59,7 +53,7 @@ public class JSONType_deserializer {
             ObjectReader<Bean> objectReader = creator.createObjectReader(Bean.class);
 
             JSONReader jsonReader = JSONReader.of(str);
-            Bean bean =  objectReader.readObject(jsonReader);
+            Bean bean = objectReader.readObject(jsonReader);
 
             assertEquals(123, bean.id);
         }

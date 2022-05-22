@@ -21,19 +21,15 @@ import com.alibaba.fastjson2.annotation.JSONType;
 public abstract class Geometry {
     private final String type;
     private double[] bbox;
-
     protected Geometry(String type) {
         this.type = type;
     }
-
     public String getType() {
         return type;
     }
-
     public double[] getBbox() {
         return bbox;
     }
-
     public void setBbox(double[] bbox) {
         this.bbox = bbox;
     }

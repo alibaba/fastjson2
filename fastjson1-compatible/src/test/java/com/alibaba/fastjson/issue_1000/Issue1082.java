@@ -22,7 +22,6 @@ public class Issue1082 {
     }
 
     public void f() {
-
     }
 
     public class Model_1082 {

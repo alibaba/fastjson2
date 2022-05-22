@@ -44,10 +44,12 @@ public class Issue1225 {
         public T data;
     }
 
-    static class ExtendGenericType<T> extends BaseGenericType<List<T>> {
+    static class ExtendGenericType<T>
+            extends BaseGenericType<List<T>> {
     }
 
-    static class SimpleGenericObject extends ExtendGenericType<String> {
+    static class SimpleGenericObject
+            extends ExtendGenericType<String> {
     }
 
 }

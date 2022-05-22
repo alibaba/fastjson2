@@ -50,6 +50,4 @@ public class HSFPerf {
         }
         System.out.println();
     }
-
-
 }

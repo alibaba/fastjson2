@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Assertions
 
 
 class TestIssue3223 {
-
     @Test
     fun test() {
         val cfg = ParserConfig.getGlobalInstance()

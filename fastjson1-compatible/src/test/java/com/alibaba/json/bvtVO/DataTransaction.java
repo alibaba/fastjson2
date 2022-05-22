@@ -12,8 +12,8 @@ import java.util.Map;
  * 交易消息体
  */
 @SuppressWarnings("rawtypes")
-public class DataTransaction implements Serializable {
-
+public class DataTransaction
+        implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Head              head             = new Head();
@@ -21,14 +21,12 @@ public class DataTransaction implements Serializable {
     private Body              body             = new Body();
 
     public DataTransaction(){
-
     }
 
     /**
      * Head
      **/
     public static class Head {
-
         private String appid;
 
         private String transcode;
@@ -43,7 +41,6 @@ public class DataTransaction implements Serializable {
          * 用户信息
          */
         public static class User {
-
             private String id;
 
             public String getId() {
@@ -59,7 +56,6 @@ public class DataTransaction implements Serializable {
          * 处理结果
          */
         public static class Ret {
-
             private String code;
             private String msg;
 
@@ -133,20 +129,17 @@ public class DataTransaction implements Serializable {
      * Body
      */
     public static class Body {
-
         private Param   param = new Param();
 
         private DataSet dataset;
 
         public Body(){
-
         }
 
         /**
          * 参数
          */
         public static class Param {
-
             private Limit               limit = new Limit();
 
             private Map<String, String> form  = new HashMap<String, String>();
@@ -155,7 +148,6 @@ public class DataTransaction implements Serializable {
              * 分页信息
              */
             public static class Limit {
-
                 private String start;
                 private String size;
                 private String total;
@@ -215,7 +207,6 @@ public class DataTransaction implements Serializable {
          * 数据集
          */
         public static class DataSet {
-
             private String total;
 
             private List   rows = new ArrayList();

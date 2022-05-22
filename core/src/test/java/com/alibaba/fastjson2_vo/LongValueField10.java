@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2_vo;
 
-import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.annotation.JSONType;
 
 @JSONType(deserializeFeatures = JSONReader.Feature.SupportSmartMatch)
 public class LongValueField10 {

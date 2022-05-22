@@ -29,10 +29,8 @@ public class Issue2787 {
     }
 
     public static class Issue2752 {
-
         @Test
         public void test_for_issue() {
-
             Pageable pageRequest = PageRequest.of(0, 10, Sort.Direction.DESC, "id");
             SerializeConfig config = new SerializeConfig();
 //                    config.register(new MyModule());
@@ -40,8 +38,8 @@ public class Issue2787 {
             assertTrue(result.indexOf("\"property\":\"id\"") != -1);
         }
 
-        public class MyModule implements Module {
-
+        public class MyModule
+                implements Module {
             @Override
             public ObjectDeserializer createDeserializer(ParserConfig config, Class type) {
                 if (type.getName().equals("org.springframework.data.domain.Sort")) {

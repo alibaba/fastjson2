@@ -23,7 +23,8 @@ public class Issue1178 {
 
     }
 
-    public static class TestModel implements Serializable {
+    public static class TestModel
+            implements Serializable {
         public String info;
     }
 }

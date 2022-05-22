@@ -25,7 +25,8 @@ public class Issue1945 {
         assertNotNull(a1);
     }
 
-    static class B implements Serializable {
+    static class B
+            implements Serializable {
         public Class[] clazz;
         public Map aInstance;
     }

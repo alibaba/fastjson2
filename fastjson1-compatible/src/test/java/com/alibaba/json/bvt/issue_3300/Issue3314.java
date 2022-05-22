@@ -41,8 +41,6 @@ public class Issue3314 {
         objOut.writeObject(array);
         objOut.flush();
 
-
-
         byte[] bytes = bytesOut.toByteArray();
 
         ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytes);

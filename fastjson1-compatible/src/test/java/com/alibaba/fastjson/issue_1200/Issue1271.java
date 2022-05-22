@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Issue1271 {
     @Test
     public void test_for_issue() throws Exception {
-
         String json = "{\"a\":1,\"b\":2}";
 
         final AtomicInteger count = new AtomicInteger(0);

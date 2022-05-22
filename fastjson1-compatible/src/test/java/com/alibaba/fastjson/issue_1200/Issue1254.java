@@ -21,7 +21,6 @@ public class Issue1254 {
         B b = new B();
         b.set_parentId("001");
 
-
         String testB = JSON.toJSONString(b);
         System.out.println(testB);
         assertEquals("{\"_parentId\":\"001\"}", testB);

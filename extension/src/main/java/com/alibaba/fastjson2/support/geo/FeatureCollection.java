@@ -12,11 +12,9 @@ import java.util.List;
 public class FeatureCollection
         extends Geometry {
     private List<Feature> features = new ArrayList<Feature>();
-
     public FeatureCollection() {
         super("FeatureCollection");
     }
-
     public List<Feature> getFeatures() {
         return features;
     }

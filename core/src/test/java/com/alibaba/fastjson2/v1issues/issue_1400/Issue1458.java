@@ -23,8 +23,8 @@ public class Issue1458 {
         assertEquals(json, json1);
     }
 
-    public static class HostPoint implements Serializable {
-
+    public static class HostPoint
+            implements Serializable {
         private final HostAddress address;
 
         @JSONField(name = "fingerprint")
@@ -68,10 +68,10 @@ public class Issue1458 {
         public void setUnkown(boolean unkown) {
             this.unkown = unkown;
         }
-
     }
 
-    public static class Fingerprint implements Serializable {
+    public static class Fingerprint
+            implements Serializable {
         private final String source;
 
         private ImmutableMap<String, String> probes;

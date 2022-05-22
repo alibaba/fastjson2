@@ -101,8 +101,8 @@ public class PathTest {
         Object result = path.extract(parser);
         assertEquals(Arrays.asList("Mozilla/5.0", "Windows NT 6.1", "1024x4069"), result);
 
-        assertEquals(new JSONArray("Mozilla/5.0", "Windows NT 6.1", "1024x4069")
-                , path.eval(rootObject));
+        assertEquals(new JSONArray("Mozilla/5.0", "Windows NT 6.1", "1024x4069"),
+                 path.eval(rootObject));
     }
 
     @Test
@@ -120,8 +120,8 @@ public class PathTest {
         Object result = path.extract(parser);
         assertEquals(Arrays.asList("Mozilla/5.0", "Windows NT 6.1", "1024x4069"), result);
 
-        assertEquals(new JSONArray("Mozilla/5.0", "Windows NT 6.1", "1024x4069")
-                , path.eval(rootObject));
+        assertEquals(new JSONArray("Mozilla/5.0", "Windows NT 6.1", "1024x4069"),
+                 path.eval(rootObject));
     }
 
     @Test

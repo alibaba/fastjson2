@@ -4,7 +4,6 @@ package com.alibaba.json.bvtVO.mogujie;
  * Created by wenshao on 16/03/2017.
  */
 public class BindQueryRespDTO {
-
     /**
      * version
      */

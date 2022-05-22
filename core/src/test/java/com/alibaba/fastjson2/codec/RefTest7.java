@@ -53,7 +53,6 @@ public class RefTest7 {
     }
 
     public static class Value {
-
     }
 
     public static class Key {

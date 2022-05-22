@@ -2,7 +2,6 @@ package com.alibaba.fastjson_perf;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2_vo.Float10;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +15,6 @@ public class FloatArrayPerf {
         for (int i = 0; i < array.length; i++) {
             array[i] = random.nextFloat();
         }
-
     }
 
     @Test

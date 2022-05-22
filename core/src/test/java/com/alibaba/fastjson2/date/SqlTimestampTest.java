@@ -6,8 +6,6 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
-import java.time.ZonedDateTime;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlTimestampTest {

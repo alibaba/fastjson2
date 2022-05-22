@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue2914 {
     @Test
     public void test_for_issue() throws Exception {
-
         ComplexInt complexInt = new ComplexInt();
 
         Queue<Integer> blockQueueInt = new ArrayBlockingQueue<Integer>(5);
@@ -27,7 +26,6 @@ public class Issue2914 {
         ComplexInt complexInt1 = JSON.parseObject(jsonInt, ComplexInt.class);
 
         assertEquals(3, complexInt1.getBlockQueue().size());
-
 
         Complex complex = new Complex();
 
@@ -48,7 +46,6 @@ public class Issue2914 {
 
 
     public static class Complex  {
-
         private Queue<String> blockQueue;
 
         public Queue<String> getBlockQueue() {
@@ -61,7 +58,6 @@ public class Issue2914 {
     }
 
     public static class ComplexInt  {
-
         private Queue<Integer> blockQueue;
 
         public Queue<Integer> getBlockQueue() {

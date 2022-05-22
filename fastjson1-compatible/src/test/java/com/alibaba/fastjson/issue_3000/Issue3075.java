@@ -276,8 +276,8 @@ public class Issue3075 {
     @NoArgsConstructor
     @Data
 
-    public static class TestBO extends TestBasicBO{
-
+    public static class TestBO
+            extends TestBasicBO{
         public String mlbkyxy;
         public List<Integer> sqhgpd;
         public List<Integer> nikawljmoafb;

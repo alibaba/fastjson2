@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class FastJsonHttpMessageConverterTest {
-
     @Test
     public void test_read() throws Exception {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
@@ -32,7 +31,6 @@ public class FastJsonHttpMessageConverterTest {
         method.invoke(converter, int.class);
 
         HttpInputMessage input = new HttpInputMessage() {
-
             public HttpHeaders getHeaders() {
                 // TODO Auto-generated method stub
                 return null;
@@ -49,7 +47,6 @@ public class FastJsonHttpMessageConverterTest {
 
         final ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         HttpOutputMessage out = new HttpOutputMessage() {
-
             public HttpHeaders getHeaders() {
                 return new HttpHeaders();
             }
@@ -66,7 +63,6 @@ public class FastJsonHttpMessageConverterTest {
 
     @Test
     public void test_1() throws Exception {
-
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
 
         Assertions.assertNotNull(converter.getFastJsonConfig());
@@ -78,7 +74,6 @@ public class FastJsonHttpMessageConverterTest {
         converter.canWrite(VO.class, VO.class, MediaType.APPLICATION_JSON_UTF8);
 
         HttpInputMessage input = new HttpInputMessage() {
-
             public HttpHeaders getHeaders() {
                 // TODO Auto-generated method stub
                 return null;
@@ -95,7 +90,6 @@ public class FastJsonHttpMessageConverterTest {
 
         final ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         HttpOutputMessage out = new HttpOutputMessage() {
-
             public HttpHeaders getHeaders() {
                 return new HttpHeaders();
             }
@@ -117,22 +111,17 @@ public class FastJsonHttpMessageConverterTest {
         converter.write(vo, VO.class, MediaType.ALL, out);
 
         HttpOutputMessage out2 = new HttpOutputMessage() {
-
             public HttpHeaders getHeaders() {
-
                 return new HttpHeaders() {
-
                     private static final long serialVersionUID = 1L;
 
                     @Override
                     public MediaType getContentType() {
-
                         return MediaType.APPLICATION_JSON;
                     }
 
                     @Override
                     public long getContentLength() {
-
                         return 1;
                     }
                 };
@@ -161,7 +150,6 @@ public class FastJsonHttpMessageConverterTest {
     };
 
     public static class VO {
-
         private int id;
 
         public int getId() {

@@ -28,7 +28,6 @@ public class Issue1079 {
     }
 
     public static class PdpResponse {
-
         @JSONField(name ="Response")
         public List<Response> response;
 
@@ -42,7 +41,6 @@ public class Issue1079 {
             @JSONField(name = "Decision")
             public String decision;
         }
-
 
         public static class Status {
             @JSONField(name = "StatusCode")

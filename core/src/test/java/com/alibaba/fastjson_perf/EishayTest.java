@@ -600,23 +600,23 @@ public class EishayTest {
                 .read(MediaContent.class);
 
         JSONB.SymbolTable symbolTable = JSONB.symbolTable(
-                "images"
-                , "height"
-                , "size"
-                , "title"
-                , "uri"
-                , "width"
-                , "media"
-                , "bitrate"
-                , "duration"
-                , "format"
-                , "persons"
-                , "player"
-                , "LARGE"
-                , "SMALL"
-                , "JAVA"
-                , "FLASH"
-                , "copyright"
+                "images",
+                 "height",
+                 "size",
+                 "title",
+                 "uri",
+                 "width",
+                 "media",
+                 "bitrate",
+                 "duration",
+                 "format",
+                 "persons",
+                 "player",
+                 "LARGE",
+                 "SMALL",
+                 "JAVA",
+                 "FLASH",
+                 "copyright"
         );
 
         JSONWriter writer = JSONWriter.ofJSONB(symbolTable);

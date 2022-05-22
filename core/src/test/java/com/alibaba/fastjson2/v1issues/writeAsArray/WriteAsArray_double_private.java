@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class WriteAsArray_double_private {
     @Test
-    public void test_0 () {
+    public void test_0() {
         VO vo = new VO();
         vo.setId(123D);
         vo.setName("wenshao");

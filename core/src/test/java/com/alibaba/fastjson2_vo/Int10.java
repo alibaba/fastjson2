@@ -13,7 +13,6 @@ public class Int10 {
     private int v0009;
 
     public Int10() {
-
     }
 
     public int getV0000() {

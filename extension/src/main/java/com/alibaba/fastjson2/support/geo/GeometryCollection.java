@@ -12,7 +12,6 @@ import java.util.List;
 public class GeometryCollection
         extends Geometry {
     private List<Geometry> geometries = new ArrayList<Geometry>();
-
     public GeometryCollection() {
         super("GeometryCollection");
     }

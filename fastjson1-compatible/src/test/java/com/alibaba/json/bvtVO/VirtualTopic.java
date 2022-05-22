@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class VirtualTopic {
-
     private static final long         serialVersionUID = 1115397330651723322L;
 
     private Map<Integer, QueueEntity> queueMap         = new HashMap<Integer, QueueEntity>();
@@ -15,7 +14,6 @@ public class VirtualTopic {
     private String                    description;
 
     public VirtualTopic(){
-
     }
 
     public String getDescription() {

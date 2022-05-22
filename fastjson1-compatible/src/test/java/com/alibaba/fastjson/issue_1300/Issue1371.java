@@ -18,7 +18,6 @@ public class Issue1371 {
 
     @Test
     public void testFastjsonEnum(){
-
         Map<Rooms, Rooms> enumMap = new TreeMap<Rooms, Rooms>();
 
         enumMap.put(Rooms.C, Rooms.D);

@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.v1issues.issue_1600.issue_1699.def;
 
 public enum RatingDetailTypeMEnum {
-
     COMM,
     FC,
     PRE_FC,
@@ -18,8 +17,5 @@ public enum RatingDetailTypeMEnum {
     PRE_TREAT,
     REALTIME_CHARGING,
     CYCLE_CHARGING,
-    SHARE_CHARGING,
-    ;
-
-
+    SHARE_CHARGING
 }

@@ -5,7 +5,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class KeyedCollection<TKey, TItem> implements CollectionEx<TItem>, Cloneable {
+public abstract class KeyedCollection<TKey, TItem>
+        implements CollectionEx<TItem>, Cloneable {
     private transient Map<TKey, TItem> items = new LinkedHashMap<TKey, TItem>();
 
     protected abstract TKey getKeyForItem(TItem item);
@@ -41,8 +42,9 @@ public abstract class KeyedCollection<TKey, TItem> implements CollectionEx<TItem
     }
 
     public boolean add(TItem item) {
-        if (item == null)
+        if (item == null) {
             throw new IllegalArgumentException("item can not be null.");
+        }
         TKey key = this.getKeyForItem(item);
         this.items.put(key, item);
         return true;
@@ -58,23 +60,26 @@ public abstract class KeyedCollection<TKey, TItem> implements CollectionEx<TItem
 
     public boolean addAll(Collection<? extends TItem> items) {
         boolean modified = false;
-        for (TItem item : items)
+        for (TItem item : items) {
             modified |= this.add(item);
+        }
         return modified;
     }
 
     public boolean removeAll(Collection<?> keys) {
         boolean modified = false;
-        for (Object key : keys)
+        for (Object key : keys) {
             modified |= this.remove(key);
+        }
         return modified;
     }
 
     public boolean retainAll(Collection<?> keys) {
         boolean modified = false;
         for (TKey key : this.items.keySet()) {
-            if (!keys.contains(key))
+            if (!keys.contains(key)) {
                 modified |= this.remove(key);
+            }
         }
         return modified;
     }

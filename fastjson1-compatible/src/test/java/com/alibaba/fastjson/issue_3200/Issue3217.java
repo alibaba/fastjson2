@@ -47,7 +47,8 @@ public class Issue3217 {
         }
     }
 
-    public static class MyException extends Exception {
+    public static class MyException
+            extends Exception {
         private EnumTest enumTest;
 
         public EnumTest getEnumTest() {

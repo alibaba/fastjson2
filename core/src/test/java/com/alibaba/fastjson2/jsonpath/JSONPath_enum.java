@@ -6,9 +6,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONPath_enum {
-
     @Test
-    public void test_name() throws Exception {
+    public void test_name() {
         Model model = new Model();
         model.size = Size.Small;
 
@@ -16,7 +15,7 @@ public class JSONPath_enum {
     }
 
     @Test
-    public void test_orginal() throws Exception {
+    public void test_orginal() {
         Model model = new Model();
         model.size = Size.Small;
 

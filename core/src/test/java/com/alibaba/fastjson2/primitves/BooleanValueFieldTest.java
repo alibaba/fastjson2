@@ -103,7 +103,7 @@ public class BooleanValueFieldTest {
         boolean value;
     }
 
-    static class B extends A {
-
+    static class B
+            extends A {
     }
 }

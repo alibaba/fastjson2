@@ -37,14 +37,11 @@ public class BigDecimal_type {
                         new Model(-100)));
     }
 
-
-
     @JSONType(serialzeFeatures = BrowserCompatible)
     public static class Model {
         public BigDecimal value;
 
         public Model() {
-
         }
 
         public Model(long value) {

@@ -38,7 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 @ContextConfiguration
 public class Issue1701 {
-
     @Autowired
     private WebApplicationContext wac;
 
@@ -55,11 +54,9 @@ public class Issue1701 {
     @RestController
     @RequestMapping()
     public static class BeanController {
-
         @PostMapping(path = "/download", produces = "application/octet-stream;charset=UTF-8")
         public @ResponseBody
         ResponseEntity<byte[]> download(@RequestBody TestBean testBean) {
-
             byte[] body = new byte[0];
             InputStream in;
             try {
@@ -86,8 +83,8 @@ public class Issue1701 {
     @ComponentScan(basePackages = "com.alibaba.fastjson.issue_1700")
     @Configuration
     @EnableWebMvc
-    public static class WebMvcConfig extends WebMvcConfigurerAdapter {
-
+    public static class WebMvcConfig
+            extends WebMvcConfigurerAdapter {
         @Override
         public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
             FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
@@ -107,7 +104,6 @@ public class Issue1701 {
     }
 
     static class TestBean {
-
         private String name;
 
         public String getName() {

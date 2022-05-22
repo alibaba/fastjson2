@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import java.io.Serializable;
 
 public class TestJson {
-
     @Test
     public void test_for_issue() {
         ParserConfig config = new ParserConfig();

@@ -21,7 +21,8 @@ public class Issue1945 {
         B a1 = JSON.parseObject(s, B.class);
     }
 
-    static class B implements Serializable {
+    static class B
+            implements Serializable {
         public Class[] clazz;
         public Map aInstance;
     }

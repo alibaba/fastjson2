@@ -17,7 +17,6 @@ public class Issue3465 {
         JSONObject parse1 = JSON.parseObject(rst1);
         System.out.println(parse1.toJSONString());
 
-
         JSONObject jsonObj = new JSONObject();
         JSONObject sonJsonObj = new JSONObject();
         sonJsonObj.put("2ca0898f74b4cc6d0174b4cc77fd0005", "2ca0898f74b4cc6d0174b4cc77fd0005");

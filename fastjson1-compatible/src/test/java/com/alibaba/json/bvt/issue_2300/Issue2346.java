@@ -27,7 +27,6 @@ public class Issue2346 {
 
         @JSONPOJOBuilder(withPrefix = "")
         public static class TestEntityBuilder{
-
         }
     }
 

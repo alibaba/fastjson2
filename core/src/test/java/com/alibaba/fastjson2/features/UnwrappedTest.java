@@ -25,7 +25,6 @@ public class UnwrappedTest {
         private Map<String, String> properties = new HashMap<>();
 
         public ExtendableBean() {
-
         }
 
         @JSONField(unwrapped = true)

@@ -52,19 +52,19 @@ public class NumberArrayTest {
     @Test
     public void test_1_jsonb() {
         Number[] values = new Number[]{
-                Long.MIN_VALUE
-                , Integer.MIN_VALUE
-                , Short.MAX_VALUE
-                , JSONBTest.INT24_MAX
-                , 0
-                , null
-                , BigDecimal.ZERO
-                , BigDecimal.valueOf(Short.MAX_VALUE)
-                , BigDecimal.valueOf(JSONBTest.INT24_MAX)
-                , BigDecimal.valueOf(Integer.MAX_VALUE)
-                , BigDecimal.valueOf(Long.MAX_VALUE)
-                , new BigDecimal("12345678901234567890123456789012345678901234567890123456789012345678901234567890")
-                , BigInteger.TEN
+                Long.MIN_VALUE,
+                 Integer.MIN_VALUE,
+                 Short.MAX_VALUE,
+                 JSONBTest.INT24_MAX,
+                 0,
+                 null,
+                 BigDecimal.ZERO,
+                 BigDecimal.valueOf(Short.MAX_VALUE),
+                 BigDecimal.valueOf(JSONBTest.INT24_MAX),
+                 BigDecimal.valueOf(Integer.MAX_VALUE),
+                 BigDecimal.valueOf(Long.MAX_VALUE),
+                 new BigDecimal("12345678901234567890123456789012345678901234567890123456789012345678901234567890"),
+                 BigInteger.TEN
         };
         for (Number value : values) {
             Number1 vo = new Number1();

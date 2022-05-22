@@ -73,10 +73,10 @@ public class Issue1556 {
         public static <T> ApiResult<T> valueOfSuccess(T data) {
             return new ApiResult<T>(0, "Success", data);
         }
-
     }
 
-    public static class ClassForData implements Serializable {
+    public static class ClassForData
+            implements Serializable {
 
         private String dataName;
 
@@ -132,10 +132,10 @@ public class Issue1556 {
         public void setCommonInfo(SubCommonClass commonInfo) {
             this.commonInfo = commonInfo;
         }
-
     }
 
-    public static class SecondSubClass implements Serializable{
+    public static class SecondSubClass
+            implements Serializable{
 
         private String name;
 

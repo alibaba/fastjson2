@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Created by wenshao on 30/05/2017.
  */
 public class Issue1225 {
-
     @Test
     public void test_parseObject_0() {
         BaseGenericType<List<String>> o = JSON.parseObject("{\"data\":[\"1\",\"2\",\"3\"]}",
@@ -42,10 +41,12 @@ public class Issue1225 {
         public T data;
     }
 
-    static class ExtendGenericType<T> extends BaseGenericType<List<T>> {
+    static class ExtendGenericType<T>
+            extends BaseGenericType<List<T>> {
     }
 
-    static class SimpleGenericObject extends ExtendGenericType<String> {
+    static class SimpleGenericObject
+            extends ExtendGenericType<String> {
     }
 
 }

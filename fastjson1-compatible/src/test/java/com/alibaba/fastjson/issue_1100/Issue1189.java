@@ -26,7 +26,6 @@ public class Issue1189 {
         private String notificationType;
 
 
-
         public Map<String, String> getBody() {
             return body;
         }

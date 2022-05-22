@@ -11,7 +11,6 @@ import java.io.ByteArrayOutputStream;
  * Created by wenshao on 11/04/2017.
  */
 public class Issue1140 {
-
     @Test
     public void test_for_issue1() throws Exception {
         String s = "\uD83C\uDDEB\uD83C\uDDF7";

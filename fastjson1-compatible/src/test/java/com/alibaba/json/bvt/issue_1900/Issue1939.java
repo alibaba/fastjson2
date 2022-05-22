@@ -17,7 +17,8 @@ public class Issue1939 {
     @XmlType(name = "", propOrder = {
             "any"
     })
-    public static class Container implements Serializable {
+    public static class Container
+            implements Serializable {
         @XmlAnyElement(lax = true)
         public List<Object> any;
     }

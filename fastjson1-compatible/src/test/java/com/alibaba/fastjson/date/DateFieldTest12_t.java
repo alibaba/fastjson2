@@ -31,7 +31,6 @@ public class DateFieldTest12_t {
     }
 
     public static class Entity {
-
         @JSONField(format = "yyyy-MM-ddTHH:mm:ssZ")
         private Date value;
 

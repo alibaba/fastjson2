@@ -27,7 +27,6 @@ public class JSONBTableTest {
 
     @Test
     public void test_jsonb_table_org() throws Exception {
-
         Org org = new Org();
         org.employees = new ArrayList<>();
         org.employees.add(new Employee(1));
@@ -62,7 +61,6 @@ public class JSONBTableTest {
         public int id;
 
         public Employee() {
-
         }
 
         public Employee(int id) {

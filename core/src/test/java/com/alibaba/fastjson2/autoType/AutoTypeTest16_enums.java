@@ -70,7 +70,6 @@ public class AutoTypeTest16_enums {
         List<Child> children;
 
         public Item() {
-
         }
 
         public Item(Child child1, Child child2) {

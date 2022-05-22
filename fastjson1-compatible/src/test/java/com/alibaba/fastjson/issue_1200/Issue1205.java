@@ -19,6 +19,5 @@ public class Issue1205 {
     }
 
     public static class Model {
-
     }
 }

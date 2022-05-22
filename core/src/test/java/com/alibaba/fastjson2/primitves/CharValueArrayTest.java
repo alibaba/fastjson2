@@ -59,8 +59,8 @@ public class CharValueArrayTest {
 
     @Test
     public void test_writeNull() {
-        assertEquals("{\"values\":null}"
-                , JSON.toJSONString(new VO(), JSONWriter.Feature.WriteNulls));
+        assertEquals("{\"values\":null}",
+                 JSON.toJSONString(new VO(), JSONWriter.Feature.WriteNulls));
         assertEquals("{\"values\":null}",
                 new String(
                         JSON.toJSONBytes(new VO(), JSONWriter.Feature.WriteNulls)));
@@ -68,8 +68,8 @@ public class CharValueArrayTest {
 
     @Test
     public void test_writeNull2() {
-        assertEquals("{}"
-                , JSON.toJSONString(new VO2()));
+        assertEquals("{}",
+                 JSON.toJSONString(new VO2()));
 
         assertEquals("{\"values\":null}",
                 new String(

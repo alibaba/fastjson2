@@ -5,9 +5,9 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
 
 public class MappingDemo {
     @Test
@@ -57,7 +57,6 @@ public class MappingDemo {
         public String name;
 
         public Product() {
-
         }
 
         public Product(int id, String name) {

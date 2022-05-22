@@ -9,8 +9,9 @@ public class AccessHttpConfigModel {
      *
      * @author wangwb (mailto:wangwb@primeton.com)
      */
-    
-    public static class FileUploadConfig implements Serializable{
+
+    public static class FileUploadConfig
+            implements Serializable{
         private String tempDir;
 
         private int maxSize;
@@ -133,7 +134,7 @@ public class AccessHttpConfigModel {
     public void setFileUploadConfig(FileUploadConfig fileUploadConfig) {
         this.fileUploadConfig = fileUploadConfig;
     }
-    
+
     private int suspend=10;
 
     /**
@@ -151,11 +152,11 @@ public class AccessHttpConfigModel {
     public void setSuspend(int suspend) {
         this.suspend = suspend;
     }
-    
+
     private String loginExcludeUrls;
-    
+
     private String loginErrorPage;
-    
+
     private boolean portal;
 
     private String loginIncludeUrls;

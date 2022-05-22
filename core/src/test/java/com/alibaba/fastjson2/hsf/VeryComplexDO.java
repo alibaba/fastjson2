@@ -1,16 +1,15 @@
 package com.alibaba.fastjson2.hsf;
 
-
 import java.io.Serializable;
 import java.util.*;
 
 /**
  * 复杂对象
- * @author yp148590
  *
+ * @author yp148590
  */
-public class VeryComplexDO implements Serializable {
-
+public class VeryComplexDO
+        implements Serializable {
     private static final long serialVersionUID = -6315109222257881914L;
     private int pint;
     private long plong;
@@ -128,7 +127,7 @@ public class VeryComplexDO implements Serializable {
         tmp.add("linux");
         vdo.setPlist(tmp);
         vdo.setPlong(56);
-        vdo.setPlongArray(new long[] { 1, 2, 3, 4, 5, 6 });
+        vdo.setPlongArray(new long[]{1, 2, 3, 4, 5, 6});
         BaseDO bdo = new BaseDO();
         bdo.setId(45);
         vdo.setpBaseDO(bdo);
@@ -147,9 +146,8 @@ public class VeryComplexDO implements Serializable {
 
     public static void verify(VeryComplexDO actual) throws Exception {
         VeryComplexDO expected = VeryComplexDO.getFixedComplexDO();
-        if(expected.getPlong() != actual.getPlong()){
+        if (expected.getPlong() != actual.getPlong()) {
             throw new Exception("VeryComplexDO verify error");
         }
-
     }
 }

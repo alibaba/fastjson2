@@ -4,11 +4,11 @@ import java.io.Serializable;
 
 /**
  * ��WarehouseInfo.java��ʵ���������ֿ���Ϣ����
- * 
+ *
  * @author maik.wangz 2011-12-12 ����09:50:32
  */
-public class WareHouseInfo implements Serializable {
-
+public class WareHouseInfo
+        implements Serializable {
     private static final long serialVersionUID = 6102232214244738211L;
     // ʡ��ID
     private String            provinceId;

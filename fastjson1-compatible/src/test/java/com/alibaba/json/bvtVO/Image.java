@@ -9,11 +9,11 @@ import java.io.Serializable;
 
 /**
  * ��Image.java��ʵ��������ͼƬ��Ϣ����
- * 
+ *
  * @author maik.wangz 2011-8-15 ����06:19:39
  */
-public class Image implements Serializable {
-
+public class Image
+        implements Serializable {
     private static final long serialVersionUID = -6804500330834961534L;
     private String            imageUrl;
 
@@ -23,7 +23,6 @@ public class Image implements Serializable {
     }
 
     public Image(){
-
     }
 
     public String getBigImageUrl() {

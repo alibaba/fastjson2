@@ -17,7 +17,6 @@ public class Issue1649_private {
 
     @JSONType(serialzeFeatures = {SerializerFeature.WriteNullStringAsEmpty,SerializerFeature.WriteMapNullValue})
     private static class Apple {
-
         // @JSONField(serialzeFeatures = {SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteMapNullValue})
         private String color;
         private String productCity;

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue2743 {
-
     // 场景：验证字符串数组，楼主提供的用例
     @Test
     public void test_0() throws Exception {

@@ -59,11 +59,10 @@ public class IgnoreNoneSerializableTest {
         public B b;
     }
 
-    public static class A implements Serializable  {
-
+    public static class A
+            implements Serializable  {
     }
 
     public static class B {
-
     }
 }

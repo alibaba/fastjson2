@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONObjectTest_get {
-
     @Test
     public void test_get() {
         JSONObject obj = JSON.parseObject("{id:123}");

@@ -25,7 +25,6 @@ public class AutoTypeTest12 {
         public Item item;
 
         public class Item {
-
         }
     }
 

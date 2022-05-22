@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.filter.ValueFilter;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +14,8 @@ public class JSONType_serializeFilters {
         assertEquals("{\"id\":0}", json);
     }
 
-    public static class MyValueFilter implements ValueFilter {
+    public static class MyValueFilter
+            implements ValueFilter {
         @Override
         public Object apply(Object object, String name, Object value) {
             if (name.equals("id") && value == null) {
@@ -28,7 +28,6 @@ public class JSONType_serializeFilters {
 
     @JSONType(serializeFilters = MyValueFilter.class)
     public static class Model {
-
         public int id;
     }
 }

@@ -1,9 +1,9 @@
 /**
  * Project: eve.services
- * 
+ *
  * File Created at 2011-12-21
  * $Id$
- * 
+ *
  * Copyright 2008 Alibaba.com Corporation Limited.
  * All rights reserved.
  *
@@ -21,8 +21,8 @@ import java.util.ArrayList;
 /**
  * @author wb_jianhui.shijh
  */
-public class IEventDto implements Serializable {
-
+public class IEventDto
+        implements Serializable {
     private static final long serialVersionUID = -3903138261314727539L;
 
     private String            source;
@@ -36,7 +36,7 @@ public class IEventDto implements Serializable {
     public void setSource(String source) {
         this.source = source;
     }
-    
+
     public ArrayList<IEvent> getEventList() {
         return eventList;
     }

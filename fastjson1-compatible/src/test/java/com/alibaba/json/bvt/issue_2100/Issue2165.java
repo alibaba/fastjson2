@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Issue2165 {
-
     @Test
     public void test_for_issue() throws Exception {
         Exception error = null;

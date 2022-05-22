@@ -64,11 +64,13 @@ public class SeeAlsoTest2 {
     public static class Animal {
     }
 
-    public static class Cat extends Animal {
+    public static class Cat
+            extends Animal {
         public int catId;
     }
 
-    public static class Pig extends Animal {
+    public static class Pig
+            extends Animal {
         public int pigId;
     }
 }

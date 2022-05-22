@@ -8,13 +8,11 @@ import java.util.List;
 public class Issue1870 {
     @Test
     public void test_for_issue() throws Exception {
-
     }
 
     public static class Comment {
         @JSONField(name = "pic_arr")
         public List<Pic> pics;
-
 
         public List<Pic> getPics() {
             return pics;

@@ -22,7 +22,6 @@ public class Issue1871 {
     }
 
     public static class UnwrapClass {
-
         private String name;
 
         @JSONField(unwrapped = true)

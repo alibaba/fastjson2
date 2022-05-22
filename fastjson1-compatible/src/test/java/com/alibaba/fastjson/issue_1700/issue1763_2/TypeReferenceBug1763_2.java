@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class TypeReferenceBug1763_2<T> {
-
     static ConcurrentMap<Type, Type> classTypeCache
             = new ConcurrentHashMap<Type, Type>(16, 0.75f, 1);
 

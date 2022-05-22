@@ -21,7 +21,8 @@ public class Issue1909 {
         assertNotNull(paramRequest);
     }
 
-    public static class ParamRequest extends Request {
+    public static class ParamRequest
+            extends Request {
         private String methodName;
 
         @JSONField(name = "id", ordinal = 3, serialize = true, deserialize = true)
@@ -49,6 +50,5 @@ public class Issue1909 {
     }
 
     public static class Request {
-
     }
 }

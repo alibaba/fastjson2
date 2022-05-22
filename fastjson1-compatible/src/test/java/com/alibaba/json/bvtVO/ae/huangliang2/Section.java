@@ -8,7 +8,8 @@ import java.util.List;
  * Created by huangliang on 17/5/8.
  */
 @JSONType(typeName = "section")
-public class Section implements Area {
+public class Section
+        implements Area {
     public List<Area> children;
 
     public String type;

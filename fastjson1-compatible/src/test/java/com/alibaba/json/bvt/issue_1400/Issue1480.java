@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1480 {
     @Test
     public void test_for_issue() throws Exception {
-
         Map<Integer,Integer> map = new LinkedHashMap<Integer,Integer>();
         map.put(1,10);
         map.put(2,4);

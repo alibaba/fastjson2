@@ -24,16 +24,17 @@ public class JSONExtractScalar {
     }
 
     public JSONWritable eval(byte[] input) {
-        JSONReader parser = JSONReader.of(input
-                , 0
-                , input.length, StandardCharsets.UTF_8
+        JSONReader parser = JSONReader.of(input,
+                 0,
+                 input.length, StandardCharsets.UTF_8
         );
 
         path.extractScalar(parser, valueConsumer);
         return text;
     }
 
-    class ExtractValueConsumer implements ValueConsumer {
+    class ExtractValueConsumer
+            implements ValueConsumer {
         @Override
         public void accept(byte[] bytes, int off, int len) {
             text.bytes = bytes;
