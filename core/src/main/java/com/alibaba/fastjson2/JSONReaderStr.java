@@ -4306,7 +4306,6 @@ final class JSONReaderStr
         }
     }
 
-
     public boolean isReference() {
         if (ch != '{') {
             return false;
@@ -4317,7 +4316,7 @@ final class JSONReaderStr
         ch = str.charAt(this.offset);
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             offset++;
-            if (offset>= length) {
+            if (offset >= length) {
                 this.offset = start;
                 this.ch = '{';
                 return false;
@@ -4347,7 +4346,7 @@ final class JSONReaderStr
         ch = str.charAt(this.offset);
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             offset++;
-            if (offset>= length) {
+            if (offset >= length) {
                 this.offset = start;
                 this.ch = '{';
                 return false;
@@ -4364,7 +4363,7 @@ final class JSONReaderStr
         ch = str.charAt(++this.offset);
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             offset++;
-            if (offset>= length) {
+            if (offset >= length) {
                 this.offset = start;
                 this.ch = '{';
                 return false;
