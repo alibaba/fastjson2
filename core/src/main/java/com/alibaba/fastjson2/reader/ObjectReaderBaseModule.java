@@ -1098,15 +1098,15 @@ public class ObjectReaderBaseModule
         }
 
         if (type == URI.class) {
-            return new FromStringReader<URI>(e -> URI.create(e));
+            return new ObjectReaderImplFromString<URI>(e -> URI.create(e));
         }
 
         if (type == File.class) {
-            return new FromStringReader<File>(e -> new File(e));
+            return new ObjectReaderImplFromString<File>(e -> new File(e));
         }
 
         if (type == URL.class) {
-            return new FromStringReader<URL>(e -> {
+            return new ObjectReaderImplFromString<URL>(e -> {
                 try {
                     return new URL(e);
                 } catch (MalformedURLException ex) {
@@ -1192,11 +1192,13 @@ public class ObjectReaderBaseModule
         }
 
         if (type == ZoneId.class) {
-            return ZoneIdImpl.INSTANCE;
+//            return ZoneIdImpl.INSTANCE;
+            // ZoneId.of(strVal)
+            return new ObjectReaderImplFromString<ZoneId>(e -> ZoneId.of(e));
         }
 
         if (type == TimeZone.class) {
-            return TimeZoneImpl.INSTANCE;
+            return new ObjectReaderImplFromString<TimeZone>(e -> TimeZone.getTimeZone(e));
         }
 
         if (type == char[].class) {
@@ -1785,35 +1787,6 @@ public class ObjectReaderBaseModule
         }
     }
 
-    public static class FromStringReader<T>
-            extends PrimitiveImpl<T> {
-        final Function<String, T> creator;
-
-        public FromStringReader(Function<String, T> creator) {
-            this.creator = creator;
-        }
-
-        @Override
-        public T readJSONBObject(JSONReader jsonReader, long features) {
-            String str = jsonReader.readString();
-            if (str == null) {
-                return null;
-            }
-
-            return creator.apply(str);
-        }
-
-        @Override
-        public T readObject(JSONReader jsonReader, long features) {
-            String str = jsonReader.readString();
-            if (str == null) {
-                return null;
-            }
-
-            return creator.apply(str);
-        }
-    }
-
     static class LocalDateImpl
             extends PrimitiveImpl {
         static final LocalDateImpl INSTANCE = new LocalDateImpl();
@@ -1878,52 +1851,6 @@ public class ObjectReaderBaseModule
                 return new Locale(items[0], items[1]);
             }
             return new Locale(items[0], items[1], items[2]);
-        }
-    }
-
-    static class ZoneIdImpl
-            extends PrimitiveImpl {
-        static final ZoneIdImpl INSTANCE = new ZoneIdImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            String strVal = jsonReader.readString();
-            if (strVal == null || strVal.isEmpty()) {
-                return null;
-            }
-            return ZoneId.of(strVal);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            String strVal = jsonReader.readString();
-            if (strVal == null || strVal.isEmpty()) {
-                return null;
-            }
-            return ZoneId.of(strVal);
-        }
-    }
-
-    static class TimeZoneImpl
-            extends PrimitiveImpl {
-        static final TimeZoneImpl INSTANCE = new TimeZoneImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            String strVal = jsonReader.readString();
-            if (strVal == null || strVal.isEmpty()) {
-                return null;
-            }
-            return TimeZone.getTimeZone(strVal);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            String strVal = jsonReader.readString();
-            if (strVal == null || strVal.isEmpty()) {
-                return null;
-            }
-            return TimeZone.getTimeZone(strVal);
         }
     }
 
