@@ -22,6 +22,8 @@ final class JSONReaderStr
     protected int nameEnd;
     protected int nameLength;
 
+    protected int referenceBegin;
+
     JSONReaderStr(Context ctx, String str) {
         this(ctx, str, 0, str.length());
     }
@@ -4302,5 +4304,90 @@ final class JSONReaderStr
                 carry = sum >>> 32;
             }
         }
+    }
+
+
+    public boolean isReference() {
+        if (ch != '{') {
+            return false;
+        }
+
+        final int start = this.offset;
+
+        ch = str.charAt(this.offset);
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            offset++;
+            if (offset>= length) {
+                this.offset = start;
+                this.ch = '{';
+                return false;
+            }
+            ch = str.charAt(this.offset);
+        }
+
+        char quote = ch;
+        if (quote != '"' && quote != '\'' || this.offset + 5 >= end) {
+            this.offset = start;
+            this.ch = '{';
+            return false;
+        }
+
+        if (str.charAt(this.offset + 1) != '$'
+                || str.charAt(this.offset + 2) != 'r'
+                || str.charAt(this.offset + 3) != 'e'
+                || str.charAt(this.offset + 4) != 'f'
+                || str.charAt(this.offset + 5) != quote
+        ) {
+            this.offset = start;
+            this.ch = '{';
+            return false;
+        }
+
+        offset += 6;
+        ch = str.charAt(this.offset);
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            offset++;
+            if (offset>= length) {
+                this.offset = start;
+                this.ch = '{';
+                return false;
+            }
+            ch = str.charAt(this.offset + 1);
+        }
+
+        if (ch != ':') {
+            this.offset = start;
+            this.ch = '{';
+            return false;
+        }
+
+        ch = str.charAt(++this.offset);
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            offset++;
+            if (offset>= length) {
+                this.offset = start;
+                this.ch = '{';
+                return false;
+            }
+            ch = str.charAt(this.offset + 1);
+        }
+
+        if (ch != quote) {
+            this.offset = start;
+            this.ch = '{';
+            return false;
+        }
+
+        this.referenceBegin = offset;
+        this.offset = start;
+        this.ch = '{';
+        return true;
+    }
+
+    public String readReference() {
+        this.offset = referenceBegin;
+        this.ch = str.charAt(this.offset++);
+        String reference = readString();
+        return reference;
     }
 }
