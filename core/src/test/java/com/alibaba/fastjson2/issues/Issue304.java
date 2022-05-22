@@ -42,13 +42,19 @@ public class Issue304 {
         assertEquals("[{\"item\":{\"name\":\"testtt\"},\"name\":\"test\"},{\"item\":{\"$ref\":\"$[0].item\"},\"name\":\"test\"},{\"item\":{\"$ref\":\"$[0].item\"},\"name\":\"test\"},{\"item\":{\"$ref\":\"$[0].item\"},\"name\":\"test\"}]", result);
     }
 
-    public void testRead0() {
+    public void testRead() {
         List<Bean> list2 = JSON.parseArray(result, Bean.class);
         assertSame(list2.get(0).item, list2.get(1).item);
     }
 
     @Test
-    public void readDefault() {
+    public void readPrivate() {
+        List<Bean1> list3 = JSON.parseArray(result, Bean1.class);
+        assertSame(list3.get(0).item, list3.get(1).item);
+    }
+
+    @Test
+    public void readUTF8() {
         List<Bean> list3 = JSON.parseArray(result.getBytes(StandardCharsets.UTF_8), Bean.class);
         assertSame(list3.get(0).item, list3.get(1).item);
     }
@@ -125,6 +131,27 @@ public class Issue304 {
         }
 
         public void setItem(Bean item) {
+            this.item = item;
+        }
+    }
+
+    public static class Bean1 {
+        private String name;
+        private Bean1 item;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Bean1 getItem() {
+            return item;
+        }
+
+        public void setItem(Bean1 item) {
             this.item = item;
         }
     }
