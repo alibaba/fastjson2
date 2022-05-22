@@ -12,7 +12,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-class FieldReaderCollectionMethodReadOnly<T> extends FieldReaderObjectMethod<T> implements FieldReaderReadOnly<T> {
+class FieldReaderCollectionMethodReadOnly<T>
+        extends FieldReaderObjectMethod<T>
+        implements FieldReaderReadOnly<T> {
     private final Type itemType;
     private ObjectReader itemReader;
 

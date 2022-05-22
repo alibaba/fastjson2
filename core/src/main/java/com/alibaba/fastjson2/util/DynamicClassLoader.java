@@ -19,7 +19,8 @@ import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DynamicClassLoader extends ClassLoader {
+public class DynamicClassLoader
+        extends ClassLoader {
     final static String FASTJSON_PACKAGE;
     final static ClassLoader FASTJSON_CLASSLOADER;
 

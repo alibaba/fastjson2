@@ -10,7 +10,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 
-final class ObjectWriterImplCalendar extends DateTimeCodec implements ObjectWriter {
+final class ObjectWriterImplCalendar
+        extends DateTimeCodec implements ObjectWriter {
     static final ObjectWriterImplCalendar INSTANCE = new ObjectWriterImplCalendar(null);
     static final ObjectWriterImplCalendar INSTANCE_UNIXTIME = new ObjectWriterImplCalendar("unixtime");
 

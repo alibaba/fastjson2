@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.util.Arrays;
 
-abstract class FieldWriterEnum extends FieldWriterImpl {
+abstract class FieldWriterEnum
+        extends FieldWriterImpl {
     volatile byte[][] valueNameCacheUTF8;
     volatile char[][] valueNameCacheUTF16;
 

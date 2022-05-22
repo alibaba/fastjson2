@@ -22,7 +22,8 @@ import java.util.function.*;
 
 import static com.alibaba.fastjson2.reader.ObjectReader.HASH_TYPE;
 
-public class ObjectReaderCreatorASM extends ObjectReaderCreator {
+public class ObjectReaderCreatorASM
+        extends ObjectReaderCreator {
     public static ObjectReaderCreatorASM INSTANCE = new ObjectReaderCreatorASM();
 
     protected static final AtomicLong seed = new AtomicLong();

@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-class ObjectWriterImplAtomicIntegerArray extends ObjectWriterBaseModule.PrimitiveImpl {
+class ObjectWriterImplAtomicIntegerArray
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplAtomicIntegerArray INSTANCE = new ObjectWriterImplAtomicIntegerArray();
 
     @Override

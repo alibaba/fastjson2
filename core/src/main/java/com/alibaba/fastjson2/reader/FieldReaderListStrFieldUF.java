@@ -8,7 +8,8 @@ import java.lang.reflect.Type;
 
 import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
 
-final class FieldReaderListStrFieldUF<T> extends FieldReaderListStrField<T> {
+final class FieldReaderListStrFieldUF<T>
+        extends FieldReaderListStrField<T> {
     final long fieldOffset;
 
     FieldReaderListStrFieldUF(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Field field) {

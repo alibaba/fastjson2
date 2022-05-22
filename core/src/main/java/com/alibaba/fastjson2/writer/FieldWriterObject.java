@@ -13,7 +13,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
 
-abstract class FieldWriterObject<T> extends FieldWriterImpl<T> {
+abstract class FieldWriterObject<T>
+        extends FieldWriterImpl<T> {
     volatile Class initValueClass;
     volatile ObjectWriter initObjectWriter;
     final boolean unwrapped;

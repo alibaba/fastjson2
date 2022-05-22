@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-final class FieldWriterInt16Method<T> extends FieldWriterInt16<T> {
+final class FieldWriterInt16Method<T>
+        extends FieldWriterInt16<T> {
     final Method method;
 
     protected FieldWriterInt16Method(String fieldName, int ordinal, Method method, Class fieldClass) {

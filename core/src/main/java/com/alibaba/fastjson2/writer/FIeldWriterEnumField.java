@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
 
-final class FIeldWriterEnumField extends FieldWriterEnum {
+final class FIeldWriterEnumField
+        extends FieldWriterEnum {
     final Field field;
 
     protected FIeldWriterEnumField(String name, int ordinal, String format, long features, Class fieldType, Field field) {

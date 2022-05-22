@@ -13,7 +13,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
-final class ObjectWriterImplMap extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplMap
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final byte[] TYPE_NAME_JSONObject1O = JSONB.toBytes("JO10");
     static final long TYPE_HASH_JSONObject1O = Fnv.hashCode64("JO10");
 

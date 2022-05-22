@@ -20,7 +20,8 @@ import java.lang.reflect.Type;
  * @see Converter.Factory
  * @since 2.0.2
  */
-public class Retrofit2ConverterFactory extends Converter.Factory {
+public class Retrofit2ConverterFactory
+        extends Converter.Factory {
     private static final MediaType MEDIA_TYPE = MediaType.parse("application/json; charset=UTF-8");
 
     private FastJsonConfig fastJsonConfig;
@@ -68,7 +69,8 @@ public class Retrofit2ConverterFactory extends Converter.Factory {
         return this;
     }
 
-    final class ResponseBodyConverter<T> implements Converter<ResponseBody, T> {
+    final class ResponseBodyConverter<T>
+            implements Converter<ResponseBody, T> {
         private Type type;
 
         ResponseBodyConverter(Type type) {
@@ -88,7 +90,8 @@ public class Retrofit2ConverterFactory extends Converter.Factory {
         }
     }
 
-    final class RequestBodyConverter<T> implements Converter<T, RequestBody> {
+    final class RequestBodyConverter<T>
+            implements Converter<T, RequestBody> {
         RequestBodyConverter() {
         }
 

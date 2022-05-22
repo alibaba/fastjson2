@@ -15,7 +15,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class GeoJsonWriterModule implements ObjectWriterModule {
+public class GeoJsonWriterModule
+        implements ObjectWriterModule {
     public static final GeoJsonWriterModule INSTANCE = new GeoJsonWriterModule();
 
     @Override
@@ -49,7 +50,8 @@ public class GeoJsonWriterModule implements ObjectWriterModule {
         }
     }
 
-    static class GeoJsonPolygonWriter implements ObjectWriter {
+    static class GeoJsonPolygonWriter
+            implements ObjectWriter {
         public final static GeoJsonPolygonWriter INSTANCE = new GeoJsonPolygonWriter();
 
         final static String PREFIX = "{\"type\":\"Polygon\",\"coordinates\":";
@@ -102,7 +104,8 @@ public class GeoJsonWriterModule implements ObjectWriterModule {
         }
     }
 
-    static class PointWriter implements ObjectWriter {
+    static class PointWriter
+            implements ObjectWriter {
         public final static PointWriter INSTANCE = new PointWriter();
 
         @Override
@@ -117,7 +120,8 @@ public class GeoJsonWriterModule implements ObjectWriterModule {
         }
     }
 
-    static class GeoJsonPointWriter implements ObjectWriter {
+    static class GeoJsonPointWriter
+            implements ObjectWriter {
         public final static GeoJsonPointWriter INSTANCE = new GeoJsonPointWriter();
 
         final static String PREFIX = "{\"type\":\"Point\",\"coordinates\":";

@@ -7,7 +7,8 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.util.BitSet;
 
-public final class ObjectReaderImplBitSet extends ObjectReaderBaseModule.PrimitiveImpl<BitSet> {
+public final class ObjectReaderImplBitSet
+        extends ObjectReaderBaseModule.PrimitiveImpl<BitSet> {
     static final ObjectReaderImplBitSet INSTANCE = new ObjectReaderImplBitSet();
 
     public static final long HASH_TYPE = Fnv.hashCode64("BitSet");

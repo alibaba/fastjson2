@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 
-final class AnyOf extends JSONSchema {
+final class AnyOf
+        extends JSONSchema {
     final JSONSchema[] items;
 
     public AnyOf(JSONSchema[] items) {

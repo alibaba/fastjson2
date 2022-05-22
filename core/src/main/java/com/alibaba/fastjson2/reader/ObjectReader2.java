@@ -14,7 +14,8 @@ import java.util.function.Supplier;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 
-public class ObjectReader2<T> extends ObjectReaderBean<T> {
+public class ObjectReader2<T>
+        extends ObjectReaderBean<T> {
     final long features;
     final Supplier<T> defaultCreator;
     final Function buildFunction;

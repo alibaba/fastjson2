@@ -22,7 +22,8 @@ import java.util.Set;
  * @see AbstractView
  * @since 2.0.2
  */
-public class FastJsonJsonView extends AbstractView {
+public class FastJsonJsonView
+        extends AbstractView {
     /**
      * renderedAttributes
      */

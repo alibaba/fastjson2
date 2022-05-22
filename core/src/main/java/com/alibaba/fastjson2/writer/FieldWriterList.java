@@ -7,7 +7,8 @@ import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
 
-abstract class FieldWriterList<T> extends FieldWriterImpl<T> {
+abstract class FieldWriterList<T>
+        extends FieldWriterImpl<T> {
     final Type itemType;
     final Class itemClass;
     ObjectWriter listWriter;

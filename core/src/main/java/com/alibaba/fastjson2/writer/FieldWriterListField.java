@@ -7,7 +7,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.List;
 
-final class FieldWriterListField<T> extends FieldWriterList<T> {
+final class FieldWriterListField<T>
+        extends FieldWriterList<T> {
     final Field field;
 
     protected FieldWriterListField(

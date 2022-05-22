@@ -45,7 +45,8 @@ public class GuavaSupport {
         return new SingletonImmutableBiMapConvertFunction();
     }
 
-    static class ImmutableSetConvertFunction implements Function {
+    static class ImmutableSetConvertFunction
+            implements Function {
         @Override
         public Object apply(Object object) {
             List list = (List) object;
@@ -61,7 +62,8 @@ public class GuavaSupport {
         }
     }
 
-    static class ImmutableListConvertFunction implements Function {
+    static class ImmutableListConvertFunction
+            implements Function {
         @Override
         public Object apply(Object object) {
             List list = (List) object;
@@ -81,7 +83,8 @@ public class GuavaSupport {
         return new AsMapWriter(objectClass);
     }
 
-    static class AsMapWriter implements ObjectWriter {
+    static class AsMapWriter
+            implements ObjectWriter {
         private Method method;
 
         public AsMapWriter(Class objectClass) {
@@ -146,7 +149,8 @@ public class GuavaSupport {
         throw new JSONException("create map error : " + objectClass);
     }
 
-    static class ArrayListMultimapConvertFunction implements Function {
+    static class ArrayListMultimapConvertFunction
+            implements Function {
         final Method method;
         final Method putAllMethod;
 
@@ -182,7 +186,8 @@ public class GuavaSupport {
         }
     }
 
-    static class SingletonImmutableBiMapConvertFunction implements Function {
+    static class SingletonImmutableBiMapConvertFunction
+            implements Function {
         @Override
         public Object apply(Object object) {
             if (CONSTRUCTOR_SINGLETON_IMMUTABLE_BIMAP == null) {
@@ -207,7 +212,8 @@ public class GuavaSupport {
         }
     }
 
-    static class ImmutableSingletonMapConvertFunction implements Function {
+    static class ImmutableSingletonMapConvertFunction
+            implements Function {
         @Override
         public Object apply(Object object) {
             if (CLASS_IMMUTABLE_MAP == null) {

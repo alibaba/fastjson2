@@ -6,7 +6,8 @@ import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReference;
 
-final class ObjectReaderImplAtomicReference extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectReaderImplAtomicReference
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplAtomicReference INSTANCE = new ObjectReaderImplAtomicReference(Object.class);
 
     final Type referenceType;

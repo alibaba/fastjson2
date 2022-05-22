@@ -9,7 +9,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
-final class ObjectWriterImplCollection extends ObjectWriterImplIterable {
+final class ObjectWriterImplCollection
+        extends ObjectWriterImplIterable {
     static final ObjectWriterImplCollection INSTANCE = new ObjectWriterImplCollection();
 
     static final byte[] LINKED_HASH_SET_JSONB_TYPE_NAME_BYTES = JSONB.toBytes(TypeUtils.getTypeName(LinkedHashSet.class));

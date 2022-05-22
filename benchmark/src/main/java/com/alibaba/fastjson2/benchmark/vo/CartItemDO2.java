@@ -6,7 +6,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CartItemDO2 implements Serializable {
+public class CartItemDO2
+        implements Serializable {
     private static final long serialVersionUID = -3291877592429392571L;
     private String id = "myId";
     private long cartId;

@@ -31,7 +31,9 @@ import java.lang.reflect.TypeVariable;
  * @since 2.0.2
  */
 
-public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<Object> implements GenericHttpMessageConverter<Object> {
+public class FastJsonHttpMessageConverter
+        extends AbstractHttpMessageConverter<Object>
+        implements GenericHttpMessageConverter<Object> {
     /**
      * with fastJson config
      */

@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 import java.net.Inet4Address;
 
-final class ObjectWriterImplInetAddress extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplInetAddress
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplInetAddress INSTANCE = new ObjectWriterImplInetAddress();
 
     @Override

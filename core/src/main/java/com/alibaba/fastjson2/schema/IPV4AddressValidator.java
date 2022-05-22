@@ -2,7 +2,8 @@ package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.util.InetAddresses;
 
-final class IPV4AddressValidator implements FormatValidator {
+final class IPV4AddressValidator
+        implements FormatValidator {
     final static IPV4AddressValidator INSTANCE = new IPV4AddressValidator();
 
     @Override

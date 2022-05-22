@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-final class ObjectReaderImplAtomicInteger extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectReaderImplAtomicInteger
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplAtomicInteger INSTANCE = new ObjectReaderImplAtomicInteger();
 
     @Override

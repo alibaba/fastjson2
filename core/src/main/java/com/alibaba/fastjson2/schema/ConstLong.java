@@ -5,7 +5,8 @@ import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-final class ConstLong extends JSONSchema {
+final class ConstLong
+        extends JSONSchema {
     final long value;
 
     ConstLong(long value) {

@@ -12,7 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-public class JSONExtractScalar extends UDF {
+public class JSONExtractScalar
+        extends UDF {
     static final byte[] BYTES_TRUE = "true".getBytes(StandardCharsets.UTF_8);
     static final byte[] BYTES_FALSE = "false".getBytes(StandardCharsets.UTF_8);
     static final byte[] BYTES_NULL = "null".getBytes(StandardCharsets.UTF_8);
@@ -36,7 +37,8 @@ public class JSONExtractScalar extends UDF {
         return text;
     }
 
-    class ExtractValueConsumer implements ValueConsumer {
+    class ExtractValueConsumer
+            implements ValueConsumer {
         @Override
         public void accept(byte[] bytes, int off, int len) {
             text.bytes = bytes;

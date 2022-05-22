@@ -16,7 +16,8 @@ import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 
-class JSONWriterUTF16 extends JSONWriter {
+class JSONWriterUTF16
+        extends JSONWriter {
     protected char[] chars;
 
     JSONWriterUTF16(Context ctx) {

@@ -10,7 +10,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 
-final class ObjectArrayTypedReader extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectArrayTypedReader
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     final Class objectClass;
     final Class componentType;
     final Class componentClass;

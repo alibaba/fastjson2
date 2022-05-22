@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.time.DateTimeException;
 
-final class DateTimeValidator implements FormatValidator {
+final class DateTimeValidator
+        implements FormatValidator {
     final static DateTimeValidator INSTANCE = new DateTimeValidator();
 
     @Override

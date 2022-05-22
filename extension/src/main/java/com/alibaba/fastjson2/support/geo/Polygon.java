@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.annotation.JSONType;
  * @since 1.2.68
  */
 @JSONType(typeName = "Polygon", orders = {"type", "bbox", "coordinates"})
-public class Polygon extends Geometry {
+public class Polygon
+        extends Geometry {
     private double[][][] coordinates;
 
     public Polygon() {

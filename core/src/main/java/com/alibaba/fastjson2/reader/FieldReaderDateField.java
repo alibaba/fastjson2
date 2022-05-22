@@ -14,7 +14,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
-final class FieldReaderDateField<T> extends FieldReaderObjectField<T> {
+final class FieldReaderDateField<T>
+        extends FieldReaderObjectField<T> {
     private ObjectReaderImplDate dateReader;
     DateTimeFormatter formatter;
     final Locale locale;

@@ -33,7 +33,8 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.reader.TypeConverts.*;
 
-public class ObjectReaderBaseModule implements ObjectReaderModule {
+public class ObjectReaderBaseModule
+        implements ObjectReaderModule {
     final ObjectReaderProvider provider;
     final ReaderAnnotationProcessor annotationProcessor;
 
@@ -190,7 +191,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    class ReaderAnnotationProcessor implements ObjectReaderAnnotationProcessor {
+    class ReaderAnnotationProcessor
+            implements ObjectReaderAnnotationProcessor {
         @Override
         public void getBeanInfo(BeanInfo beanInfo, Class<?> objectClass) {
             Class mixInSource = provider.mixInCache.get(objectClass);
@@ -1571,7 +1573,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         return new ObjectReaderImplMapTyped(mapType, instanceType, keyType, valueType, 0, null);
     }
 
-    static abstract class PrimitiveImpl<T> implements ObjectReader<T> {
+    static abstract class PrimitiveImpl<T>
+            implements ObjectReader<T> {
         @Override
         public T createInstance(long features) {
             throw new UnsupportedOperationException();
@@ -1586,7 +1589,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         public abstract T readJSONBObject(JSONReader jsonReader, long features);
     }
 
-    static class CharacterImpl extends PrimitiveImpl {
+    static class CharacterImpl
+            extends PrimitiveImpl {
         static final CharacterImpl INSTANCE = new CharacterImpl();
 
         @Override
@@ -1608,7 +1612,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class BooleanImpl extends PrimitiveImpl {
+    static class BooleanImpl
+            extends PrimitiveImpl {
         static final BooleanImpl INSTANCE = new BooleanImpl();
 
         @Override
@@ -1622,7 +1627,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class IntegerImpl extends PrimitiveImpl {
+    static class IntegerImpl
+            extends PrimitiveImpl {
         static final IntegerImpl INSTANCE = new IntegerImpl();
 
         @Override
@@ -1636,7 +1642,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class OptionalLongImpl extends PrimitiveImpl {
+    static class OptionalLongImpl
+            extends PrimitiveImpl {
         static final OptionalLongImpl INSTANCE = new OptionalLongImpl();
 
         @Override
@@ -1658,7 +1665,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class OptionalDoubleImpl extends PrimitiveImpl {
+    static class OptionalDoubleImpl
+            extends PrimitiveImpl {
         static final OptionalDoubleImpl INSTANCE = new OptionalDoubleImpl();
 
         @Override
@@ -1680,7 +1688,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class LongImpl extends PrimitiveImpl<Long> {
+    static class LongImpl
+            extends PrimitiveImpl<Long> {
         static final LongImpl INSTANCE = new LongImpl();
 
         @Override
@@ -1694,7 +1703,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class FloatImpl extends PrimitiveImpl {
+    static class FloatImpl
+            extends PrimitiveImpl {
         static final FloatImpl INSTANCE = new FloatImpl();
 
         @Override
@@ -1708,7 +1718,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class DoubleImpl extends PrimitiveImpl {
+    static class DoubleImpl
+            extends PrimitiveImpl {
         static final DoubleImpl INSTANCE = new DoubleImpl();
 
         @Override
@@ -1722,7 +1733,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class NumberImpl extends PrimitiveImpl {
+    static class NumberImpl
+            extends PrimitiveImpl {
         static final NumberImpl INSTANCE = new NumberImpl();
 
         @Override
@@ -1736,7 +1748,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class UUIDImpl extends PrimitiveImpl {
+    static class UUIDImpl
+            extends PrimitiveImpl {
         static final UUIDImpl INSTANCE = new UUIDImpl();
 
         @Override
@@ -1750,7 +1763,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class URIImpl extends PrimitiveImpl<URI> {
+    static class URIImpl
+            extends PrimitiveImpl<URI> {
         static final URIImpl INSTANCE = new URIImpl();
 
         @Override
@@ -1769,7 +1783,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class URLImpl extends PrimitiveImpl<URL> {
+    static class URLImpl
+            extends PrimitiveImpl<URL> {
         static final URLImpl INSTANCE = new URLImpl();
 
         @Override
@@ -1796,7 +1811,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class ReflectTypeImpl extends PrimitiveImpl {
+    static class ReflectTypeImpl
+            extends PrimitiveImpl {
         @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             String className = jsonReader.readString();
@@ -1826,7 +1842,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class LocalDateImpl extends PrimitiveImpl {
+    static class LocalDateImpl
+            extends PrimitiveImpl {
         static final LocalDateImpl INSTANCE = new LocalDateImpl();
 
         @Override
@@ -1840,7 +1857,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class LocalTimeImpl extends PrimitiveImpl {
+    static class LocalTimeImpl
+            extends PrimitiveImpl {
         static final LocalTimeImpl INSTANCE = new LocalTimeImpl();
 
         @Override
@@ -1854,7 +1872,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class LocaleImpl extends PrimitiveImpl {
+    static class LocaleImpl
+            extends PrimitiveImpl {
         static final LocaleImpl INSTANCE = new LocaleImpl();
 
         @Override
@@ -1890,7 +1909,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class ZoneIdImpl extends PrimitiveImpl {
+    static class ZoneIdImpl
+            extends PrimitiveImpl {
         static final ZoneIdImpl INSTANCE = new ZoneIdImpl();
 
         @Override
@@ -1912,7 +1932,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class TimeZoneImpl extends PrimitiveImpl {
+    static class TimeZoneImpl
+            extends PrimitiveImpl {
         static final TimeZoneImpl INSTANCE = new TimeZoneImpl();
 
         @Override
@@ -1934,7 +1955,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class LocalDateTimeImpl extends DateTimeCodec implements ObjectReader {
+    static class LocalDateTimeImpl
+            extends DateTimeCodec
+            implements ObjectReader {
         static final LocalDateTimeImpl INSTANCE = new LocalDateTimeImpl(null);
         static final LocalDateTimeImpl INSTANCE_UNIXTIME = new LocalDateTimeImpl("unixtime");
 
@@ -1975,7 +1998,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class AtomicIntegerArrayImpl extends PrimitiveImpl {
+    static class AtomicIntegerArrayImpl
+            extends PrimitiveImpl {
         static final AtomicIntegerArrayImpl INSTANCE = new AtomicIntegerArrayImpl();
 
         @Override
@@ -2026,7 +2050,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class BoolValueArrayImpl extends PrimitiveImpl {
+    static class BoolValueArrayImpl
+            extends PrimitiveImpl {
         static final BoolValueArrayImpl INSTANCE = new BoolValueArrayImpl();
 
         @Override
@@ -2078,7 +2103,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class InterfaceImpl extends PrimitiveImpl {
+    static class InterfaceImpl
+            extends PrimitiveImpl {
         final Type interfaceType;
 
         public InterfaceImpl(Type interfaceType) {
@@ -2154,7 +2180,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class MapEntryImpl extends PrimitiveImpl {
+    static class MapEntryImpl
+            extends PrimitiveImpl {
         final Type keyType;
         final Type valueType;
 
@@ -2217,40 +2244,9 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class EmptyListImpl extends PrimitiveImpl {
-        static final Class TYPE = Collections.emptyList().getClass();
-
-        static final EmptyListImpl INSTANCE = new EmptyListImpl();
-
-        @Override
-        public Object createInstance(long features) {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt != 0) {
-                throw new JSONException("input not empty");
-            }
-            return createInstance(jsonReader.getContext().getFeatures() | features);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            jsonReader.nextIfMatch('[');
-            if (jsonReader.nextIfMatch(']')) {
-                jsonReader.nextIfMatch(',');
-            } else {
-                throw new JSONException("input not empty");
-            }
-            return createInstance(jsonReader.getContext().getFeatures() | features);
-        }
-    }
-
-    static class SingletonSetImpl extends PrimitiveImpl {
+    static class SingletonSetImpl
+            extends PrimitiveImpl {
         static final Class TYPE = Collections.singleton(1).getClass();
-        static final SingletonSetImpl INSTANCE = new SingletonSetImpl();
 
         @Override
         public Class getObjectClass() {
@@ -2281,7 +2277,8 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-    static class GenericArrayImpl implements ObjectReader {
+    static class GenericArrayImpl
+            implements ObjectReader {
         final Type itemType;
         final Class<?> componentClass;
         ObjectReader itemObjectReader = null;

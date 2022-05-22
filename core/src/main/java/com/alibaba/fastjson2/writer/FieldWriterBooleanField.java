@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONException;
 
 import java.lang.reflect.Field;
 
-final class FieldWriterBooleanField extends FieldWriterBoolean {
+final class FieldWriterBooleanField
+        extends FieldWriterBoolean {
     final Field field;
 
     protected FieldWriterBooleanField(String fieldName, int ordinal, long features, Field field, Class fieldClass) {

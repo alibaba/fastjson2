@@ -8,7 +8,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Locale;
 
-final class FieldReaderStringMethod<T> extends FieldReaderObjectMethod<T> {
+final class FieldReaderStringMethod<T>
+        extends FieldReaderObjectMethod<T> {
     final boolean trim;
 
     FieldReaderStringMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, String defaultValue, JSONSchema schema, Method setter) {

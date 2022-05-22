@@ -17,7 +17,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 
-public class JSONArray extends ArrayList<Object> {
+public class JSONArray
+        extends ArrayList<Object> {
     private static final long serialVersionUID = 1L;
 
     static ObjectWriter<JSONArray> arrayWriter;

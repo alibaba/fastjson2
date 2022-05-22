@@ -8,7 +8,8 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 import java.util.Optional;
 
-class ObjectReaderImplOptional extends ObjectReaderBaseModule.PrimitiveImpl {
+class ObjectReaderImplOptional
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplOptional INSTANCE = new ObjectReaderImplOptional(null, null, null);
 
     final String format;

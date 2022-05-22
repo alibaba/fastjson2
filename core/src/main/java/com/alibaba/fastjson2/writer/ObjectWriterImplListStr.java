@@ -10,7 +10,8 @@ import java.util.List;
 
 import static com.alibaba.fastjson2.writer.ObjectWriterImplList.CLASS_SUBLIST;
 
-final class ObjectWriterImplListStr extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplListStr
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplListStr INSTANCE = new ObjectWriterImplListStr();
 
     @Override

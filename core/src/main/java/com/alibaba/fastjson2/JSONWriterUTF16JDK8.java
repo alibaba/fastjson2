@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.util.Arrays;
 
-final class JSONWriterUTF16JDK8 extends JSONWriterUTF16 {
+final class JSONWriterUTF16JDK8
+        extends JSONWriterUTF16 {
     JSONWriterUTF16JDK8(Context ctx) {
         super(ctx);
     }

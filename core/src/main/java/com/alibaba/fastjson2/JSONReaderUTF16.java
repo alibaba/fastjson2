@@ -11,7 +11,8 @@ import java.util.UUID;
 import static com.alibaba.fastjson2.util.UUIDUtils.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
-final class JSONReaderUTF16 extends JSONReader {
+final class JSONReaderUTF16
+        extends JSONReader {
     private final String str;
     private final char[] chars;
     private final int length;

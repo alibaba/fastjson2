@@ -98,7 +98,8 @@ public class UnsafeUtils {
         return (byte[]) UNSAFE.getObject(str, STRING_VALUE_OFFSET);
     }
 
-    static final class UTF16StringCreator implements Function<byte[], String> {
+    static final class UTF16StringCreator
+            implements Function<byte[], String> {
         final long CODER_OFFSET;
         final long VALUE_OFFSET;
 
@@ -123,7 +124,8 @@ public class UnsafeUtils {
         }
     }
 
-    static final class ASCIIStringCreator implements Function<byte[], String> {
+    static final class ASCIIStringCreator
+            implements Function<byte[], String> {
         final long CODER_OFFSET;
         final long VALUE_OFFSET;
 

@@ -8,7 +8,8 @@ import java.io.Reader;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class JSONReader implements Closeable {
+public class JSONReader
+        implements Closeable {
     private final Reader input;
     private final com.alibaba.fastjson2.JSONReader raw;
 

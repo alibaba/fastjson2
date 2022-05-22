@@ -15,9 +15,10 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-public class ObjectReaderImplDate extends DateTimeCodec implements ObjectReader {
+public class ObjectReaderImplDate
+        extends DateTimeCodec
+        implements ObjectReader {
     static final ObjectReaderImplDate INSTANCE = new ObjectReaderImplDate(null, null);
 
     public static ObjectReaderImplDate of(String format, Locale locale) {

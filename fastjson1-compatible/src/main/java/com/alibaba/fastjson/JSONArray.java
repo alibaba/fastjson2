@@ -13,7 +13,9 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 
-public class JSONArray extends JSON implements List {
+public class JSONArray
+        extends JSON
+        implements List {
     static ObjectReader<JSONArray> arrayReader;
     static ObjectReader<JSONObject> objectReader;
 

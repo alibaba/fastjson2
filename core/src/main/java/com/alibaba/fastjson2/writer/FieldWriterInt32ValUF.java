@@ -7,7 +7,8 @@ import java.lang.reflect.Field;
 
 import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
 
-final class FieldWriterInt32ValUF<T> extends FieldWriterInt32Val<T> {
+final class FieldWriterInt32ValUF<T>
+        extends FieldWriterInt32Val<T> {
     final long fieldOffset;
 
     FieldWriterInt32ValUF(String name, int ordinal, long features, String format, Field field) {

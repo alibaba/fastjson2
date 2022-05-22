@@ -7,7 +7,9 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-class FieldReaderAnySetter<T> extends FieldReaderObjectMethod<T> implements FieldReaderReadOnly<T> {
+class FieldReaderAnySetter<T>
+        extends FieldReaderObjectMethod<T>
+        implements FieldReaderReadOnly<T> {
     volatile ObjectReader itemReader;
 
     FieldReaderAnySetter(

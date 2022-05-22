@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONException;
 
 import java.lang.reflect.Field;
 
-final class FieldWriterBoolValField extends FieldWriterBoolVal {
+final class FieldWriterBoolValField
+        extends FieldWriterBoolVal {
     final Field field;
 
     protected FieldWriterBoolValField(String fieldName, int ordinal, long features, Field field, Class fieldClass) {

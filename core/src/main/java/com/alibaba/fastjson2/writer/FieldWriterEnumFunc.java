@@ -6,7 +6,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.function.Function;
 
-final class FieldWriterEnumFunc extends FieldWriterEnum {
+final class FieldWriterEnumFunc
+        extends FieldWriterEnum {
     final Type fieldType;
     final Method method;
     final Function function;

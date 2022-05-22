@@ -132,7 +132,8 @@ public final class JSONFactory {
 
     static final AtomicReferenceFieldUpdater<Cache, byte[]> VALUE_BYTES_UPDATER = AtomicReferenceFieldUpdater.newUpdater(Cache.class, byte[].class, "valueBytes");
 
-    static final class SymbolTableImpl implements JSONB.SymbolTable {
+    static final class SymbolTableImpl
+            implements JSONB.SymbolTable {
         private final String[] names;
         private final long hashCode64;
         private final short[] mapping;

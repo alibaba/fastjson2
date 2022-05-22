@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.util.IOUtils;
 
 import java.util.Arrays;
 
-abstract class FieldWriterInt64<T> extends FieldWriterImpl<T> {
+abstract class FieldWriterInt64<T>
+        extends FieldWriterImpl<T> {
     volatile byte[][] utf8ValueCache;
     volatile char[][] utf16ValueCache;
     final boolean browserCompatible;

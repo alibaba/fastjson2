@@ -7,7 +7,8 @@ import com.alibaba.fastjson2.util.Fnv;
 import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicInteger;
 
-final class ObjectWriterImplAtomicInteger extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplAtomicInteger
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplAtomicInteger INSTANCE = new ObjectWriterImplAtomicInteger(null);
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("AtomicInteger");
     static final long JSONB_TYPE_HASH = Fnv.hashCode64("AtomicInteger");

@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 
-final class ObjectWriterImplBigDecimal extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplBigDecimal
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplBigDecimal INSTANCE = new ObjectWriterImplBigDecimal();
 
     @Override

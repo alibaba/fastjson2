@@ -9,7 +9,8 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-final class FieldReaderDateMethod<T> extends FieldReaderObjectMethod<T> {
+final class FieldReaderDateMethod<T>
+        extends FieldReaderObjectMethod<T> {
     DateTimeFormatter formatter;
     ObjectReaderImplDate dateReader;
 

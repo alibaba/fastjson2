@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SimplePropertyPreFilter implements PropertyPreFilter {
+public class SimplePropertyPreFilter
+        implements PropertyPreFilter {
     private final Class<?> clazz;
     private final Set<String> includes = new HashSet<String>();
     private final Set<String> excludes = new HashSet<String>();

@@ -7,7 +7,9 @@ import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-final class ObjectWriterImplZonedDateTime extends DateTimeCodec implements ObjectWriter {
+final class ObjectWriterImplZonedDateTime
+        extends DateTimeCodec
+        implements ObjectWriter {
     static final ObjectWriterImplZonedDateTime INSTANCE = new ObjectWriterImplZonedDateTime(null);
     static final ObjectWriterImplZonedDateTime INSTANCE_UNIXTIME = new ObjectWriterImplZonedDateTime("unixtime");
 

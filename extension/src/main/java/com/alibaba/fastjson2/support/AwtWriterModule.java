@@ -9,7 +9,8 @@ import java.lang.reflect.Type;
 import static com.alibaba.fastjson2.writer.ObjectWriters.fieldWriter;
 import static com.alibaba.fastjson2.writer.ObjectWriters.objectWriter;
 
-public class AwtWriterModule implements ObjectWriterModule {
+public class AwtWriterModule
+        implements ObjectWriterModule {
     public static AwtWriterModule INSTANCE = new AwtWriterModule();
 
     @Override

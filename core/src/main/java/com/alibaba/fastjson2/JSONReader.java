@@ -26,7 +26,8 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
-public abstract class JSONReader implements Closeable {
+public abstract class JSONReader
+        implements Closeable {
     static final int MAX_EXP = 512;
 
     static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
@@ -2200,7 +2201,8 @@ public abstract class JSONReader implements Closeable {
     public static interface Filter {
     }
 
-    public interface AutoTypeBeforeHandler extends JSONReader.Filter {
+    public interface AutoTypeBeforeHandler
+            extends JSONReader.Filter {
         Class<?> apply(String typeName, Class<?> expectClass, long features);
     }
 

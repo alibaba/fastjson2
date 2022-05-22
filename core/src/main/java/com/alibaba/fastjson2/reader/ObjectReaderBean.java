@@ -10,7 +10,8 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
-public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
+public abstract class ObjectReaderBean<T>
+        implements ObjectReader<T> {
     final protected Class objectClass;
     final protected String typeName;
     final protected long typeNameHash;

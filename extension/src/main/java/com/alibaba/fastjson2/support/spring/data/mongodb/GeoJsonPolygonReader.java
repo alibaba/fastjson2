@@ -11,7 +11,8 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPolygon;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GeoJsonPolygonReader implements ObjectReader<GeoJsonPolygon> {
+public class GeoJsonPolygonReader
+        implements ObjectReader<GeoJsonPolygon> {
     public final static GeoJsonPolygonReader INSTANCE = new GeoJsonPolygonReader();
 
     final static long HASH_TYPE = Fnv.hashCode64("type");

@@ -10,7 +10,8 @@ import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-final class JSONReaderASCII extends JSONReaderUTF8 {
+final class JSONReaderASCII
+        extends JSONReaderUTF8 {
     final String str;
 
     JSONReaderASCII(Context ctx, String str, byte[] bytes, int offset, int length) {

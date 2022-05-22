@@ -17,7 +17,8 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
-class ObjectReaderImplMapTyped implements ObjectReader {
+class ObjectReaderImplMapTyped
+        implements ObjectReader {
     final Class mapType;
     final Class instanceType;
     final Type keyType;

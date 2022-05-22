@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-final class FieldWriterMillisMethod<T> extends FieldWriterDate<T> {
+final class FieldWriterMillisMethod<T>
+        extends FieldWriterDate<T> {
     final Method method;
 
     FieldWriterMillisMethod(String fieldName

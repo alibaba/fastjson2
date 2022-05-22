@@ -9,7 +9,9 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
 
-class FieldReaderMapFieldReadOnly<T> extends FieldReaderObjectField<T> implements FieldReaderReadOnly<T> {
+class FieldReaderMapFieldReadOnly<T>
+        extends FieldReaderObjectField<T>
+        implements FieldReaderReadOnly<T> {
     volatile ObjectReader itemReader;
 
     FieldReaderMapFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Field field) {

@@ -11,7 +11,8 @@ import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public final class ObjectSchema extends JSONSchema {
+public final class ObjectSchema
+        extends JSONSchema {
     final boolean typed;
     final Map<String, JSONSchema> definitions;
     final Map<String, JSONSchema> defs;

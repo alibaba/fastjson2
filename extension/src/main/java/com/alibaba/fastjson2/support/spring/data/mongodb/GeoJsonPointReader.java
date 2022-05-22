@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.util.Fnv;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
-public class GeoJsonPointReader implements ObjectReader<GeoJsonPoint> {
+public class GeoJsonPointReader
+        implements ObjectReader<GeoJsonPoint> {
     public final static GeoJsonPointReader INSTANCE = new GeoJsonPointReader();
 
     final static long HASH_TYPE = Fnv.hashCode64("type");

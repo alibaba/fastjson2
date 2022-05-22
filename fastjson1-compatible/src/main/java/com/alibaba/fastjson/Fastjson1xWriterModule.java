@@ -9,7 +9,8 @@ import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import java.lang.reflect.Type;
 import java.util.List;
 
-public class Fastjson1xWriterModule implements ObjectWriterModule {
+public class Fastjson1xWriterModule
+        implements ObjectWriterModule {
     final ObjectWriterProvider provider;
 
     public Fastjson1xWriterModule(ObjectWriterProvider provider) {
@@ -25,7 +26,8 @@ public class Fastjson1xWriterModule implements ObjectWriterModule {
         return null;
     }
 
-    static class JSONAwareWriter implements ObjectWriter {
+    static class JSONAwareWriter
+            implements ObjectWriter {
         static final JSONAwareWriter INSTANCE = new JSONAwareWriter();
 
         @Override

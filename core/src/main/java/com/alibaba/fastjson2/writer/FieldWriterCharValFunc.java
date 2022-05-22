@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.function.ToCharFunction;
 
 import java.lang.reflect.Method;
 
-final class FieldWriterCharValFunc extends FieldWriterImpl {
+final class FieldWriterCharValFunc
+        extends FieldWriterImpl {
     final Method method;
     final ToCharFunction function;
 

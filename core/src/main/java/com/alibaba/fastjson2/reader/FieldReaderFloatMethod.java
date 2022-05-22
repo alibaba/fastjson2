@@ -9,7 +9,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Locale;
 
-final class FieldReaderFloatMethod<T> extends FieldReaderObjectMethod<T> {
+final class FieldReaderFloatMethod<T>
+        extends FieldReaderObjectMethod<T> {
     FieldReaderFloatMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Float defaultValue, JSONSchema schema, Method setter) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter);
     }

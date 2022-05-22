@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 
-class ObjectWriterImplBoolValueArray extends ObjectWriterBaseModule.PrimitiveImpl {
+class ObjectWriterImplBoolValueArray
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplBoolValueArray INSTANCE = new ObjectWriterImplBoolValueArray();
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("[Z");
     static final long JSONB_TYPE_HASH = Fnv.hashCode64("[Z");

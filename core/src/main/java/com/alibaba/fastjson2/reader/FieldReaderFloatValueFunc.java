@@ -8,7 +8,8 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 
-final class FieldReaderFloatValueFunc<T> extends FieldReaderImpl<T> {
+final class FieldReaderFloatValueFunc<T>
+        extends FieldReaderImpl<T> {
     final Method method;
     final ObjFloatConsumer<T> function;
 

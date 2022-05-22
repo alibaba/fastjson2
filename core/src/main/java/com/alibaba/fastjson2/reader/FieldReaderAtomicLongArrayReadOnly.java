@@ -7,7 +7,8 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicLongArray;
 
-final class FieldReaderAtomicLongArrayReadOnly<T> extends FieldReaderImpl<T> {
+final class FieldReaderAtomicLongArrayReadOnly<T>
+        extends FieldReaderImpl<T> {
     final Method method;
 
     FieldReaderAtomicLongArrayReadOnly(String fieldName, Class fieldType, int ordinal, JSONSchema jsonSchema, Method method) {

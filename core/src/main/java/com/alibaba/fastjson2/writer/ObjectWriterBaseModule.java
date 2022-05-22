@@ -24,7 +24,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
-class ObjectWriterBaseModule implements ObjectWriterModule {
+class ObjectWriterBaseModule
+        implements ObjectWriterModule {
     static ObjectWriterAdapter STACK_TRACE_ELEMENT_WRITER;
 
     final ObjectWriterProvider provider;
@@ -40,7 +41,8 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
         return annotationProcessor;
     }
 
-    class WriterAnnotationProcessor implements ObjectWriterAnnotationProcessor {
+    class WriterAnnotationProcessor
+            implements ObjectWriterAnnotationProcessor {
         @Override
         public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
             Class superclass = objectClass.getSuperclass();
@@ -1027,7 +1029,8 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
         return null;
     }
 
-    static abstract class PrimitiveImpl<T> implements ObjectWriter<T> {
+    static abstract class PrimitiveImpl<T>
+            implements ObjectWriter<T> {
         @Override
         public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             writeJSONB(jsonWriter, object, null, null, 0);
@@ -1039,7 +1042,8 @@ class ObjectWriterBaseModule implements ObjectWriterModule {
         }
     }
 
-    static class VoidObjectWriter implements ObjectWriter {
+    static class VoidObjectWriter
+            implements ObjectWriter {
         public final static VoidObjectWriter INSTANCE = new VoidObjectWriter();
 
         @Override

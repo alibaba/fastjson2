@@ -12,7 +12,8 @@ import java.util.UUID;
 
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
-final class JSONReaderStr extends JSONReader {
+final class JSONReaderStr
+        extends JSONReader {
     protected final String str;
     protected final int length;
     protected final int end;

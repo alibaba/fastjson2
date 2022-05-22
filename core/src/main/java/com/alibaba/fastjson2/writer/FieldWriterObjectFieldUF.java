@@ -7,7 +7,8 @@ import java.lang.reflect.Type;
 
 import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
 
-final class FieldWriterObjectFieldUF extends FieldWriterObjectField {
+final class FieldWriterObjectFieldUF
+        extends FieldWriterObjectField {
     final long fieldOffset;
 
     protected FieldWriterObjectFieldUF(

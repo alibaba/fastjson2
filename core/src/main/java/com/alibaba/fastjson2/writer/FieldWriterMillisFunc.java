@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Method;
 import java.util.function.ToLongFunction;
 
-final class FieldWriterMillisFunc<T> extends FieldWriterDate<T> {
+final class FieldWriterMillisFunc<T>
+        extends FieldWriterDate<T> {
     final Method method;
     final ToLongFunction function;
 

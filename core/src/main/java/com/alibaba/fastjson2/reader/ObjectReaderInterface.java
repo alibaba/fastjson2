@@ -8,7 +8,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public final class ObjectReaderInterface<T> extends ObjectReaderAdapter<T> {
+public final class ObjectReaderInterface<T>
+        extends ObjectReaderAdapter<T> {
     public ObjectReaderInterface(
             Class objectClass,
             String typeKey,

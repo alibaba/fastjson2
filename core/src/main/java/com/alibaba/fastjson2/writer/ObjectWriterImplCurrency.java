@@ -8,7 +8,8 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Type;
 import java.util.Currency;
 
-final class ObjectWriterImplCurrency extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplCurrency
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplCurrency INSTANCE = new ObjectWriterImplCurrency(null);
     static final ObjectWriterImplCurrency INSTANCE_FOR_FIELD = new ObjectWriterImplCurrency(null);
 

@@ -10,7 +10,8 @@ import java.util.Map;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
-final class ObjectReaderImplObject extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectReaderImplObject
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplObject INSTANCE = new ObjectReaderImplObject();
 
     @Override

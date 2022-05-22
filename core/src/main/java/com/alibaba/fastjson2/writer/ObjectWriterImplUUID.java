@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 import java.util.UUID;
 
-final class ObjectWriterImplUUID extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplUUID
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplUUID INSTANCE = new ObjectWriterImplUUID();
 
     @Override

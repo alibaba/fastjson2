@@ -11,7 +11,8 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-final class ObjectWriterImplEnum<E extends Enum<E>> extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplEnum<E extends Enum<E>>
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     final Member valueField;
 
     final Class defineClass;

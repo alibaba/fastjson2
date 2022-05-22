@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.JSONReader;
 import java.util.HashMap;
 import java.util.Map;
 
-final class ObjectReaderImplMapString extends ObjectReaderImplMapTyped {
+final class ObjectReaderImplMapString
+        extends ObjectReaderImplMapTyped {
     public ObjectReaderImplMapString(Class mapType, Class instanceType, long features) {
         super(mapType, instanceType, null, String.class, features, null);
     }

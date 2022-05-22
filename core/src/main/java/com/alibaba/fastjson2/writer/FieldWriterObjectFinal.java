@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;
 
-abstract class FieldWriterObjectFinal<T> extends FieldWriterImpl<T> {
+abstract class FieldWriterObjectFinal<T>
+        extends FieldWriterImpl<T> {
     final Type fieldType;
     final Class fieldClass;
     volatile ObjectWriter objectWriter;

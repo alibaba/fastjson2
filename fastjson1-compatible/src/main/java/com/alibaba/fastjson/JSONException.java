@@ -19,7 +19,8 @@ package com.alibaba.fastjson;
  * @author wenshao[szujobs@hotmail.com]
  */
 @SuppressWarnings("serial")
-public class JSONException extends RuntimeException {
+public class JSONException
+        extends RuntimeException {
     public JSONException() {
         super();
     }

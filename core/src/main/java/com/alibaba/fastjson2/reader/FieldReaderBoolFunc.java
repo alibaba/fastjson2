@@ -7,7 +7,8 @@ import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-final class FieldReaderBoolFunc<T, V> extends FieldReaderImpl<T> {
+final class FieldReaderBoolFunc<T, V>
+        extends FieldReaderImpl<T> {
     final Method method;
     final BiConsumer<T, V> function;
 

@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Method;
 import java.util.function.ToDoubleFunction;
 
-final class FieldWriterDoubleValueFunc extends FieldWriterImpl {
+final class FieldWriterDoubleValueFunc
+        extends FieldWriterImpl {
     final Method method;
     final ToDoubleFunction function;
 

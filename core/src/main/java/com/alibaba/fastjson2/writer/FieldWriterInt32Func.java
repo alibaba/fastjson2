@@ -3,7 +3,8 @@ package com.alibaba.fastjson2.writer;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
-final class FieldWriterInt32Func<T> extends FieldWriterInt32<T> {
+final class FieldWriterInt32Func<T>
+        extends FieldWriterInt32<T> {
     final Method method;
     final Function<T, Integer> function;
 

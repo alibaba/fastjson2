@@ -9,7 +9,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Map;
 
-public final class ObjectReaderImplInstant extends DateTimeCodec implements ObjectReader {
+public final class ObjectReaderImplInstant
+        extends DateTimeCodec
+        implements ObjectReader {
     public static final ObjectReaderImplInstant INSTANCE = new ObjectReaderImplInstant(null, null);
 
     public static ObjectReaderImplInstant of(String format, Locale locale) {

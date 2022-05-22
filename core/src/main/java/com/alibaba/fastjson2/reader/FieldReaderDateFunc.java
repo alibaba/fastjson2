@@ -10,7 +10,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-final class FieldReaderDateFunc<T> extends FieldReaderImpl<T> {
+final class FieldReaderDateFunc<T>
+        extends FieldReaderImpl<T> {
     final Method method;
     final BiConsumer<T, Date> function;
     DateTimeFormatter formatter;

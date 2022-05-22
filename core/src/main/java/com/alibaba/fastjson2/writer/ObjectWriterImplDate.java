@@ -10,7 +10,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-final class ObjectWriterImplDate extends DateTimeCodec implements ObjectWriter {
+final class ObjectWriterImplDate
+        extends DateTimeCodec
+        implements ObjectWriter {
     static final ObjectWriterImplDate INSTANCE = new ObjectWriterImplDate(null);
     static final ObjectWriterImplDate INSTANCE_UNIXTIME = new ObjectWriterImplDate("unixtime");
 

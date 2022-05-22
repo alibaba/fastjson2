@@ -45,7 +45,9 @@ import static com.alibaba.fastjson.util.TypeUtils.*;
 /**
  * @author wenshao[szujobs@hotmail.com]
  */
-public class JSONObject extends JSON implements Map<String, Object>, Cloneable, Serializable, InvocationHandler {
+public class JSONObject
+        extends JSON
+        implements Map<String, Object>, Cloneable, Serializable, InvocationHandler {
     static ObjectReader<JSONArray> arrayReader;
     static ObjectReader<JSONObject> objectReader;
 
@@ -1043,7 +1045,8 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         return JSON.toJSONString(this, features);
     }
 
-    static class SecureObjectInputStream extends ObjectInputStream {
+    static class SecureObjectInputStream
+            extends ObjectInputStream {
         static Field[] fields;
         static volatile boolean fields_error;
 

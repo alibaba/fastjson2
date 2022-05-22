@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.Function;
 
-final class FieldWriterObjectFunc<T> extends FieldWriterObject<T> {
+final class FieldWriterObjectFunc<T>
+        extends FieldWriterObject<T> {
     final Method method;
     final Function function;
     final boolean isArray;

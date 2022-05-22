@@ -6,7 +6,8 @@ import org.javamoney.moneta.spi.DefaultNumberValue;
 
 import java.math.BigDecimal;
 
-public class NumberValueReader implements ObjectReader {
+public class NumberValueReader
+        implements ObjectReader {
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
         BigDecimal decimal = jsonReader.readBigDecimal();

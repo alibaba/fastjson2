@@ -6,7 +6,8 @@ import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.function.Function;
 
-final class FieldWriterDateFunc<T> extends FieldWriterDate<T> {
+final class FieldWriterDateFunc<T>
+        extends FieldWriterDate<T> {
     final Method method;
     Function<T, Date> function;
 

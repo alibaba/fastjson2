@@ -7,7 +7,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.Function;
 
-final class FieldWriterListFunc<T> extends FieldWriterList<T> {
+final class FieldWriterListFunc<T>
+        extends FieldWriterList<T> {
     final Method method;
     final Function<T, List> function;
 

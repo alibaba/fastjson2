@@ -9,7 +9,8 @@ import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class FieldReaderAtomicReferenceField<T>
-        extends FieldReaderAtomicReference<T> implements FieldReaderReadOnly<T> {
+        extends FieldReaderAtomicReference<T>
+        implements FieldReaderReadOnly<T> {
     final Field field;
     final boolean readOnly;
 

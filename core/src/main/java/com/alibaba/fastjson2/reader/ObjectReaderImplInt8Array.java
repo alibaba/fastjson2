@@ -13,7 +13,8 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
-class ObjectReaderImplInt8Array extends ObjectReaderBaseModule.PrimitiveImpl {
+class ObjectReaderImplInt8Array
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplInt8Array INSTANCE = new ObjectReaderImplInt8Array(null);
 
     final String format;

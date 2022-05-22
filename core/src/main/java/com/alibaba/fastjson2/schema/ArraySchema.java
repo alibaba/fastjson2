@@ -8,7 +8,8 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.*;
 
-public final class ArraySchema extends JSONSchema {
+public final class ArraySchema
+        extends JSONSchema {
     final Map<String, JSONSchema> definitions;
     final Map<String, JSONSchema> defs;
 

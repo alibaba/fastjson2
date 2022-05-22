@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
-public final class ObjectReaderImplShort extends ObjectReaderBaseModule.PrimitiveImpl {
+public final class ObjectReaderImplShort
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplShort INSTANCE = new ObjectReaderImplShort();
 
     public static final long HASH_TYPE = Fnv.hashCode64("S");

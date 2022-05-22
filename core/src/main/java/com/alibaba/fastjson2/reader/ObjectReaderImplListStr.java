@@ -6,12 +6,12 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.reader.ObjectReaderImplList.*;
 
-public final class ObjectReaderImplListStr implements ObjectReader {
+public final class ObjectReaderImplListStr
+        implements ObjectReader {
     final Class listType;
     final Class instanceType;
 

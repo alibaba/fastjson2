@@ -90,7 +90,8 @@ public class Issue283 {
     @Configuration
     @Order(Ordered.LOWEST_PRECEDENCE + 1)
     @EnableWebMvc
-    public static class WebMvcConfig implements WebMvcConfigurer {
+    public static class WebMvcConfig
+            implements WebMvcConfigurer {
         @Override
         public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
             FastJsonHttpMessageConverter fastConverter = new FastJsonHttpMessageConverter();
@@ -107,7 +108,8 @@ public class Issue283 {
         }
     }
 
-    public static class ToStringObjectWriter implements ObjectWriter<Object> {
+    public static class ToStringObjectWriter
+            implements ObjectWriter<Object> {
         public final static ToStringObjectWriter INSTANCE = new ToStringObjectWriter();
 
         @Override

@@ -12,7 +12,8 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.BiConsumer;
 
-final class FieldReaderListStrFunc<T> extends FieldReaderImpl<T>
+final class FieldReaderListStrFunc<T>
+        extends FieldReaderImpl<T>
         implements FieldListStrReader<T> {
     final Method method;
     final BiConsumer<T, List> function;

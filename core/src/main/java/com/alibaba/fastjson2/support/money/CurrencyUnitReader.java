@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 
 import javax.money.Monetary;
 
-final class CurrencyUnitReader implements ObjectReader {
+final class CurrencyUnitReader
+        implements ObjectReader {
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
         String str = jsonReader.readString();

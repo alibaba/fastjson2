@@ -10,7 +10,8 @@ import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_ARRAY_FIX_0;
 
-final class ObjectWriterImplList extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplList
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplList
             INSTANCE = new ObjectWriterImplList(null, null, null, null, 0);
 

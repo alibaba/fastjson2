@@ -21,7 +21,8 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 
-final class JSONWriterJSONB extends JSONWriter {
+final class JSONWriterJSONB
+        extends JSONWriter {
     static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
     static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 

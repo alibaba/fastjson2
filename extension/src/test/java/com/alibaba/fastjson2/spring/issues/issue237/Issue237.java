@@ -70,7 +70,8 @@ public class Issue237 {
     @Configuration
     @Order(Ordered.LOWEST_PRECEDENCE + 1)
     @EnableWebMvc
-    public static class WebMvcConfig implements WebMvcConfigurer {
+    public static class WebMvcConfig
+            implements WebMvcConfigurer {
         @Override
         public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
             FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();

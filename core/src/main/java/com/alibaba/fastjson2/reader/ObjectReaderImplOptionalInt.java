@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.util.OptionalInt;
 
-final class ObjectReaderImplOptionalInt extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectReaderImplOptionalInt
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplOptionalInt INSTANCE = new ObjectReaderImplOptionalInt();
 
     @Override

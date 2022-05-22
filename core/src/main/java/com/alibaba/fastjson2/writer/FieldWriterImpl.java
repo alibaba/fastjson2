@@ -9,7 +9,8 @@ import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Locale;
 
-abstract class FieldWriterImpl<T> implements FieldWriter<T> {
+abstract class FieldWriterImpl<T>
+        implements FieldWriter<T> {
     final String name;
     final int ordinal;
     final String format;

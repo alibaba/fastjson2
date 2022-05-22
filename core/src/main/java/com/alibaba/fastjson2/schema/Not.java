@@ -8,7 +8,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-final class Not extends JSONSchema {
+final class Not
+        extends JSONSchema {
     final JSONSchema schema;
     final Type[] types;
     final Boolean result;

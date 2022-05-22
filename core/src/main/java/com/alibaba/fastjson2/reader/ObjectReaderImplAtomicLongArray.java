@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLongArray;
 
-final class ObjectReaderImplAtomicLongArray extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectReaderImplAtomicLongArray
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplAtomicLongArray INSTANCE = new ObjectReaderImplAtomicLongArray();
 
     @Override

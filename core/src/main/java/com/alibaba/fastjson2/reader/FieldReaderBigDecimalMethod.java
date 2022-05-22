@@ -10,7 +10,8 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Locale;
 
-final class FieldReaderBigDecimalMethod<T> extends FieldReaderObjectMethod<T> {
+final class FieldReaderBigDecimalMethod<T>
+        extends FieldReaderObjectMethod<T> {
     FieldReaderBigDecimalMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, BigDecimal defaultValue, JSONSchema schema, Method method) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method);
     }

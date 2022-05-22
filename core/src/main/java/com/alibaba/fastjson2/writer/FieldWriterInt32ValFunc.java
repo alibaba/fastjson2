@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Method;
 import java.util.function.ToIntFunction;
 
-final class FieldWriterInt32ValFunc extends FieldWriterInt32 {
+final class FieldWriterInt32ValFunc
+        extends FieldWriterInt32 {
     final Method method;
     final ToIntFunction function;
 

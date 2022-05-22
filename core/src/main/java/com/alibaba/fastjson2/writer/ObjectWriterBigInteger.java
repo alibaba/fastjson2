@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
 
-final class ObjectWriterBigInteger implements ObjectWriter {
+final class ObjectWriterBigInteger
+        implements ObjectWriter {
     static final ObjectWriterBigInteger INSTANCE = new ObjectWriterBigInteger(0L);
 
     final long features;

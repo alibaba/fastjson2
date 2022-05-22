@@ -10,7 +10,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-final class ObjectReaderImplInt64ValueArray extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectReaderImplInt64ValueArray
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplInt64ValueArray INSTANCE = new ObjectReaderImplInt64ValueArray();
 
     static final long HASH_TYPE = Fnv.hashCode64("[J");

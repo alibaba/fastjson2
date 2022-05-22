@@ -8,7 +8,8 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
-final class FieldReaderInt16ValueFunc<T> extends FieldReaderImpl<T> {
+final class FieldReaderInt16ValueFunc<T>
+        extends FieldReaderImpl<T> {
     final Method method;
     final ObjShortConsumer<T> function;
 

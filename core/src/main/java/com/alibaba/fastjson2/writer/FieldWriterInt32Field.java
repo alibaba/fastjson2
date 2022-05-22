@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONException;
 
 import java.lang.reflect.Field;
 
-final class FieldWriterInt32Field<T> extends FieldWriterInt32<T> {
+final class FieldWriterInt32Field<T>
+        extends FieldWriterInt32<T> {
     final Field field;
 
     FieldWriterInt32Field(String name, int ordinal, long features, String format, Field field) {
