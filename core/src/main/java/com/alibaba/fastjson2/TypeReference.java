@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -276,17 +277,13 @@ public abstract class TypeReference<T> {
                             break Loader;
                         }
 
-                        try {
-                            char[] chars = new char[dimension + 1];
-                            for (int j = 0; j < dimension; j++) {
-                                chars[j] = '[';
-                            }
-                            chars[dimension] = ch;
-                            String typeName = new String(chars);
-                            argTypes[i] = Class.forName(typeName);
-                        } catch (ClassNotFoundException e) {
-                            // nothing
+                        char[] chars = new char[dimension + 1];
+                        for (int j = 0; j < dimension; j++) {
+                            chars[j] = '[';
                         }
+                        chars[dimension] = ch;
+                        String typeName = new String(chars);
+                        argTypes[i] = TypeUtils.loadClass(typeName);
                     }
                 }
             }

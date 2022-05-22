@@ -929,6 +929,75 @@ public class TypeUtils {
             return null;
         }
 
+        switch (className) {
+            case "java.lang.Object":
+                return Object.class;
+            case "class java.util.Collections$EmptyMap":
+                return Collections.EMPTY_MAP.getClass();
+            case "java.util.Collections$EmptyList":
+                return Collections.EMPTY_LIST.getClass();
+            case "java.util.Collections$EmptySet":
+                return Collections.EMPTY_SET.getClass();
+            case "java.util.Optional":
+                return Optional.class;
+            case "java.util.OptionalInt":
+                return OptionalInt.class;
+            case "java.util.OptionalLong":
+                return OptionalLong.class;
+            case "java.util.List":
+                return List.class;
+            case "java.util.ArrayList":
+                return ArrayList.class;
+            case "java.util.Map":
+                return Map.class;
+            case "java.util.HashMap":
+                return HashMap.class;
+            case "java.lang.Class":
+                return Class.class;
+            case "java.lang.Integer":
+                return Integer.class;
+            case "java.lang.Long":
+                return Long.class;
+            case "java.lang.String":
+                return String.class;
+            case "I":
+                return int.class;
+            case "S":
+                return short.class;
+            case "J":
+                return long.class;
+            case "Z":
+                return boolean.class;
+            case "B":
+                return byte.class;
+            case "F":
+                return float.class;
+            case "D":
+                return double.class;
+            case "C":
+                return char.class;
+            case "[B":
+                return byte[].class;
+            case "[S":
+                return short[].class;
+            case "[I":
+                return int[].class;
+            case "[J":
+                return long[].class;
+            case "[F":
+                return float[].class;
+            case "[D":
+                return double[].class;
+            case "[C":
+                return char[].class;
+            case "[Z":
+                return boolean[].class;
+            case "java.io.IOException":
+                return java.io.IOException.class;
+            default:
+                break;
+        }
+
         if (className.charAt(0) == '[' || className.endsWith("[]")) {
             String itemClassName = className.charAt(0) == '[' ? className.substring(1) : className.substring(0, className.length() - 2);
             Class itemClass = loadClass(itemClassName);
