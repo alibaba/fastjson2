@@ -1095,9 +1095,11 @@ public class ObjectWriterCreatorASM
             String TYPE_OBJECT
     ) {
         Class<?> fieldClass = fieldWriter.getFieldClass();
+        String fieldName = fieldWriter.getFieldName();
 
         MethodWriter mw = mwc.mw;
         int FIELD_VALUE = mwc.var(fieldClass);
+        int REF_PATH = mwc.var("REF_PATH");
 
         Label endIfNull_ = new Label(), notNull_ = new Label();
 
@@ -1111,6 +1113,46 @@ public class ObjectWriterCreatorASM
         mw.visitJumpInsn(Opcodes.GOTO, endIfNull_);
 
         mw.visitLabel(notNull_);
+
+        boolean refDetection = !ObjectWriterProvider.isNotReferenceDetect(fieldClass);
+        if (refDetection) {
+            Label endDetect_ = new Label(), refSetPath_ = new Label();
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isRefDetect", "()Z", false);
+            mw.visitJumpInsn(Opcodes.IFEQ, endDetect_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitJumpInsn(Opcodes.IF_ACMPNE, refSetPath_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitLdcInsn("..");
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeReference", "(Ljava/lang/String;)V", false);
+
+            mw.visitJumpInsn(Opcodes.GOTO, endIfNull_);
+
+            mw.visitLabel(refSetPath_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitLdcInsn(fieldName);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "setPath", METHOD_DESC_SET_PATH, false);
+            mw.visitInsn(Opcodes.DUP);
+            mw.visitVarInsn(Opcodes.ASTORE, REF_PATH);
+            mw.visitJumpInsn(Opcodes.IFNULL, endDetect_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, REF_PATH);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeReference", METHOD_DESC_WRITE_REFERENCE, false);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "popPath", "(Ljava/lang/Object;)V", false);
+            mw.visitJumpInsn(Opcodes.GOTO, endIfNull_);
+
+            mw.visitLabel(endDetect_);
+        }
 
         // fw.getObjectWriter(w, value.getClass());
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
@@ -1133,6 +1175,12 @@ public class ObjectWriterCreatorASM
         mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_FIELD_WRITER, "getFieldType", "()Ljava/lang/reflect/Type;", true);
         mw.visitLdcInsn(fieldWriter.getFeatures());
         mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_WRITER, "write", METHOD_DESC_WRITE_OBJECT, true);
+
+        if (refDetection) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "popPath", "(Ljava/lang/Object;)V", false);
+        }
 
         mw.visitLabel(endIfNull_);
     }
@@ -1402,6 +1450,16 @@ public class ObjectWriterCreatorASM
             int i
     ) {
         Class<?> fieldClass = fieldWriter.getFieldClass();
+        String fieldName = fieldWriter.getFieldName();
+
+        boolean refDetection = !ObjectWriterProvider.isNotReferenceDetect(fieldClass);
+        int FIELD_VALUE = mwc.var(fieldClass);
+
+        Integer REF_PATH = null;
+        if (refDetection) {
+            REF_PATH = mwc.var("REF_PATH");
+        }
+
         long features = fieldWriter.getFeatures() | mwc.objectFeatures;
         MethodWriter mw = mwc.mw;
 
@@ -1418,8 +1476,6 @@ public class ObjectWriterCreatorASM
             mw.visitJumpInsn(Opcodes.GOTO, notNull_);
         }
 
-        int FIELD_VALUE = mwc.var(fieldClass);
-
         genGetObject(mwc, fieldWriter, OBJECT);
         mw.visitInsn(Opcodes.DUP);
         mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
@@ -1430,6 +1486,58 @@ public class ObjectWriterCreatorASM
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isIgnoreNoneSerializable", "()Z", false);
             mw.visitJumpInsn(Opcodes.IFNE, notNull_);
+        }
+
+        if (refDetection) {
+            Label endDetect_ = new Label(), refSetPath_ = new Label();
+
+            int REF_DETECT = mwc.var("REF_DETECT");
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            if (fieldClass == Object.class) {
+                mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isRefDetect", "(Ljava/lang/Object;)Z", false);
+            } else {
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isRefDetect", "()Z", false);
+            }
+            mw.visitInsn(Opcodes.DUP);
+            mw.visitVarInsn(Opcodes.ISTORE, REF_DETECT);
+            mw.visitJumpInsn(Opcodes.IFEQ, endDetect_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitJumpInsn(Opcodes.IF_ACMPNE, refSetPath_);
+
+            gwFieldName(mwc, i);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitLdcInsn("..");
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeReference", "(Ljava/lang/String;)V", false);
+
+            mw.visitJumpInsn(Opcodes.GOTO, notNull_);
+
+            mw.visitLabel(refSetPath_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitLdcInsn(fieldName);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "setPath", METHOD_DESC_SET_PATH, false);
+            mw.visitInsn(Opcodes.DUP);
+            mw.visitVarInsn(Opcodes.ASTORE, REF_PATH);
+            mw.visitJumpInsn(Opcodes.IFNULL, endDetect_);
+
+            gwFieldName(mwc, i);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, REF_PATH);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeReference", METHOD_DESC_WRITE_REFERENCE, false);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "popPath", "(Ljava/lang/Object;)V", false);
+            mw.visitJumpInsn(Opcodes.GOTO, notNull_);
+
+            mw.visitLabel(endDetect_);
         }
 
         // writeFieldName(w);
@@ -1480,6 +1588,21 @@ public class ObjectWriterCreatorASM
         }
 
         mw.visitJumpInsn(Opcodes.GOTO, notNull_);
+
+        if (refDetection) {
+            int REF_DETECT = mwc.var("REF_DETECT");
+
+            Label endDetect_ = new Label();
+
+            mw.visitVarInsn(Opcodes.ILOAD, REF_DETECT);
+            mw.visitJumpInsn(Opcodes.IFEQ, endDetect_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "popPath", "(Ljava/lang/Object;)V", false);
+
+            mw.visitLabel(endDetect_);
+        }
 
         mw.visitLabel(null_);
 

@@ -856,7 +856,11 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(text)) {
             reader.context.config(features);
-            return reader.read(paramType);
+            List<T> list = reader.read(paramType);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            return list;
         }
     }
 
@@ -883,6 +887,9 @@ public interface JSON {
                 );
             }
             reader.endArray();
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(array);
+            }
             return array;
         }
     }

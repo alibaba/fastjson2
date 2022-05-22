@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.JSONBDump;
+import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.IdentityHashMap;
+import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
@@ -259,8 +261,9 @@ public interface JSONB {
     }
 
     static JSONArray parseArray(byte[] jsonbBytes) {
+        JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
         JSONReader reader = new JSONReaderJSONB(
-                new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider()),
+                context,
                 jsonbBytes,
                 0,
                 jsonbBytes.length, null);
@@ -269,6 +272,25 @@ public interface JSONB {
             reader.handleResolveTasks(array);
         }
         return array;
+    }
+
+    static <T> List<T> parseArray(byte[] jsonbBytes, Type type, JSONReader.Feature... features) {
+        if (jsonbBytes == null || jsonbBytes.length == 0) {
+            return null;
+        }
+
+        ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(
+                new Type[]{type}, null, List.class
+        );
+
+        try (JSONReader reader = JSONReader.ofJSONB(jsonbBytes, features)) {
+            reader.context.config(features);
+            List<T> list = reader.read(paramType);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            return list;
+        }
     }
 
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass) {
