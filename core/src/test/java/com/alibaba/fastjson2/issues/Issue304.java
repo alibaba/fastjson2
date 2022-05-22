@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2.issues;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,8 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class Issue304 {
-    @Test
-    public void test() {
+    List<Bean> list;
+    String result;
+
+    @BeforeEach
+    public void init() {
         Bean tt = new Bean();
         tt.setItem(null);
         tt.setName("testtt");
@@ -31,11 +34,32 @@ public class Issue304 {
                 JSONWriter.Feature.ReferenceDetection,
                 //JSONWriter.Feature.FieldBased
         };
-        String result = JSON.toJSONString(list,features );
-        assertEquals("[{\"item\":{\"name\":\"testtt\"},\"name\":\"test\"},{\"item\":{\"$ref\":\"$[0].item\"},\"name\":\"test\"},{\"item\":{\"$ref\":\"$[0].item\"},\"name\":\"test\"},{\"item\":{\"$ref\":\"$[0].item\"},\"name\":\"test\"}]", result);
+        result = JSON.toJSONString(list,features );
+    }
 
+    @Test
+    public void write() {
+        assertEquals("[{\"item\":{\"name\":\"testtt\"},\"name\":\"test\"},{\"item\":{\"$ref\":\"$[0].item\"},\"name\":\"test\"},{\"item\":{\"$ref\":\"$[0].item\"},\"name\":\"test\"},{\"item\":{\"$ref\":\"$[0].item\"},\"name\":\"test\"}]", result);
+    }
+
+    public void testRead0() {
         List<Bean> list2 = JSON.parseArray(result, Bean.class);
         assertSame(list2.get(0).item, list2.get(1).item);
+    }
+
+    @Test
+    public void readDefault() {
+        List<Bean> list3 = JSON.parseArray(result.getBytes(StandardCharsets.UTF_8), Bean.class);
+        assertSame(list3.get(0).item, list3.get(1).item);
+    }
+
+    @Test
+    public void readStr() {
+        JSONReader jsonReaderStr = TestUtils.createJSONReaderStr(result);
+        Type type = new TypeReference<List<Bean>>() {}.getType();
+        List<Bean> list4 = jsonReaderStr.read(type);
+        jsonReaderStr.handleResolveTasks(list4);
+        assertSame(list4.get(0).item, list4.get(1).item);
     }
 
     @Test

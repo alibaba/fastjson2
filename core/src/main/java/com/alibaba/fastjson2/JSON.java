@@ -912,7 +912,11 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(bytes)) {
             reader.context.config(features);
-            return reader.read(paramType);
+            List<T> list = reader.read(paramType);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            return list;
         }
     }
 

@@ -26,6 +26,8 @@ final class JSONReaderUTF16
     private int nameEnd;
     private int nameLength;
 
+    private int referenceBegin;
+
     JSONReaderUTF16(Context ctx, byte[] bytes, int offset, int length) {
         super(ctx);
 
@@ -79,6 +81,90 @@ final class JSONReaderUTF16
                 throw new JSONException("input not support " + ch + ", offset " + offset);
             }
         }
+    }
+
+    public boolean isReference() {
+        if (ch != '{') {
+            return false;
+        }
+
+        final int start = this.offset;
+
+        ch = chars[this.offset];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            offset++;
+            if (offset>= length) {
+                this.offset = start;
+                this.ch = '{';
+                return false;
+            }
+            ch = chars[offset];
+        }
+
+        char quote = ch;
+        if (quote != '"' && quote != '\'' || this.offset + 5 >= end) {
+            this.offset = start;
+            this.ch = '{';
+            return false;
+        }
+
+        if (chars[offset + 1] != '$'
+                || chars[offset + 2] != 'r'
+                || chars[offset + 3] != 'e'
+                || chars[offset + 4] != 'f'
+                || chars[offset + 5] != quote
+        ) {
+            this.offset = start;
+            this.ch = '{';
+            return false;
+        }
+
+        offset += 6;
+        ch = chars[this.offset];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            offset++;
+            if (offset>= length) {
+                this.offset = start;
+                this.ch = '{';
+                return false;
+            }
+            ch = chars[offset];
+        }
+
+        if (ch != ':') {
+            this.offset = start;
+            this.ch = '{';
+            return false;
+        }
+
+        ch = chars[++this.offset];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            offset++;
+            if (offset>= length) {
+                this.offset = start;
+                this.ch = '{';
+                return false;
+            }
+            ch = chars[offset];
+        }
+
+        if (ch != quote) {
+            this.offset = start;
+            this.ch = '{';
+            return false;
+        }
+
+        this.referenceBegin = offset;
+        this.offset = start;
+        this.ch = '{';
+        return true;
+    }
+
+    public String readReference() {
+        this.offset = referenceBegin;
+        this.ch = chars[offset++];
+        String reference = readString();
+        return reference;
     }
 
     JSONReaderUTF16(Context ctx, String str, char[] chars, int offset, int length) {
