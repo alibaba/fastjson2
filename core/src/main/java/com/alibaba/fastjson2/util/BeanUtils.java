@@ -75,7 +75,7 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (parameterTypes.length > 0 && parameterTypes[parameterTypes.length - 1].getName().equals("kotlin.jvm.internal.DefaultConstructorMarker")) {
+            if (parameterTypes.length > 0 && "kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterTypes.length - 1].getName())) {
                 continue;
             }
             if (creatorConstructor != null && creatorConstructor.getParameterTypes().length >= parameterTypes.length) {
@@ -86,64 +86,64 @@ public abstract class BeanUtils {
         return creatorConstructor;
     }
 
-    private static volatile boolean kotlin_class_klass_error;
-    private static volatile Constructor kotlin_kclass_constructor;
-    private static volatile Method kotlin_kclass_getConstructors;
-    private static volatile Method kotlin_kfunction_getParameters;
-    private static volatile Method kotlin_kparameter_getName;
-    private static volatile boolean kotlin_error;
+    private static volatile boolean kotlinClassKlassError;
+    private static volatile Constructor kotlinKclassConstructor;
+    private static volatile Method kotlinKclassGetConstructors;
+    private static volatile Method kotlinKfunctionGetParameters;
+    private static volatile Method kotlinKparameterGetName;
+    private static volatile boolean kotlinError;
 
     public static String[] getKotlinConstructorParameters(Class clazz) {
-        if (kotlin_kclass_constructor == null && !kotlin_class_klass_error) {
+        if (kotlinKclassConstructor == null && !kotlinClassKlassError) {
             try {
-                Class class_kotlin_kclass = Class.forName("kotlin.reflect.jvm.internal.KClassImpl");
-                kotlin_kclass_constructor = class_kotlin_kclass.getConstructor(Class.class);
+                Class classKotlinKclass = Class.forName("kotlin.reflect.jvm.internal.KClassImpl");
+                kotlinKclassConstructor = classKotlinKclass.getConstructor(Class.class);
             } catch (Throwable e) {
-                kotlin_class_klass_error = true;
+                kotlinClassKlassError = true;
             }
         }
-        if (kotlin_kclass_constructor == null) {
+        if (kotlinKclassConstructor == null) {
             return null;
         }
 
-        if (kotlin_kclass_getConstructors == null && !kotlin_class_klass_error) {
+        if (kotlinKclassGetConstructors == null && !kotlinClassKlassError) {
             try {
-                Class class_kotlin_kclass = Class.forName("kotlin.reflect.jvm.internal.KClassImpl");
-                kotlin_kclass_getConstructors = class_kotlin_kclass.getMethod("getConstructors");
+                Class classKotlinKclass = Class.forName("kotlin.reflect.jvm.internal.KClassImpl");
+                kotlinKclassGetConstructors = classKotlinKclass.getMethod("getConstructors");
             } catch (Throwable e) {
-                kotlin_class_klass_error = true;
+                kotlinClassKlassError = true;
             }
         }
 
-        if (kotlin_kfunction_getParameters == null && !kotlin_class_klass_error) {
+        if (kotlinKfunctionGetParameters == null && !kotlinClassKlassError) {
             try {
-                Class class_kotlin_kfunction = Class.forName("kotlin.reflect.KFunction");
-                kotlin_kfunction_getParameters = class_kotlin_kfunction.getMethod("getParameters");
+                Class classKotlinKfunction = Class.forName("kotlin.reflect.KFunction");
+                kotlinKfunctionGetParameters = classKotlinKfunction.getMethod("getParameters");
             } catch (Throwable e) {
-                kotlin_class_klass_error = true;
+                kotlinClassKlassError = true;
             }
         }
 
-        if (kotlin_kparameter_getName == null && !kotlin_class_klass_error) {
+        if (kotlinKparameterGetName == null && !kotlinClassKlassError) {
             try {
-                Class class_kotlinn_kparameter = Class.forName("kotlin.reflect.KParameter");
-                kotlin_kparameter_getName = class_kotlinn_kparameter.getMethod("getName");
+                Class classKotlinnKparameter = Class.forName("kotlin.reflect.KParameter");
+                kotlinKparameterGetName = classKotlinnKparameter.getMethod("getName");
             } catch (Throwable e) {
-                kotlin_class_klass_error = true;
+                kotlinClassKlassError = true;
             }
         }
 
-        if (kotlin_error) {
+        if (kotlinError) {
             return null;
         }
 
         try {
             Object constructor = null;
-            Object kclassImpl = kotlin_kclass_constructor.newInstance(clazz);
-            Iterable it = (Iterable) kotlin_kclass_getConstructors.invoke(kclassImpl);
+            Object kclassImpl = kotlinKclassConstructor.newInstance(clazz);
+            Iterable it = (Iterable) kotlinKclassGetConstructors.invoke(kclassImpl);
             for (Iterator iterator = it.iterator(); iterator.hasNext(); iterator.hasNext()) {
                 Object item = iterator.next();
-                List parameters = (List) kotlin_kfunction_getParameters.invoke(item);
+                List parameters = (List) kotlinKfunctionGetParameters.invoke(item);
                 if (constructor != null && parameters.size() == 0) {
                     continue;
                 }
@@ -154,16 +154,16 @@ public abstract class BeanUtils {
                 return null;
             }
 
-            List parameters = (List) kotlin_kfunction_getParameters.invoke(constructor);
+            List parameters = (List) kotlinKfunctionGetParameters.invoke(constructor);
             String[] names = new String[parameters.size()];
             for (int i = 0; i < parameters.size(); i++) {
                 Object param = parameters.get(i);
-                names[i] = (String) kotlin_kparameter_getName.invoke(param);
+                names[i] = (String) kotlinKparameterGetName.invoke(param);
             }
             return names;
         } catch (Throwable e) {
             e.printStackTrace();
-            kotlin_error = true;
+            kotlinError = true;
         }
         return null;
     }
@@ -805,11 +805,11 @@ public abstract class BeanUtils {
                 for (int i = firstIndex; i < methodName.length(); ++i) {
                     char ch = methodName.charAt(i);
                     if (ch >= 'A' && ch <= 'Z') {
-                        char ch_ucase = (char) (ch + 32);
+                        char chUcase = (char) (ch + 32);
                         if (i > firstIndex) {
                             buf.append('-');
                         }
-                        buf.append(ch_ucase);
+                        buf.append(chUcase);
                     } else {
                         buf.append(ch);
                     }
@@ -865,11 +865,11 @@ public abstract class BeanUtils {
                 for (int i = 0; i < methodName.length(); ++i) {
                     char ch = methodName.charAt(i);
                     if (ch >= 'A' && ch <= 'Z') {
-                        char ch_ucase = (char) (ch + 32);
+                        char chUcase = (char) (ch + 32);
                         if (i > 0) {
                             buf.append('-');
                         }
-                        buf.append(ch_ucase);
+                        buf.append(chUcase);
                     } else {
                         buf.append(ch);
                     }
@@ -893,11 +893,11 @@ public abstract class BeanUtils {
             for (int i = prefixLength; i < methodNameLength; ++i) {
                 char ch = methodName.charAt(i);
                 if (ch >= 'A' && ch <= 'Z') {
-                    char ch_ucase = (char) (ch + 32);
+                    char chUcase = (char) (ch + 32);
                     if (i > prefixLength) {
                         buf[off++] = '_';
                     }
-                    buf[off++] = ch_ucase;
+                    buf[off++] = chUcase;
                 } else {
                     buf[off++] = ch;
                 }

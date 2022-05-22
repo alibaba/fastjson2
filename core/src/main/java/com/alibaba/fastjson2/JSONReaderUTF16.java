@@ -83,6 +83,7 @@ final class JSONReaderUTF16
         }
     }
 
+    @Override
     public boolean isReference() {
         if (ch != '{') {
             return false;
@@ -160,6 +161,7 @@ final class JSONReaderUTF16
         return true;
     }
 
+    @Override
     public String readReference() {
         this.offset = referenceBegin;
         this.ch = chars[offset++];
