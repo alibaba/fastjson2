@@ -57,6 +57,7 @@ public class FastJsonConfig {
      * init param.
      */
     public FastJsonConfig() {
+        this.dateFormat = "yyyy-MM-dd HH:mm:ss";
         this.charset = StandardCharsets.UTF_8;
         this.readerFeatures = new JSONReader.Feature[0];
         this.writerFeatures = new JSONWriter.Feature[0];
