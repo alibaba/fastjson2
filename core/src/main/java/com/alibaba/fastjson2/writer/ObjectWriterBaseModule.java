@@ -11,6 +11,7 @@ import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
@@ -954,6 +955,7 @@ class ObjectWriterBaseModule
 
             if (clazz == URI.class
                     || clazz == URL.class
+                    || clazz == File.class
                     || ZoneId.class.isAssignableFrom(clazz)
                     || Charset.class.isAssignableFrom(clazz)) {
                 return ObjectWriterImplToString.INSTANCE;

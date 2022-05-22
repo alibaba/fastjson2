@@ -17,6 +17,7 @@ import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -1097,11 +1098,21 @@ public class ObjectReaderBaseModule
         }
 
         if (type == URI.class) {
-            return URIImpl.INSTANCE;
+            return new FromStringReader<URI>(e -> URI.create(e));
+        }
+
+        if (type == File.class) {
+            return new FromStringReader<File>(e -> new File(e));
         }
 
         if (type == URL.class) {
-            return URLImpl.INSTANCE;
+            return new FromStringReader<URL>(e -> {
+                try {
+                    return new URL(e);
+                } catch (MalformedURLException ex) {
+                    throw new JSONException("read URL error", ex);
+                }
+            });
         }
 
         if (type == Class.class) {
@@ -1109,7 +1120,7 @@ public class ObjectReaderBaseModule
         }
 
         if (type == Type.class) {
-            return new ReflectTypeImpl();
+            return ObjectReaderImplClass.INSTANCE;
         }
 
         String typeName = type.getTypeName();
@@ -1774,82 +1785,31 @@ public class ObjectReaderBaseModule
         }
     }
 
-    static class URIImpl
-            extends PrimitiveImpl<URI> {
-        static final URIImpl INSTANCE = new URIImpl();
+    public static class FromStringReader<T> extends PrimitiveImpl<T> {
+        final Function<String, T> creator;
+
+        public FromStringReader(Function<String, T> creator) {
+            this.creator = creator;
+        }
 
         @Override
-        public URI readJSONBObject(JSONReader jsonReader, long features) {
+        public T readJSONBObject(JSONReader jsonReader, long features) {
             String str = jsonReader.readString();
             if (str == null) {
                 return null;
             }
 
-            return URI.create(str);
+            return creator.apply(str);
         }
 
         @Override
-        public URI readObject(JSONReader jsonReader, long features) {
-            return URI.create(jsonReader.readString());
-        }
-    }
-
-    static class URLImpl
-            extends PrimitiveImpl<URL> {
-        static final URLImpl INSTANCE = new URLImpl();
-
-        @Override
-        public URL readJSONBObject(JSONReader jsonReader, long features) {
+        public T readObject(JSONReader jsonReader, long features) {
             String str = jsonReader.readString();
             if (str == null) {
                 return null;
             }
 
-            try {
-                return new URL(str);
-            } catch (MalformedURLException e) {
-                throw new JSONException("read URL error", e);
-            }
-        }
-
-        @Override
-        public URL readObject(JSONReader jsonReader, long features) {
-            try {
-                return new URL(jsonReader.readString());
-            } catch (MalformedURLException e) {
-                throw new JSONException("read URL error", e);
-            }
-        }
-    }
-
-    static class ReflectTypeImpl
-            extends PrimitiveImpl {
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            String className = jsonReader.readString();
-            if (className == null) {
-                return null;
-            }
-
-            try {
-                return Class.forName(className);
-            } catch (ClassNotFoundException e) {
-                throw new JSONException("read class error " + className, e);
-            }
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            String className = jsonReader.readString();
-            if (className == null) {
-                return null;
-            }
-
-            try {
-                return Class.forName(className);
-            } catch (ClassNotFoundException e) {
-                throw new JSONException("read class error " + className, e);
-            }
+            return creator.apply(str);
         }
     }
 
