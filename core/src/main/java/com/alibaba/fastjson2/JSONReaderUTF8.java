@@ -5022,6 +5022,7 @@ class JSONReaderUTF8
         return str;
     }
 
+    @Override
     public boolean isReference() {
         if (ch != '{') {
             return false;
@@ -5099,6 +5100,7 @@ class JSONReaderUTF8
         return true;
     }
 
+    @Override
     public String readReference() {
         this.offset = referenceBegin;
         this.ch = (char) bytes[offset++];
