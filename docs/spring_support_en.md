@@ -3,7 +3,7 @@
 # 0. Download
 
 Fastjson2 adopts a multi-module structure design, and the support for frameworks such as SpringFramework is now
-independent in the `extension` package.
+independent in the `extension` dependency.
 
 `Maven`:
 
