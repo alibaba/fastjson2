@@ -12,6 +12,7 @@ class ObjectReaderImplInt16Array
         extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplInt16Array INSTANCE = new ObjectReaderImplInt16Array();
 
+    @Override
     public Object createInstance(Collection collection) {
         Short[] array = new Short[collection.size()];
         int i = 0;

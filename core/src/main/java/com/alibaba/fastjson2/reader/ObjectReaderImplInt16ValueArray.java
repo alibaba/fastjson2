@@ -61,6 +61,7 @@ class ObjectReaderImplInt16ValueArray
         return array;
     }
 
+    @Override
     public Object createInstance(Collection collection) {
         short[] array = new short[collection.size()];
         int i = 0;

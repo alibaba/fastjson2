@@ -60,6 +60,7 @@ class ObjectReaderImplNumberArray
         return array;
     }
 
+    @Override
     public Object createInstance(Collection collection) {
         Number[] array = new Number[collection.size()];
         int i = 0;

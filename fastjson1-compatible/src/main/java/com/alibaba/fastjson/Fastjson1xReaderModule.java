@@ -39,6 +39,7 @@ public class Fastjson1xReaderModule
             throw new JSONException("read json error");
         }
 
+        @Override
         public Object createInstance(Collection collection) {
             return Collections.emptyList();
         }

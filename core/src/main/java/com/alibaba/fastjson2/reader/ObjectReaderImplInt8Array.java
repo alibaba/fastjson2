@@ -104,6 +104,7 @@ class ObjectReaderImplInt8Array
         return array;
     }
 
+    @Override
     public Object createInstance(Collection collection) {
         Byte[] array = new Byte[collection.size()];
         int i = 0;

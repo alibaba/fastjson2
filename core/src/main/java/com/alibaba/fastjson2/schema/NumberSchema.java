@@ -144,6 +144,7 @@ final class NumberSchema
         return validate(value.longValue());
     }
 
+    @Override
     public ValidateResult validate(Float value) {
         if (value == null) {
             return SUCCESS;
@@ -152,6 +153,7 @@ final class NumberSchema
         return validate(value.doubleValue());
     }
 
+    @Override
     public ValidateResult validate(Double value) {
         if (value == null) {
             return SUCCESS;

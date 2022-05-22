@@ -19,6 +19,7 @@ public final class ObjectArrayReader
         return Object[].class;
     }
 
+    @Override
     public Object[] createInstance(Collection collection) {
         Object[] array = new Object[collection.size()];
         int i = 0;
