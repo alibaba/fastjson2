@@ -15,7 +15,7 @@
 </dependency>
 ```
 
-`Gradle`:
+`Kotlin Gradle`:
 
 ```kotlin
 dependencies {

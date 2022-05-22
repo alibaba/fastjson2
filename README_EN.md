@@ -98,7 +98,7 @@ If your project uses `kotlin`, you can use the `Fastjson-Kotlin` module, and use
 </dependency>
 ```
 
-`Gradle`:
+`Kotlin Gradle`:
 
 ```kotlin
 dependencies {
@@ -122,12 +122,11 @@ If your project uses a framework such as `SpringFramework`, you can use the `fas
 
 `Gradle`:
 
-```kotlin
+```groovy
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-extension:2.0.4")
+    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.4'
 }
 ```
-
 
 # 2. Usage
 
