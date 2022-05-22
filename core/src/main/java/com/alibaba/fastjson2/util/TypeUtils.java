@@ -921,6 +921,22 @@ public class TypeUtils {
             return (char) 0;
         }
 
+        if (paramType == Optional.class) {
+            return Optional.empty();
+        }
+
+        if (paramType == OptionalInt.class) {
+            return OptionalInt.empty();
+        }
+
+        if (paramType == OptionalLong.class) {
+            return OptionalLong.empty();
+        }
+
+        if (paramType == OptionalDouble.class) {
+            return OptionalDouble.empty();
+        }
+
         return null;
     }
 
