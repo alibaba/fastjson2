@@ -1785,7 +1785,8 @@ public class ObjectReaderBaseModule
         }
     }
 
-    public static class FromStringReader<T> extends PrimitiveImpl<T> {
+    public static class FromStringReader<T>
+            extends PrimitiveImpl<T> {
         final Function<String, T> creator;
 
         public FromStringReader(Function<String, T> creator) {
