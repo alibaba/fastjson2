@@ -106,6 +106,28 @@ dependencies {
 }
 ```
 
+### `Fastjson Extension`扩展模块
+
+如果项目使用`SpringFramework`等框架，可以使用`fastjson-extension`模块，使用方式参考 [SpringFramework Support](docs/spring_support_cn.md)。
+
+`Maven`:
+
+```xml
+<dependency>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-extension</artifactId>
+    <version>2.0.4</version>
+</dependency>
+```
+
+`Gradle`:
+
+```kotlin
+dependencies {
+    implementation("com.alibaba.fastjson2:fastjson2-extension:2.0.4")
+}
+```
+
 # 2. 简单使用
 
 在`fastjson v2`中，`package`和`1.x`不一样，是`com.alibaba.fastjson2`。如果你之前用的是`fastjson1`，大多数情况直接更包名就即可。

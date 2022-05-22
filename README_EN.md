@@ -86,7 +86,7 @@ dependencies {
 
 ### `Kotlin` integration module `fastjson-kotlin`
 
-If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use the characteristics of `kotlin`.
+If your project uses `kotlin`, you can use the `Fastjson-Kotlin` module, and use the characteristics of `kotlin`.
 
 `Maven`:
 
@@ -105,6 +105,29 @@ dependencies {
     implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.4")
 }
 ```
+
+### `Extension` integration module `fastjson-extension`
+
+If your project uses a framework such as `SpringFramework`, you can use the `fastjson-extension` module, please refer to the usage [SpringFramework Support](docs/spring_support_en.md).
+
+`Maven`:
+
+```xml
+<dependency>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-extension</artifactId>
+    <version>2.0.4</version>
+</dependency>
+```
+
+`Gradle`:
+
+```kotlin
+dependencies {
+    implementation("com.alibaba.fastjson2:fastjson2-extension:2.0.4")
+}
+```
+
 
 # 2. Usage
 
