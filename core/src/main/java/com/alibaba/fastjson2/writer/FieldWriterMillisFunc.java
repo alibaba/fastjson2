@@ -10,12 +10,12 @@ final class FieldWriterMillisFunc<T>
     final Method method;
     final ToLongFunction function;
 
-    FieldWriterMillisFunc(String fieldName
-            , int ordinal
-            , long features
-            , String dateTimeFormat
-            , Method method
-            , ToLongFunction function
+    FieldWriterMillisFunc(String fieldName,
+            int ordinal,
+            long features,
+            String dateTimeFormat,
+            Method method,
+            ToLongFunction function
     ) {
         super(fieldName, ordinal, features, dateTimeFormat, long.class, long.class);
         this.method = method;

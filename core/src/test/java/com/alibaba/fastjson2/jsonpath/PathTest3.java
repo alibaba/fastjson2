@@ -445,8 +445,8 @@ public class PathTest3 {
                 ,
                 JSONPath.of("$.child.size()")
                         .eval(
-                                JSONObject.of("child"
-                                        , JSONObject.of("id", 123))
+                                JSONObject.of("child",
+                                        JSONObject.of("id", 123))
                         )
         );
     }

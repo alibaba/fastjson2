@@ -62,8 +62,8 @@ final class FieldReaderBigDecimalField<T>
         }
 
         try {
-            field.set(object
-                    , TypeUtils.toBigDecimal(value));
+            field.set(object,
+                    TypeUtils.toBigDecimal(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

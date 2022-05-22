@@ -35,7 +35,7 @@ public class Issue251 {
 
 
     @Data
-    static abstract public class AbstractTypeFile {
+    abstract static public class AbstractTypeFile {
 
         /**
          * 媒体资源的id信息。String类型

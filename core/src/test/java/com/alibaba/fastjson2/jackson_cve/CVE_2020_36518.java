@@ -9,7 +9,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CVE_2020_36518 {
-    private final static int TOO_DEEP_NESTING = 2000;
+    private static final int TOO_DEEP_NESTING = 2000;
 
     @Test
     public void testWithArray() throws Exception {

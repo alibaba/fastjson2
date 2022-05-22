@@ -1,12 +1,16 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.function.Function;
 
-import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_NULL;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
 class ObjectReaderNoneDefaultConstrutor<T>
         extends ObjectReaderAdapter<T> {

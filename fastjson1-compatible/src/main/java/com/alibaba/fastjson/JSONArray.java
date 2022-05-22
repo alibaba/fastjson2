@@ -28,8 +28,8 @@ public class JSONArray
         this.list = list;
     }
 
-    public JSONArray(int initialCapacity){
-        this.list = new ArrayList<Object>(initialCapacity);
+    public JSONArray(int initialCapacity) {
+        this.list = new ArrayList<>(initialCapacity);
     }
 
     public Byte getByte(int index) {

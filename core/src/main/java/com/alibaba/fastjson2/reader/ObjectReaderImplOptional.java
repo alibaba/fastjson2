@@ -17,7 +17,7 @@ class ObjectReaderImplOptional
 
     final Type itemType;
     final Class itemClass;
-    ObjectReader itemObjectReader = null;
+    ObjectReader itemObjectReader;
 
     static ObjectReaderImplOptional of(Type type, String format, Locale locale) {
         if (type == null) {

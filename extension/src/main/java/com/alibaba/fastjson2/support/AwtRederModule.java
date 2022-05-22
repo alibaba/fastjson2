@@ -25,35 +25,36 @@ public class AwtRederModule
     @Override
     public ObjectReader getObjectReader(ObjectReaderProvider provider, Type type) {
         if (type == Color.class) {
-            return createObjectReader(new ColorCreator()
-                    , fieldReader("rgb", int.class)
-                    , fieldReader("r", int.class)
-                    , fieldReader("g", int.class)
-                    , fieldReader("b", int.class)
+            return createObjectReader(
+                    new ColorCreator(),
+                    fieldReader("rgb", int.class),
+                    fieldReader("r", int.class),
+                    fieldReader("g", int.class),
+                    fieldReader("b", int.class)
             );
         }
 
         if (type == Point.class) {
             return createObjectReader(
                     (values) -> new Point(
-                            (Integer) values.get(HASH_X)
-                            , (Integer) values.get(HASH_Y)
-                    )
-                    , fieldReader("x", int.class)
-                    , fieldReader("y", int.class)
+                            (Integer) values.get(HASH_X),
+                            (Integer) values.get(HASH_Y)
+                    ),
+                    fieldReader("x", int.class),
+                    fieldReader("y", int.class)
             );
         }
 
         if (type == Font.class) {
             return createObjectReader(
                     (values) -> new Font(
-                            (String) values.get(HASH_NAME)
-                            , (Integer) values.get(HASH_STYLE)
-                            , (Integer) values.get(HASH_SIZE)
-                    )
-                    , fieldReader("name", String.class)
-                    , fieldReader("style", int.class)
-                    , fieldReader("size", int.class)
+                            (String) values.get(HASH_NAME),
+                            (Integer) values.get(HASH_STYLE),
+                            (Integer) values.get(HASH_SIZE)
+                    ),
+                    fieldReader("name", String.class),
+                    fieldReader("style", int.class),
+                    fieldReader("size", int.class)
             );
         }
         return null;

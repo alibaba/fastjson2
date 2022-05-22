@@ -61,8 +61,8 @@ final class FieldReaderInt8ValueField<T>
         }
 
         try {
-            field.setByte(object
-                    , TypeUtils.toByteValue(value));
+            field.setByte(object,
+                    TypeUtils.toByteValue(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

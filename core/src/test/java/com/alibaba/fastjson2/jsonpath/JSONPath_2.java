@@ -106,8 +106,8 @@ public class JSONPath_2 {
     @Test
     public void test_path_1() {
         JSONObject root = new JSONObject()
-                .fluentPut("user"
-                        , new JSONArray()
+                .fluentPut("user",
+                        new JSONArray()
                                 .fluentAdd(
                                         new JSONObject()
                                                 .fluentPut("id", 101)

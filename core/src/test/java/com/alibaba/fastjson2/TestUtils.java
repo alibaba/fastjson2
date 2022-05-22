@@ -47,12 +47,12 @@ public class TestUtils {
         return READER_CREATOR.createObjectReader(objectType);
     }
 
-    public final static String encodeToBase64String(byte[] sArr, boolean lineSep) {
+    public static final String encodeToBase64String(byte[] sArr, boolean lineSep) {
         // Reuse char[] since we can't create a String incrementally anyway and StringBuffer/Builder would be slower.
         return new String(encodeToChar(sArr, lineSep));
     }
 
-    private final static char[] encodeToChar(byte[] sArr, boolean lineSep) {
+    private static final char[] encodeToChar(byte[] sArr, boolean lineSep) {
         char[] CA = IOUtils.CA;
 
         // Check special case

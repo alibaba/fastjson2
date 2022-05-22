@@ -101,7 +101,6 @@ public final class ArraySchema
             additionalItemsSupport = true;
         } else if (prefixItems == null && !(items instanceof Boolean)) {
             additionalItemsSupport = true;
-        } else if (itemSchema == null && prefixItems == null) {
         }
         this.additionalItems = additionalItemsSupport;
 
@@ -410,7 +409,7 @@ public final class ArraySchema
 
             if (this.contains != null) {
                 if (minContains >= 0 && containsCount < minContains) {
-                    return new ValidateResult(false, "minContains not match, expect %s, but %s",  minContains, containsCount);
+                    return new ValidateResult(false, "minContains not match, expect %s, but %s", minContains, containsCount);
                 } else {
                     if (containsCount == 0 && minContains != 0) {
                         return CONTAINS_NOT_MATCH;
@@ -451,8 +450,12 @@ public final class ArraySchema
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         com.alibaba.fastjson2.schema.ArraySchema that = (com.alibaba.fastjson2.schema.ArraySchema) o;
         return Objects.equals(title, that.title) && Objects.equals(description, that.description);
     }

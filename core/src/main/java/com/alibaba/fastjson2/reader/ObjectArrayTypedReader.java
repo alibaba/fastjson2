@@ -16,7 +16,6 @@ final class ObjectArrayTypedReader
     final Class componentType;
     final Class componentClass;
     final long componentClassHash;
-    ObjectReader itemObjectReader = null;
     final String typeName;
     final long typeNameHashCode;
 
@@ -156,7 +155,7 @@ final class ObjectArrayTypedReader
 
             if (componentType.isInstance(item)) {
                 values[index++] = item;
-            }  else {
+            } else {
                 ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(componentType);
                 if (item instanceof Map) {
                     item = objectReader.createInstance((Map) item);

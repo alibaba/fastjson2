@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.function.ObjShortConsumer;
+import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
@@ -45,8 +45,8 @@ final class FieldReaderInt16ValueFunc<T>
             schema.assertValidate(value);
         }
 
-        function.accept(object
-                , TypeUtils.toShortValue(value));
+        function.accept(object,
+                TypeUtils.toShortValue(value));
     }
 
     @Override

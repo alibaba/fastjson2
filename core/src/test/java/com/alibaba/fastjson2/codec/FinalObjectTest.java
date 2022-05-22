@@ -28,8 +28,8 @@ public class FinalObjectTest {
                 Org vo = new Org();
                 vo.setEmp(new Emp(0));
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[[0]]"
-                        , jsonWriter.toString());
+                assertEquals("[[0]]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -37,8 +37,8 @@ public class FinalObjectTest {
                 Org vo = new Org();
                 vo.setEmp(new Emp(0));
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[[0]]"
-                        , jsonWriter.toString());
+                assertEquals("[[0]]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofJSONB();
@@ -46,8 +46,8 @@ public class FinalObjectTest {
                 Org vo = new Org();
                 vo.setEmp(new Emp(0));
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[[0]]"
-                        , jsonWriter.toString());
+                assertEquals("[[0]]",
+                        jsonWriter.toString());
             }
         }
     }
@@ -66,23 +66,23 @@ public class FinalObjectTest {
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
                 Org vo = new Org();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[null]"
-                        , jsonWriter.toString());
+                assertEquals("[null]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 Org vo = new Org();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 Org vo = new Org();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"date\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"date\":null}",
+                        jsonWriter.toString());
             }
         }
     }

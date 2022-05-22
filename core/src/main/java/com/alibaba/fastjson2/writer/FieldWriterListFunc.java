@@ -13,15 +13,15 @@ final class FieldWriterListFunc<T>
     final Function<T, List> function;
 
     FieldWriterListFunc(
-            String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Type itemType
-            , Method method
-            , Function<T, List> function
-            , Type fieldType
-            , Class fieldClass
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Type itemType,
+            Method method,
+            Function<T, List> function,
+            Type fieldType,
+            Class fieldClass
     ) {
         super(fieldName, itemType, ordinal, features, format, fieldType, fieldClass);
         this.method = method;

@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * @since 1.2.8
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
+@Target(ElementType.TYPE)
 public @interface JSONPOJOBuilder {
     /**
      * Property to use for re-defining which zero-argument method

@@ -110,7 +110,7 @@ public class Issue283 {
 
     public static class ToStringObjectWriter
             implements ObjectWriter<Object> {
-        public final static ToStringObjectWriter INSTANCE = new ToStringObjectWriter();
+        public static final ToStringObjectWriter INSTANCE = new ToStringObjectWriter();
 
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {

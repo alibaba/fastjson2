@@ -65,23 +65,23 @@ public class BigDecimalTest {
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
                 BigDecimal1 vo = new BigDecimal1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[null]"
-                        , jsonWriter.toString());
+                assertEquals("[null]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 BigDecimal1 vo = new BigDecimal1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 BigDecimal1 vo = new BigDecimal1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"id\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"id\":null}",
+                        jsonWriter.toString());
             }
         }
     }

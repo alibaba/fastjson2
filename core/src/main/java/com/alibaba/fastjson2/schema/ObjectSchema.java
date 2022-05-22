@@ -564,8 +564,12 @@ public final class ObjectSchema
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         com.alibaba.fastjson2.schema.ObjectSchema that = (com.alibaba.fastjson2.schema.ObjectSchema) o;
         return Objects.equals(properties, that.properties)
                 && Objects.equals(required, that.required);

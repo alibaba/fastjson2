@@ -1,13 +1,13 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.codec.BeanInfo;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.codec.BeanInfo;
-import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
@@ -284,7 +284,9 @@ class ObjectWriterBaseModule
                         default:
                             break;
                     }
-                } catch (Throwable ignored) {}
+                } catch (Throwable ignored) {
+                    // ignored
+                }
             });
         }
 
@@ -305,7 +307,9 @@ class ObjectWriterBaseModule
                         default:
                             break;
                     }
-                } catch (Throwable ignored) {}
+                } catch (Throwable ignored) {
+                    // ignored
+                }
             });
         }
 
@@ -363,7 +367,9 @@ class ObjectWriterBaseModule
                         default:
                             break;
                     }
-                } catch (Throwable ignored) {}
+                } catch (Throwable ignored) {
+                    // ignored
+                }
             });
         }
 
@@ -1029,7 +1035,7 @@ class ObjectWriterBaseModule
         return null;
     }
 
-    static abstract class PrimitiveImpl<T>
+    abstract static class PrimitiveImpl<T>
             implements ObjectWriter<T> {
         @Override
         public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -1044,7 +1050,7 @@ class ObjectWriterBaseModule
 
     static class VoidObjectWriter
             implements ObjectWriter {
-        public final static VoidObjectWriter INSTANCE = new VoidObjectWriter();
+        public static final VoidObjectWriter INSTANCE = new VoidObjectWriter();
 
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {

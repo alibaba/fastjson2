@@ -18,13 +18,21 @@ public class MediaContent
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         MediaContent that = (MediaContent) o;
 
-        if (images != null ? !images.equals(that.images) : that.images != null) return false;
-        if (media != null ? !media.equals(that.media) : that.media != null) return false;
+        if (images != null ? !images.equals(that.images) : that.images != null) {
+            return false;
+        }
+        if (media != null ? !media.equals(that.media) : that.media != null) {
+            return false;
+        }
 
         return true;
     }

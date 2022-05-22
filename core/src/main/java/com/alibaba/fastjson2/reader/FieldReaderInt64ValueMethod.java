@@ -41,8 +41,8 @@ final class FieldReaderInt64ValueMethod<T>
         }
 
         try {
-            method.invoke(object
-                    , TypeUtils.toLongValue(value));
+            method.invoke(object,
+                    TypeUtils.toLongValue(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

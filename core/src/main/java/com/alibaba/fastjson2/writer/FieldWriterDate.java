@@ -108,7 +108,7 @@ abstract class FieldWriterDate<T>
 
         if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
             writeFieldName(jsonWriter);
-            jsonWriter.writeInt64(timeMillis/1000);
+            jsonWriter.writeInt64(timeMillis / 1000);
             return;
         }
 

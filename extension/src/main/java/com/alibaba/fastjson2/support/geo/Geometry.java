@@ -5,16 +5,19 @@ import com.alibaba.fastjson2.annotation.JSONType;
 /**
  * @since 1.2.68
  */
-@JSONType(seeAlso = {GeometryCollection.class
-        , LineString.class
-        , MultiLineString.class
-        , Point.class
-        , MultiPoint.class
-        , Polygon.class
-        , MultiPolygon.class
-        , Feature.class
-        , FeatureCollection.class}
-    , typeKey = "type")
+@JSONType(
+        seeAlso = {
+            GeometryCollection.class,
+            LineString.class,
+            MultiLineString.class,
+            Point.class,
+            MultiPoint.class,
+            Polygon.class,
+            MultiPolygon.class,
+            Feature.class,
+            FeatureCollection.class},
+        typeKey = "type"
+)
 public abstract class Geometry {
     private final String type;
     private double[] bbox;

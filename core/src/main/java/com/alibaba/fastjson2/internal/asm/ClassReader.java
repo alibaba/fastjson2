@@ -208,8 +208,7 @@ public class ClassReader {
             u += attrSize;
         }
         // reads declared exceptions
-        if (w == 0) {
-        } else {
+        if (w != 0) {
             w += 2;
             for (j = 0; j < readUnsignedShort(w); ++j) {
                 w += 2;

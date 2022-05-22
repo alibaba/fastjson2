@@ -12,11 +12,11 @@ final class FieldWriterBigDecimalFunc<T>
     final Function<T, BigDecimal> function;
 
     protected FieldWriterBigDecimalFunc(
-            String fieldName
-            , int ordinal
-            , long features
-            , Method method
-            , Function<T, BigDecimal> function
+            String fieldName,
+            int ordinal,
+            long features,
+            Method method,
+            Function<T, BigDecimal> function
     ) {
         super(fieldName, ordinal, features, null, BigDecimal.class, BigDecimal.class);
         this.method = method;

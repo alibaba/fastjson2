@@ -34,8 +34,8 @@ final class FieldReaderBigDecimalMethod<T>
     @Override
     public void accept(T object, Object value) {
         try {
-            method.invoke(object
-                    , TypeUtils.toBigDecimal(value));
+            method.invoke(object,
+                    TypeUtils.toBigDecimal(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

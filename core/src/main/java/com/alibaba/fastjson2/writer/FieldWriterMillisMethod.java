@@ -10,12 +10,12 @@ final class FieldWriterMillisMethod<T>
         extends FieldWriterDate<T> {
     final Method method;
 
-    FieldWriterMillisMethod(String fieldName
-            , int ordinal
-            , long features
-            , String dateTimeFormat
-            , Method method
-            , Class fieldClass
+    FieldWriterMillisMethod(String fieldName,
+            int ordinal,
+            long features,
+            String dateTimeFormat,
+            Method method,
+            Class fieldClass
     ) {
         super(fieldName, ordinal, features, dateTimeFormat, fieldClass, fieldClass);
         this.method = method;

@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -38,7 +38,7 @@ public final class JSONFactory {
         static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
         static Function<byte[], String> STRING_CREATOR_JDK11;
         static BiFunction<byte[], Charset, String> STRING_CREATOR_JDK17;
-        static volatile boolean STRING_CREATOR_ERROR = false;
+        static volatile boolean STRING_CREATOR_ERROR;
     }
 
     static final BigDecimal LOW = BigDecimal.valueOf(-9007199254740991L);

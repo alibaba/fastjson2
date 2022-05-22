@@ -13,11 +13,11 @@ final class FieldWriterStringMethod<T>
     final boolean trim;
 
     FieldWriterStringMethod(
-            String fieldName
-            , int ordinal
-            , String format
-            , long features
-            , Method method
+            String fieldName,
+            int ordinal,
+            String format,
+            long features,
+            Method method
     ) {
         super(fieldName, ordinal, features, format, String.class, String.class);
         this.method = method;

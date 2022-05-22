@@ -12,19 +12,15 @@ import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
 public abstract class ObjectReaderBean<T>
         implements ObjectReader<T> {
-    final protected Class objectClass;
-    final protected String typeName;
-    final protected long typeNameHash;
+    protected final Class objectClass;
+    protected final String typeName;
+    protected final long typeNameHash;
 
-    protected FieldReader extraFieldReader = null;
+    protected FieldReader extraFieldReader;
 
     protected boolean hasDefaultValue;
 
     protected final JSONSchema schema;
-
-    protected ObjectReaderBean(Class objectClass, String typeName) {
-        this(objectClass, typeName, null);
-    }
 
     protected ObjectReaderBean(Class objectClass, String typeName, JSONSchema schema) {
         if (typeName == null) {

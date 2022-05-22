@@ -3,12 +3,10 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK11;
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK17;
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+
+import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 final class JSONReaderASCII
         extends JSONReaderUTF8 {

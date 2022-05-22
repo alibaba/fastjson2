@@ -44,9 +44,9 @@ public class CartItemDO2Benchmark {
     @Benchmark
     public byte[] testCartItem() throws Exception {
         return JSONB.toBytes(
-                newCartsItem()
-                , JSONB.symbolTable("myId")
-                , JSONWriter.Feature.BeanToArray
+                newCartsItem(),
+                JSONB.symbolTable("myId"),
+                JSONWriter.Feature.BeanToArray
         );
     }
 }

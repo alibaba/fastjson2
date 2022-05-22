@@ -16,18 +16,18 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class GuavaSupport {
-    static Class CLASS_IMMUTABLE_MAP = null;
-    static Class CLASS_ARRAYLIST_MULTI_MAP = null;
+    static Class CLASS_IMMUTABLE_MAP;
+    static Class CLASS_ARRAYLIST_MULTI_MAP;
 
-    static Method METHOD_IMMUTABLE_MAP_OF_0 = null;
-    static Method METHOD_IMMUTABLE_MAP_OF_1 = null;
-    static Method METHOD_IMMUTABLE_MAP_COPY_OF = null;
+    static Method METHOD_IMMUTABLE_MAP_OF_0;
+    static Method METHOD_IMMUTABLE_MAP_OF_1;
+    static Method METHOD_IMMUTABLE_MAP_COPY_OF;
 
-    static Method METHOD_ARRAYLIST_MULTI_MAP_CREATE = null;
-    static Method METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL = null;
-    static volatile  boolean METHOD_ARRAYLIST_MULTI_MAP_ERROR = false;
+    static Method METHOD_ARRAYLIST_MULTI_MAP_CREATE;
+    static Method METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL;
+    static volatile boolean METHOD_ARRAYLIST_MULTI_MAP_ERROR;
 
-    static Constructor CONSTRUCTOR_SINGLETON_IMMUTABLE_BIMAP = null;
+    static Constructor CONSTRUCTOR_SINGLETON_IMMUTABLE_BIMAP;
 
     public static Function immutableListConverter() {
         return new ImmutableListConvertFunction();

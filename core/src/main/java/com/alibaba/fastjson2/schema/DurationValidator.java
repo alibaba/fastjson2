@@ -5,7 +5,7 @@ import java.time.format.DateTimeParseException;
 
 final class DurationValidator
         implements FormatValidator {
-    final static DurationValidator INSTANCE = new DurationValidator();
+    static final DurationValidator INSTANCE = new DurationValidator();
 
     @Override
     public boolean isValid(String input) {

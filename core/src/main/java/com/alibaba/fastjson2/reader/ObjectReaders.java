@@ -25,8 +25,8 @@ public class ObjectReaders {
     }
 
     public static <T> ObjectReader<T> createObjectReader(
-            Function<Map<Long, Object>, T> creator
-            , FieldReader... fieldReaders) {
+            Function<Map<Long, Object>, T> creator,
+            FieldReader... fieldReaders) {
         return ObjectReaderCreator.INSTANCE.createObjectReaderNoneDefaultConstrutor(null, creator, fieldReaders);
     }
 
@@ -66,26 +66,29 @@ public class ObjectReaders {
         return new FieldReaderDoubleValueFunc<>(fieldName, 0, null, null, null, function);
     }
 
-    public static <T, V> FieldReader fieldReader(String fieldName
-            , Class<V> fieldClass
-            , BiConsumer<T, V> function
+    public static <T, V> FieldReader fieldReader(
+            String fieldName,
+            Class<V> fieldClass,
+            BiConsumer<T, V> function
     ) {
         return ObjectReaderCreator.INSTANCE.createFieldReader(fieldName, fieldClass, fieldClass, null, function);
     }
 
-    public static <T, U> FieldReader fieldReader(String fieldName
-            , Type fieldType
-            , BiConsumer<T, U> consumer
-            , ObjectReader<U> fieldObjectReader
+    public static <T, U> FieldReader fieldReader(
+            String fieldName,
+            Type fieldType,
+            BiConsumer<T, U> consumer,
+            ObjectReader<U> fieldObjectReader
     ) {
         return new FieldReaderObjectFunc2<>(fieldObjectReader, consumer, fieldType, fieldName);
     }
 
-    public static <T, V> FieldReader fieldReaderList(String fieldName
-            , Type itemType
-            , Supplier<List<V>> listCreator
-            , BiConsumer<T, List<V>> function
-            , ObjectReader<V> itemObjectReader
+    public static <T, V> FieldReader fieldReaderList(
+            String fieldName,
+            Type itemType,
+            Supplier<List<V>> listCreator,
+            BiConsumer<T, List<V>> function,
+            ObjectReader<V> itemObjectReader
     ) {
         return new FieldReaderListFuncImpl<>(listCreator, itemObjectReader, function, itemType, fieldName);
     }

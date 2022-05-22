@@ -33,8 +33,8 @@ final class FieldReaderDoubleValueMethod<T>
     @Override
     public void accept(T object, Object value) {
         try {
-            method.invoke(object
-                    , TypeUtils.toDoubleValue(value));
+            method.invoke(object,
+                    TypeUtils.toDoubleValue(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

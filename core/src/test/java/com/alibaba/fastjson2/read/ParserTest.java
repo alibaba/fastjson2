@@ -61,12 +61,12 @@ public class ParserTest {
         assertEquals('{', lexer.current());
         lexer.next();
         assertEquals(Fnv.hashCode64LCase("id"), lexer.readFieldNameHashCode());
-        assertEquals(123
-                , lexer.readInt32Value());
+        assertEquals(123,
+                lexer.readInt32Value());
 
         assertEquals(Fnv.hashCode64LCase("name"), lexer.readFieldNameHashCode());
-        assertEquals("jobs"
-                , lexer.readString());
+        assertEquals("jobs",
+                 lexer.readString());
 
         assertEquals('}', lexer.current());
         lexer.next();

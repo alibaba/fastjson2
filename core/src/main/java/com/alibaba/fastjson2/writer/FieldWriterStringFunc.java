@@ -13,12 +13,12 @@ final class FieldWriterStringFunc<T>
     final boolean trim;
 
     protected FieldWriterStringFunc(
-            String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Method method
-            , Function<T, String> function
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Method method,
+            Function<T, String> function
     ) {
         super(fieldName, ordinal, features, format, String.class, String.class);
         this.method = method;

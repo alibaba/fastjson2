@@ -17,9 +17,9 @@ public interface ObjectWriterModule {
     }
 
     default boolean createFieldWriters(
-            ObjectWriterCreator creator
-            , Class objectType
-            , List<FieldWriter> fieldWriters) {
+            ObjectWriterCreator creator,
+            Class objectType,
+            List<FieldWriter> fieldWriters) {
         return false;
     }
 

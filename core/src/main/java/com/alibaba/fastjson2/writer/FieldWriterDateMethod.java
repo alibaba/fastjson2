@@ -12,12 +12,12 @@ final class FieldWriterDateMethod<T>
     final Method method;
 
     protected FieldWriterDateMethod(
-            String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Class fieldClass
-            , Method method
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Class fieldClass,
+            Method method
     ) {
         super(fieldName, ordinal, features, format, fieldClass, fieldClass);
         this.method = method;

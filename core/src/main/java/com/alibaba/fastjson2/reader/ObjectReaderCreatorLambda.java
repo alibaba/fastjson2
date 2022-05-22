@@ -1,13 +1,16 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.codec.BeanInfo;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
-import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
-import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 
 import java.lang.invoke.*;
@@ -106,18 +109,19 @@ public class ObjectReaderCreatorLambda
 
             String fieldName = BeanUtils.setterName(method.getName(), beanInfo.namingStrategy);
             if (method.getParameterCount() == 0) {
-                FieldReader fieldReader = super.createFieldReaderMethod(objectClass
-                        , objectType
-                        , fieldName
-                        , fieldInfo.ordinal
-                        , fieldInfo.features
-                        , fieldInfo.format
-                        , fieldInfo.locale
-                        , fieldInfo.defaultValue
-                        , fieldInfo.schema
-                        , method.getGenericReturnType()
-                        , method.getReturnType()
-                        , method);
+                FieldReader fieldReader = super.createFieldReaderMethod(
+                        objectClass,
+                        objectType,
+                        fieldName,
+                        fieldInfo.ordinal,
+                        fieldInfo.features,
+                        fieldInfo.format,
+                        fieldInfo.locale,
+                        fieldInfo.defaultValue,
+                        fieldInfo.schema,
+                        method.getGenericReturnType(),
+                        method.getReturnType(),
+                        method);
                 FieldReader origin = fieldReaders.putIfAbsent(fieldName,
                         fieldReader
                 );
@@ -130,18 +134,18 @@ public class ObjectReaderCreatorLambda
             Type fieldType = method.getGenericParameterTypes()[0];
             Class fieldClass = method.getParameterTypes()[0];
             FieldReader fieldReader = createFieldReaderLambda(
-                    objectClass
-                    , objectType
-                    , fieldName
-                    , fieldInfo.ordinal
-                    , fieldInfo.features
-                    , fieldInfo.format
-                    , fieldInfo.locale
-                    , fieldInfo.defaultValue
-                    , fieldInfo.schema
-                    , fieldType
-                    , fieldClass
-                    , method
+                    objectClass,
+                    objectType,
+                    fieldName,
+                    fieldInfo.ordinal,
+                    fieldInfo.features,
+                    fieldInfo.format,
+                    fieldInfo.locale,
+                    fieldInfo.defaultValue,
+                    fieldInfo.schema,
+                    fieldType,
+                    fieldClass,
+                    method
             );
             FieldReader origin = fieldReaders.putIfAbsent(fieldName, fieldReader);
             if (origin != null && origin.compareTo(fieldReader) > 0) {
@@ -149,8 +153,8 @@ public class ObjectReaderCreatorLambda
             }
         });
 
-        BeanUtils.fields(objectClass
-                , field -> {
+        BeanUtils.fields(objectClass,
+                 field -> {
                     fieldInfo.init();
                     for (ObjectReaderModule module : modules) {
                         ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
@@ -161,20 +165,20 @@ public class ObjectReaderCreatorLambda
 
                     String fieldName = field.getName();
                     fieldReaders.put(
-                            fieldName
-                            , createFieldReader(
-                                    objectClass
-                                    , objectClass
-                                    , fieldName
-                                    , fieldInfo.ordinal
-                                    , fieldInfo.features
-                                    , fieldInfo.format
-                                    , fieldInfo.locale
-                                    , fieldInfo.defaultValue
-                                    , fieldInfo.schema
-                                    , field.getGenericType()
-                                    , field.getType()
-                                    , field
+                            fieldName,
+                            createFieldReader(
+                                    objectClass,
+                                    objectClass,
+                                    fieldName,
+                                    fieldInfo.ordinal,
+                                    fieldInfo.features,
+                                    fieldInfo.format,
+                                    fieldInfo.locale,
+                                    fieldInfo.defaultValue,
+                                    fieldInfo.schema,
+                                    field.getGenericType(),
+                                    field.getType(),
+                                    field
                             )
                     );
                 });
@@ -195,18 +199,18 @@ public class ObjectReaderCreatorLambda
 
     @Override
     public <T> FieldReader createFieldReaderMethod(
-            Class<T> objectClass
-            , Type objectType
-            , String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Locale locale
-            , Object defaultValue
-            , String schema
-            , Type fieldType
-            , Class fieldClass
-            , Method method
+            Class<T> objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            String schema,
+            Type fieldType,
+            Class fieldClass,
+            Method method
     ) {
         if ((method != null && method.getReturnType() != void.class)
                 || !Modifier.isPublic(objectClass.getModifiers())
@@ -298,9 +302,9 @@ public class ObjectReaderCreatorLambda
 
         MethodType invokedType = methodTypeMapping.getOrDefault(fieldClass, METHODTYPE_BiFunction);
         try {
-            MethodHandle target = lookup.findVirtual(objectType
-                    , method.getName()
-                    , MethodType.methodType(void.class, fieldClass)
+            MethodHandle target = lookup.findVirtual(objectType,
+                    method.getName(),
+                    MethodType.methodType(void.class, fieldClass)
             );
             MethodType func = target.type();
 
@@ -330,9 +334,9 @@ public class ObjectReaderCreatorLambda
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         MethodType invokedType = METHODTYPE_Function;
         try {
-            MethodHandle target = lookup.findVirtual(builderMethod.getDeclaringClass()
-                    , builderMethod.getName()
-                    , MethodType.methodType(builderMethod.getReturnType())
+            MethodHandle target = lookup.findVirtual(builderMethod.getDeclaringClass(),
+                    builderMethod.getName(),
+                    MethodType.methodType(builderMethod.getReturnType())
             );
             MethodType func = target.type();
 
@@ -361,10 +365,10 @@ public class ObjectReaderCreatorLambda
         MethodHandles.Lookup lookup = MethodHandles.lookup();
 
         MethodHandle mh = lookup.findConstructor(objectType, METHODTYPE_VOID);
-        CallSite callSite = LambdaMetafactory.metafactory(lookup
-                , "get"
-                , MethodType.methodType(Supplier.class)
-                , mh.type().generic(), mh, mh.type());
+        CallSite callSite = LambdaMetafactory.metafactory(lookup,
+                "get",
+                MethodType.methodType(Supplier.class),
+                mh.type().generic(), mh, mh.type());
 
         return (Supplier<T>) callSite
                 .getTarget()

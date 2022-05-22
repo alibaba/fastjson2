@@ -13,14 +13,14 @@ final class FieldWriterListMethod<T>
     final Method method;
 
     protected FieldWriterListMethod(
-            String fieldName
-            , Type itemType
-            , int ordinal
-            , long features
-            , String format
-            , Method method
-            , Type fieldType
-            , Class fieldClass
+            String fieldName,
+            Type itemType,
+            int ordinal,
+            long features,
+            String format,
+            Method method,
+            Type fieldType,
+            Class fieldClass
     ) {
         super(fieldName, itemType, ordinal, features, format, fieldType, fieldClass);
         this.method = method;

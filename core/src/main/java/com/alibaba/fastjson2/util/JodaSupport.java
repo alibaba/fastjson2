@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.util;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -144,8 +147,7 @@ public class JodaSupport {
         final Class dateTimeZone;
         final Method forID;
         final Method getInstance;
-
-        final Object UTC;
+        final Object utc;
 
         ChronologyReader(Class objectClass) {
             this.objectClass = objectClass;
@@ -154,7 +156,7 @@ public class JodaSupport {
                 gregorianChronology = classLoader.loadClass("org.joda.time.chrono.GregorianChronology");
                 dateTimeZone = classLoader.loadClass("org.joda.time.DateTimeZone");
 
-                UTC = gregorianChronology.getMethod("getInstanceUTC").invoke(null);
+                utc = gregorianChronology.getMethod("getInstanceUTC").invoke(null);
                 forID = dateTimeZone.getMethod("forID", String.class);
                 getInstance = gregorianChronology.getMethod("getInstance", dateTimeZone);
             } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -193,7 +195,7 @@ public class JodaSupport {
 
             if (minimumDaysInFirstWeek == null) {
                 if ("UTC".equals(zoneId)) {
-                    return UTC;
+                    return utc;
                 }
 
                 try {
@@ -321,12 +323,12 @@ public class JodaSupport {
     static class LocalDateReader
             implements ObjectReader {
         final Class objectClass;
-        final Constructor Constructor3;
-        final Constructor Constructor4;
+        final Constructor constructor3;
+        final Constructor constructor4;
 
         final Class classISOChronology;
         final Class classChronology;
-        final Object UTC;
+        final Object utc;
 
         LocalDateReader(Class objectClass) {
             this.objectClass = objectClass;
@@ -334,11 +336,11 @@ public class JodaSupport {
                 ClassLoader classLoader = objectClass.getClassLoader();
                 classChronology = classLoader.loadClass("org.joda.time.Chronology");
 
-                Constructor3 = objectClass.getConstructor(int.class, int.class, int.class);
-                Constructor4 = objectClass.getConstructor(int.class, int.class, int.class, classChronology);
+                constructor3 = objectClass.getConstructor(int.class, int.class, int.class);
+                constructor4 = objectClass.getConstructor(int.class, int.class, int.class, classChronology);
 
                 classISOChronology = classLoader.loadClass("org.joda.time.chrono.ISOChronology");
-                UTC = classISOChronology.getMethod("getInstance").invoke(null);
+                utc = classISOChronology.getMethod("getInstance").invoke(null);
             } catch (ClassNotFoundException
                     | NoSuchMethodException
                     | IllegalAccessException
@@ -361,7 +363,7 @@ public class JodaSupport {
 
             LocalDate localDate = jsonReader.readLocalDate();
             try {
-                return Constructor4.newInstance(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), null);
+                return constructor4.newInstance(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), null);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 throw new JSONException("read org.joda.time.LocalDate error", e);
             }
@@ -374,7 +376,7 @@ public class JodaSupport {
             if (type == BC_LOCAL_DATE) {
                 LocalDate localDate = jsonReader.readLocalDate();
                 try {
-                    return Constructor3.newInstance(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+                    return constructor3.newInstance(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                     throw new JSONException("read org.joda.time.LocalDate error", e);
                 }
@@ -403,7 +405,7 @@ public class JodaSupport {
                 }
 
                 try {
-                    return Constructor4.newInstance(year, month, day, chronology);
+                    return constructor4.newInstance(year, month, day, chronology);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                     throw new JSONException("read org.joda.time.LocalDate error", e);
                 }
@@ -423,7 +425,7 @@ public class JodaSupport {
         final Method getChronology;
 
         final Class isoChronology;
-        final Object UTC;
+        final Object utc;
 
         LocalDateWriter(Class objectClass, String format) {
             super(format);
@@ -433,7 +435,7 @@ public class JodaSupport {
                 ClassLoader classLoader = objectClass.getClassLoader();
                 isoChronology = classLoader.loadClass("org.joda.time.chrono.ISOChronology");
                 Object instance = isoChronology.getMethod("getInstance").invoke(null);
-                UTC = isoChronology.getMethod("withUTC").invoke(instance);
+                utc = isoChronology.getMethod("withUTC").invoke(instance);
 
                 getYear = objectClass.getMethod("getYear");
                 getMonthOfYear = objectClass.getMethod("getMonthOfYear");
@@ -460,7 +462,7 @@ public class JodaSupport {
                     jsonWriter.writeTypeName(TypeUtils.getTypeName(object.getClass()));
                 }
 
-                if (chronology == UTC || chronology == null) {
+                if (chronology == utc || chronology == null) {
                     jsonWriter.writeLocalDate(LocalDate.of(year, monthOfYear, dayOfMonth));
                     return;
                 }
@@ -493,7 +495,7 @@ public class JodaSupport {
                 int dayOfMonth = (Integer) getDayOfMonth.invoke(object);
                 Object chronology = getChronology.invoke(object);
 
-                if (chronology == UTC || chronology == null) {
+                if (chronology == utc || chronology == null) {
                     LocalDate localDate = LocalDate.of(year, monthOfYear, dayOfMonth);
 
                     DateTimeFormatter formatter = this.getDateFormatter();
@@ -540,7 +542,7 @@ public class JodaSupport {
 
         final Class classISOChronology;
         final Class classChronology;
-        final Object UTC;
+        final Object utc;
 
         LocalDateTimeReader(Class objectClass) {
             this.objectClass = objectClass;
@@ -552,7 +554,7 @@ public class JodaSupport {
                 constructor8 = objectClass.getConstructor(int.class, int.class, int.class, int.class, int.class, int.class, int.class, classChronology);
 
                 classISOChronology = classLoader.loadClass("org.joda.time.chrono.ISOChronology");
-                UTC = classISOChronology.getMethod("getInstance").invoke(null);
+                utc = classISOChronology.getMethod("getInstance").invoke(null);
             } catch (ClassNotFoundException
                     | NoSuchMethodException
                     | IllegalAccessException
@@ -661,7 +663,7 @@ public class JodaSupport {
         final Method getChronology;
 
         final Class isoChronology;
-        final Object UTC;
+        final Object utc;
 
         LocalDateTimeWriter(Class objectClass, String fromat) {
             super(fromat);
@@ -671,7 +673,7 @@ public class JodaSupport {
                 ClassLoader classLoader = objectClass.getClassLoader();
                 isoChronology = classLoader.loadClass("org.joda.time.chrono.ISOChronology");
                 Object instance = isoChronology.getMethod("getInstance").invoke(null);
-                UTC = isoChronology.getMethod("withUTC").invoke(instance);
+                utc = isoChronology.getMethod("withUTC").invoke(instance);
 
                 getYear = objectClass.getMethod("getYear");
                 getMonthOfYear = objectClass.getMethod("getMonthOfYear");
@@ -710,7 +712,7 @@ public class JodaSupport {
                     jsonWriter.writeTypeName(TypeUtils.getTypeName(object.getClass()));
                 }
 
-                if (chronology == UTC || chronology == null) {
+                if (chronology == utc || chronology == null) {
                     jsonWriter.writeLocalDateTime(
                             LocalDateTime.of(year, monthOfYear, dayOfMonth, hour, minute, second, millis * 1000000));
                     return;
@@ -766,7 +768,7 @@ public class JodaSupport {
                     jsonWriter.writeTypeName(TypeUtils.getTypeName(object.getClass()));
                 }
 
-                if (chronology == UTC || chronology == null) {
+                if (chronology == utc || chronology == null) {
                     int nanoOfSecond = millis * 1000_000;
                     LocalDateTime ldt = LocalDateTime.of(year, monthOfYear, dayOfMonth, hour, minute, second, nanoOfSecond);
 

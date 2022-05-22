@@ -31,8 +31,8 @@ public class JSONBReadAnyTest {
 
             assertEquals(value
                     , JSONB.parse(
-                            JSONB.toBytes(value, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.NotWriteRootClassName)
-                            , JSONReader.Feature.SupportAutoType
+                            JSONB.toBytes(value, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.NotWriteRootClassName),
+                            JSONReader.Feature.SupportAutoType
                     ));
         }
     }

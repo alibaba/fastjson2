@@ -30,8 +30,8 @@ public class Enum_0 {
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[0]"
-                        , jsonWriter.toString());
+                assertEquals("[0]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -40,8 +40,8 @@ public class Enum_0 {
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[\"T0\"]"
-                        , jsonWriter.toString());
+                assertEquals("[\"T0\"]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -50,8 +50,8 @@ public class Enum_0 {
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[\"T0\"]"
-                        , jsonWriter.toString());
+                assertEquals("[\"T0\"]",
+                        jsonWriter.toString());
             }
         }
     }
@@ -69,16 +69,16 @@ public class Enum_0 {
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"value\":0}"
-                        , jsonWriter.toString());
+                assertEquals("{\"value\":0}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF8();
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"value\":0}"
-                        , jsonWriter.toString());
+                assertEquals("{\"value\":0}",
+                        jsonWriter.toString());
             }
 
             {
@@ -87,8 +87,8 @@ public class Enum_0 {
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"value\":\"T0\"}"
-                        , jsonWriter.toString());
+                assertEquals("{\"value\":\"T0\"}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofUTF8();
@@ -96,8 +96,8 @@ public class Enum_0 {
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"value\":\"T0\"}"
-                        , jsonWriter.toString());
+                assertEquals("{\"value\":\"T0\"}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
@@ -105,8 +105,8 @@ public class Enum_0 {
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"value\":\"T0\"}"
-                        , jsonWriter.toString());
+                assertEquals("{\"value\":\"T0\"}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
@@ -114,8 +114,8 @@ public class Enum_0 {
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"value\":\"T0\"}"
-                        , jsonWriter.toString());
+                assertEquals("{\"value\":\"T0\"}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofJSONB();
@@ -123,8 +123,8 @@ public class Enum_0 {
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"value\":\"T0\"}"
-                        , jsonWriter.toString());
+                assertEquals("{\"value\":\"T0\"}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofJSONB();
@@ -132,8 +132,8 @@ public class Enum_0 {
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"value\":\"T0\"}"
-                        , jsonWriter.toString());
+                assertEquals("{\"value\":\"T0\"}",
+                        jsonWriter.toString());
             }
         }
     }
@@ -152,23 +152,23 @@ public class Enum_0 {
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
                 VO vo = new VO();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[null]"
-                        , jsonWriter.toString());
+                assertEquals("[null]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 VO vo = new VO();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 VO vo = new VO();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"date\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"date\":null}",
+                        jsonWriter.toString());
             }
         }
     }
@@ -187,23 +187,23 @@ public class Enum_0 {
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
                 V1 vo = new V1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[null]"
-                        , jsonWriter.toString());
+                assertEquals("[null]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 V1 vo = new V1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 V1 vo = new V1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"date\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"date\":null}",
+                        jsonWriter.toString());
             }
         }
     }
@@ -222,23 +222,23 @@ public class Enum_0 {
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
                 VO vo = new VO();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[null]"
-                        , jsonWriter.toString());
+                assertEquals("[null]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 VO vo = new VO();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 VO vo = new VO();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"date\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"date\":null}",
+                        jsonWriter.toString());
             }
         }
     }

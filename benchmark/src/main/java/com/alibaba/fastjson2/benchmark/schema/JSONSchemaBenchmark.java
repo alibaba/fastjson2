@@ -7,12 +7,12 @@ import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.RunnerException;
 
 public class JSONSchemaBenchmark {
-    final static JSONSchema SCHEMA_UUID = JSONObject.of("type", "string", "format", "uuid").to(JSONSchema::of);
-    final static JSONSchema SCHEMA_DATETIME = JSONObject.of("type", "string", "format", "date-time").to(JSONSchema::of);
-    final static JSONSchema SCHEMA_DATE = JSONObject.of("type", "string", "format", "date").to(JSONSchema::of);
-    final static JSONSchema SCHEMA_TIME = JSONObject.of("type", "string", "format", "time").to(JSONSchema::of);
-    final static JSONSchema SCHEMA_NUMBER = JSONObject.of("type", "number", "minimum", 10).to(JSONSchema::of);
-    final static JSONSchema SCHEMA_INTEGER = JSONObject.of("type", "integer", "minimum", 10).to(JSONSchema::of);
+    static final JSONSchema SCHEMA_UUID = JSONObject.of("type", "string", "format", "uuid").to(JSONSchema::of);
+    static final JSONSchema SCHEMA_DATETIME = JSONObject.of("type", "string", "format", "date-time").to(JSONSchema::of);
+    static final JSONSchema SCHEMA_DATE = JSONObject.of("type", "string", "format", "date").to(JSONSchema::of);
+    static final JSONSchema SCHEMA_TIME = JSONObject.of("type", "string", "format", "time").to(JSONSchema::of);
+    static final JSONSchema SCHEMA_NUMBER = JSONObject.of("type", "number", "minimum", 10).to(JSONSchema::of);
+    static final JSONSchema SCHEMA_INTEGER = JSONObject.of("type", "integer", "minimum", 10).to(JSONSchema::of);
 
     @Benchmark
     public void format_uuid(Blackhole bh) {

@@ -24,20 +24,17 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 
 import java.lang.reflect.*;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author wenshao[szujobs@hotmail.com]
  */
 public class TypeUtils {
-    public static boolean compatibleWithJavaBean = false;
+    public static boolean compatibleWithJavaBean;
     /**
      * 根据field name的大小写输出输入数据
      */
-    public static boolean compatibleWithFieldName = false;
+    public static boolean compatibleWithFieldName;
 
     static {
         try {
@@ -204,7 +201,7 @@ public class TypeUtils {
         throw new JSONException("can not cast to : " + type);
     }
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings("unchecked")
     public static <T> T castToJavaBean(Map<String, Object> map, Class<T> clazz, ParserConfig config) {
         try {
             if (clazz == StackTraceElement.class) {

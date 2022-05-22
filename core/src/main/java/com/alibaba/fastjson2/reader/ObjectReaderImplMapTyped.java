@@ -27,8 +27,8 @@ class ObjectReaderImplMapTyped
     final long features;
     final Function builder;
 
-    ObjectReader valueObjectReader = null;
-    ObjectReader keyObjectReader = null;
+    ObjectReader valueObjectReader;
+    ObjectReader keyObjectReader;
 
     public ObjectReaderImplMapTyped(Class mapType, Class instanceType, Type keyType, Type valueType, long features, Function builder) {
         if (keyType == Object.class) {

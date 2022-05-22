@@ -1297,16 +1297,12 @@ public class DomainValidator {
                 return ascii;
             }
             final int length = input.length();
-            if (length == 0) {// check there is a last character
+            if (length == 0) {
                 return input;
             }
-// RFC3490 3.1. 1)
-//            Whenever dots are used as label separators, the following
-//            characters MUST be recognized as dots: U+002E (full stop), U+3002
-//            (ideographic full stop), U+FF0E (fullwidth full stop), U+FF61
-//            (halfwidth ideographic full stop).
-            char lastChar = input.charAt(length-1);// fetch original last char
-            switch(lastChar) {
+
+            char lastChar = input.charAt(length - 1);
+            switch (lastChar) {
                 case '\u002E': // "." full stop
                 case '\u3002': // ideographic full stop
                 case '\uFF0E': // fullwidth full stop
@@ -1328,7 +1324,7 @@ public class DomainValidator {
         if (input == null) {
             return true;
         }
-        for(int i=0; i < input.length(); i++) {
+        for (int i = 0; i < input.length(); i++) {
             if (input.charAt(i) > 0x7F) {
                 return false;
             }

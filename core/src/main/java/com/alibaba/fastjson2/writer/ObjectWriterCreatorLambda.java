@@ -39,13 +39,13 @@ public class ObjectWriterCreatorLambda
 
     @Override
     public <T> FieldWriter<T> createFieldWriter(
-            Class<T> objectClass
-            , String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Method method
-            , ObjectWriter initObjectWriter
+            Class<T> objectClass,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Method method,
+            ObjectWriter initObjectWriter
     ) {
         int modifiers = objectClass.getModifiers();
         if (!Modifier.isPublic(modifiers) || isExternalClass(objectClass)) {
@@ -150,9 +150,9 @@ public class ObjectWriterCreatorLambda
 
         MethodType invokedType = methodTypeMapping.getOrDefault(fieldClass, METHODTYPE_FUNCTION);
         try {
-            MethodHandle target = lookup.findVirtual(objectType
-                    , method.getName()
-                    , MethodType.methodType(fieldClass)
+            MethodHandle target = lookup.findVirtual(objectType,
+                    method.getName(),
+                    MethodType.methodType(fieldClass)
             );
             MethodType func = target.type();
 

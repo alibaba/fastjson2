@@ -19,11 +19,11 @@ public class AtomicLongReadTest {
 
         for (ObjectReaderCreator creator : creators) {
             FieldReader fieldWriter = creator.createFieldReader(
-                    AtomicLongReadOnly1.class
-                    , "value"
-                    , AtomicLong.class
-                    , AtomicLong.class
-                    , AtomicLongReadOnly1.class.getMethod("getValue"));
+                    AtomicLongReadOnly1.class,
+                    "value",
+                    AtomicLong.class,
+                    AtomicLong.class,
+                    AtomicLongReadOnly1.class.getMethod("getValue"));
             ObjectReader<AtomicLongReadOnly1> objectReader
                     = creator.createObjectReader(AtomicLongReadOnly1.class, fieldWriter);
 

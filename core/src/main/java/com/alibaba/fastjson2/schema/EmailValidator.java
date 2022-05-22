@@ -21,7 +21,7 @@ final class EmailValidator
     private static final Pattern IP_DOMAIN_PATTERN = Pattern.compile(IP_DOMAIN_REGEX);
     private static final Pattern USER_PATTERN = Pattern.compile(USER_REGEX);
 
-    final static EmailValidator INSTANCE = new EmailValidator();
+    static final EmailValidator INSTANCE = new EmailValidator();
 
     @Override
     public boolean isValid(String email) {

@@ -29,7 +29,7 @@ public class Issue1306 {
         assertNotNull(n.getGoodsList().get(0).getProperties());
     }
 
-    public static abstract class IdEntity<ID extends Serializable> implements Cloneable, Serializable{
+    public abstract static class IdEntity<ID extends Serializable> implements Cloneable, Serializable{
 
         private static final long serialVersionUID = 4877536176216854937L;
 

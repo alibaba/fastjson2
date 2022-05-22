@@ -28,9 +28,9 @@ public class JSONExtractScalar
     }
 
     public Writable eval(Text input) {
-        JSONReader parser = JSONReader.of(input.getBytes()
-                , 0
-                , input.getLength(), StandardCharsets.UTF_8
+        JSONReader parser = JSONReader.of(input.getBytes(),
+                0,
+                input.getLength(), StandardCharsets.UTF_8
         );
 
         path.extractScalar(parser, valueConsumer);

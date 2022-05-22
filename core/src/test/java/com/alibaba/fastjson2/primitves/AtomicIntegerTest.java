@@ -19,11 +19,11 @@ public class AtomicIntegerTest {
 
         for (ObjectReaderCreator creator : creators) {
             FieldReader fieldWriter = creator.createFieldReader(
-                    AtomicIntegerReadOnly1.class
-                    , "value"
-                    , AtomicInteger.class
-                    , AtomicInteger.class
-                    , AtomicIntegerReadOnly1.class.getMethod("getValue"));
+                    AtomicIntegerReadOnly1.class,
+                    "value",
+                    AtomicInteger.class,
+                    AtomicInteger.class,
+                    AtomicIntegerReadOnly1.class.getMethod("getValue"));
             ObjectReader<AtomicIntegerReadOnly1> objectReader
                     = creator.createObjectReader(AtomicIntegerReadOnly1.class, fieldWriter);
 

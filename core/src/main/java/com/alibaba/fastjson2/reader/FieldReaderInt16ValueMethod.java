@@ -41,8 +41,8 @@ final class FieldReaderInt16ValueMethod<T>
         }
 
         try {
-            method.invoke(object
-                    , TypeUtils.toShortValue(value));
+            method.invoke(object,
+                    TypeUtils.toShortValue(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

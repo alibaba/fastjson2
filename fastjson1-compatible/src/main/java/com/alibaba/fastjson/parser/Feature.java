@@ -138,8 +138,7 @@ public enum Feature {
      */
     ErrorOnEnumNotMatch,
 
-    TrimStringFieldValue,
-    ;
+    TrimStringFieldValue;
 
     public final int mask;
 

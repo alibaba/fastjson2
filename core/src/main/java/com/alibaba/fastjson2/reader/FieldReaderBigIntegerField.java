@@ -50,8 +50,8 @@ final class FieldReaderBigIntegerField<T>
     @Override
     public void accept(T object, Object value) {
         try {
-            field.set(object
-                    , TypeUtils.toBigInteger(value));
+            field.set(object,
+                    TypeUtils.toBigInteger(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

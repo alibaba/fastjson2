@@ -12,7 +12,7 @@ public class Issue2344 {
     public void test_for_issue() throws Exception {
         LongPrimitiveEntity vo = new LongPrimitiveEntity(9007199254741992L);
 
-        assertEquals("{\"value\":\"9007199254741992\"}"
-                , JSON.toJSONString(vo, SerializerFeature.BrowserCompatible));
+        assertEquals("{\"value\":\"9007199254741992\"}",
+                JSON.toJSONString(vo, SerializerFeature.BrowserCompatible));
     }
 }

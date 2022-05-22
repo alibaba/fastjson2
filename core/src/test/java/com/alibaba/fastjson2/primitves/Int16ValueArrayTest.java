@@ -19,8 +19,8 @@ public class Int16ValueArrayTest {
         assertEquals("{\"values\":null}"
                 , JSON.toJSONString(
                         JSONB.parseObject(
-                                JSONB.toBytes(new VO(), JSONWriter.Feature.WriteNulls))
-                        , JSONWriter.Feature.WriteNulls));
+                                JSONB.toBytes(new VO(), JSONWriter.Feature.WriteNulls)),
+                        JSONWriter.Feature.WriteNulls));
     }
 
     @Test
@@ -35,8 +35,8 @@ public class Int16ValueArrayTest {
         assertEquals("{\"values\":null}"
                 , JSON.toJSONString(
                         JSONB.parseObject(
-                                JSONB.toBytes(new VO2(), JSONWriter.Feature.WriteNulls))
-                        , JSONWriter.Feature.WriteNulls));
+                                JSONB.toBytes(new VO2(), JSONWriter.Feature.WriteNulls)),
+                        JSONWriter.Feature.WriteNulls));
     }
 
     @Test

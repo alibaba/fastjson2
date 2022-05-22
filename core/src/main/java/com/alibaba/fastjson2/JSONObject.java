@@ -3,14 +3,14 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
+import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.lang.annotation.Annotation;
@@ -1560,7 +1560,7 @@ public class JSONObject
      */
     static void nameFilter(Map map, NameFilter nameFilter) {
         JSONObject changed = null;
-        for (Iterator it = map.entrySet().iterator();it.hasNext();) {
+        for (Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             Object entryKey = entry.getKey();
             Object entryValue = entry.getValue();
@@ -1606,7 +1606,7 @@ public class JSONObject
      * @since 2.0.3
      */
     static void valueFilter(Map map, ValueFilter valueFilter) {
-        for (Iterator it = map.entrySet().iterator();it.hasNext();) {
+        for (Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             Object entryKey = entry.getKey();
             Object entryValue = entry.getValue();

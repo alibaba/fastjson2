@@ -19,8 +19,8 @@ public class Int32ValueArrayTest {
         assertEquals("{\"values\":null}"
                 , JSON.toJSONString(
                         JSONB.parseObject(
-                                JSONB.toBytes(new VO(), JSONWriter.Feature.WriteNulls))
-                        , JSONWriter.Feature.WriteNulls));
+                                JSONB.toBytes(new VO(), JSONWriter.Feature.WriteNulls)),
+                        JSONWriter.Feature.WriteNulls));
     }
 
     @Test

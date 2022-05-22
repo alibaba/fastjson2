@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 
 final class URIValidator
         implements FormatValidator {
-    final static URIValidator INSTANCE = new URIValidator();
+    static final URIValidator INSTANCE = new URIValidator();
 
     @Override
     public boolean isValid(String url) {

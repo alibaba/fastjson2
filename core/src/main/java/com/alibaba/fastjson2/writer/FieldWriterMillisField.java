@@ -9,11 +9,11 @@ final class FieldWriterMillisField<T>
         extends FieldWriterDate<T> {
     final Field field;
 
-    FieldWriterMillisField(String fieldName
-            , int ordinal
-            , long features
-            , String dateTimeFormat
-            , Field method
+    FieldWriterMillisField(String fieldName,
+            int ordinal,
+            long features,
+            String dateTimeFormat,
+            Field method
     ) {
         super(fieldName, ordinal, features, dateTimeFormat, long.class, long.class);
         this.field = method;

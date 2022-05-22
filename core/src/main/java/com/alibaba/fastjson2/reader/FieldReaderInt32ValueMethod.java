@@ -40,8 +40,8 @@ final class FieldReaderInt32ValueMethod<T>
         }
 
         try {
-            method.invoke(object
-                    , TypeUtils.toIntValue(value));
+            method.invoke(object,
+                    TypeUtils.toIntValue(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

@@ -36,8 +36,8 @@ final class FieldReaderDoubleMethod<T>
         }
 
         try {
-            method.invoke(object
-                    , TypeUtils.toDouble(value));
+            method.invoke(object,
+                    TypeUtils.toDouble(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

@@ -12,14 +12,14 @@ final class FieldWriterListField<T>
     final Field field;
 
     protected FieldWriterListField(
-            String fieldName
-            , Type itemType
-            , int ordinal
-            , long features
-            , String format
-            , Type fieldType
-            , Class fieldClass
-            , Field field
+            String fieldName,
+            Type itemType,
+            int ordinal,
+            long features,
+            String format,
+            Type fieldType,
+            Class fieldClass,
+            Field field
     ) {
         super(fieldName, itemType, ordinal, features, format, fieldType, fieldClass);
         this.field = field;

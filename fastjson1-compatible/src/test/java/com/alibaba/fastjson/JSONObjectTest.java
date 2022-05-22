@@ -448,8 +448,8 @@ public class JSONObjectTest {
     @Test
     public void test_getBoolean2() {
         assertEquals(
-                Boolean.TRUE
-                , new JSONObject()
+                Boolean.TRUE,
+                new JSONObject()
                         .fluentPut("val", 1)
                         .getBoolean("val"));
         assertEquals(

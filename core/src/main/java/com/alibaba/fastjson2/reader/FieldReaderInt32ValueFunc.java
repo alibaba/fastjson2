@@ -47,8 +47,8 @@ final class FieldReaderInt32ValueFunc<T>
             schema.assertValidate(value);
         }
 
-        function.accept(object
-                , TypeUtils.toIntValue(value));
+        function.accept(object,
+                TypeUtils.toIntValue(value));
     }
 
     @Override

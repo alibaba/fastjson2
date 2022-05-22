@@ -1,9 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.internal.asm.ASMUtils;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.internal.asm.ASMUtils;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.schema.JSONSchema;
@@ -17,7 +17,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.atomic.*;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ObjectReaderCreator {
     public static final ObjectReaderCreator INSTANCE = new ObjectReaderCreator();
@@ -29,11 +31,11 @@ public class ObjectReaderCreator {
     }
 
     public <T> ObjectReader<T> createObjectReaderNoneDefaultConstrutor(
-            Class objectClass
-            , Constructor constructor
-            , String[] paramNames
-            , FieldReader[] paramFieldReaders
-            , FieldReader[] setterFieldReaders
+            Class objectClass,
+            Constructor constructor,
+            String[] paramNames,
+            FieldReader[] paramFieldReaders,
+            FieldReader[] setterFieldReaders
     ) {
         Function<Map<Long, Object>, T> function = createFunction(constructor, paramNames);
         return new ObjectReaderNoneDefaultConstrutor(objectClass, null, null, 0, function, null, paramNames, paramFieldReaders, setterFieldReaders);
@@ -65,15 +67,15 @@ public class ObjectReaderCreator {
             }
             Type paramType = parameter.getParameterizedType();
             fieldReaders[i] = createFieldReaderParam(
-                    null
-                    , null
-                    , paramName
-                    , null
-                    , paramType
-                    , parameter.getType()
-                    , paramName
-                    , parameter
-                    , i
+                    null,
+                    null,
+                    paramName,
+                    null,
+                    paramType,
+                    parameter.getType(),
+                    paramName,
+                    parameter,
+                    i
             );
         }
         return fieldReaders;
@@ -113,29 +115,29 @@ public class ObjectReaderCreator {
     }
 
     public <T> ObjectReader<T> createObjectReaderSeeAlso(
-            Class<T> objectType
-            , Class[] seeAlso
-            , FieldReader... fieldReaders
+            Class<T> objectType,
+            Class[] seeAlso,
+            FieldReader... fieldReaders
     ) {
         Supplier<T> instanceSupplier = createInstanceSupplier(objectType);
         return new ObjectReaderSeeAlso(objectType, instanceSupplier, "@type", seeAlso, null, fieldReaders);
     }
 
     public <T> ObjectReader<T> createObjectReaderSeeAlso(
-            Class<T> objectType
-            , Supplier<T> defaultCreator
-            , String typeKey
-            , Class[] seeAlso
-            , String[] seeAlsoNames
-            , FieldReader... fieldReaders
+            Class<T> objectType,
+            Supplier<T> defaultCreator,
+            String typeKey,
+            Class[] seeAlso,
+            String[] seeAlsoNames,
+            FieldReader... fieldReaders
     ) {
         return new ObjectReaderSeeAlso(objectType, defaultCreator, typeKey, seeAlso, seeAlsoNames, fieldReaders);
     }
 
     protected <T> ObjectReader<T> createObjectReaderWithBuilder(
-            Class<T> objectType
-            , List<ObjectReaderModule> modules
-            , BeanInfo beanInfo) {
+            Class<T> objectType,
+            List<ObjectReaderModule> modules,
+            BeanInfo beanInfo) {
         Function<Object, Object> builderFunction = null;
         if (beanInfo.buildMethod != null) {
             builderFunction = createBuildFunction(beanInfo.buildMethod);
@@ -209,19 +211,18 @@ public class ObjectReaderCreator {
             method.setAccessible(true);
 
             FieldReader fieldReader = createFieldReaderMethod(
-                    builderClass
-                    , objectType
-                    , fieldName
-                    , fieldInfo.ordinal
-                    , fieldInfo.features
-                    , fieldInfo.format
-                    , fieldInfo.locale
-                    , fieldInfo.defaultValue
-                    , fieldInfo.schema
-                    , fieldType
-                    , fieldClass
-                    , method
-            );
+                    builderClass,
+                    objectType,
+                    fieldName,
+                    fieldInfo.ordinal,
+                    fieldInfo.features,
+                    fieldInfo.format,
+                    fieldInfo.locale,
+                    fieldInfo.defaultValue,
+                    fieldInfo.schema,
+                    fieldType,
+                    fieldClass,
+                    method);
 
             FieldReader origin = fieldReaders.putIfAbsent(fieldName, fieldReader);
             if (origin != null && origin.compareTo(fieldReader) > 0) {
@@ -235,22 +236,20 @@ public class ObjectReaderCreator {
                     }
 
                     fieldReaders
-                            .putIfAbsent(alternateName
-                                    , createFieldReaderMethod(
-                                            builderClass
-                                            , objectType
-                                            , alternateName
-                                            , fieldInfo.ordinal
-                                            , fieldInfo.features
-                                            , fieldInfo.format
-                                            , fieldInfo.locale
-                                            , fieldInfo.defaultValue
-                                            , fieldInfo.schema
-                                            , fieldType
-                                            , fieldClass
-                                            , method
-                                    )
-                            );
+                            .putIfAbsent(alternateName,
+                                    createFieldReaderMethod(
+                                            builderClass,
+                                            objectType,
+                                            alternateName,
+                                            fieldInfo.ordinal,
+                                            fieldInfo.features,
+                                            fieldInfo.format,
+                                            fieldInfo.locale,
+                                            fieldInfo.defaultValue,
+                                            fieldInfo.schema,
+                                            fieldType,
+                                            fieldClass,
+                                            method));
                 }
             }
         });
@@ -264,9 +263,9 @@ public class ObjectReaderCreator {
     }
 
     protected <T> ObjectReader<T> createObjectReaderWithCreator(
-            Class<T> objectClass
-            , List<ObjectReaderModule> modules
-            , BeanInfo beanInfo) {
+            Class<T> objectClass,
+            List<ObjectReaderModule> modules,
+            BeanInfo beanInfo) {
         FieldInfo fieldInfo = new FieldInfo();
 
         Map<String, FieldReader> fieldReaders = new LinkedHashMap<>();
@@ -315,8 +314,16 @@ public class ObjectReaderCreator {
             }
 
             Type paramType = parameter.getParameterizedType();
-            fieldReaders.put(fieldName
-                    , createFieldReaderParam(objectClass, objectClass, fieldName, fieldInfo.format, paramType, parameter.getType(), fieldName, parameter, i));
+            fieldReaders.put(fieldName,
+                    createFieldReaderParam(
+                            objectClass,
+                            objectClass,
+                            fieldName,
+                            fieldInfo.format,
+                            paramType,
+                            parameter.getType(),
+                            fieldName,
+                            parameter, i));
 
             if (fieldInfo.alternateNames != null) {
                 for (String alternateName : fieldInfo.alternateNames) {
@@ -324,8 +331,17 @@ public class ObjectReaderCreator {
                         continue;
                     }
 
-                    fieldReaders.putIfAbsent(alternateName
-                            , createFieldReaderParam(objectClass, objectClass, alternateName, fieldInfo.format, paramType, parameter.getType(), fieldName, parameter, i));
+                    fieldReaders.putIfAbsent(alternateName,
+                            createFieldReaderParam(
+                                    objectClass,
+                                    objectClass,
+                                    alternateName,
+                                    fieldInfo.format,
+                                    paramType,
+                                    parameter.getType(),
+                                    fieldName,
+                                    parameter,
+                                    i));
                 }
             }
         }
@@ -394,13 +410,13 @@ public class ObjectReaderCreator {
                 );
             case 2:
                 return new ObjectReader2(
-                        objectClass
-                        , features
-                        , schema
-                        , defaultCreator
-                        , buildFunction
-                        , fieldReaders[0]
-                        , fieldReaders[1]);
+                        objectClass,
+                        features,
+                        schema,
+                        defaultCreator,
+                        buildFunction,
+                        fieldReaders[0],
+                        fieldReaders[1]);
             case 3:
                 return new ObjectReader3(
                         objectClass,
@@ -464,17 +480,17 @@ public class ObjectReaderCreator {
         Class<T> objectClass = (Class<T>) TypeUtils.getMapping(objectType);
         FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType);
         return createObjectReader(
-                objectClass
-                , createInstanceSupplier(objectClass)
-                , fieldReaderArray);
+                objectClass,
+                createInstanceSupplier(objectClass),
+                fieldReaderArray);
     }
 
     public <T> ObjectReader<T> createObjectReader(Class<T> objectType) {
         return createObjectReader(
-                objectType
-                , objectType
-                , false
-                , JSONFactory
+                objectType,
+                objectType,
+                false,
+                JSONFactory
                         .getDefaultObjectReaderProvider()
                         .modules
         );
@@ -482,10 +498,10 @@ public class ObjectReaderCreator {
 
     public <T> ObjectReader<T> createObjectReader(Class<T> objectType, boolean fieldBased) {
         return createObjectReader(
-                objectType
-                , objectType
-                , fieldBased
-                , JSONFactory
+                objectType,
+                objectType,
+                fieldBased,
+                JSONFactory
                         .getDefaultObjectReaderProvider()
                         .modules
         );
@@ -550,11 +566,11 @@ public class ObjectReaderCreator {
                     FieldReader[] constructorParamReaders = createFieldReaders(constructor.getParameters(), paramNames);
                     Arrays.sort(fieldReaderArray);
                     return createObjectReaderNoneDefaultConstrutor(
-                            objectClass
-                            , constructor
-                            , paramNames
-                            , constructorParamReaders
-                            , fieldReaderArray
+                            objectClass,
+                            constructor,
+                            paramNames,
+                            constructorParamReaders,
+                            fieldReaderArray
                     );
                 }
             } catch (Throwable ignored) {
@@ -629,15 +645,15 @@ public class ObjectReaderCreator {
                 Function<Map<Long, Object>, T> function = new ConstructorFunction(alternateConstructors, creatorConstructor, parameterNames);
                 FieldReader[] paramFieldReaders = createFieldReaders(creatorConstructor.getParameters(), parameterNames);
                 return new ObjectReaderNoneDefaultConstrutor(
-                        objectClass
-                        , beanInfo.typeKey
-                        , beanInfo.typeName
-                        , beanInfo.readerFeatures
-                        , function
-                        , alternateConstructors
-                        , parameterNames
-                        , paramFieldReaders
-                        , fieldReaderArray
+                        objectClass,
+                        beanInfo.typeKey,
+                        beanInfo.typeName,
+                        beanInfo.readerFeatures,
+                        function,
+                        alternateConstructors,
+                        parameterNames,
+                        paramFieldReaders,
+                        fieldReaderArray
                 );
             }
         }
@@ -662,22 +678,22 @@ public class ObjectReaderCreator {
 
         JSONSchema jsonSchema = JSONSchema.of(JSON.parseObject(beanInfo.schema), objectClass);
         return createObjectReader(
-                objectClass
-                , beanInfo.typeKey
-                , beanInfo.readerFeatures
-                , jsonSchema
-                , creator
-                , null
-                , fieldReaderArray);
+                objectClass,
+                beanInfo.typeKey,
+                beanInfo.readerFeatures,
+                jsonSchema,
+                creator,
+                null,
+                fieldReaderArray);
     }
 
     public <T> FieldReader[] createFieldReaders(Class<T> objectClass) {
         return createFieldReaders(
-                objectClass
-                , objectClass
-                , null
-                , false
-                , JSONFactory
+                objectClass,
+                objectClass,
+                null,
+                false,
+                JSONFactory
                         .getDefaultObjectReaderProvider()
                         .modules
         );
@@ -685,11 +701,11 @@ public class ObjectReaderCreator {
 
     public <T> FieldReader[] createFieldReaders(Class<T> objectClass, Type objectType) {
         return createFieldReaders(
-                objectClass
-                , objectType
-                , null
-                , false
-                , JSONFactory
+                objectClass,
+                objectType,
+                null,
+                false,
+                JSONFactory
                         .getDefaultObjectReaderProvider()
                         .modules
         );
@@ -725,18 +741,18 @@ public class ObjectReaderCreator {
         Class<?> fieldClass = field.getType();
 
         FieldReader<Object> fieldReader = createFieldReader(
-                objectClass
-                , objectType
-                , fieldName
-                , fieldInfo.ordinal
-                , fieldInfo.features
-                , fieldInfo.format
-                , fieldInfo.locale
-                , fieldInfo.defaultValue
-                , fieldInfo.schema
-                , fieldType
-                , fieldClass
-                , field);
+                objectClass,
+                objectType,
+                fieldName,
+                fieldInfo.ordinal,
+                fieldInfo.features,
+                fieldInfo.format,
+                fieldInfo.locale,
+                fieldInfo.defaultValue,
+                fieldInfo.schema,
+                fieldType,
+                fieldClass,
+                field);
         FieldReader previous = fieldReaders.putIfAbsent(fieldName, fieldReader);
         if (previous != null) {
             int cmp = fieldReader.compareTo(previous);
@@ -752,22 +768,22 @@ public class ObjectReaderCreator {
                 }
 
                 fieldReaders
-                        .putIfAbsent(alternateName
-                                , createFieldReader(
-                                        objectClass
-                                        , objectType
-                                        , alternateName
-                                        , fieldInfo.ordinal
-                                        , fieldInfo.features
-                                        , null
-                                        , fieldInfo.locale
-                                        , fieldInfo.defaultValue
-                                        , fieldInfo.schema
-                                        , fieldType
-                                        , fieldClass
-                                        , field
-                                )
-                        );
+                        .putIfAbsent(
+                                alternateName,
+                                createFieldReader(
+                                        objectClass,
+                                        objectType,
+                                        alternateName,
+                                        fieldInfo.ordinal,
+                                        fieldInfo.features,
+                                        null,
+                                        fieldInfo.locale,
+                                        fieldInfo.defaultValue,
+                                        fieldInfo.schema,
+                                        fieldType,
+                                        fieldClass,
+                                        field
+                                ));
             }
         }
     }
@@ -859,18 +875,18 @@ public class ObjectReaderCreator {
         Class fieldClass = method.getParameterTypes()[0];
 
         FieldReader fieldReader = createFieldReaderMethod(
-                objectClass
-                , objectType
-                , fieldName
-                , fieldInfo.ordinal
-                , fieldInfo.features
-                , fieldInfo.format
-                , fieldInfo.locale
-                , fieldInfo.defaultValue
-                , fieldInfo.schema
-                , fieldType
-                , fieldClass
-                , method
+                objectClass,
+                objectType,
+                fieldName,
+                fieldInfo.ordinal,
+                fieldInfo.features,
+                fieldInfo.format,
+                fieldInfo.locale,
+                fieldInfo.defaultValue,
+                fieldInfo.schema,
+                fieldType,
+                fieldClass,
+                method
         );
         FieldReader origin = fieldReaders.putIfAbsent(fieldName, fieldReader);
         if (origin != null && origin.compareTo(fieldReader) > 0) {
@@ -884,22 +900,21 @@ public class ObjectReaderCreator {
                 }
 
                 fieldReaders
-                        .putIfAbsent(alternateName
-                                , createFieldReaderMethod(
-                                        objectClass
-                                        , objectType
-                                        , alternateName
-                                        , fieldInfo.ordinal
-                                        , fieldInfo.features
-                                        , fieldInfo.format
-                                        , fieldInfo.locale
-                                        , fieldInfo.defaultValue
-                                        , fieldInfo.schema
-                                        , fieldType
-                                        , fieldClass
-                                        , method
-                                )
-                        );
+                        .putIfAbsent(alternateName,
+                                createFieldReaderMethod(
+                                        objectClass,
+                                        objectType,
+                                        alternateName,
+                                        fieldInfo.ordinal,
+                                        fieldInfo.features,
+                                        fieldInfo.format,
+                                        fieldInfo.locale,
+                                        fieldInfo.defaultValue,
+                                        fieldInfo.schema,
+                                        fieldType,
+                                        fieldClass,
+                                        method
+                                ));
             }
         }
     }
@@ -1007,47 +1022,47 @@ public class ObjectReaderCreator {
     }
 
     public <T> FieldReader createFieldReader(
-            Class<T> objectType
-            , String fieldName
-            , Type fieldType
-            , Class fieldClass
-            , Method method
+            Class<T> objectType,
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            Method method
     ) {
         return createFieldReaderMethod(objectType, objectType, fieldName, 0, 0L, null, null, null, null, fieldType, fieldClass, method);
     }
 
     public <T> FieldReader createFieldReader(
-            Class<T> objectType
-            , String fieldName
-            , String format
-            , Type fieldType
-            , Class fieldClass
-            , Method method
+            Class<T> objectType,
+            String fieldName,
+            String format,
+            Type fieldType,
+            Class fieldClass,
+            Method method
     ) {
         return createFieldReaderMethod(objectType, fieldName, format, fieldType, fieldClass, method);
     }
 
     public <T> FieldReader createFieldReaderMethod(
-            Class<T> objectClass
-            , String fieldName
-            , String format
-            , Type fieldType
-            , Class fieldClass
-            , Method method
+            Class<T> objectClass,
+            String fieldName,
+            String format,
+            Type fieldType,
+            Class fieldClass,
+            Method method
     ) {
         return createFieldReaderMethod(objectClass, objectClass, fieldName, 0, 0L, format, null, null, null, fieldType, fieldClass, method);
     }
 
     protected <T> FieldReader createFieldReaderParam(
-            Class<T> objectClass
-            , Type objectType
-            , String fieldName
-            , String format
-            , Type fieldType
-            , Class fieldClass
-            , String paramName
-            , Parameter parameter
-            , int ordinal
+            Class<T> objectClass,
+            Type objectType,
+            String fieldName,
+            String format,
+            Type fieldType,
+            Class fieldClass,
+            String paramName,
+            Parameter parameter,
+            int ordinal
     ) {
         if (fieldType == byte.class || fieldType == Byte.class) {
             return new FieldReaderInt8Param(fieldName, fieldClass, paramName, parameter, ordinal);
@@ -1069,18 +1084,18 @@ public class ObjectReaderCreator {
     }
 
     public <T> FieldReader createFieldReaderMethod(
-            Class<T> objectClass
-            , Type objectType
-            , String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Locale locale
-            , Object defaultValue
-            , String schema
-            , Type fieldType
-            , Class fieldClass
-            , Method method
+            Class<T> objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            String schema,
+            Type fieldType,
+            Class fieldClass,
+            Method method
     ) {
         if (method != null) {
             method.setAccessible(true);
@@ -1150,7 +1165,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == Long.class) {
-            return new FieldReaderInt64Method(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Long)defaultValue, jsonSchema, method);
+            return new FieldReaderInt64Method(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method);
         }
 
         if (fieldType == Float.class) {
@@ -1257,49 +1272,49 @@ public class ObjectReaderCreator {
     }
 
     public <T> FieldReader<T> createFieldReader(
-            String fieldName
-            , Type fieldType
-            , Field field
+            String fieldName,
+            Type fieldType,
+            Field field
     ) {
         return createFieldReader(fieldName, null, fieldType, field);
     }
 
     public <T> FieldReader<T> createFieldReader(
-            String fieldName
-            , String format
-            , Type fieldType
-            , Field field
+            String fieldName,
+            String format,
+            Type fieldType,
+            Field field
     ) {
         Class objectClass = field.getDeclaringClass();
         return createFieldReader(objectClass, objectClass, fieldName, 0, format, fieldType, field.getType(), field);
     }
 
     public <T> FieldReader<T> createFieldReader(
-            Class objectClass
-            , Type objectType
-            , String fieldName
-            , long features
-            , String format
-            , Type fieldType
-            , Class fieldClass
-            , Field field
+            Class objectClass,
+            Type objectType,
+            String fieldName,
+            long features,
+            String format,
+            Type fieldType,
+            Class fieldClass,
+            Field field
     ) {
         return createFieldReader(objectClass, objectType, fieldName, 0, features, format, null, null, null, fieldType, field.getType(), field);
     }
 
     public <T> FieldReader<T> createFieldReader(
-            Class objectClass
-            , Type objectType
-            , String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Locale locale
-            , Object defaultValue
-            , String schema
-            , Type fieldType
-            , Class fieldClass
-            , Field field
+            Class objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            String schema,
+            Type fieldType,
+            Class fieldClass,
+            Field field
     ) {
         if (defaultValue != null && defaultValue.getClass() != fieldClass) {
             Function typeConvert = JSONFactory
@@ -1521,26 +1536,26 @@ public class ObjectReaderCreator {
         if (fieldClassResolved != null) {
             if (JDKUtils.UNSAFE_SUPPORT) {
                 return new FieldReaderObjectFieldUF(
-                        fieldName
-                        , fieldTypeResolved
-                        , fieldClass
-                        , ordinal
-                        , features
-                        , format
-                        , defaultValue
-                        , jsonSchema
-                        , field);
+                        fieldName,
+                        fieldTypeResolved,
+                        fieldClass,
+                        ordinal,
+                        features,
+                        format,
+                        defaultValue,
+                        jsonSchema,
+                        field);
             } else {
                 return new FieldReaderObjectField(
-                        fieldName
-                        , fieldTypeResolved
-                        , fieldClass
-                        , ordinal
-                        , features
-                        , format
-                        , defaultValue
-                        , jsonSchema
-                        , field);
+                        fieldName,
+                        fieldTypeResolved,
+                        fieldClass,
+                        ordinal,
+                        features,
+                        format,
+                        defaultValue,
+                        jsonSchema,
+                        field);
             }
         }
 
@@ -1551,11 +1566,11 @@ public class ObjectReaderCreator {
     }
 
     <T, V> FieldReader createFieldReader(
-            String fieldName
-            , Type fieldType
-            , Class<V> fieldClass
-            , Method method
-            , BiConsumer<T, V> function
+            String fieldName,
+            Type fieldType,
+            Class<V> fieldClass,
+            Method method,
+            BiConsumer<T, V> function
     ) {
         return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, 0, null, null, null, method, function);
     }

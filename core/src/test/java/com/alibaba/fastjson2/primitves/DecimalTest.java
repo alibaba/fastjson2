@@ -25,15 +25,15 @@ public class DecimalTest {
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 BigDecimal1 vo = new BigDecimal1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"id\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"id\":null}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 BigDecimal1 vo = new BigDecimal1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
         }
 
@@ -51,8 +51,8 @@ public class DecimalTest {
             JSONWriter jsonWriter = JSONWriter.of();
             BigDecimal1 vo = new BigDecimal1();
             objectWriter.write(jsonWriter, vo);
-            assertEquals("{\"id\":null}"
-                    , jsonWriter.toString());
+            assertEquals("{\"id\":null}",
+                    jsonWriter.toString());
         }
     }
 

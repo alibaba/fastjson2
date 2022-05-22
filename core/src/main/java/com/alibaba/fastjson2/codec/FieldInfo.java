@@ -3,6 +3,9 @@ package com.alibaba.fastjson2.codec;
 import java.util.Locale;
 
 public class FieldInfo {
+    public static final long VALUE_MASK = 1L << 48;
+    public static final long UNWRAPPED_MASK = 1L << 49;
+
     public String fieldName;
     public String format;
     public int ordinal;
@@ -30,7 +33,4 @@ public class FieldInfo {
         locale = null;
         schema = null;
     }
-
-   public static final long VALUE_MASK = 1L << 48;
-   public static final long UNWRAPPED_MASK = 1L << 49;
 }

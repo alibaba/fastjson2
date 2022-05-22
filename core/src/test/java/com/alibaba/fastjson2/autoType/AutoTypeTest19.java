@@ -100,7 +100,7 @@ public class AutoTypeTest19 {
         public List<Item2> values;
     }
 
-    static abstract class Item2 {
+    abstract static class Item2 {
         public int id;
         public int value;
     }

@@ -13,11 +13,11 @@ import java.util.List;
 
 public class GeoJsonPolygonReader
         implements ObjectReader<GeoJsonPolygon> {
-    public final static GeoJsonPolygonReader INSTANCE = new GeoJsonPolygonReader();
+    public static final GeoJsonPolygonReader INSTANCE = new GeoJsonPolygonReader();
 
-    final static long HASH_TYPE = Fnv.hashCode64("type");
-    final static long HASH_POLYGON = Fnv.hashCode64("Polygon");
-    final static long HASH_COORDINATES = Fnv.hashCode64("coordinates");
+    static final long HASH_TYPE = Fnv.hashCode64("type");
+    static final long HASH_POLYGON = Fnv.hashCode64("Polygon");
+    static final long HASH_COORDINATES = Fnv.hashCode64("coordinates");
 
     public GeoJsonPolygonReader() {
     }

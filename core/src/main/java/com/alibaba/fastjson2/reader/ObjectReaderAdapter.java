@@ -1,20 +1,22 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ObjectReaderAdapter<T>
         extends ObjectReaderBean<T> {
-    final protected String typeKey;
-    final protected long typeKeyHashCode;
+    protected final String typeKey;
+    protected final long typeKeyHashCode;
     final long features;
     final Supplier<T> creator;
     final Function buildFunction;

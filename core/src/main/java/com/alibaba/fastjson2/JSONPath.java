@@ -10,7 +10,6 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
-import javax.security.auth.callback.Callback;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -24,8 +23,8 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 
 public abstract class JSONPath {
     JSONReader.Context readerContext;
@@ -588,8 +587,8 @@ public abstract class JSONPath {
                             String fieldName = jsonReader.readFieldNameUnquote();
                             if ("randomIndex".equals(fieldName)) {
                                 if (!jsonReader.nextIfMatch('(')
-                                    || !jsonReader.nextIfMatch(')')
-                                    || !(jsonReader.ch == (']'))) {
+                                        || !jsonReader.nextIfMatch(')')
+                                        || !(jsonReader.ch == (']'))) {
                                     throw new JSONException("not support : " + fieldName);
                                 }
                                 segments.add(RandomIndexSegment.INSTANCE);
@@ -889,12 +888,12 @@ public abstract class JSONPath {
                             }
                         }
                         segment = new NameMatchFilter(
-                                fieldName
-                                , hashCode
-                                , startsWithValue
-                                , endsWithValue,
-                                containsValues
-                                , operator == Operator.NOT_LIKE
+                                fieldName,
+                                hashCode,
+                                startsWithValue,
+                                endsWithValue,
+                                containsValues,
+                                operator == Operator.NOT_LIKE
                         );
                     } else {
                         segment = new NameStringOpSegment(fieldName, hashCode, function, operator, strVal);
@@ -1022,8 +1021,7 @@ public abstract class JSONPath {
                     operator = Operator.REG_MATCH;
                 } else if (jsonReader.ch == '=') {
                     jsonReader.next();
-                    operator = Operator.EQ
-                    ;
+                    operator = Operator.EQ;
                 } else {
                     operator = Operator.EQ;
                 }
@@ -1147,7 +1145,7 @@ public abstract class JSONPath {
         REG_MATCH
     }
 
-    static abstract class FilterSegment
+    abstract static class FilterSegment
             extends Segment
             implements EvalSegment {
         abstract boolean apply(Context context, Object object);
@@ -1593,7 +1591,7 @@ public abstract class JSONPath {
         }
     }
 
-    static abstract class NameFilter
+    abstract static class NameFilter
             extends FilterSegment {
         final String fieldName;
         final long fieldNameNameHash;
@@ -1730,10 +1728,11 @@ public abstract class JSONPath {
         final String value;
 
         public NameStringOpSegment(
-                String fieldName
-                , long fieldNameNameHash
-                , Function expr
-                , Operator operator, String value
+                String fieldName,
+                long fieldNameNameHash,
+                Function expr,
+                Operator operator,
+                String value
         ) {
             super(fieldName, fieldNameNameHash, expr);
             this.operator = operator;
@@ -2932,7 +2931,7 @@ public abstract class JSONPath {
         Object root;
         Object value;
 
-        boolean eval = false;
+        boolean eval;
 
         Context(JSONPath path, Context parent, Segment current, Segment next) {
             this.path = path;
@@ -2942,7 +2941,7 @@ public abstract class JSONPath {
         }
     }
 
-    static abstract class Segment {
+    abstract static class Segment {
         public abstract void accept(JSONReader jsonReader, Context context);
 
         public abstract void eval(Context context);
@@ -3498,8 +3497,7 @@ public abstract class JSONPath {
 
             ObjectReaderProvider provider = context.path.getReaderContext().getProvider();
 
-            ObjectReader objectReader = provider.
-                    getObjectReader(object.getClass());
+            ObjectReader objectReader = provider.getObjectReader(object.getClass());
             ObjectWriter objectWriter = context.path
                     .getWriterContext()
                     .getProvider()
@@ -4638,10 +4636,8 @@ public abstract class JSONPath {
         @Override
         public void accept(JSONReader jsonReader, Context context) {
             if (context.parent != null
-                && (context.parent.eval
-                || (context.parent.current instanceof CycleNameSegment && context.next == null)
-            )
-            ) {
+                    && (context.parent.eval
+                    || (context.parent.current instanceof CycleNameSegment && context.next == null))) {
                 eval(context);
                 return;
             }
@@ -4810,8 +4806,7 @@ public abstract class JSONPath {
         public void accept(JSONReader jsonReader, Context context) {
             if (context.parent != null
                     && (context.parent.eval
-                    || (context.parent.current instanceof CycleNameSegment && context.next == null)
-            )
+                    || (context.parent.current instanceof CycleNameSegment && context.next == null))
             ) {
                 eval(context);
                 return;

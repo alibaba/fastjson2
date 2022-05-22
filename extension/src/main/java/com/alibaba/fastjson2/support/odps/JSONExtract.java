@@ -40,9 +40,9 @@ public class JSONExtract
     }
 
     public Writable eval(Text input) {
-        JSONReader jsonReader = JSONReader.of(input.getBytes()
-                , 0
-                , input.getLength(), StandardCharsets.UTF_8
+        JSONReader jsonReader = JSONReader.of(input.getBytes(),
+                0,
+                input.getLength(), StandardCharsets.UTF_8
         );
 
         path.extract(jsonReader, valueConsumer);

@@ -38,8 +38,8 @@ final class FieldReaderDoubleValueFunc<T>
             schema.assertValidate(value);
         }
 
-        function.accept(object
-                , TypeUtils.toDoubleValue(value));
+        function.accept(object,
+                TypeUtils.toDoubleValue(value));
     }
 
     @Override

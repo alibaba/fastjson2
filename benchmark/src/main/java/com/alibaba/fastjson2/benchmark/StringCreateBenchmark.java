@@ -36,8 +36,8 @@ public class StringCreateBenchmark {
             modes.setInt(caller, -1);   // -1 == Lookup.TRUSTED
             // create handle for shared String constructor
             MethodHandle handle = caller.findConstructor(
-                    String.class
-                    , MethodType.methodType(void.class, char[].class, boolean.class)
+                    String.class,
+                    MethodType.methodType(void.class, char[].class, boolean.class)
             );
 
             CallSite callSite = LambdaMetafactory.metafactory(

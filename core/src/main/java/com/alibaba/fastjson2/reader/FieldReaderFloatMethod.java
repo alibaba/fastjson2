@@ -33,8 +33,8 @@ final class FieldReaderFloatMethod<T>
     @Override
     public void accept(T object, Object value) {
         try {
-            method.invoke(object
-                    , TypeUtils.toFloat(value));
+            method.invoke(object,
+                    TypeUtils.toFloat(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

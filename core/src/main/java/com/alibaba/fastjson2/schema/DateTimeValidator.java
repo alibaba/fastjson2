@@ -7,7 +7,7 @@ import java.time.DateTimeException;
 
 final class DateTimeValidator
         implements FormatValidator {
-    final static DateTimeValidator INSTANCE = new DateTimeValidator();
+    static final DateTimeValidator INSTANCE = new DateTimeValidator();
 
     @Override
     public boolean isValid(String str) {

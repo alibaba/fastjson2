@@ -4,12 +4,16 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.math.BigInteger;
-import java.time.*;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import static com.alibaba.fastjson2.util.UUIDUtils.*;
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
+import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
+import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
+import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 final class JSONReaderUTF16
         extends JSONReader {
@@ -543,7 +547,7 @@ final class JSONReaderUTF16
             return null;
         }
 
-        final char quote= ch;
+        final char quote = ch;
 
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
@@ -1610,7 +1614,7 @@ final class JSONReaderUTF16
 
     @Override
     public void skipLineComment() {
-        for (;;) {
+        while (true) {
             if (ch == '\n') {
                 offset++;
 

@@ -74,8 +74,8 @@ public class SqlTimeTest {
         Student4 student = JSON.parseObject(str, Student4.class);
         String str2 = JSON.toJSONString(student);
         Student4 student1 = JSON.parseObject(str2, Student4.class);
-        assertEquals(student.birthday.getTime()
-                , student1.birthday.getTime()
+        assertEquals(student.birthday.getTime(),
+                student1.birthday.getTime()
         );
     }
 

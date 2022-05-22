@@ -1,15 +1,14 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.internal.asm.*;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.function.*;
+import com.alibaba.fastjson2.internal.asm.*;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
+import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.*;
-import com.alibaba.fastjson2.JSONReader;
-
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.lang.reflect.*;
@@ -138,18 +137,18 @@ public class ObjectReaderCreatorASM
 
     @Override
     public <T> FieldReader<T> createFieldReader(
-            Class objectClass
-            , Type objectType
-            , String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Locale locale
-            , Object defaultValue
-            , String schema
-            , Type fieldType
-            , Class fieldClass
-            , Field field
+            Class objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            String schema,
+            Type fieldType,
+            Class fieldClass,
+            Field field
     ) {
         return super.createFieldReader(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, field);
     }
@@ -163,14 +162,14 @@ public class ObjectReaderCreatorASM
         final String readMethodDesc;
         final int storeCode;
 
-        FieldReaderInfo(String interfaceDesc
-                , String acceptDesc
-                , String setterDesc
-                , int loadCode
-                , String readMethodName
-                , String readMethodDesc
-                , int storeCode
-        ) {
+        FieldReaderInfo(
+                String interfaceDesc,
+                String acceptDesc,
+                String setterDesc,
+                int loadCode,
+                String readMethodName,
+                String readMethodDesc,
+                int storeCode) {
             this.interfaceDesc = interfaceDesc;
             this.acceptDesc = acceptDesc;
             this.setterDesc = setterDesc;
@@ -382,8 +381,9 @@ public class ObjectReaderCreatorASM
         String TYPE_OBJECT = ASMUtils.type(objectClass);
 
         {
-            MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
-                    , fieldBased ? "createInstance0" : "createInstance",
+            MethodWriter mw = cw.visitMethod(
+                    Opcodes.ACC_PUBLIC,
+                    fieldBased ? "createInstance0" : "createInstance",
                     "(J)Ljava/lang/Object;"
             );
 
@@ -433,12 +433,13 @@ public class ObjectReaderCreatorASM
     }
 
     private void genMethodGetFieldReader(
-            FieldReader[] fieldReaderArray
-            , ClassWriter cw
-            , String classNameType
-            , ObjectReaderAdapter objectReaderAdapter) {
-        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
-                , "getFieldReader",
+            FieldReader[] fieldReaderArray,
+            ClassWriter cw,
+            String classNameType,
+            ObjectReaderAdapter objectReaderAdapter) {
+        MethodWriter mw = cw.visitMethod(
+                Opcodes.ACC_PUBLIC,
+                "getFieldReader",
                 "(J)" + DESC_FIELD_READER
         );
 
@@ -542,12 +543,13 @@ public class ObjectReaderCreatorASM
     }
 
     private void genMethodGetFieldReaderLCase(
-            FieldReader[] fieldReaderArray
-            , ClassWriter cw
-            , String classNameType
-            , ObjectReaderAdapter objectReaderAdapter) {
-        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
-                , "getFieldReaderLCase",
+            FieldReader[] fieldReaderArray,
+            ClassWriter cw,
+            String classNameType,
+            ObjectReaderAdapter objectReaderAdapter) {
+        MethodWriter mw = cw.visitMethod(
+                Opcodes.ACC_PUBLIC,
+                "getFieldReaderLCase",
                 "(J)" + DESC_FIELD_READER
         );
 
@@ -650,12 +652,13 @@ public class ObjectReaderCreatorASM
         mw.visitEnd();
     }
 
-    private void genInitFields(FieldReader[] fieldReaderArray
-            , String classNameType
-            , boolean generatedFields
-            , int THIS
-            , int FIELD_READER_ARRAY
-            , MethodWriter mw) {
+    private void genInitFields(
+            FieldReader[] fieldReaderArray,
+            String classNameType,
+            boolean generatedFields,
+            int THIS,
+            int FIELD_READER_ARRAY,
+            MethodWriter mw) {
         if (!generatedFields) {
             return;
         }
@@ -716,18 +719,18 @@ public class ObjectReaderCreatorASM
     }
 
     private <T> void genMethodReadJSONBObject(
-            Class<T> objectType
-            , long readerFeatures
-            , String TYPE_OBJECT
-            , FieldReader[] fieldReaderArray
-            , ClassWriter cw
-            , String classNameType
-            , ObjectReaderAdapter objectReaderAdapter
+            Class<T> objectType,
+            long readerFeatures,
+            String TYPE_OBJECT,
+            FieldReader[] fieldReaderArray,
+            ClassWriter cw,
+            String classNameType,
+            ObjectReaderAdapter objectReaderAdapter
     ) {
         boolean fieldBased = (readerFeatures & JSONReader.Feature.FieldBased.mask) != 0;
 
-        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
-                , "readJSONBObject",
+        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC,
+                "readJSONBObject",
                 METHOD_DESC_READ_OBJECT
         );
 
@@ -781,22 +784,22 @@ public class ObjectReaderCreatorASM
 
             for (int i = 0; i < fieldReaderArray.length; ++i) {
                 FieldReader fieldReader = fieldReaderArray[i];
-                varIndex = genReadFieldValue(objectType
-                        , fieldReader
-                        , fieldBased
-                        , classNameType
-                        , mw
-                        , THIS
-                        , JSON_READER
-                        , OBJECT
-                        , FEATURES
-                        , varIndex
-                        , variants
-                        , ITEM_CNT
-                        , J
-                        , i
-                        , true   // JSONB
-                        , TYPE_OBJECT
+                varIndex = genReadFieldValue(objectType,
+                        fieldReader,
+                        fieldBased,
+                        classNameType,
+                        mw,
+                        THIS,
+                        JSON_READER,
+                        OBJECT,
+                        FEATURES,
+                        varIndex,
+                        variants,
+                        ITEM_CNT,
+                        J,
+                        i,
+                        true,   // JSONB
+                        TYPE_OBJECT
                 );
             }
 
@@ -871,22 +874,22 @@ public class ObjectReaderCreatorASM
                 mw.visitInsn(Opcodes.LCMP);
                 mw.visitJumpInsn(Opcodes.IFNE, next_);
 
-                varIndex = genReadFieldValue(objectType
-                        , fieldReader
-                        , fieldBased
-                        , classNameType
-                        , mw
-                        , THIS
-                        , JSON_READER
-                        , OBJECT
-                        , FEATURES
-                        , varIndex
-                        , variants
-                        , ITEM_CNT
-                        , J
-                        , i
-                        , true // JSONB
-                        , TYPE_OBJECT
+                varIndex = genReadFieldValue(objectType,
+                        fieldReader,
+                        fieldBased,
+                        classNameType,
+                        mw,
+                        THIS,
+                        JSON_READER,
+                        OBJECT,
+                        FEATURES,
+                        varIndex,
+                        variants,
+                        ITEM_CNT,
+                        J,
+                        i,
+                        true, // JSONB
+                        TYPE_OBJECT
                 );
 
                 mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
@@ -921,22 +924,22 @@ public class ObjectReaderCreatorASM
                 mw.visitInsn(Opcodes.LCMP);
                 mw.visitJumpInsn(Opcodes.IFNE, next_);
 
-                varIndex = genReadFieldValue(objectType
-                        , fieldReader
-                        , fieldBased
-                        , classNameType
-                        , mw
-                        , THIS
-                        , JSON_READER
-                        , OBJECT
-                        , FEATURES
-                        , varIndex
-                        , variants
-                        , ITEM_CNT
-                        , J
-                        , i
-                        , false // JSONB
-                        , TYPE_OBJECT
+                varIndex = genReadFieldValue(objectType,
+                        fieldReader,
+                        fieldBased,
+                        classNameType,
+                        mw,
+                        THIS,
+                        JSON_READER,
+                        OBJECT,
+                        FEATURES,
+                        varIndex,
+                        variants,
+                        ITEM_CNT,
+                        J,
+                        i,
+                        false, // JSONB
+                        TYPE_OBJECT
                 );
 
                 mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
@@ -1005,22 +1008,22 @@ public class ObjectReaderCreatorASM
 
                     FieldReader fieldReader = fieldReaderArray[index];
 
-                    varIndex = genReadFieldValue(objectType
-                            , fieldReader
-                            , fieldBased
-                            , classNameType
-                            , mw
-                            , THIS
-                            , JSON_READER
-                            , OBJECT
-                            , FEATURES
-                            , varIndex
-                            , variants
-                            , ITEM_CNT
-                            , J
-                            , index
-                            , true // JSONB
-                            , TYPE_OBJECT
+                    varIndex = genReadFieldValue(objectType,
+                            fieldReader,
+                            fieldBased,
+                            classNameType,
+                            mw,
+                            THIS,
+                            JSON_READER,
+                            OBJECT,
+                            FEATURES,
+                            varIndex,
+                            variants,
+                            ITEM_CNT,
+                            J,
+                            index,
+                            true, // JSONB
+                            TYPE_OBJECT
                     );
                     mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
                 }
@@ -1108,19 +1111,20 @@ public class ObjectReaderCreatorASM
     }
 
     private <T> void genMethodReadObject(
-            Class<T> objectType
-            , long readerFeatures
-            , String TYPE_OBJECT
-            , Supplier<T> supplier
-            , FieldReader[] fieldReaderArray
-            , ClassWriter cw
-            , String classNameType
-            , ObjectReaderAdapter objectReaderAdapter
+            Class<T> objectType,
+            long readerFeatures,
+            String TYPE_OBJECT,
+            Supplier<T> supplier,
+            FieldReader[] fieldReaderArray,
+            ClassWriter cw,
+            String classNameType,
+            ObjectReaderAdapter objectReaderAdapter
     ) {
         boolean fieldBased = (readerFeatures & JSONReader.Feature.FieldBased.mask) != 0;
 
-        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
-                , "readObject",
+        MethodWriter mw = cw.visitMethod(
+                Opcodes.ACC_PUBLIC,
+                "readObject",
                 METHOD_DESC_READ_OBJECT
         );
 
@@ -1175,22 +1179,22 @@ public class ObjectReaderCreatorASM
             FieldReader fieldReader = fieldReaderArray[i];
 
             varIndex = genReadFieldValue(
-                    objectType
-                    , fieldReader
-                    , fieldBased
-                    , classNameType
-                    , mw
-                    , THIS
-                    , JSON_READER
-                    , OBJECT
-                    , FEATURES
-                    , varIndex
-                    , variants
-                    , ITEM_CNT
-                    , J
-                    , i
-                    , false // JSONB
-                    , TYPE_OBJECT
+                    objectType,
+                    fieldReader,
+                    fieldBased,
+                    classNameType,
+                    mw,
+                    THIS,
+                    JSON_READER,
+                    OBJECT,
+                    FEATURES,
+                    varIndex,
+                    variants,
+                    ITEM_CNT,
+                    J,
+                    i,
+                    false, // JSONB
+                    TYPE_OBJECT
             );
         }
 
@@ -1281,22 +1285,22 @@ public class ObjectReaderCreatorASM
                 mw.visitJumpInsn(Opcodes.IFNE, next_);
 
                 mw.visitLabel(get_);
-                varIndex = genReadFieldValue(objectType
-                        , fieldReader
-                        , fieldBased
-                        , classNameType
-                        , mw
-                        , THIS
-                        , JSON_READER
-                        , OBJECT
-                        , FEATURES
-                        , varIndex
-                        , variants
-                        , ITEM_CNT
-                        , J
-                        , i
-                        , false // JSONB
-                        , TYPE_OBJECT
+                varIndex = genReadFieldValue(objectType,
+                        fieldReader,
+                        fieldBased,
+                        classNameType,
+                        mw,
+                        THIS,
+                        JSON_READER,
+                        OBJECT,
+                        FEATURES,
+                        varIndex,
+                        variants,
+                        ITEM_CNT,
+                        J,
+                        i,
+                        false,
+                        TYPE_OBJECT
                 );
 
                 mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
@@ -1344,22 +1348,22 @@ public class ObjectReaderCreatorASM
                 }
 
                 mw.visitLabel(get_);
-                varIndex = genReadFieldValue(objectType
-                        , fieldReader
-                        , fieldBased
-                        , classNameType
-                        , mw
-                        , THIS
-                        , JSON_READER
-                        , OBJECT
-                        , FEATURES
-                        , varIndex
-                        , variants
-                        , ITEM_CNT
-                        , J
-                        , i
-                        , false // JSONB
-                        , TYPE_OBJECT
+                varIndex = genReadFieldValue(objectType,
+                        fieldReader,
+                        fieldBased,
+                        classNameType,
+                        mw,
+                        THIS,
+                        JSON_READER,
+                        OBJECT,
+                        FEATURES,
+                        varIndex,
+                        variants,
+                        ITEM_CNT,
+                        J,
+                        i,
+                        false,
+                        TYPE_OBJECT
                 );
 
                 mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
@@ -1428,22 +1432,22 @@ public class ObjectReaderCreatorASM
 
                     FieldReader fieldReader = fieldReaderArray[index];
 
-                    varIndex = genReadFieldValue(objectType
-                            , fieldReader
-                            , fieldBased
-                            , classNameType
-                            , mw
-                            , THIS
-                            , JSON_READER
-                            , OBJECT
-                            , FEATURES
-                            , varIndex
-                            , variants
-                            , ITEM_CNT
-                            , J
-                            , index
-                            , false // JSONB
-                            , TYPE_OBJECT
+                    varIndex = genReadFieldValue(objectType,
+                            fieldReader,
+                            fieldBased,
+                            classNameType,
+                            mw,
+                            THIS,
+                            JSON_READER,
+                            OBJECT,
+                            FEATURES,
+                            varIndex,
+                            variants,
+                            ITEM_CNT,
+                            J,
+                            index,
+                            false,
+                            TYPE_OBJECT
                     );
                     mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
                 }
@@ -1517,22 +1521,22 @@ public class ObjectReaderCreatorASM
     }
 
     private <T> int genReadFieldValue(
-            Class<T> objectType
-            , FieldReader fieldReader
-            , boolean fieldBased
-            , String classNameType
-            , MethodWriter mw
-            , int THIS
-            , int JSON_READER
-            , int OBJECT
-            , int FEATURES
-            , int varIndex
-            , Map<Object, Integer> variants
-            , int ITEM_CNT
-            , int J
-            , int i
-            , boolean jsonb
-            , String TYPE_OBJECT
+            Class<T> objectType,
+            FieldReader fieldReader,
+            boolean fieldBased,
+            String classNameType,
+            MethodWriter mw,
+            int THIS,
+            int JSON_READER,
+            int OBJECT,
+            int FEATURES,
+            int varIndex,
+            Map<Object, Integer> variants,
+            int ITEM_CNT,
+            int J,
+            int i,
+            boolean jsonb,
+            String TYPE_OBJECT
     ) {
         Class fieldClass = fieldReader.getFieldClass();
         Type fieldType = fieldReader.getFieldType();
@@ -1699,7 +1703,6 @@ public class ObjectReaderCreatorASM
                 String LIST_TYPE = fieldClass.isInterface() ? "java/util/ArrayList" : TYPE_FIELD_CLASS;
 
                 Label loadList_ = new Label(), listNotNull_ = new Label();
-                ;
 
                 if (jsonb) {
                     Label checkAutoTypeNull_ = new Label();
@@ -1850,11 +1853,11 @@ public class ObjectReaderCreatorASM
 
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                     mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
-                    mw.visitMethodInsn(Opcodes.INVOKEINTERFACE
-                            , TYPE_OBJECT_READER
-                            , jsonb ? "readJSONBObject" : "readObject"
-                            , METHOD_DESC_READ_OBJECT
-                            , true);
+                    mw.visitMethodInsn(Opcodes.INVOKEINTERFACE,
+                            TYPE_OBJECT_READER,
+                            jsonb ? "readJSONBObject" : "readObject",
+                            METHOD_DESC_READ_OBJECT,
+                            true);
                     mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);
                     mw.visitInsn(Opcodes.POP);
                 }
@@ -1925,11 +1928,11 @@ public class ObjectReaderCreatorASM
 
                 mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                 mw.visitLdcInsn(fieldFeatures);
-                mw.visitMethodInsn(Opcodes.INVOKEINTERFACE
-                        , TYPE_OBJECT_READER
-                        , jsonb ? "readJSONBObject" : "readObject"
-                        , METHOD_DESC_READ_OBJECT
-                        , true);
+                mw.visitMethodInsn(Opcodes.INVOKEINTERFACE,
+                        TYPE_OBJECT_READER,
+                        jsonb ? "readJSONBObject" : "readObject",
+                        METHOD_DESC_READ_OBJECT,
+                        true);
 
                 if (method != null || (Modifier.isPublic(objectType.getModifiers())
                         && Modifier.isPublic(fieldModifers)
@@ -1951,10 +1954,10 @@ public class ObjectReaderCreatorASM
         }
 
         if (method != null) {
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL
-                    , TYPE_OBJECT
-                    , method.getName()
-                    , "(" + DESC_FIELD_CLASS + ")V", false);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                    TYPE_OBJECT,
+                    method.getName(),
+                    "(" + DESC_FIELD_CLASS + ")V", false);
             // TODO BUILD METHOD
         } else if (field != null) {
 //            if (Modifier.isPublic(objectType.getModifiers())

@@ -13,8 +13,8 @@ public class Issue3266 {
         VO vo = new VO();
         vo.type = Color.Black;
 
-        assertEquals("1003"
-                , JSON.toJSONString(vo.type));
+        assertEquals("1003",
+                JSON.toJSONString(vo.type));
 
         String str = JSON.toJSONString(vo);
         assertEquals("{\"type\":1003}", str);

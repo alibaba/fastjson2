@@ -155,8 +155,8 @@ public class ObjectWriterProvider {
 
             objectWriter = creator.createObjectWriter(
                     objectClass,
-                    fieldBased ? JSONWriter.Feature.FieldBased.mask : 0
-                    , modules
+                    fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
+                    modules
             );
             ObjectWriter previous = fieldBased
                     ? cacheFieldBased.putIfAbsent(objectType, objectWriter)

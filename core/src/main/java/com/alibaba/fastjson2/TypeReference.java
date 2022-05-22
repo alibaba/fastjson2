@@ -71,8 +71,8 @@ public abstract class TypeReference<T> {
      */
     @SuppressWarnings("unchecked")
     public TypeReference(Type[] actualTypeArguments) {
-        if (actualTypeArguments == null ||
-            actualTypeArguments.length == 0) {
+        if (actualTypeArguments == null
+                || actualTypeArguments.length == 0) {
             throw new NullPointerException();
         }
 
@@ -235,8 +235,8 @@ public abstract class TypeReference<T> {
         Type[] argTypes = type.getActualTypeArguments();
 
         for (int i = 0; i < argTypes.length; ++i) {
-            if (argTypes[i] instanceof TypeVariable &&
-                actualIndex < actualTypeArguments.length) {
+            if (argTypes[i] instanceof TypeVariable
+                    && actualIndex < actualTypeArguments.length) {
                 argTypes[i] = actualTypeArguments[actualIndex++];
             }
 

@@ -97,7 +97,7 @@ public class FastJsonHttpMessageConverterMockTest {
         }
     }
 
-    static abstract class GenericEntity<ID extends Serializable> {
+    abstract static class GenericEntity<ID extends Serializable> {
         public abstract ID getId();
     }
 
