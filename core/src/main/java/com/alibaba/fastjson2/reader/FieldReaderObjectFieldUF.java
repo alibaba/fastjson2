@@ -25,6 +25,4 @@ final class FieldReaderObjectFieldUF extends FieldReaderObjectField {
 
         UNSAFE.putObject(object, fieldOffset, value);
     }
-
-
 }

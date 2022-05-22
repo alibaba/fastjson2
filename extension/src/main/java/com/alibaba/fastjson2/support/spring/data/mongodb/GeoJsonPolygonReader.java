@@ -19,7 +19,6 @@ public class GeoJsonPolygonReader implements ObjectReader<GeoJsonPolygon> {
     final static long HASH_COORDINATES = Fnv.hashCode64("coordinates");
 
     public GeoJsonPolygonReader() {
-
     }
 
     @Override

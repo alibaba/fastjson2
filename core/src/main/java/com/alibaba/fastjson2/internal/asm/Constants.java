@@ -35,7 +35,6 @@ package com.alibaba.fastjson2.internal.asm;
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-6.html">JVMS 6</a>
  */
 final class Constants {
-
     // The ClassFile attribute names, in the order they are defined in
     // https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.7-300.
 
@@ -155,5 +154,4 @@ final class Constants {
 
     private Constants() {
     }
-
 }

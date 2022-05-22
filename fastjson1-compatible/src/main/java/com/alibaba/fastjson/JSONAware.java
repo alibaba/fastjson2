@@ -21,7 +21,6 @@ package com.alibaba.fastjson;
  * @author wenshao[szujobs@hotmail.com]
  */
 public interface JSONAware {
-
     /**
      * @return JSON text
      */

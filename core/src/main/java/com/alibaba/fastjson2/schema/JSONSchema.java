@@ -671,9 +671,7 @@ public abstract class JSONSchema {
     static final ValidateResult FAIL_TYPE_NOT_MATCH = new ValidateResult(false, "type not match");
     static final ValidateResult FAIL_PROPERTY_NAME = new ValidateResult(false, "propertyName not match");
 
-
     final static ValidateResult CONTAINS_NOT_MATCH = new ValidateResult(false, "contains not match");
     final static ValidateResult UNIQUE_ITEMS_NOT_MATCH = new ValidateResult(false, "uniqueItems not match");
     final static ValidateResult REQUIRED_NOT_MATCH = new ValidateResult(false, "required");
-
 }

@@ -116,7 +116,6 @@ public final class RyuFloat {
         final long LOG10_5_DENOMINATOR = 10000000L;
         final long LOG10_5_NUMERATOR = 6989700L; // (long) (LOG10_5_DENOMINATOR * Math.log10(5));
 
-
         // Step 1: Decode the floating point number, and unify normalized and subnormal cases.
         // First, handle all the trivial cases.
         int index = off;
@@ -427,7 +426,6 @@ public final class RyuFloat {
         final long LOG10_2_NUMERATOR = 3010299; // (long) (10000000L * Math.log10(2));
         final long LOG10_5_DENOMINATOR = 10000000L;
         final long LOG10_5_NUMERATOR = 6989700L; // (long) (LOG10_5_DENOMINATOR * Math.log10(5));
-
 
         // Step 1: Decode the floating point number, and unify normalized and subnormal cases.
         // First, handle all the trivial cases.

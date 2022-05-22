@@ -16,7 +16,6 @@ final class FieldWriterStringField<T> extends FieldWriterImpl<T> {
             , String format
             , long features
             , Field field) {
-
         super(fieldName, ordinal, features, format, String.class, String.class);
         this.field = field;
         this.symbol = "symbol".equals(format);

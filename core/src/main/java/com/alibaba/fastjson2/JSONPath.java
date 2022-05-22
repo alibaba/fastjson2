@@ -62,7 +62,6 @@ public abstract class JSONPath {
         return JSON.toJSONString(object);
     }
 
-
     public static boolean contains(Object rootObject, String path) {
         if (rootObject == null) {
             return false;
@@ -413,7 +412,6 @@ public abstract class JSONPath {
                                     break;
                                 default:
                                     throw new JSONException("not support syntax, path : " + path);
-
                             }
                             jsonReader.next();
                             if (jsonReader.ch != ')') {
@@ -464,7 +462,6 @@ public abstract class JSONPath {
                                     IndexSegment.of(index));
                             continue;
                         } catch (NumberFormatException ignored) {
-
                         }
                     }
 
@@ -492,7 +489,6 @@ public abstract class JSONPath {
                                 break;
                             default:
                                 throw new JSONException("not support syntax, path : " + path);
-
                         }
                         jsonReader.next();
                         if (jsonReader.ch != ')') {
@@ -603,7 +599,6 @@ public abstract class JSONPath {
                         default:
                             throw new JSONException("TODO : " + jsonReader.current());
                     }
-
                 } while (jsonReader.ch != ']' && jsonReader.ch != JSONReader.EOI);
 
                 if (jsonReader.ch == ']') {
@@ -640,7 +635,6 @@ public abstract class JSONPath {
                             break;
                         default:
                             throw new JSONException("not support syntax, path : " + path);
-
                     }
                     jsonReader.next();
                     if (jsonReader.ch != ')') {
@@ -699,7 +693,6 @@ public abstract class JSONPath {
             jsonReader.next();
             long hashCode = jsonReader.readFieldNameHashCodeUnquote();
             String fieldName = jsonReader.getFieldName();
-
 
             if (parentheses) {
                 if (jsonReader.nextIfMatch(')')) {
@@ -1159,7 +1152,6 @@ public abstract class JSONPath {
     }
 
     interface EvalSegment {
-
     }
 
     static final class NameIntOpSegment extends NameFilter {
@@ -2232,7 +2224,6 @@ public abstract class JSONPath {
 
             if (jsonReader.nextIfObjectStart()) {
                 while (!jsonReader.nextIfObjectEnd()) {
-
                     long nameHashCode = jsonReader.readFieldNameHashCode();
                     boolean match = nameHashCode == this.nameHashCode;
 
@@ -3782,7 +3773,6 @@ public abstract class JSONPath {
                 }
             }
 
-
             if (values.size() == 1 && values.get(0) instanceof Collection) {
                 context.value = values.get(0);
             } else {
@@ -4687,7 +4677,6 @@ public abstract class JSONPath {
             int index = Math.abs(random.nextInt()) % array.size();
             context.value = array.get(index);
             context.eval = true;
-
         }
 
         @Override
@@ -5096,7 +5085,6 @@ public abstract class JSONPath {
                 nameHashCodes[i] = Fnv.hashCode64(names[i]);
                 nameSet.add(names[i]);
             }
-
         }
 
         @Override

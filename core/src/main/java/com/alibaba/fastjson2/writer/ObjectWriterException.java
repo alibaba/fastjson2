@@ -6,7 +6,6 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 public class ObjectWriterException extends ObjectWriterAdapter {
-
     public ObjectWriterException(Class objectType, long features, List<FieldWriter> fieldWriters) {
         super(objectType, null, null, features, fieldWriters);
     }

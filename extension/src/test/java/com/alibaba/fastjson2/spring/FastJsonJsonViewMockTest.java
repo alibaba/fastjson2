@@ -38,7 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 @ContextConfiguration
 public class FastJsonJsonViewMockTest {
-
     @Autowired
     private WebApplicationContext wac;
 
@@ -53,7 +52,6 @@ public class FastJsonJsonViewMockTest {
 
     @Test
     public void test() throws Exception {
-
         mockMvc.perform(
                 (get("/fastjson/mocktest").characterEncoding("UTF-8")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -63,12 +61,10 @@ public class FastJsonJsonViewMockTest {
     @Controller
     @RequestMapping("fastjson")
     public static class BeanController {
-
         @RequestMapping(value = "/mocktest", method = RequestMethod.GET)
         public
         @ResponseBody
         ModelAndView test7() {
-
             AuthIdentityRequest authRequest = new AuthIdentityRequest();
             authRequest.setAppId("cert01");
             authRequest.setUserId(2307643);
@@ -85,7 +81,6 @@ public class FastJsonJsonViewMockTest {
 
             return modelAndView;
         }
-
     }
 
     @ComponentScan(basePackages = "com.alibaba.fastjson2.spring")
@@ -107,7 +102,6 @@ public class FastJsonJsonViewMockTest {
     }
 
     static class AuthIdentityRequest {
-
         private String appId;
         private int userId;
         private String idNumber;
@@ -172,6 +166,4 @@ public class FastJsonJsonViewMockTest {
             this.offline = offline;
         }
     }
-
-
 }

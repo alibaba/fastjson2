@@ -16,7 +16,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 public @interface JSONType {
-
     boolean asm() default true;
 
     String[] orders() default {};

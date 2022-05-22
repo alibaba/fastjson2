@@ -11,7 +11,6 @@ import java.nio.charset.Charset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FastJsonConfigTest {
-
     @Test
     public void test() throws Exception {
         FastJsonConfig fastJsonConfig = new FastJsonConfig();

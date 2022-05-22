@@ -118,5 +118,4 @@ public class CartItemDO2 implements Serializable {
     private long subType = 0L;
     public long cityCode;
     private Map<String, String> attributes = new HashMap();
-
 }

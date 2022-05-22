@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.function.Function;
 
 public interface FieldReaderList<T, V> extends FieldReader<T> {
-
     @Override
     default Type getFieldType() {
         return List.class;
@@ -130,7 +129,6 @@ public interface FieldReaderList<T, V> extends FieldReader<T> {
             if (itemType instanceof Class
                     && Number.class.isAssignableFrom((Class<?>) itemType)
             ) {
-
                 Function typeConvert = jsonReader.getContext().getProvider().getTypeConvert(String.class, itemType);
                 if (typeConvert != null) {
                     List list = createList();

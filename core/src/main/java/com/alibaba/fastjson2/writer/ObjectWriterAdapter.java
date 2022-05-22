@@ -272,7 +272,6 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
     public boolean writeTypeInfo(JSONWriter jsonWriter) {
         if (jsonWriter.isUTF8()) {
             if (nameWithColonUTF8 == null) {
-
                 byte[] chars = new byte[typeKey.length() + typeName.length() + 5];
                 chars[0] = '"';
                 typeKey.getBytes(0, typeKey.length(), chars, 1);
@@ -288,7 +287,6 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
             return true;
         } else if (jsonWriter.isUTF16()) {
             if (nameWithColonUTF16 == null) {
-
                 char[] chars = new char[typeKey.length() + typeName.length() + 5];
                 chars[0] = '"';
                 typeKey.getChars(0, typeKey.length(), chars, 1);
@@ -368,7 +366,6 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
             Object filteredValue;
             if (valueFilter != null
                     && (filteredValue = valueFilter.apply(object, fieldWriterFieldName, fieldValue)) != fieldValue) {
-
                 if (nameChanged) {
                     jsonWriter.writeName(filteredName);
                     jsonWriter.writeColon();
@@ -385,7 +382,6 @@ public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
             } else {
                 if (!nameChanged) {
                     fieldWriter.write(jsonWriter, object);
-
                 } else {
                     if (nameChanged) {
                         jsonWriter.writeName(filteredName);

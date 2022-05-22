@@ -19,7 +19,6 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FastJsonHttpMessageConverterUnitTest {
-
     @Test
     public void test() throws Exception {
         FastJsonHttpMessageConverter messageConverter = new FastJsonHttpMessageConverter();
@@ -64,7 +63,6 @@ public class FastJsonHttpMessageConverterUnitTest {
     }
 
     public static class VO {
-
         private int id;
 
         public int getId() {

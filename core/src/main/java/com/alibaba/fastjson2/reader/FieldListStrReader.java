@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 interface FieldListStrReader<T> extends FieldReader<T> {
-
     @Override
     default Type getFieldType() {
         return List.class;

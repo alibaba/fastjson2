@@ -43,7 +43,6 @@ final class ObjectReaderImplDoubleArray extends ObjectReaderBaseModule.Primitive
             return Arrays.copyOf(values, size);
         }
 
-
         throw new JSONException("TODO");
     }
 

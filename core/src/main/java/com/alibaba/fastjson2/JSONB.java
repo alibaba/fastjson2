@@ -16,20 +16,20 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 /**
- * x91			# binary len_int32 bytes
+ * x91          # binary len_int32 bytes
  * x92          # type [str] symbol_int32 jsonb
  * x93          # reference
  * <p>
  * x94 - xa3    # array_0 - array_15
  * xa4          # array len_int32 item*
  * <p>
- * xa5			# object_end
- * xa6			# object_start
+ * xa5          # object_end
+ * xa6          # object_start
  * <p>
- * xa7			# local time b0 b1 b2
- * xa8			# local datetime b0 b1 b2 b3 b4 b5 b6
- * xa9			# local date b0 b1 b2 b3
- * xab			# timestamp millis b0 b1 b2 b3 b4 b5 b6 b7
+ * xa7          # local time b0 b1 b2
+ * xa8          # local datetime b0 b1 b2 b3 b4 b5 b6
+ * xa9          # local date b0 b1 b2 b3
+ * xab          # timestamp millis b0 b1 b2 b3 b4 b5 b6 b7
  * xac          # timestamp seconds b0 b1 b2 b3
  * xad          # timestamp minutes b0 b1 b2 b3
  * xae          # timestamp b0 b1 b2 b3 b4 b5 b6 b7 nano_int32
@@ -748,7 +748,6 @@ public interface JSONB {
         int size();
     }
 
-
     static String toJSONString(byte[] jsonbBytes) {
         return new JSONBDump(jsonbBytes, false)
                 .toString();
@@ -763,7 +762,6 @@ public interface JSONB {
             OutputStream out
             , Object object
             , JSONWriter.Feature... features) {
-
         try (JSONWriter writer = JSONWriter.ofJSONB()) {
             writer.config(features);
 

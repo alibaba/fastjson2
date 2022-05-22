@@ -1112,7 +1112,6 @@ public class JSONObject extends JSON implements Map<String, Object>, Cloneable, 
         //Hack:默认构造方法会调用这个方法，重写此方法使用反射还原部分关键属性
         @Override
         protected void readStreamHeader() throws IOException {
-
         }
     }
 }

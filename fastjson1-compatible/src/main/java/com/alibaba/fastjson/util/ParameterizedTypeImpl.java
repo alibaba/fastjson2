@@ -5,7 +5,6 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 public class ParameterizedTypeImpl implements ParameterizedType {
-
     private final Type[] actualTypeArguments;
     private final Type ownerType;
     private final Type rawType;
@@ -31,7 +30,6 @@ public class ParameterizedTypeImpl implements ParameterizedType {
         return rawType;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -51,7 +49,6 @@ public class ParameterizedTypeImpl implements ParameterizedType {
             return false;
         }
         return rawType != null ? rawType.equals(that.rawType) : that.rawType == null;
-
     }
 
     @Override

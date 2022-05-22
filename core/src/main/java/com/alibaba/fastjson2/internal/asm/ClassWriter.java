@@ -31,7 +31,6 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 public class ClassWriter {
-
     /**
      * The minor_version and major_version fields of the JVMS ClassFile structure. minor_version is
      * stored in the 16 most significant bits, and major_version in the 16 least significant bits.

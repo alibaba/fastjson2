@@ -381,7 +381,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                             break;
                     }
                 } catch (Throwable ignored) {
-
                 }
             });
         }
@@ -465,7 +464,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 try {
                     mixInConstructor = mixInSource.getDeclaredConstructor(constructor.getParameterTypes());
                 } catch (NoSuchMethodException ignored) {
-
                 }
                 if (mixInConstructor != null) {
                     Parameter mixInParam = mixInConstructor.getParameters()[paramIndex];
@@ -491,7 +489,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 try {
                     mixInMethod = mixInSource.getMethod(method.getName(), method.getParameterTypes());
                 } catch (NoSuchMethodException ignored) {
-
                 }
                 if (mixInMethod != null) {
                     Parameter mixInParam = mixInMethod.getParameters()[paramIndex];
@@ -882,7 +879,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                         break;
                 }
             } catch (Throwable ignored) {
-
             }
         });
     }
@@ -915,7 +911,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                                     break;
                             }
                         } catch (Throwable ignored) {
-
                         }
                     });
                     break;
@@ -977,7 +972,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                                     break;
                             }
                         } catch (Throwable ignored) {
-
                         }
                     });
                     break;
@@ -1003,7 +997,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         try {
             targetMethod = objectClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
         } catch (NoSuchMethodException ignored) {
-
         }
 
         if (targetMethod != null) {
@@ -1513,7 +1506,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                         return ObjectReaderImplList.of(type, null, 0);
                     default:
                         break;
-
                 }
 
                 if (rawType == Optional.class) {
@@ -1805,7 +1797,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
     }
 
     static class ReflectTypeImpl extends PrimitiveImpl {
-
         @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             String className = jsonReader.readString();
@@ -1984,7 +1975,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
         }
     }
 
-
     static class AtomicIntegerArrayImpl extends PrimitiveImpl {
         static final AtomicIntegerArrayImpl INSTANCE = new AtomicIntegerArrayImpl();
 
@@ -2015,7 +2005,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
                 return array;
             }
 
-
             throw new JSONException("TODO");
         }
 
@@ -2036,7 +2025,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return array;
         }
     }
-
 
     static class BoolValueArrayImpl extends PrimitiveImpl {
         static final BoolValueArrayImpl INSTANCE = new BoolValueArrayImpl();
@@ -2089,7 +2077,6 @@ public class ObjectReaderBaseModule implements ObjectReaderModule {
             return array;
         }
     }
-
 
     static class InterfaceImpl extends PrimitiveImpl {
         final Type interfaceType;

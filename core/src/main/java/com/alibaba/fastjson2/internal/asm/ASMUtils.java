@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.internal.asm;
 
-
 import com.alibaba.fastjson2.util.IOUtils;
 
 import java.io.IOException;

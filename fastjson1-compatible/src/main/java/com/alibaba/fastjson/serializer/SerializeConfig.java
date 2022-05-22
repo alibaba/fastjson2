@@ -3,7 +3,6 @@ package com.alibaba.fastjson.serializer;
 import com.alibaba.fastjson.PropertyNamingStrategy;
 
 public class SerializeConfig {
-
     public static SerializeConfig global = new SerializeConfig();
     public PropertyNamingStrategy propertyNamingStrategy;
 

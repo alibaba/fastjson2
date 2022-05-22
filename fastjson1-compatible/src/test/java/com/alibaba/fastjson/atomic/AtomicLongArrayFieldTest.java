@@ -58,6 +58,5 @@ public class AtomicLongArrayFieldTest {
         public void setValue(AtomicLongArray value) {
             this.value = value;
         }
-
     }
 }

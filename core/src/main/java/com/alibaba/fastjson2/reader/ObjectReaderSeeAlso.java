@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 final class ObjectReaderSeeAlso<T> extends ObjectReaderAdapter<T> {
-
     final Class[] seeAlso;
     final String[] seeAlsoNames;
 

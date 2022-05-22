@@ -28,7 +28,6 @@ public class Issue1233 {
 
     @JSONType(seeAlso = {FloorV2.class}, typeKey = "type")
     public interface AreaMixIn {
-
     }
 
     @JSONType(typeName = "floorV2")

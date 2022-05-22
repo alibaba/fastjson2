@@ -50,7 +50,6 @@ public class Issue3443 {
     }
 
     static class CustomFilter extends AfterFilter {
-
         @Override
         public void writeAfter(Object object) {
             if (object instanceof ParameterDesc) {

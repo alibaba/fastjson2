@@ -1,6 +1,5 @@
 package com.alibaba.fastjson;
 
-
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.reader.ObjectReader;

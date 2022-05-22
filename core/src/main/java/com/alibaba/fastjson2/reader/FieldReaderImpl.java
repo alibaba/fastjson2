@@ -58,7 +58,6 @@ abstract class FieldReaderImpl<T>
             Locale locale,
             Object defaultValue,
             JSONSchema schema) {
-
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;

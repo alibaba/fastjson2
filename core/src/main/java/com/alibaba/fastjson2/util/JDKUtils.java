@@ -160,7 +160,6 @@ public class JDKUtils {
                 utf16Creator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorUTF16()).get();
                 asciiCreator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorASCII()).get();
             } catch (Throwable ignored) {
-
             }
         }
         UNSAFE_UTF16_CREATOR = utf16Creator;

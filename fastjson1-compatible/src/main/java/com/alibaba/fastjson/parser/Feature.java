@@ -15,7 +15,6 @@
  */
 package com.alibaba.fastjson.parser;
 
-
 /**
  * @author wenshao[szujobs@hotmail.com]
  */

@@ -8,7 +8,6 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import java.util.Arrays;
 
 public class Media_ObjectReader implements ObjectReader {
-
     private FieldReader[] fieldReaders;
 
     private FieldReader fieldReader0; // bitrate
@@ -103,7 +102,6 @@ public class Media_ObjectReader implements ObjectReader {
                         for (int j = 0; j < listItemCnt; ++j) {
                             list.add(
                                     jsonReader.readString());
-
                         }
                         object.setPersons(list);
                         continue;

@@ -185,7 +185,6 @@ public class GuavaSupport {
     static class SingletonImmutableBiMapConvertFunction implements Function {
         @Override
         public Object apply(Object object) {
-
             if (CONSTRUCTOR_SINGLETON_IMMUTABLE_BIMAP == null) {
                 try {
                     Constructor constructor = TypeUtils.loadClass("com.google.common.collect.SingletonImmutableBiMap")

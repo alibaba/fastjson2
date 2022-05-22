@@ -146,7 +146,6 @@ final class ObjectWriterImplList extends ObjectWriterBaseModule.PrimitiveImpl {
             return;
         }
 
-
         JSONWriter.Context context = jsonWriter.getContext();
 
         jsonWriter.startArray(size);

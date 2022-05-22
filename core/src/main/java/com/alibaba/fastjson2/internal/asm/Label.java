@@ -36,7 +36,6 @@ package com.alibaba.fastjson2.internal.asm;
  * @author Eric Bruneton
  */
 public class Label {
-
     /**
      * A flag indicating that a label is only used for debug attributes. Such a label is not the start
      * of a basic block, the target of a jump instruction, or an exception handler. It can be safely

@@ -69,7 +69,6 @@ final class ObjectReaderImplInt32Array extends ObjectReaderBaseModule.PrimitiveI
             return Arrays.copyOf(values, size);
         }
 
-
         throw new JSONException("TODO");
     }
 

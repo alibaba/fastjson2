@@ -222,7 +222,6 @@ public class PlatformDepartmentVO {
     }
 
     public PlatformDepartmentVO() {
-
     }
 //    public PlatformDepartmentVO(String id, String label, String value, String parentId,
 //                                String companyId) {

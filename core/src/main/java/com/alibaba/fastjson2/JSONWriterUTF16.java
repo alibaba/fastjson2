@@ -217,7 +217,6 @@ class JSONWriterUTF16 extends JSONWriter {
             }
         }
 
-
         if (!special) {
             // inline ensureCapacity(off + strlen + 2);
             int minCapacity = off + strlen + 2;
@@ -344,7 +343,6 @@ class JSONWriterUTF16 extends JSONWriter {
 
         boolean browserCompatible = ((context.features | features) & Feature.BrowserCompatible.mask) != 0;
         if (browserCompatible && (value.compareTo(LOW_BIGINT) < 0 || value.compareTo(HIGH_BIGINT) > 0)) {
-
             final int strlen = str.length();
             ensureCapacity(off + strlen + 2);
             chars[off++] = '"';
@@ -956,7 +954,6 @@ class JSONWriterUTF16 extends JSONWriter {
             int hour,
             int minute,
             int second) {
-
         ensureCapacity(off + 21);
 
         chars[off++] = '"';

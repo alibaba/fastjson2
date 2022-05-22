@@ -83,7 +83,6 @@ public abstract class ObjectReaderBean<T> implements ObjectReader<T> {
     }
 
     protected void initDefaultValue(T object) {
-
     }
 
     @Override

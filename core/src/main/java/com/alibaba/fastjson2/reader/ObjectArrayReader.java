@@ -97,7 +97,6 @@ public final class ObjectArrayReader extends ObjectReaderBaseModule.PrimitiveImp
             return Arrays.copyOf(values, size);
         }
 
-
         throw new JSONException("TODO");
     }
 

@@ -98,6 +98,4 @@ final class ObjectWriterImplDate extends DateTimeCodec implements ObjectWriter {
         String str = formatter.format(zdt);
         jsonWriter.writeString(str);
     }
-
-
 }

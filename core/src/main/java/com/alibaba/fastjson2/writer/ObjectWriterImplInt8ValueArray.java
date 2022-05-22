@@ -37,7 +37,6 @@ final class ObjectWriterImplInt8ValueArray extends ObjectWriterBaseModule.Primit
 
         byte[] array = (byte[]) object;
 
-
         String format = jsonWriter.getContext().getDateFormat();
 
         if ("gzip".equals(format) || "gzip,base64".equals(format)) {
@@ -57,7 +56,6 @@ final class ObjectWriterImplInt8ValueArray extends ObjectWriterBaseModule.Primit
             } finally {
                 IOUtils.close(gzipOut);
             }
-
         }
 
         if ("base64".equals(format) || "gzip,base64".equals(format)) {

@@ -20,7 +20,6 @@ public class JSONArray extends JSON implements List {
     private List list = new com.alibaba.fastjson2.JSONArray();
 
     public JSONArray() {
-
     }
 
     public JSONArray(List list) {

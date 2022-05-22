@@ -38,7 +38,6 @@ package com.alibaba.fastjson2.internal.asm;
  * 4.7.23</a>
  */
 final class SymbolTable {
-
     final ClassWriter classWriter;
 
     /**
@@ -165,7 +164,6 @@ final class SymbolTable {
      * @param output where the JVMS BootstrapMethods attribute must be put.
      */
     void putBootstrapMethods(final ByteVector output) {
-
     }
 
     // -----------------------------------------------------------------------------------------------
@@ -419,7 +417,6 @@ final class SymbolTable {
         return put(new Entry(constantPoolCount++, tag, value, hashCode));
     }
 
-
     /**
      * Returns the type table element whose index is given.
      *
@@ -521,7 +518,6 @@ final class SymbolTable {
      * @author Eric Bruneton
      */
     private static class Entry extends Symbol {
-
         /**
          * The hash code of this entry.
          */

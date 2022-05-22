@@ -12,7 +12,6 @@ import java.util.function.BiConsumer;
 final class FieldReaderListFunc<T, V>
         extends FieldReaderImpl<T>
         implements FieldReaderList<T, Object> {
-
     final Method method;
     final BiConsumer<T, V> function;
     final Type itemType;

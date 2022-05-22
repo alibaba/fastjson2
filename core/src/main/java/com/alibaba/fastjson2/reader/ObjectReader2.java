@@ -201,7 +201,6 @@ public class ObjectReader2<T> extends ObjectReaderBean<T> {
                 throw new JSONException("array to bean end error, " + jsonReader.current());
             }
             jsonReader.next();
-
         } else {
             jsonReader.nextIfMatch('{');
             object = defaultCreator.get();

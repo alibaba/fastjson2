@@ -20,7 +20,6 @@ package com.alibaba.fastjson;
  */
 @SuppressWarnings("serial")
 public class JSONException extends RuntimeException {
-
     public JSONException() {
         super();
     }

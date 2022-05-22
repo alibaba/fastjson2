@@ -266,7 +266,6 @@ public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
         return fieldReaders[index];
     }
 
-
     @Override
     public FieldReader getFieldReaderLCase(long hashCode) {
         int m = Arrays.binarySearch(hashCodesLCase, hashCode);

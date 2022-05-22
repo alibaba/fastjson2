@@ -778,7 +778,6 @@ class JSONWriterUTF8 extends JSONWriter {
             int hour,
             int minute,
             int second) {
-
         ensureCapacity(off + 21);
 
         bytes[off++] = '"';

@@ -18,7 +18,6 @@ class ObjectReaderImplFloatValueArray extends ObjectReaderBaseModule.PrimitiveIm
         }
 
         if (jsonReader.nextIfMatch('[')) {
-
             float[] values = new float[16];
             int size = 0;
             for (; ; ) {
@@ -43,7 +42,6 @@ class ObjectReaderImplFloatValueArray extends ObjectReaderBaseModule.PrimitiveIm
 
             return Arrays.copyOf(values, size);
         }
-
 
         throw new JSONException("TODO");
     }

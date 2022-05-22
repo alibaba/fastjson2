@@ -103,7 +103,6 @@ public class FinalObjectTest {
         private int id;
 
         public Emp() {
-
         }
 
         public Emp(int id) {

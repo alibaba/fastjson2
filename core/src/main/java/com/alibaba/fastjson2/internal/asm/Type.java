@@ -35,7 +35,6 @@ package com.alibaba.fastjson2.internal.asm;
  * @author Chris Nokleberg
  */
 public final class Type {
-
     /**
      * The sort of the {@code void} type. See {@link #getSort}.
      */

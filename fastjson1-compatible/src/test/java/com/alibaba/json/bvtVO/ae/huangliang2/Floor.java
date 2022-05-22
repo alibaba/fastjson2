@@ -6,5 +6,4 @@ package com.alibaba.json.bvtVO.ae.huangliang2;
  */
 
 public interface Floor extends Area {
-
 }

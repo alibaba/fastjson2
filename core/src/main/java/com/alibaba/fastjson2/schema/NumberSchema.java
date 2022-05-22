@@ -89,7 +89,6 @@ final class NumberSchema extends JSONSchema {
         if (value instanceof Number) {
             Number number = (Number) value;
 
-
             if (number instanceof Byte || number instanceof Short || number instanceof Integer || number instanceof Long) {
                 return validate(number.longValue());
             }
@@ -229,7 +228,6 @@ final class NumberSchema extends JSONSchema {
 
     @Override
     public ValidateResult validate(double value) {
-
         if (minimum != null) {
             if (minimumLongValue != Long.MIN_VALUE) {
                 if (exclusiveMinimum ? value <= minimumLongValue : value < minimumLongValue) {

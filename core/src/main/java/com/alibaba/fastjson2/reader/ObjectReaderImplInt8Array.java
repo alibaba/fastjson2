@@ -80,7 +80,6 @@ class ObjectReaderImplInt8Array extends ObjectReaderBaseModule.PrimitiveImpl {
                         }
                     }
                     return byteOut.toByteArray();
-
                 } catch (IOException ex) {
                     throw new JSONException("unzip bytes error.", ex);
                 }

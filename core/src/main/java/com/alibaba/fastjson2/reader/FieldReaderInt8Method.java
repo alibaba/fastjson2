@@ -31,7 +31,6 @@ final class FieldReaderInt8Method<T> extends FieldReaderObjectMethod<T> {
 
     @Override
     public void accept(T object, Object value) {
-
         if (schema != null) {
             schema.assertValidate(value);
         }

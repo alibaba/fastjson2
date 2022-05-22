@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.codec;
 
-
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 

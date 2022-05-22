@@ -1541,7 +1541,6 @@ class JSONReaderUTF8 extends JSONReader {
                         }
                         throw new JSONException("malformed input around byte " + offset);
                 }
-
             }
 
             byte[] bytes = new byte[bytesMaxiumLength];
@@ -3071,7 +3070,6 @@ class JSONReaderUTF8 extends JSONReader {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 19;
-
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 21 || c21 == '[' || c21 == '+' || c21 == '-' || c21 == 'Z')) {
             y0 = c0;
@@ -3204,7 +3202,6 @@ class JSONReaderUTF8 extends JSONReader {
             S8 = '0';
             zoneIdBegin = 23;
             isTimeZone = c23 == '|';
-
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 24 || c24 == '[' || c24 == '|' || c24 == '+' || c24 == '-' || c24 == 'Z')) {
             y0 = c0;
@@ -3238,8 +3235,6 @@ class JSONReaderUTF8 extends JSONReader {
             S8 = '0';
             zoneIdBegin = 24;
             isTimeZone = c24 == '|';
-
-
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 25 || c25 == '[' || c25 == '|' || c25 == '+' || c25 == '-' || c25 == 'Z')) {
             y0 = c0;
@@ -3273,7 +3268,6 @@ class JSONReaderUTF8 extends JSONReader {
             S8 = '0';
             zoneIdBegin = 25;
             isTimeZone = c25 == '|';
-
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 26 || c26 == '[' || c26 == '|' || c26 == '+' || c26 == '-' || c26 == 'Z')) {
             y0 = c0;
@@ -3307,7 +3301,6 @@ class JSONReaderUTF8 extends JSONReader {
             S8 = '0';
             zoneIdBegin = 26;
             isTimeZone = c26 == '|';
-
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 27 || c27 == '[' || c27 == '|' || c27 == '+' || c27 == '-' || c27 == 'Z')) {
             y0 = c0;
@@ -3341,7 +3334,6 @@ class JSONReaderUTF8 extends JSONReader {
             S8 = '0';
             zoneIdBegin = 27;
             isTimeZone = c27 == '|';
-
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 28 || c28 == '[' || c28 == '|' || c28 == '+' || c28 == '-' || c28 == 'Z')) {
             y0 = c0;
@@ -3375,7 +3367,6 @@ class JSONReaderUTF8 extends JSONReader {
             S8 = '0';
             zoneIdBegin = 28;
             isTimeZone = c28 == '|';
-
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 29 || c29 == '[' || c29 == '|' || c29 == '+' || c29 == '-' || c29 == 'Z')) {
             y0 = c0;
@@ -3409,7 +3400,6 @@ class JSONReaderUTF8 extends JSONReader {
             S8 = c28;
             zoneIdBegin = 29;
             isTimeZone = c29 == '|';
-
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && len == 23) {
             y0 = c0;
@@ -3504,7 +3494,6 @@ class JSONReaderUTF8 extends JSONReader {
         char c6 = (char) bytes[offset + 6];
         char c7 = (char) bytes[offset + 7];
 
-
         char y0, y1, y2, y3, m0, m1, d0, d1;
         if (c4 == '-' && c6 == '-') {
             y0 = c0;
@@ -3549,7 +3538,6 @@ class JSONReaderUTF8 extends JSONReader {
         } else {
             return null;
         }
-
 
         int dom;
         if (d0 >= '0' && d0 <= '9'
@@ -3632,7 +3620,6 @@ class JSONReaderUTF8 extends JSONReader {
         } else {
             return null;
         }
-
 
         int dom;
         if (d0 >= '0' && d0 <= '9'
@@ -3738,7 +3725,6 @@ class JSONReaderUTF8 extends JSONReader {
         } else {
             return null;
         }
-
 
         int dom;
         if (d0 >= '0' && d0 <= '9'
@@ -3902,7 +3888,6 @@ class JSONReaderUTF8 extends JSONReader {
             return null;
         }
 
-
         int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
@@ -4064,7 +4049,6 @@ class JSONReaderUTF8 extends JSONReader {
 
         return LocalTime.of(hour, minute, seccond, millis);
     }
-
 
     @Override
     protected LocalTime readLocalTime10() {
@@ -4463,7 +4447,6 @@ class JSONReaderUTF8 extends JSONReader {
         } else {
             return null;
         }
-
 
         int second = 0;
 //            if (c17 >= '0' && c17 <= '9'

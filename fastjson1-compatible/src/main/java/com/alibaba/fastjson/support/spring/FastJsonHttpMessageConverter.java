@@ -32,7 +32,6 @@ import java.lang.reflect.TypeVariable;
  */
 
 public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<Object> implements GenericHttpMessageConverter<Object> {
-
     /**
      * with fastJson config
      */
@@ -42,7 +41,6 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
      * Can serialize/deserialize all types.
      */
     public FastJsonHttpMessageConverter() {
-
         super(MediaType.ALL);
     }
 
@@ -97,7 +95,6 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
     }
 
     private Object readType(Type type, HttpInputMessage inputMessage) {
-
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             InputStream in = inputMessage.getBody();
 
@@ -124,20 +121,16 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
 
     @Override
     protected void writeInternal(Object object, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
-
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-
             HttpHeaders headers = outputMessage.getHeaders();
 
             int len = JSON.writeJSONString(baos, object, fastJsonConfig.getSerializeFilters(), fastJsonConfig.getSerializerFeatures());
 
             if (headers.getContentLength() < 0 && fastJsonConfig.isWriteContentLength()) {
-
                 headers.setContentLength(len);
             }
 
             baos.writeTo(outputMessage.getBody());
-
         } catch (JSONException ex) {
             throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
         } catch (IOException ex) {
@@ -151,7 +144,6 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
         }
         return type;
     }
-
 
     private static class Spring4TypeResolvableHelper {
         private static boolean hasClazzResolvableType;
@@ -168,7 +160,6 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
         private static boolean isSupport() {
             return hasClazzResolvableType;
         }
-
 
         private static Type getType(Type type, Class<?> contextClass) {
             if (contextClass != null) {
@@ -229,6 +220,4 @@ public class FastJsonHttpMessageConverter extends AbstractHttpMessageConverter<O
             return ResolvableType.NONE;
         }
     }
-
-
 }

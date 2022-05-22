@@ -43,7 +43,6 @@ final class ObjectReaderImplFloatArray extends ObjectReaderBaseModule.PrimitiveI
             return Arrays.copyOf(values, size);
         }
 
-
         throw new JSONException("TODO");
     }
 

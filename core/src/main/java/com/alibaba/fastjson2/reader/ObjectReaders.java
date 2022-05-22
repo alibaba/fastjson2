@@ -27,14 +27,12 @@ public class ObjectReaders {
     public static <T> ObjectReader<T> createObjectReader(
             Function<Map<Long, Object>, T> creator
             , FieldReader... fieldReaders) {
-
         return ObjectReaderCreator.INSTANCE.createObjectReaderNoneDefaultConstrutor(null, creator, fieldReaders);
     }
 
     public static FieldReader fieldReader(String fieldName, Class fieldType) {
         return ObjectReaderCreator.INSTANCE.createFieldReader(null, fieldName, fieldType, fieldType, (Method) null);
     }
-
 
     public static <T> FieldReader fieldReaderBool(String fieldName, ObjBoolConsumer<T> function) {
         return new FieldReaderBoolValFunc<>(fieldName, 0, null, null, function);

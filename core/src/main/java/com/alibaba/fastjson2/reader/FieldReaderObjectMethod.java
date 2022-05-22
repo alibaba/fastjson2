@@ -11,7 +11,6 @@ import java.util.Locale;
 class FieldReaderObjectMethod<T>
         extends FieldReaderImpl<T>
         implements FieldReaderObject<T, Object> {
-
     final Method method;
     ObjectReader fieldObjectReader;
 

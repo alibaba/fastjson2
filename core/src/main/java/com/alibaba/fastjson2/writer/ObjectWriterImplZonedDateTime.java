@@ -37,7 +37,6 @@ final class ObjectWriterImplZonedDateTime extends DateTimeCodec implements Objec
             return;
         }
 
-
         if (formatMillis || ctx.isDateFormatMillis()) {
             jsonWriter.writeInt64(zdt
                     .toInstant()

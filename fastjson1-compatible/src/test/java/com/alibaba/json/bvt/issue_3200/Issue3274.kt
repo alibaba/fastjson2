@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 class TestFJ {
-
     @Test
     fun test() {
         val str = """

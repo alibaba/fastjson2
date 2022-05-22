@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.benchmark.eishay.vo;
 
-
 public class Image implements java.io.Serializable {
-
     private static final long serialVersionUID = 1L;
 
     public enum Size {

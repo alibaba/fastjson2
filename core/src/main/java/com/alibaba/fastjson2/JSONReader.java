@@ -1230,7 +1230,6 @@ public abstract class JSONReader implements Closeable {
             object.put(name, val);
         }
 
-
         if (ch == ',') {
             next();
         }
@@ -1265,7 +1264,6 @@ public abstract class JSONReader implements Closeable {
             } else {
                 throw new JSONException("syntax error : " + ch);
             }
-
         } else if (ch == 'f') {
             next();
             char c1 = ch;
@@ -1577,7 +1575,6 @@ public abstract class JSONReader implements Closeable {
 
     @Override
     public void close() {
-
     }
 
     static BigInteger getBigInt(boolean negative, int[] mag) {
@@ -1974,7 +1971,6 @@ public abstract class JSONReader implements Closeable {
 
         // Process remaining digit groups
         while (cursor < len) {
-
             int groupVal;
             {
                 int start = cursor;
@@ -2112,7 +2108,6 @@ public abstract class JSONReader implements Closeable {
 
         // Process remaining digit groups
         while (cursor < len) {
-
             int groupVal;
             {
                 int start = cursor;
@@ -2203,7 +2198,6 @@ public abstract class JSONReader implements Closeable {
     }
 
     public static interface Filter {
-
     }
 
     public interface AutoTypeBeforeHandler extends JSONReader.Filter {
@@ -2406,7 +2400,6 @@ public abstract class JSONReader implements Closeable {
             char S6,
             char S7,
             char S8) {
-
         int year;
         if (y0 >= '0' && y0 <= '9'
                 && y1 >= '0' && y1 <= '9'

@@ -8,7 +8,6 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 
 public class NumberValueWriter implements ObjectWriter {
-
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         NumberValue value = (NumberValue) object;

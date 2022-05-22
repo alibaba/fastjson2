@@ -347,7 +347,6 @@ public class JodaSupport {
                 ClassLoader classLoader = objectClass.getClassLoader();
                 classChronology = classLoader.loadClass("org.joda.time.Chronology");
 
-
                 Constructor3 = objectClass.getConstructor(int.class, int.class, int.class);
                 Constructor4 = objectClass.getConstructor(int.class, int.class, int.class, classChronology);
 
@@ -559,7 +558,6 @@ public class JodaSupport {
                 ClassLoader classLoader = objectClass.getClassLoader();
                 classChronology = classLoader.loadClass("org.joda.time.Chronology");
 
-
                 constructor7 = objectClass.getConstructor(int.class, int.class, int.class, int.class, int.class, int.class, int.class);
                 constructor8 = objectClass.getConstructor(int.class, int.class, int.class, int.class, int.class, int.class, int.class, classChronology);
 
@@ -693,7 +691,6 @@ public class JodaSupport {
                 getMillisOfSecond = objectClass.getMethod("getMillisOfSecond");
 
                 getChronology = objectClass.getMethod("getChronology");
-
             } catch (ClassNotFoundException
                     | NoSuchMethodException
                     | IllegalAccessException

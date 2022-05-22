@@ -36,6 +36,5 @@ public class AtomicBooleanReadOnlyTest {
         public AtomicBoolean getValue() {
             return value;
         }
-
     }
 }

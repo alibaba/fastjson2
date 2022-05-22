@@ -44,7 +44,6 @@ final class ObjectReaderImplInt64Array extends ObjectReaderBaseModule.PrimitiveI
         }
 
         if (jsonReader.nextIfMatch('[')) {
-
             Long[] values = new Long[16];
             int size = 0;
             for (; ; ) {
@@ -69,7 +68,6 @@ final class ObjectReaderImplInt64Array extends ObjectReaderBaseModule.PrimitiveI
 
             return Arrays.copyOf(values, size);
         }
-
 
         throw new JSONException("TODO");
     }

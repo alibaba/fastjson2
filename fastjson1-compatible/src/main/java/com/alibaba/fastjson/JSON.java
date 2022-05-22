@@ -51,7 +51,6 @@ public class JSON {
         ObjectWriterProvider writerProvider = JSONFactory.getDefaultObjectWriterProvider();
         writerProvider.register(AwtWriterModule.INSTANCE);
         writerProvider.register(new Fastjson1xWriterModule(writerProvider));
-
     }
 
     public static JSONObject parseObject(String str) {
@@ -234,7 +233,6 @@ public class JSON {
         }
     }
 
-
     @SuppressWarnings("unchecked")
     public static <T> T parseObject(byte[] input, //
                                     int off, //
@@ -294,7 +292,6 @@ public class JSON {
             }
 
             return writer.toString();
-
         } catch (com.alibaba.fastjson2.JSONException ex) {
             Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
             throw new JSONException("toJSONString error", cause);
@@ -330,7 +327,6 @@ public class JSON {
             }
 
             return writer.getBytes();
-
         } catch (com.alibaba.fastjson2.JSONException ex) {
             Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
             throw new JSONException("toJSONBytes error", cause);
@@ -364,7 +360,6 @@ public class JSON {
     }
 
     static void config(JSONWriter.Context ctx, SerializerFeature[] features) {
-
         ctx.setDateFormat("millis");
         ctx.setZoneId(defaultTimeZone.toZoneId());
         ctx.config(JSONWriter.Feature.ReferenceDetection);

@@ -178,7 +178,6 @@ final class ObjectArrayTypedReader extends ObjectReaderBaseModule.PrimitiveImpl 
                 }
                 values[index++] = item;
             }
-
         }
         return values;
     }

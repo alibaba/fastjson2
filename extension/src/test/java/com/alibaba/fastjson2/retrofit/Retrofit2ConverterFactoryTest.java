@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class Retrofit2ConverterFactoryTest {
-
     @Test
     public void test_for_coverage() throws Exception {
         assertThrows(NullPointerException.class, () -> Retrofit2ConverterFactory.create(null));
@@ -43,11 +42,9 @@ public class Retrofit2ConverterFactoryTest {
         assertThrows(NullPointerException.class, () -> Retrofit2ConverterFactory.create()
                 .responseBodyConverter(null, null, null)
                 .convert(null));
-
     }
 
     public static class Model {
-
         private int id;
         private String name;
 

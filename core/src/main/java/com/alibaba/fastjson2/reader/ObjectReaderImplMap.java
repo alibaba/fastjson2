@@ -133,7 +133,6 @@ public final class ObjectReaderImplMap implements ObjectReader {
                 break;
         }
 
-
         return new ObjectReaderImplMap(fieldType, mapType, instanceType, features, builder);
     }
 

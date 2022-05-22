@@ -30,8 +30,6 @@ public abstract class BeanUtils {
     private static volatile Class RECORD_CLASS;
     private static volatile Method RECORD_GET_RECORD_COMPONENTS;
     private static volatile Method RECORD_COMPONENT_GET_NAME;
-    private static volatile Method RECORD_COMPONENT_GET_TYPE;
-
 
     public static String[] getRecordFieldNames(Class<?> recordType) {
         if (JDKUtils.JVM_VERSION < 14) {
@@ -46,7 +44,6 @@ public abstract class BeanUtils {
             if (RECORD_COMPONENT_GET_NAME == null) {
                 Class<?> c = Class.forName("java.lang.reflect.RecordComponent");
                 RECORD_COMPONENT_GET_NAME = c.getMethod("getName");
-                RECORD_COMPONENT_GET_TYPE = c.getMethod("getType");
             }
 
             final Object[] components = (Object[]) RECORD_GET_RECORD_COMPONENTS.invoke(recordType);
@@ -985,20 +982,16 @@ public abstract class BeanUtils {
         if (type instanceof Class) {
             Class<?> c = (Class<?>) type;
             return c.isArray() ? new GenericArrayTypeImpl(canonicalize(c.getComponentType())) : c;
-
         } else if (type instanceof ParameterizedType) {
             ParameterizedType p = (ParameterizedType) type;
             return new ParameterizedTypeImpl(p.getOwnerType(),
                     p.getRawType(), p.getActualTypeArguments());
-
         } else if (type instanceof GenericArrayType) {
             GenericArrayType g = (GenericArrayType) type;
             return new GenericArrayTypeImpl(g.getGenericComponentType());
-
         } else if (type instanceof WildcardType) {
             WildcardType w = (WildcardType) type;
             return new WildcardTypeImpl(w.getUpperBounds(), w.getLowerBounds());
-
         } else {
             // type is either serializable as-is or unsupported
             return type;
@@ -1009,7 +1002,6 @@ public abstract class BeanUtils {
         if (type instanceof Class<?>) {
             // type is a normal class.
             return (Class<?>) type;
-
         } else if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
 
@@ -1019,19 +1011,15 @@ public abstract class BeanUtils {
             Type rawType = parameterizedType.getRawType();
             checkArgument(rawType instanceof Class);
             return (Class<?>) rawType;
-
         } else if (type instanceof GenericArrayType) {
             Type componentType = ((GenericArrayType) type).getGenericComponentType();
             return Array.newInstance(getRawType(componentType), 0).getClass();
-
         } else if (type instanceof TypeVariable) {
             // we could use the variable's bounds, but that won't work if there are multiple.
             // having a raw type that's more general than necessary is okay
             return Object.class;
-
         } else if (type instanceof WildcardType) {
             return getRawType(((WildcardType) type).getUpperBounds()[0]);
-
         } else {
             String className = type == null ? "null" : type.getClass().getName();
             throw new IllegalArgumentException("Expected a Class, ParameterizedType, or "
@@ -1050,11 +1038,9 @@ public abstract class BeanUtils {
         if (a == b) {
             // also handles (a == null && b == null)
             return true;
-
         } else if (a instanceof Class) {
             // Class already specifies equals().
             return a.equals(b);
-
         } else if (a instanceof ParameterizedType) {
             if (!(b instanceof ParameterizedType)) {
                 return false;
@@ -1066,7 +1052,6 @@ public abstract class BeanUtils {
             return equal(pa.getOwnerType(), pb.getOwnerType())
                     && pa.getRawType().equals(pb.getRawType())
                     && Arrays.equals(pa.getActualTypeArguments(), pb.getActualTypeArguments());
-
         } else if (a instanceof GenericArrayType) {
             if (!(b instanceof GenericArrayType)) {
                 return false;
@@ -1075,7 +1060,6 @@ public abstract class BeanUtils {
             GenericArrayType ga = (GenericArrayType) a;
             GenericArrayType gb = (GenericArrayType) b;
             return equals(ga.getGenericComponentType(), gb.getGenericComponentType());
-
         } else if (a instanceof WildcardType) {
             if (!(b instanceof WildcardType)) {
                 return false;
@@ -1085,7 +1069,6 @@ public abstract class BeanUtils {
             WildcardType wb = (WildcardType) b;
             return Arrays.equals(wa.getUpperBounds(), wb.getUpperBounds())
                     && Arrays.equals(wa.getLowerBounds(), wb.getLowerBounds());
-
         } else if (a instanceof TypeVariable) {
             if (!(b instanceof TypeVariable)) {
                 return false;
@@ -1094,7 +1077,6 @@ public abstract class BeanUtils {
             TypeVariable<?> vb = (TypeVariable<?>) b;
             return va.getGenericDeclaration() == vb.getGenericDeclaration()
                     && va.getName().equals(vb.getName());
-
         } else {
             // This isn't a type we support. Could be a generic array type, wildcard type, etc.
             return false;
@@ -1149,7 +1131,6 @@ public abstract class BeanUtils {
     }
 
     public static Type resolve(Type context, Class<?> contextRawType, Type toResolve) {
-
         return resolve(context, contextRawType, toResolve, new HashMap<TypeVariable<?>, Type>());
     }
 
@@ -1176,7 +1157,6 @@ public abstract class BeanUtils {
                 if (toResolve == typeVariable) {
                     break;
                 }
-
             } else if (toResolve instanceof Class && ((Class<?>) toResolve).isArray()) {
                 Class<?> original = (Class<?>) toResolve;
                 Type componentType = original.getComponentType();
@@ -1185,7 +1165,6 @@ public abstract class BeanUtils {
                         ? original
                         : arrayOf(newComponentType);
                 break;
-
             } else if (toResolve instanceof GenericArrayType) {
                 GenericArrayType original = (GenericArrayType) toResolve;
                 Type componentType = original.getGenericComponentType();
@@ -1194,7 +1173,6 @@ public abstract class BeanUtils {
                         ? original
                         : arrayOf(newComponentType);
                 break;
-
             } else if (toResolve instanceof ParameterizedType) {
                 ParameterizedType original = (ParameterizedType) toResolve;
                 Type ownerType = original.getOwnerType();
@@ -1217,7 +1195,6 @@ public abstract class BeanUtils {
                         ? newParameterizedTypeWithOwner(newOwnerType, original.getRawType(), args)
                         : original;
                 break;
-
             } else if (toResolve instanceof WildcardType) {
                 WildcardType original = (WildcardType) toResolve;
                 Type[] originalLowerBound = original.getLowerBounds();
@@ -1409,7 +1386,6 @@ public abstract class BeanUtils {
                 checkArgument(upperBounds[0] == Object.class);
                 this.lowerBound = canonicalize(lowerBounds[0]);
                 this.upperBound = Object.class;
-
             } else {
                 checkNotNull(upperBounds[0]);
                 checkNotPrimitive(upperBounds[0]);

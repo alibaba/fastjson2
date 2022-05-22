@@ -14,7 +14,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FastJsonJsonViewUnitTest {
-
     @Test
     public void test_0() throws Exception {
         FastJsonJsonView view = new FastJsonJsonView();
@@ -40,12 +39,10 @@ public class FastJsonJsonViewUnitTest {
 
         view.setRenderedAttributes(new HashSet<String>(Collections.singletonList("abc")));
         view.render(Collections.singletonMap("abc", "cde"), request, response);
-
     }
 
     @Test
     public void test_1() throws Exception {
-
         FastJsonJsonView view = new FastJsonJsonView();
 
         assertNotNull(view.getFastJsonConfig());
@@ -67,7 +64,6 @@ public class FastJsonJsonViewUnitTest {
 
         view.setDisableCaching(true);
         view.render(Collections.singletonMap("abc", "cde"), request, response);
-
     }
 
     @Test

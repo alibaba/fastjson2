@@ -36,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 @ContextConfiguration
 public class Issue237 {
-
     @Autowired
     private WebApplicationContext wac;
 
@@ -61,7 +60,6 @@ public class Issue237 {
     @RestController
     @RequestMapping()
     public static class BeanController {
-
         @PostMapping(path = "/test", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
         public JSONObject test(@RequestBody JSONObject requestBody) {
             return requestBody.getJSONObject("xxx");

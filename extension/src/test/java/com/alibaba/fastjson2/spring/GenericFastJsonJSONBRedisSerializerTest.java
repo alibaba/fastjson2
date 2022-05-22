@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 public class GenericFastJsonJSONBRedisSerializerTest {
-
     private GenericFastJsonJSONBRedisSerializer serializer;
 
     @BeforeEach
@@ -58,7 +57,6 @@ public class GenericFastJsonJSONBRedisSerializerTest {
 
     @Test
     public void test_6() {
-
         BaseResult<List<String>> baseResult = new BaseResult<List<String>>();
         baseResult.setCode("1000");
         baseResult.setMsg("success");

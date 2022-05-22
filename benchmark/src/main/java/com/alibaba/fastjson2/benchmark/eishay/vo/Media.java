@@ -6,7 +6,6 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class Media implements java.io.Serializable {
-
     public enum Player {
         JAVA, FLASH
     }
@@ -134,5 +133,4 @@ public class Media implements java.io.Serializable {
     public void setCopyright(String copyright) {
         this.copyright = copyright;
     }
-
 }

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream
 
 class JSONTest {
-
     @Test
     fun test_into1() {
         val users = """[{"id":1,"name":"kraity"}]""".into<List<User>>()

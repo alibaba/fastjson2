@@ -62,7 +62,6 @@ final class FieldWriterListStrFunc<T> extends FieldWriterImpl<T> {
         writeFieldName(jsonWriter);
 
         if (jsonWriter.isJSONB()) {
-
             int size = list.size();
             jsonWriter.startArray(size);
 
@@ -104,7 +103,6 @@ final class FieldWriterListStrFunc<T> extends FieldWriterImpl<T> {
         }
 
         if (jsonWriter.isJSONB()) {
-
             int size = list.size();
             jsonWriter.startArray(size);
 

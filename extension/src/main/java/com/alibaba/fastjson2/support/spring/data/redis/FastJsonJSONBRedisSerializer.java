@@ -13,7 +13,6 @@ import org.springframework.data.redis.serializer.SerializationException;
  * @since 2.0.3
  */
 public class FastJsonJSONBRedisSerializer<T> implements RedisSerializer<T> {
-
     private FastJsonConfig fastJsonConfig = new FastJsonConfig();
     private final Class<T> type;
 
@@ -36,7 +35,6 @@ public class FastJsonJSONBRedisSerializer<T> implements RedisSerializer<T> {
         }
         try {
             return JSONB.toBytes(t, fastJsonConfig.getSymbolTable(), fastJsonConfig.getWriterFeatures());
-
         } catch (Exception ex) {
             throw new SerializationException("Could not serialize: " + ex.getMessage(), ex);
         }
@@ -49,7 +47,6 @@ public class FastJsonJSONBRedisSerializer<T> implements RedisSerializer<T> {
         }
         try {
             return JSONB.parseObject(bytes, type, fastJsonConfig.getSymbolTable(), fastJsonConfig.getReaderFeatures());
-
         } catch (Exception ex) {
             throw new SerializationException("Could not deserialize: " + ex.getMessage(), ex);
         }

@@ -10,23 +10,17 @@ import java.lang.reflect.Parameter;
 
 public interface ObjectReaderAnnotationProcessor {
     default void getBeanInfo(BeanInfo beanInfo, Class<?> objectClass) {
-
     }
 
     default void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Field field) {
-
     }
 
     default void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Constructor constructor, int paramIndex, Parameter parameter) {
-
     }
 
-
     default void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method, int paremIndex, Parameter parameter) {
-
     }
 
     default void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method) {
-
     }
 }

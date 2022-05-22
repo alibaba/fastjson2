@@ -7,7 +7,6 @@ import com.alibaba.fastjson.annotation.JSONType;
  */
 @JSONType(typeName = "floorV1")
 public class FloorV1 implements Floor {
-
     public String type;
     public String templateId;
 

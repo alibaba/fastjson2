@@ -34,7 +34,6 @@ package com.alibaba.fastjson2.internal.asm;
  * @author Eric Bruneton
  */
 public class ByteVector {
-
     /**
      * The content of this vector. Only the first {@link #length} bytes contain real data.
      */

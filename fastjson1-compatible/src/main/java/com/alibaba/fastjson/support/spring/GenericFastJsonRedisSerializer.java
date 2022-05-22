@@ -17,7 +17,6 @@ import org.springframework.data.redis.serializer.SerializationException;
  * @since 2.0.2
  */
 public class GenericFastJsonRedisSerializer implements RedisSerializer<Object> {
-
     @Override
     public byte[] serialize(Object object) throws SerializationException {
         if (object == null) {
