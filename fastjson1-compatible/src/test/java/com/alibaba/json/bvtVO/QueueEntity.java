@@ -12,11 +12,10 @@ import java.util.Map;
 
 /**
  * 用于存Queue配置信息的类，这里的Queue就是指业务上对应的�1�7�辑Queue，可能会分布到多台机器上
- * 
+ *
  * @author xiaosong.liangxs
  */
 public class QueueEntity {
-
     private int                         id;
     private String                      description;
 

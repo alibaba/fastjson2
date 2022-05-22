@@ -1,13 +1,12 @@
 package com.alibaba.fastjson2.issues;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 
 import static org.junit.jupiter.api.Assertions.*;
 

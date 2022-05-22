@@ -7,7 +7,6 @@ import java.math.BigInteger;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONObjectTest_getBigInteger {
-
     @Test
     public void test_get_float() {
         JSONObject obj = new JSONObject();

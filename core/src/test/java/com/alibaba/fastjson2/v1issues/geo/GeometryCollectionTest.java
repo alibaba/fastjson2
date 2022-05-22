@@ -28,8 +28,8 @@ public class GeometryCollectionTest {
         assertEquals(GeometryCollection.class, geometry.getClass());
 
         assertEquals(
-                "{\"type\":\"GeometryCollection\",\"geometries\":[{\"type\":\"Point\",\"coordinates\":[100.0,0.0]},{\"type\":\"LineString\",\"coordinates\":[[101.0,0.0],[102.0,1.0]]}]}"
-                , JSON.toJSONString(geometry));
+                "{\"type\":\"GeometryCollection\",\"geometries\":[{\"type\":\"Point\",\"coordinates\":[100.0,0.0]},{\"type\":\"LineString\",\"coordinates\":[[101.0,0.0],[102.0,1.0]]}]}",
+                 JSON.toJSONString(geometry));
 
         String str2 = JSON.toJSONString(geometry);
         assertEquals(str2, JSON.toJSONString(JSON.parseObject(str2, Geometry.class)));

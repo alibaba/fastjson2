@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSpecial_4 {
-
     @Test
     public void test_special() {
         String json = "{\"大小\":123}";

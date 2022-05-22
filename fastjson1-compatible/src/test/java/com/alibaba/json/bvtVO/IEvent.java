@@ -1,9 +1,9 @@
 /**
  * Project: eve.services
- * 
+ *
  * File Created at 2011-12-21
  * $Id$
- * 
+ *
  * Copyright 2008 Alibaba.com Corporation Limited.
  * All rights reserved.
  *
@@ -21,11 +21,11 @@ import java.util.Map;
 
 /**
  * �¼�����
- * 
+ *
  * @author wb_jianhui.shijh
  */
-public class IEvent implements Serializable {
-
+public class IEvent
+        implements Serializable {
     private static final long   serialVersionUID = -791431935700654454L;
 
     /**

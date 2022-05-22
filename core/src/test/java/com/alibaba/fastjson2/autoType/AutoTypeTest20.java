@@ -43,7 +43,6 @@ public class AutoTypeTest20 {
     }
 
     public static interface Item {
-
     }
 
     public static enum XItem implements Item {

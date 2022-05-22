@@ -13,8 +13,8 @@ public class AutoTypeTest50 {
         assertEquals(123, bean.id);
     }
 
-    public static class LocalAutoTypeBeforeHandler implements JSONReader.AutoTypeBeforeHandler {
-
+    public static class LocalAutoTypeBeforeHandler
+            implements JSONReader.AutoTypeBeforeHandler {
         @Override
         public Class<?> apply(String typeName, Class<?> expectClass, long features) {
             if ("AutoTypeTest50$Bean".equals(typeName)) {

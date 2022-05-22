@@ -7,12 +7,12 @@ import java.util.List;
 /**
  * Created by haihong.xiahh on 13-12-23.
  */
-public class PushMsg implements Serializable {
-
+public class PushMsg
+        implements Serializable {
     public static final String DIR_PUSH = "push";
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 8145512296629061628L;
 
@@ -91,12 +91,12 @@ public class PushMsg implements Serializable {
      * 条件： <br/>
      * 1、没过期(et>=当前时间，st可以大于也可以小于当前时间)<br/>
      * 2、消息体有效<br/>
-     * 
+     *
      * @return true if valid.
      */
     public boolean isValid() {
         long now = new Date().getTime() / 1000;
- 
+
         if (now > et) {
             return false;
         }// end if
@@ -138,7 +138,7 @@ public class PushMsg implements Serializable {
 
     /**
      * 消息的URL是否存在
-     * 
+     *
      * @return true if exist.
      */
     public boolean hasUrl() {
@@ -147,7 +147,6 @@ public class PushMsg implements Serializable {
         } else {
             result = false;
         }
-
 
         return result;
     }
@@ -159,13 +158,12 @@ public class PushMsg implements Serializable {
             result = false;
         }
 
-
         return result;
     }
 
     /**
      * 通知所需的图片资源是否就绪
-     * 
+     *
      * @return true if ready, otherwise return false.
      */
     private boolean isImagesReady() {
@@ -190,7 +188,7 @@ public class PushMsg implements Serializable {
 
     /**
      * 获取需要下载图片的URL列表
-     * 
+     *
      * @return list of image URL which image's URL is not cached, otherwise
      *         return null.
      */
@@ -198,9 +196,10 @@ public class PushMsg implements Serializable {
         return null;
     }
 
-    public static class Msg implements Serializable {
+    public static class Msg
+            implements Serializable {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -2020714577526457332L;
 
@@ -312,17 +311,16 @@ public class PushMsg implements Serializable {
          * </p>
          * 0.gid 不为null 1.controlFlag 必须有效（即非空，则控制位数目足够）<br/>
          * 2.当开启分享功能时，stxt/surl/simg 至少有一个有效（非空）<br/>
-         * 
+         *
          * @return true if valid.
          */
         public boolean isValid() {
-
             return true;
         }
 
         /**
          * 打印debug信息
-         * 
+         *
          * @return
          */
         public String debug() {
@@ -344,13 +342,13 @@ public class PushMsg implements Serializable {
 
         /**
          * 标志控制
-         * 
+         *
          * @author wangyue.wy
          */
-        public static class ControlFlags implements Serializable {
-
+        public static class ControlFlags
+                implements Serializable {
             /**
-             * 
+             *
              */
             private static final long serialVersionUID = 6289110973325625431L;
 
@@ -454,7 +452,6 @@ public class PushMsg implements Serializable {
             private char ctrlLimitShowMaxOnce;
 
             public ControlFlags(String param) {
-
                 this.text = param;
                 ctrlPos = text.charAt(INDEX_TYPE.INDEX_POS.ordinal());
                 ctrlOpenUrl = text.charAt(INDEX_TYPE.INDEX_OPEN_URL.ordinal());
@@ -508,7 +505,7 @@ public class PushMsg implements Serializable {
 
             /**
              * 是否首页 或 Web页，开启分享按钮
-             * 
+             *
              * @return true if Not 'B'(B:首页 和 Web页均关闭分享按钮显示)
              */
             public boolean enableShare() {
@@ -518,7 +515,7 @@ public class PushMsg implements Serializable {
             /* control of share */
             /**
              * 首页是否支持通知显示分享按钮
-             * 
+             *
              * @return true if equal 'A', 'C' or [*,A] || [D,*]
              */
             public boolean enableShareInHomePage() {
@@ -528,7 +525,7 @@ public class PushMsg implements Serializable {
 
             /**
              * Web页是否支持通知显示分享按钮
-             * 
+             *
              * @return true if equal 'A' Or 'D'
              */
             public boolean enableShareInWebPage() {
@@ -568,20 +565,19 @@ public class PushMsg implements Serializable {
             }
 
             /**
-             * 
+             *
              * 控制字不能为空<br/>
              * 控制字长度不少于所需长度
-             * 
+             *
              * @return true if valid, otherwise return false.
              */
             public boolean isValid() {
-
                 return true;
             }
 
             /**
              * 打印调试信息
-             * 
+             *
              * @return
              */
             public String debug() {
@@ -605,7 +601,7 @@ public class PushMsg implements Serializable {
 
     /**
      * 打印debug信息
-     * 
+     *
      * @return
      */
     public String debug() {

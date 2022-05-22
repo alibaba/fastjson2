@@ -1,7 +1,6 @@
 package com.alibaba.json.bvtVO;
 
 public class PhysicalQueue {
-
     private QueueEntity queue;
     private Integer     weight;
     private Integer     capacity;
@@ -13,7 +12,6 @@ public class PhysicalQueue {
     private boolean     receivable;
 
     public PhysicalQueue(){
-
     }
 
     public Integer getCapacity() {

@@ -38,5 +38,4 @@ public class DateTest {
         assertEquals(1539308902000L, date.getTime());
     }
 
-
 }

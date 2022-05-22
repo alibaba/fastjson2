@@ -36,7 +36,8 @@ public class Issue1151 {
 
     }
 
-    public static  class C implements B {
+    public static  class C
+            implements B {
         public int id;
         public C() {
 

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2_vo.cart;
 
-public class ShopV2 extends CartObject<ShopV2.ShopV2Fields> {
+public class ShopV2
+        extends CartObject<ShopV2.ShopV2Fields> {
     public static class ShopV2Fields {
         public String title;
         public boolean is11;

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONObjectTest7 {
-
     @Test
     public void test() throws Exception {
         JSONObject jsonObject = JSON.parseObject("{\"test\":null,\"a\":\"cc\"}");

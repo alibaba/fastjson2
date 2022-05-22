@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
  * @version 1.0.0-SNAPSHOT
  */
 public class BeanUtilsTest {
-
     @Test
     public void declaredFields() {
         BeanUtils.declaredFields(JSONArray.class, Assertions::assertNotNull);

@@ -10,7 +10,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue2397 {
-
     @Test
     public void test_for_bug(){
         String jsonStr = "{\"items\":[{\"id\":1,\"name\":\"kata\"}]}";
@@ -32,11 +31,12 @@ public class Issue2397 {
         }
     }
 
-    public static class BaseReply<T> extends SuperBaseReply<T> {
-
+    public static class BaseReply<T>
+            extends SuperBaseReply<T> {
     }
 
-    public static class Msg implements Serializable {
+    public static class Msg
+            implements Serializable {
         private int id;
         private String name;
 
@@ -62,7 +62,7 @@ public class Issue2397 {
         }
     }
 
-    public static class TestReply extends BaseReply<Msg> {
-
+    public static class TestReply
+            extends BaseReply<Msg> {
     }
 }

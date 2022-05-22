@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue3652 {
-
     @Test
     public void test_SerializeConfig_different_Class_Annotation() {
         Object[] models = new Object[]{

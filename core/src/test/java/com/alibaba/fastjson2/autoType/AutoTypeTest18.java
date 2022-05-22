@@ -42,19 +42,20 @@ public class AutoTypeTest18 {
     public static interface Item {
     }
 
-    public static class XItem implements Item {
+    public static class XItem
+            implements Item {
         public XItem() {
-
         }
     }
 
-    public static class YItem implements Item {
+    public static class YItem
+            implements Item {
         public YItem() {
-
         }
     }
 
-    public static enum ZEnum implements Item {
+    public static enum ZEnum
+            implements Item {
         A
     }
 

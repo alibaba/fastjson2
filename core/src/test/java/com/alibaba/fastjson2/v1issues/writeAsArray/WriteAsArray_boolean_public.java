@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WriteAsArray_boolean_public {
     @Test
-    public void test_0 () throws Exception {
+    public void test_0() throws Exception {
         VO vo = new VO();
         vo.setId(true);
         vo.setName("wenshao");

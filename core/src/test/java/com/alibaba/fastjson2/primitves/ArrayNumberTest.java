@@ -15,20 +15,20 @@ public class ArrayNumberTest {
     @Test
     public void test_array() {
         Object[] array = new Object[] {
-                (Byte.valueOf((byte)0))
-                , Short.valueOf((short) 0)
-                , Integer.valueOf(0)
-                , Long.valueOf(0)
-                , BigInteger.valueOf(0)
-                , BigDecimal.valueOf(0),
+                (Byte.valueOf((byte)0)),
+                 Short.valueOf((short) 0),
+                 Integer.valueOf(0),
+                 Long.valueOf(0),
+                 BigInteger.valueOf(0),
+                 BigDecimal.valueOf(0),
         };
         JSONWriter jw = JSONWriter.of();
         jw.writeAny(array);
         String str = jw.toString();
         assertEquals("[0,0,0,0,0,0]", str);
 
-        assertEquals(Arrays.toString(array)
-                , Arrays.toString((Object[])
+        assertEquals(Arrays.toString(array),
+                 Arrays.toString((Object[])
                         JSONReader.of(str)
                                 .read(array.getClass())
                 )
@@ -38,20 +38,20 @@ public class ArrayNumberTest {
     @Test
     public void test_array_1() {
         Number[] array = new Number[] {
-                (Byte.valueOf((byte)0))
-                , Short.valueOf((short) 0)
-                , Integer.valueOf(0)
-                , Long.valueOf(0)
-                , BigInteger.valueOf(0)
-                , BigDecimal.valueOf(0),
+                (Byte.valueOf((byte)0)),
+                 Short.valueOf((short) 0),
+                 Integer.valueOf(0),
+                 Long.valueOf(0),
+                 BigInteger.valueOf(0),
+                 BigDecimal.valueOf(0),
         };
         JSONWriter jw = JSONWriter.of();
         jw.writeAny(array);
         String str = jw.toString();
         assertEquals("[0,0,0,0,0,0]", str);
 
-        assertEquals(Arrays.toString(array)
-                , Arrays.toString((Object[])
+        assertEquals(Arrays.toString(array),
+                 Arrays.toString((Object[])
                         JSONReader.of(str)
                                 .read(array.getClass())
                 )
@@ -66,8 +66,8 @@ public class ArrayNumberTest {
         String str = jw.toString();
         assertEquals("[0,1,2,3,4]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -79,8 +79,8 @@ public class ArrayNumberTest {
         String str = jw.toString();
         assertEquals("[0,1,2,3,4]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -92,8 +92,8 @@ public class ArrayNumberTest {
         String str = jw.toString();
         assertEquals("[0,1,2,3,4]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -105,8 +105,8 @@ public class ArrayNumberTest {
         String str = jw.toString();
         assertEquals("[0,1,2,3,4]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -118,8 +118,8 @@ public class ArrayNumberTest {
         String str = jw.toString();
         assertEquals("[0,1,2,3,4]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -131,8 +131,8 @@ public class ArrayNumberTest {
         String str = jw.toString();
         assertEquals("[0,1,2,3,4]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -162,8 +162,8 @@ public class ArrayNumberTest {
         String str = jw.toString();
         assertEquals("[0,1,2,3,4]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -175,44 +175,44 @@ public class ArrayNumberTest {
         String str = jw.toString();
         assertEquals("[0,1,2,3,4]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
     @Test
     public void test_array_BigInt() {
-        BigInteger[] array = new BigInteger[] {BigInteger.valueOf(0)
-                , BigInteger.valueOf(1)
-                , BigInteger.valueOf(2)
-                , BigInteger.valueOf(3)
-                , BigInteger.valueOf(4)
+        BigInteger[] array = new BigInteger[] {BigInteger.valueOf(0),
+                 BigInteger.valueOf(1),
+                 BigInteger.valueOf(2),
+                 BigInteger.valueOf(3),
+                 BigInteger.valueOf(4)
         };
         JSONWriter jw = JSONWriter.of();
         jw.writeAny(array);
         String str = jw.toString();
         assertEquals("[0,1,2,3,4]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
     @Test
     public void test_array_BigDecimal() {
-        BigDecimal[] array = new BigDecimal[] {BigDecimal.valueOf(0)
-                , BigDecimal.valueOf(1)
-                , BigDecimal.valueOf(2)
-                , BigDecimal.valueOf(3)
-                , BigDecimal.valueOf(4)
+        BigDecimal[] array = new BigDecimal[] {BigDecimal.valueOf(0),
+                 BigDecimal.valueOf(1),
+                 BigDecimal.valueOf(2),
+                 BigDecimal.valueOf(3),
+                 BigDecimal.valueOf(4)
         };
         JSONWriter jw = JSONWriter.of();
         jw.writeAny(array);
         String str = jw.toString();
         assertEquals("[0,1,2,3,4]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -224,8 +224,8 @@ public class ArrayNumberTest {
         String str = jw.toString();
         assertEquals("[0.0,1.0,2.0,3.0,4.0]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -237,8 +237,8 @@ public class ArrayNumberTest {
         String str = jw.toString();
         assertEquals("[0.0,1.0,2.0,3.0,4.0]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -250,8 +250,8 @@ public class ArrayNumberTest {
         String str = jw.toString();
         assertEquals("[0.0,1.0,2.0,3.0,4.0]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -263,8 +263,8 @@ public class ArrayNumberTest {
         String str = jw.toString();
         assertEquals("[0.0,1.0,2.0,3.0,4.0]", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 }

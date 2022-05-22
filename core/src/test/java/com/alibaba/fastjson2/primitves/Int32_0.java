@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Int32_0 {
-    public int MIN_VALUE = Short.MIN_VALUE;
-    public int MAX_VALUE = Short.MAX_VALUE;
+    static int MIN_VALUE = Short.MIN_VALUE;
+    static int MAX_VALUE = Short.MAX_VALUE;
 
     @Test
     public void test_reflect() throws Exception {

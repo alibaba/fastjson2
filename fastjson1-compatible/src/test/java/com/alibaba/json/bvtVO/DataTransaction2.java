@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * 交易消息体
  * */
-public class DataTransaction2 implements Serializable {
-
+public class DataTransaction2
+        implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Head head = new Head();
@@ -23,14 +23,12 @@ public class DataTransaction2 implements Serializable {
     private Body body = new Body();
 
     public DataTransaction2() {
-
     }
 
     /**
      * Head
      **/
     class Head {
-
         private String appid;
 
         private String transcode;
@@ -42,7 +40,6 @@ public class DataTransaction2 implements Serializable {
         private Ret ret = new Ret();
 
         public Head() {
-
         }
 
         class User {
@@ -135,13 +132,11 @@ public class DataTransaction2 implements Serializable {
      * */
     @SuppressWarnings("rawtypes")
     class Body {
-
         private Param param = new Param();
 
         private DataSet dataset = new DataSet();
 
         public Body() {
-
         }
 
         /**
@@ -293,7 +288,6 @@ public class DataTransaction2 implements Serializable {
     }
 
     public static void main(String args[]) {
-
         String jsonString = "{'head' : {'appid':'epas','transcode' : '000000','seqno' : '111111111',        'user' : {          'id' : '00000'},        'ret' : {           'code' : '1',           'msg' : 'txt'}  },  'body' : {      param : {           form:{              name : '111',               sex : '1',              address : 'street1',                array : [ {                 id : '1',                   name : 'tom1'               }, {                    id : '2',                   name : 'tom2'               } ]},           limit : {               start : 1,              size : 25,              total : 100}        },      dataset : {         total : 1000,           rows : [ {              id : 'id',              name : 'name'           }, {                id : 'id',              name : 'name'           } ]     }   }}";
         DataTransaction2 dt = DataTransaction2.fromJSON(jsonString);
         System.out.println(dt.toJSON());

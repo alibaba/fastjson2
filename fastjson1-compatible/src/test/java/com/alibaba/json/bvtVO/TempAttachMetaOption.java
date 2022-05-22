@@ -1,9 +1,9 @@
 /**
  * Project: rowan.server.biz.service-1.0-SNAPSHOT
- * 
+ *
  * File Created at 2011-12-9
  * $Id$
- * 
+ *
  * Copyright 1999-2100 Alibaba.com Corporation Limited.
  * All rights reserved.
  *
@@ -19,11 +19,11 @@ import java.io.Serializable;
 
 /**
  * 类TempAttachMetaOption.java的实现描述：TODO 类实现描述
- * 
+ *
  * @author lei.yaol 2011-12-27 下午03:43:32
  */
-public class TempAttachMetaOption implements Serializable {
-
+public class TempAttachMetaOption
+        implements Serializable {
     private static final long serialVersionUID = -8786217160252057362L;
 
     private Integer           id;

@@ -19,22 +19,22 @@ public class AutoTypeTest30 {
         Bean1 bean = new Bean1();
         bean.items = list;
 
-        byte[] bytes = JSONB.toBytes(bean
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(bean,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
 
-        Bean1 bean2 = (Bean1) JSONB.parseObject(bytes
-                , Object.class
-                , JSONReader.Feature.SupportAutoType
-                , JSONReader.Feature.FieldBased
-                , JSONReader.Feature.UseNativeObject
+        Bean1 bean2 = (Bean1) JSONB.parseObject(bytes,
+                 Object.class,
+                 JSONReader.Feature.SupportAutoType,
+                 JSONReader.Feature.FieldBased,
+                 JSONReader.Feature.UseNativeObject
         );
         assertNotNull(bean2);
         assertNotNull(bean2.items);
@@ -66,22 +66,22 @@ public class AutoTypeTest30 {
             list.add(bean);
         }
 
-        byte[] bytes = JSONB.toBytes(list
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(list,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
 
-        List list2 = (List) JSONB.parseObject(bytes
-                , Object.class
-                , JSONReader.Feature.SupportAutoType
-                , JSONReader.Feature.FieldBased
-                , JSONReader.Feature.UseNativeObject
+        List list2 = (List) JSONB.parseObject(bytes,
+                 Object.class,
+                 JSONReader.Feature.SupportAutoType,
+                 JSONReader.Feature.FieldBased,
+                 JSONReader.Feature.UseNativeObject
         );
 
         Bean1 bean = (Bean1) list.get(0);
@@ -104,13 +104,13 @@ public class AutoTypeTest30 {
         Bean2 bean = new Bean2();
         bean.value = "1001";
 
-        byte[] bytes = JSONB.toBytes(bean
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(bean,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -118,14 +118,14 @@ public class AutoTypeTest30 {
         assertEquals("{\n" +
                         "\t\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest30$Bean2\",\n" +
                         "\t\"value\":\"1001\"\n" +
-                        "}"
-                ,JSONB.toJSONString(bytes));
+                        "}",
+                JSONB.toJSONString(bytes));
 
-        Bean2 bean2 = (Bean2) JSONB.parseObject(bytes
-                , Object.class
-                , JSONReader.Feature.SupportAutoType
-                , JSONReader.Feature.FieldBased
-                , JSONReader.Feature.UseNativeObject
+        Bean2 bean2 = (Bean2) JSONB.parseObject(bytes,
+                 Object.class,
+                 JSONReader.Feature.SupportAutoType,
+                 JSONReader.Feature.FieldBased,
+                 JSONReader.Feature.UseNativeObject
         );
         assertNotNull(bean2);
         assertNotNull(bean2.value);
@@ -133,12 +133,13 @@ public class AutoTypeTest30 {
         assertSame(bean.value.getClass(), bean2.value.getClass());
     }
 
-    public static class Bean2 extends Address {
+    public static class Bean2
+            extends Address {
         private String value;
     }
 
-    public static class Address extends BaseAddress {
-
+    public static class Address
+            extends BaseAddress {
     }
 
     public static class BaseAddress {

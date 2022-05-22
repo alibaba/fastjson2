@@ -10,7 +10,6 @@ import org.springframework.messaging.MessageHeaders;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-
 public class MappingFastJsonMessageConverterTest {
     @Test
     public void test_1() throws Exception {

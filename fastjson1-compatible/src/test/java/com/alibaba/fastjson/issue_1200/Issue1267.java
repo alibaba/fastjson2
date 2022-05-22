@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1267 {
     @Test
     public void test_for_issue() {
-
         String json = "{\"message\":{\"refund_fee\":[\"0.01\"],\"pay_fee\":[\"0.01\"]},\"url\":\"http://localhost:8080\"}";
 
         LinkedMultiValueMap message = JSON.parseObject(

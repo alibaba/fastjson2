@@ -8,7 +8,6 @@ import java.nio.charset.Charset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONBytesTest3 {
-
     @Test
     public void test_codec() throws Exception {
         Model model = new Model();

@@ -105,7 +105,7 @@ public class AutoTypeTest19 {
         public int value;
     }
 
-    static class XItem2 extends Item2 {
-
+    static class XItem2
+            extends Item2 {
     }
 }

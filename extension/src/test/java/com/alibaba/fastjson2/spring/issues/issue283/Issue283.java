@@ -44,7 +44,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 @ContextConfiguration
 public class Issue283 {
-
     @Autowired
     private WebApplicationContext wac;
 
@@ -59,7 +58,6 @@ public class Issue283 {
 
     @Test
     public void test() throws Exception {
-
         String requestJson = "{\"captcha\":\"test_captcha\",\"password\":\"test_password\",\"rememberMe\":true,\"username\":\"test_username\",\"uuid\":\"test_uuid\"}";
         mockMvc.perform(
                 (post("/xx/xx").characterEncoding("UTF-8")
@@ -71,7 +69,6 @@ public class Issue283 {
     @RestController
     @RequestMapping()
     public static class BeanController {
-
         @PostMapping("/xx/xx")
         public @ResponseBody
         Map<String, Object> login(@RequestBody SysLoginForm form) throws IOException {

@@ -29,7 +29,6 @@ public class BuilderTest0 {
     }
 
     public static class VOBuilder {
-
         private VO vo = new VO();
 
         public VO build() {

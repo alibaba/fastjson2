@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "TestDTO")
 public class TestDTO {
-
     private String       channel;
     private String       txCode;
 

@@ -34,7 +34,6 @@ public class Issue1987 {
     }
 
     public static class JsonExample {
-
         private LocalDateTime testLocalDateTime;
 
         public LocalDateTime getTestLocalDateTime() {

@@ -35,12 +35,10 @@ public class Issue1565 {
         Assertions.assertEquals(expectedStr, actualStr);
         Assertions.assertEquals(expectedBean.getId(), actualBean.getString("id"));
         Assertions.assertEquals(expectedBean.getNetValueDate(), actualBean.getInteger("net_value_date"));
-
-
-
     }
 
-    public static class SmallBean implements Serializable{
+    public static class SmallBean
+            implements Serializable{
         private String id;
 
         public String getId() {
@@ -63,8 +61,8 @@ public class Issue1565 {
     }
 
     @JSONType(naming = NamingStrategy.SnakeCase)
-    public static class LargeBean implements Serializable {
-
+    public static class LargeBean
+            implements Serializable {
         /**
          * 每页数量
          */

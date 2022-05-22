@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 public class HSFPerf2 {
     byte[] bytes;
     Result result;
+
     public HSFPerf2() {
         result = new Result();
         ComponentProtocol protocol = new ComponentProtocol();
@@ -46,10 +47,9 @@ public class HSFPerf2 {
     }
 
     @Test
-    public void test_perf_read() throws Exception {
+    public void test_perf_read() {
         for (int i = 0; i < 5; ++i) {
             long start = System.currentTimeMillis();
-
             for (int j = 0; j < 10_000_000; ++j) {
                 JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType);
             }
@@ -60,6 +60,4 @@ public class HSFPerf2 {
         }
         System.out.println();
     }
-
-
 }

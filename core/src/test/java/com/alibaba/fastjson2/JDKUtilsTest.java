@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -75,15 +74,14 @@ public class JDKUtilsTest {
         }
     }
 
-    static BiFunction<byte[], Charset, String> stringCreatorJDK17 = null;
-    static Function<byte[], String> stringCreatorJDK11 = null;
-    static BiFunction<char[], Boolean, String> stringCreatorJDK8 = null;
+    static BiFunction<byte[], Charset, String> stringCreatorJDK17;
+    static Function<byte[], String> stringCreatorJDK11;
+    static BiFunction<char[], Boolean, String> stringCreatorJDK8;
 
     public String formatYYYYMMDD(Calendar calendar) throws Throwable {
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1;
         int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-
 
         byte y0 = (byte) (year / 1000 + '0');
         byte y1 = (byte) ((year / 100) % 10 + '0');

@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Created by wenshao on 09/04/2017.
  */
 public class Issue1134 {
-
     @Test
     public void test_for_issue() throws Exception {
         Model model = new Model();

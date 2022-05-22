@@ -20,6 +20,5 @@ public class Issue1503 {
     }
 
     public static class Bean {
-
     }
 }

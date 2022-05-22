@@ -199,23 +199,23 @@ public class ParserTest {
         MediaContent o = jr.read(MediaContent.class);
 
         JSONB.SymbolTable symbolTable = JSONB.symbolTable(
-                "images"
-                , "height"
-                , "size"
-                , "title"
-                , "uri"
-                , "width"
-                , "media"
-                , "bitrate"
-                , "duration"
-                , "format"
-                , "persons"
-                , "player"
-                , "LARGE"
-                , "SMALL"
-                , "JAVA"
-                , "FLASH"
-                , "copyright"
+                "images",
+                 "height",
+                 "size",
+                 "title",
+                 "uri",
+                 "width",
+                 "media",
+                 "bitrate",
+                 "duration",
+                 "format",
+                 "persons",
+                 "player",
+                 "LARGE",
+                 "SMALL",
+                 "JAVA",
+                 "FLASH",
+                 "copyright"
         );
 
         JSONWriter jsonWriter = JSONWriter.ofJSONB(symbolTable);

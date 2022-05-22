@@ -39,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 @ContextConfiguration
 public class Issue1367 {
-
     @Autowired
     private WebApplicationContext wac;
 
@@ -57,7 +56,6 @@ public class Issue1367 {
 
 
     public static class AbstractController<ID extends Serializable, PO extends GenericEntity<ID>> {
-
         @PostMapping(path = "/typeVariableBean",consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
         public PO save(@RequestBody PO dto) {
             //do something
@@ -68,8 +66,8 @@ public class Issue1367 {
 
     @RestController
     @RequestMapping()
-    public static class BeanController extends AbstractController<Long, TypeVariableBean> {
-
+    public static class BeanController
+            extends AbstractController<Long, TypeVariableBean> {
 
 
         @PostMapping(path = "/parameterizedTypeBean",consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -85,7 +83,8 @@ public class Issue1367 {
     @Configuration
     @Order(Ordered.LOWEST_PRECEDENCE + 1)
     @EnableWebMvc
-    public static class WebMvcConfig extends WebMvcConfigurerAdapter {
+    public static class WebMvcConfig
+            extends WebMvcConfigurerAdapter {
         @Override
         public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
             FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
@@ -112,11 +111,13 @@ public class Issue1367 {
 
     }
 
-    public abstract static class GenericEntity<ID extends Serializable> {
+    public abstract static class GenericEntity<ID
+            extends Serializable> {
         public abstract ID getId();
     }
 
-    public static class TypeVariableBean extends GenericEntity<Long> {
+    public static class TypeVariableBean
+            extends GenericEntity<Long> {
         private Long id;
 
         @Override

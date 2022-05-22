@@ -7,10 +7,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1500 {
-
     @Test
     public void test_for_issue() throws Exception {
-
         // test aa
         Aa aa = new Aa();
         aa.setName("aa");
@@ -28,8 +26,8 @@ public class Issue1500 {
         assertEquals("java.lang.Exception",c2.getE().getClass().getName());
     }
 
-    public static class Aa extends Exception {
-
+    public static class Aa
+            extends Exception {
         public Aa(){
         }
 
@@ -45,7 +43,6 @@ public class Issue1500 {
     }
 
     public static class C {
-
         private Exception e;
 
         public Exception getE() {

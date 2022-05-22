@@ -101,7 +101,6 @@ public class DateFieldTest3 {
     }
 
     public static class V0 {
-
         private Date value;
 
         public Date getValue() {

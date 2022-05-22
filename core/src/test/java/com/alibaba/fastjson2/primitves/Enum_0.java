@@ -506,7 +506,6 @@ public class Enum_0 {
         }
     }
 
-
     public static class V1 {
         public Type value;
     }

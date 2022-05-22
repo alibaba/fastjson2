@@ -33,11 +33,10 @@ public class Issue1524 {
     }
 
     public static class Value {
-
     }
 
-    public static class ValueSerializer implements ObjectSerializer {
-
+    public static class ValueSerializer
+            implements ObjectSerializer {
         public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features) throws IOException {
             serializer.write("xx");
         }

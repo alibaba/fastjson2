@@ -9,7 +9,6 @@ import java.util.List;
 public class Issue2239 {
     @Test
     public void test_for_issue() throws Exception {
-
         String json = "{\"page\":{}}";
 
         BaseResponse<Bean> bean = JSON.parseObject(json,
@@ -19,13 +18,10 @@ public class Issue2239 {
     }
 
     public static class Bean {
-
     }
 
     public static class BaseResponse<T> {
-
         private PageBean<T> page;
-
 
 
         public PageBean<T> getPage() {
@@ -34,7 +30,6 @@ public class Issue2239 {
     }
 
     public static class PageBean<T> {
-
         private List<T> list;
 
         public List<T> getList() {

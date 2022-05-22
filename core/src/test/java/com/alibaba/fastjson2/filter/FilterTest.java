@@ -28,14 +28,14 @@ public class FilterTest {
         assertEquals("{\"id\":123}", JSON.toJSONString(
                 new JSONObject()
                 .fluentPut("id", 123)
-                .fluentPut("name", "DataWorks")
-                , new SimplePropertyPreFilter("id")));
+                .fluentPut("name", "DataWorks"),
+                 new SimplePropertyPreFilter("id")));
 
         assertEquals("{\"id\":123,\"name\":\"DataWorks\"}", JSON.toJSONString(
                 new JSONObject()
                         .fluentPut("id", 123)
-                        .fluentPut("name", "DataWorks")
-                , new SimplePropertyPreFilter(JSONObject.class)));
+                        .fluentPut("name", "DataWorks"),
+                 new SimplePropertyPreFilter(JSONObject.class)));
     }
 
     @Test
@@ -45,8 +45,8 @@ public class FilterTest {
         assertEquals(0, filter.getMaxLevel());
         filter.setMaxLevel(1);
         assertEquals(1, filter.getMaxLevel());
-        assertEquals("{\"value\":{}}"
-                , JSON.toJSONString(
+        assertEquals("{\"value\":{}}",
+                 JSON.toJSONString(
                         new JSONObject()
                                 .fluentPut("value",
                                         new JSONObject()
@@ -63,8 +63,8 @@ public class FilterTest {
         assertEquals("{\"id\":123}", JSON.toJSONString(
                 new JSONObject()
                         .fluentPut("id", 123)
-                        .fluentPut("name", "DataWorks")
-                , filter));
+                        .fluentPut("name", "DataWorks"),
+                 filter));
     }
 
     @Test
@@ -74,16 +74,16 @@ public class FilterTest {
         assertEquals("{\"name\":\"DataWorks\"}", JSON.toJSONString(
                 new JSONObject()
                         .fluentPut("id", 123)
-                        .fluentPut("name", "DataWorks")
-                , filter));
+                        .fluentPut("name", "DataWorks"),
+                 filter));
     }
 
     @Test
     public void test_6() {
         SimplePropertyPreFilter filter = new SimplePropertyPreFilter(JSONArray.class);
         assertNotNull(filter.getClazz());
-        assertEquals("{}"
-                , JSON.toJSONString(
+        assertEquals("{}",
+                 JSON.toJSONString(
                         new JSONObject()
                                 .fluentPut("value",
                                         new JSONObject()

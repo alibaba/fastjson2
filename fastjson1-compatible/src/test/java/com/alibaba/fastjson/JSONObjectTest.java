@@ -28,7 +28,6 @@ import java.util.HashMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONObjectTest {
-
     @Test
     public void test_toJSONObject() throws Exception {
         {
@@ -453,18 +452,18 @@ public class JSONObjectTest {
                         .fluentPut("val", 1)
                         .getBoolean("val"));
         assertEquals(
-                Boolean.TRUE
-                , new JSONObject()
+                Boolean.TRUE,
+                 new JSONObject()
                         .fluentPut("val", "true")
                         .getBoolean("val"));
         assertEquals(
-                Boolean.FALSE
-                , new JSONObject()
+                Boolean.FALSE,
+                 new JSONObject()
                         .fluentPut("val", Boolean.FALSE)
                         .getBoolean("val"));
         assertEquals(
-                Boolean.FALSE
-                , new JSONObject()
+                Boolean.FALSE,
+                 new JSONObject()
                         .fluentPut("val", "FALSE")
                         .getBoolean("val"));
     }
@@ -472,48 +471,48 @@ public class JSONObjectTest {
     @Test
     public void test_getBigInt() {
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12)
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (byte) 12)
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (short) 12)
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12L)
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12F)
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12D)
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigDecimal("12"))
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigInteger("12"))
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", "12")
                         .getBigInteger("val"));
     }
@@ -543,7 +542,6 @@ public class JSONObjectTest {
     }
 
     public static class Bean {
-
     }
 
     public static class Bean2 {

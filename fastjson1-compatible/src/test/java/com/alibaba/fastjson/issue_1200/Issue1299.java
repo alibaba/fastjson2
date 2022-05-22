@@ -42,14 +42,12 @@ public class Issue1299 {
         }
     }
 
-    public static class UnitsSaveResponse extends ServiceResult<UnitSave> {
-
-
-
+    public static class UnitsSaveResponse
+            extends ServiceResult<UnitSave> {
     }
 
-    public static class UnitSave implements Serializable {
-
+    public static class UnitSave
+            implements Serializable {
         private SaveUnitInfo unitInfo;
 
         private List materials;
@@ -72,11 +70,9 @@ public class Issue1299 {
     }
 
     public static class SaveUnitInfo {
-
     }
 
     public static class BaseResultDo{
-
     }
 
 

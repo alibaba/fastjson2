@@ -41,7 +41,6 @@ public class JSONExtractScalarTest {
                 result.toString());
     }
 
-
     @Test
     public void test_extract_Duration() throws Exception {
         JSONExtractScalar udf = new JSONExtractScalar("$.Duration");

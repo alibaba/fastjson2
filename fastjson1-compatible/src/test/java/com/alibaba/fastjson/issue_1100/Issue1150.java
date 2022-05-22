@@ -32,6 +32,5 @@ public class Issue1150 {
     }
 
     public static class Item {
-
     }
 }

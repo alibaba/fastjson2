@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2;
 
 
-import com.alibaba.fastjson2.JSONValidator;
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
@@ -28,8 +27,8 @@ public class JSONReaderStrTest {
             reader.nextIfMatch(':')
         );
 
-        assertEquals(123
-                , reader.readInt32()
+        assertEquals(123,
+                 reader.readInt32()
                         .intValue());
 
         reader.skipName();
@@ -69,8 +68,8 @@ public class JSONReaderStrTest {
                 reader.readFieldNameHashCode()
         );
 
-        assertEquals(1238
-                , reader.readInt64()
+        assertEquals(1238,
+                 reader.readInt64()
                         .intValue());
     }
 

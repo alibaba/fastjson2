@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class JSONPath_4 {
-
     @Test
     public void test_path() throws Exception {
         String a = "{\"key\":\"value\",\"10.0.1.1\":\"haha\"}";

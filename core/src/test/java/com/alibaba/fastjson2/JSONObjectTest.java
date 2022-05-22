@@ -58,8 +58,8 @@ public class JSONObjectTest {
     public void test_3() {
         JSONObject object = new JSONObject();
         object.put("obj", Collections.singletonList(Collections.emptyMap()));
-        List<Integer1> list = object.getObject("obj"
-                , new TypeReference<List<Integer1>>() {
+        List<Integer1> list = object.getObject("obj",
+                 new TypeReference<List<Integer1>>() {
                 }.getType());
         assertNotNull(list);
         assertEquals(Integer1.class, list.get(0).getClass());
@@ -70,8 +70,8 @@ public class JSONObjectTest {
     public void test_4() {
         JSONObject object = new JSONObject();
         object.put("obj", Collections.singletonMap("val", Collections.emptyMap()));
-        Map<String, Integer1> map = object.getObject("obj"
-                , new TypeReference<Map<String, Integer1>>() {
+        Map<String, Integer1> map = object.getObject("obj",
+                 new TypeReference<Map<String, Integer1>>() {
                 }.getType());
         assertNotNull(map);
         assertEquals(Integer1.class, map.get("val").getClass());
@@ -376,48 +376,48 @@ public class JSONObjectTest {
     @Test
     public void test_getBigInt() {
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12)
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (byte) 12)
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (short) 12)
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12L)
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12F)
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12D)
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigDecimal("12"))
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigInteger("12"))
                         .getBigInteger("val"));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONObject()
+                BigInteger.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", "12")
                         .getBigInteger("val"));
     }
@@ -425,58 +425,58 @@ public class JSONObjectTest {
     @Test
     public void test_getBigDecimal() {
         assertEquals(
-                BigDecimal.valueOf(12)
-                , new JSONObject()
+                BigDecimal.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12)
                         .getBigDecimal("val"));
         assertEquals(
-                BigDecimal.valueOf(12)
-                , new JSONObject()
+                BigDecimal.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (byte) 12)
                         .getBigDecimal("val"));
         assertEquals(
-                BigDecimal.valueOf(12)
-                , new JSONObject()
+                BigDecimal.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (short) 12)
                         .getBigDecimal("val"));
         assertEquals(
-                BigDecimal.valueOf(12)
-                , new JSONObject()
+                BigDecimal.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12L)
                         .getBigDecimal("val"));
         assertEquals(
-                BigDecimal.valueOf(12F)
-                , new JSONObject()
+                BigDecimal.valueOf(12F),
+                 new JSONObject()
                         .fluentPut("val", 12F)
                         .getBigDecimal("val"));
         assertEquals(
-                BigDecimal.valueOf(12D)
-                , new JSONObject()
+                BigDecimal.valueOf(12D),
+                 new JSONObject()
                         .fluentPut("val", 12D)
                         .getBigDecimal("val"));
         assertEquals(
-                BigDecimal.valueOf(12)
-                , new JSONObject()
+                BigDecimal.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigDecimal("12"))
                         .getBigDecimal("val"));
         assertEquals(
-                BigDecimal.valueOf(12)
-                , new JSONObject()
+                BigDecimal.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigInteger("12"))
                         .getBigDecimal("val"));
         assertEquals(
-                BigDecimal.valueOf(12)
-                , new JSONObject()
+                BigDecimal.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", "12")
                         .getBigDecimal("val"));
         assertEquals(
-                BigDecimal.ONE
-                , new JSONObject()
+                BigDecimal.ONE,
+                 new JSONObject()
                         .fluentPut("val", true)
                         .getBigDecimal("val"));
         assertEquals(
-                BigDecimal.ZERO
-                , new JSONObject()
+                BigDecimal.ZERO,
+                 new JSONObject()
                         .fluentPut("val", false)
                         .getBigDecimal("val"));
     }
@@ -484,48 +484,48 @@ public class JSONObjectTest {
     @Test
     public void test_getFloatValue() {
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12)
                         .getFloatValue("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (byte) 12)
                         .getFloatValue("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (short) 12)
                         .getFloatValue("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12L)
                         .getFloatValue("val"));
         assertEquals(
-                Float.valueOf(12F)
-                , new JSONObject()
+                Float.valueOf(12F),
+                 new JSONObject()
                         .fluentPut("val", 12F)
                         .getFloatValue("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12D)
                         .getFloatValue("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigDecimal("12"))
                         .getFloatValue("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigInteger("12"))
                         .getFloatValue("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", "12")
                         .getFloatValue("val"));
     }
@@ -533,48 +533,48 @@ public class JSONObjectTest {
     @Test
     public void test_getFloat() {
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12)
                         .getFloat("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (byte) 12)
                         .getFloat("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (short) 12)
                         .getFloat("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12L)
                         .getFloat("val"));
         assertEquals(
-                Float.valueOf(12F)
-                , new JSONObject()
+                Float.valueOf(12F),
+                 new JSONObject()
                         .fluentPut("val", 12F)
                         .getFloat("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12D)
                         .getFloat("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigDecimal("12"))
                         .getFloat("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigInteger("12"))
                         .getFloat("val"));
         assertEquals(
-                Float.valueOf(12)
-                , new JSONObject()
+                Float.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", "12")
                         .getFloat("val"));
     }
@@ -582,48 +582,48 @@ public class JSONObjectTest {
     @Test
     public void test_getDoubleValue() {
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12)
                         .getDoubleValue("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (byte) 12)
                         .getDoubleValue("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (short) 12)
                         .getDoubleValue("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12L)
                         .getDoubleValue("val"));
         assertEquals(
-                Double.valueOf(12F)
-                , new JSONObject()
+                Double.valueOf(12F),
+                 new JSONObject()
                         .fluentPut("val", 12F)
                         .getDoubleValue("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12D)
                         .getDoubleValue("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigDecimal("12"))
                         .getDoubleValue("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigInteger("12"))
                         .getDoubleValue("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", "12")
                         .getDoubleValue("val"));
     }
@@ -631,48 +631,48 @@ public class JSONObjectTest {
     @Test
     public void test_getDouble() {
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12)
                         .getDouble("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (byte) 12)
                         .getDouble("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", (short) 12)
                         .getDouble("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12L)
                         .getDouble("val"));
         assertEquals(
-                Double.valueOf(12F)
-                , new JSONObject()
+                Double.valueOf(12F),
+                 new JSONObject()
                         .fluentPut("val", 12F)
                         .getDouble("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", 12D)
                         .getDouble("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigDecimal("12"))
                         .getDouble("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", new BigInteger("12"))
                         .getDouble("val"));
         assertEquals(
-                Double.valueOf(12)
-                , new JSONObject()
+                Double.valueOf(12),
+                 new JSONObject()
                         .fluentPut("val", "12")
                         .getDouble("val"));
     }
@@ -680,23 +680,23 @@ public class JSONObjectTest {
     @Test
     public void test_getBoolean() {
         assertEquals(
-                Boolean.TRUE
-                , new JSONObject()
+                Boolean.TRUE,
+                 new JSONObject()
                         .fluentPut("val", 1)
                         .getBoolean("val"));
         assertEquals(
-                Boolean.TRUE
-                , new JSONObject()
+                Boolean.TRUE,
+                 new JSONObject()
                         .fluentPut("val", "true")
                         .getBoolean("val"));
         assertEquals(
-                Boolean.FALSE
-                , new JSONObject()
+                Boolean.FALSE,
+                 new JSONObject()
                         .fluentPut("val", Boolean.FALSE)
                         .getBoolean("val"));
         assertEquals(
-                Boolean.FALSE
-                , new JSONObject()
+                Boolean.FALSE,
+                 new JSONObject()
                         .fluentPut("val", "FALSE")
                         .getBoolean("val"));
     }
@@ -704,23 +704,23 @@ public class JSONObjectTest {
     @Test
     public void test_getBooleanValue() {
         assertEquals(
-                true
-                , new JSONObject()
+                true,
+                 new JSONObject()
                         .fluentPut("val", 1)
                         .getBooleanValue("val"));
         assertEquals(
-                true
-                , new JSONObject()
+                true,
+                 new JSONObject()
                         .fluentPut("val", "true")
                         .getBooleanValue("val"));
         assertEquals(
-                false
-                , new JSONObject()
+                false,
+                 new JSONObject()
                         .fluentPut("val", "FALSE")
                         .getBooleanValue("val"));
         assertEquals(
-                false
-                , new JSONObject()
+                false,
+                 new JSONObject()
                         .fluentPut("val", Boolean.FALSE)
                         .getBooleanValue("val"));
     }
@@ -728,48 +728,48 @@ public class JSONObjectTest {
     @Test
     public void test_getShortValue() {
         assertEquals(
-                (short) 12
-                , new JSONObject()
+                (short) 12,
+                 new JSONObject()
                         .fluentPut("val", 12)
                         .getShortValue("val"));
         assertEquals(
-                (short) 12
-                , new JSONObject()
+                (short) 12,
+                 new JSONObject()
                         .fluentPut("val", (byte) 12)
                         .getShortValue("val"));
         assertEquals(
-                (short) 12
-                , new JSONObject()
+                (short) 12,
+                 new JSONObject()
                         .fluentPut("val", (short) 12)
                         .getShortValue("val"));
         assertEquals(
-                (short) 12
-                , new JSONObject()
+                (short) 12,
+                 new JSONObject()
                         .fluentPut("val", 12L)
                         .getShortValue("val"));
         assertEquals(
-                (short) 12
-                , new JSONObject()
+                (short) 12,
+                 new JSONObject()
                         .fluentPut("val", 12F)
                         .getShortValue("val"));
         assertEquals(
-                (short) 12
-                , new JSONObject()
+                (short) 12,
+                 new JSONObject()
                         .fluentPut("val", 12D)
                         .getShortValue("val"));
         assertEquals(
-                (short) 12
-                , new JSONObject()
+                (short) 12,
+                 new JSONObject()
                         .fluentPut("val", new BigDecimal("12"))
                         .getShortValue("val"));
         assertEquals(
-                (short) 12
-                , new JSONObject()
+                (short) 12,
+                 new JSONObject()
                         .fluentPut("val", new BigInteger("12"))
                         .getShortValue("val"));
         assertEquals(
-                (short) 12
-                , new JSONObject()
+                (short) 12,
+                 new JSONObject()
                         .fluentPut("val", "12")
                         .getShortValue("val"));
     }
@@ -777,58 +777,58 @@ public class JSONObjectTest {
     @Test
     public void test_getShort() {
         assertEquals(
-                Short.valueOf((short) 12)
-                , new JSONObject()
+                Short.valueOf((short) 12),
+                 new JSONObject()
                         .fluentPut("val", 12)
                         .getShort("val"));
         assertEquals(
-                Short.valueOf((short) 12)
-                , new JSONObject()
+                Short.valueOf((short) 12),
+                 new JSONObject()
                         .fluentPut("val", (byte) 12)
                         .getShort("val"));
         assertEquals(
-                Short.valueOf((short) 12)
-                , new JSONObject()
+                Short.valueOf((short) 12),
+                 new JSONObject()
                         .fluentPut("val", (short) 12)
                         .getShort("val"));
         assertEquals(
-                Short.valueOf((short) 12)
-                , new JSONObject()
+                Short.valueOf((short) 12),
+                 new JSONObject()
                         .fluentPut("val", 12L)
                         .getShort("val"));
         assertEquals(
-                Short.valueOf((short) 12)
-                , new JSONObject()
+                Short.valueOf((short) 12),
+                 new JSONObject()
                         .fluentPut("val", 12F)
                         .getShort("val"));
         assertEquals(
-                Short.valueOf((short) 12)
-                , new JSONObject()
+                Short.valueOf((short) 12),
+                 new JSONObject()
                         .fluentPut("val", 12D)
                         .getShort("val"));
         assertEquals(
-                Short.valueOf((short) 12)
-                , new JSONObject()
+                Short.valueOf((short) 12),
+                 new JSONObject()
                         .fluentPut("val", new BigDecimal("12"))
                         .getShort("val"));
         assertEquals(
-                Short.valueOf((short) 12)
-                , new JSONObject()
+                Short.valueOf((short) 12),
+                 new JSONObject()
                         .fluentPut("val", new BigInteger("12"))
                         .getShort("val"));
         assertEquals(
-                Short.valueOf((short) 12)
-                , new JSONObject()
+                Short.valueOf((short) 12),
+                 new JSONObject()
                         .fluentPut("val", Short.valueOf((short) 12))
                         .getShort("val"));
         assertEquals(
-                Short.valueOf((short) 12)
-                , new JSONObject()
+                Short.valueOf((short) 12),
+                 new JSONObject()
                         .fluentPut("val", Byte.valueOf((byte) 12))
                         .getShort("val"));
         assertEquals(
-                Short.valueOf((short) 12)
-                , new JSONObject()
+                Short.valueOf((short) 12),
+                 new JSONObject()
                         .fluentPut("val", "12")
                         .getShort("val"));
     }
@@ -836,48 +836,48 @@ public class JSONObjectTest {
     @Test
     public void test_getByteValue() {
         assertEquals(
-                (byte) 12
-                , new JSONObject()
+                (byte) 12,
+                 new JSONObject()
                         .fluentPut("val", 12)
                         .getByteValue("val"));
         assertEquals(
-                (byte) 12
-                , new JSONObject()
+                (byte) 12,
+                 new JSONObject()
                         .fluentPut("val", (byte) 12)
                         .getByteValue("val"));
         assertEquals(
-                (byte) 12
-                , new JSONObject()
+                (byte) 12,
+                 new JSONObject()
                         .fluentPut("val", (short) 12)
                         .getByteValue("val"));
         assertEquals(
-                (byte) 12
-                , new JSONObject()
+                (byte) 12,
+                 new JSONObject()
                         .fluentPut("val", 12L)
                         .getByteValue("val"));
         assertEquals(
-                (byte) 12
-                , new JSONObject()
+                (byte) 12,
+                 new JSONObject()
                         .fluentPut("val", 12F)
                         .getByteValue("val"));
         assertEquals(
-                (byte) 12
-                , new JSONObject()
+                (byte) 12,
+                 new JSONObject()
                         .fluentPut("val", 12D)
                         .getByteValue("val"));
         assertEquals(
-                (byte) 12
-                , new JSONObject()
+                (byte) 12,
+                 new JSONObject()
                         .fluentPut("val", new BigDecimal("12"))
                         .getByteValue("val"));
         assertEquals(
-                (byte) 12
-                , new JSONObject()
+                (byte) 12,
+                 new JSONObject()
                         .fluentPut("val", new BigInteger("12"))
                         .getByteValue("val"));
         assertEquals(
-                (byte) 12
-                , new JSONObject()
+                (byte) 12,
+                 new JSONObject()
                         .fluentPut("val", "12")
                         .getByteValue("val"));
     }
@@ -885,58 +885,58 @@ public class JSONObjectTest {
     @Test
     public void test_getByte() {
         assertEquals(
-                Byte.valueOf((byte) 12)
-                , new JSONObject()
+                Byte.valueOf((byte) 12),
+                 new JSONObject()
                         .fluentPut("val", 12)
                         .getByte("val"));
         assertEquals(
-                Byte.valueOf((byte) 12)
-                , new JSONObject()
+                Byte.valueOf((byte) 12),
+                 new JSONObject()
                         .fluentPut("val", (byte) 12)
                         .getByte("val"));
         assertEquals(
-                Byte.valueOf((byte) 12)
-                , new JSONObject()
+                Byte.valueOf((byte) 12),
+                 new JSONObject()
                         .fluentPut("val", (short) 12)
                         .getByte("val"));
         assertEquals(
-                Byte.valueOf((byte) 12)
-                , new JSONObject()
+                Byte.valueOf((byte) 12),
+                 new JSONObject()
                         .fluentPut("val", 12L)
                         .getByte("val"));
         assertEquals(
-                Byte.valueOf((byte) 12)
-                , new JSONObject()
+                Byte.valueOf((byte) 12),
+                 new JSONObject()
                         .fluentPut("val", 12F)
                         .getByte("val"));
         assertEquals(
-                Byte.valueOf((byte) 12)
-                , new JSONObject()
+                Byte.valueOf((byte) 12),
+                 new JSONObject()
                         .fluentPut("val", 12D)
                         .getByte("val"));
         assertEquals(
-                Byte.valueOf((byte) 12)
-                , new JSONObject()
+                Byte.valueOf((byte) 12),
+                 new JSONObject()
                         .fluentPut("val", new BigDecimal("12"))
                         .getByte("val"));
         assertEquals(
-                Byte.valueOf((byte) 12)
-                , new JSONObject()
+                Byte.valueOf((byte) 12),
+                 new JSONObject()
                         .fluentPut("val", new BigInteger("12"))
                         .getByte("val"));
         assertEquals(
-                Byte.valueOf((byte) 12)
-                , new JSONObject()
+                Byte.valueOf((byte) 12),
+                 new JSONObject()
                         .fluentPut("val", Short.valueOf((short) 12))
                         .getByte("val"));
         assertEquals(
-                Byte.valueOf((byte) 12)
-                , new JSONObject()
+                Byte.valueOf((byte) 12),
+                 new JSONObject()
                         .fluentPut("val", Byte.valueOf((byte) 12))
                         .getByte("val"));
         assertEquals(
-                Byte.valueOf((byte) 12)
-                , new JSONObject()
+                Byte.valueOf((byte) 12),
+                 new JSONObject()
                         .fluentPut("val", "12")
                         .getByte("val"));
     }
@@ -1195,11 +1195,11 @@ public class JSONObjectTest {
                 new Class<?>[]{InvokeInterface.class, Map.class}, object
         );
 
-        assertThrows(JSONException.class
-                , () -> proxy.f(1)
+        assertThrows(JSONException.class,
+                 () -> proxy.f(1)
         );
-        assertThrows(JSONException.class
-                , () -> proxy.f1(1)
+        assertThrows(JSONException.class,
+                 () -> proxy.f1(1)
         );
 
         assertTrue(proxy.equals(object));
@@ -1208,26 +1208,26 @@ public class JSONObjectTest {
         assertEquals(101, object.get("id"));
         assertEquals(101, proxy.getId());
 
-        assertThrows(JSONException.class
-                , () -> proxy.set(101)
+        assertThrows(JSONException.class,
+                 () -> proxy.set(101)
         );
-        assertThrows(JSONException.class
-                , () -> proxy.get()
+        assertThrows(JSONException.class,
+                 () -> proxy.get()
         );
-        assertThrows(JSONException.class
-                , () -> proxy.getX()
+        assertThrows(JSONException.class,
+                 () -> proxy.getX()
         );
-        assertThrows(JSONException.class
-                , () -> proxy.is()
+        assertThrows(JSONException.class,
+                 () -> proxy.is()
         );
-        assertThrows(JSONException.class
-                , () -> proxy.x0()
+        assertThrows(JSONException.class,
+                 () -> proxy.x0()
         );
-        assertThrows(JSONException.class
-                , () -> proxy.x(0)
+        assertThrows(JSONException.class,
+                 () -> proxy.x(0)
         );
-        assertThrows(UnsupportedOperationException.class
-                , () -> proxy.xx(0, 1)
+        assertThrows(UnsupportedOperationException.class,
+                 () -> proxy.xx(0, 1)
         );
 
         assertNull(proxy.getName());

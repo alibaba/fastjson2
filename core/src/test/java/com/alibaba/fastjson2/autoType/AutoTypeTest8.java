@@ -128,14 +128,12 @@ public class AutoTypeTest8 {
     }
 
     private static class A {
-
     }
 
-    static class A1 extends A {
-
+    static class A1
+            extends A {
     }
 
     public static class B {
-
     }
 }

@@ -39,7 +39,8 @@ public class Issue1903C {
     }
 
 
-    class MapHandler implements InvocationHandler {
+    class MapHandler
+            implements InvocationHandler {
         Map<String, Object> map = new HashMap<String, Object>();
 
         public Object invoke(Object proxy, Method method, Object[] args) {

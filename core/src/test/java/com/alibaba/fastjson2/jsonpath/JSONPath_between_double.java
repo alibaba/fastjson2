@@ -45,7 +45,6 @@ public class JSONPath_between_double {
     }
 
     public static class Entity {
-
         private Double id;
         private String name;
 
@@ -69,6 +68,5 @@ public class JSONPath_between_double {
         public void setName(String name) {
             this.name = name;
         }
-
     }
 }

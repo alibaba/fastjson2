@@ -5,8 +5,8 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import java.io.Serializable;
 
 
-public class ContactTemplateParam implements Serializable {
-
+public class ContactTemplateParam
+        implements Serializable {
     private static final long serialVersionUID = 1L;
 
 

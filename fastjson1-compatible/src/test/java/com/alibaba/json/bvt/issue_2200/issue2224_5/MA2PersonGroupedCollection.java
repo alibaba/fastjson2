@@ -2,7 +2,8 @@ package com.alibaba.json.bvt.issue_2200.issue2224_5;
 
 import java.util.Map;
 
-public class MA2PersonGroupedCollection extends MA2StringGroupedCollection<String> {
+public class MA2PersonGroupedCollection
+        extends MA2StringGroupedCollection<String> {
     @Override
     protected String getKeyForItem(Map<String, String[]>[] array) {
         if (array == null || array.length == 0)

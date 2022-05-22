@@ -111,14 +111,12 @@ public class Issue2348 {
             return code;
         }
 
-
         public void setData(List<PersonnelModel> data) {
             this.data = data;
         }
         public List<PersonnelModel> getData() {
             return data;
         }
-
 
         public void setCount(int count) {
             this.count = count;
@@ -129,8 +127,8 @@ public class Issue2348 {
     }
 
     @JSONType(naming = NamingStrategy.UpperCase)
-    public static class PersonnelModel implements Serializable {
-
+    public static class PersonnelModel
+            implements Serializable {
         private String xm;
         private String xb;
         private String xb_;
@@ -626,7 +624,6 @@ public class Issue2348 {
         public String getTzz2() {
             return tzz2;
         }
-
 
         public void setRsxz(String rsxz) {
             this.rsxz = rsxz;

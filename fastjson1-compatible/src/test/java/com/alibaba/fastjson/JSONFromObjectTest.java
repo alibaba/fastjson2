@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JSONFromObjectTest {
-
     @Test
     public void test_0() throws Exception {
         User user = new User();
@@ -76,7 +75,6 @@ public class JSONFromObjectTest {
     }
 
     public static class User {
-
         private long   id;
         private String name;
 
@@ -99,7 +97,6 @@ public class JSONFromObjectTest {
     }
 
     public static class C {
-
         public int getId() {
             throw new UnsupportedOperationException();
         }

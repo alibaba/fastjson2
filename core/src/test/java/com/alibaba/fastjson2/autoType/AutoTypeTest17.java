@@ -41,12 +41,11 @@ public class AutoTypeTest17 {
 
     public static class Item {
         public Item() {
-
         }
     }
 
-    public static class XItem extends Item {
-
+    public static class XItem
+            extends Item {
     }
 
     @Test

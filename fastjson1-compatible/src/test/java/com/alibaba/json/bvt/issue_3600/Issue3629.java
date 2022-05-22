@@ -39,7 +39,6 @@ public class Issue3629 {
                 "    }\n" +
                 "]";
 
-
         List<Object> extract = (List) JSONPath.extract(text1, "$..*[?(@.price < 10)]");
         assertEquals(2, extract.size());
     }

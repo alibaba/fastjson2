@@ -184,7 +184,6 @@ public class AutoTypeTest10 {
     }
 
     public static class Item4 {
-
     }
 
 }

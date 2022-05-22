@@ -17,17 +17,14 @@ public class SafeModeTest {
         assertTrue(object instanceof Map);
         assertTrue(JSON.parse(str, JSONReader.Feature.SupportAutoType) instanceof Map);
     }
-
     public static class Bean {
     }
-
     @Test
     public void test1() {
         IOException ex = new IOException();
         String jsonString = JSON.toJSONString(ex, JSONWriter.Feature.WriteClassName);
         Throwable e1 = JSON.parseObject(jsonString, Throwable.class);
         assertEquals(Throwable.class, e1.getClass());
-
         JSONObject object = JSON.parseObject(jsonString);
         Throwable e2 = object.toJavaObject(Throwable.class);
         assertEquals(Throwable.class, e2.getClass());

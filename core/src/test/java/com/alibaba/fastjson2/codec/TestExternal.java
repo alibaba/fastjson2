@@ -46,7 +46,8 @@ public class TestExternal {
         }
     }
 
-    public static class ExtClassLoader extends ClassLoader {
+    public static class ExtClassLoader
+            extends ClassLoader {
         public ExtClassLoader() throws IOException{
             super(Thread.currentThread().getContextClassLoader());
 

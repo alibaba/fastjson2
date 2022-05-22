@@ -13,8 +13,8 @@ public class Issue3266_str {
         VO vo = new VO();
         vo.type = Color.Black;
 
-        assertEquals("\"黑色\""
-                , JSON.toJSONString(vo.type));
+        assertEquals("\"黑色\"",
+                 JSON.toJSONString(vo.type));
 
         String str = JSON.toJSONString(vo);
         assertEquals("{\"type\":\"黑色\"}", str);

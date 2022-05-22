@@ -96,7 +96,7 @@ public class ParseMapTest {
         assertEquals(0, map.size());
     }
 
-    public static class MyMap extends HashMap {
-
+    public static class MyMap
+            extends HashMap {
     }
 }

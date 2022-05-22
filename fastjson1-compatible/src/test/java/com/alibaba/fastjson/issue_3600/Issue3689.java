@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Issue3689 {
-
     @Test
     public void test_without_type_0_meaningles_char() {
         assertThrows(com.alibaba.fastjson2.JSONException.class, () -> {

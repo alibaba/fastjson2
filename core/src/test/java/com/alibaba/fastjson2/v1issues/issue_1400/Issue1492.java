@@ -38,8 +38,8 @@ public class Issue1492 {
 
     }
 
-    public static final class DubboResponse implements Serializable {
-
+    public static final class DubboResponse
+            implements Serializable {
         private String message;
 
         private String error;

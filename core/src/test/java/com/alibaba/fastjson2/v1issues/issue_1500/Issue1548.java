@@ -15,8 +15,8 @@ public class Issue1548 {
         JSON.parseArray(msg).toJavaList(PublishDoc.class);
     }
 
-    public static class PublishDoc implements Serializable {
-
+    public static class PublishDoc
+            implements Serializable {
         public static final String LSN_META_NAME = "LSN";
         public static final String DOCTYPE_META_NAME = "TYPE";
         public static final String AREA_META_NAME = "AREA";

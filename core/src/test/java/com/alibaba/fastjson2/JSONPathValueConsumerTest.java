@@ -44,8 +44,8 @@ public class JSONPathValueConsumerTest {
         JSONPath path = JSONPath.of("$.id");
         AtomicReference ref = new AtomicReference();
         path.extract(
-                JSONReader.of("{\"id\":\"123\"}")
-                , new ValueConsumer() {
+                JSONReader.of("{\"id\":\"123\"}"),
+                 new ValueConsumer() {
                     @Override
                     public void accept(String val) {
                         ref.set(val);

@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class MixinAPITest4 {
-
     static class BaseClass {
         public final int a;
         public final int b;

@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.annotation;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
-import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import org.junit.jupiter.api.Test;
@@ -26,8 +25,8 @@ public class JSONType_serializer {
         public int id;
     }
 
-    public static class BeanWriter implements ObjectWriter<Bean> {
-
+    public static class BeanWriter
+            implements ObjectWriter<Bean> {
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             Bean bean = (Bean) object;

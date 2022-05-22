@@ -7,7 +7,6 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONObjectFluentTest {
-
     @Test
     public void test_fluent() throws Exception {
         JSONObject object = new JSONObject() //

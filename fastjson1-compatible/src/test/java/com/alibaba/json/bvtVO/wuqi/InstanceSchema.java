@@ -4,7 +4,6 @@ package com.alibaba.json.bvtVO.wuqi;
  * Created by wuqi on 17/3/30.
  */
 public class InstanceSchema {
-
     public InstanceSchema() {
         this.created = System.currentTimeMillis() / 1000;
         this.updated = System.currentTimeMillis() / 1000;

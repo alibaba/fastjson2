@@ -71,7 +71,6 @@ public class Issue1066 {
     }
 
     public static enum EnumType {
-
         ONE(1, "1"),
 
         TWO(2, "2")
