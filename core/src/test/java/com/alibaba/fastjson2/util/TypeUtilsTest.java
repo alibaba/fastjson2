@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
-import java.util.Date;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -145,6 +145,29 @@ public class TypeUtilsTest {
         assertNull(TypeUtils.toBigDecimal("null"));
         assertEquals(BigDecimal.valueOf(1), TypeUtils.toBigDecimal(1));
         assertEquals(BigDecimal.valueOf(1), TypeUtils.toBigDecimal("1"));
+
+        assertEquals(byte.class, TypeUtils.loadClass("B"));
+        assertEquals(short.class, TypeUtils.loadClass("S"));
+        assertEquals(int.class, TypeUtils.loadClass("I"));
+        assertEquals(long.class, TypeUtils.loadClass("J"));
+        assertEquals(float.class, TypeUtils.loadClass("F"));
+        assertEquals(double.class, TypeUtils.loadClass("D"));
+        assertEquals(boolean.class, TypeUtils.loadClass("Z"));
+        assertEquals(char.class, TypeUtils.loadClass("C"));
+
+        Class[] classes = new Class[]{
+                String.class,
+                BigDecimal.class,
+                Integer.class,
+                Long.class,
+                char[].class,
+                Collections.EMPTY_MAP.getClass(),
+                Collections.EMPTY_SET.getClass(),
+                Collections.EMPTY_LIST.getClass()
+        };
+        for (Class clazz : classes) {
+            assertEquals(clazz, TypeUtils.loadClass(clazz.getName()));
+        }
     }
 
     @Test
@@ -323,5 +346,22 @@ public class TypeUtilsTest {
             error = ex;
         }
         assertNotNull(error);
+    }
+
+    @Test
+    public void testGetDefaultValue() {
+        assertEquals(false, TypeUtils.getDefaultValue(boolean.class));
+        assertEquals((byte) 0, TypeUtils.getDefaultValue(byte.class));
+        assertEquals((short) 0, TypeUtils.getDefaultValue(short.class));
+        assertEquals(0, TypeUtils.getDefaultValue(int.class));
+        assertEquals(0L, TypeUtils.getDefaultValue(long.class));
+        assertEquals(0F, TypeUtils.getDefaultValue(float.class));
+        assertEquals(0D, TypeUtils.getDefaultValue(double.class));
+        assertEquals((char) 0, TypeUtils.getDefaultValue(char.class));
+
+        assertEquals(Optional.empty(), TypeUtils.getDefaultValue(Optional.class));
+        assertEquals(OptionalInt.empty(), TypeUtils.getDefaultValue(OptionalInt.class));
+        assertEquals(OptionalLong.empty(), TypeUtils.getDefaultValue(OptionalLong.class));
+        assertEquals(OptionalDouble.empty(), TypeUtils.getDefaultValue(OptionalDouble.class));
     }
 }
