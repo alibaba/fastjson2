@@ -868,6 +868,29 @@ public interface JSON {
      * Parse JSON {@link String} into {@link List}
      *
      * @param text     the JSON {@link String} to be parsed
+     * @param type     specify the {@link Class} to be converted
+     * @param features features to be enabled in parsing
+     */
+    static <T> List<T> parseArray(String text, Class<T> type, JSONReader.Feature... features) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+        ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            reader.context.config(features);
+            List<T> list = reader.read(paramType);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            return list;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link List}
+     *
+     * @param text     the JSON {@link String} to be parsed
      * @param types    specify some {@link Type}s to be converted
      * @param features features to be enabled in parsing
      */
@@ -902,6 +925,31 @@ public interface JSON {
      * @param features features to be enabled in parsing
      */
     static <T> List<T> parseArray(byte[] bytes, Type type, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(
+                new Type[]{type}, null, List.class
+        );
+
+        try (JSONReader reader = JSONReader.of(bytes)) {
+            reader.context.config(features);
+            List<T> list = reader.read(paramType);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            return list;
+        }
+    }
+    /**
+     * Parse UTF8 encoded JSON byte array into {@link List} with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param bytes    UTF8 encoded JSON byte array to parse
+     * @param type     specify the {@link Class} to be converted
+     * @param features features to be enabled in parsing
+     */
+    static <T> List<T> parseArray(byte[] bytes, Class<T> type, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
