@@ -15,8 +15,8 @@ public class Issue1320 {
     }
 
     @SuppressWarnings("serial")
-    public static class SSOToken extends Token {
-
+    public static class SSOToken
+            extends Token {
         /* 登录类型 */
         private Integer type;
 
@@ -72,6 +72,5 @@ public class Issue1320 {
     }
 
     public static class Token {
-
     }
 }

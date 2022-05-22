@@ -31,7 +31,6 @@ public class RefTest1 {
     }
 
     public static class C {
-
     }
 
     private static class B {

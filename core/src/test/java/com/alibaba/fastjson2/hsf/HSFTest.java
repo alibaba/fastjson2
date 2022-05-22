@@ -52,7 +52,6 @@ public class HSFTest {
         protocol.setData(data);
         protocol.setEndpoint(data);
 
-
         byte[] jsonbBytes = JSONB.toBytes(protocol, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteClassName);
 
         JSONReader reader = JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length);

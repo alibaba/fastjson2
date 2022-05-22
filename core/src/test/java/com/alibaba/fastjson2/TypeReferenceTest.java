@@ -77,22 +77,22 @@ public class TypeReferenceTest {
 
     @Test
     public void testError() {
-        assertThrows(NullPointerException.class
-                , () -> TypeReference.get(null)
+        assertThrows(NullPointerException.class,
+                 () -> TypeReference.get(null)
         );
     }
 
     @Test
     public void testError1() {
-        assertThrows(NullPointerException.class
-                , () -> error1(User.class)
+        assertThrows(NullPointerException.class,
+                 () -> error1(User.class)
         );
     }
 
     @Test
     public void testError2() {
-        assertThrows(NullPointerException.class
-                , () -> error1(User.class)
+        assertThrows(NullPointerException.class,
+                 () -> error1(User.class)
         );
     }
 

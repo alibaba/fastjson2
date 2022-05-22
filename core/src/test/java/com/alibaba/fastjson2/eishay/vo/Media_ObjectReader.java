@@ -7,8 +7,8 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 
 import java.util.Arrays;
 
-public class Media_ObjectReader implements ObjectReader {
-
+public class Media_ObjectReader
+        implements ObjectReader {
     private FieldReader[] fieldReaders;
 
     private FieldReader fieldReader0; // bitrate
@@ -60,7 +60,7 @@ public class Media_ObjectReader implements ObjectReader {
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         jsonReader.nextIfObjectStart();
         Media object = new Media();
-        for (;;) {
+        for (; ; ) {
             if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
@@ -70,8 +70,8 @@ public class Media_ObjectReader implements ObjectReader {
                 continue;
             }
 
-            int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
-            switch(hashCode32) {
+            int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
+            switch (hashCode32) {
                 case 388047649:
                     if (hashCode64 == -8434675112194400115L) { // duration
                         object.setDuration(jsonReader.readInt64Value());
@@ -101,9 +101,7 @@ public class Media_ObjectReader implements ObjectReader {
                         int listItemCnt = jsonReader.startArray();
                         java.util.List list = new java.util.ArrayList(listItemCnt);
                         for (int j = 0; j < listItemCnt; ++j) {
-                            list.add(
-                                    jsonReader.readString());
-
+                            list.add(jsonReader.readString());
                         }
                         object.setPersons(list);
                         continue;
@@ -171,15 +169,15 @@ public class Media_ObjectReader implements ObjectReader {
         jsonReader.next();
         Media object = new Media();
         for_:
-        for (;;) {
+        for (; ; ) {
             if (jsonReader.current() == '}') {
                 jsonReader.next();
                 break;
             }
 
             long hashCode64 = jsonReader.readFieldNameHashCode();
-            int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
-            switch(hashCode32) {
+            int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
+            switch (hashCode32) {
                 case 388047649:
                     if (hashCode64 == -8434675112194400115L) { // duration
                         object.setDuration(jsonReader.readInt64Value());
@@ -209,7 +207,7 @@ public class Media_ObjectReader implements ObjectReader {
                         if (jsonReader.current() == '[') {
                             java.util.List list = new java.util.ArrayList();
                             jsonReader.next();
-                            for (;;) {
+                            for (; ; ) {
                                 if (jsonReader.current() == ']') {
                                     jsonReader.next();
                                     break;
@@ -289,8 +287,8 @@ public class Media_ObjectReader implements ObjectReader {
 
     @Override
     public FieldReader getFieldReader(long hashCode64) {
-        int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
-        switch(hashCode32) {
+        int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
+        switch (hashCode32) {
             case 388047649:
                 if (hashCode64 == -8434675112194400115L) { // duration
                     return this.fieldReader2;

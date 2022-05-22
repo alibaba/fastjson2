@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Issue3693 {
-
     @Test
     public void test_for_issue() throws Exception {
         Model<ModelProperties> model = new Model<ModelProperties>("hello 世界", new ModelProperties("红色", 66));
@@ -30,7 +29,6 @@ public class Issue3693 {
         assertEquals("红色", deserializedModel.getProperties().getColor());
         assertEquals(66, deserializedModel.getProperties().getSize());
     }
-
 
     static class Model<T> {
         private String name;
@@ -62,7 +60,6 @@ public class Issue3693 {
         }
     }
 
-
     static class ModelProperties {
         private String color;
         private int size;
@@ -92,8 +89,8 @@ public class Issue3693 {
         }
     }
 
-
-    public static class MyCodec implements ObjectSerializer, ObjectDeserializer {
+    public static class MyCodec
+            implements ObjectSerializer, ObjectDeserializer {
         @Override
         public int getFastMatchToken() {
             return 0;

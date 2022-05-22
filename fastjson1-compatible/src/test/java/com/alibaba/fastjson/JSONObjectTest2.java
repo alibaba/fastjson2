@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JSONObjectTest2 {
-
     @Test
     public void test_0() throws Exception {
         Map<String, Object> map = new LinkedHashMap<String, Object>();

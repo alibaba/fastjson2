@@ -11,7 +11,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class DateFieldTest9 {
-
     @BeforeEach
     protected void setUp() throws Exception {
         JSON.defaultTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
@@ -199,7 +198,6 @@ public class DateFieldTest9 {
     }
 
     public static class Entity {
-
         public Date date;
     }
 }

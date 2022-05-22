@@ -10,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Int16ValueArrayTest {
     @Test
     public void test_writeNull() {
-        assertEquals("{\"values\":null}"
-                , JSON.toJSONString(new VO(), JSONWriter.Feature.WriteNulls));
+        assertEquals("{\"values\":null}",
+                 JSON.toJSONString(new VO(), JSONWriter.Feature.WriteNulls));
         assertEquals("{\"values\":null}",
                 new String(
                         JSON.toJSONBytes(new VO(), JSONWriter.Feature.WriteNulls)));
 
-        assertEquals("{\"values\":null}"
-                , JSON.toJSONString(
+        assertEquals("{\"values\":null}",
+                 JSON.toJSONString(
                         JSONB.parseObject(
                                 JSONB.toBytes(new VO(), JSONWriter.Feature.WriteNulls)),
                         JSONWriter.Feature.WriteNulls));
@@ -25,15 +25,15 @@ public class Int16ValueArrayTest {
 
     @Test
     public void test_writeNull2() {
-        assertEquals("{}"
-                , JSON.toJSONString(new VO2()));
+        assertEquals("{}",
+                 JSON.toJSONString(new VO2()));
 
         assertEquals("{\"values\":null}",
                 new String(
                         JSON.toJSONBytes(new VO2(), JSONWriter.Feature.WriteNulls)));
 
-        assertEquals("{\"values\":null}"
-                , JSON.toJSONString(
+        assertEquals("{\"values\":null}",
+                 JSON.toJSONString(
                         JSONB.parseObject(
                                 JSONB.toBytes(new VO2(), JSONWriter.Feature.WriteNulls)),
                         JSONWriter.Feature.WriteNulls));
@@ -43,11 +43,11 @@ public class Int16ValueArrayTest {
     public void test_1() {
         VO vo = new VO();
         vo.values = new short[]{1, 2, 3};
-        assertEquals("{\"values\":[1,2,3]}"
-                , JSON.toJSONString(vo));
+        assertEquals("{\"values\":[1,2,3]}",
+                 JSON.toJSONString(vo));
 
-        assertEquals("{\"values\":[1,2,3]}"
-                , JSON.toJSONString(
+        assertEquals("{\"values\":[1,2,3]}",
+                 JSON.toJSONString(
                         JSONB.parseObject(
                                 JSONB.toBytes(vo))));
     }
@@ -56,11 +56,11 @@ public class Int16ValueArrayTest {
     public void test_1_setter() {
         VO2 vo = new VO2();
         vo.values = new short[]{1, 2, 3};
-        assertEquals("{\"values\":[1,2,3]}"
-                , JSON.toJSONString(vo));
+        assertEquals("{\"values\":[1,2,3]}",
+                 JSON.toJSONString(vo));
 
-        assertEquals("{\"values\":[1,2,3]}"
-                , JSON.toJSONString(
+        assertEquals("{\"values\":[1,2,3]}",
+                 JSON.toJSONString(
                         JSONB.parseObject(
                                 JSONB.toBytes(vo))));
     }

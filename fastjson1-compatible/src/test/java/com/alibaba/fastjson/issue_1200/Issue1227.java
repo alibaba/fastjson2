@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class Issue1227 {
     @Test
     public void test_for_issue() throws Exception {
-
         String t2 = "{\"state\":2,\"msg\":\"\ufeffmsg2222\",\"data\":[]}";
 
         try {

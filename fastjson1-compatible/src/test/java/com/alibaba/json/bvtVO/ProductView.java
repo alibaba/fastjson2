@@ -1,7 +1,6 @@
 package com.alibaba.json.bvtVO;
 
 public class ProductView {
-
     private Integer id;
     private String  keyword;
     private boolean hasProduct;

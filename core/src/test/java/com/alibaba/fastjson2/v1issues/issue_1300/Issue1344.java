@@ -18,7 +18,8 @@ public class Issue1344 {
         System.out.println("after：" + o.getMessage());
     }
 
-    public static class TestException extends Exception {
+    public static class TestException
+            extends Exception {
 
         @JSONCreator
         public TestException() {

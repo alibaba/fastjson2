@@ -1,11 +1,12 @@
 package com.alibaba.fastjson2.autoType;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Test;
 
-import java.util.Base64;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AutoTypeTest49 {
     @Test
@@ -22,10 +23,8 @@ public class AutoTypeTest49 {
     }
 
     public static class Bean {
-
     }
 
     public static class A {
-
     }
 }

@@ -12,9 +12,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Int32Value_1 {
-    public int MIN_VALUE = Integer.MIN_VALUE;
-    public int MAX_VALUE = Integer.MAX_VALUE;
-
     private int[] values = new int[100];
     private int off;
 

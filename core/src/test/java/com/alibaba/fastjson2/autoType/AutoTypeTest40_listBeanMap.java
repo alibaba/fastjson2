@@ -22,13 +22,13 @@ public class AutoTypeTest40_listBeanMap {
         Bean bean = new Bean();
         bean.items = list;
 
-        byte[] bytes = JSONB.toBytes(bean
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(bean,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -51,7 +51,6 @@ public class AutoTypeTest40_listBeanMap {
     }
 
     public abstract static class ItemBase {
-
     }
 
     @Test
@@ -62,13 +61,13 @@ public class AutoTypeTest40_listBeanMap {
         Bean2 bean = new Bean2();
         bean.items = map;
 
-        byte[] bytes = JSONB.toBytes(bean
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(bean,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);

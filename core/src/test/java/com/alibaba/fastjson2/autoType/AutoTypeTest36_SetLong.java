@@ -24,13 +24,13 @@ public class AutoTypeTest36_SetLong {
         bean.values1 = new HashSet<>();
         bean.values1.add(100L);
 
-        byte[] bytes = JSONB.toBytes(bean
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(bean,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -77,13 +77,13 @@ public class AutoTypeTest36_SetLong {
             list.add(bean1);
         }
 
-        byte[] bytes = JSONB.toBytes(list
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(list,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -111,13 +111,13 @@ public class AutoTypeTest36_SetLong {
         Bean2 bean = new Bean2();
         bean.values = set;
 
-        byte[] bytes = JSONB.toBytes(bean
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(bean,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);

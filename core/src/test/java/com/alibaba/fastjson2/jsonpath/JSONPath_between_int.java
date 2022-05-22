@@ -66,8 +66,8 @@ public class JSONPath_between_int {
                                 .fluentPut("id", BigInteger.valueOf(103))
                                 .fluentPut("name", "EMR")
                 );
-        assertEquals("[{\"id\":101,\"name\":\"DataWorks\"},{\"id\":102,\"name\":\"MaxCompute\"}]"
-                , JSONPath.of("$[?(@.id between 101 and 102)]")
+        assertEquals("[{\"id\":101,\"name\":\"DataWorks\"},{\"id\":102,\"name\":\"MaxCompute\"}]",
+                 JSONPath.of("$[?(@.id between 101 and 102)]")
                         .eval(array)
                         .toString()
         );
@@ -91,8 +91,8 @@ public class JSONPath_between_int {
                                 .fluentPut("id", BigDecimal.valueOf(103))
                                 .fluentPut("name", "EMR")
                 );
-        assertEquals("[{\"id\":101,\"name\":\"DataWorks\"},{\"id\":102,\"name\":\"MaxCompute\"}]"
-                , JSONPath.of("$[?(@.id between 101 and 102)]")
+        assertEquals("[{\"id\":101,\"name\":\"DataWorks\"},{\"id\":102,\"name\":\"MaxCompute\"}]",
+                 JSONPath.of("$[?(@.id between 101 and 102)]")
                         .eval(array)
                         .toString()
         );
@@ -116,8 +116,8 @@ public class JSONPath_between_int {
                                 .fluentPut("id", BigDecimal.valueOf(103))
                                 .fluentPut("name", "EMR")
                 );
-        assertEquals("[{\"id\":101,\"name\":\"DataWorks\"},{\"id\":102,\"name\":\"MaxCompute\"}]"
-                , JSONPath.of("$[?(@.id >= 101 and @.id <= 102)]")
+        assertEquals("[{\"id\":101,\"name\":\"DataWorks\"},{\"id\":102,\"name\":\"MaxCompute\"}]",
+                 JSONPath.of("$[?(@.id >= 101 and @.id <= 102)]")
                         .eval(array)
                         .toString()
         );
@@ -128,20 +128,19 @@ public class JSONPath_between_int {
         JSONObject object = new JSONObject()
                 .fluentPut("id", BigDecimal.valueOf(101))
                 .fluentPut("name", "DataWorks");
-        assertEquals("{\"id\":101,\"name\":\"DataWorks\"}"
-                , JSONPath.of("$[?(@.id >= 101 and @.id <= 102)]")
+        assertEquals("{\"id\":101,\"name\":\"DataWorks\"}",
+                 JSONPath.of("$[?(@.id >= 101 and @.id <= 102)]")
                         .eval(object)
                         .toString()
         );
-        assertEquals("{\"id\":101,\"name\":\"DataWorks\"}"
-                , JSONPath.of("$[?(@.id <= 101 or @.id >= 102)]")
+        assertEquals("{\"id\":101,\"name\":\"DataWorks\"}",
+                 JSONPath.of("$[?(@.id <= 101 or @.id >= 102)]")
                         .eval(object)
                         .toString()
         );
     }
 
     public static class Entity {
-
         private Integer id;
         private String name;
 
@@ -165,6 +164,5 @@ public class JSONPath_between_int {
         public void setName(String name) {
             this.name = name;
         }
-
     }
 }

@@ -29,7 +29,8 @@ public class Issue3655 {
         assertEquals(jsonStr, result);
     }
 
-    public static class issue3655_b extends issue3655_a {
+    public static class issue3655_b
+            extends issue3655_a {
         private String data;
         private String data2;
         private String data3;
@@ -130,7 +131,8 @@ public class Issue3655 {
     @Getter
     @Setter
     @AllArgsConstructor
-    public static class issue3655_c extends issue3655_a {
+    public static class issue3655_c
+            extends issue3655_a {
         private String data;
         private String data2;
         private String data3;

@@ -41,7 +41,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 @ContextConfiguration
 public class Issue1405 {
-
     @Autowired
     private WebApplicationContext wac;
 
@@ -57,12 +56,10 @@ public class Issue1405 {
     @Controller
     @RequestMapping("fastjson")
     public static class BeanController {
-
         @RequestMapping(value = "/test1405", method = RequestMethod.GET)
         public
         @ResponseBody
         ModelAndView test7() {
-
             AuthIdentityRequest authRequest = new AuthIdentityRequest();
             authRequest.setAppId("cert01");
             authRequest.setUserId(2307643);
@@ -87,7 +84,8 @@ public class Issue1405 {
     @Configuration
     @Order(Ordered.LOWEST_PRECEDENCE + 1)
     @EnableWebMvc
-    public static class WebMvcConfig extends WebMvcConfigurerAdapter {
+    public static class WebMvcConfig
+            extends WebMvcConfigurerAdapter {
         @Override
         public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
             FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
@@ -103,7 +101,6 @@ public class Issue1405 {
 
     @Test
     public void test7() throws Exception {
-
         mockMvc.perform(
                 (get("/fastjson/test1405").characterEncoding("UTF-8")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -111,7 +108,6 @@ public class Issue1405 {
     }
 
     static class AuthIdentityRequest {
-
         private String appId;
         private int userId;
         private String idNumber;

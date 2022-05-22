@@ -20,13 +20,13 @@ public class AutoTypeTest36_MapAtomicLong {
         bean.map = new HashMap<>();
         bean.map.put("123", new AtomicLong(123));
 
-        byte[] bytes = JSONB.toBytes(bean
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(bean,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -50,13 +50,13 @@ public class AutoTypeTest36_MapAtomicLong {
         bean.map = new HashMap<>();
         bean.map.put("123", new AtomicInteger(123));
 
-        byte[] bytes = JSONB.toBytes(bean
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(bean,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);

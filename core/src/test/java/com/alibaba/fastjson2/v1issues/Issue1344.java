@@ -18,7 +18,8 @@ public class Issue1344 {
         assertNull(o.getMessage());
     }
 
-    public static class TestException extends Exception {
+    public static class TestException
+            extends Exception {
 
         @JSONCreator
         public TestException() {

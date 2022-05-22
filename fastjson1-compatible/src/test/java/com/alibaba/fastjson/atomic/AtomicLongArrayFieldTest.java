@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 public class AtomicLongArrayFieldTest {
-
     @Test
     public void test_codec_null() {
         V0 v = new V0();
@@ -48,7 +47,6 @@ public class AtomicLongArrayFieldTest {
     }
 
     public static class V0 {
-
         private AtomicLongArray value;
 
         public AtomicLongArray getValue() {

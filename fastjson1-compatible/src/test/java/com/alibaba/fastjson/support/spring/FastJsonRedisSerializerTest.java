@@ -61,7 +61,6 @@ public class FastJsonRedisSerializerTest {
      */
     @Test
     public void test_6() {
-
         FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
         fastJsonConfig.setSerializerFeatures(SerializerFeature.WriteClassName);

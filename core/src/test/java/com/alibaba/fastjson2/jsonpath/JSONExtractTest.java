@@ -23,8 +23,8 @@ public class JSONExtractTest {
         JSONExtract udf = new JSONExtract("$.id");
 
         JSONWritable result = udf.eval(utf8Bytes);
-        assertEquals("\"1\""
-                , result.toString());
+        assertEquals("\"1\"",
+                 result.toString());
     }
 
     @Test
@@ -32,7 +32,7 @@ public class JSONExtractTest {
         JSONExtract udf = new JSONExtract("$.StartTime");
 
         JSONWritable result = udf.eval(utf8Bytes);
-        assertEquals("\"2020-01-06 17:00:00\""
-                , result.toString());
+        assertEquals("\"2020-01-06 17:00:00\"",
+                 result.toString());
     }
 }

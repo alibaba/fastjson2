@@ -36,7 +36,6 @@ public class Issue126 {
 
     @Data
     public static class People {
-
         @JSONField(ordinal = 5)
         public double weight;
 

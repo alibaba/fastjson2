@@ -8,7 +8,6 @@ import java.util.Map;
  * Created by wuqi on 17/3/30.
  */
 public class SchemaResult {
-
     private int code;
     private String massage;
     private List<InstanceSchema> data;

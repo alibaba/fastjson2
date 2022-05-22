@@ -5,7 +5,8 @@ import java.io.Serializable;
 /**
  * Created by wenshao on 16/03/2017.
  */
-public class BankCard implements Serializable {
+public class BankCard
+        implements Serializable {
     private static final long serialVersionUID = -8043292491053382301L;
 
     public static final Integer CARD_TYPE_DEBIT = 1;        //借记卡

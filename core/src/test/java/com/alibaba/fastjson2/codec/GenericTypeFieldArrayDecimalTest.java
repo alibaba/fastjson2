@@ -122,7 +122,8 @@ public class GenericTypeFieldArrayDecimalTest {
         public T[] value;
     }
 
-    public static class P1 extends P<BigDecimal> {
+    public static class P1
+            extends P<BigDecimal> {
     }
 
     public static class P2<T extends BigDecimal> extends P<T> {

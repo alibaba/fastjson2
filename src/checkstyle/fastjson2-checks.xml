@@ -129,5 +129,7 @@
             <property name="tokens" value="DOT" />
             <property name="allowLineBreaks" value="false" />
         </module>
+
+        <module name="MissingOverride"/>
     </module>
 </module>

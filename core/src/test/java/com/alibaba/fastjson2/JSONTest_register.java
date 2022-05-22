@@ -33,7 +33,8 @@ public class JSONTest_register {
         }
     }
 
-    public static class VOWriter implements ObjectWriter {
+    public static class VOWriter
+            implements ObjectWriter {
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
             VO vo = (VO) object;
             jsonWriter.startObject();
@@ -50,7 +51,8 @@ public class JSONTest_register {
         }
     }
 
-    public static class VOReader implements ObjectReader<VO> {
+    public static class VOReader
+            implements ObjectReader<VO> {
         public VO readObject(JSONReader jsonReader, long features) {
             jsonReader.nextIfObjectStart();
 

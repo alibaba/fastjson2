@@ -28,14 +28,13 @@ public class AutoTypeTest3 {
 
     @JSONType(deserializeFeatures = JSONReader.Feature.SupportAutoType)
     public static class B {
-
     }
 
-    public static class C extends B {
+    public static class C
+            extends B {
         public int id;
 
         public C() {
-
         }
 
         public C(int id) {

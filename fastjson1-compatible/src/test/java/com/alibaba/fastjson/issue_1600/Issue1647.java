@@ -25,7 +25,6 @@ public class Issue1647 {
 
     @JSONType(naming = PropertyNamingStrategy.SnakeCase)
     public static class Params {
-
         private boolean withFields;
 
         private List<String> verificationIds;

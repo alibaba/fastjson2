@@ -20,10 +20,10 @@ public class Issue2289 {
     }
 
     public static class A {
-
     }
 
-    public static class B extends A {
+    public static class
+    B extends A {
         public int id;
     }
 }

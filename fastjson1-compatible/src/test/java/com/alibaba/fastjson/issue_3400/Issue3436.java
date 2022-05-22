@@ -27,7 +27,6 @@ public class Issue3436 {
     public static class FileSystemResourceMixedIn {
         @JSONCreator
         public FileSystemResourceMixedIn(String path) {
-
         }
     }
 }

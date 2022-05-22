@@ -17,14 +17,14 @@ public class AutoTypeTest46_Pair {
         bean.pair1 = Pair.of("101", Boolean.TRUE);
         bean.pair2 = Pair.of("102", Boolean.TRUE);
 
-        byte[] bytes = JSONB.toBytes(bean
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
-                , JSONWriter.Feature.WriteNameAsSymbol
+        byte[] bytes = JSONB.toBytes(bean,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+                 JSONWriter.Feature.WriteNameAsSymbol
         );
 
         JSONBDump.dump(bytes);

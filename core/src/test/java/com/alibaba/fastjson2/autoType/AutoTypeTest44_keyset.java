@@ -19,13 +19,13 @@ public class AutoTypeTest44_keyset {
         map.put("a", 101);
         Set value = map.keySet();
 
-        byte[] bytes = JSONB.toBytes(value
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(value,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -47,13 +47,13 @@ public class AutoTypeTest44_keyset {
         map.put("a", 101);
         Collection value = map.values();
 
-        byte[] bytes = JSONB.toBytes(value
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(value,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -76,13 +76,13 @@ public class AutoTypeTest44_keyset {
         map.put("a", 101);
         Set value = map.keySet();
 
-        byte[] bytes = JSONB.toBytes(value
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(value,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -104,13 +104,13 @@ public class AutoTypeTest44_keyset {
         map.put("a", 101);
         Collection value = map.values();
 
-        byte[] bytes = JSONB.toBytes(value
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(value,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -133,13 +133,13 @@ public class AutoTypeTest44_keyset {
         map.put("a", 101);
         Set value = map.keySet();
 
-        byte[] bytes = JSONB.toBytes(value
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(value,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -161,13 +161,13 @@ public class AutoTypeTest44_keyset {
         map.put("a", 101);
         Collection value = map.values();
 
-        byte[] bytes = JSONB.toBytes(value
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(value,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -190,13 +190,13 @@ public class AutoTypeTest44_keyset {
         map.put("a", 101);
         Set value = map.keySet();
 
-        byte[] bytes = JSONB.toBytes(value
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(value,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -218,13 +218,13 @@ public class AutoTypeTest44_keyset {
         map.put("a", 101);
         Collection value = map.values();
 
-        byte[] bytes = JSONB.toBytes(value
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(value,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -247,13 +247,13 @@ public class AutoTypeTest44_keyset {
         map.put("a", 101);
         Set value = map.keySet();
 
-        byte[] bytes = JSONB.toBytes(value
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(value,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -275,13 +275,13 @@ public class AutoTypeTest44_keyset {
         map.put("a", 101);
         Collection value = map.values();
 
-        byte[] bytes = JSONB.toBytes(value
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(value,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);

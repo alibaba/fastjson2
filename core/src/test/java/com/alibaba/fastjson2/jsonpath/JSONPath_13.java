@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONPath_13 {
-
     @Test
     public void test_0() {
         JSONObject root = new JSONObject();

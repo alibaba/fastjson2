@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MixinAPITest2 {
-
     static class BaseClass {
         public final int a;
         public final int b;
@@ -27,7 +26,6 @@ public class MixinAPITest2 {
 
         @JSONCreator(parameterNames = {"apple", "banana"})
         public MixIn1(int a, int b) {
-
         }
     }
 

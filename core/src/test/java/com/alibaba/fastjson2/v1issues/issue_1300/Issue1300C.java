@@ -31,7 +31,8 @@ public class Issue1300C {
         assertEquals(0, object.code);
     }
 
-    public static class City implements Parcelable {
+    public static class City
+            implements Parcelable {
         public final int code;
         public final String name;
         public final String pinyin;

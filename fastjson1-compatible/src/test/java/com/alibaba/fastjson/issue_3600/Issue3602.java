@@ -27,7 +27,8 @@ public class Issue3602 {
         public Long id;
     }
 
-    public static class VOSer implements ObjectSerializer {
+    public static class VOSer
+            implements ObjectSerializer {
         public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features) throws IOException {
             throw new UnsupportedEncodingException();
         }

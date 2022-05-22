@@ -45,7 +45,6 @@ public class JSONExtractScalarTest {
         }
     }
 
-
     @Test
     public void test_extract_Duration() {
         JSONExtractScalar udf = new JSONExtractScalar("$.Duration");

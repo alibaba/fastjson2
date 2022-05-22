@@ -5,7 +5,8 @@ import java.io.Serializable;
 /**
  * Created by wenshao on 16/03/2017.
  */
-public class BaseDTO implements Serializable {
+public class BaseDTO
+        implements Serializable {
     /**
      *  serialVersionUID
      */

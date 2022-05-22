@@ -93,7 +93,8 @@ public class Issue2617 {
 		}
 	}
 
-	public static class MyDateDeserializer implements ObjectDeserializer {
+	public static class MyDateDeserializer
+            implements ObjectDeserializer {
 
 		@SuppressWarnings("unchecked")
 		@Override

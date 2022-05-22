@@ -1,6 +1,5 @@
 package com.alibaba.json.bvt.issue_1300;
 
-
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.jaxrs.FastJsonFeature;
@@ -18,10 +17,9 @@ import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import java.util.Date;
 
-public class Issue1392 extends JerseyTest {
-
+public class Issue1392
+        extends JerseyTest {
     static class Book {
-
         private int bookId;
         private String bookName;
         private String publisher;
@@ -79,10 +77,9 @@ public class Issue1392 extends JerseyTest {
     }
 
     @Provider
-    static class FastJsonResolver implements ContextResolver<FastJsonConfig> {
-
+    static class FastJsonResolver
+            implements ContextResolver<FastJsonConfig> {
         public FastJsonConfig getContext(Class<?> type) {
-
             FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
             fastJsonConfig.setSerializerFeatures(
@@ -93,17 +90,14 @@ public class Issue1392 extends JerseyTest {
         }
     }
 
-
     @Path("book1392")
     public static class BookRestFul {
-
         @GET
         @Path("{id}")
         @Produces({"application/javascript", "application/json"})
         @Consumes({"application/javascript", "application/json"})
         @JSONP(queryParam = "callback")
         public Book getBookById(@PathParam("id") Long id) {
-
             Book book = new Book();
             book.setBookId(2);
             book.setBookName("Python源码剖析");
@@ -137,7 +131,6 @@ public class Issue1392 extends JerseyTest {
 
     @Test
     public void test() {
-
         final String reponse = target("book1392").path("123").request().accept("application/javascript").get(String.class);
         System.out.println(reponse);
         Assertions.assertTrue(reponse.indexOf("Python源码剖析") > 0);

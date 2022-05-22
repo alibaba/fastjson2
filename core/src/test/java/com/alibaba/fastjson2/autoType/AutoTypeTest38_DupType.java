@@ -16,13 +16,13 @@ public class AutoTypeTest38_DupType {
         bean.second = new Item(102, "MaxCompute");
         bean.third = new Item(102, "EMR");
 
-        byte[] bytes = JSONB.toBytes(bean
-                , JSONWriter.Feature.WriteClassName
-                , JSONWriter.Feature.FieldBased
-                , JSONWriter.Feature.ReferenceDetection
-                , JSONWriter.Feature.WriteNulls
-                , JSONWriter.Feature.NotWriteDefaultValue
-                , JSONWriter.Feature.NotWriteHashMapArrayListClassName
+        byte[] bytes = JSONB.toBytes(bean,
+                 JSONWriter.Feature.WriteClassName,
+                 JSONWriter.Feature.FieldBased,
+                 JSONWriter.Feature.ReferenceDetection,
+                 JSONWriter.Feature.WriteNulls,
+                 JSONWriter.Feature.NotWriteDefaultValue,
+                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -60,7 +60,6 @@ public class AutoTypeTest38_DupType {
         public String name;
 
         public Item() {
-
         }
 
         public Item(int id, String name) {

@@ -33,13 +33,12 @@ public class Issue1151 {
     }
 
     public static  interface B {
-
     }
 
-    public static  class C implements B {
+    public static class C
+            implements B {
         public int id;
         public C() {
-
         }
 
         public C(int id) {

@@ -40,12 +40,12 @@ public class Issue89 {
     }
 
     public static class BaseDO {
-
     }
 
     @Getter
     @Setter
-    public static class ActivityDO extends BaseDO {
+    public static class ActivityDO
+            extends BaseDO {
         private JSONObject activityContent;
     }
 }

@@ -25,8 +25,8 @@ public class CharacterWriteTest {
         String str = jw.toString();
         assertEquals("\"abc\"", str);
 
-        assertTrue(Arrays.equals(array
-                , JSONReader.of(str)
+        assertTrue(Arrays.equals(array,
+                 JSONReader.of(str)
                         .read(array.getClass())));
     }
 

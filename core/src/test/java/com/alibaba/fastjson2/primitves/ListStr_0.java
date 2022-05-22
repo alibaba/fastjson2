@@ -53,7 +53,6 @@ public class ListStr_0 {
         }
     }
 
-
     public static class VO {
         private List<String> value;
 

@@ -4,7 +4,6 @@ package com.alibaba.fastjson2.util;
 public class Fnv {
     public static final long MAGIC_HASH_CODE = 0xcbf29ce484222325L;
     public static final long MAGIC_PRIME = 0x100000001b3L;
-
     public static long hashCode64LCase(String name) {
         long hashCode = MAGIC_HASH_CODE;
         for (int i = 0; i < name.length(); ++i) {
@@ -12,7 +11,6 @@ public class Fnv {
             if (ch == '_') {
                 continue;
             }
-
             if (ch >= 'A' && ch <= 'Z') {
                 ch = (char) (ch + 32);
             }
@@ -21,7 +19,6 @@ public class Fnv {
         }
         return hashCode;
     }
-
     public static long hashCode64(String name) {
         long hashCode = MAGIC_HASH_CODE;
         for (int i = 0; i < name.length(); ++i) {

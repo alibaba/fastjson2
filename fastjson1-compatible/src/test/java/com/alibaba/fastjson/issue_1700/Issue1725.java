@@ -22,8 +22,8 @@ public class Issue1725 {
         public FieldEnum enumField;
     }
 
-    public static class ConcreteBean extends AbstractBean {
-
+    public static class ConcreteBean
+            extends AbstractBean {
     }
 
     public static enum FieldEnum { A, B }

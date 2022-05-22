@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -15,9 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONPath_2 {
     @Test
-    public void test_path() throws Exception {
-        String json ="{\"user\":[{\"amount\":1.11,\"isadmin\":true,\"age\":18},{\"amount\":0.22,\"isadmin\":false,\"age\":28}]}";
-
+    public void test_path() {
+        String json = "{\"user\":[{\"amount\":1.11,\"isadmin\":true,\"age\":18},{\"amount\":0.22,\"isadmin\":false,\"age\":28}]}";
 
         {
             JSONArray array = (JSONArray) JSONPath.extract(json, "$.user");
@@ -126,9 +124,9 @@ public class JSONPath_2 {
                 );
 
         assertEquals("[{\"id\":101,\"amount\":1}]",
-            JSONPath.of("$.user[?(@.amount <= 1)]")
-                    .eval(root)
-                    .toString()
+                JSONPath.of("$.user[?(@.amount <= 1)]")
+                        .eval(root)
+                        .toString()
         );
         assertEquals("[{\"id\":101,\"amount\":1}]",
                 JSONPath.of("$.user[?(@.amount < 2)]")
@@ -136,9 +134,9 @@ public class JSONPath_2 {
                         .toString()
         );
         assertEquals("[{\"id\":102,\"amount\":2.0},{\"id\":103,\"amount\":3.0}]",
-            JSONPath.of("$.user[?(@.amount >= 2)]")
-                    .eval(root)
-                    .toString()
+                JSONPath.of("$.user[?(@.amount >= 2)]")
+                        .eval(root)
+                        .toString()
         );
         assertEquals("[{\"id\":103,\"amount\":3.0}]",
                 JSONPath.of("$.user[?(@.amount > 2)]")
@@ -161,43 +159,42 @@ public class JSONPath_2 {
         );
     }
 
-
     @Test
     public void test_path_offset() {
         String content = "{\n"
-            + "    \"code\":\"success\",\n"
-            + "    \"data\":{\n"
-            + "        \"data2\":{\n"
-            + "            \"id\":null,\n"
-            + "            \"type\":null,\n"
-            + "            \"serveCategoryInfoList\":[\n"
-            + "                {\n"
-            + "                    \"id\":0,\n"
-            + "                    \"infoList\":[\n"
-            + "\n"
-            + "                    ],\n"
-            + "                    \"idList\":[\n"
-            + "                        200226\n"
-            + "                    ]\n"
-            + "                },\n"
-            + "                {\n"
-            + "                    \"id\":1,\n"
-            + "                    \"idList\":[\n"
-            + "                        1,\n"
-            + "                        2,\n"
-            + "                        3,\n"
-            + "                        4,\n"
-            + "                        5,\n"
-            + "                        6,\n"
-            + "                        7\n"
-            + "                    ]\n"
-            + "                },\n"
-            + "            ]\n"
-            + "        },\n"
-            + "    },\n"
-            + "    \"msg\":\"\",\n"
-            + "    \"status\":\"1\"\n"
-            + "}\n";
+                + "    \"code\":\"success\",\n"
+                + "    \"data\":{\n"
+                + "        \"data2\":{\n"
+                + "            \"id\":null,\n"
+                + "            \"type\":null,\n"
+                + "            \"serveCategoryInfoList\":[\n"
+                + "                {\n"
+                + "                    \"id\":0,\n"
+                + "                    \"infoList\":[\n"
+                + "\n"
+                + "                    ],\n"
+                + "                    \"idList\":[\n"
+                + "                        200226\n"
+                + "                    ]\n"
+                + "                },\n"
+                + "                {\n"
+                + "                    \"id\":1,\n"
+                + "                    \"idList\":[\n"
+                + "                        1,\n"
+                + "                        2,\n"
+                + "                        3,\n"
+                + "                        4,\n"
+                + "                        5,\n"
+                + "                        6,\n"
+                + "                        7\n"
+                + "                    ]\n"
+                + "                },\n"
+                + "            ]\n"
+                + "        },\n"
+                + "    },\n"
+                + "    \"msg\":\"\",\n"
+                + "    \"status\":\"1\"\n"
+                + "}\n";
         JSONPath path = JSONPath.of("$.status");
         assertEquals(path.extract(JSONReader.of(content)), "1");
     }

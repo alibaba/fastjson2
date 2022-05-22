@@ -15,8 +15,8 @@ public class Issue3082 {
     @Test
     public void test_for_issue_entry() {
         String str = "{\"k\":{\"k\":\"v\"}}";
-        Map.Entry<String, Map.Entry<String, String>> entry = JSON.parseObject(str
-                , new TypeReference<Map.Entry<String, Map.Entry<String, String>>>() {});
+        Map.Entry<String, Map.Entry<String, String>> entry = JSON.parseObject(str,
+                 new TypeReference<Map.Entry<String, Map.Entry<String, String>>>() {});
         assertEquals("v", entry.getValue().getValue());
     }
 

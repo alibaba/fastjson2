@@ -26,6 +26,5 @@ public class HomePagePerf {
         byte[] bytes = JSON.toJSONBytes(resp);
         byte[] bytes2 = JSON.toJSONBytes(resp, JSONWriter.Feature.BeanToArray);
         System.out.println(str2);
-
     }
 }

@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AtomicIntegerReadOnlyTest {
-
     @Test
     public void test_readOnly_method() {
         V0 v = new V0(123);
@@ -35,7 +34,6 @@ public class AtomicIntegerReadOnlyTest {
     }
 
     public static class V0 {
-
         private final AtomicInteger value;
 
         public V0(){

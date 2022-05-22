@@ -79,9 +79,7 @@ public class FastJsonJsonViewUnitTest {
         request.addParameter("callback", "queryName");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-
         assertTrue(view.isExtractValueFromSingleKeyModel());
-
 
         view.render(Collections.singletonMap("abc", "cde中文"), request, response);
         String contentAsString = response.getContentAsString();

@@ -69,7 +69,6 @@ public class DateFieldFormatTest {
     }
 
     public static class Model {
-
         @JSONField(format = "yyyy-MM-dd HH:mm:ss")
         public Date serverTime;
 

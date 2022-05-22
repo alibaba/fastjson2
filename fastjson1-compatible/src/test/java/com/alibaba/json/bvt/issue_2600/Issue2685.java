@@ -43,8 +43,8 @@ public class Issue2685 {
         void setMsgContent(SmsMessage msg);
     }
 
-    public static class MyDeserializer implements ObjectDeserializer {
-
+    public static class MyDeserializer
+            implements ObjectDeserializer {
         public <T> T deserialze(DefaultJSONParser parser, Type type, Object fieldName) {
             String msg = StringCodec.deserialze(parser);
             return (T) CMPPCommonUtil.buildTextMessage(msg);

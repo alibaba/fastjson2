@@ -24,7 +24,6 @@ public class Issue1319 {
 
     @JSONType(seeAlso = {OtherEnum.class, MyEnum.class})
     interface EnumInterface{
-
     }
 
     @JSONType(typeName = "myEnum")

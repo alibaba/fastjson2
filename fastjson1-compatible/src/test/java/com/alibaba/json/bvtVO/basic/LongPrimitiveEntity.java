@@ -4,7 +4,6 @@ public class LongPrimitiveEntity {
     public long value;
 
     public LongPrimitiveEntity() {
-
     }
 
     public LongPrimitiveEntity(long value) {

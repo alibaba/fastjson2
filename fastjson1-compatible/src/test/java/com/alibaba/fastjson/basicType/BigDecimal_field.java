@@ -32,20 +32,14 @@ public class BigDecimal_field {
                 JSON.toJSONString(
                         new Model(100)));
 
-        assertEquals("{\"value\":-100}",
-                JSON.toJSONString(
-                        new Model(-100)));
+        assertEquals("{\"value\":-100}", JSON.toJSONString(new Model(-100)));
     }
-
-
-
 
     public static class Model {
         @JSONField(serialzeFeatures = BrowserCompatible)
         public BigDecimal value;
 
         public Model() {
-
         }
 
         public Model(long value) {

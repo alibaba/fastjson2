@@ -25,69 +25,68 @@ public class JSONPath_17 {
     }
 
     @Test
-    public void test_for_jsonpath_enumKey() throws Exception {
+    public void test_for_jsonpath_enumKey() {
         Map map = new HashMap();
         map.put(TimeUnit.DAYS, "101");
 
-        assertEquals("101"
-                , JSONPath.of("$.DAYS")
+        assertEquals("101",
+                 JSONPath.of("$.DAYS")
                         .eval(map));
     }
 
     @Test
-    public void test_for_jsonpath_enumKey_1() throws Exception {
+    public void test_for_jsonpath_enumKey_1() {
         Map root = new HashMap();
         Map map = new HashMap();
         map.put(TimeUnit.DAYS, "101");
         root.put("values", map);
 
-        assertEquals("101"
-                , JSONPath.of("$.values.DAYS")
+        assertEquals("101",
+                 JSONPath.of("$.values.DAYS")
                         .eval(root));
     }
 
     @Test
-    public void test_for_jsonpath_longKey() throws Exception {
+    public void test_for_jsonpath_longKey() {
         Map map = new HashMap();
         map.put(2748734281L, "101");
 
-        assertEquals("101"
-                , JSONPath.of("$.2748734281")
+        assertEquals("101",
+                 JSONPath.of("$.2748734281")
                         .eval(map));
     }
 
     @Test
-    public void test_for_jsonpath_longKey_1() throws Exception {
+    public void test_for_jsonpath_longKey_1() {
         Map root = new HashMap();
         Map map = new HashMap();
         map.put(2748734281L, "101");
         root.put("values", map);
 
-        assertEquals("101"
-                , JSONPath.of("$.values.2748734281")
+        assertEquals("101",
+                 JSONPath.of("$.values.2748734281")
                         .eval(root));
     }
 
     @Test
-    public void test_for_jsonpath_longKey_2() throws Exception {
+    public void test_for_jsonpath_longKey_2() {
         Map map = new HashMap();
         map.put(1773193982L, "101");
 
-        assertEquals("101"
-                , JSONPath.of("$.1773193982")
+        assertEquals("101",
+                 JSONPath.of("$.1773193982")
                         .eval(map));
     }
 
     @Test
-    public void test_for_jsonpath_longKey_3() throws Exception {
+    public void test_for_jsonpath_longKey_3() {
         Map root = new HashMap();
         Map map = new HashMap();
         map.put(1773193982L, "101");
         root.put("values", map);
 
-        assertEquals("101"
-                , JSONPath.of("$.values.1773193982")
+        assertEquals("101",
+                 JSONPath.of("$.values.1773193982")
                         .eval(root));
     }
-
 }

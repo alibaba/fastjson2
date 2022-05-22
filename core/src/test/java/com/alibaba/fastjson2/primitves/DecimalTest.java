@@ -59,30 +59,30 @@ public class DecimalTest {
     @Test
     public void test_null_str() {
         BigDecimal decimal = null;
-        assertEquals("null"
-                , JSON.toJSONString(decimal));
+        assertEquals("null",
+                 JSON.toJSONString(decimal));
     }
 
     @Test
     public void test_null_utf8() {
         BigDecimal decimal = null;
-        assertEquals("null"
-                , new String(
+        assertEquals("null",
+                 new String(
                         JSON.toJSONBytes(decimal)));
     }
 
     @Test
     public void test_BrowserCompatible_str() {
         BigDecimal decimal = new BigDecimal("90071992547409910");
-        assertEquals("\"90071992547409910\""
-                , JSON.toJSONString(decimal, JSONWriter.Feature.BrowserCompatible));
+        assertEquals("\"90071992547409910\"",
+                 JSON.toJSONString(decimal, JSONWriter.Feature.BrowserCompatible));
     }
 
     @Test
     public void test_BrowserCompatible_utf8() {
         BigDecimal decimal = new BigDecimal("90071992547409910");
-        assertEquals("\"90071992547409910\""
-                , new String(
+        assertEquals("\"90071992547409910\"",
+                 new String(
                         JSON.toJSONBytes(decimal, JSONWriter.Feature.BrowserCompatible)));
     }
 

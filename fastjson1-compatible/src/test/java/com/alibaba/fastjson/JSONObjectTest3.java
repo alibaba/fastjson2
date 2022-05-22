@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JSONObjectTest3 {
-
     @Test
     public void test_0() {
         String text = "{'value':'123','big':false}";
@@ -150,7 +149,6 @@ public class JSONObjectTest3 {
     }
 
     public interface Bean {
-
         String getValue();
 
         void setValue(String value);

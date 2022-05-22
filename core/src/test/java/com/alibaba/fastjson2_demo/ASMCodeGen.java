@@ -15,11 +15,9 @@ public class ASMCodeGen {
         BeanUtils.setters(Int1000.class, e -> methods.add(e));
 
         List<String> propertyNames = new ArrayList<>();
-        methods.forEach(e -> {
-            propertyNames.add(
-                    BeanUtils.setterName(e.getName()));
-        });
-
+        methods.forEach(
+                e -> propertyNames.add(
+                        BeanUtils.setterName(e.getName())));
 
         long[] hashCodes = new long[propertyNames.size()];
         for (int i = 0; i < propertyNames.size(); i++) {
@@ -38,7 +36,7 @@ public class ASMCodeGen {
         BeanUtils.setters(Int1000.class, e -> {
             String propertyName = BeanUtils.setterName(e.getName());
             long hashCode64 = Fnv.hashCode64(propertyName);
-            int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
+            int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
             List<Long> relatedHashCodes = map.get(hashCode32);
             if (relatedHashCodes == null) {
                 map.put(hashCode32, relatedHashCodes = new ArrayList<>());
@@ -49,22 +47,21 @@ public class ASMCodeGen {
         System.out.println("int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));");
         System.out.println("int indx;");
         System.out.println("switch(hashCode32) {");
-        map.forEach((
-                hashCode32, relatedHashCodes) -> {
+        map.forEach(
+                (hashCode32, relatedHashCodes) -> {
                         System.out.println("\tcase " + hashCode32 + ":");
-                        relatedHashCodes.forEach(e -> {
-                        System.out.println("\t\tif (hashCode64 == " + e + "L) {");
-                            int m = Arrays.binarySearch(hashCodes, e);
-                            int indx = mapping[m];
-                            System.out.println("\t\t\tindx = " + indx + ";");
-                        System.out.println("\t\t\tbreak;");
-                        System.out.println("\t\t}");
-                    });
-                }
-        ) ;
+                        relatedHashCodes.forEach(
+                                e -> {
+                                    System.out.println("\t\tif (hashCode64 == " + e + "L) {");
+                                    int m = Arrays.binarySearch(hashCodes, e);
+                                    int indx = mapping[m];
+                                    System.out.println("\t\t\tindx = " + indx + ";");
+                                    System.out.println("\t\t\tbreak;");
+                                    System.out.println("\t\t}");
+                                });
+                });
         System.out.println("\tdefault:");
         System.out.println("\t\treturn null;");
         System.out.println("}");
     }
-
 }

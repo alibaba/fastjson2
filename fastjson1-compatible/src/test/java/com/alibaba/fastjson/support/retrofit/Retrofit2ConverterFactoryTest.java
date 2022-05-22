@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class Retrofit2ConverterFactoryTest {
-
     @Test
     public void test_for_coverage() throws Exception {
         Retrofit2ConverterFactory f = new Retrofit2ConverterFactory();
@@ -40,7 +39,6 @@ public class Retrofit2ConverterFactoryTest {
     }
 
     public static class Model {
-
         private int id;
         private String name;
 

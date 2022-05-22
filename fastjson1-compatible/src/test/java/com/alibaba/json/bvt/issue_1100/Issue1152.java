@@ -25,7 +25,6 @@ public class Issue1152 {
     }
 
     public static class TestBean {
-
         private Date shijian;
 
         public Date getShijian() {

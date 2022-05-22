@@ -38,7 +38,8 @@ public class AutoTypeTest22 {
         public int id;
     }
 
-    public static class XItem extends Item {
+    public static class XItem
+            extends Item {
         public XItem(int id) {
             this.id = id;
         }

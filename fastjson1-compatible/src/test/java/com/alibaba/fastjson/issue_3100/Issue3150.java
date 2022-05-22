@@ -22,8 +22,8 @@ public class Issue3150 {
 
     }
 
-    public static class MyRefAfterFilter extends AfterFilter {
-
+    public static class MyRefAfterFilter
+            extends AfterFilter {
         private Category category = new Category("afterFilterCategory");
 
         @Override
@@ -36,11 +36,9 @@ public class Issue3150 {
     }
 
     public static class Item {
-
         private String name;
 
         private Category category;
-
 
         public Item(String name,Category category){
             this.name = name;
@@ -57,7 +55,6 @@ public class Issue3150 {
     }
 
     public static class Category {
-
         private String name;
 
         public Category(String name){

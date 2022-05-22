@@ -20,7 +20,6 @@ public class Issue1188 {
     }
 
     public static class Info{
-
         @JSONField(deserialize=false)
         private List<Integer> ids;
         private String name;

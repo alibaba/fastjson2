@@ -43,7 +43,6 @@ public class Issue1764_bean_biginteger {
         public BigInteger value;
 
         public Model() {
-
         }
 
         public Model(long value) {

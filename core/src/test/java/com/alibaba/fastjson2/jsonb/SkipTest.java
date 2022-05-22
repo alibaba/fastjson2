@@ -28,6 +28,5 @@ public class SkipTest {
     }
 
     public static class A {
-
     }
 }

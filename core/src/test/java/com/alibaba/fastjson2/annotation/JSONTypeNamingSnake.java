@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.annotation.JSONType;
-import com.alibaba.fastjson2.annotation.NamingStrategy;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

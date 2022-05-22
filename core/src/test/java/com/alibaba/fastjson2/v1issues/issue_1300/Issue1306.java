@@ -39,7 +39,8 @@ public class Issue1306 {
         public abstract void setId(ID id);
     }
 
-    public static class LongEntity extends IdEntity<Long> {
+    public static class LongEntity
+            extends IdEntity<Long> {
 
         private static final long serialVersionUID = -2740365657805589848L;
 
@@ -55,7 +56,8 @@ public class Issue1306 {
         }
     }
 
-    public static class Goods extends LongEntity{
+    public static class Goods
+            extends LongEntity{
         private static final long serialVersionUID = -5751106975913625097L;
         private List<Property> properties;
 
@@ -67,12 +69,14 @@ public class Issue1306 {
             this.properties = properties;
         }
 
-        public static class Property extends LongEntity{
+        public static class Property
+                extends LongEntity{
             private static final long serialVersionUID = 7941148286688199390L;
         }
     }
 
-    public static class TT extends LongEntity {
+    public static class TT
+            extends LongEntity {
         private static final long serialVersionUID = 2988415809510669142L;
 
         public TT(){}

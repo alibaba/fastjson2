@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue2903 {
-
     @Test
     public void test_1() {
         String date1 = "{\"createTime\":\"1570636800000\"}";

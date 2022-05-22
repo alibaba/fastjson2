@@ -34,8 +34,8 @@ public class Issue1307 {
         data.put("name", "ace");
         params.add(data);
         //fail Actual   :[{"name":"ace"}]
-        assertEquals("[{\"name\":\"mark-ace\"}]"
-                , JSON.toJSONString(params,
+        assertEquals("[{\"name\":\"mark-ace\"}]",
+                 JSON.toJSONString(params,
                         new Filter[]{
                                 contextValueFilter
                         })

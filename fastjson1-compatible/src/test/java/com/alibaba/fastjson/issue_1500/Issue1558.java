@@ -18,7 +18,8 @@ public class Issue1558 {
     }
 
     @JSONType
-    public static class Request implements Serializable {
+    public static class Request
+            implements Serializable {
         private String id;
         private String instance;
         private String _interface;

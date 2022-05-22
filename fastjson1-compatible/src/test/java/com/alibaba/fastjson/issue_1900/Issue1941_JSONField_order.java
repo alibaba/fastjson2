@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1941_JSONField_order {
-
     @Test
     public void test_for_issue() {
         String json = "{\"type\":\"floorV2\",\"templateId\":\"x123\",\"name\":\"floorname2\"}";
@@ -22,7 +21,8 @@ public class Issue1941_JSONField_order {
     }
 
     @JSONType(typeName = "floorV2")
-    public static class FloorV2 implements Area {
+    public static class FloorV2
+            implements Area {
         @JSONField(ordinal = -1)
         public String type;
         public String templateId;

@@ -12,7 +12,6 @@ public class Issue2086 {
 
     public static class Model {
         public void set() {
-
         }
     }
 }

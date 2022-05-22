@@ -6,7 +6,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CartItemDO2 implements Serializable {
+public class CartItemDO2
+        implements Serializable {
     private static final long serialVersionUID = -3291877592429392571L;
     private String id = "myId";
     private long cartId;
@@ -109,14 +110,13 @@ public class CartItemDO2 implements Serializable {
     }
 
     private long userId;
-    private String trackId ="myTrackId";
+    private String trackId = "myTrackId";
     private long itemId;
     private long skuId;
     private int quantity;
-    private int mainType = 0;
+    private int mainType;
     private long tpId;
-    private long subType = 0L;
+    private long subType;
     public long cityCode;
     private Map<String, String> attributes = new HashMap();
-
 }

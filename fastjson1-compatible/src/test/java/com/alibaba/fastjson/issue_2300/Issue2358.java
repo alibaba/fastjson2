@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Issue2358 {
-
     @Test
     public void test_for_issue() {
         String str = "[{\n" +
@@ -28,7 +27,6 @@ public class Issue2358 {
     }
 
     class TestJson {
-
         private String test1;
         private String test2;
 

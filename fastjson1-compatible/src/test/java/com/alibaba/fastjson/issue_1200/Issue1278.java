@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1278 {
     @Test
     public void test_for_issue() throws Exception {
-
         String json1 = "{\"name\":\"name\",\"id\":1}";
         String json2 = "{\"user\":\"user\",\"id\":2}";
         AlternateNames c1 = JSON.parseObject(json1, AlternateNames.class);

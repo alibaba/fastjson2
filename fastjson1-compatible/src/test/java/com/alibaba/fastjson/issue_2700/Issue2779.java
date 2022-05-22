@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 public class Issue2779 {
-
     @Test
     public void test_for_issue() throws Exception {
         String str = JSON.toJSONString(new Model());
@@ -114,7 +113,6 @@ public class Issue2779 {
         private List f097;
         private List f098;
         private List f099;
-
 
 
 

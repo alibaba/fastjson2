@@ -15,7 +15,6 @@ import java.util.List;
  * Created by SongLing.Dong on 11/7/2017.
  */
 public class Issue1565 {
-
     @Test
     public void test_testLargeBeanContainsOver256Field(){
         SerializeConfig serializeConfig = new SerializeConfig();
@@ -27,7 +26,6 @@ public class Issue1565 {
 //
 //        System.out.println(JSON.toJSONString(smallBean, serializeConfig));
 
-
         LargeBean expectedBean = new LargeBean();
         expectedBean.setId("S35669");
         expectedBean.setNetValueDate(20171105);
@@ -38,12 +36,10 @@ public class Issue1565 {
         Assertions.assertEquals(expectedStr, actualStr);
         Assertions.assertEquals(expectedBean.getId(), actualBean.getString("id"));
         Assertions.assertEquals(expectedBean.getNetValueDate(), actualBean.getInteger("net_value_date"));
-
-
-
     }
 
-    public static class SmallBean implements Serializable{
+    public static class SmallBean
+            implements Serializable{
         private String id;
 
         public String getId() {
@@ -66,8 +62,8 @@ public class Issue1565 {
     }
 
     @JSONType(naming = PropertyNamingStrategy.SnakeCase)
-    public static class LargeBean implements Serializable {
-
+    public static class LargeBean
+            implements Serializable {
         /**
          * 每页数量
          */

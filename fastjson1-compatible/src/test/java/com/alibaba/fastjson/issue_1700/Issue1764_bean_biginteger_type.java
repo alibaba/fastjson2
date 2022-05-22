@@ -44,7 +44,6 @@ public class Issue1764_bean_biginteger_type {
         public BigInteger value;
 
         public Model() {
-
         }
 
         public Model(long value) {

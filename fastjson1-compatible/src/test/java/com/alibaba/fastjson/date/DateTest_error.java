@@ -11,7 +11,6 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateTest_error {
-
     @Test
     public void test_error() throws Exception {
         String text = "{\"value\":true}";

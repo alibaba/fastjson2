@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @create 2020/9/20
  */
 public class Issue3460 {
-
     @Test
     public void test_for_issue() throws Exception {
         String body = "11{\"time\":" + System.currentTimeMillis() + "}";

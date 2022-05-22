@@ -80,7 +80,6 @@ public class UUID_0 {
         assertEquals(vo.value, o.value);
     }
 
-
     public static class VO {
         private UUID value;
 

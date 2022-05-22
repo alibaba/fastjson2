@@ -24,7 +24,8 @@ public class Issue1494 {
     }
 
     @JSONType(parseFeatures = Feature.SupportNonPublicField)
-    public static class B extends A {
+    public static class B
+            extends A {
         private String name;
 
         public String getName() {

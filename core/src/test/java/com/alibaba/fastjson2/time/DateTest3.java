@@ -13,7 +13,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateTest3 {
-
     @Test
     public void test_list() {
         Bean bean = new Bean();

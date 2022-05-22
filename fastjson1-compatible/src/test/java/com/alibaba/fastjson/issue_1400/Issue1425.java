@@ -20,7 +20,6 @@ public class Issue1425 {
         System.out.println(JSON.toJSONString(dicDomain, features));
     }
     public static class DicDomain {
-
         private String code;
 
         private String name;

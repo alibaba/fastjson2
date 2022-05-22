@@ -12,11 +12,11 @@ public class JSONObject1xTest {
     @Test
     public void test_0() {
         JSONObject object = new JSONObject();
-        assertEquals("{}"
-                , JSON.toJSONString(object));
+        assertEquals("{}",
+                 JSON.toJSONString(object));
 
-        assertEquals("{}"
-                , JSON.toJSONString(
+        assertEquals("{}",
+                 JSON.toJSONString(
                         JSONB.parse(
                                 JSONB.toBytes(object))));
     }
@@ -24,11 +24,11 @@ public class JSONObject1xTest {
     @Test
     public void test_1() {
         JSONArray array = new JSONArray();
-        assertEquals("[]"
-                , JSON.toJSONString(array));
+        assertEquals("[]",
+                 JSON.toJSONString(array));
 
-        assertEquals("[]"
-                , JSON.toJSONString(
+        assertEquals("[]",
+                 JSON.toJSONString(
                         JSONB.parse(
                                 JSONB.toBytes(array))));
     }

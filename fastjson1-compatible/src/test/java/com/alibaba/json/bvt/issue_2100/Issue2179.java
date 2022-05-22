@@ -245,7 +245,8 @@ public class Issue2179 {
 		}
 	}
 
-	public static class EnumAwareSerializer1 implements ObjectDeserializer {
+	public static class EnumAwareSerializer1
+            implements ObjectDeserializer {
 		@SuppressWarnings("unchecked")
 		public <T> T deserialze(DefaultJSONParser parser, Type type, Object fieldName) {
 			String val = StringCodec.instance.deserialze(parser, type, fieldName);
@@ -260,7 +261,8 @@ public class Issue2179 {
 		}
 	}
 
-	public static class EnumAwareSerializer2 implements ObjectDeserializer {
+	public static class EnumAwareSerializer2
+            implements ObjectDeserializer {
 		@SuppressWarnings("unchecked")
 		public <T> T deserialze(DefaultJSONParser parser, Type type, Object fieldName) {
 			String val = StringCodec.instance.deserialze(parser, type, fieldName);
@@ -275,7 +277,8 @@ public class Issue2179 {
 		}
 	}
 
-	public static class MyModuel implements Module {
+	public static class MyModuel
+            implements Module {
 
 		@SuppressWarnings("rawtypes")
 		@Override

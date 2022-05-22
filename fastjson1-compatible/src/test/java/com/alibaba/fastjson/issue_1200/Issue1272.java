@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Created by wenshao on 18/06/2017.
  */
 public class Issue1272 {
-
     @Test
     public void test_for_issue1() throws Exception {
         Exception exception = null;
@@ -54,7 +53,6 @@ public class Issue1272 {
     }
 
     public static class Point {
-
         private Long userId;
 
         public long getUserId() {

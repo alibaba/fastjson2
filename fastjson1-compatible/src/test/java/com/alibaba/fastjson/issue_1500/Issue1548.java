@@ -16,8 +16,8 @@ public class Issue1548 {
         JSON.parseArray(msg).toJavaList(PublishDoc.class);
     }
 
-    public static class PublishDoc implements Serializable {
-
+    public static class PublishDoc
+            implements Serializable {
         public static final String LSN_META_NAME = "LSN";
         public static final String DOCTYPE_META_NAME = "TYPE";
         public static final String AREA_META_NAME = "AREA";
@@ -32,7 +32,6 @@ public class Issue1548 {
             this.doc = new JSONObject();
         }
 
-
         @JSONField(serialize = false)
         public void addMeta(String name, Object value) {
             this.meta.put(name, value);
@@ -44,7 +43,6 @@ public class Issue1548 {
         }
 
 
-
         @Override
         public String toString() {
             return JSON.toJSONString(this);
@@ -52,6 +50,5 @@ public class Issue1548 {
     }
 
     public static enum DocType{
-
     }
 }

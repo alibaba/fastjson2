@@ -117,8 +117,3 @@ public class JsonGen {
         System.out.println("}");
     }
 }
-
-
-class A {
-
-}

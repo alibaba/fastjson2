@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1941 {
-
     @Test
     public void test_for_issue() throws Exception {
         String json = "{\"type\":\"floorV2\",\"templateId\":\"x123\",\"name\":\"floorname2\"}";
@@ -21,7 +20,8 @@ public class Issue1941 {
     }
 
     @JSONType(typeName = "floorV2")
-    public static class FloorV2 implements Area {
+    public static class FloorV2
+            implements Area {
         public String type;
         public String templateId;
         public String name;
