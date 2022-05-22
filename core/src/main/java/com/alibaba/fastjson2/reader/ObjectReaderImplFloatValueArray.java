@@ -60,6 +60,7 @@ class ObjectReaderImplFloatValueArray
         return array;
     }
 
+    @Override
     public Object createInstance(Collection collection) {
         float[] array = new float[collection.size()];
         int i = 0;
