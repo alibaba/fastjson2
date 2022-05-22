@@ -7,7 +7,7 @@
 - 支持`Java`服务端、客户端`Android`、大数据场景。
 - 支持`Kotlin`
 - 支持`JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
-- 支持`Android` [(2.0.4.android)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.graal/)
+- 支持`Android` [(2.0.4.android)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.android/)
 - 支持`Graal Native-Image` [(2.0.4.graal)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.4.graal/)
 
 ![fastjson](logo.jpg "fastjson")
@@ -93,7 +93,7 @@ dependencies {
 
 ### `Fastjson Extension`扩展模块
 
-如果项目使用`SpringFramework`等框架，可以使用`fastjson-extension`模块，使用方式参考 [SpringFramework Support](spring_support_cn.md)。
+如果项目使用`SpringFramework`等框架，可以使用`fastjson-extension`模块，使用方式参考 [SpringFramework Support](https://alibaba.github.io/fastjson2/spring_support_cn)。
 
 `Maven`:
 
