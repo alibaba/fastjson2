@@ -718,7 +718,7 @@ public abstract class JSONReader
         }
 
         String str = readString();
-        if (str.isEmpty() || str.equals("null")) {
+        if (str.isEmpty() || "null".equals(str)) {
             return null;
         }
 
@@ -804,7 +804,7 @@ public abstract class JSONReader
         }
 
         String strVal = readString();
-        if (strVal.isEmpty() || strVal.equals("null")) {
+        if (strVal.isEmpty() || "null".equals(strVal)) {
             wasNull = true;
             return null;
         }
@@ -884,7 +884,7 @@ public abstract class JSONReader
         }
 
         String str = readString();
-        if (str.isEmpty() || str.equals("null")) {
+        if (str.isEmpty() || "null".equals(str)) {
             return null;
         }
 
@@ -908,7 +908,7 @@ public abstract class JSONReader
             if (zdt == null) {
                 String str = readString();
 
-                if (str.isEmpty() || str.equals("null")) {
+                if (str.isEmpty() || "null".equals(str)) {
                     return null;
                 }
 
@@ -1031,7 +1031,7 @@ public abstract class JSONReader
 
         String str = readString();
 
-        if (str.isEmpty() || str.equals("null")) {
+        if (str.isEmpty() || "null".equals(str)) {
             wasNull = true;
             return 0;
         }

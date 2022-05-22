@@ -4306,6 +4306,7 @@ final class JSONReaderStr
         }
     }
 
+    @Override
     public boolean isReference() {
         if (ch != '{') {
             return false;
@@ -4383,6 +4384,7 @@ final class JSONReaderStr
         return true;
     }
 
+    @Override
     public String readReference() {
         this.offset = referenceBegin;
         this.ch = str.charAt(this.offset++);

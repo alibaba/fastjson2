@@ -126,7 +126,7 @@ public class JdbcSupport {
                     return new java.sql.Time(0);
                 }
 
-                if (str.isEmpty() || str.equals("null")) {
+                if (str.isEmpty() || "null".equals(str)) {
                     return null;
                 }
 
