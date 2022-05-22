@@ -36,7 +36,7 @@ public class ReflectTypeTest {
     public void test_paramType() {
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{String.class, String.class}, null, Map.class);
         String str = JSON.toJSONString(paramType);
-        ParameterizedType paramType1 = JSON.parseObject(str, ParameterizedType.class);
+        ParameterizedType paramType1 = JSON.parseObject(str, ParameterizedType.class, JSONReader.Feature.SupportClassForName);
         assertEquals(paramType, paramType1);
     }
 
@@ -47,7 +47,7 @@ public class ReflectTypeTest {
 
         JSONBDump.dump(bytes);
 
-        ParameterizedType paramType1 = JSONB.parseObject(bytes, ParameterizedType.class);
+        ParameterizedType paramType1 = JSONB.parseObject(bytes, ParameterizedType.class, JSONReader.Feature.SupportClassForName);
         assertEquals(paramType, paramType1);
     }
 
