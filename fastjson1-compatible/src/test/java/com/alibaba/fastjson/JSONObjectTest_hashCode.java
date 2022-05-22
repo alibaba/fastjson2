@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONObjectTest_hashCode {
-
     @Test
     public void test_hashCode() throws Exception {
         assertEquals(new JSONObject().hashCode(), new JSONObject().hashCode());

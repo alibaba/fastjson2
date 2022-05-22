@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import org.junit.jupiter.api.Test;
 
 public class ArgCheckTest {
-
     @Test
     public void testJSON() {
         TestDTO dto = new TestDTO();
@@ -16,10 +15,8 @@ public class ArgCheckTest {
     }
 
     public static class TestDTO {
-
         private String       channel;
         private String       txCode;
-
 
         public String getChannel() {
             return channel;

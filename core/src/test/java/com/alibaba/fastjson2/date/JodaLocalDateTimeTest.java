@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import org.joda.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JodaLocalDateTimeTest {

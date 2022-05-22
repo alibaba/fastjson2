@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Date;
 
 public class DateTest_dotnet_4 {
-
     @Test
     public void test_date() throws Exception {
         String text = "{\"date\":\"/Date(1461081600321+5000)/\"}";
@@ -18,7 +17,6 @@ public class DateTest_dotnet_4 {
     }
 
     private static class Model {
-
         private Date date;
 
         public Date getDate() {

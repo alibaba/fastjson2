@@ -46,10 +46,10 @@ public class Issue3443 {
             this.parameterUsage = parameterUsage;
         }
 
-
     }
 
-    static class CustomFilter extends AfterFilter {
+    static class CustomFilter
+            extends AfterFilter {
         @Override
         public void writeAfter(Object object) {
             if (object instanceof ParameterDesc) {

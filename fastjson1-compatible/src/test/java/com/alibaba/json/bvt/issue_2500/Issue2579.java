@@ -84,7 +84,8 @@ public class Issue2579 {
 	}
 
 	@SuppressWarnings("serial")
-	public static class MyPoint1 extends Point {
+	public static class MyPoint1
+            extends Point {
 		private UUID id;
 		private int batchNumber;
 		private Point point = new Point();
@@ -144,7 +145,8 @@ public class Issue2579 {
 
 	@SuppressWarnings("serial")
 	@JSONType(asm = false)
-	public static class MyPoint2 extends Point {
+	public static class MyPoint2
+            extends Point {
 		private UUID id;
 		private int batchNumber;
 		private Point point = new Point();

@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WriteAsArray_char_public {
     @Test
-    public void test_0 () {
+    public void test_0() {
         VO vo = new VO();
         vo.setId('x');
         vo.setName("wenshao");

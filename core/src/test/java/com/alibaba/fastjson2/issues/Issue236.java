@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class Issue236 {
-
     @Test
     public void test() {
         String testJsonStr = "{\"result\":{\"puid\":\"21025318\"},\"state\":0}";

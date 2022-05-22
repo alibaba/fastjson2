@@ -25,7 +25,6 @@ public class Issue1496 {
     }
 
     public interface ISetupStatusProcess {
-
         /**
          *
          * @return

@@ -9,10 +9,8 @@ import org.springframework.messaging.MessageHeaders;
 
 
 public class MappingFastJsonMessageConverterTest {
-
     @Test
     public void test_1() throws Exception {
-
         MappingFastJsonMessageConverter converter = new MappingFastJsonMessageConverter();
 
         Assertions.assertNotNull(converter.getFastJsonConfig());
@@ -55,7 +53,6 @@ public class MappingFastJsonMessageConverterTest {
     }
 
     public static class TestMessage<T> implements Message<T> {
-
         private T payload;
 
         public TestMessage(T payload) {
@@ -74,7 +71,6 @@ public class MappingFastJsonMessageConverterTest {
     }
 
     public static class VO {
-
         private int id;
 
         public int getId() {

@@ -13,10 +13,8 @@ import org.junit.jupiter.api.Test;
  * @since 2017/11/27
  */
 public class Issue1612 {
-
     @Test
     public void test() {
-
         RegResponse<User> userRegResponse = testFastJson(User.class);
 
         User user = userRegResponse.getResult();
@@ -25,7 +23,6 @@ public class Issue1612 {
     }
 
     public static <T> RegResponse<T> testFastJson(Class<T> clasz) {
-
         //把body解析成一个对象
         String body = "{\"retCode\":\"200\", \"result\":{\"name\":\"Zhangsan\",\"password\":\"123\"}}";
 
@@ -34,7 +31,6 @@ public class Issue1612 {
 }
 
 class RegResponse<T> {
-
     private String retCode;
     private String retDesc;
     private T result;
@@ -74,7 +70,6 @@ class RegResponse<T> {
 }
 
 class User {
-
     public User(){}
     public User(String username, String password) {
         this.username = username;

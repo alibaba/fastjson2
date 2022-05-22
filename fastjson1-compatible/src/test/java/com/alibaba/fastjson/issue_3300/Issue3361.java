@@ -54,7 +54,6 @@ public class Issue3361 {
     @Setter
     @ToString
     public static class Model {
-
         private Date oldDate;
     }
 }

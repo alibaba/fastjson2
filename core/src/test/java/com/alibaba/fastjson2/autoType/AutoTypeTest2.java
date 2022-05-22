@@ -30,14 +30,13 @@ public class AutoTypeTest2 {
     }
 
     public static class B {
-
     }
 
-    public static class C extends B {
+    public static class C
+            extends B {
         public int id;
 
         public C() {
-
         }
 
         public C(int id) {

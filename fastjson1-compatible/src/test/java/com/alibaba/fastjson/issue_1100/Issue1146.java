@@ -17,7 +17,6 @@ public class Issue1146 {
 
     @JSONType(ignores = {"xxx", "yyy"})
     public static class Test {
-
         public boolean isXxx() {
             return true;
         }

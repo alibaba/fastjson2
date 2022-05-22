@@ -17,28 +17,28 @@ public class JSONPath_16 {
     public void test_for_jsonpath() throws Exception {
         String str = "[{\"id\":1001,\"salary\":4000,\"name\":\"jobs\",\"valid\":false},{\"id\":1001,\"salary\":5000}]";
         System.out.println(str);
-        assertEquals(2
-                , JSONPath.extract(str, "$.size()"));
+        assertEquals(2,
+                 JSONPath.extract(str, "$.size()"));
 
-        assertEquals("array"
-                , JSONPath.extract(str, "$.type()"));
+        assertEquals("array",
+                 JSONPath.extract(str, "$.type()"));
 
-        assertEquals("object"
-                , JSONPath.of("$[0].type()")
+        assertEquals("object",
+                 JSONPath.of("$[0].type()")
                         .extract(
                                 JSONReader.of(str)));
 
-        assertEquals("number"
-                , JSONPath.extract(str, "$[0].id.type()"));
+        assertEquals("number",
+                 JSONPath.extract(str, "$[0].id.type()"));
 
-        assertEquals("string"
-                , JSONPath.extract(str, "$[0].name.type()"));
+        assertEquals("string",
+                 JSONPath.extract(str, "$[0].name.type()"));
 
-        assertEquals("boolean"
-                , JSONPath.extract(str, "$[0].valid.type()"));
+        assertEquals("boolean",
+                 JSONPath.extract(str, "$[0].valid.type()"));
 
-        assertEquals("null"
-                , JSONPath.extract(str, "$[0].xx.type()"));
+        assertEquals("null",
+                 JSONPath.extract(str, "$[0].xx.type()"));
     }
 
     @Test
@@ -47,21 +47,17 @@ public class JSONPath_16 {
         root.put("id", UUID.randomUUID());
         root.put("unit", TimeUnit.SECONDS);
 
-        assertEquals("string"
-                , JSONPath.eval(root, "$.id.type()"));
+        assertEquals("string",
+                 JSONPath.eval(root, "$.id.type()"));
 
-        assertEquals("string"
-                , JSONPath.eval(root, "$.unit.type()"));
+        assertEquals("string",
+                 JSONPath.eval(root, "$.unit.type()"));
     }
 
     @Test
-    public void test_for_jsonpath_1() throws Exception {
+    public void test_for_jsonpath_1() {
         String str = "{\"id\":1001,\"salary\":4000}";
-        assertNull(
-                JSONPath.of("$[?( @.salary > 100000 )]").
-                        extract(
-                                JSONReader.of(str))
-        );
+        assertNull(JSONPath.of("$[?( @.salary > 100000 )]").extract(JSONReader.of(str)));
 
         assertEquals(JSON.parseObject(str),
                 JSONPath.extract(str, "$[?( @.salary > 1000 )]"));

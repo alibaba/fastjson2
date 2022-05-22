@@ -94,7 +94,6 @@ public class DateFieldTest4 {
     }
 
     public static class V0 {
-
         private Date value;
 
         @JSONField(format = "yyyy-MM-dd")

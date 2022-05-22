@@ -55,6 +55,5 @@ public class RefTest6_list {
     }
 
     public class C {
-
     }
 }

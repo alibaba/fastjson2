@@ -11,8 +11,8 @@ import java.util.Map;
 /**
  *
  */
-public class RatingDetailBO implements Serializable {
-
+public class RatingDetailBO
+        implements Serializable {
     private static final long serialVersionUID = 6413142622719509002L;
 
     /**
@@ -456,5 +456,4 @@ public class RatingDetailBO implements Serializable {
     public void setIndexNum(Integer indexNum) {
         this.indexNum = indexNum;
     }
-
 }

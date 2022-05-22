@@ -28,7 +28,6 @@ public class Issue2164 {
         public java.sql.Timestamp time;
 
         public Model() {
-
         }
 
         public Model(long ts) {

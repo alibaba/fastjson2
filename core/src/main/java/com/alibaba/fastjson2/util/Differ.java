@@ -14,11 +14,9 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public class Differ {
     final Object left;
     final Object right;
-
     boolean skipTransient = true;
     String leftName = "left";
     String rightName = "right";
-
     boolean referenceDetect = true;
 
     IdentityHashMap<Object, JSONWriter.Path> leftReferences = new IdentityHashMap();

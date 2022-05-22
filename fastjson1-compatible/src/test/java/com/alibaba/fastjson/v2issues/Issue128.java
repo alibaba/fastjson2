@@ -46,10 +46,8 @@ public class Issue128 {
     }
 
     public static class Bean {
-
     }
 
     public static class XXXXXXItem {
-
     }
 }

@@ -40,7 +40,6 @@ public class IncomingDataPoint {
      * Empty constructor necessary for some de/serializers
      */
     public IncomingDataPoint() {
-
     }
 
     /**

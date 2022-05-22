@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class FastJsonJsonViewTest {
-
     @Test
     public void test_0() throws Exception {
         FastJsonJsonView view = new FastJsonJsonView();
@@ -44,7 +43,6 @@ public class FastJsonJsonViewTest {
 
     @Test
     public void test_1() throws Exception {
-
         FastJsonJsonView view = new FastJsonJsonView();
 
         Assertions.assertNotNull(view.getFastJsonConfig());
@@ -82,9 +80,7 @@ public class FastJsonJsonViewTest {
         request.addParameter("callback", "queryName");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-
         Assertions.assertEquals(true, view.isExtractValueFromSingleKeyModel());
-
 
         view.render(Collections.singletonMap("abc", "cde中文"), request, response);
         String contentAsString = response.getContentAsString();
@@ -106,9 +102,7 @@ public class FastJsonJsonViewTest {
         request.addParameter("callback", "-methodName");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-
         Assertions.assertEquals(true, view.isExtractValueFromSingleKeyModel());
-
 
         view.render(Collections.singletonMap("doesn't matter", Collections.singletonMap("abc", "cde中文")), request, response);
         String contentAsString = response.getContentAsString();
@@ -117,7 +111,6 @@ public class FastJsonJsonViewTest {
     }
 
     private SerializeFilter serializeFilter = new ValueFilter() {
-
         public Object process(Object object, String name, Object value) {
             if (value == null) {
                 return "";

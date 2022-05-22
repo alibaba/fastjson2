@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CalendarTest {
-
     @Test
     public void test_null() {
         String text = "{\"calendar\":null}";
@@ -56,7 +55,6 @@ public class CalendarTest {
     }
 
     public static class VO {
-
         private Calendar calendar;
 
         public Calendar getCalendar() {

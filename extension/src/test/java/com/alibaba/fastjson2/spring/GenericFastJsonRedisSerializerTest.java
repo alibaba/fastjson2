@@ -13,7 +13,6 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class GenericFastJsonRedisSerializerTest {
     private GenericFastJsonRedisSerializer serializer;
 

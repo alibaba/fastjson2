@@ -39,7 +39,6 @@ public class Issue1764_bean {
         public long value;
 
         public Model() {
-
         }
 
         public Model(long value) {

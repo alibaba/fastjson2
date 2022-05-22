@@ -26,7 +26,8 @@ public class Issue1662_1 {
         public int value;
     }
 
-    public static class ModelValueSerializer implements ObjectSerializer {
+    public static class ModelValueSerializer
+            implements ObjectSerializer {
         public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType,
                           int features) throws IOException {
             Integer value = (Integer) object;
@@ -35,8 +36,8 @@ public class Issue1662_1 {
         }
     }
 
-    public static class ModelValueDeserializer implements ObjectDeserializer {
-
+    public static class ModelValueDeserializer
+            implements ObjectDeserializer {
         public Integer deserialze(DefaultJSONParser parser, Type type, Object fieldName) {
             Object val = parser.parse();
             return ((Integer) val).intValue() * 100;

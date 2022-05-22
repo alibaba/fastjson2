@@ -1,7 +1,7 @@
 package com.alibaba.fastjson_perf;
 
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONPath;
+import com.alibaba.fastjson2.JSONReader;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +27,6 @@ public class JSONPath_0 {
             JSONReader parser = JSONReader.of(str);
             assertEquals(1, path.extract(parser));
         }
-
 
         char[] chars = str.toCharArray();
 
@@ -70,7 +69,6 @@ public class JSONPath_0 {
             JSONReader parser = JSONReader.of(str);
             assertEquals(1L, path.extractInt64(parser).longValue());
         }
-
 
         char[] chars = str.toCharArray();
 

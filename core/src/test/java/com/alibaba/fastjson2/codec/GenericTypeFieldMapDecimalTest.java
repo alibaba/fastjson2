@@ -101,27 +101,22 @@ public class GenericTypeFieldMapDecimalTest {
         public Map<String,T> value;
     }
 
-    public static class P1 extends P<BigDecimal> {
-
+    public static class P1
+            extends P<BigDecimal> {
     }
 
     public static class P2<T extends BigDecimal> extends P<T> {
-
     }
 
     public static class P21<T extends BigDecimal> extends P2<T> {
-
     }
 
     public static class P3<T> extends P<T> {
-
     }
 
     public static class P31<T> extends P3<T> {
-
     }
 
     public static class P311<T extends BigDecimal> extends P31<T> {
-
     }
 }

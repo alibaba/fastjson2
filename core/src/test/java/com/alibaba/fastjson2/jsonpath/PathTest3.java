@@ -19,18 +19,18 @@ public class PathTest3 {
         Integer[] values = new Integer[]{1, 2, 3};
 
         assertEquals(values[0], JSONPath.of("$[0]").eval(values));
-        assertEquals("[1,2]"
-                , JSONPath
+        assertEquals("[1,2]",
+                 JSONPath
                         .of("$[0,1]")
                         .eval(values)
                         .toString());
-        assertEquals("[1,2]"
-                , JSONPath
+        assertEquals("[1,2]",
+                 JSONPath
                         .of("$[:1]")
                         .eval(values)
                         .toString());
-        assertEquals(3
-                , JSONPath
+        assertEquals(3,
+                 JSONPath
                         .of("$.length()")
                         .eval(values));
     }
@@ -38,8 +38,8 @@ public class PathTest3 {
     @Test
     public void test_length() {
         Map values = Collections.singletonMap("a", 1);
-        assertEquals(1
-                , JSONPath
+        assertEquals(1,
+                 JSONPath
                         .of("$.length()")
                         .eval(values));
     }
@@ -109,13 +109,13 @@ public class PathTest3 {
         byte[] jsonbBytes = JSONB.toBytes(values);
 
         assertEquals(values[0], JSONPath.of("$[0]").extract(JSONReader.ofJSONB(jsonbBytes)));
-        assertEquals("[1,2]"
-                , JSONPath
+        assertEquals("[1,2]",
+                 JSONPath
                         .of("$[0,1]")
                         .extract(JSONReader.ofJSONB(jsonbBytes))
                         .toString());
-        assertEquals("[1]"
-                , JSONPath
+        assertEquals("[1]",
+                 JSONPath
                         .of("$[:1]")
                         .extract(JSONReader.ofJSONB(jsonbBytes))
                         .toString());
@@ -127,13 +127,13 @@ public class PathTest3 {
         String jsonString = JSON.toJSONString(values);
 
         assertEquals(values[0], JSONPath.of("$[0]").extract(JSONReader.of(jsonString)));
-        assertEquals("[1,2]"
-                , JSONPath
+        assertEquals("[1,2]",
+                 JSONPath
                         .of("$[0,1]")
                         .extract(JSONReader.of(jsonString))
                         .toString());
-        assertEquals("[1]"
-                , JSONPath
+        assertEquals("[1]",
+                 JSONPath
                         .of("$[:1]")
                         .extract(JSONReader.of(jsonString))
                         .toString());
@@ -142,8 +142,8 @@ public class PathTest3 {
     @Test
     public void test_range() {
         String jsonString = "[1,2,true,\"a\",false,[],{},null]";
-        assertEquals("[1,2,true,\"a\",false,[],{},null]"
-                , JSONPath
+        assertEquals("[1,2,true,\"a\",false,[],{},null]",
+                 JSONPath
                         .of("$[0:]")
                         .extract(JSONReader.of(jsonString))
                         .toString());
@@ -152,8 +152,8 @@ public class PathTest3 {
     @Test
     public void test_multi_index() {
         String jsonString = "[1,2,true,\"a\",false,[],{},null]";
-        assertEquals("[1,2,true,\"a\",false,[],{},null]"
-                , JSONPath
+        assertEquals("[1,2,true,\"a\",false,[],{},null]",
+                 JSONPath
                         .of("$[0,1,2,3,4,5,6,7]")
                         .extract(JSONReader.of(jsonString))
                         .toString());
@@ -162,8 +162,8 @@ public class PathTest3 {
     @Test
     public void test_gt() {
         String jsonString = "[1,2,3,4,5]";
-        assertEquals("[4,5]"
-                , JSONPath
+        assertEquals("[4,5]",
+                 JSONPath
                         .of("$[?(@>3)]")
                         .extract(JSONReader.of(jsonString))
                         .toString());
@@ -408,14 +408,14 @@ public class PathTest3 {
 
     @Test
     public void test_extractScalar_0() {
-        assertEquals("123"
-                , JSONPath.of("$.id")
+        assertEquals("123",
+                 JSONPath.of("$.id")
                         .extractScalar(
                                 JSONReader.of("{\"id\":123}")
                         )
         );
-        assertEquals("123"
-                , JSONPath.of("$[0]")
+        assertEquals("123",
+                 JSONPath.of("$[0]")
                         .extractScalar(
                                 JSONReader.of("[123]")
                         )
@@ -426,14 +426,14 @@ public class PathTest3 {
 
     @Test
     public void test_size_0() {
-        assertEquals(1
-                ,
+        assertEquals(1,
+
                 JSONPath.of("$.size()")
                         .eval(
                                 JSONObject.of("id", 123))
         );
-        assertEquals(1
-                ,
+        assertEquals(1,
+
                 JSONPath.of("$[0].size()")
                         .eval(
                                 JSONArray.of(
@@ -441,8 +441,8 @@ public class PathTest3 {
                                 )
                         )
         );
-        assertEquals(1
-                ,
+        assertEquals(1,
+
                 JSONPath.of("$.child.size()")
                         .eval(
                                 JSONObject.of("child",

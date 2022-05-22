@@ -32,7 +32,8 @@ public class StringMessageTest {
         JSONB.parseObject(bytes, Object.class, WRITER_FEATURES);
     }
 
-    static class StringMessage implements Serializable {
+    static class StringMessage
+            implements Serializable {
         private static final long serialVersionUID = 7193122183120113947L;
 
         private String mText;

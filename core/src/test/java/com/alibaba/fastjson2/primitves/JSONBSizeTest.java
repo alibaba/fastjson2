@@ -483,9 +483,9 @@ public class JSONBSizeTest {
 
         double[] values_9 = new double[]{
                 Integer.MIN_VALUE -1L, Integer.MAX_VALUE + 1L, Long.MIN_VALUE, Long.MAX_VALUE
-                -262145.1d, 262144.1d
-                , Float.MIN_VALUE, Float.MAX_VALUE, Float.NaN, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY
-                , Double.MIN_VALUE, Double.MAX_VALUE, Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY
+                -262145.1d, 262144.1d,
+                 Float.MIN_VALUE, Float.MAX_VALUE, Float.NaN, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY,
+                 Double.MIN_VALUE, Double.MAX_VALUE, Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY
         };
         for (int i = 0; i < values_9.length; i++) {
             double val = values_9[i];

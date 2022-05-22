@@ -62,7 +62,8 @@ public class Issue1246 {
         }
     }
 
-    public static class B extends A{
+    public static class B
+            extends A{
         private String x;
 
         @Override

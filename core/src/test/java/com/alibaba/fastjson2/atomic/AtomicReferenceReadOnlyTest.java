@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AtomicReferenceReadOnlyTest {
-
     @Test
     public void test_readOnly_method() {
         V0 v = new V0(new Value(123));
@@ -35,7 +34,6 @@ public class AtomicReferenceReadOnlyTest {
     }
 
     public static class V0 {
-
         private final AtomicReference<Value> value;
 
         public V0(){
@@ -59,7 +57,6 @@ public class AtomicReferenceReadOnlyTest {
         public int id;
 
         public Value() {
-
         }
 
         public Value(int id) {

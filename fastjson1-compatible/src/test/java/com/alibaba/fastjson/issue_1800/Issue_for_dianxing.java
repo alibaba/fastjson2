@@ -13,7 +13,6 @@ public class Issue_for_dianxing {
     }
 
     public static class TopAlarm {
-
         private Double error;                                  //为null表示不报警
         private int errorCount;
         private Double warn;                                   //为null表示不报警

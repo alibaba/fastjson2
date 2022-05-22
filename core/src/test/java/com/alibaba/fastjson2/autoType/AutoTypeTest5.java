@@ -1,12 +1,10 @@
 package com.alibaba.fastjson2.autoType;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class AutoTypeTest5 {
     @Test
@@ -27,11 +25,11 @@ public class AutoTypeTest5 {
 
     public static class B {
         public B(int type) {
-
         }
     }
 
-    public static class C extends B {
+    public static class C
+            extends B {
         public int id;
 
         public C() {

@@ -17,7 +17,8 @@ public class OverrideTest {
         public abstract Object getValue();
     }
 
-    public static class B extends A {
+    public static class B
+            extends A {
         private String value;
         public String getValue() {
             return value;

@@ -27,7 +27,6 @@ public class Issue2678 {
     }
 
     static class Person {
-
         @JSONField(serialzeFeatures = SerializerFeature.UseSingleQuotes)
         private String name;
 
@@ -55,7 +54,6 @@ public class Issue2678 {
     }
 
     static class Person2 {
-
         private String name;
 
         private int age;

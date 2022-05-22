@@ -15,7 +15,6 @@ import java.util.Arrays;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class FastJsonRedisSerializerTest {
     private FastJsonRedisSerializer<User> serializer;
 

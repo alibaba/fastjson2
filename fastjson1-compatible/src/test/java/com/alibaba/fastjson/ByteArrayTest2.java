@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class ByteArrayTest2 {
-
     public static class CertFile {
         public String name;
         public byte[] data;

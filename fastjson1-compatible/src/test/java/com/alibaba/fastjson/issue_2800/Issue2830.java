@@ -26,7 +26,6 @@ public class Issue2830 {
         assertEquals(10, jsonObject.getLong("qty1"));
         assertEquals(10, jsonObject.getLong("qty2"));
 
-
         assertEquals(10, jsonObject.getFloatValue("qty"));
         assertEquals(10, jsonObject.getFloatValue("qty1"));
         assertEquals(10, jsonObject.getFloatValue("qty2"));

@@ -34,8 +34,8 @@ public class Issue1500 {
         assertEquals("aa",((Aa)c2.getE()).getName());
     }
 
-    public static class Aa extends Exception {
-
+    public static class Aa
+            extends Exception {
         public Aa() {
         }
 

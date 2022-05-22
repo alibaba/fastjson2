@@ -67,6 +67,5 @@ public class JSONBTableTest8 {
     }
 
     public static class ItemEvent {
-
     }
 }

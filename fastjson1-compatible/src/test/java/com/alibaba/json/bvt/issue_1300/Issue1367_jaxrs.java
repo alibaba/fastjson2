@@ -25,10 +25,9 @@ import java.io.Serializable;
  * @version 1.0
  * @since 2017/8/7
  */
-public class Issue1367_jaxrs extends JerseyTest {
-
+public class Issue1367_jaxrs
+        extends JerseyTest {
     public static class AbstractController<ID extends Serializable, PO extends Issue1367.GenericEntity<ID>> {
-
         @POST
         @Path("/typeVariableBean")
         @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
@@ -40,8 +39,8 @@ public class Issue1367_jaxrs extends JerseyTest {
     }
 
     @Path("beanController")
-    public static class BeanController extends AbstractController<Long, Issue1367.TypeVariableBean> {
-
+    public static class BeanController
+            extends AbstractController<Long, Issue1367.TypeVariableBean> {
         @POST
         @Path("/parameterizedTypeBean")
         @Produces(javax.ws.rs.core.MediaType.APPLICATION_JSON)
@@ -71,7 +70,6 @@ public class Issue1367_jaxrs extends JerseyTest {
 
     @Test
     public void testParameterizedTypeBean() throws Exception {
-
         String request = "{\"t\": \"victor zeng\"}";
 
         Response response = target("beanController").path("parameterizedTypeBean").request().
@@ -83,7 +81,6 @@ public class Issue1367_jaxrs extends JerseyTest {
 
     @Test
     public void testTypeVariableBean() throws Exception {
-
         String request = "{\"id\": 1}";
 
         Response response = target("beanController").path("typeVariableBean").request().

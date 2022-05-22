@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue1780_JSONObject {
-
     @Test
 	public void test_for_issue() {
 		org.json.JSONObject req = new org.json.JSONObject();

@@ -11,19 +11,18 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONPath_deepScan_test {
-
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void test_0() throws Exception {
-        Map root = Collections.singletonMap("company", //
-                Collections.singletonMap("departs", //
-                        Arrays.asList( //
+        Map root = Collections.singletonMap("company",
+                Collections.singletonMap("departs",
+                        Arrays.asList(
                                 Collections.singletonMap("id",
-                                        1001), //
+                                        1001),
                                 Collections.singletonMap("id",
-                                        1002), //
+                                        1002),
                                 Collections.singletonMap("id", 1003) //
-                        ) //
+                        )
                 ));
 
         List<Object> ids = (List<Object>) JSONPath.eval(root, "$..id");
@@ -34,6 +33,5 @@ public class JSONPath_deepScan_test {
     }
 
     public static class Root {
-
     }
 }

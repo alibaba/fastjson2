@@ -47,11 +47,11 @@ public class TransientTest {
     }
 
 
-    public static class Bean implements Serializable {
+    public static class Bean
+            implements Serializable {
         private transient AtomicBoolean atomicBoolean = new AtomicBoolean(false);
 
         public Bean() {
-
         }
 
         public AtomicBoolean getAtomicBoolean() {

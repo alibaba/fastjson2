@@ -47,7 +47,6 @@ public class AutoTypeTest21 {
         Map<Item, String> values2;
 
         public Bean1() {
-
         }
     }
 

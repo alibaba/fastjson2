@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 public class Issue1357 {
     @Test
     public void test_for_issue() throws Exception {
-
         String str = "{\"d2\":null}";
         Test2Bean b = JSONObject.parseObject(str,Test2Bean.class);
         System.out.println(b);

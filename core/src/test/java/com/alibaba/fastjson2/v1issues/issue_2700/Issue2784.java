@@ -50,8 +50,8 @@ public class Issue2784 {
                 + "}", str);
 
         Model m1 = JSON.parseObject(str, Model.class);
-        assertEquals(m.time1.atZone(zoneId).toEpochSecond()
-                , m1.time1.atZone(zoneId).toEpochSecond());
+        assertEquals(m.time1.atZone(zoneId).toEpochSecond(),
+                 m1.time1.atZone(zoneId).toEpochSecond());
     }
 
     @Test
@@ -64,8 +64,8 @@ public class Issue2784 {
                 + "}", str);
 
         Model m1 = JSON.parseObject(str, Model.class);
-        assertEquals(m.ztime1.toEpochSecond()
-                , m1.ztime1.toEpochSecond());
+        assertEquals(m.ztime1.toEpochSecond(),
+                 m1.ztime1.toEpochSecond());
     }
 
     @Test
@@ -78,8 +78,8 @@ public class Issue2784 {
                 + "}", str);
 
         Model m1 = JSON.parseObject(str, Model.class);
-        assertEquals(m.date.getTime()
-                , m1.date.getTime());
+        assertEquals(m.date.getTime(),
+                 m1.date.getTime());
     }
 
     @Test
@@ -92,8 +92,8 @@ public class Issue2784 {
                 + "}", str);
 
         Model m1 = JSON.parseObject(str, Model.class);
-        assertEquals(m.date1.getTime() / 1000
-                , m1.date1.getTime() / 1000);
+        assertEquals(m.date1.getTime() / 1000,
+                 m1.date1.getTime() / 1000);
     }
 
     @Test
@@ -106,8 +106,8 @@ public class Issue2784 {
                 + "}", str);
 
         Model m1 = JSON.parseObject(str, Model.class);
-        assertEquals(m.date1.getTime() / 1000
-                , m1.date1.getTime() / 1000);
+        assertEquals(m.date1.getTime() / 1000,
+                 m1.date1.getTime() / 1000);
     }
 
     @Test

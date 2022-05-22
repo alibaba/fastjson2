@@ -74,7 +74,6 @@ public class FloatTest3_random {
         public float value;
 
         public Model() {
-
         }
 
         public Model(float value) {

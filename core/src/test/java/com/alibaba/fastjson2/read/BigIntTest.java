@@ -221,7 +221,6 @@ public class BigIntTest {
 
         // Process remaining digit groups
         while (cursor < len) {
-
             int groupVal;
             {
                 int start = cursor;

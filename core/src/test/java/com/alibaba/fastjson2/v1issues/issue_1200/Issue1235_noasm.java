@@ -35,7 +35,8 @@ public class Issue1235_noasm {
     }
 
     @JSONType(typeName = "floorV2")
-    private static class FloorV2 implements Area {
+    private static class FloorV2
+            implements Area {
         @JSONField(ordinal = 1)
         public String type;
 

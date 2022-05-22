@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AtomicReferenceTest {
-
     @Test
     public void test_method() {
         V0 v = new V0(new Value(123));
@@ -61,11 +60,9 @@ public class AtomicReferenceTest {
     }
 
     public static class V0 {
-
         private AtomicReference<Value> value;
 
         public V0(){
-
         }
 
         public V0(Value value){
@@ -89,7 +86,6 @@ public class AtomicReferenceTest {
         public int id;
 
         public Value() {
-
         }
 
         public Value(int id) {

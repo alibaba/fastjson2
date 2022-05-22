@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-
 public class Issue206ParseTreeStringPretty {
     static String str;
     static ObjectMapper mapper = new ObjectMapper();

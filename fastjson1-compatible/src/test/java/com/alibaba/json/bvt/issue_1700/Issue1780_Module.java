@@ -16,7 +16,6 @@ import java.lang.reflect.Type;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue1780_Module {
-
     @Test
 	public void test_for_issue() {
 		org.json.JSONObject req = new org.json.JSONObject();
@@ -30,7 +29,8 @@ public class Issue1780_Module {
 		assertTrue("{\"id\":1111,\"name\":\"name11\"}".equals(text) || "{\"name\":\"name11\",\"id\":1111}".equals(text));
 	}
 
-	public class myModule implements Module {
+	public class myModule
+            implements Module {
 
 		@SuppressWarnings("rawtypes")
 		public ObjectDeserializer createDeserializer(ParserConfig config, Class type) {

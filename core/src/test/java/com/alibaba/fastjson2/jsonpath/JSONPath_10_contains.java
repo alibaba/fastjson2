@@ -9,9 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JSONPath_10_contains {
-
     @Test
-    public void test(){
+    public void test() {
         String json = "{\n" +
                 "    \"queryScene\":{\n" +
                 "        \"scene\":[\n" +
@@ -64,12 +63,4 @@ public class JSONPath_10_contains {
                 JSONPath.of("$.queryScene.scene.queryDataSet.dataSet.name")
                         .contains(root));
     }
-
-//    public void test_path_2() throws Exception {
-////        File file = new File("/Users/wenshao/Downloads/test");
-////        String json = FileUtils.readFileToString(file);
-//        String json = "{\"returnObj\":[{\"$ref\":\"$.subInvokes.com\\\\.alipay\\\\.cif\\\\.user\\\\.UserInfoQueryService\\\\@findUserInfosByCardNo\\\\(String[])[0].response[0]\"}]}";
-//        JSON.parseObject(json);
-//    }
-
 }

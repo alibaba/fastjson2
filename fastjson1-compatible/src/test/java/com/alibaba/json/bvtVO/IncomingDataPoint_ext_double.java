@@ -40,7 +40,6 @@ public class IncomingDataPoint_ext_double {
      * Empty constructor necessary for some de/serializers
      */
     public IncomingDataPoint_ext_double() {
-
     }
 
     /**

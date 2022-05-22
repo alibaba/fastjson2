@@ -191,7 +191,8 @@ public class Hessian2Test {
         return byteArrayOutputStream.toByteArray();
     }
 
-    public static class Item implements Serializable {
+    public static class Item
+            implements Serializable {
         public int id;
         public String name;
 
@@ -204,7 +205,8 @@ public class Hessian2Test {
         }
     }
 
-    public static class Bean implements Serializable {
+    public static class Bean
+            implements Serializable {
         List<Item> items;
     }
 
@@ -225,7 +227,8 @@ public class Hessian2Test {
         JSONBDump.dump(jsonbBytes);
     }
 
-    public static class Bean2 implements Serializable {
+    public static class Bean2
+            implements Serializable {
         public Object first;
         public Object second;
         public Object third;

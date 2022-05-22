@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
  * @create 2020/9/20
  */
 public class Issue3453 {
-
     @Test
     public void test_for_issue() throws Exception {
         String str = "[\n" +

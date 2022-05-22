@@ -11,72 +11,55 @@ public class CartItemDO2
     private static final long serialVersionUID = -3291877592429392571L;
     private String id = "myId";
     private long cartId;
-
     @JSONField(format = "symbol")
     public String getId() {
         return id;
     }
-
     public void setId(String id) {
         this.id = id;
     }
-
     public long getCartId() {
         return cartId;
     }
-
     public void setCartId(long cartId) {
         this.cartId = cartId;
     }
-
     public long getUserId() {
         return userId;
     }
-
     public void setUserId(long userId) {
         this.userId = userId;
     }
-
     public String getTrackId() {
         return trackId;
     }
-
     public void setTrackId(String trackId) {
         this.trackId = trackId;
     }
-
     public long getItemId() {
         return itemId;
     }
-
     public void setItemId(long itemId) {
         this.itemId = itemId;
     }
-
     public long getSkuId() {
         return skuId;
     }
-
     public void setSkuId(long skuId) {
         this.skuId = skuId;
     }
-
     public int getQuantity() {
         return quantity;
     }
-
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-
     public int getMainType() {
         return mainType;
     }
-
     public void setMainType(int mainType) {
         this.mainType = mainType;
     }
-
     public long getTpId() {
         return tpId;
     }

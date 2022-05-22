@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.v1issues.writeAsArray;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
@@ -9,9 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WriteAsArray_byte_public {
     @Test
-    public void test_0 () throws Exception {
+    public void test_0() throws Exception {
         VO vo = new VO();
-        vo.setId((byte)123);
+        vo.setId((byte) 123);
         vo.setName("wenshao");
 
         String text = JSON.toJSONString(vo, JSONWriter.Feature.BeanToArray);

@@ -32,7 +32,6 @@ public class Issue1233 {
 
     @JSONType(typeName = "floorV2")
     public interface FloorV2MixIn {
-
     }
 
     public interface Area {
@@ -43,7 +42,8 @@ public class Issue1233 {
         String getName();
     }
 
-    public static class Section implements Area {
+    public static class Section
+            implements Area {
         public List<Area> children;
 
         public String type;
@@ -55,7 +55,8 @@ public class Issue1233 {
         }
     }
 
-    public static class FloorV1 implements Area {
+    public static class FloorV1
+            implements Area {
         public String type;
         public String templateId;
 
@@ -64,7 +65,8 @@ public class Issue1233 {
         }
     }
 
-    public static class FloorV2 implements Area {
+    public static class FloorV2
+            implements Area {
         public List<Area> children;
 
         public String type;

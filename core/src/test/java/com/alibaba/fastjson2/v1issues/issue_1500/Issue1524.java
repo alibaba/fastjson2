@@ -118,7 +118,8 @@ public class Issue1524 {
 
     }
 
-    public static class ValueSerializer implements ObjectWriter {
+    public static class ValueSerializer
+            implements ObjectWriter {
         public ValueSerializer() {
 
         }

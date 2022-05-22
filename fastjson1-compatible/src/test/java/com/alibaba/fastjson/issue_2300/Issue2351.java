@@ -28,7 +28,6 @@ public class Issue2351 {
     }
 
     public static class Bean1 {
-
         public String a;
 
         public List<Bean2> b;

@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Issue251 {
-
     @Test
     public void test0() {
         String str = "{\"msgid\":\"CAQQvPnc4QUY0On2rYSAgAMgooLa0Q8=\",\"action\":\"send\",\"from\":\"XuJinSheng\",\"tolist\":[\"icefog\"],\"roomid\":\"\",\"msgtime\":0,\"msgtype\":\"image\",\"image\":{\"md5sum\":\"50de8e5ae8ffe4f1df7a93841f71993a\",\"filesize\":70961,\"sdkfileid\":\"CtYBMzA2OTAyMDEwMjA0NjIzMDYwMDIwMTAwMDIwNGI3ZmU0MDZlMDIwMzBmNTliMTAyMDQ1YzliNTQ3NzAyMDQ1YzM3M2NiYzA0MjQ2NjM0MzgzNTM0NjEzNTY1MmQzNDYxMzQzODJkMzQzMTYxNjEyZDM5NjEzOTM2MmQ2MTM2NjQ2NDY0NjUzMDY2NjE2NjM1MzcwMjAxMDAwMjAzMDExNTQwMDQxMDUwZGU4ZTVhZThmZmU0ZjFkZjdhOTM4NDFmNzE5OTNhMDIwMTAyMDIwMTAwMDQwMBI4TkRkZk1UWTRPRGcxTVRBek1ETXlORFF6TWw4eE9UUTVOamN6TkRZMlh6RTFORGN4TWpNNU1ERT0aIGEwNGQwYWUyM2JlYzQ3NzQ5MjZhNWZjMjk0ZTEyNTkz\"}}\n";
@@ -29,14 +28,12 @@ public class Issue251 {
     }
 
     @Data
-    public static class TypeImage extends AbstractTypeFile {
-
+    public static class TypeImage
+            extends AbstractTypeFile {
     }
-
 
     @Data
     abstract static public class AbstractTypeFile {
-
         /**
          * 媒体资源的id信息。String类型
          */

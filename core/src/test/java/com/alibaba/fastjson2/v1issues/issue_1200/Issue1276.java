@@ -23,7 +23,8 @@ public class Issue1276 {
 
     }
 
-    public static class MyException extends RuntimeException{
+    public static class MyException
+            extends RuntimeException{
         private static final long serialVersionUID = 7815426752583648734L;
         private long code;
 

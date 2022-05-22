@@ -20,15 +20,13 @@ public class Issue3373 {
         System.out.println(JSON.toJSONString(items,refAfterFilterTest));
     }
 
-    public static class RefBeforeFilterTest extends BeforeFilter {
-
+    public static class RefBeforeFilterTest
+            extends BeforeFilter {
         private Category category = new Category("afterFilterCategory");
 
         @Override
         public void writeBefore(Object object) {
-
             if (object instanceof Item) {
-
                 this.writeKeyValue("afterFilterCategory", category);
                 /*多加一个属性报错,原因是category是object也触发了writeAfter,当前线程变量serializer被设置为null了serializerLocal.set(null);
                  *这两个write换个顺序就不会报错
@@ -40,7 +38,6 @@ public class Issue3373 {
     }
 
     public static class Category {
-
         private String name;
 
         public Category(String name){
@@ -57,13 +54,11 @@ public class Issue3373 {
     }
 
     public static class Item {
-
         private String name;
 
         private Category category;
 
         private String barcode;
-
 
         public Item(String name, Category category){
             this.name = name;

@@ -11,7 +11,6 @@ import java.util.HashMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class Issue2185 {
-
     @Test
     public void test_for_issue() throws Exception {
         Exception error = null;

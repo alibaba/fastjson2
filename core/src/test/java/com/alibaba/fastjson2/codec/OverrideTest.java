@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OverrideTest {
-
     @Test
     public void test_override() throws Exception {
         ObjectReaderCreator creator = TestUtils.READER_CREATOR;
@@ -34,7 +33,8 @@ public class OverrideTest {
         }
     }
 
-    public static class Cat extends Animal {
+    public static class Cat
+            extends Animal {
         private int catId;
         public void setId(int id) {
             this.catId = id;

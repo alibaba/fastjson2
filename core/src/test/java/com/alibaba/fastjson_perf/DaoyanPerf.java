@@ -29,7 +29,6 @@ public class DaoyanPerf {
         ObjectOutputStream objectOutputStream = null;
 
         try {
-
             byteOutputStream = new ByteArrayOutputStream();
             objectOutputStream = new ObjectOutputStream(byteOutputStream);
 
@@ -38,11 +37,9 @@ public class DaoyanPerf {
             objectOutputStream.flush();
 
             return byteOutputStream.toByteArray();
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-
             if (null != objectOutputStream) {
                 try {
                     objectOutputStream.close();
@@ -56,14 +53,13 @@ public class DaoyanPerf {
         return null;
     }
 
-
-    public static class CartItemDO implements Serializable {
+    public static class CartItemDO
+            implements Serializable {
         private static final long serialVersionUID = -3291877592429392571L;
         private String id = "myId";
         private long cartId;
 
         public CartItemDO() {
-
         }
 
         public String getId() {
@@ -150,7 +146,6 @@ public class DaoyanPerf {
             return cityCode;
         }
 
-
         public void setCityCode(long cityCode) {
             this.cityCode = cityCode;
         }
@@ -168,22 +163,20 @@ public class DaoyanPerf {
         private long itemId;
         private long skuId;
         private int quantity;
-        private int mainType = 0;
+        private int mainType;
         private long tpId;
-        private long subType = 0L;
+        private long subType;
         private long cityCode;
         private Map<String, String> attributes = new HashMap();
     }
-
 
     static final int LOOP_COUNT = 1000 * 1000 * 1;
     static final int ITER_COUNT = 5;
 
     private static List<CartItemDO> newCartsItem() {
-
         List<CartItemDO> list = new ArrayList();
 
-        for (long i = 90000000000l; i < 90000000000l + 10; i++) {
+        for (long i = 90000000000L; i < 90000000000L + 10; i++) {
             CartItemDO cartItemDO2 = new CartItemDO();
 
             cartItemDO2.setUserId(i);
@@ -226,12 +219,14 @@ public class DaoyanPerf {
                     JSONWriter.Feature.NotWriteDefaultValue,
                     JSONWriter.Feature.FieldBased,
                     JSONWriter.Feature.IgnoreErrorGetter);
-            Type type = new TypeReference<List<CartItemDO>>(){}.getType();
+            Type type = new TypeReference<List<CartItemDO>>() {
+            }.getType();
             JSONB.parseObject(jsonbBytes, type);
         }
         {
             jsonBytes = JSON.toJSONBytes(lists);
-            Type type = new TypeReference<List<CartItemDO>>(){}.getType();
+            Type type = new TypeReference<List<CartItemDO>>() {
+            }.getType();
             JSON.parseObject(jsonBytes, type);
         }
         {
@@ -260,7 +255,7 @@ public class DaoyanPerf {
     public void test_hessoin2() throws Exception {
         byte[] copyOfWrittenBuffer = null;
 
-        for (int i = 0; i < ITER_COUNT; ++i)  {
+        for (int i = 0; i < ITER_COUNT; ++i) {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < LOOP_COUNT; j++) {
@@ -275,7 +270,7 @@ public class DaoyanPerf {
     @Test
     public void test_hessoin2_parse() throws Exception {
         Object o = null;
-        for (int i = 0; i < ITER_COUNT; ++i)  {
+        for (int i = 0; i < ITER_COUNT; ++i) {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < LOOP_COUNT; j++) {
@@ -283,7 +278,6 @@ public class DaoyanPerf {
 
                 Hessian2Input hessian2Input = new Hessian2Input(bytesIn);
                 o = hessian2Input.readObject();
-
             }
 
             System.out.println("hession2-parse : millis " + (System.currentTimeMillis() - start) + ", len " + hessian2Bytes.length);
@@ -295,7 +289,7 @@ public class DaoyanPerf {
     public void test_fastjson2_jsonb() {
         byte[] copyOfWrittenBuffer = null;
 
-        for (int i = 0; i < ITER_COUNT; ++i){
+        for (int i = 0; i < ITER_COUNT; ++i) {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < LOOP_COUNT; j++) {
@@ -310,8 +304,9 @@ public class DaoyanPerf {
 
     @Test
     public void test_fastjson2_jsonb_parse() {
-        Type type = new TypeReference<List<CartItemDO>>(){}.getType();
-        for (int i = 0; i < ITER_COUNT; ++i){
+        Type type = new TypeReference<List<CartItemDO>>() {
+        }.getType();
+        for (int i = 0; i < ITER_COUNT; ++i) {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < LOOP_COUNT; j++) {
@@ -327,7 +322,7 @@ public class DaoyanPerf {
     public void test_fastjson2() {
         byte[] copyOfWrittenBuffer = null;
 
-        for (int i = 0; i < ITER_COUNT; ++i){
+        for (int i = 0; i < ITER_COUNT; ++i) {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < LOOP_COUNT; j++) {
@@ -340,10 +335,10 @@ public class DaoyanPerf {
 
     @Test
     public void test_fastjson2_parse() {
+        Type type = new TypeReference<List<CartItemDO>>() {
+        }.getType();
 
-        Type type = new TypeReference<List<CartItemDO>>(){}.getType();
-
-        for (int i = 0; i < ITER_COUNT; ++i){
+        for (int i = 0; i < ITER_COUNT; ++i) {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < LOOP_COUNT; j++) {
@@ -358,7 +353,7 @@ public class DaoyanPerf {
     public void test_jdk() {
         byte[] copyOfWrittenBuffer = null;
 
-        for (int i = 0; i < ITER_COUNT; ++i){
+        for (int i = 0; i < ITER_COUNT; ++i) {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < LOOP_COUNT; j++) {
@@ -373,7 +368,7 @@ public class DaoyanPerf {
     public void test_jdk_parse() throws Exception {
         byte[] copyOfWrittenBuffer = serializeByJdk(lists);
 
-        for (int i = 0; i < ITER_COUNT; ++i){
+        for (int i = 0; i < ITER_COUNT; ++i) {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < LOOP_COUNT; j++) {
@@ -384,5 +379,4 @@ public class DaoyanPerf {
             System.out.println("jdk-parse : millis " + (System.currentTimeMillis() - start) + ", len " + copyOfWrittenBuffer.length);
         }
     }
-
 }

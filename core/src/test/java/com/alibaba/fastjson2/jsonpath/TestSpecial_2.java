@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 //import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class TestSpecial_2 {
-
     @Test
     public void test_special() {
         Model model = new Model();
@@ -35,6 +34,5 @@ public class TestSpecial_2 {
     }
 
     public static class Value {
-
     }
 }

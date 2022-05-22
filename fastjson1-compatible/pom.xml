@@ -128,7 +128,6 @@
             <scope>provided</scope>
         </dependency>
 
-
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-messaging</artifactId>
@@ -149,7 +148,6 @@
             <artifactId>spring-data-redis</artifactId>
             <scope>provided</scope>
         </dependency>
-
 
         <dependency>
             <groupId>cglib</groupId>
@@ -313,7 +311,6 @@
             <artifactId>javassist</artifactId>
             <scope>test</scope>
         </dependency>
-
 
         <!-- spring libs -->
         <dependency>
