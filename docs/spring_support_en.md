@@ -1,8 +1,9 @@
-# 在 Spring 中集成 Fastjson2
+# Integrate Fastjson2 in SpringFramework
 
-# 0. 依赖配置
+# 0. Download
 
-Fastjson2采用多module的结构设计，对SpringFramework等框架的支持现独立在`extension`包中。
+Fastjson2 adopts a multi-module structure design, and the support for frameworks such as SpringFramework is now
+independent in the `extension` dependency.
 
 `Maven`:
 
@@ -23,31 +24,32 @@ dependencies {
 }
 ```
 
-# 1. 参数配置
+# 1. Configuration
 
-Fastjson2对于序列化和反序列化的行为进行了重新设计，所以`FastJsonConfig`也会重新适配。
+Fastjson2 has redesigned the behavior of serialization and deserialization, so `FastJsonConfig` will also be re-adapted.
 
 **Package**: `com.alibaba.fastjson2.support.config.FastJsonConfig`
 
 **Attributes**:
 
-参数 | 类型 | 描述
+param | Type | Desc
 ---- | ---- | ----
-charset | Charset | 指定的字符集，默认UTF-8
-dateFormat | String | 指定的日期格式，默认yyyy-MM-dd HH:mm:ss
-writerFilters | Filter[] | 配置序列化过滤器
-writerFeatures | JSONWriter.Feature[] | 配置序列化的指定行为，更多配置请见：[Features](features_cn.md)
-readerFeatures | JSONReader.Feature[] | 配置反序列化的指定行为，更多配置请见：[Features](features_cn.md)
-symbolTable | JSONB.SymbolTable | JSONB序列化和反序列化的符号表，只有使用JSONB时生效
+charset | Charset | The specified character set, default UTF-8
+dateFormat | String | The specified date format, default yyyy-MM-dd HH:mm:ss
+writerFilters | Filter[] | Configure serialization filters
+writerFeatures | JSONWriter.Feature[] | Configure the specified behavior of serialization. For more configuration, see [Features](features_en.md)
+readerFeatures | JSONReader.Feature[] | Configure the specified behavior of deserialization. For more configuration, see [Features](features_en.md)
+symbolTable | JSONB.SymbolTable | JSONB serialization and deserialization symbol table, only valid when using JSONB
 
-# 2. 在 Spring Web MVC 中集成 Fastjson2
+# 2. Integrate Fastjson2 in Spring Web MVC
 
-在Fastjson2中，同样可以使用`FastJsonHttpMessageConverter` 和 `FastJsonJsonView` 为 Spring MVC 构建的 Web 应用提供更好的性能体验。
+In Fastjson2, `FastJsonHttpMessageConverter` and `FastJsonJsonView` can also be used to provide a better performance
+experience for Web applications built with Spring MVC.
 
 ## 2.1  Spring Web MVC Converter
 
-使用 `FastJsonHttpMessageConverter` 来替换 Spring MVC 默认的 `HttpMessageConverter`
-以提高 `@RestController` `@ResponseBody` `@RequestBody` 注解的 JSON序列化和反序列化速度。
+Use `FastJsonHttpMessageConverter` to replace Spring MVC's default `HttpMessageConverter` to improve JSON serialization
+and deserialization speed of `@RestController` `@ResponseBody` `@RequestBody` annotations.
 
 **Package**: `com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter`
 
@@ -62,7 +64,7 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
-        //自定义配置...
+        //custom configuration...
         FastJsonConfig config = new FastJsonConfig();
         config.setDateFormat("yyyy-MM-dd HH:mm:ss");
         config.setReaderFeatures(JSONReader.Feature.FieldBased, JSONReader.Feature.SupportArrayToBean);
@@ -77,7 +79,8 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
 
 ## 2.2  Spring Web MVC View
 
-使用 `FastJsonJsonView` 来设置 Spring MVC 默认的视图模型解析器，以提高 `@Controller` `@ResponseBody` `ModelAndView` JSON序列化速度。
+Use `FastJsonJsonView` to set Spring MVC's default view model resolver to improve the speed
+of `@Controller` `@ResponseBody` `ModelAndView` JSON serialization.
 
 **Package**: `com.alibaba.fastjson2.support.spring.webservlet.view.FastJsonJsonView`
 
@@ -92,7 +95,7 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
     @Override
     public void configureViewResolvers(ViewResolverRegistry registry) {
         FastJsonJsonView fastJsonJsonView = new FastJsonJsonView();
-        //自定义配置...
+        //custom configuration...
         //FastJsonConfig config = new FastJsonConfig();
         //config.set...
         //fastJsonJsonView.setFastJsonConfig(config);
@@ -101,11 +104,11 @@ public class WebMvcConfigurer extends WebMvcConfigurerAdapter {
 }
 ```
 
-> 参考：Spring Framework 官方文档 Spring Web MVC 部分，[查看更多](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-config) 。
+> Reference: Spring Framework official documentation Spring Web MVC section, [For more configuration](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-config).
 
-# 3. 在 Spring Web Socket 中集成 Fastjson2
+# 3. Integrate Fastjson2 in Spring Web Socket
 
-在Fastjson2中，同样也对 Spring WebSocket 给予支持，可以使用 `FastjsonSockJsMessageCodec` 进行配置。
+In Fastjson2, Spring WebSocket is also supported, which can be configured using `FastjsonSockJsMessageCodec`.
 
 **Package**: `com.alibaba.fastjson2.support.spring.websocket.sockjs.FastjsonSockJsMessageCodec`
 
@@ -121,7 +124,7 @@ public class WebSocketConfig extends WebMvcConfigurerAdapter implements WebSocke
     WebSocketHandler handler;
 
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        //自定义配置...
+        //custom configuration...
         //FastjsonSockJsMessageCodec messageCodec = new FastjsonSockJsMessageCodec();
         //FastJsonConfig config = new FastJsonConfig();
         //config.set...
@@ -132,15 +135,17 @@ public class WebSocketConfig extends WebMvcConfigurerAdapter implements WebSocke
 }
 ```
 
-> 参考：Spring Framework 官方文档 Spring Web Socket 部分，[查看更多](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#websocket) 。
+> Reference: Spring Framework official documentation Spring Web Socket section, [For more configuration](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#websocket).
 
-# 4. 在 Spring Data Redis 中集成 Fastjson2
+# 4. Integrate Fastjson2 in Spring Data Redis
 
-在Fastjson2中，同样可以使用 `GenericFastJsonRedisSerializer` 或 `FastJsonRedisSerializer` 为 Spring Data Redis 提供更好的性能体验。
+In Fastjson2, you can also use `GenericFastJsonRedisSerializer` or `FastJsonRedisSerializer` to provide a better
+performance experience for Spring Data Redis.
 
 ## 4.1 Generic Redis Serializer
 
-使用 `GenericFastJsonRedisSerializer` 作为 `RedisTemplate` 的 `RedisSerializer` 来提升JSON序列化和反序列化速度。
+Use `GenericFastJsonRedisSerializer` as the `RedisSerializer` of `RedisTemplate` to improve JSON serialization and
+deserialization speed.
 
 **Package**: `com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonRedisSerializer`
 
@@ -157,10 +162,10 @@ public class RedisConfiguration {
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
         GenericFastJsonRedisSerializer fastJsonRedisSerializer = new GenericFastJsonRedisSerializer();
-        redisTemplate.setDefaultSerializer(fastJsonRedisSerializer);//设置默认的Serialize，包含 keySerializer & valueSerializer
+        redisTemplate.setDefaultSerializer(fastJsonRedisSerializer);//Set the default Serialize, including keySerializer & valueSerializer
 
-        //redisTemplate.setKeySerializer(fastJsonRedisSerializer);//单独设置keySerializer
-        //redisTemplate.setValueSerializer(fastJsonRedisSerializer);//单独设置valueSerializer
+        //redisTemplate.setKeySerializer(fastJsonRedisSerializer);//Only set keySerializer
+        //redisTemplate.setValueSerializer(fastJsonRedisSerializer);//Only set valueSerializer
         return redisTemplate;
     }
 }
@@ -168,8 +173,9 @@ public class RedisConfiguration {
 
 ## 4.2 Customized Redis Serializer
 
-通常使用 `GenericFastJsonRedisSerializer` 即可满足大部分场景，如果你想定义特定类型专用的 `RedisTemplate` 可以使用 `FastJsonRedisSerializer`
-来代替 `GenericFastJsonRedisSerializer` ，配置是类似的。
+Usually, `GenericFastJsonRedisSerializer` can be used for most scenarios. If you want to define a specific type
+of `RedisTemplate`, you can use `FastJsonRedisSerializer` instead of `GenericFastJsonRedisSerializer` , the
+configuration is similar.
 
 **Package**: `com.alibaba.fastjson2.support.spring.data.redis.FastJsonRedisSerializer`
 
@@ -194,8 +200,9 @@ public class RedisConfiguration {
 
 ## 4.3 JSONB Redis Serializer
 
-如果你准备使用 JSONB 作为对象序列/反序列化的方式并对序列化速度有较高的要求的话，还可以使用 `GenericFastJsonJSONBRedisSerializer` 和 `FastJsonJSONBRedisSerializer`
-这两个 `RedisSerializer` 是 fastjson 2.0.3 版本中新增的支持，配置也是类似的。
+If you plan to use JSONB as an object serialization/deserialization method and have higher serialization speed
+requirements, you can also use `GenericFastJsonJSONBRedisSerializer` and `FastJsonJSONBRedisSerializer`. These
+two `RedisSerializer` are new in fastjson 2.0.3 version Added support, the configuration is similar.
 
 **Package**：`com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonJSONBRedisSerializer`
 and `com.alibaba.fastjson2.support.spring.data.redis.FastJsonJSONBRedisSerializer`
@@ -219,5 +226,5 @@ public class RedisConfiguration {
 
 ```
 
-> 参考：Spring Data Redis 官方文档，[查看更多](https://docs.spring.io/spring-data/redis/docs/current/reference/html/) 。
+> Reference: Spring Data Redis official documentation, [For more configuration](https://docs.spring.io/spring-data/redis/docs/current/reference/html/).
 
