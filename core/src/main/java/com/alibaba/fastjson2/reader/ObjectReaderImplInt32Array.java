@@ -17,6 +17,7 @@ final class ObjectReaderImplInt32Array
         return Integer[].class;
     }
 
+    @Override
     public Object createInstance(Collection collection) {
         Integer[] array = new Integer[collection.size()];
         int i = 0;

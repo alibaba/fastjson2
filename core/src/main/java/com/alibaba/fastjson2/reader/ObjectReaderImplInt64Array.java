@@ -17,6 +17,7 @@ final class ObjectReaderImplInt64Array
         return Long[].class;
     }
 
+    @Override
     public Object createInstance(Collection collection) {
         Long[] array = new Long[collection.size()];
         int i = 0;
