@@ -22,8 +22,7 @@ public class JSONArray
     private static final long serialVersionUID = 1L;
 
     static ObjectWriter<JSONArray> arrayWriter;
-    static ObjectReader<JSONArray> arrayReader;
-    static ObjectReader<JSONObject> objectReader;
+    static final ObjectReader<JSONArray> READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONArray.class);
 
     /**
      * default
@@ -132,10 +131,7 @@ public class JSONArray
             }
 
             JSONReader reader = JSONReader.of(str);
-            if (arrayReader == null) {
-                arrayReader = reader.getObjectReader(JSONArray.class);
-            }
-            return arrayReader.readObject(reader, 0);
+            return READER.readObject(reader, 0);
         }
 
         if (value instanceof Collection) {
@@ -187,10 +183,7 @@ public class JSONArray
             }
 
             JSONReader reader = JSONReader.of(str);
-            if (objectReader == null) {
-                objectReader = reader.getObjectReader(JSONObject.class);
-            }
-            return objectReader.readObject(reader, 0);
+            return JSONObject.READER.readObject(reader, 0);
         }
 
         if (value instanceof Map) {
