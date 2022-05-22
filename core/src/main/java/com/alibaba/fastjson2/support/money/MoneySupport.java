@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 import com.alibaba.fastjson2.writer.ObjectWriters;
 
 import javax.money.*;
+
 import java.util.Arrays;
 
 public class MoneySupport {

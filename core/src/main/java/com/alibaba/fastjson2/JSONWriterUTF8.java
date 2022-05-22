@@ -5,10 +5,6 @@ import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.RyuDouble;
 import com.alibaba.fastjson2.util.RyuFloat;
 
-import static com.alibaba.fastjson2.util.IOUtils.DigitOnes;
-import static com.alibaba.fastjson2.util.IOUtils.DigitTens;
-import static com.alibaba.fastjson2.util.IOUtils.digits;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -22,6 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.IOUtils.*;
 
 class JSONWriterUTF8
         extends JSONWriter {
@@ -266,12 +263,12 @@ class JSONWriterUTF8
         if (i + 2 <= chars.length) {
             char c0 = chars[i];
             char c1 = chars[i + 1];
-            if (c0 == quote || c1 == quote
+
+            if (!(c0 == quote || c1 == quote
                     || c0 == '\\' || c1 == '\\'
                     || c0 < ' ' || c1 < ' '
-                    || c0 > 0x007F || c1 > 0x007F
+                    || c0 > 0x007F || c1 > 0x007F)
             ) {
-            } else {
                 bytes[off] = (byte) c0;
                 bytes[off + 1] = (byte) c1;
                 off += 2;

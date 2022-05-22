@@ -101,8 +101,8 @@ public class ParserTest_number {
         assertEquals(Fnv.hashCode64("id"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("id"), lexer.getNameHashCodeLCase());
         assertEquals("id", lexer.getFieldName());
-        assertEquals(123456789
-                , lexer.readNumber());
+        assertEquals(123456789,
+                 lexer.readNumber());
 
         assertEquals(Fnv.hashCode64("v0"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v0"), lexer.getNameHashCodeLCase());

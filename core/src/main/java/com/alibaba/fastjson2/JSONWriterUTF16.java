@@ -3,10 +3,6 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.RyuDouble;
 import com.alibaba.fastjson2.util.RyuFloat;
 
-import static com.alibaba.fastjson2.util.IOUtils.DigitOnes;
-import static com.alibaba.fastjson2.util.IOUtils.DigitTens;
-import static com.alibaba.fastjson2.util.IOUtils.digits;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -15,6 +11,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.IOUtils.*;
 
 class JSONWriterUTF16
         extends JSONWriter {

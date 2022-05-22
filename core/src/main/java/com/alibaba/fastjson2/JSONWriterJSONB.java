@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,9 +17,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-
+import static com.alibaba.fastjson2.JSONFactory.CACHE_THREAD;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
-import static com.alibaba.fastjson2.JSONFactory.*;
 
 final class JSONWriterJSONB
         extends JSONWriter {
@@ -31,7 +30,7 @@ final class JSONWriterJSONB
     private byte[] bytes;
     private JSONB.SymbolTable symbolTable;
 
-    TLongIntHashMap symbols = null;
+    TLongIntHashMap symbols;
     private int symbolIndex;
 
     JSONWriterJSONB(Context ctx, JSONB.SymbolTable symbolTable) {

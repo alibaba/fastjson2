@@ -21,8 +21,8 @@ import java.util.Map;
 
 public class DynamicClassLoader
         extends ClassLoader {
-    final static String FASTJSON_PACKAGE;
-    final static ClassLoader FASTJSON_CLASSLOADER;
+    static final String FASTJSON_PACKAGE;
+    static final ClassLoader FASTJSON_CLASSLOADER;
 
     private static java.security.ProtectionDomain DOMAIN;
 

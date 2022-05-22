@@ -13,13 +13,13 @@ final class FieldWriterEnumFunc
     final Function function;
 
     protected FieldWriterEnumFunc(
-            String name
-            , int ordinal
-            , long features
-            , Type fieldType
-            , Class fieldClass
-            , Method method
-            , Function function) {
+            String name,
+            int ordinal,
+            long features,
+            Type fieldType,
+            Class fieldClass,
+            Method method,
+            Function function) {
         super(name, ordinal, features, null, fieldClass);
         this.fieldType = fieldType;
         this.method = method;

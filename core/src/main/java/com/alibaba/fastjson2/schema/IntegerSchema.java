@@ -184,8 +184,12 @@ final class IntegerSchema
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         com.alibaba.fastjson2.schema.IntegerSchema that = (com.alibaba.fastjson2.schema.IntegerSchema) o;
         return Objects.equals(title, that.title)
                 && Objects.equals(description, that.description)
@@ -193,8 +197,7 @@ final class IntegerSchema
                 && Objects.equals(exclusiveMinimum, that.exclusiveMinimum)
                 && Objects.equals(maximum, that.maximum)
                 && Objects.equals(exclusiveMaximum, that.exclusiveMaximum)
-                && Objects.equals(multipleOf, that.multipleOf)
-                ;
+                && Objects.equals(multipleOf, that.multipleOf);
     }
 
     @Override

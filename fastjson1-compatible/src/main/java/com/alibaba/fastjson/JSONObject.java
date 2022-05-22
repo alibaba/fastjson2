@@ -401,7 +401,7 @@ public class JSONObject
 
     public boolean getBooleanValue(String key) {
         Object value = get(key);
-        Boolean booleanVal =  com.alibaba.fastjson2.util.TypeUtils.cast(value, Boolean.class);
+        Boolean booleanVal = com.alibaba.fastjson2.util.TypeUtils.cast(value, Boolean.class);
         if (booleanVal == null) {
             return false;
         }
@@ -1071,9 +1071,10 @@ public class JSONObject
                     Field[] array = new Field[fieldnames.length];
                     for (int i = 0; i < fieldnames.length; i++) {
                         Field field = TypeUtils
-                                .getField(ObjectInputStream.class
-                                        , fieldnames[i]
-                                        , declaredFields
+                                .getField(
+                                        ObjectInputStream.class,
+                                        fieldnames[i],
+                                        declaredFields
                                 );
                         field.setAccessible(true);
                         array[i] = field;

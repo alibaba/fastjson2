@@ -76,15 +76,15 @@ public class BigDecimalFieldTest {
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
                 BigDecimalField1 vo = new BigDecimalField1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[null]"
-                        , jsonWriter.toString());
+                assertEquals("[null]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 BigDecimalField1 vo = new BigDecimalField1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();

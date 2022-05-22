@@ -42,8 +42,9 @@ final class FieldReaderAtomicReferenceField<T>
                 AtomicReference atomic = (AtomicReference) field.get(object);
                 atomic.set(value);
             } else {
-                field.set(object
-                        , new AtomicReference(value));
+                field.set(
+                        object,
+                        new AtomicReference(value));
             }
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);

@@ -112,7 +112,7 @@ public class Issue1367 {
 
     }
 
-    public static abstract class GenericEntity<ID extends Serializable> {
+    public abstract static class GenericEntity<ID extends Serializable> {
         public abstract ID getId();
     }
 

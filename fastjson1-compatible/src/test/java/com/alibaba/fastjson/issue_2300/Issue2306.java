@@ -12,8 +12,8 @@ public class Issue2306 {
         JSONObject object = new JSONObject();
         object.put("help_score_avg.cbm", 123);
 
-        assertEquals(123
-            , JSONPath.extract(
+        assertEquals(123,
+            JSONPath.extract(
                     object.toJSONString(), "['help_score_avg.cbm']"));
     }
 }

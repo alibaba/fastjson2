@@ -16,7 +16,7 @@ public class Issue1085 {
         assertEquals(123, model.id);
     }
 
-    public static abstract class AbstractModel {
+    public abstract static class AbstractModel {
         public int id;
 
         @JSONCreator

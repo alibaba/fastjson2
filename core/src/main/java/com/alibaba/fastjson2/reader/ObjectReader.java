@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 import java.util.function.Function;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -115,7 +116,7 @@ public interface ObjectReader<T> {
                     typedFieldValue = ((JSONArray) fieldValue).toJavaObject(fieldType);
                 } else {
                     String fieldValueJSONString = JSON.toJSONString(fieldValue);
-                    try(JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {
+                    try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {
                         ObjectReader fieldObjectReader = fieldReader.getObjectReader(jsonReader);
                         typedFieldValue = fieldObjectReader.readObject(jsonReader, 0);
                     }

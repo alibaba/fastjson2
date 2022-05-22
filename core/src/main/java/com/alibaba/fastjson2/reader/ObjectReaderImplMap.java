@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONPath;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.*;
 
 import java.lang.reflect.ParameterizedType;
@@ -33,7 +36,7 @@ public final class ObjectReaderImplMap
     final Class instanceType;
     final long features;
     final Function builder;
-    volatile boolean instanceError = false;
+    volatile boolean instanceError;
 
     public static ObjectReader of(Type fieldType, Class mapType, long features) {
         Function builder = null;

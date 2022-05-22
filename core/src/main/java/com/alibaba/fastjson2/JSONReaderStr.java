@@ -487,7 +487,7 @@ final class JSONReaderStr
 
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
-        for (int i = 0; offset < end ; ++i) {
+        for (int i = 0; offset < end; ++i) {
             char c = str.charAt(offset);
             if (c == '\\') {
                 nameEscape = true;
@@ -1078,7 +1078,7 @@ final class JSONReaderStr
 
     @Override
     public void skipLineComment() {
-        for (;;) {
+        while (true) {
             if (ch == '\n') {
                 offset++;
 

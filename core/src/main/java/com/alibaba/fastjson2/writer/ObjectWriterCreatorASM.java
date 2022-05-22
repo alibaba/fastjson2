@@ -9,9 +9,6 @@ import com.alibaba.fastjson2.internal.asm.*;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.*;
-import com.alibaba.fastjson2.internal.asm.ClassWriter;
-import com.alibaba.fastjson2.internal.asm.Label;
-import com.alibaba.fastjson2.internal.asm.MethodWriter;
 
 import java.lang.reflect.*;
 import java.lang.reflect.Type;
@@ -263,13 +260,13 @@ public class ObjectWriterCreatorASM
                     }
 
                     FieldWriter fieldWriter = createFieldWriter(
-                            objectClass
-                            , fieldName
-                            , fieldInfo.ordinal
-                            , fieldInfo.features
-                            , fieldInfo.format
-                            , method
-                            , writeUsingWriter
+                            objectClass,
+                            fieldName,
+                            fieldInfo.ordinal,
+                            fieldInfo.features,
+                            fieldInfo.format,
+                            method,
+                            writeUsingWriter
                     );
 
                     FieldWriter origin = fieldWriterMap.putIfAbsent(fieldName, fieldWriter);
@@ -336,12 +333,11 @@ public class ObjectWriterCreatorASM
             classNameFull = className;
         }
 
-        cw.visit(Opcodes.V1_8
-                , Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER
-                , classNameType
-                ,
-                TYPE_OBJECT_WRITER_ADAPTER
-                , INTERFACES
+        cw.visit(Opcodes.V1_8,
+                Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER,
+                classNameType,
+                TYPE_OBJECT_WRITER_ADAPTER,
+                INTERFACES
         );
 
         // // define fieldWriter
@@ -518,11 +514,11 @@ public class ObjectWriterCreatorASM
         mw.visitEnd();
     }
 
-    private void genMethodWriteJSONB(Class objectType
-            , List<FieldWriter> fieldWriters
-            , ClassWriter cw
-            , String classNameType
-            , long objectFeatures
+    private void genMethodWriteJSONB(Class objectType,
+            List<FieldWriter> fieldWriters,
+            ClassWriter cw,
+            String classNameType,
+            long objectFeatures
     ) {
         MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC, "writeJSONB", METHOD_DESC_WRITE);
 
@@ -566,15 +562,16 @@ public class ObjectWriterCreatorASM
     }
 
     private void genMethodWriteArrayMappingJSONB(
-            Class objectType
-            , long objectFeatures
-            , List<FieldWriter> fieldWriters
-            , ClassWriter cw
-            , String classNameType
-            , long features
+            Class objectType,
+            long objectFeatures,
+            List<FieldWriter> fieldWriters,
+            ClassWriter cw,
+            String classNameType,
+            long features
     ) {
-        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
-                , "writeArrayMappingJSONB",
+        MethodWriter mw = cw.visitMethod(
+                Opcodes.ACC_PUBLIC,
+                "writeArrayMappingJSONB",
                 METHOD_DESC_WRITE
         );
 
@@ -656,11 +653,11 @@ public class ObjectWriterCreatorASM
     }
 
     private void gwObjectJSONB(
-            FieldWriter fieldWriter
-            , int OBJECT
-            , MethodWriterContext mwc
-            , int i
-            , boolean beanToArray
+            FieldWriter fieldWriter,
+            int OBJECT,
+            MethodWriterContext mwc,
+            int i,
+            boolean beanToArray
     ) {
         Class<?> fieldClass = fieldWriter.getFieldClass();
         String fieldName = fieldWriter.getFieldName();
@@ -729,11 +726,11 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
         mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
-        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE
-                , TYPE_FIELD_WRITER
-                , "getObjectWriter"
-                , METHOD_DESC_GET_OBJECT_WRITER
-                , true);
+        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE,
+                TYPE_FIELD_WRITER,
+                "getObjectWriter",
+                METHOD_DESC_GET_OBJECT_WRITER,
+                true);
 
         // objectWriter.write(jw, ctx, value);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -744,11 +741,11 @@ public class ObjectWriterCreatorASM
         mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_FIELD_WRITER, "getFieldType", "()Ljava/lang/reflect/Type;", true);
         mw.visitLdcInsn(fieldWriter.getFeatures());
         mw.visitMethodInsn(
-                Opcodes.INVOKEINTERFACE
-                , TYPE_OBJECT_WRITER
-                , beanToArray ? "writeJSONB" : "writeArrayMappingJSONB"
-                , METHOD_DESC_WRITE_OBJECT
-                , true
+                Opcodes.INVOKEINTERFACE,
+                TYPE_OBJECT_WRITER,
+                beanToArray ? "writeJSONB" : "writeArrayMappingJSONB",
+                METHOD_DESC_WRITE_OBJECT,
+                true
         );
 
         if (refDetection) {
@@ -972,15 +969,15 @@ public class ObjectWriterCreatorASM
     }
 
     private void genMethodWriteArrayMapping(
-            String methodName
-            , Class objectType
-            , long objectFeatures
-            , List<FieldWriter> fieldWriters
-            , ClassWriter cw
-            , String classNameType
+            String methodName,
+            Class objectType,
+            long objectFeatures,
+            List<FieldWriter> fieldWriters,
+            ClassWriter cw,
+            String classNameType
     ) {
-        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
-                , methodName,
+        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC,
+                methodName,
                 METHOD_DESC_WRITE
         );
 
@@ -1035,10 +1032,10 @@ public class ObjectWriterCreatorASM
             }
 
             gwFieldValueArrayMapping(
-                    fieldWriters.get(i)
-                    , mwc
-                    , OBJECT
-                    , i
+                    fieldWriters.get(i),
+                    mwc,
+                    OBJECT,
+                    i
             );
         }
 
@@ -1121,11 +1118,11 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
         mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
-        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE
-                , TYPE_FIELD_WRITER
-                , "getObjectWriter"
-                , METHOD_DESC_GET_OBJECT_WRITER
-                , true);
+        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE,
+                TYPE_FIELD_WRITER,
+                "getObjectWriter",
+                METHOD_DESC_GET_OBJECT_WRITER,
+                true);
 
         // objectWriter.write(jw, ctx, value);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -1252,10 +1249,10 @@ public class ObjectWriterCreatorASM
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, ITEM_CLASS);
 
-            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_FIELD_WRITER
-                    , "getItemWriter"
-                    , METHOD_DESC_GET_ITEM_WRITER
-                    , true
+            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_FIELD_WRITER,
+                    "getItemWriter",
+                    METHOD_DESC_GET_ITEM_WRITER,
+                    true
             );
             mw.visitVarInsn(Opcodes.ASTORE, ITEM_OBJECT_WRITER);
 
@@ -1415,8 +1412,8 @@ public class ObjectWriterCreatorASM
             mw.visitFieldInsn(Opcodes.GETFIELD, mwc.classNameType, fieldWriter(i), DESC_FIELD_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_FIELD_WRITER
-                    , "write", METHOD_DESC_FIELD_WRITE_OBJECT, true);
+            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_FIELD_WRITER,
+                    "write", METHOD_DESC_FIELD_WRITE_OBJECT, true);
             mw.visitInsn(Opcodes.POP);
             mw.visitJumpInsn(Opcodes.GOTO, notNull_);
         }
@@ -1464,8 +1461,8 @@ public class ObjectWriterCreatorASM
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
 
-            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_FIELD_WRITER
-                    , "getObjectWriter", METHOD_DESC_GET_OBJECT_WRITER, true);
+            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_FIELD_WRITER,
+                    "getObjectWriter", METHOD_DESC_GET_OBJECT_WRITER, true);
 
             // objectWriter.write(jw, ctx, value);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -1474,11 +1471,11 @@ public class ObjectWriterCreatorASM
             mw.visitInsn(Opcodes.ACONST_NULL); // TODO fieldType
             mw.visitLdcInsn(features);
             mw.visitMethodInsn(
-                    Opcodes.INVOKEINTERFACE
-                    , TYPE_OBJECT_WRITER
-                    , (features & JSONWriter.Feature.BeanToArray.mask) != 0 ? "writeArrayMapping" : "write"
-                    , METHOD_DESC_WRITE_OBJECT
-                    , true
+                    Opcodes.INVOKEINTERFACE,
+                    TYPE_OBJECT_WRITER,
+                    (features & JSONWriter.Feature.BeanToArray.mask) != 0 ? "writeArrayMapping" : "write",
+                    METHOD_DESC_WRITE_OBJECT,
+                    true
             );
         }
 
@@ -1917,11 +1914,11 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
         mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
-        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE
-                , TYPE_FIELD_WRITER
-                , "getObjectWriter"
-                , METHOD_DESC_GET_OBJECT_WRITER
-                , true);
+        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE,
+                TYPE_FIELD_WRITER,
+                "getObjectWriter",
+                METHOD_DESC_GET_OBJECT_WRITER,
+                true);
 
         // objectWriter.write(jw, ctx, value);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -2314,11 +2311,11 @@ public class ObjectWriterCreatorASM
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "trim", "()Ljava/lang/String;", false);
         }
         mw.visitMethodInsn(
-                Opcodes.INVOKEVIRTUAL
-                , TYPE_JSON_WRITER
-                , jsonb && "symbol".equals(format) ? "writeSymbol" : "writeString"
-                , "(Ljava/lang/String;)V"
-                , false
+                Opcodes.INVOKEVIRTUAL,
+                TYPE_JSON_WRITER,
+                jsonb && "symbol".equals(format) ? "writeSymbol" : "writeString",
+                "(Ljava/lang/String;)V",
+                false
         );
 
         mw.visitJumpInsn(Opcodes.GOTO, endIfNull_);
@@ -2405,8 +2402,8 @@ public class ObjectWriterCreatorASM
                     break;
             }
             mw.visitInsn(Opcodes.AALOAD); // fieldWriterArray
-            mw.visitTypeInsn(Opcodes.CHECKCAST
-                    , TYPE_FIELD_WRITER); // cast
+            mw.visitTypeInsn(Opcodes.CHECKCAST,
+                    TYPE_FIELD_WRITER); // cast
             mw.visitFieldInsn(Opcodes.PUTFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
         }
 
@@ -2654,12 +2651,12 @@ public class ObjectWriterCreatorASM
     }
 
     private void genGetFieldReader(
-            List<FieldWriter> fieldWriters
-            , ClassWriter cw
-            , String classNameType
-            , ObjectWriterAdapter objectReaderAdapter) {
-        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC
-                , "getFieldWriter",
+            List<FieldWriter> fieldWriters,
+            ClassWriter cw,
+            String classNameType,
+            ObjectWriterAdapter objectReaderAdapter) {
+        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC,
+                "getFieldWriter",
                 "(J)" + DESC_FIELD_WRITER
         );
 

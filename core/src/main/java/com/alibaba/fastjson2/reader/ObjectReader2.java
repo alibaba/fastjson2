@@ -27,13 +27,13 @@ public class ObjectReader2<T>
     private final long secondHashCodeLCase;
 
     public ObjectReader2(
-            Class objectClass
-            , long features
-            , JSONSchema schema
-            , Supplier<T> defaultCreator
-            , Function buildFunction
-            , FieldReader first
-            , FieldReader second) {
+            Class objectClass,
+            long features,
+            JSONSchema schema,
+            Supplier<T> defaultCreator,
+            Function buildFunction,
+            FieldReader first,
+            FieldReader second) {
         super(objectClass, null, schema);
 
         this.features = features;

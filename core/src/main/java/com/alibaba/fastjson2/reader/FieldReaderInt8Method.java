@@ -37,8 +37,8 @@ final class FieldReaderInt8Method<T>
         }
 
         try {
-            method.invoke(object
-                    , TypeUtils.toByte(value));
+            method.invoke(object,
+                    TypeUtils.toByte(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

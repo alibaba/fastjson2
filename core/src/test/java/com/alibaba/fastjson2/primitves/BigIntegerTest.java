@@ -48,23 +48,23 @@ public class BigIntegerTest {
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
                 BigInteger1 vo = new BigInteger1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[null]"
-                        , jsonWriter.toString());
+                assertEquals("[null]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 BigInteger1 vo = new BigInteger1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 BigInteger1 vo = new BigInteger1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"id\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"id\":null}",
+                        jsonWriter.toString());
             }
         }
     }

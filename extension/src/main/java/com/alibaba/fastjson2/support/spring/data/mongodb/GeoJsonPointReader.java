@@ -8,11 +8,11 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
 public class GeoJsonPointReader
         implements ObjectReader<GeoJsonPoint> {
-    public final static GeoJsonPointReader INSTANCE = new GeoJsonPointReader();
+    public static final GeoJsonPointReader INSTANCE = new GeoJsonPointReader();
 
-    final static long HASH_TYPE = Fnv.hashCode64("type");
-    final static long HASH_POINT = Fnv.hashCode64("Point");
-    final static long HASH_COORDINATES = Fnv.hashCode64("coordinates");
+    static final long HASH_TYPE = Fnv.hashCode64("type");
+    static final long HASH_POINT = Fnv.hashCode64("Point");
+    static final long HASH_COORDINATES = Fnv.hashCode64("coordinates");
 
     public GeoJsonPointReader() {
     }

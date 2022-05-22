@@ -1,7 +1,6 @@
 package com.alibaba.fastjson;
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson2.JSONReader;
 
 import java.io.IOException;
 import java.io.Writer;

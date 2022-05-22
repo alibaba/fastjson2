@@ -7,20 +7,19 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
-
 public abstract class JSONSchema {
-    final static Map<String, JSONSchema> CACHE = new ConcurrentHashMap<>();
+    static final Map<String, JSONSchema> CACHE = new ConcurrentHashMap<>();
 
     final String title;
     final String description;
 
-    final static JSONReader.Context CONTEXT = JSONFactory.createReadContext();
+    static final JSONReader.Context CONTEXT = JSONFactory.createReadContext();
 
     JSONSchema(JSONObject input) {
         this.title = input.getString("title");
@@ -379,13 +378,13 @@ public abstract class JSONSchema {
                                 typeSchemas[i] = new BooleanSchema(JSONObject.of("type", "boolean"));
                                 break;
                             case Null:
-                                typeSchemas[i] =  new NullSchema(JSONObject.of("type", "null"));
+                                typeSchemas[i] = new NullSchema(JSONObject.of("type", "null"));
                                 break;
                             case Object:
-                                typeSchemas[i] =  new ObjectSchema(JSONObject.of("type", "object"));
+                                typeSchemas[i] = new ObjectSchema(JSONObject.of("type", "object"));
                                 break;
                             case Array:
-                                typeSchemas[i] =  new ArraySchema(JSONObject.of("type", "array"), null);
+                                typeSchemas[i] = new ArraySchema(JSONObject.of("type", "array"), null);
                                 break;
                             default:
                                 throw new JSONException("not support type : " + itemType);
@@ -671,7 +670,7 @@ public abstract class JSONSchema {
     static final ValidateResult FAIL_TYPE_NOT_MATCH = new ValidateResult(false, "type not match");
     static final ValidateResult FAIL_PROPERTY_NAME = new ValidateResult(false, "propertyName not match");
 
-    final static ValidateResult CONTAINS_NOT_MATCH = new ValidateResult(false, "contains not match");
-    final static ValidateResult UNIQUE_ITEMS_NOT_MATCH = new ValidateResult(false, "uniqueItems not match");
-    final static ValidateResult REQUIRED_NOT_MATCH = new ValidateResult(false, "required");
+    static final ValidateResult CONTAINS_NOT_MATCH = new ValidateResult(false, "contains not match");
+    static final ValidateResult UNIQUE_ITEMS_NOT_MATCH = new ValidateResult(false, "uniqueItems not match");
+    static final ValidateResult REQUIRED_NOT_MATCH = new ValidateResult(false, "required");
 }

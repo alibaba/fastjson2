@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.util.InetAddresses;
 
 final class IPV6AddressValidator
         implements FormatValidator {
-    final static IPV6AddressValidator INSTANCE = new IPV6AddressValidator();
+    static final IPV6AddressValidator INSTANCE = new IPV6AddressValidator();
 
     @Override
     public boolean isValid(String address) {

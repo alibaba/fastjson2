@@ -16,7 +16,7 @@ import java.util.List;
 
 public class GeoJsonReaderModule
         implements ObjectReaderModule {
-    public final static GeoJsonReaderModule INSTANCE = new GeoJsonReaderModule();
+    public static final GeoJsonReaderModule INSTANCE = new GeoJsonReaderModule();
 
     @Override
     public void init(ObjectReaderProvider provider) {
@@ -38,7 +38,7 @@ public class GeoJsonReaderModule
             typeKey = "type",
             typeName = "MultiPoint",
             deserializeFeatures = JSONReader.Feature.SupportArrayToBean)
-    static abstract class GeoJsonMultiPointMixin {
+    abstract static class GeoJsonMultiPointMixin {
         @JSONCreator(parameterNames = "coordinates")
         public GeoJsonMultiPointMixin(List<Point> points) {
         }
@@ -52,7 +52,7 @@ public class GeoJsonReaderModule
             typeName = "LineString",
             deserializeFeatures = JSONReader.Feature.SupportArrayToBean
     )
-    static abstract class GeoJsonLineStringMixin {
+    abstract static class GeoJsonLineStringMixin {
         @JSONCreator(parameterNames = "coordinates")
         public GeoJsonLineStringMixin(List<Point> points) {
         }

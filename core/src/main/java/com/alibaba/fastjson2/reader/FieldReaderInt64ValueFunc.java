@@ -38,8 +38,8 @@ final class FieldReaderInt64ValueFunc<T>
             schema.assertValidate(value);
         }
 
-        function.accept(object
-                , TypeUtils.toLongValue(value));
+        function.accept(object,
+                TypeUtils.toLongValue(value));
     }
 
     @Override

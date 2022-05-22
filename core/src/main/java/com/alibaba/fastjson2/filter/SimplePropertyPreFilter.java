@@ -10,7 +10,7 @@ public class SimplePropertyPreFilter
     private final Class<?> clazz;
     private final Set<String> includes = new HashSet<String>();
     private final Set<String> excludes = new HashSet<String>();
-    private int maxLevel = 0;
+    private int maxLevel;
 
     public SimplePropertyPreFilter(String... properties) {
         this(null, properties);

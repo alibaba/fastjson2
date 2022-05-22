@@ -114,34 +114,34 @@ public class Calendar1Test {
     public void test_utf16_0() {
         assertEquals(6
                 , JSON.parseObject(
-                        "\"2017년7월3일\""
-                        , Calendar.class
+                        "\"2017년7월3일\"",
+                        Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(6
                 , JSON.parseObject(
-                        "\"2017년7월13일\""
-                        , Calendar.class
+                        "\"2017년7월13일\"",
+                        Calendar.class
                 ).get(Calendar.MONTH));
 
         assertEquals(6
                 , JSON.parseObject(
-                        "\"2017-7-13\""
-                        , Calendar.class
+                        "\"2017-7-13\"",
+                        Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(11
                 , JSON.parseObject(
-                        "\"2017-12-7\""
-                        , Calendar.class
+                        "\"2017-12-7\"",
+                        Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(11
                 , JSON.parseObject(
-                        "\"2017-12-17\""
-                        , Calendar.class
+                        "\"2017-12-17\"",
+                        Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(11
                 , JSON.parseObject(
-                        "\"2017年12月17日\""
-                        , Calendar.class
+                        "\"2017年12月17日\"",
+                        Calendar.class
                 ).get(Calendar.MONTH));
     }
 
@@ -150,26 +150,26 @@ public class Calendar1Test {
         assertEquals(2017
                 , JSON.parseObject(
                         "\"20171213\""
-                                .getBytes(StandardCharsets.UTF_8)
-                        , Calendar.class
+                                .getBytes(StandardCharsets.UTF_8),
+                        Calendar.class
                 ).get(Calendar.YEAR));
         assertEquals(2017
                 , JSON.parseObject(
                         "\"2017-2-3\""
-                                .getBytes(StandardCharsets.UTF_8)
-                        , Calendar.class
+                                .getBytes(StandardCharsets.UTF_8),
+                        Calendar.class
                 ).get(Calendar.YEAR));
         assertEquals(11
                 , JSON.parseObject(
                         "\"2017-12-3\""
-                                .getBytes(StandardCharsets.UTF_8)
-                        , Calendar.class
+                                .getBytes(StandardCharsets.UTF_8),
+                        Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(2
                 , JSON.parseObject(
                         "\"2017-3-13\""
-                                .getBytes(StandardCharsets.UTF_8)
-                        , Calendar.class
+                                .getBytes(StandardCharsets.UTF_8),
+                        Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(2017
                 , JSON.parseObject(
@@ -180,14 +180,14 @@ public class Calendar1Test {
         assertEquals(11
                 , JSON.parseObject(
                         "\"2017年12月13日\""
-                                .getBytes(StandardCharsets.UTF_8)
-                        , Calendar.class
+                                .getBytes(StandardCharsets.UTF_8),
+                        Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(2017
                 , JSON.parseObject(
                         "\"2017年11月9日\""
-                                .getBytes(StandardCharsets.UTF_8)
-                        , Calendar.class
+                                .getBytes(StandardCharsets.UTF_8),
+                        Calendar.class
                 ).get(Calendar.YEAR));
     }
 
@@ -205,8 +205,8 @@ public class Calendar1Test {
                 Calendar1 vo = new Calendar1();
                 vo.setDate(calendar(0));
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[\"1970-01-01 08:00:00\"]"
-                        , jsonWriter.toString());
+                assertEquals("[\"1970-01-01 08:00:00\"]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
@@ -215,8 +215,8 @@ public class Calendar1Test {
                 Calendar1 vo = new Calendar1();
                 vo.setDate(calendar(0));
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[0]"
-                        , jsonWriter.toString());
+                assertEquals("[0]",
+                        jsonWriter.toString());
             }
         }
     }
@@ -235,23 +235,23 @@ public class Calendar1Test {
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
                 Calendar1 vo = new Calendar1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[null]"
-                        , jsonWriter.toString());
+                assertEquals("[null]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 Calendar1 vo = new Calendar1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 Calendar1 vo = new Calendar1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"date\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"date\":null}",
+                        jsonWriter.toString());
             }
         }
     }

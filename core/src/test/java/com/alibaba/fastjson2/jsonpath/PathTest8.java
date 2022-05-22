@@ -44,7 +44,7 @@ public class PathTest8 {
         );
     }
 
-    public final static String STR =
+    public static final String STR =
             "{ \"store\": {\n" +
                     "    \"book\": [ \n" +
                     "      { \"category\": \"reference\",\n" +

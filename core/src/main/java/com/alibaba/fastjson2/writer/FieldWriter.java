@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JdbcSupport;
 import com.alibaba.fastjson2.util.JodaSupport;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -15,7 +14,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.time.*;
 import java.util.*;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;

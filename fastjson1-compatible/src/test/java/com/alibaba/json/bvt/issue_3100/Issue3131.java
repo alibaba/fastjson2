@@ -105,7 +105,7 @@ public class Issue3131 {
         }
     }
 
-    public static abstract class Org implements Serializable{
+    public abstract static class Org implements Serializable{
 
         private String name;
 

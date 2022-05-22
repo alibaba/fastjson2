@@ -34,7 +34,7 @@ public class MediaContent_ObjectReader implements ObjectReader {
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         jsonReader.nextIfObjectStart();
         MediaContent object = new MediaContent();
-        for (;;) {
+        for (; ; ) {
             if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
@@ -79,7 +79,7 @@ public class MediaContent_ObjectReader implements ObjectReader {
         jsonReader.next();
         MediaContent object = new MediaContent();
         for_:
-        for (;;) {
+        for (; ; ) {
             if (jsonReader.current() == '}') {
                 jsonReader.next();
                 break;
@@ -104,7 +104,7 @@ public class MediaContent_ObjectReader implements ObjectReader {
 
                     java.util.List list = new java.util.ArrayList();
                     jsonReader.next();
-                    for (;;) {
+                    for (; ; ) {
                         if (jsonReader.current() == ']') {
                             jsonReader.next();
                             break;

@@ -1,14 +1,14 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codegen.ObjectReaderGen;
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.util.DynamicClassLoader;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import javax.tools.*;
+
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
@@ -51,11 +51,11 @@ public class ObjectReaderCreatorDynamicCompile
         ObjectReader objectReader;
         try {
             objectReader = compile(
-                    gen.getPackageName()
-                    , gen.getClassName()
-                    , sourceCode
-                    , new Class[]{FieldReader[].class}
-                    , new Object[]{fieldReaderArray}
+                    gen.getPackageName(),
+                    gen.getClassName(),
+                    sourceCode,
+                    new Class[]{FieldReader[].class},
+                    new Object[]{fieldReaderArray}
             );
         } catch (Exception e) {
             throw new JSONException("compile error", e);

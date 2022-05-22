@@ -82,8 +82,8 @@ public class Date1Test {
                 Date1 vo = new Date1();
                 vo.setDate(new Date(0));
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[\"1970-01-01 08:00:00\"]"
-                        , jsonWriter.toString());
+                assertEquals("[\"1970-01-01 08:00:00\"]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
@@ -92,8 +92,8 @@ public class Date1Test {
                 Date1 vo = new Date1();
                 vo.setDate(new Date(0));
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[0]"
-                        , jsonWriter.toString());
+                assertEquals("[0]",
+                        jsonWriter.toString());
             }
         }
     }
@@ -112,23 +112,23 @@ public class Date1Test {
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
                 Date1 vo = new Date1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[null]"
-                        , jsonWriter.toString());
+                assertEquals("[null]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 Date1 vo = new Date1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 Date1 vo = new Date1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"date\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"date\":null}",
+                        jsonWriter.toString());
             }
         }
     }
@@ -148,16 +148,16 @@ public class Date1Test {
                 Date1 vo = new Date1();
                 vo.setDate(new Date(0));
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[0]"
-                        , jsonWriter.toString());
+                assertEquals("[0]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 Date1 vo = new Date1();
                 vo.setDate(new Date(0));
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"date\":0}"
-                        , jsonWriter.toString());
+                assertEquals("{\"date\":0}",
+                        jsonWriter.toString());
             }
         }
     }
@@ -168,12 +168,12 @@ public class Date1Test {
 
         for (ObjectWriterCreator creator : creators) {
             FieldWriter fieldWriter = creator
-                    .createFieldWriter(LongValue1.class
-                            , "date"
-                            , 0
-                            , 0
-                            , "iso8601"
-                            , LongValue1.class.getMethod("getV0000"));
+                    .createFieldWriter(LongValue1.class,
+                            "date",
+                            0,
+                            0,
+                            "iso8601",
+                            LongValue1.class.getMethod("getV0000"));
             ObjectWriter<LongValue1> objectWriter
                     = creator.createObjectWriter(fieldWriter);
 
@@ -183,16 +183,16 @@ public class Date1Test {
                 LongValue1 vo = new LongValue1();
                 vo.setV0000(0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[\"1970-01-01 08:00:00\"]"
-                        , jsonWriter.toString());
+                assertEquals("[\"1970-01-01 08:00:00\"]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 LongValue1 vo = new LongValue1();
                 vo.setV0000(0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"date\":\"1970-01-01T08:00:00+08:00\"}"
-                        , jsonWriter.toString());
+                assertEquals("{\"date\":\"1970-01-01T08:00:00+08:00\"}",
+                        jsonWriter.toString());
             }
         }
     }
@@ -204,8 +204,8 @@ public class Date1Test {
         for (ObjectWriterCreator creator : creators) {
             FieldWriter fieldWriter = creator
                     .createFieldWriter("date"
-                            ,"iso8601"
-                            , LongValueField1.class.getField("v0000"));
+                            ,"iso8601",
+                            LongValueField1.class.getField("v0000"));
             ObjectWriter<LongValueField1> objectWriter
                     = creator.createObjectWriter(fieldWriter);
 
@@ -215,16 +215,16 @@ public class Date1Test {
                 LongValueField1 vo = new LongValueField1();
                 vo.v0000 = 0;
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[\"1970-01-01 08:00:00\"]"
-                        , jsonWriter.toString());
+                assertEquals("[\"1970-01-01 08:00:00\"]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 LongValueField1 vo = new LongValueField1();
                 vo.v0000 = 0;
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"date\":\"1970-01-01T08:00:00+08:00\"}"
-                        , jsonWriter.toString());
+                assertEquals("{\"date\":\"1970-01-01T08:00:00+08:00\"}",
+                        jsonWriter.toString());
             }
         }
     }

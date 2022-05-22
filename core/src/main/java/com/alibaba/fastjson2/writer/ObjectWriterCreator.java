@@ -36,23 +36,23 @@ public class ObjectWriterCreator {
 
     public ObjectWriter createObjectWriter(Class objectType) {
         return createObjectWriter(
-                objectType
-                , 0
-                , JSONFactory
+                objectType,
+                0,
+                JSONFactory
                         .getDefaultObjectWriterProvider()
                         .getModules()
         );
     }
 
-    public ObjectWriter createObjectWriter(Class objectType
-            , FieldWriter... fieldWriters) {
+    public ObjectWriter createObjectWriter(Class objectType,
+            FieldWriter... fieldWriters) {
         return createObjectWriter(objectType, 0, fieldWriters);
     }
 
     public ObjectWriter createObjectWriter(
-            Class objectType
-            , long features
-            , FieldWriter... fieldWriters
+            Class objectType,
+            long features,
+            FieldWriter... fieldWriters
     ) {
         if (fieldWriters.length == 0) {
             return createObjectWriter(objectType, features, Collections.emptyList());
@@ -62,12 +62,12 @@ public class ObjectWriterCreator {
     }
 
     protected FieldWriter creteFieldWriter(
-            Class objectClass
-            , long writerFeatures
-            , List<ObjectWriterModule> modules
-            , BeanInfo beanInfo
-            , FieldInfo fieldInfo
-            , Field field
+            Class objectClass,
+            long writerFeatures,
+            List<ObjectWriterModule> modules,
+            BeanInfo beanInfo,
+            FieldInfo fieldInfo,
+            Field field
     ) {
         fieldInfo.features = writerFeatures;
         for (ObjectWriterModule module : modules) {
@@ -142,9 +142,9 @@ public class ObjectWriterCreator {
     }
 
     public ObjectWriter createObjectWriter(
-            Class objectClass
-            , long features
-            , final List<ObjectWriterModule> modules
+            Class objectClass,
+            long features,
+            final List<ObjectWriterModule> modules
     ) {
         BeanInfo beanInfo = new BeanInfo();
         for (ObjectWriterModule module : modules) {
@@ -281,13 +281,13 @@ public class ObjectWriterCreator {
                     }
 
                     FieldWriter fieldWriter
-                            = createFieldWriter(objectClass
-                            , fieldName
-                            , fieldInfo.ordinal
-                            , fieldInfo.features
-                            , fieldInfo.format
-                            , method
-                            , writeUsingWriter
+                            = createFieldWriter(objectClass,
+                            fieldName,
+                            fieldInfo.ordinal,
+                            fieldInfo.features,
+                            fieldInfo.format,
+                            method,
+                            writeUsingWriter
                     );
 
                     FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
@@ -361,22 +361,22 @@ public class ObjectWriterCreator {
     }
 
     public <T> FieldWriter<T> createFieldWriter(
-            String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Field field
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Field field
     ) {
         return createFieldWriter(fieldName, ordinal, features, format, field, null);
     }
 
     public <T> FieldWriter<T> createFieldWriter(
-            String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Field field
-            , ObjectWriter initObjectWriter
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Field field,
+            ObjectWriter initObjectWriter
     ) {
         field.setAccessible(true);
 
@@ -492,31 +492,31 @@ public class ObjectWriterCreator {
         return new FieldWriterObjectField(fieldName, ordinal, features, format, field.getGenericType(), fieldClass, field);
     }
 
-    public <T> FieldWriter<T> createFieldWriter(Class<T> objectType
-            , String fieldName
-            , String dateFormat
-            , Method method) {
+    public <T> FieldWriter<T> createFieldWriter(Class<T> objectType,
+            String fieldName,
+            String dateFormat,
+            Method method) {
         return createFieldWriter(objectType, fieldName, 0, 0, dateFormat, method);
     }
 
     public <T> FieldWriter<T> createFieldWriter(
-            Class<T> objectType
-            , String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Method method) {
+            Class<T> objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Method method) {
         return createFieldWriter(objectType, fieldName, ordinal, features, format, method, null);
     }
 
     public <T> FieldWriter<T> createFieldWriter(
-            Class<T> objectType
-            , String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Method method
-            , ObjectWriter initObjectWriter
+            Class<T> objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Method method,
+            ObjectWriter initObjectWriter
     ) {
         method.setAccessible(true);
         Class<?> fieldClass = method.getReturnType();
@@ -624,33 +624,33 @@ public class ObjectWriterCreator {
     }
 
     public <T, V> FieldWriter createFieldWriter(
-            String fieldName
-            , Class fieldClass
-            , Function<T, V> function
+            String fieldName,
+            Class fieldClass,
+            Function<T, V> function
     ) {
         return createFieldWriter(null, fieldName, 0, 0, null, fieldClass, fieldClass, null, function);
     }
 
     public <T, V> FieldWriter createFieldWriter(
-            String fieldName
-            , long features
-            , String format
-            , Class fieldClass
-            , Function<T, V> function
+            String fieldName,
+            long features,
+            String format,
+            Class fieldClass,
+            Function<T, V> function
     ) {
         return createFieldWriter(null, fieldName, 0, features, format, fieldClass, fieldClass, null, function);
     }
 
     public <T, V> FieldWriter<T> createFieldWriter(
-            Class<T> objectType
-            , String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Type fieldType
-            , Class<V> fieldClass
-            , Method method
-            , Function<T, V> function
+            Class<T> objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Type fieldType,
+            Class<V> fieldClass,
+            Method method,
+            Function<T, V> function
     ) {
         if (fieldClass == Byte.class) {
             return new FieldWriterInt8Func(fieldName, ordinal, method, function);

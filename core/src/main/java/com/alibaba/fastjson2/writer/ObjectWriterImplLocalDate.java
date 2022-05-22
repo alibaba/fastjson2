@@ -28,9 +28,9 @@ final class ObjectWriterImplLocalDate
         String dateFormat = ctx.getDateFormat();
         if (dateFormat == null) {
             jsonWriter.writeDateYYYMMDD10(
-                    date.getYear()
-                    , date.getMonthValue()
-                    , date.getDayOfMonth());
+                    date.getYear(),
+                    date.getMonthValue(),
+                    date.getDayOfMonth());
         } else {
             String str = ctx.getDateFormatter().format(date);
             jsonWriter.writeString(str);

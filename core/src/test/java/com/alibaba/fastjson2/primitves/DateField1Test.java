@@ -46,8 +46,8 @@ public class DateField1Test {
                 DateField1 vo = new DateField1();
                 vo.date = new Date(0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[\"1970-01-01 08:00:00\"]"
-                        , jsonWriter.toString());
+                assertEquals("[\"1970-01-01 08:00:00\"]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
@@ -56,8 +56,8 @@ public class DateField1Test {
                 DateField1 vo = new DateField1();
                 vo.date = new Date(0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[0]"
-                        , jsonWriter.toString());
+                assertEquals("[0]",
+                        jsonWriter.toString());
             }
         }
     }
@@ -99,23 +99,23 @@ public class DateField1Test {
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
                 DateField1 vo = new DateField1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[null]"
-                        , jsonWriter.toString());
+                assertEquals("[null]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 DateField1 vo = new DateField1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 DateField1 vo = new DateField1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"date\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"date\":null}",
+                        jsonWriter.toString());
             }
         }
     }
@@ -135,16 +135,16 @@ public class DateField1Test {
                 DateField1 vo = new DateField1();
                 vo.date = new Date(0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[0]"
-                        , jsonWriter.toString());
+                assertEquals("[0]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 DateField1 vo = new DateField1();
                 vo.date = new Date(0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"date\":0}"
-                        , jsonWriter.toString());
+                assertEquals("{\"date\":0}",
+                        jsonWriter.toString());
             }
         }
     }

@@ -41,8 +41,8 @@ final class FieldReaderBigIntegerFunc<T, V>
             schema.assertValidate(value);
         }
 
-        function.accept(object
-                , (V) TypeUtils.toBigInteger(value));
+        function.accept(object,
+                (V) TypeUtils.toBigInteger(value));
     }
 
     @Override
@@ -51,7 +51,8 @@ final class FieldReaderBigIntegerFunc<T, V>
             schema.assertValidate(value);
         }
 
-        function.accept(object, (V) BigInteger.valueOf(value));
+        function.accept(object,
+                (V) BigInteger.valueOf(value));
     }
 
     @Override

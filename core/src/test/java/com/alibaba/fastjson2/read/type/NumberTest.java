@@ -29,8 +29,8 @@ public class NumberTest {
                 Number num = (Number) JSONReader.of(json)
                         .readObject()
                         .get("v");
-                assertEquals(str
-                        , num.toString());
+                assertEquals(str,
+                        num.toString());
             }
 
             chars[i + 1] = (char) ('0' + ((1 + i) % 10));
@@ -57,8 +57,8 @@ public class NumberTest {
                 Number num = (Number) JSONReader.of(json)
                         .readObject()
                         .get("v");
-                assertEquals(str
-                        , num.toString());
+                assertEquals(str,
+                        num.toString());
             }
 
             chars[i + 1] = (char) ('0' + ((1 + i) % 10));
@@ -73,8 +73,8 @@ public class NumberTest {
         Number num = (Number) JSONReader.of(json)
                 .readObject()
                 .get("v");
-        assertEquals(str
-                , num.toString());
+        assertEquals(str,
+                 num.toString());
     }
 
     @Test
@@ -88,8 +88,8 @@ public class NumberTest {
         Number num = (Number) JSONReader.of(json)
                 .readObject()
                 .get("v");
-        assertEquals(str
-                , num.toString());
+        assertEquals(str,
+                 num.toString());
     }
 
     @Test
@@ -100,8 +100,8 @@ public class NumberTest {
         Number num = (Number) JSONReader.of(json)
                 .readObject()
                 .get("v");
-        assertEquals(str
-                , num.toString());
+        assertEquals(str,
+                 num.toString());
 
     }
 
@@ -117,8 +117,8 @@ public class NumberTest {
         Number num = (Number) JSONReader.of(json)
                 .readObject()
                 .get("v");
-        assertEquals(str
-                , num.toString());
+        assertEquals(str,
+                 num.toString());
 
     }
 
@@ -134,8 +134,8 @@ public class NumberTest {
         Number num = (Number) JSONReader.of(json)
                 .readObject()
                 .get("v");
-        assertEquals(str
-                , num.toString());
+        assertEquals(str,
+                 num.toString());
 
     }
 }

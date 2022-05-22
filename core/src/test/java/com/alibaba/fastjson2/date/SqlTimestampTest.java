@@ -90,8 +90,8 @@ public class SqlTimestampTest {
         Student4 student = JSON.parseObject(str, Student4.class);
         String str2 = JSON.toJSONString(student);
         Student4 student1 = JSON.parseObject(str2, Student4.class);
-        assertEquals(student.birthday.toInstant().getEpochSecond()
-                , student1.birthday.toInstant().getEpochSecond()
+        assertEquals(student.birthday.toInstant().getEpochSecond(),
+                student1.birthday.toInstant().getEpochSecond()
         );
 
         Student4 student2 = JSONB.parseObject(

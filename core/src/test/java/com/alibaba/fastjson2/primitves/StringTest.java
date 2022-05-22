@@ -28,8 +28,8 @@ public class StringTest {
             JSONWriter jsonWriter = JSONWriter.of();
             String1 vo = new String1();
             objectWriter.write(jsonWriter, vo);
-            assertEquals("{\"id\":null}"
-                    , jsonWriter.toString());
+            assertEquals("{\"id\":null}",
+                    jsonWriter.toString());
         }
     }
 
@@ -140,23 +140,23 @@ public class StringTest {
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
                 String1 vo = new String1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[null]"
-                        , jsonWriter.toString());
+                assertEquals("[null]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 String1 vo = new String1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 String1 vo = new String1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"id\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"id\":null}",
+                        jsonWriter.toString());
             }
         }
     }

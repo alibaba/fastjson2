@@ -12,11 +12,11 @@ final class FieldWriterStringField<T>
     final boolean trim;
 
     protected FieldWriterStringField(
-            String fieldName
-            , int ordinal
-            , String format
-            , long features
-            , Field field) {
+            String fieldName,
+            int ordinal,
+            String format,
+            long features,
+            Field field) {
         super(fieldName, ordinal, features, format, String.class, String.class);
         this.field = field;
         this.symbol = "symbol".equals(format);

@@ -12,20 +12,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SkipTest {
     @Test
     public void test_0() {
-        assertEquals(0
-                , JSON.parseObject("{\"value\":123}".getBytes(StandardCharsets.UTF_8)
-                        , A.class).id);
+        assertEquals(0,
+                 JSON.parseObject("{\"value\":123}".getBytes(StandardCharsets.UTF_8),
+                        A.class).id);
 
-        assertEquals(0
-                , JSON.parseObject("{\"value\":123,\"name\":\"DataWorks\"}".getBytes(StandardCharsets.UTF_8)
-                        , A.class).id);
+        assertEquals(0,
+                 JSON.parseObject("{\"value\":123,\"name\":\"DataWorks\"}".getBytes(StandardCharsets.UTF_8),
+                        A.class).id);
 
-        assertEquals(0
-                , JSON.parseObject("{\"value\":123,\"name\":\"DataWorks\"}".getBytes(StandardCharsets.UTF_8)
-                        , A1.class).id);
+        assertEquals(0,
+                 JSON.parseObject("{\"value\":123,\"name\":\"DataWorks\"}".getBytes(StandardCharsets.UTF_8),
+                        A1.class).id);
 
-        assertEquals("DataWorks"
-                , JSONPath
+        assertEquals("DataWorks",
+                 JSONPath
                         .of("$.name")
                         .extract(
                                 JSONReader
@@ -33,8 +33,8 @@ public class SkipTest {
                 )
         );
 
-        assertEquals("DataWorks"
-                , JSONPath
+        assertEquals("DataWorks",
+                 JSONPath
                         .of("$[1]")
                         .extract(
                                 JSONReader

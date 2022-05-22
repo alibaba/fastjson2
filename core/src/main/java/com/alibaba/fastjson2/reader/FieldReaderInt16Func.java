@@ -40,8 +40,8 @@ final class FieldReaderInt16Func<T, V>
             schema.assertValidate(value);
         }
 
-        function.accept(object
-                , (V) TypeUtils.toShort(value));
+        function.accept(object,
+                (V) TypeUtils.toShort(value));
     }
 
     @Override

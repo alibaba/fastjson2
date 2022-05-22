@@ -2,8 +2,8 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.function.ObjFloatConsumer;
+import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
@@ -40,8 +40,8 @@ final class FieldReaderFloatValueFunc<T>
         }
 
         try {
-            method.invoke(object
-                    , TypeUtils.toFloatValue(value));
+            method.invoke(object,
+                    TypeUtils.toFloatValue(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

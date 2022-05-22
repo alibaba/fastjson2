@@ -29,12 +29,12 @@ public class Issue1635 {
         SerializeConfig config = new SerializeConfig();
         config.setAsmEnable(false);
         Foo foo = new Foo(null, null);
-        String json = JSON.toJSONString(foo
-                , new SerializeFilter[]{new PascalNameFilter()}
-                , SerializerFeature.WriteNullBooleanAsFalse
-                , SerializerFeature.WriteNullNumberAsZero
-                , SerializerFeature.WriteNullStringAsEmpty
-                , SerializerFeature.WriteNullListAsEmpty
+        String json = JSON.toJSONString(foo,
+                new SerializeFilter[]{new PascalNameFilter()},
+                SerializerFeature.WriteNullBooleanAsFalse,
+                SerializerFeature.WriteNullNumberAsZero,
+                SerializerFeature.WriteNullStringAsEmpty,
+                SerializerFeature.WriteNullListAsEmpty
         );
         assertEquals("{\"BarCount\":0,\"Flag\":false,\"List\":[],\"Name\":\"\"}", json);
     }
@@ -44,13 +44,13 @@ public class Issue1635 {
         SerializeConfig config = new SerializeConfig();
         config.setAsmEnable(false);
         Foo foo = new Foo(null, null);
-        String json = JSON.toJSONString(foo
-                , new SerializeFilter[]{new PascalNameFilter()}
-                , SerializerFeature.WriteNullBooleanAsFalse
-                , SerializerFeature.WriteNullNumberAsZero
-                , SerializerFeature.WriteNullStringAsEmpty
-                , SerializerFeature.WriteNullListAsEmpty
-                , SerializerFeature.BeanToArray
+        String json = JSON.toJSONString(foo,
+                new SerializeFilter[]{new PascalNameFilter()},
+                SerializerFeature.WriteNullBooleanAsFalse,
+                SerializerFeature.WriteNullNumberAsZero,
+                SerializerFeature.WriteNullStringAsEmpty,
+                SerializerFeature.WriteNullListAsEmpty,
+                SerializerFeature.BeanToArray
         );
         assertEquals("[0,false,[],\"\"]", json);
     }

@@ -4,8 +4,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegexValidator {
-    private static final long serialVersionUID = -8832409930574867162L;
-
     private final Pattern[] patterns;
 
     /**
@@ -57,12 +55,12 @@ public class RegexValidator {
             throw new IllegalArgumentException("Regular expressions are missing");
         }
         patterns = new Pattern[regexs.length];
-        int flags =  (caseSensitive ? 0: Pattern.CASE_INSENSITIVE);
+        int flags = (caseSensitive ? 0 : Pattern.CASE_INSENSITIVE);
         for (int i = 0; i < regexs.length; i++) {
             if (regexs[i] == null || regexs[i].length() == 0) {
                 throw new IllegalArgumentException("Regular expression[" + i + "] is missing");
             }
-            patterns[i] =  Pattern.compile(regexs[i], flags);
+            patterns[i] = Pattern.compile(regexs[i], flags);
         }
     }
 
@@ -103,7 +101,7 @@ public class RegexValidator {
                 int count = matcher.groupCount();
                 String[] groups = new String[count];
                 for (int j = 0; j < count; j++) {
-                    groups[j] = matcher.group(j+1);
+                    groups[j] = matcher.group(j + 1);
                 }
                 return groups;
             }
@@ -132,7 +130,7 @@ public class RegexValidator {
                 }
                 StringBuilder buffer = new StringBuilder();
                 for (int j = 0; j < count; j++) {
-                    String component = matcher.group(j+1);
+                    String component = matcher.group(j + 1);
                     if (component != null) {
                         buffer.append(component);
                     }

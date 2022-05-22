@@ -27,8 +27,8 @@ public class JSONExtractScalarTest {
 
         Text intput = new Text(utf8Bytes);
         Writable result = udf.eval(intput);
-        assertEquals("1"
-                , result.toString());
+        assertEquals("1",
+                result.toString());
     }
 
     @Test
@@ -37,8 +37,8 @@ public class JSONExtractScalarTest {
 
         Text intput = new Text(utf8Bytes);
         Writable result = udf.eval(intput);
-        assertEquals("2020-01-06 17:00:00"
-                , result.toString());
+        assertEquals("2020-01-06 17:00:00",
+                result.toString());
     }
 
 
@@ -48,7 +48,7 @@ public class JSONExtractScalarTest {
 
         Text intput = new Text(utf8Bytes);
         Writable result = udf.eval(intput);
-        assertEquals("450"
-                , result.toString());
+        assertEquals("450",
+                result.toString());
     }
 }

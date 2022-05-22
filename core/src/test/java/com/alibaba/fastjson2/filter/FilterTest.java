@@ -48,11 +48,11 @@ public class FilterTest {
         assertEquals("{\"value\":{}}"
                 , JSON.toJSONString(
                         new JSONObject()
-                                .fluentPut("value"
-                                        , new JSONObject()
+                                .fluentPut("value",
+                                        new JSONObject()
                                                 .fluentPut("id", 123)
-                                                .fluentPut("name", "DataWorks"))
-                        , filter)
+                                                .fluentPut("name", "DataWorks")),
+                        filter)
         );
     }
 
@@ -85,11 +85,11 @@ public class FilterTest {
         assertEquals("{}"
                 , JSON.toJSONString(
                         new JSONObject()
-                                .fluentPut("value"
-                                        , new JSONObject()
+                                .fluentPut("value",
+                                        new JSONObject()
                                                 .fluentPut("id", 123)
-                                                .fluentPut("name", "DataWorks"))
-                        , filter)
+                                                .fluentPut("name", "DataWorks")),
+                        filter)
         );
     }
 

@@ -25,9 +25,9 @@ public class ListFieldTest {
         for (ObjectReaderCreator creator : creators) {
             Field field = ListField1.class.getField("v0000");
             FieldReader fieldWriter = creator.createFieldReader(
-                    "value"
-                    , field.getGenericType()
-                    , field);
+                    "value",
+                    field.getGenericType(),
+                    field);
 
             ObjectReader<ListField1> objectReader
                     = creator.createObjectReader(ListField1.class, fieldWriter);
@@ -55,9 +55,9 @@ public class ListFieldTest {
         for (ObjectReaderCreator creator : creators) {
             Field field = ListFinalField1.class.getField("v0000");
             FieldReader fieldWriter = creator.createFieldReader(
-                    "value"
-                    , field.getGenericType()
-                    , field);
+                    "value",
+                    field.getGenericType(),
+                    field);
 
             ObjectReader<ListFinalField1> objectReader
                     = creator.createObjectReader(ListFinalField1.class, fieldWriter);

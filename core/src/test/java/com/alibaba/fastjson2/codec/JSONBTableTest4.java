@@ -26,8 +26,8 @@ public class JSONBTableTest4 {
     @Test
     public void test_1() {
         JSONObject object = JSONObject
-                .of("items"
-                        , JSONArray.of(
+                .of("items",
+                        JSONArray.of(
                                 JSONObject.of("id", 101).fluentPut("name", "DataWorks").fluentPut("x1", "A"),
                                 JSONObject.of("id", 102).fluentPut("name", "MaxCompute").fluentPut("x1", "A")
                         )
@@ -55,8 +55,8 @@ public class JSONBTableTest4 {
     @Test
     public void test_b_1() {
         JSONObject object = JSONObject
-                .of("items"
-                        , JSONArray.of(
+                .of("items",
+                        JSONArray.of(
                                 JSONObject.of("id", 101).fluentPut("name", "DataWorks").fluentPut("x1", "A"),
                                 JSONObject.of("id", 102).fluentPut("name", "MaxCompute").fluentPut("x1", "A")
                         )
@@ -74,8 +74,8 @@ public class JSONBTableTest4 {
     @Test
     public void test_d() {
         JSONObject object = JSONObject
-                .of("items"
-                        , JSONArray.of(
+                .of("items",
+                        JSONArray.of(
                                 JSONObject.of("id", 101).fluentPut("name", "DataWorks").fluentPut("x1", "A"),
                                 JSONObject.of("id", 102).fluentPut("name", "MaxCompute").fluentPut("x1", "A")
                         )
@@ -108,8 +108,8 @@ public class JSONBTableTest4 {
     @Test
     public void test_b10_1() {
         JSONObject object = JSONObject
-                .of("items"
-                        , JSONArray.of(
+                .of("items",
+                        JSONArray.of(
                                 JSONObject.of("id", 101).fluentPut("x", "x1"),
                                 JSONObject.of("id", 102).fluentPut("x", "x2")
                         )

@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderImplByte;
+import com.alibaba.fastjson2.reader.ObjectReaderImplShort;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
@@ -16,11 +19,12 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static com.alibaba.fastjson2.JSONB.*;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-
-import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.util.UUIDUtils.*;
+import static com.alibaba.fastjson2.JSONB.SymbolTable;
+import static com.alibaba.fastjson2.JSONB.typeName;
+import static com.alibaba.fastjson2.JSONFactory.CACHE;
+import static com.alibaba.fastjson2.JSONFactory.VALUE_BYTES_UPDATER;
+import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 final class JSONReaderJSONB
         extends JSONReader {
@@ -930,8 +934,7 @@ final class JSONReaderJSONB
         return (type >= BC_BIGINT_LONG && type <= BC_INT32)
                 || type == BC_TIMESTAMP_SECONDS
                 || type == BC_TIMESTAMP_MINUTES
-                || type == BC_TIMESTAMP_MILLIS
-                ;
+                || type == BC_TIMESTAMP_MILLIS;
     }
 
     @Override
@@ -1032,8 +1035,7 @@ final class JSONReaderJSONB
                                 throw new JSONException("malformed input around byte " + offset);
                             }
                             c = (char) (((c & 0x1F) << 6)
-                                    | (c2 & 0x3F)
-                            );
+                                    | (c2 & 0x3F));
                             offset += 2;
                             break;
                         }
@@ -1153,8 +1155,7 @@ final class JSONReaderJSONB
                                 throw new JSONException("malformed input around byte " + offset);
                             }
                             c = (char) (((c & 0x1F) << 6)
-                                    | (c2 & 0x3F)
-                            );
+                                    | (c2 & 0x3F));
                             offset += 2;
                             break;
                         }
@@ -1587,7 +1588,7 @@ final class JSONReaderJSONB
 
     private static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
     private static Function<byte[], String> STRING_CREATOR_JDK11;
-    private static volatile boolean STRING_CREATOR_ERROR = false;
+    private static volatile boolean STRING_CREATOR_ERROR;
 
     @Override
     public String readString() {
@@ -1597,8 +1598,8 @@ final class JSONReaderJSONB
         }
 
         strBegin = offset;
-        Charset charset = null;
-        String str = null;
+        Charset charset;
+        String str;
         if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
             if (strtype == BC_STR_ASCII) {
                 strlen = readLength();
@@ -3167,8 +3168,8 @@ final class JSONReaderJSONB
                 int nano = readInt32Value();
                 LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
                 String zoneId = readString();
-                return ZonedDateTime.of(ldt
-                        , ZoneId.of(zoneId));
+                return ZonedDateTime.of(ldt,
+                        ZoneId.of(zoneId));
             default:
                 break;
         }

@@ -16,14 +16,14 @@ final class FieldWriterObjectArrayMethod<T>
     ObjectWriter itemObjectWriter;
 
     protected FieldWriterObjectArrayMethod(
-            String fieldName
-            , Type itemType
-            , int ordinal
-            , long features
-            , String format
-            , Type fieldType
-            , Class fieldClass
-            , Method method
+            String fieldName,
+            Type itemType,
+            int ordinal,
+            long features,
+            String format,
+            Type fieldType,
+            Class fieldClass,
+            Method method
     ) {
         super(fieldName, ordinal, features, format, fieldType, fieldClass);
         this.method = method;

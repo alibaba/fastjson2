@@ -35,8 +35,8 @@ public final class ObjectReaderImplList
     final String itemClassName;
     final long itemClassNameHash;
     final Function builder;
-    ObjectReader itemObjectReader = null;
-    volatile boolean instanceError = false;
+    ObjectReader itemObjectReader;
+    volatile boolean instanceError;
 
     public static ObjectReader of(Type type, Class listClass, long features) {
         Type itemType = Object.class;

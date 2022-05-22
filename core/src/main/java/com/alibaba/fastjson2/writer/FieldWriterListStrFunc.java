@@ -13,14 +13,14 @@ final class FieldWriterListStrFunc<T>
     final Function<T, List> function;
 
     protected FieldWriterListStrFunc(
-            String fieldName
-            , int ordinal
-            , long features
-            , String format
-            , Method method
-            , Function<T, List> function
-            , Type fieldType
-            , Class fieldClass
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Method method,
+            Function<T, List> function,
+            Type fieldType,
+            Class fieldClass
     ) {
         super(fieldName, ordinal, features, format, fieldType, fieldClass);
         this.method = method;

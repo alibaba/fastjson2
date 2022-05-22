@@ -15,14 +15,14 @@ final class FieldWriterObjectArrayField<T>
     ObjectWriter itemObjectWriter;
 
     protected FieldWriterObjectArrayField(
-            String fieldName
-            , Type itemType
-            , int ordinal
-            , long features
-            , String format
-            , Type fieldType
-            , Class fieldClass
-            , Field field
+            String fieldName,
+            Type itemType,
+            int ordinal,
+            long features,
+            String format,
+            Type fieldType,
+            Class fieldClass,
+            Field field
     ) {
         super(fieldName, ordinal, features, format, fieldType, fieldClass);
         this.field = field;

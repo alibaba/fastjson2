@@ -19,11 +19,11 @@ public class AtomicBooleanTest {
 
         for (ObjectReaderCreator creator : creators) {
             FieldReader fieldWriter = creator.createFieldReader(
-                    AtomicBooleanReadOnly1.class
-                    , "value"
-                    , AtomicBoolean.class
-                    , AtomicBoolean.class
-                    , AtomicBooleanReadOnly1.class.getMethod("getValue"));
+                    AtomicBooleanReadOnly1.class,
+                    "value",
+                    AtomicBoolean.class,
+                    AtomicBoolean.class,
+                    AtomicBooleanReadOnly1.class.getMethod("getValue"));
             ObjectReader<AtomicBooleanReadOnly1> objectReader
                     = creator.createObjectReader(AtomicBooleanReadOnly1.class, fieldWriter);
 

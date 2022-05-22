@@ -16,7 +16,7 @@ final class ObjectWriterImplCalendar
     static final ObjectWriterImplCalendar INSTANCE_UNIXTIME = new ObjectWriterImplCalendar("unixtime");
 
     public ObjectWriterImplCalendar(String format) {
-        super (format);
+        super(format);
     }
 
     @Override

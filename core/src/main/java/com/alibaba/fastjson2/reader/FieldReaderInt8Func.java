@@ -30,8 +30,8 @@ final class FieldReaderInt8Func<T, V>
             schema.assertValidate(value);
         }
 
-        function.accept(object
-                , (V) TypeUtils.toByte(value));
+        function.accept(object,
+                (V) TypeUtils.toByte(value));
     }
 
     @Override

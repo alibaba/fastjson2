@@ -20,8 +20,8 @@
 
 package com.alibaba.fastjson2.internal.trove.map.hash;
 
-import com.alibaba.fastjson2.internal.trove.procedure.TLongIntProcedure;
 import com.alibaba.fastjson2.internal.trove.impl.PrimeFinder;
+import com.alibaba.fastjson2.internal.trove.procedure.TLongIntProcedure;
 
 /**
  * An open addressed Map implementation for long keys and int values.
@@ -36,13 +36,13 @@ public class TLongIntHashMap {
     static final byte FREE = 0;
     static final byte FULL = 1;
 
-    protected int[] _values;
-    protected long[] _set;
+    protected int[] values;
+    protected long[] set;
     protected boolean consumeFreeSlot;
-    protected byte[] _states;
-    protected int _size;
-    protected int _free;
-    protected int _maxSize;
+    protected byte[] states;
+    protected int size;
+    protected int free;
+    protected int maxSize;
 
     /**
      * Creates a new <code>TLongIntHashMap</code> instance with the default
@@ -50,12 +50,12 @@ public class TLongIntHashMap {
      */
     public TLongIntHashMap() {
         int capacity = 37;
-        _maxSize = 18;
-        _free = capacity; // reset the free element count
+        maxSize = 18;
+        free = capacity; // reset the free element count
 
-        _states = new byte[capacity];
-        _set = new long[capacity];
-        _values = new int[capacity];
+        states = new byte[capacity];
+        set = new long[capacity];
+        values = new int[capacity];
     }
 
     public void put(long key, int value) {
@@ -63,24 +63,24 @@ public class TLongIntHashMap {
         int index;
         {
             int hash = ((int) (key ^ (key >>> 32))) & 0x7fffffff;
-            index = hash % _states.length;
-            byte state = _states[index];
+            index = hash % states.length;
+            byte state = states[index];
 
             consumeFreeSlot = false;
 
             if (state == FREE) {
                 consumeFreeSlot = true;
 //                insertKeyAt(index, key);
-                _set[index] = key;
-                _states[index] = FULL;
-            } else if (state == FULL && _set[index] == key) {
+                set[index] = key;
+                states[index] = FULL;
+            } else if (state == FULL && set[index] == key) {
                 index = -index - 1;   // already stored
             } else {
                 // already FULL or REMOVED, must probe
 //                index = insertKeyRehash(key, index, hash);
                 {
                     // compute the double hash
-                    final int length = _set.length;
+                    final int length = set.length;
                     int probe = 1 + (hash % (length - 2));
                     final int loopIndex = index;
 
@@ -92,17 +92,17 @@ public class TLongIntHashMap {
                         if (index < 0) {
                             index += length;
                         }
-                        state = _states[index];
+                        state = states[index];
 
                         // A FREE slot stops the search
                         if (state == FREE) {
                             consumeFreeSlot = true;
-                            _set[index] = key;  // insert value
-                            _states[index] = FULL;
+                            set[index] = key;  // insert value
+                            states[index] = FULL;
                             break;
                         }
 
-                        if (state == FULL && _set[index] == key) {
+                        if (state == FULL && set[index] == key) {
                             index = -index - 1;
                             break;
                         }
@@ -118,66 +118,66 @@ public class TLongIntHashMap {
             index = -index - 1;
             isNewMapping = false;
         }
-        _values[index] = value;
+        values[index] = value;
 
         if (isNewMapping) {
             if (consumeFreeSlot) {
-                _free--;
+                free--;
             }
 
             // rehash whenever we exhaust the available space in the table
-            if (++_size > _maxSize || _free == 0) {
+            if (++size > maxSize || free == 0) {
                 // choose a new capacity suited to the new state of the table
                 // if we've grown beyond our maximum size, double capacity;
                 // if we've exhausted the free spots, rehash to the same capacity,
                 // which will free up any stale removed slots for reuse.
-                int capacity = _states.length;
-                int newCapacity = _size > _maxSize ? PrimeFinder.nextPrime(capacity << 1) : capacity;
+                int capacity = states.length;
+                int newCapacity = size > maxSize ? PrimeFinder.nextPrime(capacity << 1) : capacity;
 //                rehash(newCapacity);
                 {
-                    int oldCapacity = _set.length;
+                    int oldCapacity = set.length;
 
-                    long[] oldKeys = _set;
-                    int[] oldVals = _values;
-                    byte[] oldStates = _states;
+                    long[] oldKeys = set;
+                    int[] oldVals = values;
+                    byte[] oldStates = states;
 
-                    _set = new long[newCapacity];
-                    _values = new int[newCapacity];
-                    _states = new byte[newCapacity];
+                    set = new long[newCapacity];
+                    values = new int[newCapacity];
+                    states = new byte[newCapacity];
 
                     for (int i = oldCapacity; i-- > 0; ) {
                         if (oldStates[i] == FULL) {
                             long o = oldKeys[i];
                             index = insertKey(o);
-                            _values[index] = oldVals[i];
+                            values[index] = oldVals[i];
                         }
                     }
                 }
 
-                capacity = _states.length;
+                capacity = states.length;
                 // computeMaxSize(capacity);
-                _maxSize = Math.min(capacity - 1, (int) (capacity * 0.5f));
-                _free = capacity - _size; // reset the free element count
+                maxSize = Math.min(capacity - 1, (int) (capacity * 0.5f));
+                free = capacity - size; // reset the free element count
             }
         }
     }
 
     public int get(long key) {
-        int length = _states.length;
+        int length = states.length;
         int hash = ((int) (key ^ (key >>> 32))) & 0x7fffffff;
         int index = hash % length;
-        byte state = _states[index];
+        byte state = states[index];
 
         if (state == FREE) {
             return DEFAULT_ENTRY_VALUE;
         }
 
-        if (state == FULL && _set[index] == key) {
-            return _values[index];
+        if (state == FULL && set[index] == key) {
+            return values[index];
         }
 
         // indexRehashed
-        int setLength = _set.length;
+        int setLength = set.length;
         int probe = 1 + (hash % (setLength - 2));
         final int loopIndex = index;
 
@@ -186,14 +186,14 @@ public class TLongIntHashMap {
             if (index < 0) {
                 index += setLength;
             }
-            state = _states[index];
+            state = states[index];
 
             if (state == FREE) {
                 return DEFAULT_ENTRY_VALUE;
             }
 
-            if (key == _set[index]) {
-                return _values[index];
+            if (key == set[index]) {
+                return values[index];
             }
         } while (index != loopIndex);
 
@@ -201,9 +201,9 @@ public class TLongIntHashMap {
     }
 
     public boolean forEachEntry(TLongIntProcedure procedure) {
-        byte[] states = _states;
-        long[] keys = _set;
-        int[] values = _values;
+        byte[] states = this.states;
+        long[] keys = set;
+        int[] values = this.values;
         for (int i = keys.length; i-- > 0; ) {
             if (states[i] == FULL && !procedure.execute(keys[i], values[i])) {
                 return false;
@@ -236,7 +236,7 @@ public class TLongIntHashMap {
     }
 
     public int size() {
-        return _size;
+        return size;
     }
 
     /**
@@ -251,21 +251,21 @@ public class TLongIntHashMap {
         int hash, index;
 
         hash = ((int) (key ^ (key >>> 32))) & 0x7fffffff;
-        index = hash % _states.length;
-        byte state = _states[index];
+        index = hash % states.length;
+        byte state = states[index];
 
         consumeFreeSlot = false;
 
         if (state == FREE) {
             consumeFreeSlot = true;
 //            insertKeyAt(index, key);
-            _set[index] = key;  // insert value
-            _states[index] = FULL;
+            set[index] = key;  // insert value
+            states[index] = FULL;
 
             return index;      // empty, all done
         }
 
-        if (state == FULL && _set[index] == key) {
+        if (state == FULL && set[index] == key) {
             return -index - 1;   // already stored
         }
 
@@ -273,7 +273,7 @@ public class TLongIntHashMap {
 //        return insertKeyRehash(key, index, hash);
         {
             // compute the double hash
-            final int length = _set.length;
+            final int length = set.length;
             int probe = 1 + (hash % (length - 2));
             final int loopIndex = index;
 
@@ -286,18 +286,18 @@ public class TLongIntHashMap {
                     index += length;
                 }
 
-                state = _states[index];
+                state = states[index];
 
                 // A FREE slot stops the search
                 if (state == FREE) {
                     consumeFreeSlot = true;
 //                    insertKeyAt(index, val);
-                    _set[index] = key;  // insert value
-                    _states[index] = FULL;
+                    set[index] = key;  // insert value
+                    states[index] = FULL;
                     return index;
                 }
 
-                if (state == FULL && _set[index] == key) {
+                if (state == FULL && set[index] == key) {
                     return -index - 1;
                 }
 

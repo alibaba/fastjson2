@@ -86,12 +86,12 @@ public class BuilderTest {
 
         Function<Object, Object> buildFunction = creator.createBuildFunction(VOBuilder.class.getMethod("build"));
         ObjectReader objectReader = creator.createObjectReader(
-                VOBuilder.class
-                , 0, instanceSupplier
-                , buildFunction
-                , fieldReader1
-                , fieldReader2
-                , fieldReader3);
+                VOBuilder.class,
+                 0, instanceSupplier,
+                 buildFunction,
+                 fieldReader1,
+                 fieldReader2,
+                 fieldReader3);
 
         {
             VO o = (VO) objectReader.readObject(JSONReader.of("{\"id\":123,\"name\":\"bill\",\"age\":56}"), 0);
@@ -133,14 +133,14 @@ public class BuilderTest {
 
         Function<Object, Object> buildFunction = creator.createBuildFunction(VOBuilder.class.getMethod("build"));
         ObjectReader objectReader = creator.createObjectReader(
-                VOBuilder.class
-                , 0
-                , instanceSupplier
-                , buildFunction
-                , fieldReader1
-                , fieldReader2
-                , fieldReader3
-                , fieldReader4
+                VOBuilder.class,
+                 0,
+                 instanceSupplier,
+                 buildFunction,
+                 fieldReader1,
+                 fieldReader2,
+                 fieldReader3,
+                 fieldReader4
         );
 
         {
@@ -187,15 +187,15 @@ public class BuilderTest {
 
         Function<Object, Object> buildFunction = creator.createBuildFunction(VOBuilder.class.getMethod("build"));
         ObjectReader objectReader = creator.createObjectReader(
-                VOBuilder.class
-                , 0, instanceSupplier
-                , buildFunction
-                , fieldReader1
-                , fieldReader2
-                , fieldReader3
-                , fieldReader4
-                , fieldReader5
-                , fieldReader6
+                VOBuilder.class,
+                 0, instanceSupplier,
+                 buildFunction,
+                 fieldReader1,
+                 fieldReader2,
+                 fieldReader3,
+                 fieldReader4,
+                 fieldReader5,
+                 fieldReader6
         );
 
         {

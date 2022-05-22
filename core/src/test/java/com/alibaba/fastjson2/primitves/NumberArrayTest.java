@@ -72,27 +72,27 @@ public class NumberArrayTest {
 
             byte[] jsonbBytes = JSONB.toBytes(vo);
             Number1 vo2 = JSONB.parseObject(jsonbBytes, Number1.class);
-            assertEquals(JSON.toJSONString(vo.getValue())
-                    , JSON.toJSONString(vo2.getValue()));
+            assertEquals(JSON.toJSONString(vo.getValue()),
+                    JSON.toJSONString(vo2.getValue()));
 
             JSONBDump.dump(jsonbBytes);
 
             JSONObject jsonObject = JSONB.parseObject(jsonbBytes, JSONObject.class);
-            assertEquals(JSON.toJSONString(vo.getValue())
-                    , JSON.toJSONString(jsonObject.get("value")));
+            assertEquals(JSON.toJSONString(vo.getValue()),
+                    JSON.toJSONString(jsonObject.get("value")));
         }
 
         {
             byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("value", "123"));
             Number1 vo2 = JSONB.parseObject(jsonbBytes, Number1.class);
-            assertEquals("123"
-                    , JSON.toJSONString(vo2.getValue()));
+            assertEquals("123",
+                    JSON.toJSONString(vo2.getValue()));
         }
         {
             byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("value", "12345678901234567890123456789012345678901234567890123456789012345678901234567890"));
             Number1 vo2 = JSONB.parseObject(jsonbBytes, Number1.class);
-            assertEquals("12345678901234567890123456789012345678901234567890123456789012345678901234567890"
-                    , JSON.toJSONString(vo2.getValue()));
+            assertEquals("12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+                    JSON.toJSONString(vo2.getValue()));
         }
     }
 

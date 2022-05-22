@@ -6,9 +6,6 @@ import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,6 +20,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
+import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
 
 public abstract class JSONWriter
         implements Closeable {
@@ -31,7 +30,7 @@ public abstract class JSONWriter
     protected final boolean utf8;
     protected final boolean utf16;
 
-    protected boolean startObject = false;
+    protected boolean startObject;
     protected int level;
     protected int off;
     protected Object rootObject;
@@ -160,8 +159,7 @@ public abstract class JSONWriter
         return context.propertyPreFilter != null
                 || context.propertyFilter != null
                 || context.nameFilter != null
-                || context.valueFilter != null
-                ;
+                || context.valueFilter != null;
     }
 
     public boolean isWriteNulls() {
@@ -183,8 +181,7 @@ public abstract class JSONWriter
     public boolean isRefDetect(Object object) {
         return (context.features & Feature.ReferenceDetection.mask) != 0
                 && object != null
-                && !ObjectWriterProvider.isNotReferenceDetect(object.getClass())
-                ;
+                && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
     }
 
     public boolean isBeanToArray() {
@@ -413,22 +410,22 @@ public abstract class JSONWriter
 
     public static JSONWriter ofJSONB() {
         return new JSONWriterJSONB(
-                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider)
-                , null
+                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider),
+                null
         );
     }
 
     public static JSONWriter ofJSONB(Feature... features) {
         return new JSONWriterJSONB(
-                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features)
-                , null
+                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features),
+                null
         );
     }
 
     public static JSONWriter ofJSONB(JSONB.SymbolTable symbolTable) {
         return new JSONWriterJSONB(
-                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider)
-                , symbolTable
+                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider),
+                symbolTable
         );
     }
 
@@ -1484,8 +1481,7 @@ public abstract class JSONWriter
         ReferenceDetection(1 << 16),
         WriteNameAsSymbol(1 << 17),
         WriteBigDecimalAsPlain(1 << 18),
-        UseSingleQuotes(1 << 19)
-        ;
+        UseSingleQuotes(1 << 19);
 
         public final long mask;
 
@@ -1494,10 +1490,10 @@ public abstract class JSONWriter
         }
     }
 
-    public final static class Path {
-        public final static Path ROOT = new Path(null, "$");
-        public final static Path ROOT_0 = new Path(ROOT, 0);
-        public final static Path ROOT_1 = new Path(ROOT, 1);
+    public static final class Path {
+        public static final Path ROOT = new Path(null, "$");
+        public static final Path ROOT_0 = new Path(ROOT, 0);
+        public static final Path ROOT_1 = new Path(ROOT, 1);
 
         final Path parent;
         final String name;

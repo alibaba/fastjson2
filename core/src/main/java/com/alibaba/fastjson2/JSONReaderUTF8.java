@@ -15,8 +15,8 @@ import java.util.Arrays;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import static com.alibaba.fastjson2.util.UUIDUtils.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
+import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 class JSONReaderUTF8
         extends JSONReader {
@@ -28,7 +28,7 @@ class JSONReaderUTF8
     protected int nameEnd;
     protected int nameLength;
 
-    protected boolean nameAscii = false;
+    protected boolean nameAscii;
 
     JSONReaderUTF8(Context ctx, byte[] bytes, int offset, int length) {
         super(ctx);
@@ -439,8 +439,7 @@ class JSONReaderUTF8
                             throw new JSONException("malformed input around byte " + offset);
                         }
                         c = (char) (((c & 0x1F) << 6)
-                                | (c2 & 0x3F)
-                        );
+                                | (c2 & 0x3F));
 
                         offset += 2;
                         nameAscii = false;
@@ -558,8 +557,7 @@ class JSONReaderUTF8
                             throw new JSONException("malformed input around byte " + offset);
                         }
                         c = (char) (((c & 0x1F) << 6)
-                                | (c2 & 0x3F)
-                        );
+                                | (c2 & 0x3F));
 
                         offset += 2;
                         nameAscii = false;
@@ -687,8 +685,7 @@ class JSONReaderUTF8
                             /* 110x xxxx   10xx xxxx*/
                             int c2 = bytes[offset + 1];
                             c = (char) (((c & 0x1F) << 6)
-                                    | (c2 & 0x3F)
-                            );
+                                    | (c2 & 0x3F));
                             offset += 2;
                             break;
                         }
@@ -697,8 +694,7 @@ class JSONReaderUTF8
                             int c3 = bytes[offset + 2];
                             c = (char) (((c & 0x0F) << 12)
                                     | ((c2 & 0x3F) << 6)
-                                    | ((c3 & 0x3F) << 0)
-                            );
+                                    | ((c3 & 0x3F) << 0));
 
                             offset += 3;
                             break;
@@ -757,8 +753,8 @@ class JSONReaderUTF8
                 }
             }
 
-            return new String(bytes, nameBegin, length
-                    , nameAscii ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8
+            return new String(bytes, nameBegin, length,
+                    nameAscii ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8
             );
         }
 
@@ -960,8 +956,8 @@ class JSONReaderUTF8
                 }
             }
 
-            return new String(bytes, nameBegin, length
-                    , nameAscii ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8
+            return new String(bytes, nameBegin, length,
+                    nameAscii ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8
             );
         }
 
@@ -1498,8 +1494,7 @@ class JSONReaderUTF8
                         offset++;
                         int c2 = bytes[offset++];
                         chars[i] = (char) (
-                                ((c & 0x1F) << 6) | (c2 & 0x3F)
-                        );
+                                ((c & 0x1F) << 6) | (c2 & 0x3F));
                         break;
                     }
                     case 14: {
@@ -1686,8 +1681,7 @@ class JSONReaderUTF8
                                 offset++;
                                 int c2 = bytes[offset++];
                                 chars[i] = (char) (
-                                        ((c & 0x1F) << 6) | (c2 & 0x3F)
-                                );
+                                        ((c & 0x1F) << 6) | (c2 & 0x3F));
                                 break;
                             }
                             case 14: {
@@ -1920,8 +1914,8 @@ class JSONReaderUTF8
 
         int length = nameEnd - nameBegin;
         if (!nameEscape) {
-            return new String(bytes, nameBegin, length
-                    , nameAscii ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8
+            return new String(bytes, nameBegin, length,
+                    nameAscii ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8
             );
         }
 
@@ -2103,7 +2097,7 @@ class JSONReaderUTF8
 
     @Override
     public void skipLineComment() {
-        for (;;) {
+        while (true) {
             if (ch == '\n') {
                 offset++;
 
@@ -2249,8 +2243,7 @@ class JSONReaderUTF8
                                     offset++;
                                     int c2 = bytes[offset++];
                                     chars[i] = (char) (
-                                            ((c & 0x1F) << 6) | (c2 & 0x3F)
-                                    );
+                                            ((c & 0x1F) << 6) | (c2 & 0x3F));
                                     break;
                                 }
                                 case 14: {

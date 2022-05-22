@@ -17,11 +17,10 @@ class FieldReaderListFuncImpl<T, V>
     final String fieldName;
 
     public FieldReaderListFuncImpl(
-            Supplier<List<V>> listCreator
-            , ObjectReader<V> itemObjectReader
-            , BiConsumer<T, List<V>> function
-            , Type itemType
-            , String fieldName) {
+            Supplier<List<V>> listCreator,
+            ObjectReader<V> itemObjectReader,
+            BiConsumer<T, List<V>> function,
+            Type itemType, String fieldName) {
         this.listCreator = listCreator;
         this.itemObjectReader = itemObjectReader;
         this.function = function;

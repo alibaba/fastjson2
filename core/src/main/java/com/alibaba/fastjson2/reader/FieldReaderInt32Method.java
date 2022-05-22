@@ -37,8 +37,8 @@ final class FieldReaderInt32Method<T>
         }
 
         try {
-            method.invoke(object
-                    , TypeUtils.toInteger(value));
+            method.invoke(object,
+                    TypeUtils.toInteger(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

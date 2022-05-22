@@ -11,13 +11,13 @@ class FieldWriterObjectMethod<T>
     final Method method;
 
     protected FieldWriterObjectMethod(
-            String name
-            , int ordinal
-            , long features
-            , String format
-            , Type fieldType
-            , Class fieldClass
-            , Method method
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            Type fieldType,
+            Class fieldClass,
+            Method method
     ) {
         super(name, ordinal, features, format, fieldType, fieldClass);
         this.method = method;

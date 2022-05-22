@@ -68,7 +68,7 @@ final class ObjectWriterImplOptional
         }
 
         if (valueWriter == null) {
-            valueWriter = jsonWriter.getObjectWriter(valueClass);;
+            valueWriter = jsonWriter.getObjectWriter(valueClass);
         }
         valueWriter.write(jsonWriter, value, fieldName, valueType, this.features);
     }

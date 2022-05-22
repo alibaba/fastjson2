@@ -12,12 +12,12 @@ final class FieldWriterDateFunc<T>
     Function<T, Date> function;
 
     protected FieldWriterDateFunc(
-            String fieldName
-            , int ordinal
-            , long features
-            , String dateTimeFormat
-            , Method method
-            , Function<T, Date> function
+            String fieldName,
+            int ordinal,
+            long features,
+            String dateTimeFormat,
+            Method method,
+            Function<T, Date> function
     ) {
         super(fieldName, ordinal, features, dateTimeFormat, Date.class, Date.class);
         this.method = method;

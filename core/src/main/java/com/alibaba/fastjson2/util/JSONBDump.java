@@ -13,8 +13,9 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.alibaba.fastjson2.JSONB.*;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.JSONB.SymbolTable;
+import static com.alibaba.fastjson2.JSONB.typeName;
 
 public class JSONBDump {
     final byte[] bytes;
@@ -913,8 +914,7 @@ public class JSONBDump {
         return (type >= BC_BIGINT_LONG && type <= BC_INT32)
                 || type == BC_TIMESTAMP_MINUTES
                 || type == BC_TIMESTAMP_SECONDS
-                || type == BC_TIMESTAMP_MILLIS
-                ;
+                || type == BC_TIMESTAMP_MILLIS;
     }
 
     public String getString(int symbol) {

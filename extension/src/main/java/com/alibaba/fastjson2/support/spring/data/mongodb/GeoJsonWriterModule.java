@@ -52,11 +52,11 @@ public class GeoJsonWriterModule
 
     static class GeoJsonPolygonWriter
             implements ObjectWriter {
-        public final static GeoJsonPolygonWriter INSTANCE = new GeoJsonPolygonWriter();
+        public static final GeoJsonPolygonWriter INSTANCE = new GeoJsonPolygonWriter();
 
-        final static String PREFIX = "{\"type\":\"Polygon\",\"coordinates\":";
-        final static byte[] utf8Prefix = PREFIX.getBytes(StandardCharsets.US_ASCII);
-        final static char[] charsPrefix = PREFIX.toCharArray();
+        static final String PREFIX = "{\"type\":\"Polygon\",\"coordinates\":";
+        static final byte[] utf8Prefix = PREFIX.getBytes(StandardCharsets.US_ASCII);
+        static final char[] charsPrefix = PREFIX.toCharArray();
 
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -106,7 +106,7 @@ public class GeoJsonWriterModule
 
     static class PointWriter
             implements ObjectWriter {
-        public final static PointWriter INSTANCE = new PointWriter();
+        public static final PointWriter INSTANCE = new PointWriter();
 
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -122,11 +122,11 @@ public class GeoJsonWriterModule
 
     static class GeoJsonPointWriter
             implements ObjectWriter {
-        public final static GeoJsonPointWriter INSTANCE = new GeoJsonPointWriter();
+        public static final GeoJsonPointWriter INSTANCE = new GeoJsonPointWriter();
 
-        final static String PREFIX = "{\"type\":\"Point\",\"coordinates\":";
-        final static byte[] utf8Prefix = PREFIX.getBytes(StandardCharsets.US_ASCII);
-        final static char[] charsPrefix = PREFIX.toCharArray();
+        static final String PREFIX = "{\"type\":\"Point\",\"coordinates\":";
+        static final byte[] utf8Prefix = PREFIX.getBytes(StandardCharsets.US_ASCII);
+        static final char[] charsPrefix = PREFIX.toCharArray();
 
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {

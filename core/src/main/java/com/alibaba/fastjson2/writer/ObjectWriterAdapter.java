@@ -1,20 +1,20 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.PropertyFilter;
 import com.alibaba.fastjson2.filter.PropertyPreFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
-
-import static com.alibaba.fastjson2.JSONB.Constants.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class ObjectWriterAdapter<T>
         implements ObjectWriter<T> {
@@ -27,12 +27,12 @@ public class ObjectWriterAdapter<T>
 
     final Class objectType;
     final List<FieldWriter> fieldWriters;
-    final protected FieldWriter[] fieldWriterArray;
+    protected final FieldWriter[] fieldWriterArray;
 
     final String typeKey;
     byte[] typeKeyJSONB;
-    final protected String typeName;
-    final protected long typeNameHash;
+    protected final String typeName;
+    protected final long typeNameHash;
     protected byte[] typeNameJSONB;
 
     byte[] nameWithColonUTF8;
@@ -50,11 +50,11 @@ public class ObjectWriterAdapter<T>
     }
 
     public ObjectWriterAdapter(
-            Class<T> objectType
-            , String typeKey
-            , String typeName
-            , long features
-            , List<FieldWriter> fieldWriters
+            Class<T> objectType,
+            String typeKey,
+            String typeName,
+            long features,
+            List<FieldWriter> fieldWriters
     ) {
         if (typeName == null && objectType != null) {
             if (Enum.class.isAssignableFrom(objectType) && !objectType.isEnum()) {
@@ -255,8 +255,8 @@ public class ObjectWriterAdapter<T>
         for (int i = 0; i < fieldWriters.size(); i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
             map.put(
-                    fieldWriter.getFieldName()
-                    , fieldWriter.getFieldValue(object)
+                    fieldWriter.getFieldName(),
+                    fieldWriter.getFieldValue(object)
             );
         }
         return map;

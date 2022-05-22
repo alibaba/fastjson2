@@ -12,7 +12,7 @@ public class Issue2074 {
         JSONObject object = new JSONObject();
         object.put("name", null);
 
-        assertEquals("{\"name\":null}"
-                , object.toString(SerializerFeature.WriteMapNullValue));
+        assertEquals("{\"name\":null}",
+                object.toString(SerializerFeature.WriteMapNullValue));
     }
 }

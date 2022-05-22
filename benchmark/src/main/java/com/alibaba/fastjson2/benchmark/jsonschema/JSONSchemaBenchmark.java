@@ -25,16 +25,16 @@ public class JSONSchemaBenchmark {
     @State(Scope.Thread)
     public static class BenchmarkState {
         // everit
-        private Schema jsonSchema_everit;
-        private org.json.JSONObject schemas_everit;
+        private Schema jsonSchemaEverit;
+        private org.json.JSONObject schemasEverit;
         private List<String> schemaNames;
 
         // fastjson
-        private JSONSchema jsonSchema_fastjson2;
-        private JSONObject schemas_fastjson2;
+        private JSONSchema jsonSchemaFastjson2;
+        private JSONObject schemasFastjson2;
 
-        private JsonSchema jsonSchema_networknt;
-        private JsonNode schemas_networknt;
+        private JsonSchema jsonSchemaNetworknt;
+        private JsonNode schemasNetworknt;
 
         public BenchmarkState() {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -42,17 +42,17 @@ public class JSONSchemaBenchmark {
             {
                 org.json.JSONObject root = new org.json.JSONObject(new org.json.JSONTokener(classLoader.getResourceAsStream("schema/perftest.json")));
                 org.json.JSONObject schemaObject = new org.json.JSONObject(new org.json.JSONTokener(classLoader.getResourceAsStream("schema/schema-draft4.json")));
-                jsonSchema_everit = SchemaLoader.load(schemaObject);
-                schemas_everit = root.getJSONObject("schemas");
+                jsonSchemaEverit = SchemaLoader.load(schemaObject);
+                schemasEverit = root.getJSONObject("schemas");
 
-                schemaNames = Arrays.asList(org.json.JSONObject.getNames(schemas_everit));
+                schemaNames = Arrays.asList(org.json.JSONObject.getNames(schemasEverit));
             }
 
             {
                 JSONObject root = JSON.parseObject(classLoader.getResource("schema/perftest.json"));
                 JSONObject schemaObject = JSON.parseObject(classLoader.getResource("schema/schema-draft4.json"));
-                jsonSchema_fastjson2 = JSONSchema.of(schemaObject);
-                schemas_fastjson2 = root.getJSONObject("schemas");
+                jsonSchemaFastjson2 = JSONSchema.of(schemaObject);
+                schemasFastjson2 = root.getJSONObject("schemas");
             }
 
             try {
@@ -61,10 +61,10 @@ public class JSONSchemaBenchmark {
 
                 ObjectReader reader = objectMapper.reader();
                 JsonNode schemaNode = reader.readTree(classLoader.getResourceAsStream("schema/schema-draft4.json"));
-                jsonSchema_networknt = factory.getSchema(schemaNode);
+                jsonSchemaNetworknt = factory.getSchema(schemaNode);
 
                 JsonNode root = reader.readTree(classLoader.getResourceAsStream("schema/perftest.json"));
-                schemas_networknt = root.get("schemas");
+                schemasNetworknt = root.get("schemas");
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -74,24 +74,24 @@ public class JSONSchemaBenchmark {
     @Benchmark
     public void everit(BenchmarkState state) {
         for (String name : state.schemaNames) {
-            org.json.JSONObject json = (org.json.JSONObject) state.schemas_everit.get(name);
-            state.jsonSchema_everit.validate(json);
+            org.json.JSONObject json = (org.json.JSONObject) state.schemasEverit.get(name);
+            state.jsonSchemaEverit.validate(json);
         }
     }
 
     @Benchmark
     public void fastjson2(BenchmarkState state) {
         for (String name : state.schemaNames) {
-            JSONObject json = state.schemas_fastjson2.getJSONObject(name);
-            state.jsonSchema_fastjson2.validate(json);
+            JSONObject json = state.schemasFastjson2.getJSONObject(name);
+            state.jsonSchemaFastjson2.validate(json);
         }
     }
 
     @Benchmark
     public void networknt(BenchmarkState state) {
         for (String name : state.schemaNames) {
-            JsonNode json = state.schemas_networknt.get(name);
-            state.jsonSchema_networknt.validate(json);
+            JsonNode json = state.schemasNetworknt.get(name);
+            state.jsonSchemaNetworknt.validate(json);
         }
     }
 

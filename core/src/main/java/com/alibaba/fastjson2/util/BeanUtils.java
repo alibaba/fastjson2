@@ -699,7 +699,7 @@ public abstract class BeanUtils {
             return methodName;
         }
 
-        int prefixLength = methodName.startsWith("set") ? 3: 0;
+        int prefixLength = methodName.startsWith("set") ? 3 : 0;
 
         switch (namingStrategy) {
             case "NeverUseThisValueExceptDefaultValue":

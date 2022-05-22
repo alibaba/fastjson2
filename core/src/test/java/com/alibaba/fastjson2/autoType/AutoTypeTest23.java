@@ -33,7 +33,7 @@ public class AutoTypeTest23 {
         public Item[] items1;
     }
 
-    public static abstract class  Item {
+    public abstract static class  Item {
         public int id;
     }
 

@@ -40,8 +40,8 @@ final class FieldReaderBigDecimalFunc<T, V>
             schema.assertValidate(value);
         }
 
-        function.accept(object
-                , (V) TypeUtils.toBigDecimal(value));
+        function.accept(object,
+                (V) TypeUtils.toBigDecimal(value));
     }
 
     @Override

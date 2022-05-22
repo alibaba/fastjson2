@@ -142,7 +142,7 @@ public class Issue3655 {
         private String data9;
     }
 
-    public static abstract class issue3655_a {
+    public abstract static class issue3655_a {
         public abstract Object getData();
 
         public abstract Object getData2();

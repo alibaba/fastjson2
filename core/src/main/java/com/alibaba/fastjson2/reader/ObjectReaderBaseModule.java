@@ -16,7 +16,8 @@ import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
@@ -214,8 +215,8 @@ public class ObjectReaderBaseModule
             if (mixInSource != null && mixInSource != objectClass) {
                 getBeanInfo(beanInfo, mixInSource.getAnnotations());
 
-                BeanUtils.staticMethod(mixInSource
-                        , method -> getCreator(beanInfo, objectClass, method)
+                BeanUtils.staticMethod(mixInSource,
+                        method -> getCreator(beanInfo, objectClass, method)
                 );
 
                 BeanUtils.constructor(mixInSource, constructor ->
@@ -240,8 +241,8 @@ public class ObjectReaderBaseModule
                 }
             }
 
-            BeanUtils.staticMethod(objectClass
-                    , method -> getCreator(beanInfo, objectClass, method)
+            BeanUtils.staticMethod(objectClass,
+                    method -> getCreator(beanInfo, objectClass, method)
             );
 
             BeanUtils.constructor(objectClass, constructor ->
@@ -476,7 +477,9 @@ public class ObjectReaderBaseModule
             Annotation[] annotations = null;
             try {
                 annotations = parameter.getAnnotations();
-            } catch (ArrayIndexOutOfBoundsException ignored) {}
+            } catch (ArrayIndexOutOfBoundsException ignored) {
+                // ignored
+            }
 
             if (annotations != null) {
                 processAnnotation(fieldInfo, annotations);
@@ -649,7 +652,9 @@ public class ObjectReaderBaseModule
                         default:
                             break;
                     }
-                } catch (Throwable ignored) {}
+                } catch (Throwable ignored) {
+                    // ignored
+                }
             });
         }
 
@@ -670,7 +675,9 @@ public class ObjectReaderBaseModule
                         default:
                             break;
                     }
-                } catch (Throwable ignored) {}
+                } catch (Throwable ignored) {
+                    // ignored
+                }
             });
         }
 
@@ -691,7 +698,9 @@ public class ObjectReaderBaseModule
                         default:
                             break;
                     }
-                } catch (Throwable ignored) {}
+                } catch (Throwable ignored) {
+                    // ignored
+                }
             });
         }
 
@@ -783,7 +792,9 @@ public class ObjectReaderBaseModule
                         default:
                             break;
                     }
-                } catch (Throwable ignored) {}
+                } catch (Throwable ignored) {
+                    // ignored
+                }
             });
         }
 
@@ -1356,18 +1367,18 @@ public class ObjectReaderBaseModule
             if (objectClass == StackTraceElement.class) {
                 try {
                     Constructor constructor = objectClass.getConstructor(
-                            String.class
-                            , String.class
-                            , String.class
-                            , int.class);
+                            String.class,
+                            String.class,
+                            String.class,
+                            int.class);
 
                     return creator
                             .createObjectReaderNoneDefaultConstrutor(
-                                    constructor
-                                    , "className"
-                                    , "methodName"
-                                    , "fileName"
-                                    , "lineNumber");
+                                    constructor,
+                                    "className",
+                                    "methodName",
+                                    "fileName",
+                                    "lineNumber");
                 } catch (Throwable ignored) {
                     //
                 }
@@ -1573,7 +1584,7 @@ public class ObjectReaderBaseModule
         return new ObjectReaderImplMapTyped(mapType, instanceType, keyType, valueType, 0, null);
     }
 
-    static abstract class PrimitiveImpl<T>
+    abstract static class PrimitiveImpl<T>
             implements ObjectReader<T> {
         @Override
         public T createInstance(long features) {
@@ -2281,7 +2292,7 @@ public class ObjectReaderBaseModule
             implements ObjectReader {
         final Type itemType;
         final Class<?> componentClass;
-        ObjectReader itemObjectReader = null;
+        ObjectReader itemObjectReader;
 
         public GenericArrayImpl(Type itemType) {
             this.itemType = itemType;

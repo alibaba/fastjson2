@@ -73,8 +73,7 @@ class ObjectReader3<T>
 
         hasDefaultValue = fieldReader0.getDefaultValue() != null
                 || fieldReader1.getDefaultValue() != null
-                || fieldReader2.getDefaultValue() != null
-        ;
+                || fieldReader2.getDefaultValue() != null;
     }
 
     @Override

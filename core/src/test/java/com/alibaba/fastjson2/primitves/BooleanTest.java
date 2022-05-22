@@ -66,23 +66,23 @@ public class BooleanTest {
                 jsonWriter.config(JSONWriter.Feature.BeanToArray);
                 Boolean1 vo = new Boolean1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("[null]"
-                        , jsonWriter.toString());
+                assertEquals("[null]",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 Boolean1 vo = new Boolean1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{}"
-                        , jsonWriter.toString());
+                assertEquals("{}",
+                        jsonWriter.toString());
             }
             {
                 JSONWriter jsonWriter = JSONWriter.of();
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 Boolean1 vo = new Boolean1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"v0000\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"v0000\":null}",
+                        jsonWriter.toString());
             }
         }
     }

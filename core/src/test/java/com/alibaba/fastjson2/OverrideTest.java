@@ -13,7 +13,7 @@ public class OverrideTest {
         assertEquals("{\"value\":\"\"}", json);
     }
 
-    public static abstract class A {
+    public abstract static class A {
         public abstract Object getValue();
     }
 

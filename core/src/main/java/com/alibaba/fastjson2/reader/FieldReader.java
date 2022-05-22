@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONPath;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
@@ -9,7 +12,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.List;
 
 public interface FieldReader<T>
         extends Comparable<FieldReader> {
@@ -108,17 +111,13 @@ public interface FieldReader<T>
             Class<?> thisFieldDeclaringClass = thisField.getDeclaringClass();
             Class<?> otherFieldDeclaringClass = otherField.getDeclaringClass();
 
-            for (Class superClass = thisFieldDeclaringClass.getSuperclass();
-                 superClass != null && superClass != Object.class;
-                 superClass = superClass.getSuperclass()) {
+            for (Class superClass = thisFieldDeclaringClass.getSuperclass(); superClass != null && superClass != Object.class; superClass = superClass.getSuperclass()) {
                 if (superClass == otherFieldDeclaringClass) {
                     return 1;
                 }
             }
 
-            for (Class superClass = otherFieldDeclaringClass.getSuperclass();
-                 superClass != null && superClass != Object.class;
-                 superClass = superClass.getSuperclass()) {
+            for (Class superClass = otherFieldDeclaringClass.getSuperclass(); superClass != null && superClass != Object.class; superClass = superClass.getSuperclass()) {
                 if (superClass == thisFieldDeclaringClass) {
                     return -1;
                 }
@@ -131,17 +130,13 @@ public interface FieldReader<T>
             Class<?> thisFieldDeclaringClass = thisMethod.getDeclaringClass();
             Class<?> otherFieldDeclaringClass = otherMethod.getDeclaringClass();
 
-            for (Class superClass = thisFieldDeclaringClass.getSuperclass();
-                 superClass != null && superClass != Object.class;
-                 superClass = superClass.getSuperclass()) {
+            for (Class superClass = thisFieldDeclaringClass.getSuperclass(); superClass != null && superClass != Object.class; superClass = superClass.getSuperclass()) {
                 if (superClass == otherFieldDeclaringClass) {
                     return 1;
                 }
             }
 
-            for (Class superClass = otherFieldDeclaringClass.getSuperclass();
-                 superClass != null && superClass != Object.class;
-                 superClass = superClass.getSuperclass()) {
+            for (Class superClass = otherFieldDeclaringClass.getSuperclass(); superClass != null && superClass != Object.class; superClass = superClass.getSuperclass()) {
                 if (superClass == thisFieldDeclaringClass) {
                     return -1;
                 }

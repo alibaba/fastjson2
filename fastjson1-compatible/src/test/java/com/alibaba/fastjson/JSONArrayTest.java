@@ -460,48 +460,48 @@ public class JSONArrayTest {
     @Test
     public void test_getBigInt() {
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONArray()
+                BigInteger.valueOf(12),
+                new JSONArray()
                         .fluentAdd(12)
                         .getBigInteger(0));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONArray()
+                BigInteger.valueOf(12),
+                new JSONArray()
                         .fluentAdd((byte) 12)
                         .getBigInteger(0));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONArray()
+                BigInteger.valueOf(12),
+                new JSONArray()
                         .fluentAdd((short) 12)
                         .getBigInteger(0));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONArray()
+                BigInteger.valueOf(12),
+                new JSONArray()
                         .fluentAdd(12L)
                         .getBigInteger(0));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONArray()
+                BigInteger.valueOf(12),
+                new JSONArray()
                         .fluentAdd(12F)
                         .getBigInteger(0));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONArray()
+                BigInteger.valueOf(12),
+                new JSONArray()
                         .fluentAdd(12D)
                         .getBigInteger(0));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONArray()
+                BigInteger.valueOf(12),
+                new JSONArray()
                         .fluentAdd(new BigDecimal("12"))
                         .getBigInteger(0));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONArray()
+                BigInteger.valueOf(12),
+                new JSONArray()
                         .fluentAdd(new BigInteger("12"))
                         .getBigInteger(0));
         assertEquals(
-                BigInteger.valueOf(12)
-                , new JSONArray()
+                BigInteger.valueOf(12),
+                new JSONArray()
                         .fluentAdd("12")
                         .getBigInteger(0));
     }
@@ -509,13 +509,13 @@ public class JSONArrayTest {
     @Test
     public void test_getBigDecimal() {
         assertEquals(
-                BigDecimal.valueOf(12)
-                , new JSONArray()
+                BigDecimal.valueOf(12),
+                new JSONArray()
                         .fluentAdd(12)
                         .getBigDecimal(0));
         assertEquals(
-                BigDecimal.valueOf(12)
-                , new JSONArray()
+                BigDecimal.valueOf(12),
+                new JSONArray()
                         .fluentAdd((byte) 12)
                         .getBigDecimal(0));
         assertEquals(

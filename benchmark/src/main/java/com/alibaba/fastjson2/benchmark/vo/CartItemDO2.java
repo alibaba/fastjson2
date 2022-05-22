@@ -110,13 +110,13 @@ public class CartItemDO2
     }
 
     private long userId;
-    private String trackId ="myTrackId";
+    private String trackId = "myTrackId";
     private long itemId;
     private long skuId;
     private int quantity;
-    private int mainType = 0;
+    private int mainType;
     private long tpId;
-    private long subType = 0L;
+    private long subType;
     public long cityCode;
     private Map<String, String> attributes = new HashMap();
 }

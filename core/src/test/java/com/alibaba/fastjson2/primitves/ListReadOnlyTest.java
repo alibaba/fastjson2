@@ -19,11 +19,11 @@ public class ListReadOnlyTest {
 
         for (ObjectReaderCreator creator : creators) {
             FieldReader fieldWriter = creator.createFieldReader(
-                    ListReadOnly1.class
-                    , "value"
-                    , List.class
-                    , List.class
-                    , ListReadOnly1.class.getMethod("getValue"));
+                    ListReadOnly1.class,
+                    "value",
+                    List.class,
+                    List.class,
+                    ListReadOnly1.class.getMethod("getValue"));
             ObjectReader<ListReadOnly1> objectReader
                     = creator.createObjectReader(ListReadOnly1.class, fieldWriter);
 

@@ -50,7 +50,7 @@ public class AutoTypeTest40_listBeanMap {
         private List<ItemBase> items;
     }
 
-    public static abstract class ItemBase {
+    public abstract static class ItemBase {
 
     }
 

@@ -34,8 +34,8 @@ final class FieldReaderBigIntegerMethod<T>
     @Override
     public void accept(T object, Object value) {
         try {
-            method.invoke(object
-                    , TypeUtils.toBigInteger(value));
+            method.invoke(object,
+                    TypeUtils.toBigInteger(value));
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

@@ -17,7 +17,7 @@ final class ObjectWriterImplDate
     static final ObjectWriterImplDate INSTANCE_UNIXTIME = new ObjectWriterImplDate("unixtime");
 
     public ObjectWriterImplDate(String format) {
-        super (format);
+        super(format);
     }
 
     @Override
