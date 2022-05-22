@@ -1,13 +1,13 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.util.List;
 
-final class ObjectWriterImplListEnum extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplListEnum
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     final Class defineClass;
     final Class enumType;
     final long features;

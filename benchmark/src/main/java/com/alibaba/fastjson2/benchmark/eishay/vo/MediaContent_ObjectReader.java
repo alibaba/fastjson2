@@ -7,7 +7,8 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 
 import java.util.Arrays;
 
-public class MediaContent_ObjectReader implements ObjectReader {
+public class MediaContent_ObjectReader
+        implements ObjectReader {
     private FieldReader[] fieldReaders;
 
     private FieldReader fieldReader0; // images

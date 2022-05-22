@@ -9,7 +9,8 @@ import java.math.BigInteger;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-final class FieldReaderBigIntegerFunc<T, V> extends FieldReaderImpl<T> {
+final class FieldReaderBigIntegerFunc<T, V>
+        extends FieldReaderImpl<T> {
     final Method method;
     final BiConsumer<T, V> function;
 

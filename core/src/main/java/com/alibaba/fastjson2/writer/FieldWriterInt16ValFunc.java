@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.function.ToShortFunction;
 
 import java.lang.reflect.Method;
 
-final class FieldWriterInt16ValFunc extends FieldWriterInt16 {
+final class FieldWriterInt16ValFunc
+        extends FieldWriterInt16 {
     final Method method;
     final ToShortFunction function;
 

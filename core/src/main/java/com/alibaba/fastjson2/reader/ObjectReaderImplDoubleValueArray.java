@@ -8,7 +8,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-class ObjectReaderImplDoubleValueArray extends ObjectReaderBaseModule.PrimitiveImpl {
+class ObjectReaderImplDoubleValueArray
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplDoubleValueArray INSTANCE = new ObjectReaderImplDoubleValueArray();
 
     @Override

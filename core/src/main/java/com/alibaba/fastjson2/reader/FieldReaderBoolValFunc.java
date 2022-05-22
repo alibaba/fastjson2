@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.function.ObjBoolConsumer;
 
 import java.lang.reflect.Method;
 
-final class FieldReaderBoolValFunc<T> extends FieldReaderImpl<T> {
+final class FieldReaderBoolValFunc<T>
+        extends FieldReaderImpl<T> {
     final Method method;
     final ObjBoolConsumer<T> function;
 

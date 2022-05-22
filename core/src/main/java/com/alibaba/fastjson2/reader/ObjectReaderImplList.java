@@ -10,7 +10,8 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 
-public final class ObjectReaderImplList implements ObjectReader {
+public final class ObjectReaderImplList
+        implements ObjectReader {
     static final Class CLASS_EMPTY_SET = Collections.emptySet().getClass();
     static final Class CLASS_EMPTY_LIST = Collections.emptyList().getClass();
     static final Class CLASS_SINGLETON = Collections.singleton(0).getClass();

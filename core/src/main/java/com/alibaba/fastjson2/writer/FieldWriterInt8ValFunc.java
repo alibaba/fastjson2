@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.function.ToByteFunction;
 
 import java.lang.reflect.Method;
 
-final class FieldWriterInt8ValFunc extends FieldWriterInt8 {
+final class FieldWriterInt8ValFunc
+        extends FieldWriterInt8 {
     final Method method;
     final ToByteFunction function;
 

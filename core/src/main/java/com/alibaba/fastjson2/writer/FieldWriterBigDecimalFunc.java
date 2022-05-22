@@ -6,7 +6,8 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.function.Function;
 
-final class FieldWriterBigDecimalFunc<T> extends FieldWriterImpl<T> {
+final class FieldWriterBigDecimalFunc<T>
+        extends FieldWriterImpl<T> {
     final Method method;
     final Function<T, BigDecimal> function;
 

@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.lang.reflect.Field;
 
-final class FieldReaderBoolField<T> extends FieldReaderObjectField<T> {
+final class FieldReaderBoolField<T>
+        extends FieldReaderObjectField<T> {
     FieldReaderBoolField(String fieldName, Class fieldType, int ordinal, long features, String format, Boolean defaultValue, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
     }

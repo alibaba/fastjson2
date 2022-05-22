@@ -7,7 +7,9 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-final class ObjectWriterImplLocalDateTime extends DateTimeCodec implements ObjectWriter {
+final class ObjectWriterImplLocalDateTime
+        extends DateTimeCodec
+        implements ObjectWriter {
     static final ObjectWriterImplLocalDateTime INSTANCE = new ObjectWriterImplLocalDateTime(null);
     static final ObjectWriterImplLocalDateTime INSTANCE_UNIXTIME = new ObjectWriterImplLocalDateTime("unixtime");
 

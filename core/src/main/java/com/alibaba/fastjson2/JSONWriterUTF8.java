@@ -23,7 +23,8 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 
-class JSONWriterUTF8 extends JSONWriter {
+class JSONWriterUTF8
+        extends JSONWriter {
     static final byte[] REF_PREF = "{\"$ref\":".getBytes(StandardCharsets.US_ASCII);
 
     final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> byteUpdater;

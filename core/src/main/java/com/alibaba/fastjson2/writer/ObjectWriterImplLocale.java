@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 import java.util.Locale;
 
-final class ObjectWriterImplLocale extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplLocale
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplLocale INSTANCE = new ObjectWriterImplLocale();
 
     @Override

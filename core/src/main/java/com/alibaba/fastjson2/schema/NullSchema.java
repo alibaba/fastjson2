@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONObject;
 
 import java.util.Objects;
 
-final class NullSchema extends JSONSchema {
+final class NullSchema
+        extends JSONSchema {
     NullSchema(JSONObject input) {
         super(input);
     }

@@ -60,7 +60,8 @@ public class JodaSupport {
         return new ISOChronologyWriter(objectClass);
     }
 
-    static class InstantReader implements ObjectReader {
+    static class InstantReader
+            implements ObjectReader {
         final Class objectClass;
         final Constructor constructor;
 
@@ -133,7 +134,8 @@ public class JodaSupport {
         }
     }
 
-    static class ChronologyReader implements ObjectReader {
+    static class ChronologyReader
+            implements ObjectReader {
         static final long HASH_MINIMUM_DAYS_IN_FIRST_WEEK = Fnv.hashCode64("minimumDaysInFirstWeek");
         static final long HASH_ZONE_ID = Fnv.hashCode64("zoneId");
 
@@ -206,7 +208,8 @@ public class JodaSupport {
         }
     }
 
-    static class GregorianChronologyWriter implements ObjectWriter {
+    static class GregorianChronologyWriter
+            implements ObjectWriter {
         final Class objectClass;
         final Method getMinimumDaysInFirstWeek;
         final Method getZone;
@@ -268,25 +271,8 @@ public class JodaSupport {
         }
     }
 
-    static class ISOChronologyReader implements ObjectReader {
-        final Class objectClass;
-
-        ISOChronologyReader(Class objectClass) {
-            this.objectClass = objectClass;
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            throw new JSONException("not support");
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            throw new JSONException("not support");
-        }
-    }
-
-    static class ISOChronologyWriter implements ObjectWriter {
+    static class ISOChronologyWriter
+            implements ObjectWriter {
         final Class objectClass;
         final Method getZone;
         final Method getID;
@@ -332,7 +318,8 @@ public class JodaSupport {
         }
     }
 
-    static class LocalDateReader implements ObjectReader {
+    static class LocalDateReader
+            implements ObjectReader {
         final Class objectClass;
         final Constructor Constructor3;
         final Constructor Constructor4;
@@ -426,7 +413,9 @@ public class JodaSupport {
         }
     }
 
-    static class LocalDateWriter extends DateTimeCodec implements ObjectWriter {
+    static class LocalDateWriter
+            extends DateTimeCodec
+            implements ObjectWriter {
         final Class objectClass;
         final Method getYear;
         final Method getMonthOfYear;
@@ -543,7 +532,8 @@ public class JodaSupport {
         }
     }
 
-    static class LocalDateTimeReader implements ObjectReader {
+    static class LocalDateTimeReader
+            implements ObjectReader {
         final Class objectClass;
         final Constructor constructor7;
         final Constructor constructor8;
@@ -654,7 +644,9 @@ public class JodaSupport {
         }
     }
 
-    static class LocalDateTimeWriter extends DateTimeCodec implements ObjectWriter {
+    static class LocalDateTimeWriter
+            extends DateTimeCodec
+            implements ObjectWriter {
         final Class objectClass;
 
         final Method getYear;

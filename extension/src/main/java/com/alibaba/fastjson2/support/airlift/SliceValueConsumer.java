@@ -9,7 +9,8 @@ import io.airlift.slice.Slices;
 import java.util.List;
 import java.util.Map;
 
-public class SliceValueConsumer implements ValueConsumer {
+public class SliceValueConsumer
+        implements ValueConsumer {
     public Slice slice;
 
     @Override

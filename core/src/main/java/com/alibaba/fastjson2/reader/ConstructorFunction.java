@@ -12,7 +12,8 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 
-class ConstructorFunction<T> implements Function<Map<Long, Object>, T> {
+class ConstructorFunction<T>
+        implements Function<Map<Long, Object>, T> {
     final Constructor constructor;
     final Parameter[] parameters;
     final String[] paramNames;

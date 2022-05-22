@@ -1,6 +1,8 @@
 package com.alibaba.fastjson.serializer;
 
-public class SimplePropertyPreFilter extends com.alibaba.fastjson2.filter.SimplePropertyPreFilter implements SerializeFilter {
+public class SimplePropertyPreFilter
+        extends com.alibaba.fastjson2.filter.SimplePropertyPreFilter
+        implements SerializeFilter {
     public SimplePropertyPreFilter(String... properties) {
         super(properties);
     }

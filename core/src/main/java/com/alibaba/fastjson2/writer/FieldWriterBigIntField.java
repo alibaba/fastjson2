@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
 
-final class FieldWriterBigIntField<T> extends FieldWriterImpl<T> {
+final class FieldWriterBigIntField<T>
+        extends FieldWriterImpl<T> {
     final Field field;
 
     protected FieldWriterBigIntField(String name, int ordinal, long features, String format, Field field) {

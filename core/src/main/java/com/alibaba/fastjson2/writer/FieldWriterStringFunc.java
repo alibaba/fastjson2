@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
-final class FieldWriterStringFunc<T> extends FieldWriterImpl<T> {
+final class FieldWriterStringFunc<T>
+        extends FieldWriterImpl<T> {
     final Method method;
     Function<T, String> function;
     final boolean symbol;

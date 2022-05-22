@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-final class FieldWriterInt8Method extends FieldWriterInt8 {
+final class FieldWriterInt8Method
+        extends FieldWriterInt8 {
     final Method method;
 
     protected FieldWriterInt8Method(String fieldName, int ordinal, Method method, Class fieldClass) {

@@ -8,7 +8,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-final class FieldWriterObjectArrayMethod<T> extends FieldWriterImpl<T> {
+final class FieldWriterObjectArrayMethod<T>
+        extends FieldWriterImpl<T> {
     final Method method;
     final Type itemType;
     final Class itemClass;

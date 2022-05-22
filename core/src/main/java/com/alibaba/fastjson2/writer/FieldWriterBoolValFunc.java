@@ -3,7 +3,8 @@ package com.alibaba.fastjson2.writer;
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
 
-final class FieldWriterBoolValFunc extends FieldWriterBoolVal {
+final class FieldWriterBoolValFunc
+        extends FieldWriterBoolVal {
     final Method method;
     final Predicate function;
 

@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
-final class FieldWriterBigDecimalField<T> extends FieldWriterImpl<T> {
+final class FieldWriterBigDecimalField<T>
+        extends FieldWriterImpl<T> {
     final Field field;
 
     protected FieldWriterBigDecimalField(String name, int ordinal, long features, Field field) {

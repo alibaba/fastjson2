@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.util.InetAddressValidator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-final class EmailValidator implements FormatValidator {
+final class EmailValidator
+        implements FormatValidator {
     private static final String SPECIAL_CHARS = "\\p{Cntrl}\\(\\)<>@,;:'\\\\\\\"\\.\\[\\]";
     private static final String VALID_CHARS = "(\\\\.)|[^\\s" + SPECIAL_CHARS + "]";
     private static final String QUOTED_USER = "(\"[^\"]*\")";

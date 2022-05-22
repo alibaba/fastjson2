@@ -9,7 +9,8 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 
-public class Fastjson1xReaderModule implements ObjectReaderModule {
+public class Fastjson1xReaderModule
+        implements ObjectReaderModule {
     final ObjectReaderProvider provider;
 
     public Fastjson1xReaderModule(ObjectReaderProvider provider) {
@@ -24,7 +25,8 @@ public class Fastjson1xReaderModule implements ObjectReaderModule {
         return null;
     }
 
-    static class JSONImpl implements ObjectReader {
+    static class JSONImpl
+            implements ObjectReader {
         @Override
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.isObject()) {

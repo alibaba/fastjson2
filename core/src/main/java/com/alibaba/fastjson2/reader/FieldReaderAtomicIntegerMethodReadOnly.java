@@ -7,7 +7,9 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class FieldReaderAtomicIntegerMethodReadOnly<T> extends FieldReaderImpl<T> implements FieldReaderReadOnly<T> {
+class FieldReaderAtomicIntegerMethodReadOnly<T>
+        extends FieldReaderImpl<T>
+        implements FieldReaderReadOnly<T> {
     final Method method;
 
     FieldReaderAtomicIntegerMethodReadOnly(String fieldName, Class fieldType, int ordinal, JSONSchema jsonSchema, Method method) {

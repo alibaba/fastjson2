@@ -14,7 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.*;
 
-public class ObjectWriterCreatorLambda extends ObjectWriterCreator {
+public class ObjectWriterCreatorLambda
+        extends ObjectWriterCreator {
     public static ObjectWriterCreatorLambda INSTANCE = new ObjectWriterCreatorLambda();
 
     static boolean isExternalClass(Class<?> clazz) {

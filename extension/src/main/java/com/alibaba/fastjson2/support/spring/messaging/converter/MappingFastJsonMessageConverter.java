@@ -17,7 +17,8 @@ import java.nio.charset.Charset;
  * @see AbstractMessageConverter
  * @since 2.0.2
  */
-public class MappingFastJsonMessageConverter extends AbstractMessageConverter {
+public class MappingFastJsonMessageConverter
+        extends AbstractMessageConverter {
     /**
      * with fastJson config
      */

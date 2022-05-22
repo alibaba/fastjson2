@@ -11,7 +11,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class ObjectReaderAdapter<T> extends ObjectReaderBean<T> {
+public class ObjectReaderAdapter<T>
+        extends ObjectReaderBean<T> {
     final protected String typeKey;
     final protected long typeKeyHashCode;
     final long features;

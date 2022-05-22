@@ -18,7 +18,8 @@ import java.util.UUID;
 import static com.alibaba.fastjson2.util.UUIDUtils.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
-class JSONReaderUTF8 extends JSONReader {
+class JSONReaderUTF8
+        extends JSONReader {
     protected final byte[] bytes;
     protected final int length;
     protected final int end;

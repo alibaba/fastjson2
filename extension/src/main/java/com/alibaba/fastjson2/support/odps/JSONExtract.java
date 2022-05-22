@@ -13,7 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-public class JSONExtract extends UDF {
+public class JSONExtract
+        extends UDF {
     static final byte[] BYTES_TRUE = new byte[]{'"', 't', 'r', 'u', 'e', '"'};
     static final byte[] BYTES_FALSE = new byte[]{'"', 'f', 'a', 'l', 's', 'e', '"'};
     private static JSONWritable[] cache = new JSONWritable[512];
@@ -51,7 +52,8 @@ public class JSONExtract extends UDF {
         return text;
     }
 
-    class ExtractValueConsumer implements ValueConsumer {
+    class ExtractValueConsumer
+            implements ValueConsumer {
         @Override
         public void accept(byte[] bytes, int off, int len) {
             text.bytes = bytes;

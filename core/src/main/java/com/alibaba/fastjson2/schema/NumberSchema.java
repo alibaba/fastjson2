@@ -6,7 +6,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
-final class NumberSchema extends JSONSchema {
+final class NumberSchema
+        extends JSONSchema {
     final BigDecimal minimum;
     final long minimumLongValue;
     final boolean exclusiveMinimum;

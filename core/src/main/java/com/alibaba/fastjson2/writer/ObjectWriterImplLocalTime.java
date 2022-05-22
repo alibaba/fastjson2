@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 import java.time.LocalTime;
 
-final class ObjectWriterImplLocalTime extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplLocalTime
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplLocalTime INSTANCE = new ObjectWriterImplLocalTime();
 
     @Override

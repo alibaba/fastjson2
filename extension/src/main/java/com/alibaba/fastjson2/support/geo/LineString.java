@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.annotation.JSONType;
  * @since 1.2.68
  */
 @JSONType(typeName = "LineString", orders = {"type", "bbox", "coordinates"})
-public class LineString extends Geometry {
+public class LineString
+        extends Geometry {
     private double[][] coordinates;
 
     public LineString() {

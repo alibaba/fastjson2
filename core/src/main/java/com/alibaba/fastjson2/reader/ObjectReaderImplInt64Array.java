@@ -8,7 +8,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-final class ObjectReaderImplInt64Array extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectReaderImplInt64Array
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplInt64Array INSTANCE = new ObjectReaderImplInt64Array();
 
     @Override

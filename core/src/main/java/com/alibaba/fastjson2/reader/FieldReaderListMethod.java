@@ -7,7 +7,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-final class FieldReaderListMethod<T> extends FieldReaderObjectMethod<T>
+final class FieldReaderListMethod<T>
+        extends FieldReaderObjectMethod<T>
         implements FieldReaderList<T, Object> {
     final Type itemType;
     final Class itemClass;

@@ -7,7 +7,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.UUID;
 
-final class JSONWriterPretty extends JSONWriter {
+final class JSONWriterPretty
+        extends JSONWriter {
     final JSONWriter jsonWriter;
     int indent;
     int startObjectOff;

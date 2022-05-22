@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
-public class JSONException extends RuntimeException {
+public class JSONException
+        extends RuntimeException {
     public JSONException(String message) {
         super(message);
     }

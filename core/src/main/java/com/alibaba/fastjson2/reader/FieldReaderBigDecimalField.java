@@ -8,7 +8,8 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
-final class FieldReaderBigDecimalField<T> extends FieldReaderObjectField<T> {
+final class FieldReaderBigDecimalField<T>
+        extends FieldReaderObjectField<T> {
     FieldReaderBigDecimalField(String fieldName, Class fieldType, int ordinal, long features, String format, BigDecimal defaultValue, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
     }

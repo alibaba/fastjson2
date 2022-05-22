@@ -9,7 +9,9 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-final class FieldReaderObjectFunc<T, V> extends FieldReaderImpl<T> implements FieldReaderObject<T, V> {
+final class FieldReaderObjectFunc<T, V>
+        extends FieldReaderImpl<T>
+        implements FieldReaderObject<T, V> {
     final Method method;
     final BiConsumer<T, V> function;
     protected ObjectReader fieldObjectReader;

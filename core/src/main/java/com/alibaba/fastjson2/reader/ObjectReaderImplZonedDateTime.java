@@ -7,7 +7,8 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-class ObjectReaderImplZonedDateTime extends DateTimeCodec implements ObjectReader {
+class ObjectReaderImplZonedDateTime
+        extends DateTimeCodec implements ObjectReader {
     static final ObjectReaderImplZonedDateTime INSTANCE = new ObjectReaderImplZonedDateTime(null, null);
 
     public static ObjectReaderImplZonedDateTime of(String format, Locale locale) {

@@ -21,7 +21,8 @@ import java.util.zip.GZIPOutputStream;
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
 import static java.time.temporal.ChronoField.YEAR;
 
-public interface FieldWriter<T> extends Comparable {
+public interface FieldWriter<T>
+        extends Comparable {
     String getFieldName();
 
     Class getFieldClass();

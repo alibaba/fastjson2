@@ -16,7 +16,8 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
-public class ObjectWriterAdapter<T> implements ObjectWriter<T> {
+public class ObjectWriterAdapter<T>
+        implements ObjectWriter<T> {
     PropertyPreFilter propertyPreFilter;
     PropertyFilter propertyFilter;
     NameFilter nameFilter;

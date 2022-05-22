@@ -3,7 +3,8 @@ package com.alibaba.fastjson2.benchmark.eishay.vo;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public class MediaContent implements java.io.Serializable {
+public class MediaContent
+        implements java.io.Serializable {
     public Media media;
     public List<Image> images;
 

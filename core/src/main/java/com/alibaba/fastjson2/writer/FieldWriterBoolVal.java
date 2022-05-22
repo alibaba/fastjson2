@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;
 
-abstract class FieldWriterBoolVal extends FieldWriterBoolean {
+abstract class FieldWriterBoolVal
+        extends FieldWriterBoolean {
     FieldWriterBoolVal(String name, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
         super(name, ordinal, features, format, fieldType, fieldClass);
     }

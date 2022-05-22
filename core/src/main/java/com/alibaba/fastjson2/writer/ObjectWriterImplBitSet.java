@@ -4,9 +4,9 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;
 import java.util.BitSet;
-import java.util.Locale;
 
-final class ObjectWriterImplBitSet extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplBitSet
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplBitSet INSTANCE = new ObjectWriterImplBitSet();
 
     @Override

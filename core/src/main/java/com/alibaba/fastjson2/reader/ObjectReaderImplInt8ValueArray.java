@@ -8,7 +8,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-class ObjectReaderImplInt8ValueArray extends ObjectReaderBaseModule.PrimitiveImpl {
+class ObjectReaderImplInt8ValueArray
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplInt8ValueArray INSTANCE = new ObjectReaderImplInt8ValueArray(null);
 
     final String format;

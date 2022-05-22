@@ -48,7 +48,8 @@ public class Fastjson1xSupport {
         };
     }
 
-    static class ObjectCreatorUF implements Function {
+    static class ObjectCreatorUF
+            implements Function {
         final Class objectClass;
         final Field map;
         final long mapOffset;

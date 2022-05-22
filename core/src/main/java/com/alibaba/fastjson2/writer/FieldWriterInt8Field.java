@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONException;
 
 import java.lang.reflect.Field;
 
-final class FieldWriterInt8Field<T> extends FieldWriterInt8<T> {
+final class FieldWriterInt8Field<T>
+        extends FieldWriterInt8<T> {
     final Field field;
 
     FieldWriterInt8Field(String name, int ordinal, Field field) {

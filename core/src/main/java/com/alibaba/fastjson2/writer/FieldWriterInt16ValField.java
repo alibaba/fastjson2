@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
 
-final class FieldWriterInt16ValField<T> extends FieldWriterInt16<T> {
+final class FieldWriterInt16ValField<T>
+        extends FieldWriterInt16<T> {
     final Field field;
 
     FieldWriterInt16ValField(String name, int ordinal, Field field) {

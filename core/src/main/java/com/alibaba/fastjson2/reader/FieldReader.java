@@ -11,7 +11,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
 
-public interface FieldReader<T> extends Comparable<FieldReader> {
+public interface FieldReader<T>
+        extends Comparable<FieldReader> {
     Type getFieldType();
 
     default Class getFieldClass() {

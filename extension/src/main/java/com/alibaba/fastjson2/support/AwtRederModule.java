@@ -13,7 +13,8 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.reader.ObjectReaders.createObjectReader;
 import static com.alibaba.fastjson2.reader.ObjectReaders.fieldReader;
 
-public class AwtRederModule implements ObjectReaderModule {
+public class AwtRederModule
+        implements ObjectReaderModule {
     static final long HASH_X = Fnv.hashCode64("x");
     static final long HASH_Y = Fnv.hashCode64("y");
     static final long HASH_NAME = Fnv.hashCode64("name");
@@ -58,7 +59,8 @@ public class AwtRederModule implements ObjectReaderModule {
         return null;
     }
 
-    static class ColorCreator implements Function<Map<Long, Object>, Color> {
+    static class ColorCreator
+            implements Function<Map<Long, Object>, Color> {
         static final long HASH_RGB = Fnv.hashCode64("rgb");
         static final long HASH_R = Fnv.hashCode64("r");
         static final long HASH_G = Fnv.hashCode64("g");

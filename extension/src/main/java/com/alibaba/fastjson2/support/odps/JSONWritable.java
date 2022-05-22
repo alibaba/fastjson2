@@ -8,7 +8,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public class JSONWritable implements Writable {
+public class JSONWritable
+        implements Writable {
     private static final byte[] EMPTY_BYTES = new byte[0];
 
     byte[] bytes;

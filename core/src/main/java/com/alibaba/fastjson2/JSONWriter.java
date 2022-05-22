@@ -24,7 +24,8 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 
-public abstract class JSONWriter implements Closeable {
+public abstract class JSONWriter
+        implements Closeable {
     protected final Context context;
     protected final Charset charset;
     protected final boolean utf8;

@@ -7,7 +7,8 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.util.Currency;
 
-final class ObjectReaderImplCurrency extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectReaderImplCurrency
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplCurrency INSTANCE = new ObjectReaderImplCurrency();
 
     static final long TYPE_HASH = Fnv.hashCode64("Currency");

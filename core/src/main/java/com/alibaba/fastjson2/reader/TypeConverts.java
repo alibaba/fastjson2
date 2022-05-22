@@ -12,7 +12,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 public class TypeConverts {
-    static class ToNumber implements Function {
+    static final class ToNumber
+            implements Function {
         final Number defaultValue;
 
         ToNumber(Number defaultValue) {
@@ -37,7 +38,8 @@ public class TypeConverts {
         }
     }
 
-    static class ToByte implements Function {
+    static class ToByte
+            implements Function {
         final Byte defaultValue;
 
         ToByte(Byte defaultValue) {
@@ -62,7 +64,8 @@ public class TypeConverts {
         }
     }
 
-    static class ToShort implements Function {
+    static class ToShort
+            implements Function {
         final Short defaultValue;
 
         ToShort(Short defaultValue) {
@@ -87,7 +90,8 @@ public class TypeConverts {
         }
     }
 
-    static class ToInteger implements Function {
+    static class ToInteger
+            implements Function {
         final Integer defaultValue;
 
         ToInteger(Integer defaultValue) {
@@ -112,7 +116,8 @@ public class TypeConverts {
         }
     }
 
-    static class ToLong implements Function {
+    static class ToLong
+            implements Function {
         final Long defaultValue;
 
         ToLong(Long defaultValue) {
@@ -137,7 +142,8 @@ public class TypeConverts {
         }
     }
 
-    static class ToFloat implements Function {
+    static class ToFloat
+            implements Function {
         final Float defaultValue;
 
         ToFloat(Float defaultValue) {
@@ -162,7 +168,8 @@ public class TypeConverts {
         }
     }
 
-    static class ToDouble implements Function {
+    static class ToDouble
+            implements Function {
         final Double defaultValue;
 
         ToDouble(Double defaultValue) {
@@ -187,7 +194,8 @@ public class TypeConverts {
         }
     }
 
-    static class ToString implements Function {
+    static class ToString
+            implements Function {
         @Override
         public Object apply(Object o) {
             if (o == null) {
@@ -197,7 +205,8 @@ public class TypeConverts {
         }
     }
 
-    static class ToBigInteger implements Function {
+    static class ToBigInteger
+            implements Function {
         @Override
         public Object apply(Object o) {
             if (o == null) {
@@ -228,7 +237,8 @@ public class TypeConverts {
         }
     }
 
-    static class ToBigDecimal implements Function {
+    static class ToBigDecimal
+            implements Function {
         @Override
         public Object apply(Object o) {
             if (o == null) {
@@ -261,7 +271,8 @@ public class TypeConverts {
         }
     }
 
-    static class StringToAny implements Function {
+    static class StringToAny
+            implements Function {
         final Object defaultValue;
         final Class targetClass;
 

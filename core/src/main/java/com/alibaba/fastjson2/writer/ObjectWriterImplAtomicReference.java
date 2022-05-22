@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicReference;
 
-final class ObjectWriterImplAtomicReference extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplAtomicReference
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplAtomicReference INSTANCE = new ObjectWriterImplAtomicReference(null);
 
     final Class defineClass;

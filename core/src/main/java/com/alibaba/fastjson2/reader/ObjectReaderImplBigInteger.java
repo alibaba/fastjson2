@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.math.BigInteger;
 
-final class ObjectReaderImplBigInteger extends ObjectReaderBaseModule.PrimitiveImpl<BigInteger> {
+final class ObjectReaderImplBigInteger
+        extends ObjectReaderBaseModule.PrimitiveImpl<BigInteger> {
     static final ObjectReaderImplBigInteger INSTANCE = new ObjectReaderImplBigInteger();
 
     @Override

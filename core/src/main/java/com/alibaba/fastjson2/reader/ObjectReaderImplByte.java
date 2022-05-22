@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
-public final class ObjectReaderImplByte extends ObjectReaderBaseModule.PrimitiveImpl<Byte> {
+public final class ObjectReaderImplByte
+        extends ObjectReaderBaseModule.PrimitiveImpl<Byte> {
     static final ObjectReaderImplByte INSTANCE = new ObjectReaderImplByte();
 
     public static final long HASH_TYPE = Fnv.hashCode64("B");

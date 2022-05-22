@@ -8,7 +8,8 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-final class FieldReaderDoubleMethod<T> extends FieldReaderObjectMethod<T> {
+final class FieldReaderDoubleMethod<T>
+        extends FieldReaderObjectMethod<T> {
     FieldReaderDoubleMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Double defaultValue, JSONSchema schema, Method setter) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, setter);
     }

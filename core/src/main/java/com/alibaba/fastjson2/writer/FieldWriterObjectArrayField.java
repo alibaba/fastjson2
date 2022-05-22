@@ -7,7 +7,8 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
-final class FieldWriterObjectArrayField<T> extends FieldWriterImpl<T> {
+final class FieldWriterObjectArrayField<T>
+        extends FieldWriterImpl<T> {
     final Field field;
     final Type itemType;
     final Class itemClass;

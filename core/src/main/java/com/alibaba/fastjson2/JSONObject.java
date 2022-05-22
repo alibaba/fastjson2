@@ -22,7 +22,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class JSONObject extends LinkedHashMap<String, Object> implements InvocationHandler {
+public class JSONObject
+        extends LinkedHashMap<String, Object>
+        implements InvocationHandler {
     private static final long serialVersionUID = 1L;
 
     static ObjectReader<JSONArray> arrayReader;
@@ -1492,7 +1494,8 @@ public class JSONObject extends LinkedHashMap<String, Object> implements Invocat
     /**
      * @since 2.0.3
      */
-    static class NameConsumer implements Consumer<Method> {
+    static class NameConsumer
+            implements Consumer<Method> {
         final Annotation annotation;
         String name;
 

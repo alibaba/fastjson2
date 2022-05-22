@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.util.IOUtils;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
-abstract class FieldWriterInt32<T> extends FieldWriterImpl<T> {
+abstract class FieldWriterInt32<T>
+        extends FieldWriterImpl<T> {
     volatile byte[][] utf8ValueCache;
     volatile char[][] utf16ValueCache;
     final boolean toString;

@@ -7,7 +7,8 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Method;
 import java.util.function.ObjIntConsumer;
 
-final class FieldReaderInt32ValueFunc<T> extends FieldReaderImpl<T> {
+final class FieldReaderInt32ValueFunc<T>
+        extends FieldReaderImpl<T> {
     final Method method;
     final ObjIntConsumer<T> function;
 

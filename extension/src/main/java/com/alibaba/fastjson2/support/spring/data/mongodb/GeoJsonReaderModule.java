@@ -14,7 +14,8 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPolygon;
 
 import java.util.List;
 
-public class GeoJsonReaderModule implements ObjectReaderModule {
+public class GeoJsonReaderModule
+        implements ObjectReaderModule {
     public final static GeoJsonReaderModule INSTANCE = new GeoJsonReaderModule();
 
     @Override

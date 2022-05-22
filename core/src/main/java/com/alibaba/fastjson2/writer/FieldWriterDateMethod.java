@@ -7,7 +7,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 
-final class FieldWriterDateMethod<T> extends FieldWriterDate<T> {
+final class FieldWriterDateMethod<T>
+        extends FieldWriterDate<T> {
     final Method method;
 
     protected FieldWriterDateMethod(

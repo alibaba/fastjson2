@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-final class FieldWriterStringMethod<T> extends FieldWriterImpl<T> {
+final class FieldWriterStringMethod<T>
+        extends FieldWriterImpl<T> {
     final Method method;
     final boolean symbol;
     final boolean trim;

@@ -6,7 +6,8 @@ import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.function.Function;
 
-final class FieldWriterCalendarFunc<T> extends FieldWriterDate<T> {
+final class FieldWriterCalendarFunc<T>
+        extends FieldWriterDate<T> {
     final Method method;
     final Function<T, Calendar> function;
 

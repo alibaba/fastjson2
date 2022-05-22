@@ -9,7 +9,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-public interface FieldReaderList<T, V> extends FieldReader<T> {
+public interface FieldReaderList<T, V>
+        extends FieldReader<T> {
     @Override
     default Type getFieldType() {
         return List.class;

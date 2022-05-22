@@ -9,7 +9,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Locale;
 
-final class FieldReaderInt16Method<T> extends FieldReaderObjectMethod<T> {
+final class FieldReaderInt16Method<T>
+        extends FieldReaderObjectMethod<T> {
     FieldReaderInt16Method(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Short defaultValue, JSONSchema schema, Method setter) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter);
     }

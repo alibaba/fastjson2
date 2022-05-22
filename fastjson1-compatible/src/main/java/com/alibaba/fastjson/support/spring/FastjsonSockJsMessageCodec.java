@@ -7,7 +7,8 @@ import org.springframework.web.socket.sockjs.frame.AbstractSockJsMessageCodec;
 
 import java.io.InputStream;
 
-public class FastjsonSockJsMessageCodec extends AbstractSockJsMessageCodec {
+public class FastjsonSockJsMessageCodec
+        extends AbstractSockJsMessageCodec {
     private FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
     public FastJsonConfig getFastJsonConfig() {

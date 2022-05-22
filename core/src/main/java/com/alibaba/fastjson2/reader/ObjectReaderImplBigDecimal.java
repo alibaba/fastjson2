@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.math.BigDecimal;
 
-final class ObjectReaderImplBigDecimal extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectReaderImplBigDecimal
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplBigDecimal INSTANCE = new ObjectReaderImplBigDecimal();
 
     @Override

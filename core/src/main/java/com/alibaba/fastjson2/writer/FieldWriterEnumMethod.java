@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-final class FieldWriterEnumMethod extends FieldWriterEnum {
+final class FieldWriterEnumMethod
+        extends FieldWriterEnum {
     final Method method;
 
     protected FieldWriterEnumMethod(String name, int ordinal, long features, Class fieldType, Method method) {

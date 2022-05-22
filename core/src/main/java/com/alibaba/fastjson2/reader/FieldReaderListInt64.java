@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 
-public final class FieldReaderListInt64 implements ObjectReader {
+public final class FieldReaderListInt64
+        implements ObjectReader {
     final Class listType;
     final Class instanceType;
     final long instanceTypeHash;

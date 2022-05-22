@@ -6,10 +6,10 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.function.Function;
 
-final class ObjectReaderImplInt32ValueArray extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectReaderImplInt32ValueArray
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray();
 
     @Override

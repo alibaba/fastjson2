@@ -9,7 +9,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Locale;
 
-final class ObjectReaderImplCalendar extends DateTimeCodec implements ObjectReader {
+final class ObjectReaderImplCalendar
+        extends DateTimeCodec
+        implements ObjectReader {
     static final ObjectReaderImplCalendar INSTANCE = new ObjectReaderImplCalendar(null, null);
 
     public static ObjectReaderImplCalendar of(String format, Locale locale) {

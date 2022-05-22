@@ -22,7 +22,8 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 
-public class ObjectWriterCreatorASM extends ObjectWriterCreator {
+public class ObjectWriterCreatorASM
+        extends ObjectWriterCreator {
     public static final ObjectWriterCreatorASM INSTANCE = new ObjectWriterCreatorASM();
 
     protected static final AtomicLong seed = new AtomicLong();

@@ -3,7 +3,8 @@ package com.alibaba.fastjson2.schema;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-final class URIValidator implements FormatValidator {
+final class URIValidator
+        implements FormatValidator {
     final static URIValidator INSTANCE = new URIValidator();
 
     @Override

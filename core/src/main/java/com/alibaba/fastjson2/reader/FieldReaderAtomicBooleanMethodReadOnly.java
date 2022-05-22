@@ -8,7 +8,8 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 final class FieldReaderAtomicBooleanMethodReadOnly<T>
-        extends FieldReaderImpl<T> implements FieldReaderReadOnly<T> {
+        extends FieldReaderImpl<T>
+        implements FieldReaderReadOnly<T> {
     final Method method;
 
     FieldReaderAtomicBooleanMethodReadOnly(String fieldName, Class fieldClass, int ordinal, JSONSchema schema, Method method) {

@@ -9,7 +9,9 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 
-final class FieldReaderCollectionFieldReadOnly<T> extends FieldReaderObjectField<T> implements FieldReaderReadOnly<T> {
+final class FieldReaderCollectionFieldReadOnly<T>
+        extends FieldReaderObjectField<T>
+        implements FieldReaderReadOnly<T> {
     FieldReaderCollectionFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, null, schema, field);
     }

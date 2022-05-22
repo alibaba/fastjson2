@@ -9,7 +9,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.*;
 
-class FieldReaderObjectField<T> extends FieldReaderImpl<T> {
+class FieldReaderObjectField<T>
+        extends FieldReaderImpl<T> {
     protected final Field field;
     protected ObjectReader fieldObjectReader;
 

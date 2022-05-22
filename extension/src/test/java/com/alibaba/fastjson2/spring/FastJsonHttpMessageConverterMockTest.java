@@ -76,7 +76,8 @@ public class FastJsonHttpMessageConverterMockTest {
 
     @RestController
     @RequestMapping()
-    public static class BeanController extends AbstractController<Long, TypeVariableBean> {
+    public static class BeanController
+            extends AbstractController<Long, TypeVariableBean> {
         @PostMapping(path = "/parameterizedTypeBean", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
         public String parameterizedTypeBean(@RequestBody ParameterizedTypeBean<String> parameterizedTypeBean) {
             return parameterizedTypeBean.t;
@@ -87,7 +88,8 @@ public class FastJsonHttpMessageConverterMockTest {
     @Configuration
     @Order(Ordered.LOWEST_PRECEDENCE + 1)
     @EnableWebMvc
-    public static class WebMvcConfig implements WebMvcConfigurer {
+    public static class WebMvcConfig
+            implements WebMvcConfigurer {
         @Override
         public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
             FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
@@ -99,7 +101,8 @@ public class FastJsonHttpMessageConverterMockTest {
         public abstract ID getId();
     }
 
-    static class TypeVariableBean extends GenericEntity<Long> {
+    static class TypeVariableBean
+            extends GenericEntity<Long> {
         private Long id;
 
         @Override

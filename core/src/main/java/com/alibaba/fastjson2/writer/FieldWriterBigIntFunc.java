@@ -6,7 +6,8 @@ import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.function.Function;
 
-final class FieldWriterBigIntFunc<T> extends FieldWriterImpl<T> {
+final class FieldWriterBigIntFunc<T>
+        extends FieldWriterImpl<T> {
     final Method method;
     final Function<T, BigInteger> function;
 

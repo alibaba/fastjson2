@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.filter;
 
-public class PascalNameFilter implements NameFilter {
+public class PascalNameFilter
+        implements NameFilter {
     @Override
     public String process(Object source, String name, Object value) {
         if (name == null || name.length() == 0) {

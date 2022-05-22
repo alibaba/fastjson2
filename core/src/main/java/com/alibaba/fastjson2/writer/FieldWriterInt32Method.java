@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-final class FieldWriterInt32Method<T> extends FieldWriterInt32<T> {
+final class FieldWriterInt32Method<T>
+        extends FieldWriterInt32<T> {
     final Method method;
 
     FieldWriterInt32Method(String fieldName, int ordinal, long features, String format, Method method, Class fieldClass) {

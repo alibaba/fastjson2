@@ -9,7 +9,8 @@ import java.util.Collection;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
-public final class ObjectArrayReader extends ObjectReaderBaseModule.PrimitiveImpl {
+public final class ObjectArrayReader
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     public static final ObjectArrayReader INSTANCE = new ObjectArrayReader();
     public static final long TYPE_HASH_CODE = Fnv.hashCode64("[O");
 

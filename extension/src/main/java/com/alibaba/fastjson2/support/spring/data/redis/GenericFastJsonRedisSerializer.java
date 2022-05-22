@@ -15,7 +15,8 @@ import org.springframework.data.redis.serializer.SerializationException;
  * @see RedisSerializer
  * @since 2.0.2
  */
-public class GenericFastJsonRedisSerializer implements RedisSerializer<Object> {
+public class GenericFastJsonRedisSerializer
+        implements RedisSerializer<Object> {
     private final FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
     public GenericFastJsonRedisSerializer() {

@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-class ObjectWriterImplIterable extends ObjectWriterBaseModule.PrimitiveImpl {
+class ObjectWriterImplIterable
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplIterable INSTANCE = new ObjectWriterImplIterable();
 
     Type itemType;

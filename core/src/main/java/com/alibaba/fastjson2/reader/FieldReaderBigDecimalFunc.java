@@ -9,7 +9,8 @@ import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-final class FieldReaderBigDecimalFunc<T, V> extends FieldReaderImpl<T> {
+final class FieldReaderBigDecimalFunc<T, V>
+        extends FieldReaderImpl<T> {
     final Method method;
     final BiConsumer<T, V> function;
 

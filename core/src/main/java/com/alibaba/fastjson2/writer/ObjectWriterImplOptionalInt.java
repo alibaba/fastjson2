@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 import java.util.OptionalInt;
 
-final class ObjectWriterImplOptionalInt extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplOptionalInt
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplOptionalInt INSTANCE = new ObjectWriterImplOptionalInt();
 
     @Override

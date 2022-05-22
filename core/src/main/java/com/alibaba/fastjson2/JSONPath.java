@@ -1147,14 +1147,17 @@ public abstract class JSONPath {
         REG_MATCH
     }
 
-    static abstract class FilterSegment extends Segment implements EvalSegment {
+    static abstract class FilterSegment
+            extends Segment
+            implements EvalSegment {
         abstract boolean apply(Context context, Object object);
     }
 
     interface EvalSegment {
     }
 
-    static final class NameIntOpSegment extends NameFilter {
+    static final class NameIntOpSegment
+            extends NameFilter {
         final Operator operator;
         final long value;
 
@@ -1257,7 +1260,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class NameDecimalOpSegment extends NameFilter {
+    static final class NameDecimalOpSegment
+            extends NameFilter {
         final Operator operator;
         final BigDecimal value;
 
@@ -1312,7 +1316,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class NameRLikeSegment extends NameFilter {
+    static final class NameRLikeSegment
+            extends NameFilter {
         final Pattern pattern;
         final boolean not;
 
@@ -1336,7 +1341,9 @@ public abstract class JSONPath {
         }
     }
 
-    static final class GroupFilter extends Segment implements EvalSegment {
+    static final class GroupFilter
+            extends Segment
+            implements EvalSegment {
         final boolean and;
         final List<FilterSegment> filters;
 
@@ -1410,7 +1417,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class NameIntInSegment extends NameFilter {
+    static final class NameIntInSegment
+            extends NameFilter {
         private final long[] values;
         private final boolean not;
 
@@ -1480,7 +1488,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class NameIntBetweenSegment extends NameFilter {
+    static final class NameIntBetweenSegment
+            extends NameFilter {
         private final long begin;
         private final long end;
         private final boolean not;
@@ -1548,7 +1557,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class TypeFunction implements Function {
+    static final class TypeFunction
+            implements Function {
         static final TypeFunction INSTANCE = new TypeFunction();
 
         @Override
@@ -1557,7 +1567,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class SizeFunction implements Function {
+    static final class SizeFunction
+            implements Function {
         static final SizeFunction INSTANCE = new SizeFunction();
 
         @Override
@@ -1582,7 +1593,8 @@ public abstract class JSONPath {
         }
     }
 
-    static abstract class NameFilter extends FilterSegment {
+    static abstract class NameFilter
+            extends FilterSegment {
         final String fieldName;
         final long fieldNameNameHash;
         final Function function;
@@ -1712,7 +1724,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class NameStringOpSegment extends NameFilter {
+    static final class NameStringOpSegment
+            extends NameFilter {
         final Operator operator;
         final String value;
 
@@ -1754,7 +1767,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class NameArrayOpSegment extends NameFilter {
+    static final class NameArrayOpSegment
+            extends NameFilter {
         final Operator operator;
         final JSONArray array;
 
@@ -1775,7 +1789,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class NameObjectOpSegment extends NameFilter {
+    static final class NameObjectOpSegment
+            extends NameFilter {
         final Operator operator;
         final JSONObject object;
 
@@ -1796,7 +1811,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class NameStringInSegment extends NameFilter {
+    static final class NameStringInSegment
+            extends NameFilter {
         private final String[] values;
         private final boolean not;
 
@@ -1820,7 +1836,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class NameMatchFilter extends NameFilter {
+    static final class NameMatchFilter
+            extends NameFilter {
         final String startsWithValue;
         final String endsWithValue;
         final String[] containsValues;
@@ -1897,7 +1914,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class NameExistsFilter extends FilterSegment {
+    static final class NameExistsFilter
+            extends FilterSegment {
         final String name;
         final long nameHashCode;
 
@@ -1945,7 +1963,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class PreviousPath extends JSONPath {
+    static final class PreviousPath
+            extends JSONPath {
         static final PreviousPath INSTANCE = new PreviousPath("#-1");
 
         PreviousPath(String path) {
@@ -2008,7 +2027,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class SingleNamePath extends JSONPath {
+    static final class SingleNamePath
+            extends JSONPath {
         final long nameHashCode;
         final String name;
 
@@ -2594,7 +2614,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class SingleSegmentPath extends JSONPath {
+    static final class SingleSegmentPath
+            extends JSONPath {
         final Segment segment;
         final boolean ref;
 
@@ -2674,7 +2695,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class MultiSegmentPath extends JSONPath {
+    static final class MultiSegmentPath
+            extends JSONPath {
         final List<Segment> segments;
         final boolean ref;
 
@@ -2951,7 +2973,9 @@ public abstract class JSONPath {
         }
     }
 
-    static final class KeysSegment extends Segment implements EvalSegment {
+    static final class KeysSegment
+            extends Segment
+            implements EvalSegment {
         static final KeysSegment INSTANCE = new KeysSegment();
 
         @Override
@@ -2982,7 +3006,9 @@ public abstract class JSONPath {
         }
     }
 
-    static final class LengthSegment extends Segment implements EvalSegment {
+    static final class LengthSegment
+            extends Segment
+            implements EvalSegment {
         static final LengthSegment INSTANCE = new LengthSegment();
 
         @Override
@@ -3016,7 +3042,9 @@ public abstract class JSONPath {
         }
     }
 
-    static final class FloorSegment extends Segment implements EvalSegment {
+    static final class FloorSegment
+            extends Segment
+            implements EvalSegment {
         static final FloorSegment INSTANCE = new FloorSegment();
 
         @Override
@@ -3059,7 +3087,9 @@ public abstract class JSONPath {
         }
     }
 
-    static final class TypeSegment extends Segment implements EvalSegment {
+    static final class TypeSegment
+            extends Segment
+            implements EvalSegment {
         static final TypeSegment INSTANCE = new TypeSegment();
 
         @Override
@@ -3107,7 +3137,9 @@ public abstract class JSONPath {
         return "object";
     }
 
-    static final class MinSegment extends Segment implements EvalSegment {
+    static final class MinSegment
+            extends Segment
+            implements EvalSegment {
         static final MinSegment INSTANCE = new MinSegment();
 
         @Override
@@ -3160,7 +3192,9 @@ public abstract class JSONPath {
         }
     }
 
-    static final class MaxSegment extends Segment implements EvalSegment {
+    static final class MaxSegment
+            extends Segment
+            implements EvalSegment {
         static final MaxSegment INSTANCE = new MaxSegment();
 
         @Override
@@ -3213,7 +3247,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class NameSegment extends Segment {
+    static final class NameSegment
+            extends Segment {
         static final long HASH_NAME = Fnv.hashCode64("name");
         static final long HASH_ORDINAL = Fnv.hashCode64("ordinal");
 
@@ -3730,7 +3765,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class CycleNameSegment extends Segment {
+    static final class CycleNameSegment
+            extends Segment {
         final String name;
         final long nameHashCode;
 
@@ -3801,7 +3837,8 @@ public abstract class JSONPath {
             action.accept(object);
         }
 
-        class MapLoop implements BiConsumer, Consumer {
+        class MapLoop
+                implements BiConsumer, Consumer {
             final Context context;
             final List values;
 
@@ -4111,7 +4148,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class IndexSegment extends Segment {
+    static final class IndexSegment
+            extends Segment {
         static final IndexSegment ZERO = new IndexSegment(0);
         static final IndexSegment ONE = new IndexSegment(1);
         static final IndexSegment TWO = new IndexSegment(2);
@@ -4591,7 +4629,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class RandomIndexSegment extends Segment {
+    static final class RandomIndexSegment
+            extends Segment {
         public static final RandomIndexSegment INSTANCE = new RandomIndexSegment();
 
         Random random = new Random();
@@ -4713,7 +4752,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class RangeIndexSegment extends Segment {
+    static final class RangeIndexSegment
+            extends Segment {
         final int begin;
         final int end;
 
@@ -4937,7 +4977,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class MultiIndexSegment extends Segment {
+    static final class MultiIndexSegment
+            extends Segment {
         final int[] indexes;
 
         public MultiIndexSegment(int[] indexes) {
@@ -5072,7 +5113,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class MultiNameSegment extends Segment {
+    static final class MultiNameSegment
+            extends Segment {
         final String[] names;
         final long[] nameHashCodes;
         final Set<String> nameSet;
@@ -5171,7 +5213,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class AllSegment extends Segment {
+    static final class AllSegment
+            extends Segment {
         static final AllSegment INSTANCE = new AllSegment();
 
         public AllSegment() {

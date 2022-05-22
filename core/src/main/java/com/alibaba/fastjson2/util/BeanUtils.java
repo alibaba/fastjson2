@@ -1266,7 +1266,8 @@ public abstract class BeanUtils {
         checkArgument(!(type instanceof Class<?>) || !((Class<?>) type).isPrimitive());
     }
 
-    private static final class ParameterizedTypeImpl implements ParameterizedType, Serializable {
+    private static final class ParameterizedTypeImpl
+            implements ParameterizedType, Serializable {
         private final Type ownerType;
         private final Type rawType;
         private final Type[] typeArguments;
@@ -1336,7 +1337,8 @@ public abstract class BeanUtils {
         private static final long serialVersionUID = 0;
     }
 
-    public static final class GenericArrayTypeImpl implements GenericArrayType, Serializable {
+    public static final class GenericArrayTypeImpl
+            implements GenericArrayType, Serializable {
         private final Type componentType;
 
         public GenericArrayTypeImpl(Type componentType) {
@@ -1372,7 +1374,8 @@ public abstract class BeanUtils {
      * lower bounds. We only support what the Java 6 language needs - at most one
      * bound. If a lower bound is set, the upper bound must be Object.class.
      */
-    private static final class WildcardTypeImpl implements WildcardType, Serializable {
+    private static final class WildcardTypeImpl
+            implements WildcardType, Serializable {
         private final Type upperBound;
         private final Type lowerBound;
 

@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.function.ObjCharConsumer;
 
 import java.lang.reflect.Method;
 
-final class FieldReaderCharValueFunc<T> extends FieldReaderImpl<T> {
+final class FieldReaderCharValueFunc<T>
+        extends FieldReaderImpl<T> {
     final Method method;
     final ObjCharConsumer<T> function;
 

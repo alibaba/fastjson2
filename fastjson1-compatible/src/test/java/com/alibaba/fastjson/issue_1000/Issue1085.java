@@ -25,6 +25,7 @@ public class Issue1085 {
         }
     }
 
-    public static class Model extends AbstractModel {
+    public static class Model
+            extends AbstractModel {
     }
 }

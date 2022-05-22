@@ -8,7 +8,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 
-final class FieldWriterListMethod<T> extends FieldWriterList<T> {
+final class FieldWriterListMethod<T>
+        extends FieldWriterList<T> {
     final Method method;
 
     protected FieldWriterListMethod(

@@ -11,7 +11,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Optional;
 
-public interface FieldReaderObject<T, V> extends FieldReader<T> {
+public interface FieldReaderObject<T, V>
+        extends FieldReader<T> {
     ObjectReader<V> getFieldObjectReader(JSONReader.Context context);
 
     @Override

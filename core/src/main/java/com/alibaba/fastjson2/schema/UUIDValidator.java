@@ -2,7 +2,8 @@ package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.util.UUIDUtils;
 
-final class UUIDValidator implements FormatValidator {
+final class UUIDValidator
+        implements FormatValidator {
     final static UUIDValidator INSTANCE = new UUIDValidator();
 
     @Override

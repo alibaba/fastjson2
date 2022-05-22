@@ -15,7 +15,8 @@ import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
-public final class ObjectReaderImplMap implements ObjectReader {
+public final class ObjectReaderImplMap
+        implements ObjectReader {
     static final Class CLASS_SINGLETON_MAP = Collections.singletonMap(1, 1).getClass();
     static final Class CLASS_EMPTY_MAP = Collections.EMPTY_MAP.getClass();
     static final Class CLASS_EMPTY_SORTED_MAP = Collections.emptySortedMap().getClass();

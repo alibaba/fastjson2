@@ -7,7 +7,8 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Type;
 import java.util.function.BiConsumer;
 
-final class FieldReaderObjectFunc2<T, U> implements FieldReaderObject<T, U> {
+final class FieldReaderObjectFunc2<T, U>
+        implements FieldReaderObject<T, U> {
     final ObjectReader<U> fieldObjectReader;
     final BiConsumer<T, U> function;
     final Type fieldType;

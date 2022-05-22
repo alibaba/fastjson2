@@ -8,7 +8,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-class ObjectReaderImplInt16Array extends ObjectReaderBaseModule.PrimitiveImpl {
+class ObjectReaderImplInt16Array
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplInt16Array INSTANCE = new ObjectReaderImplInt16Array();
 
     public Object createInstance(Collection collection) {

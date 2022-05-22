@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.util.Arrays;
 
-final class ObjectReaderImplCharValueArray extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectReaderImplCharValueArray
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplCharValueArray INSTANCE = new ObjectReaderImplCharValueArray();
 
     @Override

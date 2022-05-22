@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
-class FieldWriterObjectField<T> extends FieldWriterObject<T> {
+class FieldWriterObjectField<T>
+        extends FieldWriterObject<T> {
     final Field field;
 
     protected FieldWriterObjectField(

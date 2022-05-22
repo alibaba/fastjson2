@@ -8,7 +8,8 @@ import com.aliyun.odps.udf.UDF;
 
 import java.nio.charset.StandardCharsets;
 
-public class JSONExtractInt32 extends UDF {
+public class JSONExtractInt32
+        extends UDF {
     private final JSONPath path;
     private final IntWritable result = new IntWritable();
 

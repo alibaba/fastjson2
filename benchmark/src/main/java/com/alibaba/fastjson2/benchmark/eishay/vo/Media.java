@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public class Media implements java.io.Serializable {
+public class Media
+        implements java.io.Serializable {
     public enum Player {
         JAVA, FLASH
     }

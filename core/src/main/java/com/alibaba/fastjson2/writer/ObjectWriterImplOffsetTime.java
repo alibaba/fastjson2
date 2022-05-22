@@ -6,7 +6,8 @@ import java.lang.reflect.Type;
 import java.time.OffsetTime;
 import java.time.temporal.ChronoField;
 
-final class ObjectWriterImplOffsetTime extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplOffsetTime
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplOffsetTime INSTANCE = new ObjectWriterImplOffsetTime();
 
     @Override

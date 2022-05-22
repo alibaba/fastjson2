@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;
 
-final class ObjectWriterImplInt64 extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplInt64
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplInt64 INSTANCE = new ObjectWriterImplInt64(null);
 
     final Class defineClass;

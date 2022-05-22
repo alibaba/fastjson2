@@ -517,7 +517,8 @@ final class SymbolTable {
      *
      * @author Eric Bruneton
      */
-    private static class Entry extends Symbol {
+    private static class Entry
+            extends Symbol {
         /**
          * The hash code of this entry.
          */

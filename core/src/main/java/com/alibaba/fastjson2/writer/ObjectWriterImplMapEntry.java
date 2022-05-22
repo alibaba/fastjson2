@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-final class ObjectWriterImplMapEntry extends ObjectWriterBaseModule.PrimitiveImpl {
+final class ObjectWriterImplMapEntry
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplMapEntry INSTANCE = new ObjectWriterImplMapEntry();
 
     @Override

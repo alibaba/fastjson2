@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.util.IOUtils;
 
 import java.util.Arrays;
 
-abstract class FieldWriterInt8<T> extends FieldWriterImpl<T> {
+abstract class FieldWriterInt8<T>
+        extends FieldWriterImpl<T> {
     final byte[][] utf8ValueCache = new byte[256][];
     final char[][] utf16ValueCache = new char[256][];
 

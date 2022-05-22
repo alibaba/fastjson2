@@ -8,7 +8,8 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-final class IntegerSchema extends JSONSchema {
+final class IntegerSchema
+        extends JSONSchema {
     final boolean typed;
     final long minimum;
     final boolean exclusiveMinimum;

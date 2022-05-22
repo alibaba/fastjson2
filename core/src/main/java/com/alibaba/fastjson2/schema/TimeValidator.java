@@ -3,7 +3,8 @@ package com.alibaba.fastjson2.schema;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
-final class TimeValidator implements FormatValidator {
+final class TimeValidator
+        implements FormatValidator {
     final static TimeValidator INSTANCE = new TimeValidator();
 
     @Override

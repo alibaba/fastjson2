@@ -58,7 +58,8 @@ public class JdbcSupport {
         return new TimestampWriter(format);
     }
 
-    static class TimeReader extends ObjectReaderImplDate {
+    static class TimeReader
+            extends ObjectReaderImplDate {
         static final TimeReader INSTANCE = new TimeReader(null, null);
 
         public TimeReader(String format, Locale locale) {
@@ -139,7 +140,9 @@ public class JdbcSupport {
         }
     }
 
-    static class TimeWriter extends DateTimeCodec implements ObjectWriter {
+    static class TimeWriter
+            extends DateTimeCodec
+            implements ObjectWriter {
         public static TimeWriter INSTANCE = new TimeWriter(null);
 
         public TimeWriter(String format) {
@@ -213,7 +216,9 @@ public class JdbcSupport {
         }
     }
 
-    static class TimestampWriter extends DateTimeCodec implements ObjectWriter {
+    static class TimestampWriter
+            extends DateTimeCodec
+            implements ObjectWriter {
         static final TimestampWriter INSTANCE = new TimestampWriter(null);
 
         public TimestampWriter(String format) {
@@ -311,7 +316,8 @@ public class JdbcSupport {
         }
     }
 
-    static class TimestampReader extends ObjectReaderImplDate {
+    static class TimestampReader
+            extends ObjectReaderImplDate {
         public static TimestampReader INSTANCE = new TimestampReader(null, null);
 
         public TimestampReader(String format, Locale locale) {
@@ -391,7 +397,8 @@ public class JdbcSupport {
         }
     }
 
-    static class DateReader extends ObjectReaderImplDate {
+    static class DateReader
+            extends ObjectReaderImplDate {
         public static DateReader INSTANCE = new DateReader(null, null);
 
         public DateReader(String format, Locale locale) {

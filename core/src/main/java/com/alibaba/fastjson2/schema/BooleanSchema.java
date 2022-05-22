@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONObject;
 
 import java.util.Objects;
 
-final class BooleanSchema extends JSONSchema {
+final class BooleanSchema
+        extends JSONSchema {
     BooleanSchema(JSONObject input) {
         super(input);
     }

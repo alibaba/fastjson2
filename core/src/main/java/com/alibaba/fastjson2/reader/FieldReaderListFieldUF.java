@@ -10,7 +10,8 @@ import java.util.Locale;
 
 import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
 
-final class FieldReaderListFieldUF<T> extends FieldReaderListField<T> {
+final class FieldReaderListFieldUF<T>
+        extends FieldReaderListField<T> {
     final long fieldOffset;
 
     FieldReaderListFieldUF(

@@ -9,7 +9,8 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 @JSONType(deserializeFeatures = JSONReader.Feature.SupportAutoType, typeName = "java.lang.reflect.ParameterizedType")
-public class ParameterizedTypeImpl implements ParameterizedType {
+public class ParameterizedTypeImpl
+        implements ParameterizedType {
     private final Type[] actualTypeArguments;
     private final Type ownerType;
     private final Type rawType;

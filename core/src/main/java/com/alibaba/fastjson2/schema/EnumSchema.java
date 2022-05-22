@@ -5,7 +5,8 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-final class EnumSchema extends JSONSchema {
+final class EnumSchema
+        extends JSONSchema {
     Set<Object> items;
 
     EnumSchema(Object[] items) {

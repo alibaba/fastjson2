@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-final class ObjectReaderImplClass extends ObjectReaderBaseModule.PrimitiveImpl {
+final class ObjectReaderImplClass
+        extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplClass INSTANCE = new ObjectReaderImplClass();
     static final long TYPE_HASH = Fnv.hashCode64("java.lang.Class");
 

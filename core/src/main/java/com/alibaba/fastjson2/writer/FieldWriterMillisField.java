@@ -5,7 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
 
-final class FieldWriterMillisField<T> extends FieldWriterDate<T> {
+final class FieldWriterMillisField<T>
+        extends FieldWriterDate<T> {
     final Field field;
 
     FieldWriterMillisField(String fieldName

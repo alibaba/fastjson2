@@ -14,7 +14,8 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
 import static java.time.temporal.ChronoField.YEAR;
 
-abstract class FieldWriterDate<T> extends FieldWriterImpl<T> {
+abstract class FieldWriterDate<T>
+        extends FieldWriterImpl<T> {
     volatile byte[] cacheFormat19UTF8;
     static AtomicReferenceFieldUpdater<FieldWriterDate, byte[]> CACHE_UTF8_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(FieldWriterDate.class, byte[].class, "cacheFormat19UTF8");
