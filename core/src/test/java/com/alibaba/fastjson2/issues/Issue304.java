@@ -42,6 +42,7 @@ public class Issue304 {
         assertEquals("[{\"item\":{\"name\":\"testtt\"},\"name\":\"test\"},{\"item\":{\"$ref\":\"$[0].item\"},\"name\":\"test\"},{\"item\":{\"$ref\":\"$[0].item\"},\"name\":\"test\"},{\"item\":{\"$ref\":\"$[0].item\"},\"name\":\"test\"}]", result);
     }
 
+    @Test
     public void testRead() {
         List<Bean> list2 = JSON.parseArray(result, Bean.class);
         assertSame(list2.get(0).item, list2.get(1).item);
@@ -49,7 +50,13 @@ public class Issue304 {
 
     @Test
     public void readPrivate() {
-        List<Bean1> list3 = JSON.parseArray(result, Bean1.class);
+        List<Bean1> list3 = JSON.parseArray(result, (Type) Bean1.class);
+        assertSame(list3.get(0).item, list3.get(1).item);
+    }
+
+    @Test
+    public void readUTF8Type() {
+        List<Bean> list3 = JSON.parseArray(result.getBytes(StandardCharsets.UTF_8), (Type) Bean.class);
         assertSame(list3.get(0).item, list3.get(1).item);
     }
 
