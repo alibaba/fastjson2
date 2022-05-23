@@ -4182,115 +4182,6 @@ public abstract class JSONPath {
                 return;
             }
 
-            if (context.parent != null && context.parent.current instanceof AllSegment) {
-                List<Object> result = new JSONArray();
-                List allItems = (List) object;
-                for (Object singleItem : allItems) {
-                    if (singleItem instanceof java.util.List) {
-                        List list = (List) singleItem;
-                        if (index >= 0) {
-                            if (index < list.size()) {
-                                result.add(list.get(index));
-                            }
-                        } else {
-                            int itemIndex = list.size() + this.index;
-                            if (itemIndex >= 0) {
-                                result.add(list.get(itemIndex));
-                            }
-                        }
-                    }
-
-                    if ((singleItem instanceof SortedSet || singleItem instanceof LinkedHashSet)
-                            || (index == 0 && singleItem instanceof Collection && ((Collection<?>) singleItem).size() == 1)
-                    ) {
-                        Collection collection = (Collection) singleItem;
-                        int i = 0;
-                        for (Iterator it = collection.iterator(); it.hasNext(); ++i) {
-                            Object item = it.next();
-                            if (i == index) {
-                                result.add(item);
-                                break;
-                            }
-                        }
-                    }
-
-                    if (singleItem instanceof Object[]) {
-                        Object[] array = (Object[]) singleItem;
-                        if (index >= 0) {
-                            if (index < array.length) {
-                                result.add(array[index]);
-                            }
-                        } else {
-                            int itemIndex = array.length + this.index;
-                            if (itemIndex >= 0) {
-                                result.add(array[itemIndex]);
-                            }
-                        }
-                    }
-
-                    Class objectClass = singleItem.getClass();
-                    if (objectClass.isArray()) {
-                        int length = Array.getLength(singleItem);
-                        if (index >= 0) {
-                            if (index < length) {
-                                result.add(Array.get(singleItem, index));
-                            }
-                        } else {
-                            int itemIndex = length + this.index;
-                            if (itemIndex >= 0) {
-                                result.add(Array.get(singleItem, itemIndex));
-                            }
-                        }
-                    }
-
-                    if (Map.class.isAssignableFrom(objectClass)) {
-                        Map map = (Map) singleItem;
-                        Object value = map.get(index);
-                        if (value == null) {
-                            value = map.get(Integer.toString(index));
-                        }
-
-                        if (value == null) {
-                            int size = map.size();
-                            Iterator it = map.entrySet().iterator();
-                            if (size == 1 || map instanceof LinkedHashMap || map instanceof SortedMap) {
-                                for (int i = 0; i <= index && i < size && it.hasNext(); ++i) {
-                                    Map.Entry entry = (Map.Entry) it.next();
-                                    Object entryKey = entry.getKey();
-                                    Object entryValue = entry.getValue();
-                                    if (entryKey instanceof Long) {
-                                        if (entryKey.equals((long) index)) {
-                                            value = entryValue;
-                                            break;
-                                        }
-                                    } else {
-                                        if (i == index) {
-                                            value = entryValue;
-                                        }
-                                    }
-                                }
-                            } else {
-                                for (int i = 0; i <= index && i < map.size() && it.hasNext(); ++i) {
-                                    Map.Entry entry = (Map.Entry) it.next();
-                                    Object entryKey = entry.getKey();
-                                    Object entryValue = entry.getValue();
-                                    if (entryKey instanceof Long) {
-                                        if (entryKey.equals(Long.valueOf(index))) {
-                                            value = entryValue;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        result.add(value);
-                    }
-                }
-                context.value = result;
-                context.eval = true;
-                return;
-            }
-
             if (object instanceof java.util.List) {
                 List list = (List) object;
                 if (index >= 0) {
@@ -4622,8 +4513,7 @@ public abstract class JSONPath {
         public void accept(JSONReader jsonReader, Context context) {
             if (context.parent != null
                     && (context.parent.eval
-                    || (context.parent.current instanceof CycleNameSegment && context.next == null)
-                    || (context.parent.current instanceof AllSegment && context.next == null))
+                    || (context.parent.current instanceof CycleNameSegment && context.next == null))
             ) {
                 eval(context);
                 return;
@@ -5486,6 +5376,11 @@ public abstract class JSONPath {
             }
 
             if (jsonReader.ch == '[') {
+                // skip
+                if (context.next != null) {
+                    return;
+                }
+
                 jsonReader.next();
                 for (; ; ) {
                     if (jsonReader.ch == ']') {
