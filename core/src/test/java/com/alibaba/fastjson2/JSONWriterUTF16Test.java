@@ -15,7 +15,7 @@ public class JSONWriterUTF16Test {
 
     @Test
     public void test_writeNameRaw() {
-        JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.WriteBooleanAsNumber);
+        JSONWriter jsonWriter = JSONWriter.ofUTF16(JSONWriter.Feature.WriteBooleanAsNumber);
         for (int i = 0; i < 8096; i++) {
             jsonWriter.writeNameRaw(new char[]{'a'});
         }
@@ -23,7 +23,7 @@ public class JSONWriterUTF16Test {
 
     @Test
     public void test_writeNameRaw_1() {
-        JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.WriteBooleanAsNumber);
+        JSONWriter jsonWriter = JSONWriter.ofUTF16(JSONWriter.Feature.WriteBooleanAsNumber);
         for (int i = 0; i < 8096; i++) {
             jsonWriter.writeNameRaw(new char[]{'a'}, 0, 1);
         }
