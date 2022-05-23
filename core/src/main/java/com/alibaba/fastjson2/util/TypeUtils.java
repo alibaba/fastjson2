@@ -393,8 +393,8 @@ public class TypeUtils {
         NAME_MAPPINGS.put(new HashMap().keySet().getClass(), "Set");
         NAME_MAPPINGS.put(new LinkedHashMap().keySet().getClass(), "Set");
         NAME_MAPPINGS.put(new TreeMap<>().keySet().getClass(), "Set");
-        NAME_MAPPINGS.put(new ConcurrentHashMap().keySet().getClass(), "Set");
-        NAME_MAPPINGS.put(new ConcurrentSkipListMap().keySet().getClass(), "Set");
+        NAME_MAPPINGS.put(((Map) new ConcurrentHashMap()).keySet().getClass(), "Set"); // bug fix for android9
+        NAME_MAPPINGS.put(((Map) new ConcurrentSkipListMap()).keySet().getClass(), "Set"); // bug fix for android9
         TYPE_MAPPINGS.put("Set", HashSet.class);
 
         NAME_MAPPINGS.put(new HashMap().values().getClass(), "List");
