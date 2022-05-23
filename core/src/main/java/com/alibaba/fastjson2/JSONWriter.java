@@ -411,6 +411,20 @@ public abstract class JSONWriter
         return jsonWriter;
     }
 
+    public static JSONWriter ofUTF16(Feature... features) {
+        Context writeContext = JSONFactory.createWriteContext(features);
+        JSONWriter jsonWriter = JDKUtils.JVM_VERSION == 8
+                ? new JSONWriterUTF16JDK8(writeContext)
+                : new JSONWriterUTF16(writeContext);
+
+        for (int i = 0; i < features.length; i++) {
+            if (features[i] == Feature.PrettyFormat) {
+                return new JSONWriterPretty(jsonWriter);
+            }
+        }
+        return jsonWriter;
+    }
+
     public static JSONWriter ofJSONB() {
         return new JSONWriterJSONB(
                 new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider),
