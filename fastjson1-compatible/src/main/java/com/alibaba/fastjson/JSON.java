@@ -88,8 +88,13 @@ public class JSON {
         }
 
         config(context, features);
+
         try {
-            return reader.read(type);
+            T object = reader.read(type);
+            if (object != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
             if (cause == null) {
