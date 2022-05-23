@@ -102,7 +102,7 @@ class JSONWriterUTF8
             int i = ((bytes[eLen] & 0xff) << 10) | (left == 2 ? ((bytes[bytes.length - 1] & 0xff) << 2) : 0);
 
             // Set last four chars
-            this.bytes[off++] = (byte)  CA[i >> 12];
+            this.bytes[off++] = (byte) CA[i >> 12];
             this.bytes[off++] = (byte) CA[(i >>> 6) & 0x3f];
             this.bytes[off++] = left == 2 ? (byte) CA[i & 0x3f] : (byte) '=';
             this.bytes[off++] = '=';
