@@ -3,25 +3,31 @@ package com.alibaba.fastjson2.util;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public class GuavaSupport {
     static Class CLASS_IMMUTABLE_MAP;
+    static Class CLASS_IMMUTABLE_LIST;
+    static Class CLASS_IMMUTABLE_SET;
     static Class CLASS_ARRAYLIST_MULTI_MAP;
 
     static Method METHOD_IMMUTABLE_MAP_OF_0;
     static Method METHOD_IMMUTABLE_MAP_OF_1;
     static Method METHOD_IMMUTABLE_MAP_COPY_OF;
+
+    static Method METHOD_IMMUTABLE_LIST_OF_0;
+    static Method METHOD_IMMUTABLE_LIST_OF_1;
+    static Method METHOD_IMMUTABLE_LIST_COPY_OF;
+
+    static Method METHOD_IMMUTABLE_SET_OF_0;
+    static Method METHOD_IMMUTABLE_SET_OF_1;
+    static Method METHOD_IMMUTABLE_SET_COPY_OF;
 
     static Method METHOD_ARRAYLIST_MULTI_MAP_CREATE;
     static Method METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL;
@@ -49,16 +55,64 @@ public class GuavaSupport {
             implements Function {
         @Override
         public Object apply(Object object) {
+            if (CLASS_IMMUTABLE_SET == null) {
+                CLASS_IMMUTABLE_SET = TypeUtils.loadClass("com.google.common.collect.ImmutableSet");
+            }
+
+            if (CLASS_IMMUTABLE_SET == null) {
+                throw new JSONException("class not found : com.google.common.collect.ImmutableSet");
+            }
+
             List list = (List) object;
             if (list.isEmpty()) {
-                return ImmutableSet.of();
+                if (METHOD_IMMUTABLE_SET_OF_0 == null) {
+                    try {
+                        Method method = CLASS_IMMUTABLE_SET.getMethod("of");
+                        METHOD_IMMUTABLE_SET_OF_0 = method;
+                    } catch (NoSuchMethodException e) {
+                        throw new JSONException("method not found : com.google.common.collect.ImmutableSet.of", e);
+                    }
+                }
+
+                try {
+                    return METHOD_IMMUTABLE_SET_OF_0.invoke(null);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new JSONException("create ImmutableSet error", e);
+                }
             }
 
             if (list.size() == 1) {
-                return ImmutableSet.of(list.get(0));
+                if (METHOD_IMMUTABLE_SET_OF_1 == null) {
+                    try {
+                        Method method = CLASS_IMMUTABLE_SET.getMethod("of", Object.class);
+                        METHOD_IMMUTABLE_SET_OF_1 = method;
+                    } catch (NoSuchMethodException e) {
+                        throw new JSONException("method not found : com.google.common.collect.ImmutableSet.of", e);
+                    }
+                }
+
+                try {
+                    Object first = list.get(0);
+                    return METHOD_IMMUTABLE_SET_OF_1.invoke(null, first);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new JSONException("create ImmutableSet error", e);
+                }
             }
 
-            return ImmutableSet.copyOf(list);
+            if (METHOD_IMMUTABLE_SET_COPY_OF == null) {
+                try {
+                    Method method = CLASS_IMMUTABLE_SET.getMethod("copyOf", Collection.class);
+                    METHOD_IMMUTABLE_SET_COPY_OF = method;
+                } catch (NoSuchMethodException e) {
+                    throw new JSONException("method not found : com.google.common.collect.ImmutableSet.copyOf", e);
+                }
+            }
+
+            try {
+                return METHOD_IMMUTABLE_SET_COPY_OF.invoke(null, list);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new JSONException("create ImmutableSet error", e);
+            }
         }
     }
 
@@ -66,16 +120,64 @@ public class GuavaSupport {
             implements Function {
         @Override
         public Object apply(Object object) {
+            if (CLASS_IMMUTABLE_LIST == null) {
+                CLASS_IMMUTABLE_LIST = TypeUtils.loadClass("com.google.common.collect.ImmutableList");
+            }
+
+            if (CLASS_IMMUTABLE_LIST == null) {
+                throw new JSONException("class not found : com.google.common.collect.ImmutableList");
+            }
+
             List list = (List) object;
             if (list.isEmpty()) {
-                return ImmutableList.of();
+                if (METHOD_IMMUTABLE_LIST_OF_0 == null) {
+                    try {
+                        Method method = CLASS_IMMUTABLE_LIST.getMethod("of");
+                        METHOD_IMMUTABLE_LIST_OF_0 = method;
+                    } catch (NoSuchMethodException e) {
+                        throw new JSONException("method not found : com.google.common.collect.ImmutableList.of", e);
+                    }
+                }
+
+                try {
+                    return METHOD_IMMUTABLE_LIST_OF_0.invoke(null);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new JSONException("create ImmutableSet error", e);
+                }
             }
 
             if (list.size() == 1) {
-                return ImmutableList.of(list.get(0));
+                if (METHOD_IMMUTABLE_LIST_OF_1 == null) {
+                    try {
+                        Method method = CLASS_IMMUTABLE_LIST.getMethod("of", Object.class);
+                        METHOD_IMMUTABLE_LIST_OF_1 = method;
+                    } catch (NoSuchMethodException e) {
+                        throw new JSONException("method not found : com.google.common.collect.ImmutableList.of", e);
+                    }
+                }
+
+                try {
+                    Object first = list.get(0);
+                    return METHOD_IMMUTABLE_LIST_OF_1.invoke(null, first);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new JSONException("create ImmutableSet error", e);
+                }
             }
 
-            return ImmutableList.copyOf(list);
+            if (METHOD_IMMUTABLE_LIST_COPY_OF == null) {
+                try {
+                    Method method = CLASS_IMMUTABLE_LIST.getMethod("copyOf", Collection.class);
+                    METHOD_IMMUTABLE_LIST_COPY_OF = method;
+                } catch (NoSuchMethodException e) {
+                    throw new JSONException("method not found : com.google.common.collect.ImmutableList.copyOf", e);
+                }
+            }
+
+            try {
+                return METHOD_IMMUTABLE_LIST_COPY_OF.invoke(null, list);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new JSONException("create ImmutableList error", e);
+            }
         }
     }
 
