@@ -29,11 +29,11 @@ final class FieldReaderCharValueFunc<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        String str = jsonReader.readString();
-        if (str == null || str.isEmpty()) {
+        char ch = jsonReader.readCharValue();
+        if (ch == '\0' && jsonReader.wasNull()) {
             return;
         }
-        function.accept(object, str.charAt(0));
+        function.accept(object, ch);
     }
 
     @Override

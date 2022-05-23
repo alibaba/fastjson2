@@ -252,7 +252,7 @@ public abstract class JSONPath {
     public void setCallback(Object rootObject, Function callback) {
         setCallback(
                 rootObject,
-                (object, value) -> callback.apply(value)
+                new BiFunctionAdapter(callback)
         );
     }
 
@@ -2170,18 +2170,19 @@ public abstract class JSONPath {
                 return;
             }
 
-            ObjectReaderProvider provider = getReaderContext().getProvider();
             Class<?> objectClass = object.getClass();
 
-            FieldReader fieldReader = this
-                    .getReaderContext()
-                    .getProvider()
+            if (readerContext == null) {
+                readerContext = JSONFactory.createReadContext();
+            }
+            FieldReader fieldReader = readerContext.provider
                     .getObjectReader(objectClass)
                     .getFieldReader(nameHashCode);
 
-            FieldWriter fieldWriter = this
-                    .getWriterContext()
-                    .getProvider()
+            if (writerContext == null) {
+                writerContext = JSONFactory.createWriteContext();
+            }
+            FieldWriter fieldWriter = writerContext.provider
                     .getObjectWriter(objectClass)
                     .getFieldWriter(nameHashCode);
 
@@ -5398,6 +5399,20 @@ public abstract class JSONPath {
             }
 
             throw new JSONException("TODO");
+        }
+    }
+
+    static final class BiFunctionAdapter
+            implements BiFunction {
+        private final Function function;
+
+        BiFunctionAdapter(Function function) {
+            this.function = function;
+        }
+
+        @Override
+        public Object apply(Object o1, Object o2) {
+            return function.apply(o2);
         }
     }
 }

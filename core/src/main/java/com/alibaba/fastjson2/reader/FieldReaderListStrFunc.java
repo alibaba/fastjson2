@@ -56,6 +56,67 @@ final class FieldReaderListStrFunc<T>
         function.accept(object, (List) value);
     }
 
+    public Object readFieldValue(JSONReader jsonReader) {
+        List value;
+        if (jsonReader.isJSONB()) {
+            Class listType = fieldClass;
+            ObjectReader objectReader = jsonReader.checkAutoType(fieldClass, fieldClassHash, features);
+            if (objectReader != null) {
+                listType = objectReader.getObjectClass();
+            }
+
+            int itemCnt = jsonReader.startArray();
+            if (itemCnt == -1) {
+                value = null;
+            } else if (listType == Collection.class
+                    || listType == AbstractCollection.class
+                    || listType == List.class
+                    || listType == AbstractList.class
+                    || listType == ArrayList.class) {
+                value = new ArrayList(itemCnt);
+            } else if (listType == LinkedList.class) {
+                value = new LinkedList();
+            } else if (listType == JSONArray.class) {
+                value = new JSONArray(itemCnt);
+            } else {
+                try {
+                    value = (List) listType.newInstance();
+                } catch (InstantiationException | IllegalAccessException e) {
+                    throw new JSONException("create instance error " + listType, e);
+                }
+            }
+
+            for (int i = 0; i < itemCnt; ++i) {
+                value.add(jsonReader.readString());
+            }
+        } else if (jsonReader.current() == '[') {
+            List list = createList();
+            jsonReader.next();
+            for (; ; ) {
+                if (jsonReader.nextIfMatch(']')) {
+                    break;
+                }
+
+                list.add(jsonReader.readString());
+
+                if (jsonReader.nextIfMatch(',')) {
+                    continue;
+                }
+            }
+            jsonReader.nextIfMatch(',');
+
+            value = list;
+        } else {
+            throw new JSONException("json format error : " + jsonReader.current());
+        }
+
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
+        return value;
+    }
+
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         List value;
