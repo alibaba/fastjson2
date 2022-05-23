@@ -325,7 +325,7 @@ class JSONWriterUTF8
         }
         for (; i < chars.length; ++i) { // ascii none special fast write
             char ch = chars[i];
-            if ((ch >= 0x0001) && (ch <= 0x007F)) {
+            if ((ch >= 0x0000) && (ch <= 0x007F)) {
                 if (ch == quote) {
                     bytes[off++] = (byte) '\\';
                     bytes[off++] = (byte) quote;
