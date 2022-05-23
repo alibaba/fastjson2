@@ -830,11 +830,10 @@ public abstract class BeanUtils {
             case "NeverUseThisValueExceptDefaultValue":
             case "CamelCase": {
                 char c0 = methodName.charAt(0);
-                char c1;
+                char c1 = methodName.length() > 1 ? methodName.charAt(1) : '\0';
                 if (c0 >= 'A' && c0 <= 'Z'
                         && methodName.length() > 1
-                        && (c1 = methodName.charAt(1)) >= 'A'
-                        && c1 <= 'Z') {
+                        && (c1 < 'A' || c1 > 'Z')) {
                     char[] chars = methodName.toCharArray();
                     chars[0] = (char) (c0 + 32);
                     return new String(chars);
