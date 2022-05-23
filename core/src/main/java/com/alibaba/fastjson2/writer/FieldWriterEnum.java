@@ -66,7 +66,7 @@ abstract class FieldWriterEnum
 
     @Override
     public final void writeEnum(JSONWriter jsonWriter, Enum e) {
-        long features = jsonWriter.getFeatures();
+        long features = this.features | jsonWriter.getFeatures();
         boolean usingOrdinal = (features & (JSONWriter.Feature.WriteEnumUsingToString.mask | JSONWriter.Feature.WriteEnumsUsingName.mask)) == 0;
 
         if ((features & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0) {
