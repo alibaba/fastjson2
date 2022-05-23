@@ -393,6 +393,13 @@
                 <version>5.6.3</version>
                 <scope>import</scope>
             </dependency>
+
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-spring-web</artifactId>
+                <version>3.0.0</version>
+                <scope>provided</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
