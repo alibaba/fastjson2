@@ -32,6 +32,11 @@ final class ObjectWriterImplCharacter
             jsonWriter.writeNull();
             return;
         }
-        jsonWriter.writeString(new char[]{(Character) object});
+        char[] chars = {(Character) object};
+        if (jsonWriter.isUTF16()) {
+            jsonWriter.writeString(chars);
+        } else {
+            jsonWriter.writeString(new String(chars));
+        }
     }
 }

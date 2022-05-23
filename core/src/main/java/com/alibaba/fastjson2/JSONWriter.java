@@ -818,26 +818,26 @@ public abstract class JSONWriter
         write0('"');
     }
 
-    public void writeString(char[] str) {
-        if (str == null) {
+    public void writeString(char[] chars) {
+        if (chars == null) {
             writeNull();
             return;
         }
 
         write0('"');
         boolean special = false;
-        for (int i = 0; i < str.length; ++i) {
-            if (str[i] == '\\' || str[i] == '"') {
+        for (int i = 0; i < chars.length; ++i) {
+            if (chars[i] == '\\' || chars[i] == '"') {
                 special = true;
                 break;
             }
         }
 
         if (!special) {
-            writeRaw(str);
+            writeRaw(chars);
         } else {
-            for (int i = 0; i < str.length; ++i) {
-                char ch = str[i];
+            for (int i = 0; i < chars.length; ++i) {
+                char ch = chars[i];
                 if (ch == '\\' || ch == '"') {
                     write0('\\');
                 }
@@ -854,17 +854,29 @@ public abstract class JSONWriter
 
         int yearSize = IOUtils.stringSize(year);
         int len = 8 + yearSize;
-        char[] chars = new char[len];
-        chars[0] = '"';
-        Arrays.fill(chars, 1, len - 1, '0');
-        IOUtils.getChars(year, yearSize + 1, chars);
-        chars[yearSize + 1] = '-';
-        IOUtils.getChars(month, yearSize + 4, chars);
-        chars[yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-        chars[len - 1] = '"';
-
-        writeRaw(chars);
+        if (isUTF8()) {
+            byte[] chars = new byte[len];
+            chars[0] = '"';
+            Arrays.fill(chars, 1, len - 1, (byte) '0');
+            IOUtils.getChars(year, yearSize + 1, chars);
+            chars[yearSize + 1] = '-';
+            IOUtils.getChars(month, yearSize + 4, chars);
+            chars[yearSize + 4] = '-';
+            IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
+            chars[len - 1] = '"';
+            writeRaw(chars);
+        } else {
+            char[] chars = new char[len];
+            chars[0] = '"';
+            Arrays.fill(chars, 1, len - 1, '0');
+            IOUtils.getChars(year, yearSize + 1, chars);
+            chars[yearSize + 1] = '-';
+            IOUtils.getChars(month, yearSize + 4, chars);
+            chars[yearSize + 4] = '-';
+            IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
+            chars[len - 1] = '"';
+            writeRaw(chars);
+        }
     }
 
     public void writeLocalDateTime(LocalDateTime dateTime) {
@@ -910,27 +922,51 @@ public abstract class JSONWriter
             small = nano;
         }
 
-        char[] chars = new char[len];
-        chars[0] = '"';
-        Arrays.fill(chars, 1, len - 1, '0');
-        IOUtils.getChars(year, yearSize + 1, chars);
-        chars[yearSize + 1] = '-';
-        IOUtils.getChars(month, yearSize + 4, chars);
-        chars[yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-        chars[yearSize + 7] = 'T';
-        IOUtils.getChars(hour, yearSize + 10, chars);
-        chars[yearSize + 10] = ':';
-        IOUtils.getChars(minute, yearSize + 13, chars);
-        chars[yearSize + 13] = ':';
-        IOUtils.getChars(second, yearSize + 16, chars);
-        if (small != 0) {
-            chars[yearSize + 16] = '.';
-            IOUtils.getChars(small, len - 1, chars);
-        }
-        chars[len - 1] = '"';
+        if (isUTF8()) {
+            byte[] chars = new byte[len];
+            chars[0] = '"';
+            Arrays.fill(chars, 1, len - 1, (byte) '0');
+            IOUtils.getChars(year, yearSize + 1, chars);
+            chars[yearSize + 1] = '-';
+            IOUtils.getChars(month, yearSize + 4, chars);
+            chars[yearSize + 4] = '-';
+            IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
+            chars[yearSize + 7] = 'T';
+            IOUtils.getChars(hour, yearSize + 10, chars);
+            chars[yearSize + 10] = ':';
+            IOUtils.getChars(minute, yearSize + 13, chars);
+            chars[yearSize + 13] = ':';
+            IOUtils.getChars(second, yearSize + 16, chars);
+            if (small != 0) {
+                chars[yearSize + 16] = '.';
+                IOUtils.getChars(small, len - 1, chars);
+            }
+            chars[len - 1] = '"';
 
-        writeRaw(chars);
+            writeRaw(chars);
+        } else {
+            char[] chars = new char[len];
+            chars[0] = '"';
+            Arrays.fill(chars, 1, len - 1, '0');
+            IOUtils.getChars(year, yearSize + 1, chars);
+            chars[yearSize + 1] = '-';
+            IOUtils.getChars(month, yearSize + 4, chars);
+            chars[yearSize + 4] = '-';
+            IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
+            chars[yearSize + 7] = 'T';
+            IOUtils.getChars(hour, yearSize + 10, chars);
+            chars[yearSize + 10] = ':';
+            IOUtils.getChars(minute, yearSize + 13, chars);
+            chars[yearSize + 13] = ':';
+            IOUtils.getChars(second, yearSize + 16, chars);
+            if (small != 0) {
+                chars[yearSize + 16] = '.';
+                IOUtils.getChars(small, len - 1, chars);
+            }
+            chars[len - 1] = '"';
+
+            writeRaw(chars);
+        }
     }
 
     public void writeLocalTime(LocalTime time) {
