@@ -37,7 +37,11 @@ public class FastjsonSockJsMessageCodec
     @Override
     public String encode(String... messages) {
         JSONWriter jsonWriter = JSONWriter.of(fastJsonConfig.getWriterFeatures());
-        jsonWriter.writeRaw(new char[]{'a'});
+        if (jsonWriter.isUTF8()) {
+            jsonWriter.writeRaw(new byte[]{'a'});
+        } else {
+            jsonWriter.writeRaw(new char[]{'a'});
+        }
         jsonWriter.startArray();
         for (int i = 0; i < messages.length; i++) {
             if (i != 0) {

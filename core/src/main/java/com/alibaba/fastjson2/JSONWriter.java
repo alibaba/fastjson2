@@ -1201,7 +1201,6 @@ public abstract class JSONWriter
             chars[20 + millislen] = 'Z';
         } else {
             int offsetAbs = Math.abs(offset);
-            int offsetlen = IOUtils.stringSize(offsetAbs);
 
             if (offset >= 0) {
                 chars[20 + millislen] = '+';
