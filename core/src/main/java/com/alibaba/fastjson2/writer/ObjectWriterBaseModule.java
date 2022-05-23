@@ -716,6 +716,8 @@ class ObjectWriterBaseModule
                 return MoneySupport.createMonetaryAmountWriter();
             case "org.javamoney.moneta.spi.DefaultNumberValue":
                 return MoneySupport.createNumberValueWriter();
+            case "net.sf.json.JSONNull":
+                return ObjectWriterMisc.INSTANCE;
             default:
                 break;
         }

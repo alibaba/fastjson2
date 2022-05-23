@@ -962,12 +962,12 @@ public class JSONArray
      * List<User> users = array.toList(User.class);
      * }</pre>
      *
-     * @param clazz specify the {@code Class<T>} to be converted
+     * @param itemClass specify the {@code Class<T>} to be converted
      * @param features features to be enabled in parsing
      * @since 2.0.4
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> List<T> toList(Class<T> clazz, JSONReader.Feature... features) {
+    public <T> List<T> toList(Class<T> itemClass, JSONReader.Feature... features) {
         boolean fieldBased = false;
         long featuresValue = 0;
         for (JSONReader.Feature feature : features) {
@@ -978,7 +978,7 @@ public class JSONArray
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<?> objectReader = provider.getObjectReader(clazz, fieldBased);
+        ObjectReader<?> objectReader = provider.getObjectReader(itemClass, fieldBased);
 
         List<T> list = new ArrayList<>(size());
         for (int i = 0; i < this.size(); i++) {
@@ -989,13 +989,10 @@ public class JSONArray
                 classItem = (T) objectReader.createInstance((Map) item, featuresValue);
             } else if (item instanceof Map) {
                 classItem = (T) objectReader.createInstance((Map) item, featuresValue);
+            } else if (item == null || itemClass.isInstance(item)) {
+                classItem = (T) item;
             } else {
-                if (item == null) {
-                    list.add(null);
-                    continue;
-                }
-
-                Function typeConvert = provider.getTypeConvert(item.getClass(), clazz);
+                Function typeConvert = provider.getTypeConvert(item.getClass(), itemClass);
                 if (typeConvert != null) {
                     Object converted = typeConvert.apply(item);
                     list.add((T) converted);
@@ -1003,10 +1000,66 @@ public class JSONArray
                 }
 
                 throw new JSONException(
-                        (item == null ? "null" : item.getClass()) + " cannot be converted to " + clazz
+                        (item == null ? "null" : item.getClass()) + " cannot be converted to " + itemClass
                 );
             }
             list.add(classItem);
+        }
+
+        return list;
+    }
+    /**
+     * Convert all the members of this {@link JSONArray} into the specified Object.
+     * Warning that each member of the {@link JSONArray} must implement the {@link Map} interface.
+     *
+     * <pre>{@code
+     * String json = "[{\"id\": 1, \"name\": \"fastjson\"}, {\"id\": 2, \"name\": \"fastjson2\"}]";
+     * JSONArray array = JSON.parseArray(json);
+     * List<User> users = array.toList(User.class);
+     * }</pre>
+     *
+     * @param itemClass specify the {@code Class<T>} to be converted
+     * @param features features to be enabled in parsing
+     * @since 2.0.4
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> T[] toArray(Class<T> itemClass, JSONReader.Feature... features) {
+        boolean fieldBased = false;
+        long featuresValue = 0;
+        for (JSONReader.Feature feature : features) {
+            featuresValue |= feature.mask;
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+            }
+        }
+
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReader<?> objectReader = provider.getObjectReader(itemClass, fieldBased);
+
+        T[] list = (T[]) Array.newInstance(itemClass, size());
+        for (int i = 0; i < this.size(); i++) {
+            Object item = this.get(i);
+
+            T classItem;
+            if (item instanceof JSONObject) {
+                classItem = (T) objectReader.createInstance((Map) item, featuresValue);
+            } else if (item instanceof Map) {
+                classItem = (T) objectReader.createInstance((Map) item, featuresValue);
+            } else if (item == null || itemClass.isInstance(item)) {
+                classItem = (T) item;
+            } else {
+                Function typeConvert = provider.getTypeConvert(item.getClass(), itemClass);
+                if (typeConvert != null) {
+                    Object converted = typeConvert.apply(item);
+                    list[i] = (T) converted;
+                    continue;
+                }
+
+                throw new JSONException(
+                        (item == null ? "null" : item.getClass()) + " cannot be converted to " + itemClass
+                );
+            }
+            list[i] = (T) classItem;
         }
 
         return list;
