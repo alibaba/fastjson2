@@ -123,6 +123,14 @@ final class JSONWriterUTF8JDK9
                 } else if (ch == '\t') {
                     bytes[off++] = '\\';
                     bytes[off++] = 't';
+                } else if (ch < 0) {
+                    int c = ch & 0xFF;
+                    if (c < 0x80) {
+                        bytes[off++] = (byte) (0xc0 | (c >> 6));
+                        bytes[off++] = (byte) (0x80 | (c & 0x3f));
+                    } else {
+                        bytes[off++] = ch;
+                    }
                 } else {
                     bytes[off++] = ch;
                 }
