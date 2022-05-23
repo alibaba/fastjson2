@@ -50,6 +50,22 @@ public class JSONWriterUTF8JDK9Test {
     }
 
     @Test
+    public void test_writeString_utf82() {
+        StringBuffer buf = new StringBuffer();
+        for (int i = 0; i < 512; i++) {
+            char ch = (char) i;
+            buf.append(ch);
+        }
+        String origin = buf.toString();
+
+        JSONWriterUTF8JDK9 jsonWriter = new JSONWriterUTF8JDK9(JSONFactory.createWriteContext());
+        jsonWriter.writeString(origin);
+        String json = jsonWriter.toString();
+        String str = (String) JSON.parse(json);
+        assertEquals(origin, str);
+    }
+
+    @Test
     public void test_writeString_special() {
         JSONWriterUTF8JDK9 jsonWriter = new JSONWriterUTF8JDK9(JSONFactory.createWriteContext());
         jsonWriter.writeString("\r\n\t\f\b\"");
