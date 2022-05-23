@@ -14,7 +14,6 @@ import java.lang.reflect.Type;
  */
 public class SwaggerJsonWriter
         implements ObjectWriter<Object> {
-
     public static final SwaggerJsonWriter INSTANCE = new SwaggerJsonWriter();
 
     @Override
