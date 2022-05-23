@@ -76,6 +76,42 @@ class JSONWriterUTF8
     }
 
     @Override
+    public void writeBase64(byte[] bytes) {
+        int charsLen = ((bytes.length - 1) / 3 + 1) << 2; // base64 character count
+
+        ensureCapacity(off + charsLen + 2);
+        this.bytes[off++] = '"';
+
+        int eLen = (bytes.length / 3) * 3; // Length of even 24-bits.
+
+        for (int s = 0; s < eLen; ) {
+            // Copy next three bytes into lower 24 bits of int, paying attension to sign.
+            int i = (bytes[s++] & 0xff) << 16 | (bytes[s++] & 0xff) << 8 | (bytes[s++] & 0xff);
+
+            // Encode the int into four chars
+            this.bytes[off++] = (byte) CA[(i >>> 18) & 0x3f];
+            this.bytes[off++] = (byte) CA[(i >>> 12) & 0x3f];
+            this.bytes[off++] = (byte) CA[(i >>> 6) & 0x3f];
+            this.bytes[off++] = (byte) CA[i & 0x3f];
+        }
+
+        // Pad and encode last bits if source isn't even 24 bits.
+        int left = bytes.length - eLen; // 0 - 2.
+        if (left > 0) {
+            // Prepare the int
+            int i = ((bytes[eLen] & 0xff) << 10) | (left == 2 ? ((bytes[bytes.length - 1] & 0xff) << 2) : 0);
+
+            // Set last four chars
+            this.bytes[off++] = (byte)  CA[i >> 12];
+            this.bytes[off++] = (byte) CA[(i >>> 6) & 0x3f];
+            this.bytes[off++] = left == 2 ? (byte) CA[i & 0x3f] : (byte) '=';
+            this.bytes[off++] = '=';
+        }
+
+        this.bytes[off++] = '"';
+    }
+
+    @Override
     public void close() {
         if (bytes.length > CACHE_THREAD) {
             return;
@@ -412,10 +448,6 @@ class JSONWriterUTF8
         }
         for (int i = 0; i < chars.length; ++i) {
             char c = chars[i];
-            if (c == '"') {
-                bytes[off++] = (byte) '\\';
-            }
-
             if ((c >= 0x0001) && (c <= 0x007F)) {
                 bytes[off++] = (byte) c;
             } else if (c > 0x07FF) {

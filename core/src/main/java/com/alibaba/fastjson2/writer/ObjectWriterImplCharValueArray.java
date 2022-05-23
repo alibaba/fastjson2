@@ -22,6 +22,11 @@ final class ObjectWriterImplCharValueArray
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        jsonWriter.writeString((char[]) object);
+        char[] chars = (char[]) object;
+        if (jsonWriter.isUTF16()) {
+            jsonWriter.writeString(chars);
+        } else {
+            jsonWriter.writeString(new String(chars));
+        }
     }
 }
