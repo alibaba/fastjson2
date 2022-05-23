@@ -1194,7 +1194,6 @@ class JSONWriterUTF8
             chars[20 + millislen] = 'Z';
         } else {
             int offsetAbs = Math.abs(offset);
-            int offsetlen = IOUtils.stringSize(offsetAbs);
 
             if (offset >= 0) {
                 chars[20 + millislen] = '+';
@@ -1202,10 +1201,13 @@ class JSONWriterUTF8
                 chars[20 + millislen] = '-';
             }
             chars[20 + millislen + 1] = '0';
-            IOUtils.getChars(offsetAbs, 20 + millislen + offsetlen + 2, chars);
+            IOUtils.getChars(offsetAbs, 20 + millislen + 3, chars);
             chars[20 + millislen + 3] = ':';
             chars[20 + millislen + 4] = '0';
             int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
+            if (offsetMinutes < 0) {
+                offsetMinutes = -offsetMinutes;
+            }
             IOUtils.getChars(offsetMinutes, 20 + millislen + zonelen, chars);
         }
         chars[chars.length - 1] = '"';
