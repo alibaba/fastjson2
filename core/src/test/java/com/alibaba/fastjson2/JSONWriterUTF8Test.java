@@ -50,7 +50,14 @@ public class JSONWriterUTF8Test {
     }
 
     @Test
-    public void test_writeString_utf82() {
+    public void test_writeString_utf8_1() {
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        jsonWriter.writeString("^á");
+        assertEquals("\"^á\"", jsonWriter.toString());
+    }
+
+    @Test
+    public void test_writeString_utf8_2() {
         StringBuffer buf = new StringBuffer();
         for (int i = 0; i < 512; i++) {
             char ch = (char) i;

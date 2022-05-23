@@ -33,8 +33,9 @@ final class JSONWriterUTF8JDK9
             }
         }
 
+        int coder = 1;
         if (CODER_FUNCTION != null && VALUE_FUNCTION != null) {
-            int coder = CODER_FUNCTION.applyAsInt(str);
+            coder = CODER_FUNCTION.applyAsInt(str);
             if (coder == 0) {
                 value = VALUE_FUNCTION.apply(str);
             }
@@ -123,14 +124,11 @@ final class JSONWriterUTF8JDK9
                 } else if (ch == '\t') {
                     bytes[off++] = '\\';
                     bytes[off++] = 't';
-                } else if (ch < 0) {
+                } else if (coder == 0 && ch < 0) {
+                    // latin
                     int c = ch & 0xFF;
-                    if (c < 0x80) {
-                        bytes[off++] = (byte) (0xc0 | (c >> 6));
-                        bytes[off++] = (byte) (0x80 | (c & 0x3f));
-                    } else {
-                        bytes[off++] = ch;
-                    }
+                    bytes[off++] = (byte) (0xc0 | (c >> 6));
+                    bytes[off++] = (byte) (0x80 | (c & 0x3f));
                 } else {
                     bytes[off++] = ch;
                 }
