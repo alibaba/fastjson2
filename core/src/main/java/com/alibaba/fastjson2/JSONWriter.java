@@ -390,16 +390,19 @@ public abstract class JSONWriter
 
     public static JSONWriter of() {
         Context writeContext = createWriteContext();
-        return JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF16(writeContext);
+        return JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF8JDK9(writeContext);
     }
 
     public static JSONWriter of(Context writeContext) {
-        return JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF16(writeContext);
+        return JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF8JDK9(writeContext);
     }
 
     public static JSONWriter of(Feature... features) {
         Context writeContext = JSONFactory.createWriteContext(features);
-        JSONWriterUTF16 jsonWriter = JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF16(writeContext);
+        JSONWriter jsonWriter = JDKUtils.JVM_VERSION == 8
+                ? new JSONWriterUTF16JDK8(writeContext)
+                : new JSONWriterUTF8JDK9(writeContext);
+
         for (int i = 0; i < features.length; i++) {
             if (features[i] == Feature.PrettyFormat) {
                 return new JSONWriterPretty(jsonWriter);
