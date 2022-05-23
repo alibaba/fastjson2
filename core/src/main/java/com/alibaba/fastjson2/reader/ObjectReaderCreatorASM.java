@@ -263,7 +263,8 @@ public class ObjectReaderCreatorASM
             }
 
             for (FieldReader fieldReader : fieldReaderArray) {
-                if (fieldReader.getMethod() != null) {
+                Method method = fieldReader.getMethod();
+                if (method != null && method.getReturnType() != void.class) {
                     match = false;
                     break;
                 }

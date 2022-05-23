@@ -1133,6 +1133,15 @@ public abstract class JSONReader
 
     public abstract String readString();
 
+    public char readCharValue() {
+        String str = readString();
+        if (str == null || str.isEmpty()) {
+            wasNull = true;
+            return '\0';
+        }
+        return str.charAt(0);
+    }
+
     public abstract void readNull();
 
     public abstract boolean readIfNull();

@@ -7,14 +7,12 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.util.Locale;
 
 abstract class FieldWriterImpl<T>
         implements FieldWriter<T> {
     final String name;
     final int ordinal;
     final String format;
-    final Locale locale = null;
     final long hashCode;
     final byte[] nameWithColonUTF8;
     final char[] nameWithColonUTF16;

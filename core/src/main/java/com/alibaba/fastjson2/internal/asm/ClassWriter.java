@@ -231,7 +231,7 @@ public class ClassWriter {
 
         Class<?> class2 = TypeUtils.loadClass(type2.replace('/', '.'));
         if (class2 == null) {
-            throw new JSONException(type2);
+            return "java/lang/Object";
         }
 
         if (class1.isAssignableFrom(class2)) {
