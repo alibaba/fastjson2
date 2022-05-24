@@ -28,5 +28,4 @@ public class MappingFastJsonJSONBMessageConverter
         Assert.isTrue(byte[].class == payloadClass,
                 () -> "Payload class must be byte[] : " + payloadClass);
     }
-
 }
