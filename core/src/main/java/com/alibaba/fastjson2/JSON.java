@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
@@ -963,11 +962,10 @@ public interface JSON {
         if (text == null || text.isEmpty()) {
             return null;
         }
-        ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
 
         try (JSONReader reader = JSONReader.of(text)) {
             reader.context.config(features);
-            List<T> list = reader.read(paramType);
+            List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
             }
@@ -986,11 +984,10 @@ public interface JSON {
         if (text == null || text.isEmpty()) {
             return null;
         }
-        ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
 
         try (JSONReader reader = JSONReader.of(text)) {
             reader.context.config(features);
-            List<T> list = reader.read(paramType);
+            List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
             }
@@ -1040,13 +1037,9 @@ public interface JSON {
             return null;
         }
 
-        ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(
-                new Type[]{type}, null, List.class
-        );
-
         try (JSONReader reader = JSONReader.of(bytes)) {
             reader.context.config(features);
-            List<T> list = reader.read(paramType);
+            List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
             }
@@ -1065,13 +1058,9 @@ public interface JSON {
             return null;
         }
 
-        ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(
-                new Type[]{type}, null, List.class
-        );
-
         try (JSONReader reader = JSONReader.of(bytes)) {
             reader.context.config(features);
-            List<T> list = reader.read(paramType);
+            List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
             }
