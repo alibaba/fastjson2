@@ -78,7 +78,7 @@ public interface ObjectWriter<T> {
                 }
 
                 Object fieldValue = fieldWriter.getFieldValue(object);
-                if (propertyFilter != null && !propertyFilter.process(object, fieldWriter.getFieldName(), fieldValue)) {
+                if (propertyFilter != null && !propertyFilter.apply(object, fieldWriter.getFieldName(), fieldValue)) {
                     jsonWriter.writeNull();
                     continue;
                 }

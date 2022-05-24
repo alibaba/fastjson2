@@ -322,7 +322,6 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public void writeWithFilter(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        boolean comma = true;
         jsonWriter.startObject();
 
         JSONWriter.Context ctx = jsonWriter.getContext();
@@ -349,6 +348,9 @@ public class ObjectWriterAdapter<T>
             }
 
             Object fieldValue = fieldWriter.getFieldValue(object);
+            if (fieldValue == null && !jsonWriter.isWriteNulls()) {
+                continue;
+            }
 
             // name filter
             String filteredName = null;
@@ -358,7 +360,7 @@ public class ObjectWriterAdapter<T>
 
             // property filter
             if (propertyFilter != null
-                    && !propertyFilter.process(object, fieldWriterFieldName, fieldValue)) {
+                    && !propertyFilter.apply(object, fieldWriterFieldName, fieldValue)) {
                 continue;
             }
 
