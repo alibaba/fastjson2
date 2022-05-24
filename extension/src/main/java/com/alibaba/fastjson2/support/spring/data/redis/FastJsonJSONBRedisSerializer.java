@@ -14,12 +14,12 @@ public class FastJsonJSONBRedisSerializer<T>
         extends FastJsonRedisSerializer<T> {
     public FastJsonJSONBRedisSerializer(Class<T> type) {
         super(type);
-        super.getFastJsonConfig().setJsonb(true);
+        super.getFastJsonConfig().setJSONB(true);
     }
 
     @Override
-    public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
-        fastJsonConfig.setJsonb(true);
-        super.setFastJsonConfig(fastJsonConfig);
+    public void setFastJsonConfig(FastJsonConfig config) {
+        config.setJSONB(true);
+        super.setFastJsonConfig(config);
     }
 }
