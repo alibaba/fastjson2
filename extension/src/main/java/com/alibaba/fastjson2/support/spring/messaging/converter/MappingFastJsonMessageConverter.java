@@ -28,10 +28,10 @@ public class MappingFastJsonMessageConverter
     protected FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
     /**
-     * default support all type
+     * default support application/json
      */
     public MappingFastJsonMessageConverter() {
-        super(MimeTypeUtils.ALL);
+        super(MimeTypeUtils.APPLICATION_JSON);
     }
 
     /**
