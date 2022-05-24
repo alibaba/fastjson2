@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
 import com.alibaba.fastjson2.reader.ObjectReaderImplInstant;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 
@@ -191,6 +192,17 @@ public class TypeUtils {
                     .getDefaultObjectReaderProvider()
                     .getObjectReader(targetClass);
             return (T) objectReader.readObject(jsonReader, 0);
+        }
+
+        if (targetClass.isEnum()) {
+            if (obj instanceof Integer) {
+                int ordinal = ((Integer) obj).intValue();
+                ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(targetClass);
+                if (objectReader instanceof ObjectReaderImplEnum) {
+                    Enum e = ((ObjectReaderImplEnum) objectReader).getEnumByOrdinal(ordinal);
+                    return (T) e;
+                }
+            }
         }
 
         throw new JSONException("can not cast to " + targetClass.getName() + ", from " + obj.getClass());
