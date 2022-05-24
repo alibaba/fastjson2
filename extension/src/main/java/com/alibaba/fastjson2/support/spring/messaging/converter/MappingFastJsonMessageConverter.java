@@ -62,18 +62,12 @@ public class MappingFastJsonMessageConverter
         Object payload = message.getPayload();
 
         if (payload instanceof byte[] && fastJsonConfig.isJsonb()) {
-
             obj = JSONB.parseObject((byte[]) payload, type, fastJsonConfig.getSymbolTable(), fastJsonConfig.getReaderFeatures());
-
         } else if (payload instanceof byte[] && !fastJsonConfig.isJsonb()) {
-
             obj = JSON.parseObject((byte[]) payload, type, fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
-
         } else if (payload instanceof String && JSON.isValid((String) payload)) {
-
             obj = JSON.parseObject((String) payload, type, fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
         }
-
         return obj;
     }
 
@@ -83,35 +77,22 @@ public class MappingFastJsonMessageConverter
         Object obj = null;
 
         if (byte[].class == getSerializedPayloadClass()) {
-
             if (payload instanceof String && fastJsonConfig.isJsonb()) {
-
                 obj = JSONB.fromJSONString((String) payload);
-
             } else if (payload instanceof String && !fastJsonConfig.isJsonb()) {
-
                 obj = ((String) payload).getBytes(fastJsonConfig.getCharset());
-
             } else if (fastJsonConfig.isJsonb()) {
-
                 obj = JSONB.toBytes(payload, fastJsonConfig.getSymbolTable(), fastJsonConfig.getWriterFeatures());
-
             } else {
-
                 obj = JSON.toJSONBytes(payload, fastJsonConfig.getDateFormat(), fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
             }
         } else if (String.class == getSerializedPayloadClass()) {
-
             if (payload instanceof String && JSON.isValid((String) payload)) {
-
                 obj = payload;
-
             } else {
-
                 obj = JSON.toJSONString(payload, fastJsonConfig.getDateFormat(), fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
             }
         }
-
         return obj;
     }
 
