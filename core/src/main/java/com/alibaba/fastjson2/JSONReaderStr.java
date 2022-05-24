@@ -681,6 +681,14 @@ final class JSONReaderStr
             ch = str.charAt(offset++);
         }
 
+        if (ch == 'L' || ch == 'F' || ch == 'D') {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = str.charAt(offset++);
+            }
+        }
+
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             if (offset >= end) {
                 ch = EOI;
@@ -789,6 +797,14 @@ final class JSONReaderStr
             }
         }
 
+        if (ch == 'L' || ch == 'F' || ch == 'D') {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = str.charAt(offset++);
+            }
+        }
+
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             if (offset >= end) {
                 ch = EOI;
@@ -887,6 +903,14 @@ final class JSONReaderStr
 
         if (quote != 0) {
             ch = str.charAt(offset++);
+        }
+
+        if (ch == 'L' || ch == 'F' || ch == 'D') {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = str.charAt(offset++);
+            }
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -991,6 +1015,14 @@ final class JSONReaderStr
                 ch = str.charAt(offset++);
             } else {
                 ch = EOI;
+            }
+        }
+
+        if (ch == 'L' || ch == 'F' || ch == 'D') {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = str.charAt(offset++);
             }
         }
 
@@ -1746,6 +1778,14 @@ final class JSONReaderStr
                 ch = str.charAt(offset++);
             } else {
                 ch = EOI;
+            }
+        }
+
+        if (ch == 'L' || ch == 'F' || ch == 'D') {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = str.charAt(offset++);
             }
         }
 
