@@ -15,6 +15,8 @@ public class FastJsonConfigTest {
     public void test() throws Exception {
         FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
+        fastJsonConfig.setJsonb(true);
+        assertEquals(fastJsonConfig.isJsonb(), true);
         fastJsonConfig.setWriteContentLength(false);
         assertEquals(fastJsonConfig.isWriteContentLength(), false);
         fastJsonConfig.setCharset(Charset.forName("UTF-8"));
@@ -27,5 +29,7 @@ public class FastJsonConfigTest {
         assertEquals(fastJsonConfig.getWriterFeatures()[0], JSONWriter.Feature.FieldBased);
         fastJsonConfig.setWriterFilters(new SimplePropertyPreFilter());
         assertEquals(fastJsonConfig.getWriterFilters().length > 0, true);
+        fastJsonConfig.setSymbolTable("id");
+        assertEquals(fastJsonConfig.getSymbolTable().size() > 0, true);
     }
 }
