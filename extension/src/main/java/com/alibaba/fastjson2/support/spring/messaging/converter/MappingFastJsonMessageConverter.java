@@ -2,12 +2,15 @@ package com.alibaba.fastjson2.support.spring.messaging.converter;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
+import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.AbstractMessageConverter;
-import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
-import java.nio.charset.Charset;
+import java.lang.reflect.Type;
 
 /**
  * Fastjson for Spring Messaging Json Converter.
@@ -22,10 +25,13 @@ public class MappingFastJsonMessageConverter
     /**
      * with fastJson config
      */
-    private FastJsonConfig fastJsonConfig = new FastJsonConfig();
+    protected FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
+    /**
+     * default support application/json
+     */
     public MappingFastJsonMessageConverter() {
-        super(new MimeType("application", "json", Charset.forName("UTF-8")));
+        super(MimeTypeUtils.APPLICATION_JSON);
     }
 
     /**
@@ -48,24 +54,15 @@ public class MappingFastJsonMessageConverter
     }
 
     @Override
-    protected boolean canConvertFrom(Message<?> message, Class<?> targetClass) {
-        return supports(targetClass);
-    }
-
-    @Override
-    protected boolean canConvertTo(Object payload, MessageHeaders headers) {
-        return supports(payload.getClass());
-    }
-
-    @Override
     protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
         // parse byte[] or String payload to Java Object
-        Object payload = message.getPayload();
         Object obj = null;
+        Type type = getResolvedType(targetClass, conversionHint);
+        Object payload = message.getPayload();
         if (payload instanceof byte[]) {
-            obj = JSON.parseObject((byte[]) payload, targetClass, fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
+            obj = JSON.parseObject((byte[]) payload, type, fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
         } else if (payload instanceof String) {
-            obj = JSON.parseObject((String) payload, targetClass, fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
+            obj = JSON.parseObject((String) payload, type, fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
         }
 
         return obj;
@@ -90,5 +87,19 @@ public class MappingFastJsonMessageConverter
         }
 
         return obj;
+    }
+
+    static Type getResolvedType(Class<?> targetClass, @Nullable Object conversionHint) {
+        if (conversionHint instanceof MethodParameter) {
+            MethodParameter param = (MethodParameter) conversionHint;
+            param = param.nestedIfOptional();
+            if (Message.class.isAssignableFrom(param.getParameterType())) {
+                param = param.nested();
+            }
+            Type genericParameterType = param.getNestedGenericParameterType();
+            Class<?> contextClass = param.getContainingClass();
+            return GenericTypeResolver.resolveType(genericParameterType, contextClass);
+        }
+        return targetClass;
     }
 }
