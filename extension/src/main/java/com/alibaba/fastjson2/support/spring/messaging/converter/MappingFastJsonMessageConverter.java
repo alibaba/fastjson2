@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.support.spring.messaging.converter;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -25,7 +26,7 @@ public class MappingFastJsonMessageConverter
     /**
      * with fastJson config
      */
-    protected FastJsonConfig fastJsonConfig = new FastJsonConfig();
+    private FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
     /**
      * default support application/json
@@ -59,9 +60,17 @@ public class MappingFastJsonMessageConverter
         Object obj = null;
         Type type = getResolvedType(targetClass, conversionHint);
         Object payload = message.getPayload();
-        if (payload instanceof byte[]) {
+
+        if (payload instanceof byte[] && fastJsonConfig.isJsonb()) {
+
+            obj = JSONB.parseObject((byte[]) payload, type, fastJsonConfig.getSymbolTable(), fastJsonConfig.getReaderFeatures());
+
+        } else if (payload instanceof byte[] && !fastJsonConfig.isJsonb()) {
+
             obj = JSON.parseObject((byte[]) payload, type, fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
-        } else if (payload instanceof String) {
+
+        } else if (payload instanceof String && JSON.isValid((String) payload)) {
+
             obj = JSON.parseObject((String) payload, type, fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
         }
 
@@ -71,17 +80,34 @@ public class MappingFastJsonMessageConverter
     @Override
     protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
         // encode payload to json string or byte[]
-        Object obj;
+        Object obj = null;
+
         if (byte[].class == getSerializedPayloadClass()) {
-            if (payload instanceof String && JSON.isValid((String) payload)) {
+
+            if (payload instanceof String && fastJsonConfig.isJsonb()) {
+
+                obj = JSONB.fromJSONString((String) payload);
+
+            } else if (payload instanceof String && !fastJsonConfig.isJsonb()) {
+
                 obj = ((String) payload).getBytes(fastJsonConfig.getCharset());
+
+            } else if (fastJsonConfig.isJsonb()) {
+
+                obj = JSONB.toBytes(payload, fastJsonConfig.getSymbolTable(), fastJsonConfig.getWriterFeatures());
+
             } else {
+
                 obj = JSON.toJSONBytes(payload, fastJsonConfig.getDateFormat(), fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
             }
-        } else {
+        } else if (String.class == getSerializedPayloadClass()) {
+
             if (payload instanceof String && JSON.isValid((String) payload)) {
+
                 obj = payload;
+
             } else {
+
                 obj = JSON.toJSONString(payload, fastJsonConfig.getDateFormat(), fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
             }
         }

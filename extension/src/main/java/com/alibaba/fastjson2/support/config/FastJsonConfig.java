@@ -49,6 +49,11 @@ public class FastJsonConfig {
     private boolean writeContentLength;
 
     /**
+     * JSONB flag.
+     */
+    private boolean jsonb;
+
+    /**
      * JSONB symbol table.
      */
     private JSONB.SymbolTable symbolTable;
@@ -174,10 +179,30 @@ public class FastJsonConfig {
     }
 
     /**
+     * Is jsonb boolean.
+     *
+     * @return the boolean
+     * @since 2.0.5
+     */
+    public boolean isJsonb() {
+        return jsonb;
+    }
+
+    /**
+     * Sets jsonb flag.
+     *
+     * @param jsonb the jsonb
+     * @since 2.0.5
+     */
+    public void setJsonb(boolean jsonb) {
+        this.jsonb = jsonb;
+    }
+
+    /**
      * Gets symbol table.
      *
      * @return the symbol table
-     * @since 2.0.3
+     * @since 2.0.5
      */
     public JSONB.SymbolTable getSymbolTable() {
         return symbolTable;
@@ -187,7 +212,7 @@ public class FastJsonConfig {
      * Sets symbol table.
      *
      * @param names the names
-     * @since 2.0.3
+     * @since 2.0.5
      */
     public void setSymbolTable(String... names) {
         this.symbolTable = JSONB.symbolTable(names);
