@@ -422,7 +422,7 @@ final class ObjectWriterImplMap
             }
 
             if (propertyFilter != null) {
-                if (!propertyFilter.process(object, key, value)) {
+                if (!propertyFilter.apply(object, key, value)) {
                     continue;
                 }
             }
