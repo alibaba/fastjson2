@@ -1282,4 +1282,11 @@ public class JSONObjectTest {
     public static class Bean {
         public int id;
     }
+
+    @Test
+    public void testCompatible() {
+        assertEquals(0, JSONObject.parseObject("{}").size());
+        assertEquals(101, JSONObject.parseObject("{\"id\":101}", Bean.class).id);
+        assertEquals(0, JSONArray.parseArray("[]").size());
+    }
 }

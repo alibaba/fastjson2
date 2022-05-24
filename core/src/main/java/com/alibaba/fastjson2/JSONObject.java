@@ -1727,4 +1727,11 @@ public class JSONObject
     public static <T> T parseObject(String text, Class<T> clazz) {
         return JSON.parseObject(text, clazz);
     }
+
+    /**
+     * See {@link JSON#parseObject} for details
+     */
+    public static JSONObject parseObject(String text) {
+        return JSON.parseObject(text);
+    }
 }

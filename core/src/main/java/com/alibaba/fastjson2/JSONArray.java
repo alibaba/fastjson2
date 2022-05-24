@@ -1370,4 +1370,14 @@ public class JSONArray
         array.add(third);
         return array;
     }
+
+    /**
+     * Parse JSON {@link String} into {@link JSONArray}
+     *
+     * @param text     the JSON {@link String} to be parsed
+     * @param features features to be enabled in parsing
+     */
+    public static JSONArray parseArray(String text, JSONReader.Feature... features) {
+        return JSON.parseArray(text, features);
+    }
 }
