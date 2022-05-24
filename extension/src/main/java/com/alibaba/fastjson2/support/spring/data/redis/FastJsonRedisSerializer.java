@@ -16,7 +16,7 @@ import org.springframework.data.redis.serializer.SerializationException;
  */
 public class FastJsonRedisSerializer<T>
         implements RedisSerializer<T> {
-    private FastJsonConfig fastJsonConfig = new FastJsonConfig();
+    private FastJsonConfig config = new FastJsonConfig();
     private final Class<T> type;
 
     public FastJsonRedisSerializer(Class<T> type) {
@@ -24,11 +24,11 @@ public class FastJsonRedisSerializer<T>
     }
 
     public FastJsonConfig getFastJsonConfig() {
-        return fastJsonConfig;
+        return config;
     }
 
     public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
-        this.fastJsonConfig = fastJsonConfig;
+        this.config = fastJsonConfig;
     }
 
     @Override
@@ -37,11 +37,11 @@ public class FastJsonRedisSerializer<T>
             return new byte[0];
         }
         try {
-            if (fastJsonConfig.isJsonb()) {
-                return JSONB.toBytes(t, fastJsonConfig.getSymbolTable(), fastJsonConfig.getWriterFeatures());
+            if (config.isJSONB()) {
+                return JSONB.toBytes(t, config.getSymbolTable(), config.getWriterFeatures());
             } else {
-                return JSON.toJSONBytes(t, fastJsonConfig.getDateFormat(),
-                        fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
+                return JSON.toJSONBytes(t, config.getDateFormat(),
+                        config.getWriterFilters(), config.getWriterFeatures());
             }
         } catch (Exception ex) {
             throw new SerializationException("Could not serialize: " + ex.getMessage(), ex);
@@ -54,11 +54,11 @@ public class FastJsonRedisSerializer<T>
             return null;
         }
         try {
-            if (fastJsonConfig.isJsonb()) {
-                return JSONB.parseObject(bytes, type, fastJsonConfig.getSymbolTable(), fastJsonConfig.getReaderFeatures());
+            if (config.isJSONB()) {
+                return JSONB.parseObject(bytes, type, config.getSymbolTable(), config.getReaderFeatures());
             } else {
                 return JSON.parseObject(bytes, type,
-                        fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
+                        config.getDateFormat(), config.getReaderFeatures());
             }
         } catch (Exception ex) {
             throw new SerializationException("Could not deserialize: " + ex.getMessage(), ex);

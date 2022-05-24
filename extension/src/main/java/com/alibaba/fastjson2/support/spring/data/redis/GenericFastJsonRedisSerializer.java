@@ -18,16 +18,16 @@ import org.springframework.data.redis.serializer.SerializationException;
  */
 public class GenericFastJsonRedisSerializer
         implements RedisSerializer<Object> {
-    private final FastJsonConfig fastJsonConfig = new FastJsonConfig();
+    private final FastJsonConfig config = new FastJsonConfig();
 
     public GenericFastJsonRedisSerializer() {
-        fastJsonConfig.setReaderFeatures(JSONReader.Feature.SupportAutoType);
-        fastJsonConfig.setWriterFeatures(JSONWriter.Feature.WriteClassName);
+        config.setReaderFeatures(JSONReader.Feature.SupportAutoType);
+        config.setWriterFeatures(JSONWriter.Feature.WriteClassName);
     }
 
     public GenericFastJsonRedisSerializer(boolean jsonb) {
         this();
-        fastJsonConfig.setJsonb(jsonb);
+        config.setJSONB(jsonb);
     }
 
     @Override
@@ -36,10 +36,10 @@ public class GenericFastJsonRedisSerializer
             return new byte[0];
         }
         try {
-            if (fastJsonConfig.isJsonb()) {
-                return JSONB.toBytes(object, fastJsonConfig.getWriterFeatures());
+            if (config.isJSONB()) {
+                return JSONB.toBytes(object, config.getWriterFeatures());
             } else {
-                return JSON.toJSONBytes(object, fastJsonConfig.getWriterFeatures());
+                return JSON.toJSONBytes(object, config.getWriterFeatures());
             }
         } catch (Exception ex) {
             throw new SerializationException("Could not serialize: " + ex.getMessage(), ex);
@@ -52,10 +52,10 @@ public class GenericFastJsonRedisSerializer
             return null;
         }
         try {
-            if (fastJsonConfig.isJsonb()) {
-                return JSONB.parseObject(bytes, Object.class, fastJsonConfig.getReaderFeatures());
+            if (config.isJSONB()) {
+                return JSONB.parseObject(bytes, Object.class, config.getReaderFeatures());
             } else {
-                return JSON.parseObject(bytes, Object.class, fastJsonConfig.getReaderFeatures());
+                return JSON.parseObject(bytes, Object.class, config.getReaderFeatures());
             }
         } catch (Exception ex) {
             throw new SerializationException("Could not deserialize: " + ex.getMessage(), ex);
