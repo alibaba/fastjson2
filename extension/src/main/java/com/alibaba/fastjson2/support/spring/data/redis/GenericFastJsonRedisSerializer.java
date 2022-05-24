@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.support.spring.data.redis;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
@@ -24,13 +25,22 @@ public class GenericFastJsonRedisSerializer
         fastJsonConfig.setWriterFeatures(JSONWriter.Feature.WriteClassName);
     }
 
+    public GenericFastJsonRedisSerializer(boolean jsonb) {
+        this();
+        fastJsonConfig.setJsonb(jsonb);
+    }
+
     @Override
     public byte[] serialize(Object object) throws SerializationException {
         if (object == null) {
             return new byte[0];
         }
         try {
-            return JSON.toJSONBytes(object, fastJsonConfig.getWriterFeatures());
+            if (fastJsonConfig.isJsonb()) {
+                return JSONB.toBytes(object, fastJsonConfig.getWriterFeatures());
+            } else {
+                return JSON.toJSONBytes(object, fastJsonConfig.getWriterFeatures());
+            }
         } catch (Exception ex) {
             throw new SerializationException("Could not serialize: " + ex.getMessage(), ex);
         }
@@ -42,7 +52,11 @@ public class GenericFastJsonRedisSerializer
             return null;
         }
         try {
-            return JSON.parseObject(bytes, Object.class, fastJsonConfig.getReaderFeatures());
+            if (fastJsonConfig.isJsonb()) {
+                return JSONB.parseObject(bytes, Object.class, fastJsonConfig.getReaderFeatures());
+            } else {
+                return JSON.parseObject(bytes, Object.class, fastJsonConfig.getReaderFeatures());
+            }
         } catch (Exception ex) {
             throw new SerializationException("Could not deserialize: " + ex.getMessage(), ex);
         }
