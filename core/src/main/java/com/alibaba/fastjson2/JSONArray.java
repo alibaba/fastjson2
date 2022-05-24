@@ -954,7 +954,6 @@ public class JSONArray
 
     /**
      * Convert all the members of this {@link JSONArray} into the specified Object.
-     * Warning that each member of the {@link JSONArray} must implement the {@link Map} interface.
      *
      * <pre>{@code
      * String json = "[{\"id\": 1, \"name\": \"fastjson\"}, {\"id\": 2, \"name\": \"fastjson2\"}]";
@@ -1010,7 +1009,6 @@ public class JSONArray
     }
     /**
      * Convert all the members of this {@link JSONArray} into the specified Object.
-     * Warning that each member of the {@link JSONArray} must implement the {@link Map} interface.
      *
      * <pre>{@code
      * String json = "[{\"id\": 1, \"name\": \"fastjson\"}, {\"id\": 2, \"name\": \"fastjson2\"}]";
