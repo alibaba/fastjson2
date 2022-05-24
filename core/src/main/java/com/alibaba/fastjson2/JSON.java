@@ -896,6 +896,26 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONArray}
      *
+     * @param bytes the JSON {@link String} to be parsed
+     */
+    @SuppressWarnings("unchecked")
+    static JSONArray parseArray(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(bytes)) {
+            JSONArray array = JSONArray.READER.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(array);
+            }
+            return array;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link JSONArray}
+     *
      * @param text     the JSON {@link String} to be parsed
      * @param features features to be enabled in parsing
      */
