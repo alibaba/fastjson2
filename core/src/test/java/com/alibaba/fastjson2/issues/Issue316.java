@@ -28,7 +28,7 @@ public class Issue316 {
     @Test
     public void getArray() {
         JSONObject object = JSON.parseObject("{\"values\":[1,\"2\"]}");
-        String[] array = object.getArray("values", String.class);
+        String[] array = object.getObject("values", String[].class);
         assertEquals(2, array.length);
         assertEquals("1", array[0]);
         assertEquals("2", array[1]);
@@ -39,6 +39,14 @@ public class Issue316 {
     public void getList() {
         JSONObject object = JSON.parseObject("{\"values\":[1,\"2\"]}");
         List<String> list = object.getList("values", String.class);
+        assertEquals(2, list.size());
+        assertEquals("1", list.get(0));
+        assertEquals("2", list.get(1));
+    }
+
+    @Test
+    public void parseArray() {
+        List<String> list = JSON.parseArray("[1,\"2\"]", String.class);
         assertEquals(2, list.size());
         assertEquals("1", list.get(0));
         assertEquals("2", list.get(1));

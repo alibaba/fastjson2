@@ -219,11 +219,6 @@ public class JSONObject
         return null;
     }
 
-    public <T> T[] getArray(String key, Class<T> itemClass, JSONReader.Feature... features) {
-        JSONArray jsonArray = getJSONArray(key);
-        return jsonArray.toArray(itemClass, features);
-    }
-
     public <T> List<T> getList(String key, Class<T> itemClass, JSONReader.Feature... features) {
         JSONArray jsonArray = getJSONArray(key);
         return jsonArray.toList(itemClass, features);
