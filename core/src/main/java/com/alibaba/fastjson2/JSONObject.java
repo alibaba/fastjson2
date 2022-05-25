@@ -1115,6 +1115,10 @@ public class JSONObject
             featuresValue |= feature.mask;
         }
 
+        if (type == String.class) {
+            return (T) toString();
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
         return objectReader.createInstance(this, featuresValue);
@@ -1141,6 +1145,10 @@ public class JSONObject
                 fieldBased = true;
             }
             featuresValue |= feature.mask;
+        }
+
+        if (clazz == String.class) {
+            return (T) toString();
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();

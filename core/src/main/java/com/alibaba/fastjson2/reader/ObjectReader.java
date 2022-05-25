@@ -100,20 +100,16 @@ public interface ObjectReader<T> {
                 }
             }
 
-            if (!fieldClass.isInstance(fieldValue)) {
-                if (fieldReader.getFormat() == null) {
-                    fieldValue = TypeUtils.cast(fieldValue, fieldClass);
-                }
-            }
-
             Object typedFieldValue;
             if (fieldValue == null || fieldType == fieldValue.getClass()) {
                 typedFieldValue = fieldValue;
             } else {
                 if (fieldValue instanceof JSONObject) {
-                    typedFieldValue = ((JSONObject) fieldValue).toJavaObject(fieldType);
+                    typedFieldValue = ((JSONObject) fieldValue).to(fieldType);
                 } else if (fieldValue instanceof JSONArray) {
-                    typedFieldValue = ((JSONArray) fieldValue).toJavaObject(fieldType);
+                    typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
+                } else if (!fieldClass.isInstance(fieldValue) && fieldReader.getFormat() == null) {
+                    typedFieldValue = TypeUtils.cast(fieldValue, fieldClass);
                 } else {
                     String fieldValueJSONString = JSON.toJSONString(fieldValue);
                     try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {

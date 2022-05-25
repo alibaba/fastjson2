@@ -930,12 +930,20 @@ public class JSONArray
      */
     @SuppressWarnings("unchecked")
     public <T> T to(Type type) {
+        if (type == String.class) {
+            return (T) toString();
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(type);
         return objectReader.createInstance(this);
     }
 
     public <T> T to(Class<T> type) {
+        if (type == String.class) {
+            return (T) toString();
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader<T> objectReader = provider.getObjectReader(type);
         return objectReader.createInstance(this);
