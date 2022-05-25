@@ -9,14 +9,14 @@ import java.io.InputStream;
 
 public class FastjsonSockJsMessageCodec
         extends AbstractSockJsMessageCodec {
-    private FastJsonConfig fastJsonConfig = new FastJsonConfig();
+    private FastJsonConfig config = new FastJsonConfig();
 
     public FastJsonConfig getFastJsonConfig() {
-        return fastJsonConfig;
+        return config;
     }
 
     public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
-        this.fastJsonConfig = fastJsonConfig;
+        this.config = fastJsonConfig;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class FastjsonSockJsMessageCodec
 
     @Override
     public String encode(String... messages) {
-        JSONWriter jsonWriter = JSONWriter.of(fastJsonConfig.getWriterFeatures());
+        JSONWriter jsonWriter = JSONWriter.of(config.getWriterFeatures());
         if (jsonWriter.isUTF8()) {
             jsonWriter.writeRaw(new byte[]{'a'});
         } else {
