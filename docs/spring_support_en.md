@@ -39,6 +39,7 @@ dateFormat | String | The specified date format, default yyyy-MM-dd HH:mm:ss
 writerFilters | Filter[] | Configure serialization filters
 writerFeatures | JSONWriter.Feature[] | Configure the specified behavior of serialization. For more configuration, see [Features](features_en.md)
 readerFeatures | JSONReader.Feature[] | Configure the specified behavior of deserialization. For more configuration, see [Features](features_en.md)
+jsonb | boolean | Use JSONB for serialization and deserialization, the default is false
 symbolTable | JSONB.SymbolTable | JSONB serialization and deserialization symbol table, only valid when using JSONB
 
 # 2. Integrate Fastjson2 in Spring Web MVC
@@ -201,11 +202,8 @@ public class RedisConfiguration {
 ## 4.3 JSONB Redis Serializer
 
 If you plan to use JSONB as an object serialization/deserialization method and have higher serialization speed
-requirements, you can also use `GenericFastJsonJSONBRedisSerializer` and `FastJsonJSONBRedisSerializer`. These
-two `RedisSerializer` are new in fastjson 2.0.3 version Added support, the configuration is similar.
-
-**Package**：`com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonJSONBRedisSerializer`
-and `com.alibaba.fastjson2.support.spring.data.redis.FastJsonJSONBRedisSerializer`
+requirements, you can configure the `jsonb` parameter, which is a new support in fastjson 2.0.5, and the configuration
+is also very simple.
 
 **Example**:
 
@@ -218,8 +216,16 @@ public class RedisConfiguration {
     public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate redisTemplate = new RedisTemplate();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
-        GenericFastJsonJSONBRedisSerializer fastJsonRedisSerializer = new GenericFastJsonJSONBRedisSerializer();
+        // GenericFastJsonRedisSerializer use jsonb
+        // GenericFastJsonRedisSerializer fastJsonRedisSerializer = new GenericFastJsonRedisSerializer(true);
+
+        // FastJsonRedisSerializer use jsonb
+        FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(User.class);
+        // FastJsonConfig fastJsonConfig = new FastJsonConfig();
+        // fastJsonConfig.setJSONB(true);
+        // fastJsonRedisSerializer.setFastJsonConfig(fastJsonConfig);
         redisTemplate.setDefaultSerializer(fastJsonRedisSerializer);
+
         return redisTemplate;
     }
 }
@@ -228,3 +234,60 @@ public class RedisConfiguration {
 
 > Reference: Spring Data Redis official documentation, [For more configuration](https://docs.spring.io/spring-data/redis/docs/current/reference/html/).
 
+# 5. Integrate Fastjson2 in Spring Messaging
+
+In Fastjson2, you can use `MappingFastJsonMessageConverter` to provide a better performance experience for Spring
+Messaging.
+
+## 5.1 JSON Message Converter
+
+Use `MappingFastJsonMessageConverter` as Spring Cloud Stream or Spring Messaging to speed up message serialization and
+deserialization.
+
+**Package**: `com.alibaba.fastjson2.support.spring.messaging.converter.MappingFastJsonMessageConverter`
+
+**Example**:
+
+```java
+
+@Configuration
+public class StreamConfiguration {
+
+    @Bean
+    @StreamMessageConverter
+    public MappingFastJsonMessageConverter messageConverter() {
+        return new MappingFastJsonMessageConverter();
+    }
+}
+
+```
+
+## 5.2 JSONB Message Converter
+
+If you plan to use JSONB as the object serialization/deserialization method and have high requirements on serialization
+speed, you can configure the `jsonb` parameter of `FastJsonConfig`, which is a new support in fastjson 2.0.5 version ,
+the configuration is also very simple.
+
+_Note: JSONB only supports serializing the payload of Message to byte[]_
+
+**Example**:
+
+```java
+
+@Configuration
+public class StreamConfiguration {
+
+    @Bean
+    @StreamMessageConverter
+    public MappingFastJsonMessageConverter messageConverter() {
+        MappingFastJsonMessageConverter messageConverter = new MappingFastJsonMessageConverter();
+        FastJsonConfig fastJsonConfig = new FastJsonConfig();
+        fastJsonConfig.setJSONB(true); // use jsonb
+        messageConverter.setFastJsonConfig(fastJsonConfig);
+        return messageConverter;
+    }
+}
+
+```
+
+> Reference: Spring Messaging official documentation, [For more configuration](https://docs.spring.io/spring-boot/docs/current/reference/html/messaging.html#messaging).
