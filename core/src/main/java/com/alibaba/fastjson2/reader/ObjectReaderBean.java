@@ -108,12 +108,14 @@ public abstract class ObjectReaderBean<T>
                 break;
             }
 
+            JSONReader.Context context = jsonReader.getContext();
             long features3, hash = jsonReader.readFieldNameHashCode();
-            if (hash == getTypeKeyHash() && i == 0 &&
-                    ((features3 = (features | getFeatures() | jsonReader.getContext().getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0
+            if (i == 0
+                    && hash == getTypeKeyHash()
+                    && ((((features3 = (features | getFeatures() | context.getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0) || context.getContextAutoTypeBeforeHandler() != null)
             ) {
                 long typeHash = jsonReader.readTypeHashCode();
-                JSONReader.Context context = jsonReader.getContext();
+
                 ObjectReader reader = autoType(context, typeHash);
 
                 String typeName = null;
