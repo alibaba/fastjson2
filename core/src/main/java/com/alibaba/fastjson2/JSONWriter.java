@@ -394,7 +394,14 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter of(Context writeContext) {
-        return JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF8JDK9(writeContext);
+        JSONWriter jsonWriter = JDKUtils.JVM_VERSION == 8
+                ? new JSONWriterUTF16JDK8(writeContext)
+                : new JSONWriterUTF8JDK9(writeContext);
+
+        if (writeContext.isEnabled(Feature.PrettyFormat)) {
+            jsonWriter = new JSONWriterPretty(jsonWriter);
+        }
+        return jsonWriter;
     }
 
     public static JSONWriter of(Feature... features) {

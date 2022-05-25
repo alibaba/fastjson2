@@ -340,6 +340,13 @@ public class JSON {
         }
     }
 
+    public static String toJSONString(Object object, boolean prettyFormat) {
+        SerializerFeature[] features = prettyFormat
+                ? new SerializerFeature[]{SerializerFeature.PrettyFormat}
+                : new SerializerFeature[0];
+        return toJSONString(object, new SerializeFilter[0], features);
+    }
+
     public static String toJSONString(Object object) {
         return toJSONString(object, new SerializeFilter[0], new SerializerFeature[0]);
     }
@@ -412,6 +419,10 @@ public class JSON {
                     break;
                 case MapSortField:
                     ctx.config(JSONWriter.Feature.MapSortField);
+                    break;
+                case PrettyFormat:
+                    ctx.config(JSONWriter.Feature.PrettyFormat);
+                    break;
                 default:
                     break;
             }
