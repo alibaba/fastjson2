@@ -1053,7 +1053,7 @@ public class ObjectReaderCreator {
         return createFieldReaderMethod(objectClass, objectClass, fieldName, 0, 0L, format, null, null, null, fieldType, fieldClass, method);
     }
 
-    protected <T> FieldReader createFieldReaderParam(
+    public <T> FieldReader createFieldReaderParam(
             Class<T> objectClass,
             Type objectType,
             String fieldName,

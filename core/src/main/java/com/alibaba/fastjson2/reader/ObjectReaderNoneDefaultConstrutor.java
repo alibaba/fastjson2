@@ -12,7 +12,7 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_NULL;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
-class ObjectReaderNoneDefaultConstrutor<T>
+public class ObjectReaderNoneDefaultConstrutor<T>
         extends ObjectReaderAdapter<T> {
     final String[] paramNames;
     final FieldReader[] setterFieldReaders;
