@@ -52,9 +52,11 @@ public class ContextAutoTypeBeforeHandler
 
                 if (clazz == null) {
                     clazz = loadClass(typeName);
-                    Class origin = classCache.putIfAbsent(typeName, clazz);
-                    if (origin != null) {
-                        clazz = origin;
+                    if (clazz != null) {
+                        Class origin = classCache.putIfAbsent(typeName, clazz);
+                        if (origin != null) {
+                            clazz = origin;
+                        }
                     }
                 }
 
