@@ -10,7 +10,6 @@ import org.springframework.web.servlet.view.AbstractView;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +42,7 @@ public class FastJsonJsonView
     /**
      * with fastJson config
      */
-    private FastJsonConfig fastJsonConfig = new FastJsonConfig();
+    private FastJsonConfig config = new FastJsonConfig();
 
     /**
      * Set default param.
@@ -57,14 +56,14 @@ public class FastJsonJsonView
      * @return the fastJsonConfig.
      */
     public FastJsonConfig getFastJsonConfig() {
-        return fastJsonConfig;
+        return config;
     }
 
     /**
      * @param fastJsonConfig the fastJsonConfig to set.
      */
     public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
-        this.fastJsonConfig = fastJsonConfig;
+        this.config = fastJsonConfig;
     }
 
     /**
@@ -100,9 +99,9 @@ public class FastJsonJsonView
 
         ByteArrayOutputStream outnew = new ByteArrayOutputStream();
 
-        int len = JSON.writeTo(outnew, value, fastJsonConfig.getDateFormat(), fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
+        int len = JSON.writeTo(outnew, value, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
 
-        if (fastJsonConfig.isWriteContentLength()) {
+        if (config.isWriteContentLength()) {
             // Write content length (determined via byte array).
             response.setContentLength(len);
         }
@@ -118,7 +117,7 @@ public class FastJsonJsonView
     protected void prepareResponse(HttpServletRequest request, //
                                    HttpServletResponse response) {
         setResponseContentType(request, response);
-        response.setCharacterEncoding(fastJsonConfig.getCharset().name());
+        response.setCharacterEncoding(config.getCharset().name());
         if (this.disableCaching) {
             response.addHeader("Pragma", "no-cache");
             response.addHeader("Cache-Control", "no-cache, no-store, max-age=0");
@@ -144,7 +143,7 @@ public class FastJsonJsonView
      * The default setting is {@code false}.
      */
     public void setUpdateContentLength(boolean updateContentLength) {
-        this.fastJsonConfig.setWriteContentLength(updateContentLength);
+        this.config.setWriteContentLength(updateContentLength);
     }
 
     /**

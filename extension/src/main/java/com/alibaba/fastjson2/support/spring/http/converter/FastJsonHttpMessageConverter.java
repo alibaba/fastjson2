@@ -34,7 +34,7 @@ public class FastJsonHttpMessageConverter
     /**
      * with fastJson config
      */
-    private FastJsonConfig fastJsonConfig = new FastJsonConfig();
+    private FastJsonConfig config = new FastJsonConfig();
 
     /**
      * Can serialize/deserialize all types.
@@ -47,14 +47,14 @@ public class FastJsonHttpMessageConverter
      * @return the fastJsonConfig.
      */
     public FastJsonConfig getFastJsonConfig() {
-        return fastJsonConfig;
+        return config;
     }
 
     /**
      * @param fastJsonConfig the fastJsonConfig to set.
      */
     public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
-        this.fastJsonConfig = fastJsonConfig;
+        this.config = fastJsonConfig;
     }
 
     @Override
@@ -105,8 +105,7 @@ public class FastJsonHttpMessageConverter
             }
             byte[] bytes = baos.toByteArray();
 
-            return JSON.parseObject(bytes, type,
-                    fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
+            return JSON.parseObject(bytes, type, config.getDateFormat(), config.getReaderFeatures());
         } catch (JSONException ex) {
             throw new HttpMessageNotReadableException("JSON parse error: " + ex.getMessage(), ex, inputMessage);
         } catch (IOException ex) {
@@ -119,10 +118,9 @@ public class FastJsonHttpMessageConverter
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             HttpHeaders headers = outputMessage.getHeaders();
 
-            int len = JSON.writeTo(baos, object, fastJsonConfig.getDateFormat(),
-                    fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
+            int len = JSON.writeTo(baos, object, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
 
-            if (headers.getContentLength() < 0 && fastJsonConfig.isWriteContentLength()) {
+            if (headers.getContentLength() < 0 && config.isWriteContentLength()) {
                 headers.setContentLength(len);
             }
 
