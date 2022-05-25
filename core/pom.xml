@@ -80,22 +80,6 @@
     </developers>
 
     <dependencies>
-        <!--
-            optional support by fastjson2.
-            so the scope of these libs is provided.
-        -->
-        <dependency>
-            <groupId>javax.money</groupId>
-            <artifactId>money-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.javamoney</groupId>
-            <artifactId>moneta</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- test libs -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
@@ -144,6 +128,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>javax.money</groupId>
+            <artifactId>money-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <scope>test</scope>
@@ -170,6 +159,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.javamoney</groupId>
+            <artifactId>moneta</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.msgpack</groupId>
             <artifactId>msgpack-core</artifactId>
             <scope>test</scope>
@@ -179,9 +173,6 @@
             <artifactId>spring-core</artifactId>
             <scope>test</scope>
         </dependency>
-
-
-
     </dependencies>
 
     <build>
@@ -219,26 +210,6 @@
                                     exports com.alibaba.fastjson2.writer;
                                     exports com.alibaba.fastjson2.util;
 
-                                    // optional dependency on java.sql
-                                    requires static java.sql;
-
-                                    // optional dependency on javax.money.Monetary
-                                    requires static java.money;
-
-                                    // optional dependency on jdk.unsupported for JDK's sun.misc.Unsafe
-                                    requires static jdk.unsupported;
-
-                                    // optional dependency on java.compiler for javax.tools.*
-                                    requires static java.compiler;
-
-                                    // optional dependency on java.management for java.lang.management.ManagementFactory
-                                    requires static java.management;
-
-                                    // optional dependency on moneta for org.javamoney.moneta.spi.DefaultNumberValue
-                                    requires static moneta;
-
-                                    // optional dependency on com.google.common for com.google.common.collect.*
-                                    requires static com.google.common;
                                     }
                                 </moduleInfoSource>
                             </module>
