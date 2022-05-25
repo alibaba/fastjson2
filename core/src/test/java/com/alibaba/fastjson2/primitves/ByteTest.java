@@ -119,7 +119,7 @@ public class ByteTest {
     public void test_filter() {
         PropertyFilter propertyFilter = new PropertyFilter() {
             @Override
-            public boolean process(Object object, String name, Object value) {
+            public boolean apply(Object object, String name, Object value) {
                 return false;
             }
         };

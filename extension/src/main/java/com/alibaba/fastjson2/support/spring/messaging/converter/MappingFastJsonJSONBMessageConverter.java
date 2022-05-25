@@ -14,12 +14,12 @@ import org.springframework.util.Assert;
 public class MappingFastJsonJSONBMessageConverter
         extends MappingFastJsonMessageConverter {
     public MappingFastJsonJSONBMessageConverter() {
-        super.getFastJsonConfig().setJsonb(true);
+        super.getFastJsonConfig().setJSONB(true);
     }
 
     @Override
     public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
-        fastJsonConfig.setJsonb(true);
+        fastJsonConfig.setJSONB(true);
         super.setFastJsonConfig(fastJsonConfig);
     }
 

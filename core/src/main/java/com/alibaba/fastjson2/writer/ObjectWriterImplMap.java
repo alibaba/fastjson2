@@ -11,10 +11,7 @@ import com.alibaba.fastjson2.util.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.SortedMap;
+import java.util.*;
 
 final class ObjectWriterImplMap
         extends ObjectWriterBaseModule.PrimitiveImpl {
@@ -332,6 +329,12 @@ final class ObjectWriterImplMap
         jsonWriter.startObject();
         Map map = (Map) object;
 
+        if (jsonWriter.isEnabled(JSONWriter.Feature.MapSortField)) {
+            if (!(map instanceof SortedMap) && map.getClass() != LinkedHashMap.class) {
+                map = new TreeMap<>(map);
+            }
+        }
+
         for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = it.next();
             Object value = entry.getValue();
@@ -422,7 +425,7 @@ final class ObjectWriterImplMap
             }
 
             if (propertyFilter != null) {
-                if (!propertyFilter.process(object, key, value)) {
+                if (!propertyFilter.apply(object, key, value)) {
                     continue;
                 }
             }
