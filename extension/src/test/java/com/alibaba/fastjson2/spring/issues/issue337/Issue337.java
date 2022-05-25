@@ -4,8 +4,9 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.support.config.FastJsonConfig;
+import com.alibaba.fastjson2.support.spring.data.redis.FastJsonRedisSerializer;
 import com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonRedisSerializer;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -15,13 +16,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue337 {
-    private GenericFastJsonRedisSerializer serializer;
-
-    @BeforeEach
-    public void setUp() {
-        this.serializer = new GenericFastJsonRedisSerializer();
-    }
-
     @Test
     public void test_0() {
         User user1 = new User(1, "test_1", 15);
@@ -64,9 +58,36 @@ public class Issue337 {
         listSer.add(baseResult1);
         listSer.add(baseResult2);
 
+        GenericFastJsonRedisSerializer serializer = new GenericFastJsonRedisSerializer();
         List<BaseResult<User>> listDes = (List<BaseResult<User>>) serializer.deserialize(serializer.serialize(listSer));
         assertTrue(listDes.size() == 2);
 //        assertTrue(listDes.get(0) instanceof BaseResult); // Expected true
+    }
+
+    @Test
+    public void test_3() {
+        User user1 = new User(1, "test_1", 25);
+        User user2 = new User(2, "test_2", 35);
+        BaseResult<User> baseResult1 = new BaseResult<>();
+        baseResult1.setData(user1);
+        baseResult1.setMsg("msg001");
+        baseResult1.setCode("001");
+        BaseResult<User> baseResult2 = new BaseResult<>();
+        baseResult2.setData(user2);
+        baseResult2.setMsg("msg002");
+        baseResult2.setCode("002");
+        List<BaseResult<User>> listSer = new ArrayList<>();
+        listSer.add(baseResult1);
+        listSer.add(baseResult2);
+
+        FastJsonRedisSerializer serializer = new FastJsonRedisSerializer(List.class);
+        FastJsonConfig config = new FastJsonConfig();
+        config.setReaderFeatures(JSONReader.Feature.SupportAutoType);
+        config.setWriterFeatures(JSONWriter.Feature.WriteClassName);
+        serializer.setFastJsonConfig(config);
+        List<BaseResult<User>> listDes = (List<BaseResult<User>>) serializer.deserialize(serializer.serialize(listSer));
+        assertTrue(listDes instanceof List);
+        assertTrue(listDes.get(0) instanceof BaseResult); // Expected true
     }
 
     static class User {
