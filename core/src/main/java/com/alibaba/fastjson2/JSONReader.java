@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
@@ -2209,12 +2210,16 @@ public abstract class JSONReader
         }
     }
 
-    public static interface Filter {
+    public interface Filter {
     }
 
     public interface AutoTypeBeforeHandler
             extends JSONReader.Filter {
         Class<?> apply(String typeName, Class<?> expectClass, long features);
+    }
+
+    public static AutoTypeBeforeHandler autoTypeFilter(String... names) {
+        return new ContextAutoTypeBeforeHandler(names);
     }
 
     public static class Context {
@@ -2258,7 +2263,19 @@ public abstract class JSONReader
             return provider.getObjectReader(typeName, expectClass, features);
         }
 
+        public AutoTypeBeforeHandler getContextAutoTypeBeforeHandler() {
+            return autoTypeBeforeHandler;
+        }
+
         public ObjectReader getObjectReaderAutoType(String typeName, Class expectClass, long features) {
+            if (autoTypeBeforeHandler != null && !ObjectReaderProvider.SAFE_MODE) {
+                Class<?> autoTypeClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
+                if (autoTypeClass != null) {
+                    boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
+                    return provider.getObjectReader(autoTypeClass, fieldBased);
+                }
+            }
+
             return provider.getObjectReader(typeName, expectClass, this.features | features);
         }
 
