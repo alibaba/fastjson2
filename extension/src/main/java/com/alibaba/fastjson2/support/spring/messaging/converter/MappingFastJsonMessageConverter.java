@@ -26,7 +26,7 @@ public class MappingFastJsonMessageConverter
     /**
      * with fastJson config
      */
-    private FastJsonConfig fastJsonConfig = new FastJsonConfig();
+    private FastJsonConfig config = new FastJsonConfig();
 
     /**
      * default support application/json
@@ -39,14 +39,14 @@ public class MappingFastJsonMessageConverter
      * @return the fastJsonConfig.
      */
     public FastJsonConfig getFastJsonConfig() {
-        return fastJsonConfig;
+        return config;
     }
 
     /**
      * @param fastJsonConfig the fastJsonConfig to set.
      */
     public void setFastJsonConfig(FastJsonConfig fastJsonConfig) {
-        this.fastJsonConfig = fastJsonConfig;
+        this.config = fastJsonConfig;
     }
 
     @Override
@@ -61,12 +61,12 @@ public class MappingFastJsonMessageConverter
         Type type = getResolvedType(targetClass, conversionHint);
         Object payload = message.getPayload();
 
-        if (payload instanceof byte[] && fastJsonConfig.isJsonb()) {
-            obj = JSONB.parseObject((byte[]) payload, type, fastJsonConfig.getSymbolTable(), fastJsonConfig.getReaderFeatures());
-        } else if (payload instanceof byte[] && !fastJsonConfig.isJsonb()) {
-            obj = JSON.parseObject((byte[]) payload, type, fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
+        if (payload instanceof byte[] && config.isJSONB()) {
+            obj = JSONB.parseObject((byte[]) payload, type, config.getSymbolTable(), config.getReaderFeatures());
+        } else if (payload instanceof byte[] && !config.isJSONB()) {
+            obj = JSON.parseObject((byte[]) payload, type, config.getDateFormat(), config.getReaderFeatures());
         } else if (payload instanceof String && JSON.isValid((String) payload)) {
-            obj = JSON.parseObject((String) payload, type, fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
+            obj = JSON.parseObject((String) payload, type, config.getDateFormat(), config.getReaderFeatures());
         }
         return obj;
     }
@@ -77,20 +77,20 @@ public class MappingFastJsonMessageConverter
         Object obj = null;
 
         if (byte[].class == getSerializedPayloadClass()) {
-            if (payload instanceof String && fastJsonConfig.isJsonb()) {
+            if (payload instanceof String && config.isJSONB()) {
                 obj = JSONB.fromJSONString((String) payload);
-            } else if (payload instanceof String && !fastJsonConfig.isJsonb()) {
-                obj = ((String) payload).getBytes(fastJsonConfig.getCharset());
-            } else if (fastJsonConfig.isJsonb()) {
-                obj = JSONB.toBytes(payload, fastJsonConfig.getSymbolTable(), fastJsonConfig.getWriterFeatures());
+            } else if (payload instanceof String && !config.isJSONB()) {
+                obj = ((String) payload).getBytes(config.getCharset());
+            } else if (config.isJSONB()) {
+                obj = JSONB.toBytes(payload, config.getSymbolTable(), config.getWriterFeatures());
             } else {
-                obj = JSON.toJSONBytes(payload, fastJsonConfig.getDateFormat(), fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
+                obj = JSON.toJSONBytes(payload, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
             }
         } else if (String.class == getSerializedPayloadClass()) {
             if (payload instanceof String && JSON.isValid((String) payload)) {
                 obj = payload;
             } else {
-                obj = JSON.toJSONString(payload, fastJsonConfig.getDateFormat(), fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
+                obj = JSON.toJSONString(payload, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
             }
         }
         return obj;

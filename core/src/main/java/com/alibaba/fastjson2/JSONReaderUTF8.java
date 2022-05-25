@@ -1037,6 +1037,14 @@ class JSONReaderUTF8
             ch = (char) bytes[offset++];
         }
 
+        if (ch == 'L' || ch == 'F' || ch == 'D') {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+        }
+
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             if (offset >= end) {
                 ch = EOI;
@@ -1145,6 +1153,14 @@ class JSONReaderUTF8
             }
         }
 
+        if (ch == 'L' || ch == 'F' || ch == 'D') {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+        }
+
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             if (offset >= end) {
                 ch = EOI;
@@ -1233,7 +1249,7 @@ class JSONReaderUTF8
                 try {
                     return bigInteger.longValueExact();
                 } catch (ArithmeticException ex) {
-                    throw new JSONException("long overflow, value " + bigInteger.toString());
+                    throw new JSONException("long overflow, value " + bigInteger);
                 }
             } else {
                 return getInt64Value();
@@ -1242,6 +1258,14 @@ class JSONReaderUTF8
 
         if (quote != 0) {
             this.ch = (char) bytes[offset++];
+        }
+
+        if (ch == 'L' || ch == 'F' || ch == 'D') {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
         }
 
         while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
@@ -1353,6 +1377,14 @@ class JSONReaderUTF8
         }
 
         if (quote != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        if (ch == 'L' || ch == 'F' || ch == 'D') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -2597,6 +2629,14 @@ class JSONReaderUTF8
                 return;
             }
 
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        if (ch == 'L' || ch == 'F' || ch == 'D') {
             if (offset >= end) {
                 ch = EOI;
             } else {

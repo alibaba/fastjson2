@@ -15,8 +15,8 @@ public class FastJsonConfigTest {
     public void test() throws Exception {
         FastJsonConfig fastJsonConfig = new FastJsonConfig();
 
-        fastJsonConfig.setJsonb(true);
-        assertEquals(fastJsonConfig.isJsonb(), true);
+        fastJsonConfig.setJSONB(true);
+        assertEquals(fastJsonConfig.isJSONB(), true);
         fastJsonConfig.setWriteContentLength(false);
         assertEquals(fastJsonConfig.isWriteContentLength(), false);
         fastJsonConfig.setCharset(Charset.forName("UTF-8"));

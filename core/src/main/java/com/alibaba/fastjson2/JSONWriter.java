@@ -1533,7 +1533,8 @@ public abstract class JSONWriter
         ReferenceDetection(1 << 16),
         WriteNameAsSymbol(1 << 17),
         WriteBigDecimalAsPlain(1 << 18),
-        UseSingleQuotes(1 << 19);
+        UseSingleQuotes(1 << 19),
+        MapSortField(1 << 20);
 
         public final long mask;
 

@@ -184,7 +184,7 @@ public class FastJsonConfig {
      * @return the boolean
      * @since 2.0.5
      */
-    public boolean isJsonb() {
+    public boolean isJSONB() {
         return jsonb;
     }
 
@@ -194,7 +194,7 @@ public class FastJsonConfig {
      * @param jsonb the jsonb
      * @since 2.0.5
      */
-    public void setJsonb(boolean jsonb) {
+    public void setJSONB(boolean jsonb) {
         this.jsonb = jsonb;
     }
 

@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 
+import java.nio.charset.StandardCharsets;
+
 public class TestUtils {
 
     public static ObjectReaderCreator[] readerCreators() {
@@ -100,5 +102,15 @@ public class TestUtils {
 
     public static JSONReader createJSONReaderStr(String str) {
         return new JSONReaderStr(JSONFactory.createReadContext(), str);
+    }
+
+    public static JSONReader[] createJSONReaders(String str) {
+        byte[] utf8Bytes = str.getBytes(StandardCharsets.UTF_8);
+        byte[] utf16Bytes = str.getBytes(StandardCharsets.UTF_16);
+        return new JSONReader[]{
+                new JSONReaderStr(JSONFactory.createReadContext(), str),
+                new JSONReaderUTF8(JSONFactory.createReadContext(), utf8Bytes, 0, utf8Bytes.length),
+                new JSONReaderUTF16(JSONFactory.createReadContext(), utf16Bytes, 0, utf16Bytes.length)
+        };
     }
 }

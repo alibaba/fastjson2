@@ -410,6 +410,8 @@ public class JSON {
                 case UseSingleQuotes:
                     ctx.config(JSONWriter.Feature.UseSingleQuotes);
                     break;
+                case MapSortField:
+                    ctx.config(JSONWriter.Feature.MapSortField);
                 default:
                     break;
             }
