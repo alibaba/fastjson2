@@ -38,6 +38,7 @@ dateFormat | String | 指定的日期格式，默认yyyy-MM-dd HH:mm:ss
 writerFilters | Filter[] | 配置序列化过滤器
 writerFeatures | JSONWriter.Feature[] | 配置序列化的指定行为，更多配置请见：[Features](features_cn.md)
 readerFeatures | JSONReader.Feature[] | 配置反序列化的指定行为，更多配置请见：[Features](features_cn.md)
+jsonb | boolean | 是否采用JSONB进行序列化和反序列化，默认false
 symbolTable | JSONB.SymbolTable | JSONB序列化和反序列化的符号表，只有使用JSONB时生效
 
 # 2. 在 Spring Web MVC 中集成 Fastjson2
@@ -194,11 +195,7 @@ public class RedisConfiguration {
 
 ## 4.3 JSONB Redis Serializer
 
-如果你准备使用 JSONB 作为对象序列/反序列化的方式并对序列化速度有较高的要求的话，还可以使用 `GenericFastJsonJSONBRedisSerializer` 和 `FastJsonJSONBRedisSerializer`
-这两个 `RedisSerializer` 是 fastjson 2.0.3 版本中新增的支持，配置也是类似的。
-
-**Package**：`com.alibaba.fastjson2.support.spring.data.redis.GenericFastJsonJSONBRedisSerializer`
-and `com.alibaba.fastjson2.support.spring.data.redis.FastJsonJSONBRedisSerializer`
+如果你准备使用 JSONB 作为对象序列/反序列化的方式并对序列化速度有较高的要求的话，可以对jsonb参数进行配置，该参数是 fastjson 2.0.5 版本中新增的支持，配置也很简单。
 
 **Example**:
 
@@ -211,8 +208,16 @@ public class RedisConfiguration {
     public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate redisTemplate = new RedisTemplate();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
-        GenericFastJsonJSONBRedisSerializer fastJsonRedisSerializer = new GenericFastJsonJSONBRedisSerializer();
+        // GenericFastJsonRedisSerializer use jsonb
+        // GenericFastJsonRedisSerializer fastJsonRedisSerializer = new GenericFastJsonRedisSerializer(true);
+
+        // FastJsonRedisSerializer use jsonb
+        FastJsonRedisSerializer fastJsonRedisSerializer = new FastJsonRedisSerializer(User.class);
+        // FastJsonConfig fastJsonConfig = new FastJsonConfig();
+        // fastJsonConfig.setJSONB(true);
+        // fastJsonRedisSerializer.setFastJsonConfig(fastJsonConfig);
         redisTemplate.setDefaultSerializer(fastJsonRedisSerializer);
+
         return redisTemplate;
     }
 }
@@ -221,3 +226,56 @@ public class RedisConfiguration {
 
 > 参考：Spring Data Redis 官方文档，[查看更多](https://docs.spring.io/spring-data/redis/docs/current/reference/html/) 。
 
+# 5. 在 Spring Messaging 中集成 Fastjson2
+
+在Fastjson2中，同样可以使用 `MappingFastJsonMessageConverter` 为 Spring Messaging 提供更好的性能体验。
+
+## 5.1 JSON Message Converter
+
+使用 `MappingFastJsonMessageConverter` 作为 Spring Cloud Stream 或 Spring Messaging 来提升Message的序列化和反序列化速度。
+
+**Package**: `com.alibaba.fastjson2.support.spring.messaging.converter.MappingFastJsonMessageConverter`
+
+**Example**:
+
+```java
+
+@Configuration
+public class StreamConfiguration {
+
+    @Bean
+    @StreamMessageConverter
+    public MappingFastJsonMessageConverter messageConverter() {
+        return new MappingFastJsonMessageConverter();
+    }
+}
+
+```
+
+## 5.2 JSONB Message Converter
+
+如果你准备使用 JSONB 作为对象序列/反序列化的方式并对序列化速度有较高的要求的话，可以对 `FastJsonConfig` 的 `jsonb` 参数进行配置，该参数是 fastjson 2.0.5 版本中新增的支持，配置也很简单。
+
+_注意：JSONB仅支持将Message的payload序列化为byte[]_
+
+**Example**:
+
+```java
+
+@Configuration
+public class StreamConfiguration {
+
+    @Bean
+    @StreamMessageConverter
+    public MappingFastJsonMessageConverter messageConverter() {
+        MappingFastJsonMessageConverter messageConverter = new MappingFastJsonMessageConverter();
+        FastJsonConfig fastJsonConfig = new FastJsonConfig();
+        fastJsonConfig.setJSONB(true); // use jsonb
+        messageConverter.setFastJsonConfig(fastJsonConfig);
+        return messageConverter;
+    }
+}
+
+```
+
+> 参考：Spring Messaging 官方文档，[查看更多](https://docs.spring.io/spring-boot/docs/current/reference/html/messaging.html#messaging) 。
