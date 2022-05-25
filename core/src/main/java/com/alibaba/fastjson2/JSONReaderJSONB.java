@@ -745,6 +745,17 @@ final class JSONReaderJSONB
                 }
             }
 
+            if (context.autoTypeBeforeHandler != null) {
+                String typeName = getString();
+                Class<?> objectClass = context.autoTypeBeforeHandler.apply(typeName, expectClass, features);
+                if (objectClass != null) {
+                    ObjectReader objectReader = context.getObjectReader(objectClass);
+                    if (objectReader != null) {
+                        return objectReader;
+                    }
+                }
+            }
+
             boolean isSupportAutoType = ((context.features | features) & Feature.SupportAutoType.mask) != 0;
             if (!isSupportAutoType) {
                 String typeName = getString();

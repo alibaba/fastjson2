@@ -378,6 +378,48 @@ public interface JSONB {
         return object;
     }
 
+    static <T> T parseObject(
+            byte[] jsonbBytes,
+            Class<T> objectClass,
+            JSONReader.Filter filter,
+            JSONReader.Feature... features) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        JSONReader.Context context = new JSONReader.Context(provider);
+        context.config(filter, features);
+
+        try (JSONReader jsonReader = new JSONReaderJSONB(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length, null)
+        ) {
+            for (JSONReader.Feature feature : features) {
+                context.features |= feature.mask;
+            }
+
+            Object object;
+            if (objectClass == Object.class) {
+                ObjectReader autoTypeObjectReader;
+                byte type = jsonReader.getType();
+                if (type == BC_TYPED_ANY) {
+                    autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, 0);
+                    object = autoTypeObjectReader.readJSONBObject(jsonReader, context.features);
+                } else {
+                    object = jsonReader.readAny();
+                }
+            } else {
+                boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+                ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
+                object = objectReader.readJSONBObject(jsonReader, 0);
+            }
+
+            if (jsonReader.resolveTasks != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return (T) object;
+        }
+    }
+
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass, JSONReader.Feature... features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);

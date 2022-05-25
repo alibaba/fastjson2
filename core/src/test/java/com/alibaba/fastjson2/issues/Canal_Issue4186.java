@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.issues;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -30,6 +27,24 @@ public class Canal_Issue4186 {
         }
 
         assertThrows(JSONException.class, () -> JSON.parseObject(jsonString, Position.class));
+    }
+
+    @Test
+    public void testJSONB() {
+        EntryPosition position = new EntryPosition();
+
+        byte[] bytes = JSONB.toBytes(position, JSONWriter.Feature.WriteClassName);
+
+        {
+            Position position1 = JSONB.parseObject(bytes, Position.class, autoTypeFilter);
+            assertEquals(position.getClass(), position1.getClass());
+        }
+        {
+            Position position1 = JSONB.parseObject(bytes, Position.class, autoTypeFilter);
+            assertEquals(position.getClass(), position1.getClass());
+        }
+
+        assertThrows(JSONException.class, () -> JSONB.parseObject(bytes, Position.class));
     }
 
     @Test
