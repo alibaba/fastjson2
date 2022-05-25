@@ -1149,6 +1149,15 @@ public class ObjectReaderBaseModule
             case "org.springframework.security.authentication.BadCredentialsException":
                 internalMixin = "org.springframework.security.jackson2.BadCredentialsExceptionMixin";
                 break;
+            case "org.springframework.security.web.csrf.DefaultCsrfToken":
+                internalMixin = "org.springframework.security.web.jackson2.DefaultCsrfTokenMixin";
+                break;
+            case "org.springframework.security.web.savedrequest.SavedCookie":
+                internalMixin = "org.springframework.security.web.jackson2.SavedCookieMixin";
+                break;
+            case "org.springframework.security.web.authentication.WebAuthenticationDetails":
+                internalMixin = "org.springframework.security.web.jackson2.WebAuthenticationDetailsMixin";
+                break;
             default:
                 break;
         }
