@@ -2,7 +2,11 @@ package com.alibaba.fastjson2.v1issues.issue_4100;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.annotation.JSONCreator;
+import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.nio.charset.StandardCharsets;
 
@@ -15,6 +19,18 @@ public class Issue4138 {
             "org.springframework.security.core.authority.SimpleGrantedAuthority",
             "org.springframework.util.LinkedCaseInsensitiveMap"
     );
+
+    @BeforeEach
+    private void init() {
+        JSON.mixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityMixin.class);
+    }
+
+    static class SimpleGrantedAuthorityMixin {
+        @JSONCreator
+        public SimpleGrantedAuthorityMixin(@JSONField(name = "authority", alternateNames = "role") String role) {
+
+        }
+    }
 
     public Object deserialize(byte[] bytes) {
         return JSON.parseObject(bytes, Object.class, filter);
@@ -31,6 +47,14 @@ public class Issue4138 {
     @Test
     public void test() {
         String json = "{\"@type\":\"org.springframework.security.core.authority.SimpleGrantedAuthority\",\"role\":\"abc\"}";
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+        Object object = deserialize(bytes);
+        assertEquals(org.springframework.security.core.authority.SimpleGrantedAuthority.class, object.getClass());
+    }
+
+    @Test
+    public void testAuthority() {
+        String json = "{\"@type\":\"org.springframework.security.core.authority.SimpleGrantedAuthority\",\"authority\":\"abc\"}";
         byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
         Object object = deserialize(bytes);
         assertEquals(org.springframework.security.core.authority.SimpleGrantedAuthority.class, object.getClass());
