@@ -24,14 +24,14 @@ public class Retrofit2ConverterFactory
         extends Converter.Factory {
     private static final MediaType MEDIA_TYPE = MediaType.parse("application/json; charset=UTF-8");
 
-    private FastJsonConfig fastJsonConfig;
+    private FastJsonConfig config;
 
     public Retrofit2ConverterFactory() {
-        this.fastJsonConfig = new FastJsonConfig();
+        this.config = new FastJsonConfig();
     }
 
     public Retrofit2ConverterFactory(FastJsonConfig fastJsonConfig) {
-        this.fastJsonConfig = fastJsonConfig;
+        this.config = fastJsonConfig;
     }
 
     public static Retrofit2ConverterFactory create() {
@@ -61,11 +61,11 @@ public class Retrofit2ConverterFactory
     }
 
     public FastJsonConfig getFastJsonConfig() {
-        return fastJsonConfig;
+        return config;
     }
 
     public Retrofit2ConverterFactory setFastJsonConfig(FastJsonConfig fastJsonConfig) {
-        this.fastJsonConfig = fastJsonConfig;
+        this.config = fastJsonConfig;
         return this;
     }
 
@@ -80,8 +80,7 @@ public class Retrofit2ConverterFactory
         @Override
         public T convert(ResponseBody value) throws IOException {
             try {
-                return JSON.parseObject(value.bytes(), type,
-                        fastJsonConfig.getDateFormat(), fastJsonConfig.getReaderFeatures());
+                return JSON.parseObject(value.bytes(), type, config.getDateFormat(), config.getReaderFeatures());
             } catch (Exception e) {
                 throw new IOException("JSON parse error: " + e.getMessage(), e);
             } finally {
@@ -98,8 +97,7 @@ public class Retrofit2ConverterFactory
         @Override
         public RequestBody convert(T value) throws IOException {
             try {
-                byte[] content = JSON.toJSONBytes(value, fastJsonConfig.getDateFormat(),
-                        fastJsonConfig.getWriterFilters(), fastJsonConfig.getWriterFeatures());
+                byte[] content = JSON.toJSONBytes(value, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
                 return RequestBody.create(MEDIA_TYPE, content);
             } catch (Exception e) {
                 throw new IOException("Could not write JSON: " + e.getMessage(), e);
