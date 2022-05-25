@@ -43,7 +43,8 @@ final class FieldReaderListStrMethod<T>
                     || listType == AbstractCollection.class
                     || listType == List.class
                     || listType == AbstractList.class
-                    || listType == ArrayList.class) {
+                    || listType == ArrayList.class
+                    || listType == ObjectReaderImplList.CLASS_ARRAYS_LIST) {
                 value = new ArrayList(itemCnt);
             } else if (listType == LinkedList.class) {
                 value = new LinkedList();
