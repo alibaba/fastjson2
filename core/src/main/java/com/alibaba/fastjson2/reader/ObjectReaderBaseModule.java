@@ -1123,6 +1123,7 @@ public class ObjectReaderBaseModule
             return ObjectReaderImplClass.INSTANCE;
         }
 
+        String internalMixin = null;
         String typeName = type.getTypeName();
         switch (typeName) {
             case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
@@ -1130,8 +1131,36 @@ public class ObjectReaderBaseModule
                 return null;
             case "org.springframework.util.LinkedMultiValueMap":
                 return ObjectReaderImplMap.of(type, (Class) type, 0L);
+            case "org.springframework.security.core.authority.RememberMeAuthenticationToken":
+                internalMixin = "org.springframework.security.jackson2.AnonymousAuthenticationTokenMixin";
+                break;
+            case "org.springframework.security.core.authority.AnonymousAuthenticationToken":
+                internalMixin = "org.springframework.security.jackson2.RememberMeAuthenticationTokenMixin";
+                break;
+            case "org.springframework.security.core.authority.SimpleGrantedAuthority":
+                internalMixin = "org.springframework.security.jackson2.SimpleGrantedAuthorityMixin";
+                break;
+            case "org.springframework.security.core.userdetails.User":
+                internalMixin = "org.springframework.security.jackson2.UserMixin";
+                break;
+            case "org.springframework.security.authentication.UsernamePasswordAuthenticationToken":
+                internalMixin = "org.springframework.security.jackson2.UsernamePasswordAuthenticationTokenMixin";
+                break;
+            case "org.springframework.security.authentication.BadCredentialsException":
+                internalMixin = "org.springframework.security.jackson2.BadCredentialsExceptionMixin";
+                break;
             default:
                 break;
+        }
+
+        if (internalMixin != null) {
+            Class mixin = provider.mixInCache.get(type);
+            if (mixin == null) {
+                mixin = TypeUtils.loadClass(internalMixin);
+                if (mixin != null) {
+                    provider.mixInCache.putIfAbsent((Class) type, mixin);
+                }
+            }
         }
 
         if (type == Map.class || type == AbstractMap.class) {
