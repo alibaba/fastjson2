@@ -17,23 +17,15 @@ package com.alibaba.fastjson.util;
 
 import com.alibaba.fastjson.JSONException;
 
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
-import java.util.Properties;
 
 /**
  * @author wenshao[szujobs@hotmail.com]
  */
 public class IOUtils {
-    public static final String FASTJSON_PROPERTIES = "fastjson.properties";
-    public static final String FASTJSON_COMPATIBLEWITHJAVABEAN = "fastjson.compatibleWithJavaBean";
-    public static final String FASTJSON_COMPATIBLEWITHFIELDNAME = "fastjson.compatibleWithFieldName";
-    public static final Properties DEFAULT_PROPERTIES = new Properties();
     public static final Charset UTF8 = StandardCharsets.UTF_8;
     public static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     public static final boolean[] firstIdentifierFlags = new boolean[256];
@@ -67,12 +59,6 @@ public class IOUtils {
             } else if (c >= '0' && c <= '9') {
                 identifierFlags[c] = true;
             }
-        }
-
-        try {
-            loadPropertiesFromFile();
-        } catch (Throwable e) {
-            //skip
         }
     }
 
@@ -152,39 +138,6 @@ public class IOUtils {
             IA[CA[i]] = i;
         }
         IA['='] = 0;
-    }
-
-    public static String getStringProperty(String name) {
-        String prop = null;
-        try {
-            prop = System.getProperty(name);
-        } catch (SecurityException e) {
-            //skip
-        }
-        return (prop == null) ? DEFAULT_PROPERTIES.getProperty(name) : prop;
-    }
-
-    public static void loadPropertiesFromFile() {
-        InputStream inputStream = AccessController.doPrivileged(new PrivilegedAction<InputStream>() {
-            @Override
-            public InputStream run() {
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                if (cl != null) {
-                    return cl.getResourceAsStream(FASTJSON_PROPERTIES);
-                } else {
-                    return ClassLoader.getSystemResourceAsStream(FASTJSON_PROPERTIES);
-                }
-            }
-        });
-
-        if (null != inputStream) {
-            try {
-                DEFAULT_PROPERTIES.load(inputStream);
-                inputStream.close();
-            } catch (java.io.IOException e) {
-                // skip
-            }
-        }
     }
 
     public static void decode(CharsetDecoder charsetDecoder, ByteBuffer byteBuf, CharBuffer charByte) {

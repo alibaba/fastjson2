@@ -30,21 +30,6 @@ import java.util.*;
  * @author wenshao[szujobs@hotmail.com]
  */
 public class TypeUtils {
-    public static boolean compatibleWithJavaBean;
-    /**
-     * 根据field name的大小写输出输入数据
-     */
-    public static boolean compatibleWithFieldName;
-
-    static {
-        try {
-            TypeUtils.compatibleWithJavaBean = "true".equals(IOUtils.getStringProperty(IOUtils.FASTJSON_COMPATIBLEWITHJAVABEAN));
-            TypeUtils.compatibleWithFieldName = "true".equals(IOUtils.getStringProperty(IOUtils.FASTJSON_COMPATIBLEWITHFIELDNAME));
-        } catch (Throwable e) {
-            // skip
-        }
-    }
-
     public static int intValue(BigDecimal decimal) {
         if (decimal == null) {
             return 0;
