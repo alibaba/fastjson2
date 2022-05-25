@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.TypeUtils;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,5 +58,22 @@ public class JSONObjectTest3 {
 
     public static class Bean1 {
         public Double value;
+    }
+
+    @Test
+    public void test4() {
+        JSONObject object = JSON.parseObject("{\"websiteList\":[\"a\",\"b\"]}");
+        Bean4 to = object.to(Bean4.class);
+        assertEquals("a", to.websiteList[0]);
+        assertEquals("b", to.websiteList[1]);
+        assertEquals("{\"websiteList\":[\"a\",\"b\"]}", object.to(String.class));
+        assertEquals("{\"websiteList\":[\"a\",\"b\"]}", object.to((Type) String.class));
+
+        assertEquals("[]", JSONArray.of().to(String.class));
+        assertEquals("[]", JSONArray.of().to((Type) String.class));
+    }
+
+    public static class Bean4 {
+        public String[] websiteList;
     }
 }
