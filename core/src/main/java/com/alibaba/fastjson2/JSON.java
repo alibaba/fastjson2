@@ -533,6 +533,30 @@ public interface JSON {
      * Parse UTF8 encoded JSON byte array into a Java object with specified {@link JSONReader.Feature}s enabled
      *
      * @param bytes    UTF8 encoded JSON byte array to parse
+     * @param clazz    specify the Class to be converted
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(byte[] bytes, Class<T> clazz, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(bytes)) {
+            reader.context.config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(clazz);
+            T object = objectReader.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse UTF8 encoded JSON byte array into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param bytes    UTF8 encoded JSON byte array to parse
      * @param type     specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
