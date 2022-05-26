@@ -1,4 +1,4 @@
-package com.alibaba.json.bvt.issue_2600;
+package com.alibaba.fastjson.issue_2600;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue2685 {
     @Test
-    public void test_field() throws Exception {
+    public void test_field() {
         SMGPSubmitMessage smgpSubmitMessage = new SMGPSubmitMessage();
         smgpSubmitMessage.setSequenceNo(1);
         smgpSubmitMessage.setServiceId("hell");
@@ -32,6 +32,8 @@ public class Issue2685 {
 
         String smsMsg = JSON.toJSONString(smgpSubmitMessage);
         // System.out.println(smsMsg);
+
+        System.out.println(smsMsg);
 
         com.alibaba.fastjson2.JSON.mixIn(SMGPSubmitMessage.class, Mixin.class);
         smgpSubmitMessage = JSON.parseObject(smsMsg, SMGPSubmitMessage.class);

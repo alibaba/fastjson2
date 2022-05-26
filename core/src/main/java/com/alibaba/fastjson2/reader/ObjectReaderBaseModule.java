@@ -790,6 +790,13 @@ public class ObjectReaderBaseModule
                             }
                             break;
                         }
+                        case "deserializeUsing": {
+                            Class<?> deserializeUsing = (Class) result;
+                            if (ObjectReader.class.isAssignableFrom(deserializeUsing)) {
+                                fieldInfo.readUsing = deserializeUsing;
+                            }
+                            break;
+                        }
                         default:
                             break;
                     }

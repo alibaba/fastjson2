@@ -32,6 +32,14 @@ public class SerializeWriter {
         this.raw.writeNull();
     }
 
+    public void writeString(String text) {
+        this.raw.writeString(text);
+    }
+
+    public void writeNull(SerializerFeature feature) {
+        this.raw.writeNull();
+    }
+
     public void write(String text) {
         this.raw.writeString(text);
     }
