@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
+import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
@@ -2210,11 +2211,8 @@ public abstract class JSONReader
         }
     }
 
-    public interface Filter {
-    }
-
     public interface AutoTypeBeforeHandler
-            extends JSONReader.Filter {
+            extends Filter {
         Class<?> apply(String typeName, Class<?> expectClass, long features);
     }
 

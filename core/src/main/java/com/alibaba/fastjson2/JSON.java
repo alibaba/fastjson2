@@ -299,7 +299,7 @@ public interface JSON {
     static <T> T parseObject(
             String text,
             Class<T> clazz,
-            JSONReader.Filter filter,
+            Filter filter,
             JSONReader.Feature... features) {
         if (text == null) {
             return null;
@@ -542,7 +542,7 @@ public interface JSON {
     static <T> T parseObject(
             byte[] utf8Bytes,
             Class<T> clazz,
-            JSONReader.Filter filter,
+            Filter filter,
             JSONReader.Feature... features) {
         if (utf8Bytes == null) {
             return null;
