@@ -2349,7 +2349,7 @@ public abstract class JSONReader
         }
 
         public void config(Filter[] filters, Feature... features) {
-            for(Filter filter: filters) {
+            for (Filter filter : filters) {
                 if (filter instanceof AutoTypeBeforeHandler) {
                     autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
                 }
