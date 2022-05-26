@@ -729,6 +729,10 @@ final class JSONReaderASCII
                 }
             }
 
+            if ((context.features & Feature.TrimString.mask) != 0) {
+                str = str.trim();
+            }
+
             if (offset + 1 == end) {
                 this.offset = end;
                 this.ch = EOI;
