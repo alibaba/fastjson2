@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.support.retrofit;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -80,7 +81,11 @@ public class Retrofit2ConverterFactory
         @Override
         public T convert(ResponseBody value) throws IOException {
             try {
-                return JSON.parseObject(value.bytes(), type, config.getDateFormat(), config.getReaderFeatures());
+                if (config.isJSONB()) {
+                    return JSONB.parseObject(value.bytes(), type, config.getSymbolTable(), config.getReaderFilters(), config.getReaderFeatures());
+                } else {
+                    return JSON.parseObject(value.bytes(), type, config.getDateFormat(), config.getReaderFilters(), config.getReaderFeatures());
+                }
             } catch (Exception e) {
                 throw new IOException("JSON parse error: " + e.getMessage(), e);
             } finally {
@@ -97,7 +102,12 @@ public class Retrofit2ConverterFactory
         @Override
         public RequestBody convert(T value) throws IOException {
             try {
-                byte[] content = JSON.toJSONBytes(value, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
+                byte[] content;
+                if (config.isJSONB()) {
+                    content = JSONB.toBytes(value, config.getSymbolTable(), config.getWriterFilters(), config.getWriterFeatures());
+                } else {
+                    content = JSON.toJSONBytes(value, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
+                }
                 return RequestBody.create(MEDIA_TYPE, content);
             } catch (Exception e) {
                 throw new IOException("Could not write JSON: " + e.getMessage(), e);
