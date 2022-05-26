@@ -2348,6 +2348,18 @@ public abstract class JSONReader
             }
         }
 
+        public void config(Filter[] filters, Feature... features) {
+            for(Filter filter: filters) {
+                if (filter instanceof AutoTypeBeforeHandler) {
+                    autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
+                }
+            }
+
+            for (Feature feature : features) {
+                this.features |= feature.mask;
+            }
+        }
+
         public boolean isEnable(Feature feature) {
             return (this.features & feature.mask) != 0;
         }
