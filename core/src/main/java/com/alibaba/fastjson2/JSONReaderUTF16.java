@@ -1423,7 +1423,6 @@ final class JSONReaderUTF16
             int start = offset;
             int valueLength;
             boolean valueEscape = false;
-            boolean ascii = true;
 
             if (JDKUtils.JVM_VERSION > 8) {
                 _for:
@@ -1546,6 +1545,10 @@ final class JSONReaderUTF16
                 } else {
                     str = new String(chars, this.offset, offset - this.offset);
                 }
+            }
+
+            if ((context.features & Feature.TrimString.mask) != 0) {
+                str = str.trim();
             }
 
             if (offset + 1 == end) {

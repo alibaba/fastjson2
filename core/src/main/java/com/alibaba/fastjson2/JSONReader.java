@@ -2376,7 +2376,8 @@ public abstract class JSONReader
         UseDefaultConstructorAsPossible(1 << 9),
         UseBigDecimalForFloats(1 << 10),
         UseBigDecimalForDoubles(1 << 11),
-        ErrorOnEnumNotMatch(1 << 12);
+        ErrorOnEnumNotMatch(1 << 12),
+        TrimString(1 << 13);
 
         public final long mask;
 

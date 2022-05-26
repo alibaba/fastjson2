@@ -248,11 +248,32 @@ public interface JSONB {
     }
 
     static JSONObject parseObject(byte[] jsonbBytes) {
+        JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
         JSONReader reader = new JSONReaderJSONB(
-                new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider()),
+                context,
                 jsonbBytes,
                 0,
-                jsonbBytes.length, null);
+                jsonbBytes.length,
+                null);
+
+        JSONObject object = (JSONObject) reader.readObject();
+        if (reader.resolveTasks != null) {
+            reader.handleResolveTasks(object);
+        }
+        return object;
+    }
+
+    static JSONObject parseObject(byte[] jsonbBytes, JSONReader.Feature... features) {
+        JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
+        context.config(features);
+
+        JSONReader reader = new JSONReaderJSONB(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length,
+                null);
+
         JSONObject object = (JSONObject) reader.readObject();
         if (reader.resolveTasks != null) {
             reader.handleResolveTasks(object);

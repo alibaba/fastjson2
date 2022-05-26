@@ -2367,6 +2367,10 @@ class JSONReaderUTF8
                 str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.UTF_8);
             }
 
+            if ((context.features & Feature.TrimString.mask) != 0) {
+                str = str.trim();
+            }
+
             if (offset + 1 == end) {
                 this.offset = end;
                 this.ch = EOI;
