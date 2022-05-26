@@ -9,6 +9,7 @@ import com.alibaba.fastjson.util.IOUtils;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.filter.PropertyFilter;
 import com.alibaba.fastjson2.filter.PropertyPreFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
@@ -116,6 +117,36 @@ public class JSON {
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             context.setUtilDateFormat(defaultDateFormat);
+        }
+
+        config(context, features);
+        try {
+            return reader.read(type);
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
+    public static <T> T parseObject(byte[] jsonBytes, Type type, SerializeFilter filter, Feature... features) {
+        if (jsonBytes == null) {
+            return null;
+        }
+
+        JSONReader reader = JSONReader.of(jsonBytes);
+        JSONReader.Context context = reader.getContext();
+        context.setObjectClass(JSONObject.class);
+
+        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
+            context.setUtilDateFormat(defaultDateFormat);
+        }
+
+        if (filter instanceof Filter) {
+            context.config((Filter) filter);
         }
 
         config(context, features);

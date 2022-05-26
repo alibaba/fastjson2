@@ -14,12 +14,12 @@ public class ContextAutoTypeBeforeHandler
     final long[] acceptHashCodes;
     final Map<String, Class> classCache = new ConcurrentHashMap<>(16, 0.75f, 1);
 
-    public ContextAutoTypeBeforeHandler(String[] accessNames) {
-        long[] array = new long[accessNames.length];
+    public ContextAutoTypeBeforeHandler(String[] acceptNames) {
+        long[] array = new long[acceptNames.length];
 
         int index = 0;
-        for (int i = 0; i < accessNames.length; i++) {
-            String name = accessNames[i];
+        for (int i = 0; i < acceptNames.length; i++) {
+            String name = acceptNames[i];
 
             if (name == null || name.isEmpty()) {
                 continue;

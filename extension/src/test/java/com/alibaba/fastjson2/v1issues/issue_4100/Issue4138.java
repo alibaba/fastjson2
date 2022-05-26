@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.v1issues.issue_4100;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.filter.Filter;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -10,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue4138 {
     // 配置AutoTypeFilter
-    static JSONReader.Filter filter = JSONReader.autoTypeFilter(
+    static Filter filter = JSONReader.autoTypeFilter(
             // 这里可以配置多个前缀
             "org.springframework.security.core.authority.SimpleGrantedAuthority",
             "org.springframework.util.LinkedCaseInsensitiveMap"

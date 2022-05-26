@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.IOUtils;
@@ -402,7 +403,7 @@ public interface JSONB {
     static <T> T parseObject(
             byte[] jsonbBytes,
             Class<T> objectClass,
-            JSONReader.Filter filter,
+            Filter filter,
             JSONReader.Feature... features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context context = new JSONReader.Context(provider);

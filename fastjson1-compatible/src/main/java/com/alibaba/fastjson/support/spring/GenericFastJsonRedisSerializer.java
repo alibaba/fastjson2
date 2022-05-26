@@ -2,6 +2,7 @@ package com.alibaba.fastjson.support.spring;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.serializer.ContextAutoTypeBeforeHandler;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
@@ -18,6 +19,16 @@ import org.springframework.data.redis.serializer.SerializationException;
  */
 public class GenericFastJsonRedisSerializer
         implements RedisSerializer<Object> {
+    ContextAutoTypeBeforeHandler contextFilter;
+
+    public GenericFastJsonRedisSerializer() {
+        this.contextFilter = null;
+    }
+
+    public GenericFastJsonRedisSerializer(String[] acceptNames) {
+        contextFilter = new ContextAutoTypeBeforeHandler(acceptNames);
+    }
+
     @Override
     public byte[] serialize(Object object) throws SerializationException {
         if (object == null) {
@@ -35,8 +46,9 @@ public class GenericFastJsonRedisSerializer
         if (bytes == null || bytes.length == 0) {
             return null;
         }
+
         try {
-            return JSON.parseObject(bytes, Object.class, Feature.SupportAutoType);
+            return JSON.parseObject(bytes, Object.class, contextFilter, Feature.SupportAutoType);
         } catch (Exception ex) {
             throw new SerializationException("Could not deserialize: " + ex.getMessage(), ex);
         }

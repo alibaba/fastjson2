@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.filter.Filter;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -9,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Canal_Issue4186 {
-    final JSONReader.Filter autoTypeFilter = JSONReader.autoTypeFilter(Canal_Issue4186.class.getName());
+    final Filter autoTypeFilter = JSONReader.autoTypeFilter(Canal_Issue4186.class.getName());
 
     @Test
     public void test() {

@@ -399,7 +399,7 @@ inline fun <reified T> String?.parseObject(
  */
 @Suppress("HasPlatformType")
 inline fun <reified T> String?.parseObject(
-    filter: JSONReader.Filter,
+    filter: Filter,
     vararg features: JSONReader.Feature
 ) = JSON.parseObject(
     this, T::class.java, filter, *features

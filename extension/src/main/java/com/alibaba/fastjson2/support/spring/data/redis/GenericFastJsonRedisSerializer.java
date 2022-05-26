@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
+import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
@@ -19,10 +21,18 @@ import org.springframework.data.redis.serializer.SerializationException;
 public class GenericFastJsonRedisSerializer
         implements RedisSerializer<Object> {
     private final FastJsonConfig config = new FastJsonConfig();
+    private Filter contextFilter;
 
     public GenericFastJsonRedisSerializer() {
         config.setReaderFeatures(JSONReader.Feature.SupportAutoType);
         config.setWriterFeatures(JSONWriter.Feature.WriteClassName);
+        this.contextFilter = null;
+    }
+
+    public GenericFastJsonRedisSerializer(String[] acceptNames) {
+        config.setReaderFeatures(JSONReader.Feature.SupportAutoType);
+        config.setWriterFeatures(JSONWriter.Feature.WriteClassName);
+        contextFilter = new ContextAutoTypeBeforeHandler(acceptNames);
     }
 
     public GenericFastJsonRedisSerializer(boolean jsonb) {
@@ -53,9 +63,9 @@ public class GenericFastJsonRedisSerializer
         }
         try {
             if (config.isJSONB()) {
-                return JSONB.parseObject(bytes, Object.class, config.getReaderFeatures());
+                return JSONB.parseObject(bytes, Object.class, contextFilter, config.getReaderFeatures());
             } else {
-                return JSON.parseObject(bytes, Object.class, config.getReaderFeatures());
+                return JSON.parseObject(bytes, Object.class, contextFilter, config.getReaderFeatures());
             }
         } catch (Exception ex) {
             throw new SerializationException("Could not deserialize: " + ex.getMessage(), ex);
