@@ -121,7 +121,8 @@ public class ObjectReaderCreatorLambda
                         fieldInfo.schema,
                         method.getGenericReturnType(),
                         method.getReturnType(),
-                        method);
+                        method,
+                        null);
                 FieldReader origin = fieldReaders.putIfAbsent(fieldName,
                         fieldReader
                 );
@@ -210,12 +211,13 @@ public class ObjectReaderCreatorLambda
             String schema,
             Type fieldType,
             Class fieldClass,
-            Method method
+            Method method,
+            ObjectReader initReader
     ) {
         if ((method != null && method.getReturnType() != void.class)
                 || !Modifier.isPublic(objectClass.getModifiers())
                 || isExternalClass(objectClass)) {
-            return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, method);
+            return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, method, initReader);
         }
         return createFieldReaderLambda(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, method);
     }

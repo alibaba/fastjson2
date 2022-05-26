@@ -194,7 +194,8 @@ public class ObjectReaderCreator {
                         fieldInfo.schema,
                         method.getGenericReturnType(),
                         method.getReturnType(),
-                        method
+                        method,
+                        null
                 );
                 FieldReader origin = fieldReaders.putIfAbsent(fieldName,
                         fieldReader
@@ -222,7 +223,8 @@ public class ObjectReaderCreator {
                     fieldInfo.schema,
                     fieldType,
                     fieldClass,
-                    method);
+                    method,
+                    null);
 
             FieldReader origin = fieldReaders.putIfAbsent(fieldName, fieldReader);
             if (origin != null && origin.compareTo(fieldReader) > 0) {
@@ -249,7 +251,8 @@ public class ObjectReaderCreator {
                                             fieldInfo.schema,
                                             fieldType,
                                             fieldClass,
-                                            method));
+                                            method,
+                                            null));
                 }
             }
         });
@@ -851,7 +854,8 @@ public class ObjectReaderCreator {
                     fieldInfo.schema,
                     method.getGenericReturnType(),
                     method.getReturnType(),
-                    method
+                    method,
+                    null
             );
             FieldReader origin = fieldReaders.putIfAbsent(fieldName,
                     fieldReader
@@ -886,8 +890,10 @@ public class ObjectReaderCreator {
                 fieldInfo.schema,
                 fieldType,
                 fieldClass,
-                method
+                method,
+                fieldInfo.getInitReader()
         );
+
         FieldReader origin = fieldReaders.putIfAbsent(fieldName, fieldReader);
         if (origin != null && origin.compareTo(fieldReader) > 0) {
             fieldReaders.put(fieldName, fieldReader);
@@ -913,7 +919,8 @@ public class ObjectReaderCreator {
                                         fieldInfo.schema,
                                         fieldType,
                                         fieldClass,
-                                        method
+                                        method,
+                                        null
                                 ));
             }
         }
@@ -1028,7 +1035,7 @@ public class ObjectReaderCreator {
             Class fieldClass,
             Method method
     ) {
-        return createFieldReaderMethod(objectType, objectType, fieldName, 0, 0L, null, null, null, null, fieldType, fieldClass, method);
+        return createFieldReaderMethod(objectType, objectType, fieldName, 0, 0L, null, null, null, null, fieldType, fieldClass, method, null);
     }
 
     public <T> FieldReader createFieldReader(
@@ -1050,7 +1057,7 @@ public class ObjectReaderCreator {
             Class fieldClass,
             Method method
     ) {
-        return createFieldReaderMethod(objectClass, objectClass, fieldName, 0, 0L, format, null, null, null, fieldType, fieldClass, method);
+        return createFieldReaderMethod(objectClass, objectClass, fieldName, 0, 0L, format, null, null, null, fieldType, fieldClass, method, null);
     }
 
     public <T> FieldReader createFieldReaderParam(
@@ -1095,7 +1102,8 @@ public class ObjectReaderCreator {
             String schema,
             Type fieldType,
             Class fieldClass,
-            Method method
+            Method method,
+            ObjectReader initReader
     ) {
         if (method != null) {
             method.setAccessible(true);
@@ -1118,6 +1126,23 @@ public class ObjectReaderCreator {
             if (!object.isEmpty()) {
                 jsonSchema = JSONSchema.of(object, fieldClass);
             }
+        }
+
+        if (initReader != null) {
+            FieldReaderObjectMethod fieldReaderObjectMethod = new FieldReaderObjectMethod(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    jsonSchema,
+                    method
+            );
+            fieldReaderObjectMethod.fieldObjectReader = initReader;
+            return fieldReaderObjectMethod;
         }
 
         if (fieldType == boolean.class) {

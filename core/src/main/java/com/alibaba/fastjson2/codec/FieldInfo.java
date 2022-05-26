@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.codec;
 
+import com.alibaba.fastjson2.reader.ObjectReader;
+
 import java.util.Locale;
 
 public class FieldInfo {
@@ -13,11 +15,24 @@ public class FieldInfo {
     public boolean ignore;
     public String[] alternateNames;
     public Class<?> writeUsing;
+    public Class<?> readUsing;
     public boolean fieldClassMixIn;
     public boolean isTransient;
     public String defaultValue;
     public Locale locale;
     public String schema;
+
+    public ObjectReader getInitReader() {
+        if (readUsing != null && ObjectReader.class.isAssignableFrom(readUsing)) {
+            try {
+                return (ObjectReader) readUsing.newInstance();
+            } catch (Exception ignored) {
+                // ignored
+            }
+            return null;
+        }
+        return null;
+    }
 
     public void init() {
         fieldName = null;
@@ -27,6 +42,7 @@ public class FieldInfo {
         ignore = false;
         alternateNames = null;
         writeUsing = null;
+        readUsing = null;
         fieldClassMixIn = false;
         isTransient = false;
         defaultValue = null;

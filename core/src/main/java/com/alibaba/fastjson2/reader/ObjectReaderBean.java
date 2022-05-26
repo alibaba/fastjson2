@@ -98,7 +98,19 @@ public abstract class ObjectReaderBean<T>
         }
 
         T object = null;
-        jsonReader.nextIfMatch('{');
+        boolean objectStart = jsonReader.nextIfMatch('{');
+        if (!objectStart) {
+            char ch = jsonReader.current();
+            // skip for fastjson 1.x compatible
+            if (ch == 't' || ch == 'f') {
+                jsonReader.readBoolValue(); // skip
+                return null;
+            }
+
+            if (ch != '"' && ch != '\'') {
+                throw new JSONException("illegal input " + ch + ", offset " + jsonReader.getOffset());
+            }
+        }
 
         for (int i = 0; ; i++) {
             if (jsonReader.nextIfMatch('}')) {
