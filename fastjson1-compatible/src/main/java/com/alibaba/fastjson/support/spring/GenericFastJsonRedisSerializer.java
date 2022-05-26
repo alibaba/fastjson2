@@ -46,7 +46,6 @@ public class GenericFastJsonRedisSerializer
         if (bytes == null || bytes.length == 0) {
             return null;
         }
-
         try {
             return JSON.parseObject(bytes, Object.class, contextFilter, Feature.SupportAutoType);
         } catch (Exception ex) {

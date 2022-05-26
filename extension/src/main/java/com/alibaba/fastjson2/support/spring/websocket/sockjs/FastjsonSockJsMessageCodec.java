@@ -21,12 +21,12 @@ public class FastjsonSockJsMessageCodec
 
     @Override
     public String[] decode(String content) {
-        return JSON.parseObject(content, String[].class);
+        return JSON.parseObject(content, String[].class, config.getReaderFeatures());
     }
 
     @Override
     public String[] decodeInputStream(InputStream content) {
-        return JSON.parseObject(content, String[].class);
+        return JSON.parseObject(content, String[].class, config.getReaderFeatures());
     }
 
     @Override
