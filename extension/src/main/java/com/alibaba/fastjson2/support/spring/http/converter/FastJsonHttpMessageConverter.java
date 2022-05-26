@@ -105,7 +105,7 @@ public class FastJsonHttpMessageConverter
             }
             byte[] bytes = baos.toByteArray();
 
-            return JSON.parseObject(bytes, type, config.getDateFormat(), config.getReaderFeatures());
+            return JSON.parseObject(bytes, type, config.getDateFormat(), config.getReaderFilters(), config.getReaderFeatures());
         } catch (JSONException ex) {
             throw new HttpMessageNotReadableException("JSON parse error: " + ex.getMessage(), ex, inputMessage);
         } catch (IOException ex) {

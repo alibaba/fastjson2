@@ -39,6 +39,11 @@ public class FastJsonConfig {
     private JSONWriter.Feature[] writerFeatures;
 
     /**
+     * JSONReader Filters
+     */
+    private Filter[] readerFilters;
+
+    /**
      * JSONWriter Filters
      */
     private Filter[] writerFilters;
@@ -66,6 +71,7 @@ public class FastJsonConfig {
         this.charset = StandardCharsets.UTF_8;
         this.readerFeatures = new JSONReader.Feature[0];
         this.writerFeatures = new JSONWriter.Feature[0];
+        this.readerFilters = new Filter[0];
         this.writerFilters = new Filter[0];
         this.writeContentLength = true;
     }
@@ -140,6 +146,24 @@ public class FastJsonConfig {
      */
     public void setWriterFeatures(JSONWriter.Feature... writerFeatures) {
         this.writerFeatures = writerFeatures;
+    }
+
+    /**
+     * Get reader filters filter [ ].
+     *
+     * @return the filter [ ]
+     */
+    public Filter[] getReaderFilters() {
+        return readerFilters;
+    }
+
+    /**
+     * Sets reader filters.
+     *
+     * @param readerFilters the reader filters
+     */
+    public void setReaderFilters(Filter... readerFilters) {
+        this.readerFilters = readerFilters;
     }
 
     /**
