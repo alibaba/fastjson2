@@ -442,6 +442,49 @@ public interface JSONB {
         }
     }
 
+    static <T> T parseObject(
+            byte[] jsonbBytes,
+            Type objectType,
+            SymbolTable symbolTable,
+            Filter[] filters,
+            JSONReader.Feature... features) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        JSONReader.Context context = new JSONReader.Context(provider);
+        context.config(filters, features);
+
+        try (JSONReader jsonReader = new JSONReaderJSONB(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length, symbolTable)
+        ) {
+            for (JSONReader.Feature feature : features) {
+                context.features |= feature.mask;
+            }
+
+            Object object;
+            if (objectType == Object.class) {
+                ObjectReader autoTypeObjectReader;
+                byte type = jsonReader.getType();
+                if (type == BC_TYPED_ANY) {
+                    autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, 0);
+                    object = autoTypeObjectReader.readJSONBObject(jsonReader, context.features);
+                } else {
+                    object = jsonReader.readAny();
+                }
+            } else {
+                boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+                ObjectReader objectReader = provider.getObjectReader(objectType, fieldBased);
+                object = objectReader.readJSONBObject(jsonReader, 0);
+            }
+
+            if (jsonReader.resolveTasks != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return (T) object;
+        }
+    }
+
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass, JSONReader.Feature... features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);
@@ -767,6 +810,34 @@ public interface JSONB {
             JSONWriter.Context ctx = writer.context;
 
             ctx.config(features);
+
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                Class<?> valueClass = object.getClass();
+
+                boolean fieldBased = (ctx.features & JSONWriter.Feature.FieldBased.mask) != 0;
+
+                ObjectWriter objectWriter = ctx.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                if ((ctx.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
+                    objectWriter.writeArrayMappingJSONB(writer, object, null, null, 0);
+                } else {
+                    objectWriter.writeJSONB(writer, object, null, null, 0);
+                }
+            }
+            return writer.getBytes();
+        }
+    }
+
+    static byte[] toBytes(Object object, SymbolTable symbolTable, Filter[] filters, JSONWriter.Feature... features) {
+        try (JSONWriter writer = new JSONWriterJSONB(
+                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features),
+                symbolTable
+        )) {
+            JSONWriter.Context ctx = writer.context;
+
+            ctx.config(features);
+            ctx.configFilter(filters);
 
             if (object == null) {
                 writer.writeNull();
