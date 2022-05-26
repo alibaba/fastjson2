@@ -62,11 +62,11 @@ public class MappingFastJsonMessageConverter
         Object payload = message.getPayload();
 
         if (payload instanceof byte[] && config.isJSONB()) {
-            obj = JSONB.parseObject((byte[]) payload, type, config.getSymbolTable(), config.getReaderFeatures());
+            obj = JSONB.parseObject((byte[]) payload, type, config.getSymbolTable(), config.getReaderFilters(), config.getReaderFeatures());
         } else if (payload instanceof byte[] && !config.isJSONB()) {
-            obj = JSON.parseObject((byte[]) payload, type, config.getDateFormat(), config.getReaderFeatures());
+            obj = JSON.parseObject((byte[]) payload, type, config.getDateFormat(), config.getReaderFilters(), config.getReaderFeatures());
         } else if (payload instanceof String && JSON.isValid((String) payload)) {
-            obj = JSON.parseObject((String) payload, type, config.getDateFormat(), config.getReaderFeatures());
+            obj = JSON.parseObject((String) payload, type, config.getDateFormat(), config.getReaderFilters(), config.getReaderFeatures());
         }
         return obj;
     }
@@ -82,7 +82,7 @@ public class MappingFastJsonMessageConverter
             } else if (payload instanceof String && !config.isJSONB()) {
                 obj = ((String) payload).getBytes(config.getCharset());
             } else if (config.isJSONB()) {
-                obj = JSONB.toBytes(payload, config.getSymbolTable(), config.getWriterFeatures());
+                obj = JSONB.toBytes(payload, config.getSymbolTable(), config.getWriterFilters(), config.getWriterFeatures());
             } else {
                 obj = JSON.toJSONBytes(payload, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
             }

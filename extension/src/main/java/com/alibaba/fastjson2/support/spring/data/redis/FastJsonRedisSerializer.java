@@ -38,10 +38,9 @@ public class FastJsonRedisSerializer<T>
         }
         try {
             if (config.isJSONB()) {
-                return JSONB.toBytes(t, config.getSymbolTable(), config.getWriterFeatures());
+                return JSONB.toBytes(t, config.getSymbolTable(), config.getWriterFilters(), config.getWriterFeatures());
             } else {
-                return JSON.toJSONBytes(t, config.getDateFormat(),
-                        config.getWriterFilters(), config.getWriterFeatures());
+                return JSON.toJSONBytes(t, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
             }
         } catch (Exception ex) {
             throw new SerializationException("Could not serialize: " + ex.getMessage(), ex);
@@ -55,10 +54,9 @@ public class FastJsonRedisSerializer<T>
         }
         try {
             if (config.isJSONB()) {
-                return JSONB.parseObject(bytes, type, config.getSymbolTable(), config.getReaderFeatures());
+                return JSONB.parseObject(bytes, type, config.getSymbolTable(), config.getReaderFilters(), config.getReaderFeatures());
             } else {
-                return JSON.parseObject(bytes, type,
-                        config.getDateFormat(), config.getReaderFeatures());
+                return JSON.parseObject(bytes, type, config.getDateFormat(), config.getReaderFilters(), config.getReaderFeatures());
             }
         } catch (Exception ex) {
             throw new SerializationException("Could not deserialize: " + ex.getMessage(), ex);
