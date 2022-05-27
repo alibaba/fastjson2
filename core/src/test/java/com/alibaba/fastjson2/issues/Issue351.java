@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.ValueFilter;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,5 +59,23 @@ public class Issue351 {
         public void setA(A a) {
             this.a = a;
         }
+    }
+
+    @Test
+    public void test1() {
+        ValueFilter valueFilter = (o, s, o1) -> {
+            if (Objects.isNull(o1)) {
+                return "";
+            } else {
+                return o1;
+            }
+        };
+
+        Bean bean = new Bean();
+        assertEquals("{\"values\":\"\"}", JSON.toJSONString(bean, valueFilter, JSONWriter.Feature.WriteNulls));
+    }
+
+    public static class Bean {
+        public List<String> values;
     }
 }

@@ -72,7 +72,7 @@ abstract class FieldWriterList<T>
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
-        if (listWriter != null) {
+        if (listWriter != null && fieldClass.isAssignableFrom(valueClass)) {
             return listWriter;
         }
 
