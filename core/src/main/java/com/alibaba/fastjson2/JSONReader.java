@@ -1896,33 +1896,7 @@ public abstract class JSONReader
         }
 
         Context ctx = JSONFactory.createReadContext();
-
-        if (JDKUtils.STRING_BYTES_INTERNAL_API) {
-            if (CODER_FUNCTION == null && !CODER_FUNCTION_ERROR) {
-                try {
-                    CODER_FUNCTION = JDKUtils.getStringCode11();
-                    VALUE_FUNCTION = JDKUtils.getStringValue11();
-                } catch (Throwable ignored) {
-                    CODER_FUNCTION_ERROR = true;
-                }
-            }
-        }
-
-        if (CODER_FUNCTION != null && VALUE_FUNCTION != null) {
-            int coder = CODER_FUNCTION.applyAsInt(str);
-            if (coder == 0) {
-                byte[] value = VALUE_FUNCTION.apply(str);
-                return new JSONReaderASCII(
-                        ctx,
-                        str,
-                        value,
-                        0,
-                        value.length
-                );
-            }
-        }
-
-        if (JDKUtils.JVM_VERSION > 8) {
+        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
             try {
                 byte coder = UnsafeUtils.getStringCoder(str);
                 if (coder == 0) {

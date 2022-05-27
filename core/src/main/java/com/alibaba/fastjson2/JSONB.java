@@ -3,10 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.JSONBDump;
-import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
+import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
@@ -698,27 +695,16 @@ public interface JSONB {
                     return bytes;
                 }
             }
-        } else if (JDKUtils.STRING_BYTES_INTERNAL_API) {
-            if (CODER_FUNCTION == null && !CODER_FUNCTION_ERROR) {
-                try {
-                    CODER_FUNCTION = JDKUtils.getStringCode11();
-                    VALUE_FUNCTION = JDKUtils.getStringValue11();
-                } catch (Throwable ignored) {
-                    CODER_FUNCTION_ERROR = true;
-                }
-            }
-
-            if (CODER_FUNCTION != null && VALUE_FUNCTION != null) {
-                int coder = CODER_FUNCTION.applyAsInt(str);
-                if (coder == 0) {
-                    byte[] value = VALUE_FUNCTION.apply(str);
-                    int strlen = value.length;
-                    if (strlen <= STR_ASCII_FIX_LEN) {
-                        byte[] bytes = new byte[value.length + 1];
-                        bytes[0] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                        System.arraycopy(value, 0, bytes, 1, value.length);
-                        return bytes;
-                    }
+        } else if (JDKUtils.UNSAFE_SUPPORT) {
+            int coder = UnsafeUtils.getStringCoder(str);
+            if (coder == 0) {
+                byte[] value = UnsafeUtils.getStringValue(str);
+                int strlen = value.length;
+                if (strlen <= STR_ASCII_FIX_LEN) {
+                    byte[] bytes = new byte[value.length + 1];
+                    bytes[0] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+                    System.arraycopy(value, 0, bytes, 1, value.length);
+                    return bytes;
                 }
             }
         }

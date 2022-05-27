@@ -10,7 +10,6 @@ import java.util.function.*;
 
 public class JDKUtils {
     public static final int JVM_VERSION;
-    public static final boolean STRING_BYTES_INTERNAL_API;
 
     public static final boolean JAVAC_UNNAMED;
     public static final boolean ILLEGAL_ACCESS_PERMIT;
@@ -77,53 +76,8 @@ public class JDKUtils {
         JAVAC_UNNAMED = inputArguments.contains("--add-opens=com.sun.tools.javac.processing=ALL-UNNAMED");
         ILLEGAL_ACCESS_PERMIT = inputArguments.contains("--illegal-access=permit");
 
-        switch (JVM_VERSION) {
-            case 9:
-            case 10:
-            case 11:
-            case 12:
-            case 13:
-            case 14:
-            case 15:
-                STRING_BYTES_INTERNAL_API = true;
-                break;
-            case 17:
-            case 18:
-            case 19: {
-                final boolean INVOKE_UNNAMED = inputArguments.contains("--add-opens=java.base/java.lang.invoke=ALL-UNNAMED");
-                final boolean REFLECT_UNNAMED = inputArguments.contains("--add-opens=java.base/jdk.internal.reflect=ALL-UNNAMED");
-                STRING_BYTES_INTERNAL_API = ILLEGAL_ACCESS_PERMIT || (INVOKE_UNNAMED && REFLECT_UNNAMED);
-                break;
-            }
-            default:
-                STRING_BYTES_INTERNAL_API = false;
-                break;
-        }
-
         LANG_UNNAMED = !vmVendor.contains("GraalVM") && !vmName.contains("Substrate")
                 && (inputArguments.contains("--add-opens=java.base/java.lang=ALL-UNNAMED") || JVM_VERSION <= 11);
-
-        Boolean bigEndian = null;
-        if (STRING_BYTES_INTERNAL_API && LANG_UNNAMED) {
-            Class clazz;
-            try {
-                clazz = Class.forName("java.lang.StringUTF16");
-                Field field = clazz.getDeclaredField("HI_BYTE_SHIFT");
-                field.setAccessible(true);
-                int hiByteShift = field.getInt(null);
-                if (hiByteShift == 8) {
-                    bigEndian = true;
-                } else {
-                    if (hiByteShift == 0) {
-                        bigEndian = false;
-                    }
-                }
-            } catch (Exception ignored) {
-            }
-        }
-        BIG_ENDIAN = bigEndian == null
-                ? -1
-                : bigEndian.booleanValue() ? (byte) 1 : (byte) 0;
 
         if (JVM_VERSION == 8) {
             Field field = null;
@@ -153,6 +107,29 @@ public class JDKUtils {
             }
         }).test(null);
         UNSAFE_SUPPORT = unsafeSupport;
+
+        Boolean bigEndian = null;
+        if (UNSAFE_SUPPORT && LANG_UNNAMED) {
+            Class clazz;
+            try {
+                clazz = Class.forName("java.lang.StringUTF16");
+                Field field = clazz.getDeclaredField("HI_BYTE_SHIFT");
+                long fieldOffset = UnsafeUtils.UNSAFE.staticFieldOffset(field);
+                int hiByteShift = UnsafeUtils.UNSAFE.getInt(clazz, fieldOffset);
+                if (hiByteShift == 8) {
+                    bigEndian = true;
+                } else {
+                    if (hiByteShift == 0) {
+                        bigEndian = false;
+                    }
+                }
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
+            }
+        }
+        BIG_ENDIAN = bigEndian == null
+                ? -1
+                : bigEndian.booleanValue() ? (byte) 1 : (byte) 0;
 
         Function<byte[], String> utf16Creator = null, asciiCreator = null;
         if (unsafeSupport) {
