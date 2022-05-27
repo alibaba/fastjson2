@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 public class Issue367 {
     @Test
     public void test() {
@@ -23,9 +25,7 @@ public class Issue367 {
 
         String s = "{\"name\":\"123\",\"age\":3,\"subDTO\":{\"id\":\"222\",\"thiDTO\":{\"h\":\"444\"}}}";
         TestDTO testDTO2 = JSON.parseObject(s, TestDTO.class, JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.UseDefaultConstructorAsPossible);
-        TestDTO testDTO1 = com.alibaba.fastjson.JSON.parseObject(s, TestDTO.class);
-        System.out.println("testDTO2 = " + testDTO2);
-        System.out.println("testDTO1 = " + testDTO1);
+        assertNotNull(testDTO2.subDTO.fouDTO);
     }
 
     @Data
@@ -36,16 +36,16 @@ public class Issue367 {
         private String name;
         private int age;
         private SubDTO subDTO = new SubDTO();
-    }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class SubDTO {
-        private String id;
-        private String nickName;
-        private ThiDTO thiDTO = new ThiDTO();
-        private FouDTO fouDTO = new FouDTO();
+        @Data
+        @AllArgsConstructor
+        @NoArgsConstructor
+        public static class SubDTO {
+            private String id;
+            private String nickName;
+            private ThiDTO thiDTO = new ThiDTO();
+            private FouDTO fouDTO = new FouDTO();
+        }
     }
 
     @Data
