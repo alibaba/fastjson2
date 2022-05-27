@@ -1365,7 +1365,12 @@ public abstract class JSONReader
     public List readArray() {
         next();
 
-        List<Object> list = new JSONArray();
+        List<Object> list;
+        if (context.arraySupplier != null) {
+            list = context.arraySupplier.get();
+        } else {
+            list = new JSONArray();
+        }
 
         _for:
         for (; ; ) {
@@ -2228,6 +2233,7 @@ public abstract class JSONReader
         Locale locale;
         TimeZone timeZone;
         Supplier<Map> objectSupplier;
+        Supplier<List> arraySupplier;
         AutoTypeBeforeHandler autoTypeBeforeHandler;
 
         protected final ObjectReaderProvider provider;
@@ -2284,6 +2290,14 @@ public abstract class JSONReader
 
         public void setObjectSupplier(Supplier<Map> objectSupplier) {
             this.objectSupplier = objectSupplier;
+        }
+
+        public Supplier<List> getArraySupplier() {
+            return arraySupplier;
+        }
+
+        public void setArraySupplier(Supplier<List> arraySupplier) {
+            this.arraySupplier = arraySupplier;
         }
 
         public DateTimeFormatter getDateFormat() {

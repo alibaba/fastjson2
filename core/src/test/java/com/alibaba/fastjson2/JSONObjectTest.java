@@ -27,6 +27,7 @@ public class JSONObjectTest {
         JSONObject object = new JSONObject();
         object.put("id", 1001);
         assertEquals("{\"id\":1001}", object.toString());
+        assertEquals(object, object.clone());
     }
 
     @Test
