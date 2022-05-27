@@ -17,7 +17,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.ToIntFunction;
 
 public final class JSONFactory {
     public static final String CREATOR;
@@ -35,9 +34,6 @@ public final class JSONFactory {
     static long defaultWriterFeatures;
 
     static final class Utils {
-        static volatile ToIntFunction<String> CODER_FUNCTION;
-        static volatile Function<String, byte[]> VALUE_FUNCTION;
-        static volatile boolean CODER_FUNCTION_ERROR;
         static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
         static Function<byte[], String> STRING_CREATOR_JDK11;
         static BiFunction<byte[], Charset, String> STRING_CREATOR_JDK17;

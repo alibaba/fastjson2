@@ -38,16 +38,6 @@ public class JDKUtilsTest {
     }
 
     @Test
-    public void test_11_coder() throws Throwable {
-        if (JDKUtils.JVM_VERSION == 11 && JDKUtils.LANG_UNNAMED) {
-            ToIntFunction<String> coderFunction = JDKUtils.getStringCode11();
-
-            int coder = coderFunction.applyAsInt("abc");
-            assertEquals(0, coder);
-        }
-    }
-
-    @Test
     public void test_unsafe_isAscii() throws Throwable {
         assertEquals(1, UnsafeUtils.getStringCoder("中国"));
 
