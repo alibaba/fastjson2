@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
@@ -1172,18 +1173,14 @@ public abstract class JSONReader
     public Map<String, Object> readObject() {
         nextIfObjectStart();
         Map object;
-        if (context.objectClass == null || context.objectClass == Object.class) {
+        if (context.objectSupplier == null) {
             if ((context.features & Feature.UseNativeObject.mask) != 0) {
                 object = new HashMap();
             } else {
                 object = new JSONObject();
             }
         } else {
-            try {
-                object = (Map) context.objectClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new JSONException("create object instance error, objectClass " + context.objectClass.getName(), e);
-            }
+            object = (Map) context.objectSupplier.get();
         }
 
         for_:
@@ -2230,7 +2227,7 @@ public abstract class JSONReader
         long features;
         Locale locale;
         TimeZone timeZone;
-        Class objectClass;
+        Supplier<Map> objectSupplier;
         AutoTypeBeforeHandler autoTypeBeforeHandler;
 
         protected final ObjectReaderProvider provider;
@@ -2281,12 +2278,12 @@ public abstract class JSONReader
             return provider.getObjectReader(typeName, expectClass, this.features | features);
         }
 
-        public Class getObjectClass() {
-            return objectClass;
+        public Supplier<Map> getObjectSupplier() {
+            return objectSupplier;
         }
 
-        public void setObjectClass(Class objectClass) {
-            this.objectClass = objectClass;
+        public void setObjectSupplier(Supplier<Map> objectSupplier) {
+            this.objectSupplier = objectSupplier;
         }
 
         public DateTimeFormatter getDateFormat() {

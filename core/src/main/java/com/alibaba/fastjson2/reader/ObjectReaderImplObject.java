@@ -1,12 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
@@ -74,21 +72,9 @@ final class ObjectReaderImplObject
             }
 
             Map object;
-            Class objectClass = context.getObjectClass();
-            if (objectClass != null) {
-                try {
-                    if (objectClass == JSONObject.class) {
-                        object = new JSONObject();
-                    } else if (objectClass == HashMap.class) {
-                        object = new HashMap();
-                    } else if (objectClass == LinkedHashMap.class) {
-                        object = new LinkedHashMap();
-                    } else {
-                        object = (Map) objectClass.newInstance();
-                    }
-                } catch (Throwable e) {
-                    throw new JSONException("createObject error", e);
-                }
+            Supplier<Map> objectSupplier = jsonReader.getContext().getObjectSupplier();
+            if (objectSupplier != null) {
+                object = objectSupplier.get();
             } else {
                 object = (Map) ObjectReaderImplMap.INSTANCE_OBJECT.createInstance(jsonReader.features(features));
             }
