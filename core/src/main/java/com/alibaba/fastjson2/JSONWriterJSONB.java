@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
@@ -484,20 +485,9 @@ final class JSONWriterJSONB
             return;
         }
 
-        if (JDKUtils.STRING_BYTES_INTERNAL_API) {
-            if (CODER_FUNCTION == null && !CODER_FUNCTION_ERROR) {
-                try {
-                    CODER_FUNCTION = JDKUtils.getStringCode11();
-                    VALUE_FUNCTION = JDKUtils.getStringValue11();
-                } catch (Throwable ignored) {
-                    CODER_FUNCTION_ERROR = true;
-                }
-            }
-        }
-
-        if (CODER_FUNCTION != null && VALUE_FUNCTION != null) {
-            int coder = CODER_FUNCTION.applyAsInt(str);
-            byte[] value = VALUE_FUNCTION.apply(str);
+        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+            int coder = UnsafeUtils.getStringCoder(str);
+            byte[] value = UnsafeUtils.getStringValue(str);
 
             if (coder == 0) {
                 int minCapacity = value.length

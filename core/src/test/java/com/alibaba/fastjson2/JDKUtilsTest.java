@@ -38,18 +38,6 @@ public class JDKUtilsTest {
     }
 
     @Test
-    public void test_17() throws Throwable {
-        System.out.println("JVM_VERSION : " + JDKUtils.JVM_VERSION);
-        if (JDKUtils.JVM_VERSION == 17 && JDKUtils.STRING_BYTES_INTERNAL_API) {
-            BiFunction<byte[], Charset, String> stringCreator = JDKUtils.getStringCreatorJDK17();
-
-            byte[] bytes = new byte[]{'a', 'b', 'c'};
-            String apply = stringCreator.apply(bytes, StandardCharsets.US_ASCII);
-            assertEquals("abc", apply);
-        }
-    }
-
-    @Test
     public void test_11_coder() throws Throwable {
         if (JDKUtils.JVM_VERSION == 11 && JDKUtils.LANG_UNNAMED) {
             ToIntFunction<String> coderFunction = JDKUtils.getStringCode11();
