@@ -29,6 +29,10 @@ public interface FieldWriter<T>
         return false;
     }
 
+    default ObjectWriter getInitWriter() {
+        return null;
+    }
+
     default boolean isFieldClassSerializable() {
         return false;
     }

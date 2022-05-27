@@ -1,4 +1,4 @@
-package com.alibaba.json.bvt.issue_1600;
+package com.alibaba.fastjson.issue_1600;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
@@ -18,6 +18,7 @@ public class Issue1662_1 {
     public void test_for_issue() throws Exception {
         String json = "{\"value\":123}";
         Model model = JSON.parseObject(json, Model.class);
+        assertEquals(12300, model.value);
         assertEquals("{\"value\":\"12300元\"}",JSON.toJSONString(model));
     }
 

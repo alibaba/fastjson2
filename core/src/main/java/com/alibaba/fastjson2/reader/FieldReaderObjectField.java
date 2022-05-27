@@ -19,6 +19,10 @@ class FieldReaderObjectField<T>
         this.field = field;
     }
 
+    public ObjectReader getInitReader() {
+        return fieldObjectReader;
+    }
+
     @Override
     public Field getField() {
         return field;

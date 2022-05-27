@@ -106,5 +106,9 @@ public class Issue3693 {
             String json = parser.parseObject(String.class);
             return JSON.parseObject(json, type);
         }
+
+        public long getFeatures() {
+            return 0L;
+        }
     }
 }

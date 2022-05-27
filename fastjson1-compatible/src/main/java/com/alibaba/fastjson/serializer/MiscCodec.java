@@ -17,7 +17,16 @@ public class MiscCodec
     }
 
     @Override
+    public int getFastMatchToken() {
+        return ObjectDeserializer.super.getFastMatchToken();
+    }
+
+    @Override
     public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features) throws IOException {
         throw new JSONException("TODO");
+    }
+
+    public long getFeatures() {
+        return 0L;
     }
 }
