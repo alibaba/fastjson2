@@ -1641,6 +1641,7 @@ public class ObjectReaderBaseModule
                 return MoneySupport.createNumberValueReader();
             case "java.net.InetAddress":
             case "java.net.InetSocketAddress":
+            case "java.text.SimpleDateFormat":
                 return new ObjectReaderMisc((Class) type);
             default:
                 break;
