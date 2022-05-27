@@ -106,7 +106,7 @@ public class JDKUtils {
         UNSAFE_SUPPORT = unsafeSupport;
 
         Boolean bigEndian = null;
-        if (UNSAFE_SUPPORT && LANG_UNNAMED) {
+        if (JDKUtils.JVM_VERSION > 8 && UNSAFE_SUPPORT && LANG_UNNAMED) {
             Class clazz;
             try {
                 clazz = Class.forName("java.lang.StringUTF16");
