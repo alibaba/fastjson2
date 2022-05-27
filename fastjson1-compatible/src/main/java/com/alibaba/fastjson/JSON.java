@@ -43,6 +43,7 @@ public class JSON {
     public static int DEFAULT_PARSER_FEATURE;
     public static int DEFAULT_GENERATE_FEATURE;
 
+    static final Supplier<List> arraySupplier = JSONArray::new;
     static final Supplier<Map> defaultSupplier = JSONObject::new;
     static final Supplier<Map> orderedSupplier = () -> new JSONObject(true);
 
@@ -83,6 +84,7 @@ public class JSON {
 
         JSONReader reader = JSONReader.of(str);
         JSONReader.Context context = reader.getContext();
+        context.setArraySupplier(arraySupplier);
         context.setObjectSupplier(defaultSupplier);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
@@ -115,6 +117,7 @@ public class JSON {
         JSONReader reader = JSONReader.of(jsonBytes);
         JSONReader.Context context = reader.getContext();
         context.setObjectSupplier(defaultSupplier);
+        context.setArraySupplier(arraySupplier);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
@@ -141,6 +144,7 @@ public class JSON {
         JSONReader reader = JSONReader.of(jsonBytes);
         JSONReader.Context context = reader.getContext();
         context.setObjectSupplier(defaultSupplier);
+        context.setArraySupplier(arraySupplier);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
@@ -171,6 +175,7 @@ public class JSON {
         try (JSONReader reader = JSONReader.of(str)) {
             JSONReader.Context context = reader.getContext();
             context.setObjectSupplier(defaultSupplier);
+            context.setArraySupplier(arraySupplier);
             config(context, features);
             if (reader.isObject() && !reader.isSupportAutoType(0)) {
                 return reader.read(JSONObject.class);
@@ -534,6 +539,7 @@ public class JSON {
         try (JSONReader reader = JSONReader.of(str)) {
             JSONReader.Context context = reader.getContext();
             context.setObjectSupplier(defaultSupplier);
+            context.setArraySupplier(arraySupplier);
             config(context, features);
             ObjectReader<JSONArray> objectReader = reader.getObjectReader(JSONArray.class);
             return objectReader.readObject(reader, 0);

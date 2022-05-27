@@ -389,5 +389,8 @@ public class JSONReaderTest {
 
         context.setObjectSupplier(null);
         assertNull(context.getObjectSupplier());
+
+        context.setArraySupplier(null);
+        assertNull(context.getArraySupplier());
     }
 }

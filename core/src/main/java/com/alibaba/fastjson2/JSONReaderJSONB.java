@@ -610,6 +610,9 @@ final class JSONReaderJSONB
                         if ((context.features & Feature.UseNativeObject.mask) != 0) {
                             return new ArrayList<>();
                         } else {
+                            if (context.arraySupplier != null) {
+                                return context.arraySupplier.get();
+                            }
                             return new JSONArray();
                         }
                     }

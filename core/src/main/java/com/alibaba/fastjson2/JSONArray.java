@@ -1313,6 +1313,11 @@ public class JSONArray
                 .isSuccess();
     }
 
+    @Override
+    public Object clone() {
+        return new JSONArray(this);
+    }
+
     /**
      * Pack multiple elements as {@link JSONArray}
      *

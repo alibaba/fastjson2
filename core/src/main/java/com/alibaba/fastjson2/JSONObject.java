@@ -1654,6 +1654,11 @@ public class JSONObject
         nameFilter(this, nameFilter);
     }
 
+    @Override
+    public JSONObject clone() {
+        return new JSONObject(this);
+    }
+
     /**
      *
      * <pre>

@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -15,7 +16,7 @@ import java.util.function.Function;
 
 public class JSONArray
         extends JSON
-        implements List {
+        implements List, Serializable, Cloneable {
     static ObjectReader<JSONArray> arrayReader;
     static ObjectReader<JSONObject> objectReader;
 
@@ -839,7 +840,7 @@ public class JSONArray
     }
 
     @Override
-    public Object clone() {
+    public JSONArray clone() {
         return new JSONArray(new ArrayList<Object>(list));
     }
 
