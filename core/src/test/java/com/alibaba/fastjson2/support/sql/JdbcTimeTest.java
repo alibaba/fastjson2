@@ -135,17 +135,17 @@ public class JdbcTimeTest {
 
     @Test
     public void test_date() {
-        long millis = System.currentTimeMillis();
+        long millis = 1653665873000L;
 
         D d = new D();
         d.value = new java.sql.Date(millis);
         String str = JSON.toJSONString(d);
         D d1 = JSON.parseObject(str, D.class);
-        assertEquals(d.value.getTime(), d1.value.getTime(), str);
+        assertEquals(d.value.toString(), d1.value.toString(), str);
 
         byte[] bytes = JSONB.toBytes(d);
         D d2 = JSONB.parseObject(bytes, D.class);
-        assertEquals(d.value, d2.value);
+        assertEquals(d.value.toString(), d2.value.toString());
     }
 
 
