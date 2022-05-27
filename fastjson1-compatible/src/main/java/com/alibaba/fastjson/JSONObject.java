@@ -984,12 +984,12 @@ public class JSONObject
         for (Entry entry : map.entrySet()) {
             final Object key = entry.getKey();
             if (key != null) {
-//                ParserConfig.global.checkAutoType(key.getClass());
+                ParserConfig.global.checkAutoType(key.getClass());
             }
 
             final Object value = entry.getValue();
             if (value != null) {
-//                ParserConfig.global.checkAutoType(value.getClass());
+                ParserConfig.global.checkAutoType(value.getClass());
             }
         }
     }

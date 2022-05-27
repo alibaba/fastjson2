@@ -10,8 +10,8 @@ abstract class FieldWriterInt8<T>
     final byte[][] utf8ValueCache = new byte[256][];
     final char[][] utf16ValueCache = new char[256][];
 
-    FieldWriterInt8(String name, int ordinal, Class fieldClass) {
-        super(name, ordinal, 0, null, fieldClass, fieldClass);
+    FieldWriterInt8(String name, int ordinal, String format, String label, Class fieldClass) {
+        super(name, ordinal, 0, format, label, fieldClass, fieldClass);
     }
 
     protected void writeInt8(JSONWriter jsonWriter, byte value) {

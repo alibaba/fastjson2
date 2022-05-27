@@ -32,6 +32,8 @@ public @interface JSONField {
      */
     String format() default "";
 
+    String label() default "";
+
     /**
      * Whether the field is serialized
      * during serialization, default {@code ture}

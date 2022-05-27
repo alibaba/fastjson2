@@ -6,8 +6,8 @@ import java.lang.reflect.Type;
 
 abstract class FieldWriterBoolVal
         extends FieldWriterBoolean {
-    FieldWriterBoolVal(String name, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, fieldType, fieldClass);
+    FieldWriterBoolVal(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass);
     }
 
     @Override

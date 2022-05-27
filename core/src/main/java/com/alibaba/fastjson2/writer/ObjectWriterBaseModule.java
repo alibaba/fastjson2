@@ -332,6 +332,13 @@ class ObjectWriterBaseModule
                             loadJsonFieldFormat(fieldInfo, (String) result);
                             break;
                         }
+                        case "label": {
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                fieldInfo.label = value;
+                            }
+                            break;
+                        }
                         case "defaultValue": {
                             String value = (String) result;
                             if (!value.isEmpty()) {
@@ -518,6 +525,11 @@ class ObjectWriterBaseModule
             }
 
             loadJsonFieldFormat(fieldInfo, jsonField.format());
+
+            String label = jsonField.label();
+            if (!label.isEmpty()) {
+                fieldInfo.label = label;
+            }
 
             if (!fieldInfo.ignore) {
                 fieldInfo.ignore = !jsonField.serialize();
@@ -717,6 +729,9 @@ class ObjectWriterBaseModule
             case "org.javamoney.moneta.spi.DefaultNumberValue":
                 return MoneySupport.createNumberValueWriter();
             case "net.sf.json.JSONNull":
+            case "java.net.Inet4Address":
+            case "java.net.Inet6Address":
+            case "java.net.InetSocketAddress":
                 return ObjectWriterMisc.INSTANCE;
             default:
                 break;

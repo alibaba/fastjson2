@@ -12,8 +12,8 @@ abstract class FieldWriterInt32<T>
     volatile char[][] utf16ValueCache;
     final boolean toString;
 
-    protected FieldWriterInt32(String name, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, fieldType, fieldClass);
+    protected FieldWriterInt32(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass);
         toString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0
                 || "string".equals(format);
     }

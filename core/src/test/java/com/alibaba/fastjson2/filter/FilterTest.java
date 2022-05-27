@@ -96,4 +96,84 @@ public class FilterTest {
     public static class A {
         public int id;
     }
+
+    @Test
+    public void afterTest() {
+        AfterFilter filter = new AfterFilter() {
+            @Override
+            public void writeAfter(Object object) {
+                writeKeyValue("id", 123);
+            }
+        };
+
+        assertEquals("{\"id\":123}",
+                JSON.toJSONString(
+                        JSONObject.of(),
+                        filter
+                )
+        );
+
+        assertEquals("{\"value\":\"xx\",\"id\":123}",
+                JSON.toJSONString(
+                        JSONObject.of("value", "xx"),
+                        filter
+                )
+        );
+    }
+
+    @Test
+    public void afterTest1() {
+        A a = new A();
+        a.id = 123;
+
+        AfterFilter filter = new AfterFilter() {
+            @Override
+            public void writeAfter(Object object) {
+                writeKeyValue("oid", 101);
+            }
+        };
+        assertEquals("{\"id\":123,\"oid\":101}",
+                JSON.toJSONString(a, filter)
+        );
+    }
+
+    @Test
+    public void beforeTest() {
+        BeforeFilter filter = new BeforeFilter() {
+            @Override
+            public void writeBefore(Object object) {
+                writeKeyValue("id", 123);
+            }
+        };
+
+        assertEquals("{\"id\":123}",
+                JSON.toJSONString(
+                        JSONObject.of(),
+                        filter
+                )
+        );
+
+        assertEquals("{\"id\":123,\"value\":\"xx\"}",
+                JSON.toJSONString(
+                        JSONObject.of("value", "xx"),
+                        filter
+                )
+        );
+    }
+
+    @Test
+    public void BeforeTest1() {
+        A a = new A();
+        a.id = 123;
+
+        BeforeFilter filter = new BeforeFilter() {
+            @Override
+            public void writeBefore(Object object) {
+                writeKeyValue("oid", 101);
+            }
+        };
+        assertEquals("{\"oid\":101,\"id\":123}",
+                JSON.toJSONString(a, filter)
+        );
+    }
 }

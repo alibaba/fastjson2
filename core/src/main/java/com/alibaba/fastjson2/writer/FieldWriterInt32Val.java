@@ -10,7 +10,7 @@ class FieldWriterInt32Val<T>
     final Field field;
 
     FieldWriterInt32Val(String name, int ordinal, long features, String format, Field field) {
-        super(name, ordinal, features, format, int.class, int.class);
+        super(name, ordinal, features, format, null, int.class, int.class);
         this.field = field;
     }
 

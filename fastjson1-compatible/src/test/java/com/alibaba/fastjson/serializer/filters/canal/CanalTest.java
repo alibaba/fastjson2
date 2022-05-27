@@ -15,6 +15,5 @@ public class CanalTest {
         address.setHostName("local");
 
         assertEquals("\"local\"", JSON.toJSONString(address));
-
     }
 }

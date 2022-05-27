@@ -16,7 +16,7 @@ abstract class FieldWriterEnum
     final long[] hashCodes;
 
     protected FieldWriterEnum(String name, int ordinal, long features, String format, Class<? extends Enum> enumType) {
-        super(name, ordinal, features, format, enumType, enumType);
+        super(name, ordinal, features, format, null, enumType, enumType);
 
         this.enumType = enumType;
         this.enumConstants = enumType.getEnumConstants();

@@ -8,8 +8,8 @@ final class FieldWriterInt16Field<T>
         extends FieldWriterInt16<T> {
     final Field field;
 
-    FieldWriterInt16Field(String name, int ordinal, Field field, Class fieldClass) {
-        super(name, ordinal, fieldClass);
+    FieldWriterInt16Field(String name, int ordinal, String format, String label, Field field, Class fieldClass) {
+        super(name, ordinal, format, label, fieldClass);
         this.field = field;
     }
 

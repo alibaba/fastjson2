@@ -20,7 +20,7 @@ final class FieldWriterStringFunc<T>
             Method method,
             Function<T, String> function
     ) {
-        super(fieldName, ordinal, features, format, String.class, String.class);
+        super(fieldName, ordinal, features, format, null, String.class, String.class);
         this.method = method;
         this.function = function;
         this.symbol = "symbol".equals(format);

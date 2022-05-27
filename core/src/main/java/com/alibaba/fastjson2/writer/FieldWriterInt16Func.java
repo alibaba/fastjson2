@@ -8,8 +8,8 @@ final class FieldWriterInt16Func<T>
     final Method method;
     final Function<T, Short> function;
 
-    protected FieldWriterInt16Func(String fieldName, int ordinal, Method method, Function<T, Short> function) {
-        super(fieldName, ordinal, Short.class);
+    protected FieldWriterInt16Func(String fieldName, int ordinal, String format, String label, Method method, Function<T, Short> function) {
+        super(fieldName, ordinal, format, label, Short.class);
         this.method = method;
         this.function = function;
     }

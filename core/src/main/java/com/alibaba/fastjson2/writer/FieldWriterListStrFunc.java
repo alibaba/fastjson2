@@ -22,7 +22,7 @@ final class FieldWriterListStrFunc<T>
             Type fieldType,
             Class fieldClass
     ) {
-        super(fieldName, ordinal, features, format, fieldType, fieldClass);
+        super(fieldName, ordinal, features, format, null, fieldType, fieldClass);
         this.method = method;
         this.function = function;
     }

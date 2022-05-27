@@ -11,7 +11,7 @@ final class FieldWriterBigIntField<T>
     final Field field;
 
     protected FieldWriterBigIntField(String name, int ordinal, long features, String format, Field field) {
-        super(name, ordinal, features, format, BigInteger.class, BigInteger.class);
+        super(name, ordinal, features, format, null, BigInteger.class, BigInteger.class);
         this.field = field;
     }
 

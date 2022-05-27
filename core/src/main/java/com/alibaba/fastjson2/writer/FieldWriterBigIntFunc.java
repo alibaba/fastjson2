@@ -12,7 +12,7 @@ final class FieldWriterBigIntFunc<T>
     final Function<T, BigInteger> function;
 
     FieldWriterBigIntFunc(String fieldName, int ordinal, Method method, Function<T, BigInteger> function) {
-        super(fieldName, ordinal, 0, null, BigInteger.class, BigInteger.class);
+        super(fieldName, ordinal, 0, null, null, BigInteger.class, BigInteger.class);
         this.method = method;
         this.function = function;
     }

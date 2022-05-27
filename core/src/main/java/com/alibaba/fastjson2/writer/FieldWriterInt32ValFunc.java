@@ -10,8 +10,8 @@ final class FieldWriterInt32ValFunc
     final Method method;
     final ToIntFunction function;
 
-    protected FieldWriterInt32ValFunc(String fieldName, int ordinal, long features, String format, Method method, ToIntFunction function) {
-        super(fieldName, ordinal, features, format, int.class, int.class);
+    protected FieldWriterInt32ValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToIntFunction function) {
+        super(fieldName, ordinal, features, format, label, int.class, int.class);
         this.method = method;
         this.function = function;
     }

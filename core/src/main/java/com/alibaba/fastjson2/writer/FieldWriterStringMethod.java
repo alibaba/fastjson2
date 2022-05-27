@@ -16,10 +16,11 @@ final class FieldWriterStringMethod<T>
             String fieldName,
             int ordinal,
             String format,
+            String label,
             long features,
             Method method
     ) {
-        super(fieldName, ordinal, features, format, String.class, String.class);
+        super(fieldName, ordinal, features, format, label, String.class, String.class);
         this.method = method;
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);

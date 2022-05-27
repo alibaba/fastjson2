@@ -9,8 +9,8 @@ final class FieldWriterDoubleValField<T>
         extends FieldWriterImpl<T> {
     final Field field;
 
-    FieldWriterDoubleValField(String name, int ordinal, Field field) {
-        super(name, ordinal, 0, null, double.class, double.class);
+    FieldWriterDoubleValField(String name, int ordinal, String format, String label, Field field) {
+        super(name, ordinal, 0, format, label, double.class, double.class);
         this.field = field;
     }
 

@@ -10,8 +10,8 @@ final class FieldWriterInt64ValFunc<T>
     final Method method;
     final ToLongFunction function;
 
-    protected FieldWriterInt64ValFunc(String fieldName, int ordinal, long features, String format, Method method, ToLongFunction function) {
-        super(fieldName, ordinal, features, format, long.class);
+    protected FieldWriterInt64ValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToLongFunction function) {
+        super(fieldName, ordinal, features, format, label, long.class);
         this.method = method;
         this.function = function;
     }

@@ -1,12 +1,14 @@
 package com.alibaba.fastjson.serializer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.filter.LabelFilter;
 import com.alibaba.fastjson2.filter.PropertyPreFilter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SerializeWriter {
+public class SerializeWriter
+        implements Cloneable {
     final JSONWriter raw;
 
     public JSONWriter getRaw() {
@@ -16,6 +18,8 @@ public class SerializeWriter {
     final ListWrapper<PropertyFilter> propertyFilters;
     final ListWrapper<ValueFilter> valueFilters;
     final ListWrapper<NameFilter> nameFilters;
+    final ListWrapper<BeforeFilter> beforeFilters;
+    final ListWrapper<AfterFilter> afterFilters;
 
     public SerializeWriter() {
         this(JSONWriter.of());
@@ -26,6 +30,8 @@ public class SerializeWriter {
         this.propertyFilters = new ListWrapper<>();
         this.valueFilters = new ListWrapper<>();
         this.nameFilters = new ListWrapper<>();
+        this.beforeFilters = new ListWrapper<>();
+        this.afterFilters = new ListWrapper<>();
     }
 
     public void writeNull() {
@@ -56,6 +62,14 @@ public class SerializeWriter {
         return nameFilters;
     }
 
+    public List<BeforeFilter> getBeforeFilters() {
+        return beforeFilters;
+    }
+
+    public List<AfterFilter> getAfterFilters() {
+        return afterFilters;
+    }
+
     class ListWrapper<T>
             extends ArrayList<T> {
         public boolean add(T filter) {
@@ -77,11 +91,35 @@ public class SerializeWriter {
                 context.setPropertyPreFilter((PropertyPreFilter) filter);
             }
 
+            if (filter instanceof BeforeFilter) {
+                context.setBeforeFilter((BeforeFilter) filter);
+            }
+
+            if (filter instanceof AfterFilter) {
+                context.setAfterFilter((AfterFilter) filter);
+            }
+
+            if (filter instanceof LabelFilter) {
+                context.setLabelFilter((LabelFilter) filter);
+            }
+
             return super.add(filter);
         }
     }
 
+    public void write(int c) {
+        raw.writeRaw((char) c);
+    }
+
+    public void writeFieldName(String key) {
+        raw.writeName(key);
+    }
+
     public String toString() {
         return raw.toString();
+    }
+
+    public void close() {
+        raw.close();
     }
 }

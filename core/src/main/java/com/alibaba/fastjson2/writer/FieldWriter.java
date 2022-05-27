@@ -55,6 +55,10 @@ public interface FieldWriter<T>
         return null;
     }
 
+    default String getLabel() {
+        return null;
+    }
+
     default Method getMethod() {
         return null;
     }

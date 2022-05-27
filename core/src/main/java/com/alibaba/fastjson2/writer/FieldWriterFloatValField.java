@@ -9,8 +9,8 @@ final class FieldWriterFloatValField<T>
         extends FieldWriterImpl<T> {
     final Field field;
 
-    FieldWriterFloatValField(String name, int ordinal, Field field) {
-        super(name, ordinal, 0, null, float.class, float.class);
+    FieldWriterFloatValField(String name, int ordinal, String format, String label, Field field) {
+        super(name, ordinal, 0, format, label, float.class, float.class);
         this.field = field;
     }
 

@@ -9,8 +9,8 @@ final class FieldWriterInt64ValField<T>
         extends FieldWriterInt64<T> {
     final Field field;
 
-    FieldWriterInt64ValField(String name, int ordinal, long features, String format, Field field) {
-        super(name, ordinal, features, format, long.class);
+    FieldWriterInt64ValField(String name, int ordinal, long features, String format, String label, Field field) {
+        super(name, ordinal, features, format, label, long.class);
         this.field = field;
     }
 

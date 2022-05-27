@@ -12,8 +12,8 @@ abstract class FieldWriterBoolean
     volatile char[] utf16ValueTrue;
     volatile char[] utf16ValueFalse;
 
-    FieldWriterBoolean(String name, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, fieldType, fieldClass);
+    FieldWriterBoolean(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass);
     }
 
     @Override

@@ -9,8 +9,8 @@ final class FieldWriterCharValField<T>
         extends FieldWriterImpl<T> {
     final Field field;
 
-    FieldWriterCharValField(String name, int ordinal, Field field) {
-        super(name, ordinal, 0, null, char.class, char.class);
+    FieldWriterCharValField(String name, int ordinal, String format, String label, Field field) {
+        super(name, ordinal, 0, format, label, char.class, char.class);
         this.field = field;
     }
 

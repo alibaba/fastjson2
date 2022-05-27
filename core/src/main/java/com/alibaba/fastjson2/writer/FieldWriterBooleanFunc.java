@@ -8,8 +8,8 @@ final class FieldWriterBooleanFunc
     final Method method;
     final Function function;
 
-    protected FieldWriterBooleanFunc(String fieldName, int ordinal, long features, Method method, Function function) {
-        super(fieldName, ordinal, features, null, Boolean.class, Boolean.class);
+    protected FieldWriterBooleanFunc(String fieldName, int ordinal, long features, String format, String label, Method method, Function function) {
+        super(fieldName, ordinal, features, format, label, Boolean.class, Boolean.class);
         this.method = method;
         this.function = function;
     }

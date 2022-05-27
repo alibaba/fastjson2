@@ -11,8 +11,8 @@ abstract class FieldWriterInt64<T>
     volatile char[][] utf16ValueCache;
     final boolean browserCompatible;
 
-    FieldWriterInt64(String name, int ordinal, long features, String format, Class fieldClass) {
-        super(name, ordinal, features, format, fieldClass, fieldClass);
+    FieldWriterInt64(String name, int ordinal, long features, String format, String label, Class fieldClass) {
+        super(name, ordinal, features, format, label, fieldClass, fieldClass);
         browserCompatible = (features & JSONWriter.Feature.BrowserCompatible.mask) != 0;
     }
 

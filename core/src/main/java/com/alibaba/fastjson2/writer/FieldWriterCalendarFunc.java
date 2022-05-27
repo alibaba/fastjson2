@@ -11,8 +11,8 @@ final class FieldWriterCalendarFunc<T>
     final Method method;
     final Function<T, Calendar> function;
 
-    FieldWriterCalendarFunc(String fieldName, int ordinal, long features, String dateTimeFormat, Method method, Function<T, Calendar> function) {
-        super(fieldName, ordinal, features, dateTimeFormat, Calendar.class, Calendar.class);
+    FieldWriterCalendarFunc(String fieldName, int ordinal, long features, String dateTimeFormat, String label, Method method, Function<T, Calendar> function) {
+        super(fieldName, ordinal, features, dateTimeFormat, label, Calendar.class, Calendar.class);
         this.method = method;
         this.function = function;
     }

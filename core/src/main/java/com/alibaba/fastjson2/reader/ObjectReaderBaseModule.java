@@ -23,9 +23,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
+import java.net.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -732,6 +730,13 @@ public class ObjectReaderBaseModule
                             }
                             break;
                         }
+                        case "label": {
+                            String label = (String) result;
+                            if (!label.isEmpty()) {
+                                fieldInfo.label = label;
+                            }
+                            break;
+                        }
                         case "defaultValue": {
                             String value = (String) result;
                             if (!value.isEmpty()) {
@@ -824,6 +829,12 @@ public class ObjectReaderBaseModule
                 }
 
                 fieldInfo.format = jsonFieldFormat;
+            }
+
+            String label = jsonField.label();
+            if (!label.isEmpty()) {
+                label = label.trim();
+                fieldInfo.label = label;
             }
 
             String defaultValue = jsonField.defaultValue();
@@ -1628,6 +1639,9 @@ public class ObjectReaderBaseModule
                 return MoneySupport.createMonetaryAmountReader();
             case "javax.money.NumberValue":
                 return MoneySupport.createNumberValueReader();
+            case "java.net.InetAddress":
+            case "java.net.InetSocketAddress":
+                return new ObjectReaderMisc((Class) type);
             default:
                 break;
         }

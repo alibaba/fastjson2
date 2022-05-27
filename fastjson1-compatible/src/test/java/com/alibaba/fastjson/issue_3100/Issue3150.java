@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class Issue3150 {
     @Test
     public void test_for_issue() throws Exception {
@@ -17,9 +19,10 @@ public class Issue3150 {
         items.add(new Item("item1",category));
         items.add(new Item("item2",category));
 
-//        System.out.println(JSON.toJSONString(items));
-        System.out.println(JSON.toJSONString(items, refAfterFilterTest));
-
+        assertEquals(
+                "[{\"category\":{\"name\":\"category\"},\"name\":\"item1\",\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"}},{\"category\":{\"$ref\":\"$[0].category\"},\"name\":\"item2\",\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"}}]",
+                JSON.toJSONString(items, refAfterFilterTest)
+        );
     }
 
     public static class MyRefAfterFilter

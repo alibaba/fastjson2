@@ -24,6 +24,11 @@ public class JSONSerializer {
         this.raw = out.raw;
     }
 
+    public JSONSerializer(SerializeWriter out, SerializeConfig config) {
+        this.out = out;
+        this.raw = out.raw;
+    }
+
     public void config(SerializerFeature feature, boolean state) {
         if (!state) {
             throw new JSONException("not support");
@@ -118,5 +123,13 @@ public class JSONSerializer {
     }
     public List<NameFilter> getNameFilters() {
         return this.out.getNameFilters();
+    }
+
+    public List<BeforeFilter> getBeforeFilters() {
+        return this.out.getBeforeFilters();
+    }
+
+    public List<AfterFilter> getAfterFilters() {
+        return this.out.getAfterFilters();
     }
 }

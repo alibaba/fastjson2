@@ -2,10 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.filter.NameFilter;
-import com.alibaba.fastjson2.filter.PropertyFilter;
-import com.alibaba.fastjson2.filter.PropertyPreFilter;
-import com.alibaba.fastjson2.filter.ValueFilter;
+import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.*;
 
 import java.lang.reflect.Field;
@@ -403,11 +400,18 @@ final class ObjectWriterImplMap
         jsonWriter.startObject();
         Map map = (Map) object;
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
-        PropertyPreFilter propertyPreFilter = ctx.getPropertyPreFilter();
-        NameFilter nameFilter = ctx.getNameFilter();
-        ValueFilter valueFilter = ctx.getValueFilter();
-        PropertyFilter propertyFilter = ctx.getPropertyFilter();
+        JSONWriter.Context context = jsonWriter.getContext();
+
+        BeforeFilter beforeFilter = context.getBeforeFilter();
+        if (beforeFilter != null) {
+            beforeFilter.writeBefore(jsonWriter, object);
+        }
+
+        PropertyPreFilter propertyPreFilter = context.getPropertyPreFilter();
+        NameFilter nameFilter = context.getNameFilter();
+        ValueFilter valueFilter = context.getValueFilter();
+        PropertyFilter propertyFilter = context.getPropertyFilter();
+        AfterFilter afterFilter = context.getAfterFilter();
 
         for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = it.next();
@@ -448,6 +452,10 @@ final class ObjectWriterImplMap
             Class<?> valueType = value.getClass();
             ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueType);
             valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
+        }
+
+        if (afterFilter != null) {
+            afterFilter.writeAfter(jsonWriter, object);
         }
 
         jsonWriter.endObject();
