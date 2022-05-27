@@ -13,9 +13,9 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -89,23 +89,8 @@ public class FastJsonHttpMessageConverter
     }
 
     private Object readType(Type type, HttpInputMessage inputMessage) {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            InputStream in = inputMessage.getBody();
-
-            byte[] buf = new byte[1024 * 64];
-            for (; ; ) {
-                int len = in.read(buf);
-                if (len == -1) {
-                    break;
-                }
-
-                if (len > 0) {
-                    baos.write(buf, 0, len);
-                }
-            }
-            byte[] bytes = baos.toByteArray();
-
-            return JSON.parseObject(bytes, type, config.getDateFormat(), config.getReaderFilters(), config.getReaderFeatures());
+        try (InputStream in = inputMessage.getBody()) {
+            return JSON.parseObject(in, type, config.getDateFormat(), config.getReaderFilters(), config.getReaderFeatures());
         } catch (JSONException ex) {
             throw new HttpMessageNotReadableException("JSON parse error: " + ex.getMessage(), ex, inputMessage);
         } catch (IOException ex) {
@@ -115,16 +100,12 @@ public class FastJsonHttpMessageConverter
 
     @Override
     protected void writeInternal(Object object, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+        try (OutputStream out = outputMessage.getBody()) {
+            int len = JSON.writeTo(out, object, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
             HttpHeaders headers = outputMessage.getHeaders();
-
-            int len = JSON.writeTo(baos, object, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
-
             if (headers.getContentLength() < 0 && config.isWriteContentLength()) {
                 headers.setContentLength(len);
             }
-
-            baos.writeTo(outputMessage.getBody());
         } catch (JSONException ex) {
             throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
         } catch (IOException ex) {
