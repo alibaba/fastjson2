@@ -250,10 +250,7 @@ class ObjectWriterBaseModule
             loadFieldInfo(fieldInfo, jsonField);
 
             Class writeUsing = jsonField.writeUsing();
-            if (writeUsing != void.class
-                    && writeUsing != Void.class
-                    && ObjectWriter.class.isAssignableFrom(writeUsing)
-            ) {
+            if (ObjectWriter.class.isAssignableFrom(writeUsing)) {
                 fieldInfo.writeUsing = writeUsing;
             }
         }
@@ -370,6 +367,13 @@ class ObjectWriterBaseModule
                         case "serialzeFeatures": {
                             Enum[] features = (Enum[]) result;
                             applyFeatures(fieldInfo, features);
+                            break;
+                        }
+                        case "serializeUsing": {
+                            Class writeUsing = (Class) result;
+                            if (ObjectWriter.class.isAssignableFrom(writeUsing)) {
+                                fieldInfo.writeUsing = writeUsing;
+                            }
                             break;
                         }
                         default:

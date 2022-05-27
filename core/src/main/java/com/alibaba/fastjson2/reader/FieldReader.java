@@ -34,6 +34,10 @@ public interface FieldReader<T>
         return 0;
     }
 
+    default ObjectReader getInitReader() {
+        return null;
+    }
+
     default boolean isUnwrapped() {
         return (getFeatures() & FieldInfo.UNWRAPPED_MASK) != 0;
     }

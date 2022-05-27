@@ -755,7 +755,9 @@ public class ObjectReaderCreator {
                 fieldInfo.schema,
                 fieldType,
                 fieldClass,
-                field);
+                field,
+                fieldInfo.getInitReader());
+
         FieldReader previous = fieldReaders.putIfAbsent(fieldName, fieldReader);
         if (previous != null) {
             int cmp = fieldReader.compareTo(previous);
@@ -785,7 +787,8 @@ public class ObjectReaderCreator {
                                         fieldInfo.schema,
                                         fieldType,
                                         fieldClass,
-                                        field
+                                        field,
+                                        null
                                 ));
             }
         }
@@ -1324,7 +1327,7 @@ public class ObjectReaderCreator {
             Class fieldClass,
             Field field
     ) {
-        return createFieldReader(objectClass, objectType, fieldName, 0, features, format, null, null, null, fieldType, field.getType(), field);
+        return createFieldReader(objectClass, objectType, fieldName, 0, features, format, null, null, null, fieldType, field.getType(), field, null);
     }
 
     public <T> FieldReader<T> createFieldReader(
@@ -1339,7 +1342,8 @@ public class ObjectReaderCreator {
             String schema,
             Type fieldType,
             Class fieldClass,
-            Field field
+            Field field,
+            ObjectReader initReader
     ) {
         if (defaultValue != null && defaultValue.getClass() != fieldClass) {
             Function typeConvert = JSONFactory
@@ -1364,6 +1368,12 @@ public class ObjectReaderCreator {
             if (!objectClass.getName().startsWith("java.lang")) {
                 field.setAccessible(true);
             }
+        }
+
+        if (initReader != null) {
+            FieldReaderObjectField fieldReader = new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
+            fieldReader.fieldObjectReader = initReader;
+            return fieldReader;
         }
 
         if (fieldClass == int.class) {

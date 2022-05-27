@@ -179,7 +179,8 @@ public class ObjectReaderCreatorLambda
                                     fieldInfo.schema,
                                     field.getGenericType(),
                                     field.getType(),
-                                    field
+                                    field,
+                                    fieldInfo.getInitReader()
                             )
                     );
                 });

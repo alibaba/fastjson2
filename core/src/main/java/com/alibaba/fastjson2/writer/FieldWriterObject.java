@@ -34,6 +34,11 @@ abstract class FieldWriterObject<T>
     }
 
     @Override
+    public ObjectWriter getInitWriter() {
+        return initObjectWriter;
+    }
+
+    @Override
     public boolean unwrapped() {
         return unwrapped;
     }
