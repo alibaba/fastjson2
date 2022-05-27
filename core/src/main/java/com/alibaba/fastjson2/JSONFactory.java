@@ -31,6 +31,9 @@ public final class JSONFactory {
         return DEFAULT_PROPERTIES.getProperty(key);
     }
 
+    static long defaultReaderFeatures;
+    static long defaultWriterFeatures;
+
     static final class Utils {
         static volatile ToIntFunction<String> CODER_FUNCTION;
         static volatile Function<String, byte[]> VALUE_FUNCTION;
@@ -251,7 +254,8 @@ public final class JSONFactory {
     }
 
     public static JSONReader.Context createReadContext() {
-        return new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        return new JSONReader.Context(provider);
     }
 
     public static ObjectWriterProvider getDefaultObjectWriterProvider() {

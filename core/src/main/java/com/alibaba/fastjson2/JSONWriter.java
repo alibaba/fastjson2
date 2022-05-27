@@ -1378,6 +1378,7 @@ public abstract class JSONWriter
                 throw new IllegalArgumentException("objectWriterProvider must not null");
             }
 
+            this.features = defaultWriterFeatures;
             this.provider = provider;
         }
 
@@ -1386,6 +1387,7 @@ public abstract class JSONWriter
                 throw new IllegalArgumentException("objectWriterProvider must not null");
             }
 
+            this.features = defaultWriterFeatures;
             this.provider = provider;
 
             for (int i = 0; i < features.length; i++) {

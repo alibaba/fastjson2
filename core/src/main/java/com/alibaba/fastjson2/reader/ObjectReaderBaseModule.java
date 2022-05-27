@@ -2075,7 +2075,7 @@ public class ObjectReaderBaseModule
                 long hash = jsonReader.readFieldNameHashCode();
                 JSONReader.Context context = jsonReader.getContext();
 
-                if (hash == HASH_TYPE && context.isEnable(JSONReader.Feature.SupportAutoType)) {
+                if (hash == HASH_TYPE && context.isEnabled(JSONReader.Feature.SupportAutoType)) {
                     long typeHash = jsonReader.readTypeHashCode();
                     ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
                     if (autoTypeObjectReader == null) {

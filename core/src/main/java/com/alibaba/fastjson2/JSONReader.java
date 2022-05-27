@@ -2233,6 +2233,7 @@ public abstract class JSONReader
         protected final ObjectReaderProvider provider;
 
         public Context(ObjectReaderProvider provider) {
+            this.features = defaultReaderFeatures;
             this.provider = provider;
         }
 
@@ -2360,7 +2361,7 @@ public abstract class JSONReader
             }
         }
 
-        public boolean isEnable(Feature feature) {
+        public boolean isEnabled(Feature feature) {
             return (this.features & feature.mask) != 0;
         }
 

@@ -28,7 +28,7 @@ final class ObjectReaderImplObject
             long hash = jsonReader.readFieldNameHashCode();
 
             if (hash == HASH_TYPE) {
-                boolean supportAutoType = context.isEnable(JSONReader.Feature.SupportAutoType);
+                boolean supportAutoType = context.isEnabled(JSONReader.Feature.SupportAutoType);
 
                 ObjectReader autoTypeObjectReader;
 

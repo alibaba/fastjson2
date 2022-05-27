@@ -32,7 +32,7 @@ final class ObjectReaderImplClass
         String className = jsonReader.readString();
 
         JSONReader.Context context = jsonReader.getContext();
-        if (!context.isEnable(JSONReader.Feature.SupportClassForName)) {
+        if (!context.isEnabled(JSONReader.Feature.SupportClassForName)) {
             throw new JSONException("not support autoType : " + jsonReader.getString());
         }
 
