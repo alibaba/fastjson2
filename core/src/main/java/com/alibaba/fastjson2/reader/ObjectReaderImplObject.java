@@ -176,7 +176,7 @@ final class ObjectReaderImplObject
                 value = null;
                 break;
             default:
-                throw new JSONException("TODO : " + jsonReader.current());
+                throw new JSONException("illegal input : " + jsonReader.current() + ", offset " + jsonReader.getOffset());
         }
 
         return value;
