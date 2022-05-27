@@ -94,14 +94,6 @@
             optional support by fastjson2.
             so the scope of these libs is provided.
         -->
-        <!-- FIXME should remove fastjson1? -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>${fastjson1x.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
         <dependency>
             <groupId>com.squareup.retrofit2</groupId>
             <artifactId>retrofit</artifactId>
