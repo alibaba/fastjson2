@@ -19,9 +19,6 @@ public class JDKUtils {
     static final long FIELD_STRING_VALUE_OFFSET;
     static volatile boolean FIELD_STRING_ERROR;
 
-    static volatile ToIntFunction<String> CODER_FUNCTION;
-    static volatile Function<String, byte[]> VALUE_FUNCTION;
-
     static final Class CLASS_SQL_DATASOURCE;
     static final Class CLASS_SQL_ROW_SET;
     public static final boolean HAS_SQL;
@@ -219,52 +216,6 @@ public class JDKUtils {
                 handle.type()
         );
         return (BiFunction<byte[], Charset, String>) callSite.getTarget().invokeExact();
-    }
-
-    public static ToIntFunction<String> getStringCode11() throws Throwable {
-        if (CODER_FUNCTION != null) {
-            return CODER_FUNCTION;
-        }
-
-        MethodHandles.Lookup lookup = getLookup();
-
-        MethodHandles.Lookup caller = lookup.in(String.class);
-        MethodHandle handle = caller.findVirtual(
-                String.class, "coder", MethodType.methodType(byte.class)
-        );
-
-        CallSite callSite = LambdaMetafactory.metafactory(
-                caller,
-                "applyAsInt",
-                MethodType.methodType(ToIntFunction.class),
-                MethodType.methodType(int.class, Object.class),
-                handle,
-                handle.type()
-        );
-        return CODER_FUNCTION = (ToIntFunction<String>) callSite.getTarget().invokeExact();
-    }
-
-    public static Function<String, byte[]> getStringValue11() throws Throwable {
-        if (VALUE_FUNCTION != null) {
-            return VALUE_FUNCTION;
-        }
-
-        MethodHandles.Lookup lookup = getLookup();
-
-        MethodHandles.Lookup caller = lookup.in(String.class);
-        MethodHandle handle = caller.findVirtual(
-                String.class, "value", MethodType.methodType(byte[].class)
-        );
-
-        CallSite callSite = LambdaMetafactory.metafactory(
-                caller,
-                "apply",
-                MethodType.methodType(Function.class),
-                handle.type().generic(),
-                handle,
-                handle.type()
-        );
-        return VALUE_FUNCTION = (Function<String, byte[]>) callSite.getTarget().invokeExact();
     }
 
     private static MethodHandles.Lookup getLookup() throws Exception {
