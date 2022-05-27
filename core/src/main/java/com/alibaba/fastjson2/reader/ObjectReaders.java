@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.function.*;
 
 import java.lang.reflect.Method;
@@ -28,6 +29,10 @@ public class ObjectReaders {
             Function<Map<Long, Object>, T> creator,
             FieldReader... fieldReaders) {
         return ObjectReaderCreator.INSTANCE.createObjectReaderNoneDefaultConstrutor(null, creator, fieldReaders);
+    }
+
+    public static <T, U, R> ObjectReader<T> createObjectReader(BiFunction<T, U, R> function, FieldReader first, FieldReader second) {
+        throw new JSONException("TODO");
     }
 
     public static FieldReader fieldReader(String fieldName, Class fieldType) {

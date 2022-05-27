@@ -10,8 +10,8 @@ final class FieldWriterFloatValueFunc
     final Method method;
     final ToFloatFunction function;
 
-    protected FieldWriterFloatValueFunc(String fieldName, int ordinal, Method method, ToFloatFunction function) {
-        super(fieldName, ordinal, 0, null, float.class, float.class);
+    protected FieldWriterFloatValueFunc(String fieldName, int ordinal, String format, String label, Method method, ToFloatFunction function) {
+        super(fieldName, ordinal, 0, format, label, float.class, float.class);
         this.method = method;
         this.function = function;
     }

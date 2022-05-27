@@ -265,6 +265,7 @@ public class ObjectWriterCreatorASM
                             fieldInfo.ordinal,
                             fieldInfo.features,
                             fieldInfo.format,
+                            fieldInfo.label,
                             method,
                             writeUsingWriter
                     );
@@ -2551,6 +2552,7 @@ public class ObjectWriterCreatorASM
             int ordinal,
             long features,
             String format,
+            String label,
             Field field,
             ObjectWriter initObjectWriter
     ) {
@@ -2579,15 +2581,15 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == boolean.class || fieldClass == Boolean.class) {
-            return new FieldWriterBooleanField(fieldName, ordinal, features, field, fieldClass);
+            return new FieldWriterBooleanField(fieldName, ordinal, features, format, label, field, fieldClass);
         }
 
         if (fieldClass == byte.class) {
-            return new FieldWriterInt8ValField(fieldName, ordinal, field);
+            return new FieldWriterInt8ValField(fieldName, ordinal, format, label, field);
         }
 
         if (fieldClass == short.class) {
-            return new FieldWriterInt16ValField(fieldName, ordinal, field);
+            return new FieldWriterInt16ValField(fieldName, ordinal, format, label, field);
         }
 
         if (fieldClass == int.class) {
@@ -2600,37 +2602,37 @@ public class ObjectWriterCreatorASM
 
         if (fieldClass == long.class) {
             if (format == null || format.isEmpty()) {
-                return new FieldWriterInt64ValField(fieldName, ordinal, features, format, field);
+                return new FieldWriterInt64ValField(fieldName, ordinal, features, format, label, field);
             }
-            return new FieldWriterMillisField(fieldName, ordinal, features, format, field);
+            return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == float.class) {
-            return new FieldWriterFloatValField(fieldName, ordinal, field);
+            return new FieldWriterFloatValField(fieldName, ordinal, format, label, field);
         }
 
         if (fieldClass == double.class) {
-            return new FieldWriterDoubleValField(fieldName, ordinal, field);
+            return new FieldWriterDoubleValField(fieldName, ordinal, format, label, field);
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharValField(fieldName, ordinal, field);
+            return new FieldWriterCharValField(fieldName, ordinal, format, label, field);
         }
 
         if (fieldClass == Integer.class) {
-            return new FieldWriterInt32Field(fieldName, ordinal, features, format, field);
+            return new FieldWriterInt32Field(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == Long.class) {
-            return new FieldWriterInt64Field(fieldName, ordinal, field);
+            return new FieldWriterInt64Field(fieldName, ordinal, format, label, field);
         }
 
         if (fieldClass == Short.class) {
-            return new FieldWriterInt16Field(fieldName, ordinal, field, fieldClass);
+            return new FieldWriterInt16Field(fieldName, ordinal, format, label, field, fieldClass);
         }
 
         if (fieldClass == Byte.class) {
-            return new FieldWriterInt8Field(fieldName, ordinal, field);
+            return new FieldWriterInt8Field(fieldName, ordinal, format, label, field);
         }
 
         if (fieldClass == BigInteger.class) {
@@ -2650,7 +2652,7 @@ public class ObjectWriterCreatorASM
                 }
             }
 
-            return new FieldWriterDateField(fieldName, ordinal, features, format, field);
+            return new FieldWriterDateField(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == String.class) {

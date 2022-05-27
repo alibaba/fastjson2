@@ -25,7 +25,7 @@ final class FieldWriterObjectArrayMethod<T>
             Class fieldClass,
             Method method
     ) {
-        super(fieldName, ordinal, features, format, fieldType, fieldClass);
+        super(fieldName, ordinal, features, format, null, fieldType, fieldClass);
         this.method = method;
         this.itemType = itemType;
         if (itemType instanceof Class) {

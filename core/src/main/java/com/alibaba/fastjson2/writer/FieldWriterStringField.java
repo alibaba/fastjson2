@@ -17,7 +17,7 @@ final class FieldWriterStringField<T>
             String format,
             long features,
             Field field) {
-        super(fieldName, ordinal, features, format, String.class, String.class);
+        super(fieldName, ordinal, features, format, null, String.class, String.class);
         this.field = field;
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);

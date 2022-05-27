@@ -9,8 +9,8 @@ final class FieldWriterBoolMethod
         extends FieldWriterBoolean {
     final Method method;
 
-    protected FieldWriterBoolMethod(String fieldName, int ordinal, long features, Method method, Class fieldClass) {
-        super(fieldName, ordinal, features, null, fieldClass, fieldClass);
+    protected FieldWriterBoolMethod(String fieldName, int ordinal, long features, String format, String label, Method method, Class fieldClass) {
+        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass);
         this.method = method;
     }
 

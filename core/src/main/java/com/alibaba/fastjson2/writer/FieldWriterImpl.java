@@ -13,6 +13,7 @@ abstract class FieldWriterImpl<T>
     final String name;
     final int ordinal;
     final String format;
+    final String label;
     final long hashCode;
     final byte[] nameWithColonUTF8;
     final char[] nameWithColonUTF16;
@@ -23,10 +24,11 @@ abstract class FieldWriterImpl<T>
     final Class fieldClass;
     final boolean fieldClassSerializable;
 
-    FieldWriterImpl(String name, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
+    FieldWriterImpl(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
         this.name = name;
         this.ordinal = ordinal;
         this.format = format;
+        this.label = label;
         this.hashCode = Fnv.hashCode64(name);
         this.features = features;
         this.fieldType = fieldType;
@@ -103,6 +105,11 @@ abstract class FieldWriterImpl<T>
     @Override
     public String getFieldName() {
         return name;
+    }
+
+    @Override
+    public String getLabel() {
+        return label;
     }
 
     @Override

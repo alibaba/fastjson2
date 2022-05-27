@@ -9,8 +9,8 @@ final class FieldWriterInt64Method<T>
         extends FieldWriterInt64<T> {
     final Method method;
 
-    protected FieldWriterInt64Method(String fieldName, int ordinal, long features, String format, Method method, Class fieldClass) {
-        super(fieldName, ordinal, features, format, fieldClass);
+    protected FieldWriterInt64Method(String fieldName, int ordinal, long features, String format, String label, Method method, Class fieldClass) {
+        super(fieldName, ordinal, features, format, label, fieldClass);
         this.method = method;
     }
 

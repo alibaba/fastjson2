@@ -16,10 +16,11 @@ final class FieldWriterDateFunc<T>
             int ordinal,
             long features,
             String dateTimeFormat,
+            String label,
             Method method,
             Function<T, Date> function
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, Date.class, Date.class);
+        super(fieldName, ordinal, features, dateTimeFormat, label, Date.class, Date.class);
         this.method = method;
         this.function = function;
     }

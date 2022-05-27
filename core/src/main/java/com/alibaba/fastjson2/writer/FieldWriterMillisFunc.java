@@ -14,10 +14,11 @@ final class FieldWriterMillisFunc<T>
             int ordinal,
             long features,
             String dateTimeFormat,
+            String label,
             Method method,
             ToLongFunction function
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, long.class, long.class);
+        super(fieldName, ordinal, features, dateTimeFormat, label, long.class, long.class);
         this.method = method;
         this.function = function;
     }

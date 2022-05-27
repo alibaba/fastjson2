@@ -10,6 +10,7 @@ public class FieldInfo {
 
     public String fieldName;
     public String format;
+    public String label;
     public int ordinal;
     public long features;
     public boolean ignore;
@@ -37,6 +38,7 @@ public class FieldInfo {
     public void init() {
         fieldName = null;
         format = null;
+        label = null;
         ordinal = 0;
         features = 0;
         ignore = false;

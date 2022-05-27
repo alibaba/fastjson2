@@ -44,12 +44,13 @@ public class ObjectWriterCreatorLambda
             int ordinal,
             long features,
             String format,
+            String label,
             Method method,
             ObjectWriter initObjectWriter
     ) {
         int modifiers = objectClass.getModifiers();
         if (!Modifier.isPublic(modifiers) || isExternalClass(objectClass)) {
-            return super.createFieldWriter(objectClass, fieldName, ordinal, features, format, method, initObjectWriter);
+            return super.createFieldWriter(objectClass, fieldName, ordinal, features, format, label, method, initObjectWriter);
         }
 
         if (initObjectWriter != null) {
@@ -69,35 +70,35 @@ public class ObjectWriterCreatorLambda
         Object lambda = lambdaSetter(objectClass, returnClass, method);
 
         if (returnClass == int.class) {
-            return new FieldWriterInt32ValFunc(fieldName, ordinal, features, format, method, (ToIntFunction<T>) lambda);
+            return new FieldWriterInt32ValFunc(fieldName, ordinal, features, format, label, method, (ToIntFunction<T>) lambda);
         }
 
         if (returnClass == long.class) {
             if (format == null || format.isEmpty()) {
-                return new FieldWriterInt64ValFunc(fieldName, ordinal, features, format, method, (ToLongFunction) lambda);
+                return new FieldWriterInt64ValFunc(fieldName, ordinal, features, format, label, method, (ToLongFunction) lambda);
             }
 
-            return new FieldWriterMillisFunc(fieldName, ordinal, features, format, method, (ToLongFunction) lambda);
+            return new FieldWriterMillisFunc(fieldName, ordinal, features, format, label, method, (ToLongFunction) lambda);
         }
 
         if (returnClass == boolean.class) {
-            return new FieldWriterBoolValFunc(fieldName, ordinal, features, method, (Predicate<T>) lambda);
+            return new FieldWriterBoolValFunc(fieldName, ordinal, features, format, label, method, (Predicate<T>) lambda);
         }
 
         if (returnClass == Boolean.class) {
-            return new FieldWriterBooleanFunc(fieldName, ordinal, features, method, (Function) lambda);
+            return new FieldWriterBooleanFunc(fieldName, ordinal, features, format, label, method, (Function) lambda);
         }
 
         if (returnClass == short.class) {
-            return new FieldWriterInt16ValFunc(fieldName, ordinal, method, (ToShortFunction) lambda);
+            return new FieldWriterInt16ValFunc(fieldName, ordinal, format, label, method, (ToShortFunction) lambda);
         }
 
         if (returnClass == byte.class) {
-            return new FieldWriterInt8ValFunc(fieldName, ordinal, method, (ToByteFunction) lambda);
+            return new FieldWriterInt8ValFunc(fieldName, ordinal, format, label, method, (ToByteFunction) lambda);
         }
 
         if (returnClass == float.class) {
-            return new FieldWriterFloatValueFunc(fieldName, ordinal, method, (ToFloatFunction) lambda);
+            return new FieldWriterFloatValueFunc(fieldName, ordinal, format, label, method, (ToFloatFunction) lambda);
         }
 
         if (returnClass == double.class) {

@@ -31,8 +31,8 @@ abstract class FieldWriterDate<T>
 
     protected ObjectWriter dateWriter;
 
-    protected FieldWriterDate(String fieldName, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
-        super(fieldName, ordinal, features, format, fieldType, fieldClass);
+    protected FieldWriterDate(String fieldName, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
+        super(fieldName, ordinal, features, format, label, fieldType, fieldClass);
 
         boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false;
         if (format != null) {

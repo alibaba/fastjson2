@@ -12,7 +12,7 @@ abstract class FieldWriterObjectFinal<T>
     boolean refDetect;
 
     protected FieldWriterObjectFinal(String name, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, fieldType, fieldClass);
+        super(name, ordinal, features, format, null, fieldType, fieldClass);
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
         this.refDetect = !ObjectWriterProvider.isNotReferenceDetect(fieldClass);

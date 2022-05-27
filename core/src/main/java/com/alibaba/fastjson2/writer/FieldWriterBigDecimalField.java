@@ -11,7 +11,7 @@ final class FieldWriterBigDecimalField<T>
     final Field field;
 
     protected FieldWriterBigDecimalField(String name, int ordinal, long features, Field field) {
-        super(name, ordinal, features, null, BigDecimal.class, BigDecimal.class);
+        super(name, ordinal, features, null, null, BigDecimal.class, BigDecimal.class);
         this.field = field;
     }
 

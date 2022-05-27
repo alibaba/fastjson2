@@ -18,12 +18,36 @@ final class ObjectWriterMisc
 
         Class<?> objectClass = object.getClass();
         String objectClassName = objectClass.getName();
+
+        String str;
         switch (objectClassName) {
             case "net.sf.json.JSONNull":
                 jsonWriter.writeNull();
+                return;
+            case "java.net.Inet4Address":
+            case "java.net.Inet6Address":
+                str = ((java.net.InetAddress) object).getHostName();
                 break;
+            case "java.net.InetSocketAddress": {
+                java.net.InetSocketAddress address = (java.net.InetSocketAddress) object;
+
+                jsonWriter.startObject();
+
+                jsonWriter.writeName("address");
+                jsonWriter.writeColon();
+                jsonWriter.writeAny(address.getAddress());
+
+                jsonWriter.writeName("port");
+                jsonWriter.writeColon();
+                jsonWriter.writeInt32(address.getPort());
+
+                jsonWriter.endObject();
+                return;
+            }
             default:
                 throw new JSONException("not support class : " + objectClassName);
         }
+
+        jsonWriter.writeString(str);
     }
 }

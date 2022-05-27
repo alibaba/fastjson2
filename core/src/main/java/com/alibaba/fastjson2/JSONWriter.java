@@ -159,7 +159,10 @@ public abstract class JSONWriter
         return context.propertyPreFilter != null
                 || context.propertyFilter != null
                 || context.nameFilter != null
-                || context.valueFilter != null;
+                || context.valueFilter != null
+                || context.beforeFilter != null
+                || context.afterFilter != null
+                || context.labelFilter != null;
     }
 
     public boolean isWriteNulls() {
@@ -182,6 +185,14 @@ public abstract class JSONWriter
         return (context.features & Feature.ReferenceDetection.mask) != 0
                 && object != null
                 && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
+    }
+
+    public boolean containsReference(Object value) {
+        return refs != null && refs.containsKey(value);
+    }
+
+    public boolean removeReference(Object value) {
+        return this.refs != null && this.refs.remove(value) != null;
     }
 
     public boolean isBeanToArray() {
@@ -533,6 +544,10 @@ public abstract class JSONWriter
     }
 
     public void writeRaw(char[] chars) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeRaw(char ch) {
         throw new UnsupportedOperationException();
     }
 
@@ -1332,6 +1347,10 @@ public abstract class JSONWriter
         throw new UnsupportedOperationException();
     }
 
+    public int flushTo(OutputStream out, Charset charset) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
     static int MAX_ARRAY_SIZE = 1024 * 1024 * 64; // 64M
 
     public static class Context {
@@ -1343,7 +1362,6 @@ public abstract class JSONWriter
         boolean dateFormatMillis;
         boolean dateFormatISO8601;
         boolean dateFormatUnixTime;
-        String numberFormat;
         long features;
         ZoneId zoneId;
 
@@ -1351,6 +1369,9 @@ public abstract class JSONWriter
         PropertyFilter propertyFilter;
         NameFilter nameFilter;
         ValueFilter valueFilter;
+        BeforeFilter beforeFilter;
+        AfterFilter afterFilter;
+        LabelFilter labelFilter;
 
         public Context(ObjectWriterProvider provider) {
             if (provider == null) {
@@ -1397,13 +1418,19 @@ public abstract class JSONWriter
         protected void configFilter(Filter... filters) {
             for (Filter filter : filters) {
                 if (filter instanceof NameFilter) {
-                    setNameFilter((NameFilter) filter);
+                    this.nameFilter = (NameFilter) filter;
                 } else if (filter instanceof ValueFilter) {
-                    setValueFilter((ValueFilter) filter);
+                    this.valueFilter = (ValueFilter) filter;
                 } else if (filter instanceof PropertyFilter) {
-                    setPropertyFilter((PropertyFilter) filter);
+                    this.propertyFilter = (PropertyFilter) filter;
                 } else if (filter instanceof PropertyPreFilter) {
-                    setPropertyPreFilter((PropertyPreFilter) filter);
+                    this.propertyPreFilter = (PropertyPreFilter) filter;
+                } else if (filter instanceof BeforeFilter) {
+                    this.beforeFilter = (BeforeFilter) filter;
+                } else if (filter instanceof AfterFilter) {
+                    this.afterFilter = (AfterFilter) filter;
+                } else if (filter instanceof LabelFilter) {
+                    this.labelFilter = (LabelFilter) filter;
                 }
             }
         }
@@ -1514,6 +1541,30 @@ public abstract class JSONWriter
 
         public void setPropertyFilter(PropertyFilter propertyFilter) {
             this.propertyFilter = propertyFilter;
+        }
+
+        public AfterFilter getAfterFilter() {
+            return afterFilter;
+        }
+
+        public void setAfterFilter(AfterFilter afterFilter) {
+            this.afterFilter = afterFilter;
+        }
+
+        public BeforeFilter getBeforeFilter() {
+            return beforeFilter;
+        }
+
+        public void setBeforeFilter(BeforeFilter beforeFilter) {
+            this.beforeFilter = beforeFilter;
+        }
+
+        public LabelFilter getLabelFilter() {
+            return labelFilter;
+        }
+
+        public void setLabelFilter(LabelFilter labelFilter) {
+            this.labelFilter = labelFilter;
         }
     }
 

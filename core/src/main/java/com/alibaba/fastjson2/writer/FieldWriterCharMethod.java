@@ -11,7 +11,7 @@ final class FieldWriterCharMethod<T>
     final Method method;
 
     protected FieldWriterCharMethod(String fieldName, int ordinal, Method method, Class fieldClass) {
-        super(fieldName, ordinal, 0, null, fieldClass, fieldClass);
+        super(fieldName, ordinal, 0, null, null, fieldClass, fieldClass);
         this.method = method;
     }
 

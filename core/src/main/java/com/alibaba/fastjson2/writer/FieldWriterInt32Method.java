@@ -9,8 +9,8 @@ final class FieldWriterInt32Method<T>
         extends FieldWriterInt32<T> {
     final Method method;
 
-    FieldWriterInt32Method(String fieldName, int ordinal, long features, String format, Method method, Class fieldClass) {
-        super(fieldName, ordinal, features, format, fieldClass, fieldClass);
+    FieldWriterInt32Method(String fieldName, int ordinal, long features, String format, String label, Method method, Class fieldClass) {
+        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass);
         this.method = method;
     }
 

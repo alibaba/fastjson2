@@ -1,10 +1,7 @@
 package com.alibaba.fastjson;
 
 import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.NameFilter;
-import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.alibaba.fastjson.serializer.SerializeFilter;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson.serializer.*;
 import com.alibaba.fastjson.util.IOUtils;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
@@ -307,17 +304,7 @@ public class JSON {
 
         try (JSONWriter writer = JSONWriter.of(context)) {
             writer.setRootObject(object);
-            for (SerializeFilter filter : filters) {
-                if (filter instanceof NameFilter) {
-                    context.setNameFilter((NameFilter) filter);
-                } else if (filter instanceof ValueFilter) {
-                    context.setValueFilter((ValueFilter) filter);
-                } else if (filter instanceof PropertyPreFilter) {
-                    context.setPropertyPreFilter((PropertyPreFilter) filter);
-                } else if (filter instanceof PropertyFilter) {
-                    context.setPropertyFilter((PropertyFilter) filter);
-                }
-            }
+            configFilter(context, filters);
 
             if (object == null) {
                 writer.writeNull();
@@ -336,23 +323,33 @@ public class JSON {
         }
     }
 
+    public static void configFilter(JSONWriter.Context context, SerializeFilter... filters) {
+        for (SerializeFilter filter : filters) {
+            if (filter instanceof NameFilter) {
+                context.setNameFilter((NameFilter) filter);
+            } else if (filter instanceof ValueFilter) {
+                context.setValueFilter((ValueFilter) filter);
+            } else if (filter instanceof PropertyPreFilter) {
+                context.setPropertyPreFilter((PropertyPreFilter) filter);
+            } else if (filter instanceof PropertyFilter) {
+                context.setPropertyFilter((PropertyFilter) filter);
+            } else if (filter instanceof BeforeFilter) {
+                context.setBeforeFilter((BeforeFilter) filter);
+            } else if (filter instanceof AfterFilter) {
+                context.setAfterFilter((AfterFilter) filter);
+            } else if (filter instanceof LabelFilter) {
+                context.setLabelFilter((LabelFilter) filter);
+            }
+        }
+    }
+
     public static byte[] toJSONBytes(Object object, SerializeFilter[] filters, SerializerFeature... features) {
         JSONWriter.Context context = JSONFactory.createWriteContext();
         config(context, features);
 
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
             writer.setRootObject(object);
-            for (SerializeFilter filter : filters) {
-                if (filter instanceof NameFilter) {
-                    context.setNameFilter((NameFilter) filter);
-                } else if (filter instanceof ValueFilter) {
-                    context.setValueFilter((ValueFilter) filter);
-                } else if (filter instanceof PropertyPreFilter) {
-                    context.setPropertyPreFilter((PropertyPreFilter) filter);
-                } else if (filter instanceof PropertyFilter) {
-                    context.setPropertyFilter((PropertyFilter) filter);
-                }
-            }
+            configFilter(context, filters);
 
             if (object == null) {
                 writer.writeNull();
@@ -402,7 +399,7 @@ public class JSON {
         return toJSONBytes(object, new SerializeFilter[0], features);
     }
 
-    static void config(JSONWriter.Context ctx, SerializerFeature[] features) {
+    public static void config(JSONWriter.Context ctx, SerializerFeature[] features) {
         ctx.setDateFormat("millis");
         ctx.setZoneId(defaultTimeZone.toZoneId());
         ctx.config(JSONWriter.Feature.ReferenceDetection);
@@ -511,17 +508,7 @@ public class JSON {
             JSONWriter.Context context = writer.getContext();
             writer.setRootObject(object);
             config(context, features);
-            for (SerializeFilter filter : filters) {
-                if (filter instanceof NameFilter) {
-                    context.setNameFilter((NameFilter) filter);
-                } else if (filter instanceof ValueFilter) {
-                    context.setValueFilter((ValueFilter) filter);
-                } else if (filter instanceof PropertyPreFilter) {
-                    context.setPropertyPreFilter((PropertyPreFilter) filter);
-                } else if (filter instanceof PropertyFilter) {
-                    context.setPropertyFilter((PropertyFilter) filter);
-                }
-            }
+            configFilter(context, filters);
 
             writer.writeAny(object);
             byte[] bytes = writer.getBytes();

@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.util.UUID;
 
 final class JSONWriterPretty
@@ -203,6 +204,11 @@ final class JSONWriterPretty
     @Override
     public int flushTo(OutputStream to) throws IOException {
         return jsonWriter.flushTo(to);
+    }
+
+    @Override
+    public int flushTo(OutputStream to, Charset charset) throws IOException {
+        return jsonWriter.flushTo(to, charset);
     }
 
     @Override

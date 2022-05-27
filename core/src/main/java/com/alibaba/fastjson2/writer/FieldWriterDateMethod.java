@@ -16,10 +16,11 @@ final class FieldWriterDateMethod<T>
             int ordinal,
             long features,
             String format,
+            String label,
             Class fieldClass,
             Method method
     ) {
-        super(fieldName, ordinal, features, format, fieldClass, fieldClass);
+        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass);
         this.method = method;
     }
 

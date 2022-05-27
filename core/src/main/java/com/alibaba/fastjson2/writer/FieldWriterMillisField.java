@@ -13,9 +13,10 @@ final class FieldWriterMillisField<T>
             int ordinal,
             long features,
             String dateTimeFormat,
+            String label,
             Field method
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, long.class, long.class);
+        super(fieldName, ordinal, features, dateTimeFormat, label, long.class, long.class);
         this.field = method;
     }
 

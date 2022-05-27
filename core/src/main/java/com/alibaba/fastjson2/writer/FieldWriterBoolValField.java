@@ -8,8 +8,8 @@ final class FieldWriterBoolValField
         extends FieldWriterBoolVal {
     final Field field;
 
-    protected FieldWriterBoolValField(String fieldName, int ordinal, long features, Field field, Class fieldClass) {
-        super(fieldName, ordinal, features, null, fieldClass, fieldClass);
+    protected FieldWriterBoolValField(String fieldName, int ordinal, long features, String format, String label, Field field, Class fieldClass) {
+        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass);
         this.field = field;
     }
 

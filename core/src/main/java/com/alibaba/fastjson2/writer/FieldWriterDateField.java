@@ -10,8 +10,8 @@ final class FieldWriterDateField<T>
         extends FieldWriterDate<T> {
     final Field field;
 
-    protected FieldWriterDateField(String fieldName, int ordinal, long features, String format, Field field) {
-        super(fieldName, ordinal, features, format, Date.class, Date.class);
+    protected FieldWriterDateField(String fieldName, int ordinal, long features, String format, String label, Field field) {
+        super(fieldName, ordinal, features, format, label, Date.class, Date.class);
         this.field = field;
     }
 
