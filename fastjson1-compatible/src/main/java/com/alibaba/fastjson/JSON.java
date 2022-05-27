@@ -26,8 +26,10 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharsetDecoder;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.function.Supplier;
 
 public class JSON {
     public static final String VERSION = com.alibaba.fastjson2.JSON.VERSION;
@@ -40,6 +42,9 @@ public class JSON {
     public static String DEFFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static int DEFAULT_PARSER_FEATURE;
     public static int DEFAULT_GENERATE_FEATURE;
+
+    static final Supplier<Map> defaultSupplier = JSONObject::new;
+    static final Supplier<Map> orderedSupplier = () -> new JSONObject(true);
 
     static {
         ObjectReaderProvider readerProvider = JSONFactory.getDefaultObjectReaderProvider();
@@ -78,7 +83,7 @@ public class JSON {
 
         JSONReader reader = JSONReader.of(str);
         JSONReader.Context context = reader.getContext();
-        context.setObjectClass(JSONObject.class);
+        context.setObjectSupplier(defaultSupplier);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
@@ -109,7 +114,7 @@ public class JSON {
 
         JSONReader reader = JSONReader.of(jsonBytes);
         JSONReader.Context context = reader.getContext();
-        context.setObjectClass(JSONObject.class);
+        context.setObjectSupplier(defaultSupplier);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
@@ -135,7 +140,7 @@ public class JSON {
 
         JSONReader reader = JSONReader.of(jsonBytes);
         JSONReader.Context context = reader.getContext();
-        context.setObjectClass(JSONObject.class);
+        context.setObjectSupplier(defaultSupplier);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
@@ -165,7 +170,7 @@ public class JSON {
 
         try (JSONReader reader = JSONReader.of(str)) {
             JSONReader.Context context = reader.getContext();
-            context.setObjectClass(JSONObject.class);
+            context.setObjectSupplier(defaultSupplier);
             config(context, features);
             if (reader.isObject() && !reader.isSupportAutoType(0)) {
                 return reader.read(JSONObject.class);
@@ -189,6 +194,9 @@ public class JSON {
                     context.config(JSONReader.Feature.ErrorOnEnumNotMatch);
                 case SupportNonPublicField:
                     context.config(JSONReader.Feature.FieldBased);
+                case OrderedField:
+                    context.setObjectSupplier(orderedSupplier);
+                    break;
                 default:
                     break;
             }
@@ -525,7 +533,7 @@ public class JSON {
     public static JSONArray parseArray(String str, Feature... features) {
         try (JSONReader reader = JSONReader.of(str)) {
             JSONReader.Context context = reader.getContext();
-            context.setObjectClass(JSONObject.class);
+            context.setObjectSupplier(defaultSupplier);
             config(context, features);
             ObjectReader<JSONArray> objectReader = reader.getObjectReader(JSONArray.class);
             return objectReader.readObject(reader, 0);

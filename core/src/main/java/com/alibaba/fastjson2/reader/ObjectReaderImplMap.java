@@ -235,22 +235,10 @@ public final class ObjectReaderImplMap
         boolean emptyObject = false;
         jsonReader.nextIfMatch(BC_OBJECT);
 
-        Class objectClass = jsonReader.getContext().getObjectClass();
+        Supplier<Map> objectSupplier = jsonReader.getContext().getObjectSupplier();
         Map map = null;
-        if (mapType == null && objectClass != null && objectClass != Object.class) {
-            try {
-                if (objectClass == HashMap.class) {
-                    map = new HashMap<>();
-                } else if (objectClass == LinkedHashMap.class) {
-                    map = new LinkedHashMap<>();
-                } else if (objectClass == JSONObject.class) {
-                    map = new JSONObject();
-                } else {
-                    map = (Map) objectClass.newInstance();
-                }
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new JSONException("create object instance error, objectClass " + objectClass.getName());
-            }
+        if (mapType == null && objectSupplier != null) {
+            map = objectSupplier.get();
         } else {
             if (instanceType == HashMap.class) {
                 map = new HashMap<>();
@@ -358,14 +346,10 @@ public final class ObjectReaderImplMap
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
         JSONReader.Context context = jsonReader.getContext();
-        Class objectClass = context.getObjectClass();
+        Supplier<Map> objectSupplier = jsonReader.getContext().getObjectSupplier();
         Map object;
-        if ((mapType == null || mapType == JSONObject.class) && objectClass != null && objectClass != Object.class) {
-            try {
-                object = (Map) objectClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new JSONException("create object instance error, objectClass " + objectClass.getName());
-            }
+        if ((mapType == null || mapType == JSONObject.class) && objectSupplier != null) {
+            object = objectSupplier.get();
         } else {
             object = (Map) createInstance(context.getFeatures() | features);
         }

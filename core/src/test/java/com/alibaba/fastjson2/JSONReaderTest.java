@@ -387,7 +387,7 @@ public class JSONReaderTest {
         context.setDateFormat(null);
         assertNull(context.getDateFormat());
 
-        context.setObjectClass(null);
-        assertNull(context.getObjectClass());
+        context.setObjectSupplier(null);
+        assertNull(context.getObjectSupplier());
     }
 }
