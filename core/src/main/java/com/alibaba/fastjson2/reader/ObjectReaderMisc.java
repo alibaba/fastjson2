@@ -56,6 +56,11 @@ public class ObjectReaderMisc
             }
         }
 
-        throw new JSONException("TODO");
+        if (objectClass == java.text.SimpleDateFormat.class) {
+            String str = jsonReader.readString();
+            return new java.text.SimpleDateFormat(str);
+        }
+
+        throw new JSONException("not support : " + objectClass.getName());
     }
 }

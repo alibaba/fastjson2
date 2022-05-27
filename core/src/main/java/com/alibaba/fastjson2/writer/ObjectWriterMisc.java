@@ -28,6 +28,9 @@ final class ObjectWriterMisc
             case "java.net.Inet6Address":
                 str = ((java.net.InetAddress) object).getHostName();
                 break;
+            case "java.text.SimpleDateFormat":
+                str = ((java.text.SimpleDateFormat) object).toPattern();
+                break;
             case "java.net.InetSocketAddress": {
                 java.net.InetSocketAddress address = (java.net.InetSocketAddress) object;
 

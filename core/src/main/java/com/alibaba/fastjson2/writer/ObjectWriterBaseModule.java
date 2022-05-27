@@ -16,7 +16,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.Inet4Address;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -736,6 +735,7 @@ class ObjectWriterBaseModule
             case "java.net.Inet4Address":
             case "java.net.Inet6Address":
             case "java.net.InetSocketAddress":
+            case "java.text.SimpleDateFormat":
                 return ObjectWriterMisc.INSTANCE;
             default:
                 break;
@@ -980,10 +980,6 @@ class ObjectWriterBaseModule
                     || ZoneId.class.isAssignableFrom(clazz)
                     || Charset.class.isAssignableFrom(clazz)) {
                 return ObjectWriterImplToString.INSTANCE;
-            }
-
-            if (clazz == Inet4Address.class || clazz == Inet4Address.class) {
-                return ObjectWriterImplInetAddress.INSTANCE;
             }
 
             externalObjectWriter = getExternalObjectWriter(clazz.getName(), clazz);
