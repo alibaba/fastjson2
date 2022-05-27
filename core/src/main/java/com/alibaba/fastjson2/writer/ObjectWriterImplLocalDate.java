@@ -32,7 +32,16 @@ final class ObjectWriterImplLocalDate
                     date.getMonthValue(),
                     date.getDayOfMonth());
         } else {
-            String str = ctx.getDateFormatter().format(date);
+            String str;
+            if ("yyyy-MM-dd HH:mm:ss".equals(dateFormat)) {
+                jsonWriter.writeDateTime19(
+                        date.getYear(),
+                        date.getMonthValue(),
+                        date.getDayOfMonth(), 0, 0, 0);
+                return;
+            }
+
+            str = ctx.getDateFormatter().format(date);
             jsonWriter.writeString(str);
         }
     }

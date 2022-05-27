@@ -715,6 +715,9 @@ public abstract class JSONReader
             case 11:
                 return readLocalDate11()
                         .toLocalDate();
+            case 19:
+                return readLocalDateTime19()
+                        .toLocalDate();
             default:
                 break;
         }

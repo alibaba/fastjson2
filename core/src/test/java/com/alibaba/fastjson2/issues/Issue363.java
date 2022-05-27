@@ -14,8 +14,15 @@ public class Issue363 {
     @Test
     public void test() {
         ProgramGridOutput vo = new ProgramGridOutput();
-        assertEquals("{}", JSON.toJSONString(vo));
-        JSON.parseObject("{}", ProgramGridOutput.class);
+        vo.validDate = LocalDate.of(2022, 5, 27);
+        String str = JSON.toJSONString(vo, "yyyy-MM-dd HH:mm:ss");
+        assertEquals("{\"validDate\":\"2022-05-27 00:00:00\"}", str);
+
+        ProgramGridOutput vo2 = JSON.parseObject(str, ProgramGridOutput.class);
+        assertEquals(vo.validDate, vo2.validDate);
+
+        ProgramGridOutput vo3 = JSON.parseObject("{\"validDate\":\"2022-05-27\"}", ProgramGridOutput.class, "yyyy-MM-dd HH:mm:ss");
+        assertEquals(vo.validDate, vo3.validDate);
     }
 
     @Data
