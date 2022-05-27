@@ -1353,6 +1353,10 @@ public abstract class JSONReader
             }
             Object item = read(itemType);
             list.add(item);
+
+            if (ch == '}') {
+                throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
+            }
         }
 
         if (ch == ',') {
