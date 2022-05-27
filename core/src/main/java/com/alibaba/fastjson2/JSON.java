@@ -812,33 +812,6 @@ public interface JSON {
      * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
      *
      * @param input    the JSON {@link InputStream} to be parsed
-     * @param type     specify the {@link Type} to be converted
-     * @param format   the specified date format
-     * @param filters  specify filters to be enabled
-     * @param features features to be enabled in parsing
-     */
-    @SuppressWarnings("unchecked")
-    static <T> T parseObject(InputStream input, Type type, String format, Filter[] filters, JSONReader.Feature... features) {
-        try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8)) {
-            JSONReader.Context context = reader.context;
-            if (format != null && !format.isEmpty()) {
-                context.setUtilDateFormat(format);
-            }
-            context.config(filters, features);
-
-            ObjectReader<T> objectReader = reader.getObjectReader(type);
-            T object = objectReader.readObject(reader, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
-            return object;
-        }
-    }
-
-    /**
-     * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
-     *
-     * @param input    the JSON {@link InputStream} to be parsed
      * @param charset  inputStream charset
      * @param type     specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
