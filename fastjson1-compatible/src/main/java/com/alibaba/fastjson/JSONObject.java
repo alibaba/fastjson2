@@ -40,8 +40,6 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Function;
 
-import static com.alibaba.fastjson.util.TypeUtils.*;
-
 /**
  * @author wenshao[szujobs@hotmail.com]
  */
@@ -232,7 +230,7 @@ public class JSONObject
         JSONReader jsonReader = JSONReader.of(json);
         config(jsonReader.getContext(), features);
 
-        boolean fieldBased = jsonReader.getContext().isEnable(JSONReader.Feature.FieldBased);
+        boolean fieldBased = jsonReader.getContext().isEnabled(JSONReader.Feature.FieldBased);
         ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
@@ -386,7 +384,7 @@ public class JSONObject
         JSONReader jsonReader = JSONReader.of(json);
         config(jsonReader.getContext(), features);
 
-        boolean fieldBased = jsonReader.getContext().isEnable(JSONReader.Feature.FieldBased);
+        boolean fieldBased = jsonReader.getContext().isEnabled(JSONReader.Feature.FieldBased);
         ObjectReader objectReader = provider.getObjectReader(type, fieldBased);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;

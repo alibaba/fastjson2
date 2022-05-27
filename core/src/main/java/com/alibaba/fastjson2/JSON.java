@@ -1823,4 +1823,40 @@ public interface JSON {
     static boolean register(Type type, ObjectWriter<?> objectWriter) {
         return JSONFactory.getDefaultObjectWriterProvider().register(type, objectWriter);
     }
+
+    static void config(JSONReader.Feature... features) {
+        for (JSONReader.Feature feature : features) {
+            JSONFactory.defaultReaderFeatures |= feature.mask;
+        }
+    }
+
+    static void config(JSONReader.Feature feature, boolean state) {
+        if (state) {
+            JSONFactory.defaultReaderFeatures |= feature.mask;
+        } else {
+            JSONFactory.defaultReaderFeatures &= ~feature.mask;
+        }
+    }
+
+    static boolean isEnabled(JSONReader.Feature feature) {
+        return (JSONFactory.defaultReaderFeatures & feature.mask) != 0;
+    }
+
+    static void config(JSONWriter.Feature... features) {
+        for (JSONWriter.Feature feature : features) {
+            JSONFactory.defaultWriterFeatures |= feature.mask;
+        }
+    }
+
+    static void config(JSONWriter.Feature feature, boolean state) {
+        if (state) {
+            JSONFactory.defaultWriterFeatures |= feature.mask;
+        } else {
+            JSONFactory.defaultWriterFeatures &= ~feature.mask;
+        }
+    }
+
+    static boolean isEnabled(JSONWriter.Feature feature) {
+        return (JSONFactory.defaultWriterFeatures & feature.mask) != 0;
+    }
 }

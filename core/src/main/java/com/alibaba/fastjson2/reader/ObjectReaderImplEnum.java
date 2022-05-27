@@ -153,7 +153,7 @@ public final class ObjectReaderImplEnum
                 );
             }
 
-            if (fieldValue == null && jsonReader.getContext().isEnable(JSONReader.Feature.ErrorOnEnumNotMatch)) {
+            if (fieldValue == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnEnumNotMatch)) {
                 String strVal = jsonReader.getString();
                 throw new JSONException("parse enum error, class " + enumClass.getName() + ", value " + strVal);
             }

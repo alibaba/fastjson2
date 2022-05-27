@@ -365,10 +365,10 @@ public class JSONReaderTest {
         JSONReader.Context context = jsonReader.getContext();
 
         context.config(JSONReader.Feature.UseNativeObject, true);
-        assertTrue(context.isEnable(JSONReader.Feature.UseNativeObject));
+        assertTrue(context.isEnabled(JSONReader.Feature.UseNativeObject));
 
         context.config(JSONReader.Feature.UseNativeObject, false);
-        assertFalse(context.isEnable(JSONReader.Feature.UseNativeObject));
+        assertFalse(context.isEnabled(JSONReader.Feature.UseNativeObject));
 
         TimeZone defaultTimeZone = TimeZone.getDefault();
         context.setTimeZone(defaultTimeZone);
