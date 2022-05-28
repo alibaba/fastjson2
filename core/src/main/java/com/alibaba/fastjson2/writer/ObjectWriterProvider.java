@@ -31,11 +31,8 @@ public class ObjectWriterProvider {
                 this.creator = ObjectWriterCreator.INSTANCE;
                 break;
             case "lambda":
-                this.creator = ObjectWriterCreatorLambda.INSTANCE;
-                break;
-            case "asm":
             default:
-                this.creator = ObjectWriterCreatorASM.INSTANCE;
+                this.creator = ObjectWriterCreatorLambda.INSTANCE;
                 break;
         }
     }
