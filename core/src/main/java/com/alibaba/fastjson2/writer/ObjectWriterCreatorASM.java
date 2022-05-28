@@ -2593,6 +2593,7 @@ public class ObjectWriterCreatorASM
                     ordinal,
                     features,
                     format,
+                    label,
                     fieldType,
                     fieldClass,
                     field
@@ -2609,18 +2610,18 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == byte.class) {
-            return new FieldWriterInt8ValField(fieldName, ordinal, format, label, field);
+            return new FieldWriterInt8ValField(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == short.class) {
-            return new FieldWriterInt16ValField(fieldName, ordinal, format, label, field);
+            return new FieldWriterInt16ValField(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == int.class) {
             if (JDKUtils.UNSAFE_SUPPORT) {
-                return new FieldWriterInt32ValUF<>(fieldName, ordinal, features, format, field);
+                return new FieldWriterInt32ValUF<>(fieldName, ordinal, features, format, label, field);
             } else {
-                return new FieldWriterInt32Val(fieldName, ordinal, features, format, field);
+                return new FieldWriterInt32Val(fieldName, ordinal, features, format, label, field);
             }
         }
 
@@ -2648,23 +2649,23 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == Long.class) {
-            return new FieldWriterInt64Field(fieldName, ordinal, format, label, field);
+            return new FieldWriterInt64Field(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == Short.class) {
-            return new FieldWriterInt16Field(fieldName, ordinal, format, label, field, fieldClass);
+            return new FieldWriterInt16Field(fieldName, ordinal, features, format, label, field, fieldClass);
         }
 
         if (fieldClass == Byte.class) {
-            return new FieldWriterInt8Field(fieldName, ordinal, format, label, field);
+            return new FieldWriterInt8Field(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldWriterBigIntField(fieldName, ordinal, features, format, field);
+            return new FieldWriterBigIntField(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldWriterBigDecimalField(fieldName, ordinal, features, field);
+            return new FieldWriterBigDecimalField(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == java.util.Date.class) {
@@ -2680,13 +2681,13 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == String.class) {
-            return new FieldWriterStringField(fieldName, ordinal, format, features, field);
+            return new FieldWriterStringField(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass.isEnum()) {
             Member enumValueField = BeanUtils.getEnumValueField(fieldClass);
             if (enumValueField == null) {
-                return new FIeldWriterEnumField(fieldName, ordinal, format, features, fieldClass, field);
+                return new FIeldWriterEnumField(fieldName, ordinal, features, format, label, fieldClass, field);
             }
         }
 
@@ -2695,7 +2696,7 @@ public class ObjectWriterCreatorASM
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
             }
-            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, fieldType, fieldClass, field);
+            return new FieldWriterListField(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field);
         }
 
         if (fieldClass.isArray()) {
@@ -2704,18 +2705,18 @@ public class ObjectWriterCreatorASM
             if (declaringClass == Throwable.class && "stackTrace".equals(fieldName)) {
                 try {
                     Method method = Throwable.class.getMethod("getStackTrace");
-                    return new FieldWriterObjectArrayMethod(fieldName, itemClass, 0, 0, null, fieldType, fieldClass, method);
+                    return new FieldWriterObjectArrayMethod(fieldName, itemClass, ordinal, features, format, label, fieldType, fieldClass, method);
                 } catch (NoSuchMethodException ignored) {
                 }
             }
 
             boolean base64 = fieldClass == byte[].class && "base64".equals(format);
             if (!base64) {
-                return new FieldWriterObjectArrayField(fieldName, itemClass, 0, 0, format, fieldType, fieldClass, field);
+                return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, fieldType, fieldClass, field);
             }
         }
 
-        return new FieldWriterObjectFieldUF(fieldName, ordinal, features, format, field.getGenericType(), fieldClass, field);
+        return new FieldWriterObjectFieldUF(fieldName, ordinal, features, format, label, field.getGenericType(), fieldClass, field);
     }
 
     void genGetObject(MethodWriterContext mwc, FieldWriter fieldWriter, int OBJECT) {

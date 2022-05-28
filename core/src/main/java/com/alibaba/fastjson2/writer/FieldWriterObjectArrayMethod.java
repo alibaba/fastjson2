@@ -21,11 +21,12 @@ final class FieldWriterObjectArrayMethod<T>
             int ordinal,
             long features,
             String format,
+            String label,
             Type fieldType,
             Class fieldClass,
             Method method
     ) {
-        super(fieldName, ordinal, features, format, null, fieldType, fieldClass);
+        super(fieldName, ordinal, features, format, label, fieldType, fieldClass);
         this.method = method;
         this.itemType = itemType;
         if (itemType instanceof Class) {

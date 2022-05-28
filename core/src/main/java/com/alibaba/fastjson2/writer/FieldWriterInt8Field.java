@@ -8,8 +8,8 @@ final class FieldWriterInt8Field<T>
         extends FieldWriterInt8<T> {
     final Field field;
 
-    FieldWriterInt8Field(String name, int ordinal, String format, String label, Field field) {
-        super(name, ordinal, format, label, Byte.class);
+    FieldWriterInt8Field(String name, int ordinal, long features, String format, String label, Field field) {
+        super(name, ordinal, features, format, label, Byte.class);
         this.field = field;
     }
 

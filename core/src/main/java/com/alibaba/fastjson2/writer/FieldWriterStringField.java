@@ -14,10 +14,11 @@ final class FieldWriterStringField<T>
     protected FieldWriterStringField(
             String fieldName,
             int ordinal,
-            String format,
             long features,
+            String format,
+            String label,
             Field field) {
-        super(fieldName, ordinal, features, format, null, String.class, String.class);
+        super(fieldName, ordinal, features, format, label, String.class, String.class);
         this.field = field;
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);

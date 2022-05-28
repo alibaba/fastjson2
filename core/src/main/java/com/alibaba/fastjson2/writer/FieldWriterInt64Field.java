@@ -8,8 +8,8 @@ final class FieldWriterInt64Field<T>
         extends FieldWriterInt64<T> {
     final Field field;
 
-    FieldWriterInt64Field(String name, int ordinal, String format, String label, Field field) {
-        super(name, ordinal, 0, format, label, Long.class);
+    FieldWriterInt64Field(String name, int ordinal, long features, String format, String label, Field field) {
+        super(name, ordinal, features, format, label, Long.class);
         this.field = field;
     }
 

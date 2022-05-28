@@ -10,8 +10,8 @@ final class FieldWriterCharMethod<T>
         extends FieldWriterImpl<T> {
     final Method method;
 
-    protected FieldWriterCharMethod(String fieldName, int ordinal, Method method, Class fieldClass) {
-        super(fieldName, ordinal, 0, null, null, fieldClass, fieldClass);
+    protected FieldWriterCharMethod(String fieldName, int ordinal, long features, String format, String label, Method method, Class fieldClass) {
+        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass);
         this.method = method;
     }
 

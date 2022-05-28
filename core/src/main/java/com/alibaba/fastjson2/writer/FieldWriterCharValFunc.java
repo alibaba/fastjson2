@@ -10,8 +10,8 @@ final class FieldWriterCharValFunc
     final Method method;
     final ToCharFunction function;
 
-    FieldWriterCharValFunc(String fieldName, int ordinal, Method method, ToCharFunction function) {
-        super(fieldName, ordinal, 0, null, null, char.class, char.class);
+    FieldWriterCharValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToCharFunction function) {
+        super(fieldName, ordinal, features, format, label, char.class, char.class);
         this.method = method;
         this.function = function;
     }

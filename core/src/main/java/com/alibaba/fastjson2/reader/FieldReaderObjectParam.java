@@ -15,7 +15,16 @@ class FieldReaderObjectParam<T>
     final long paramNameHash;
     ObjectReader fieldObjectReader;
 
-    FieldReaderObjectParam(String fieldName, Type fieldType, Class fieldClass, String paramName, Parameter parameter, int ordinal, long features, String format, JSONSchema schema) {
+    FieldReaderObjectParam(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            String paramName,
+            Parameter parameter,
+            int ordinal,
+            long features,
+            String format,
+            JSONSchema schema) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema);
         this.paramName = paramName;
         this.paramNameHash = Fnv.hashCode64(paramName);

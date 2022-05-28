@@ -17,12 +17,13 @@ final class FieldWriterListStrFunc<T>
             int ordinal,
             long features,
             String format,
+            String label,
             Method method,
             Function<T, List> function,
             Type fieldType,
             Class fieldClass
     ) {
-        super(fieldName, ordinal, features, format, null, fieldType, fieldClass);
+        super(fieldName, ordinal, features, format, label, fieldType, fieldClass);
         this.method = method;
         this.function = function;
     }

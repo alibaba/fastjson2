@@ -10,8 +10,8 @@ final class FieldWriterInt16ValFunc
     final Method method;
     final ToShortFunction function;
 
-    FieldWriterInt16ValFunc(String fieldName, int ordinal, String format, String label, Method method, ToShortFunction function) {
-        super(fieldName, ordinal, format, label, short.class);
+    FieldWriterInt16ValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToShortFunction function) {
+        super(fieldName, ordinal, features, format, label, short.class);
         this.method = method;
         this.function = function;
     }

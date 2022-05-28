@@ -15,11 +15,12 @@ class FieldWriterObjectMethod<T>
             int ordinal,
             long features,
             String format,
+            String label,
             Type fieldType,
             Class fieldClass,
             Method method
     ) {
-        super(name, ordinal, features, format, fieldType, fieldClass);
+        super(name, ordinal, features, format, label, fieldType, fieldClass);
         this.method = method;
     }
 

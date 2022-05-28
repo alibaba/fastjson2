@@ -70,12 +70,14 @@ public class ObjectReaderCreator {
                     null,
                     null,
                     paramName,
+                    i,
+                    0,
                     null,
                     paramType,
                     parameter.getType(),
                     paramName,
                     parameter,
-                    i
+                    null
             );
         }
         return fieldReaders;
@@ -322,11 +324,14 @@ public class ObjectReaderCreator {
                             objectClass,
                             objectClass,
                             fieldName,
+                            i,
+                            fieldInfo.features,
                             fieldInfo.format,
                             paramType,
                             parameter.getType(),
                             fieldName,
-                            parameter, i));
+                            parameter,
+                            null));
 
             if (fieldInfo.alternateNames != null) {
                 for (String alternateName : fieldInfo.alternateNames) {
@@ -339,12 +344,15 @@ public class ObjectReaderCreator {
                                     objectClass,
                                     objectClass,
                                     alternateName,
+                                    i,
+                                    fieldInfo.features,
                                     fieldInfo.format,
                                     paramType,
                                     parameter.getType(),
                                     fieldName,
                                     parameter,
-                                    i));
+                                    null
+                            ));
                 }
             }
         }
@@ -1067,30 +1075,32 @@ public class ObjectReaderCreator {
             Class<T> objectClass,
             Type objectType,
             String fieldName,
+            int ordinal,
+            long features,
             String format,
             Type fieldType,
             Class fieldClass,
             String paramName,
             Parameter parameter,
-            int ordinal
+            JSONSchema schema
     ) {
         if (fieldType == byte.class || fieldType == Byte.class) {
-            return new FieldReaderInt8Param(fieldName, fieldClass, paramName, parameter, ordinal);
+            return new FieldReaderInt8Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
         }
 
         if (fieldType == short.class || fieldType == Short.class) {
-            return new FieldReaderInt16Param(fieldName, fieldClass, paramName, parameter, ordinal);
+            return new FieldReaderInt16Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
         }
 
         if (fieldType == int.class || fieldType == Integer.class) {
-            return new FieldReaderInt32Param(fieldName, fieldClass, paramName, parameter, ordinal);
+            return new FieldReaderInt32Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
         }
 
         if (fieldType == long.class || fieldType == Long.class) {
-            return new FieldReaderInt64Param(fieldName, fieldClass, paramName, parameter, ordinal);
+            return new FieldReaderInt64Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
         }
 
-        return new FieldReaderObjectParam(fieldName, fieldType, fieldClass, paramName, parameter, ordinal, 0, format, null);
+        return new FieldReaderObjectParam(fieldName, fieldType, fieldClass, paramName, parameter, ordinal, features, format, schema);
     }
 
     public <T> FieldReader createFieldReaderMethod(

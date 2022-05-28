@@ -8,8 +8,8 @@ final class FieldWriterInt8Func<T>
     final Method method;
     final Function<T, Byte> function;
 
-    FieldWriterInt8Func(String fieldName, int ordinal, String format, String label, Method method, Function<T, Byte> function) {
-        super(fieldName, ordinal, format, label, Byte.class);
+    FieldWriterInt8Func(String fieldName, int ordinal, long features, String format, String label, Method method, Function<T, Byte> function) {
+        super(fieldName, ordinal, features, format, label, Byte.class);
         this.method = method;
         this.function = function;
     }

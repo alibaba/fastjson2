@@ -17,11 +17,12 @@ final class FieldWriterListField<T>
             int ordinal,
             long features,
             String format,
+            String label,
             Type fieldType,
             Class fieldClass,
             Field field
     ) {
-        super(fieldName, itemType, ordinal, features, format, fieldType, fieldClass);
+        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass);
         this.field = field;
     }
 

@@ -10,8 +10,8 @@ final class FieldWriterInt8ValFunc
     final Method method;
     final ToByteFunction function;
 
-    protected FieldWriterInt8ValFunc(String fieldName, int ordinal, String format, String label, Method method, ToByteFunction function) {
-        super(fieldName, ordinal, format, label, byte.class);
+    protected FieldWriterInt8ValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToByteFunction function) {
+        super(fieldName, ordinal, features, format, label, byte.class);
         this.method = method;
         this.function = function;
     }

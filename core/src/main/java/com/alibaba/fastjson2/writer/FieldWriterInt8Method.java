@@ -9,8 +9,8 @@ final class FieldWriterInt8Method
         extends FieldWriterInt8 {
     final Method method;
 
-    protected FieldWriterInt8Method(String fieldName, int ordinal, String format, String label, Method method, Class fieldClass) {
-        super(fieldName, ordinal, format, label, fieldClass);
+    protected FieldWriterInt8Method(String fieldName, int ordinal, long features, String format, String label, Method method, Class fieldClass) {
+        super(fieldName, ordinal, features, format, label, fieldClass);
         this.method = method;
     }
 

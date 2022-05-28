@@ -8,8 +8,8 @@ final class FieldWriterInt64Func<T>
     final Method method;
     final Function<T, Long> function;
 
-    protected FieldWriterInt64Func(String fieldName, int ordinal, String format, String label, Method method, Function<T, Long> function) {
-        super(fieldName, ordinal, 0, format, label, Long.class);
+    protected FieldWriterInt64Func(String fieldName, int ordinal, long features, String format, String label, Method method, Function<T, Long> function) {
+        super(fieldName, ordinal, features, format, label, Long.class);
         this.method = method;
         this.function = function;
     }
