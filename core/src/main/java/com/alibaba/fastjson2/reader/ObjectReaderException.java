@@ -109,6 +109,24 @@ public class ObjectReaderException
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
+        if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY && jsonReader.isSupportAutoType(features)) {
+            jsonReader.next();
+            long typeHash = jsonReader.readTypeHashCode();
+
+            JSONReader.Context context = jsonReader.getContext();
+
+            ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+            if (autoTypeObjectReader == null) {
+                String typeName = jsonReader.getString();
+                autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
+
+                if (autoTypeObjectReader == null) {
+                    throw new JSONException("auoType not support : " + typeName + ", offset " + jsonReader.getOffset());
+                }
+            }
+            return autoTypeObjectReader.readJSONBObject(jsonReader, 0);
+        }
+
         return readObject(jsonReader, features);
     }
 
