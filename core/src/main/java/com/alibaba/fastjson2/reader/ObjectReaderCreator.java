@@ -1604,10 +1604,6 @@ public class ObjectReaderCreator {
             }
         }
 
-        if (field.getDeclaringClass() == Throwable.class && "cause".equals(fieldName)) {
-            features |= JSONReader.Feature.IgnoreSetNullValue.mask;
-        }
-
         if (JDKUtils.UNSAFE_SUPPORT) {
             return new FieldReaderObjectFieldUF(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
         }
