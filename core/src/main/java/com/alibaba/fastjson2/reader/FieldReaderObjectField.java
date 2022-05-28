@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.Function;
 
 class FieldReaderObjectField<T>
         extends FieldReaderImpl<T> {
@@ -250,17 +251,16 @@ class FieldReaderObjectField<T>
                     .getContext()
                     .getObjectReader(fieldType);
         }
-        return jsonReader.isJSONB()
+
+        Object object = jsonReader.isJSONB()
                 ? fieldObjectReader.readJSONBObject(jsonReader, features)
                 : fieldObjectReader.readObject(jsonReader, features);
-    }
 
-    public Object readFieldValueJSONB(JSONReader jsonReader) {
-        if (fieldObjectReader == null) {
-            fieldObjectReader = jsonReader
-                    .getContext()
-                    .getObjectReader(fieldType);
+        Function builder = fieldObjectReader.getBuildFunction();
+        if (builder != null) {
+            object =builder.apply(object);
         }
-        return fieldObjectReader.readJSONBObject(jsonReader, features);
+
+        return object;
     }
 }
