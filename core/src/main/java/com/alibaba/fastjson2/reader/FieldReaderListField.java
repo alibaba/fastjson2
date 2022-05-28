@@ -107,11 +107,11 @@ class FieldReaderListField<T>
         }
 
         JSONReader.Context context = jsonReader.getContext();
+        Function builder = this.fieldObjectReader.getBuildFunction();
 
         if (jsonReader.isJSONB()) {
             Class fieldClass = this.fieldClass;
             ObjectReader autoTypeReader = null;
-            Function builder = this.fieldObjectReader.getBuildFunction();
 
             if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
                 long typeHash = jsonReader.readTypeHashCode();
@@ -182,6 +182,11 @@ class FieldReaderListField<T>
                     continue;
                 }
             }
+
+            if (builder != null) {
+                list = (Collection) builder.apply(list);
+            }
+
             accept(object, list);
 
             jsonReader.nextIfMatch(',');
