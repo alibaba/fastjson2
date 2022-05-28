@@ -989,36 +989,52 @@ public class TypeUtils {
             case "java.lang.String":
                 return String.class;
             case "I":
+            case "int":
                 return int.class;
             case "S":
+            case "short":
                 return short.class;
             case "J":
+            case "long":
                 return long.class;
             case "Z":
+            case "boolean":
                 return boolean.class;
             case "B":
+            case "byte":
                 return byte.class;
             case "F":
+            case "float":
                 return float.class;
             case "D":
+            case "double":
                 return double.class;
             case "C":
+            case "char":
                 return char.class;
             case "[B":
+            case "byte[]":
                 return byte[].class;
             case "[S":
+            case "short[]":
                 return short[].class;
             case "[I":
+            case "int[]":
                 return int[].class;
             case "[J":
+            case "long[]":
                 return long[].class;
             case "[F":
+            case "float[]":
                 return float[].class;
             case "[D":
+            case "double[]":
                 return double[].class;
             case "[C":
+            case "char[]":
                 return char[].class;
             case "[Z":
+            case "boolean[]":
                 return boolean[].class;
             case "java.io.IOException":
                 return java.io.IOException.class;
