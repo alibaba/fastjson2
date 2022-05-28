@@ -249,7 +249,7 @@ public class ObjectReaderBaseModule
             );
 
             if (beanInfo.creatorConstructor == null && beanInfo.kotlin) {
-                beanInfo.creatorConstructor = BeanUtils.getKotlinConstructor(objectClass, beanInfo.createParameterNames);
+                BeanUtils.getKotlinConstructor(objectClass, beanInfo);
             }
         }
 

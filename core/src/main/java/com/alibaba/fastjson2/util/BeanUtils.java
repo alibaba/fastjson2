@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.util;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.codec.BeanInfo;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -60,8 +61,7 @@ public abstract class BeanUtils {
         }
     }
 
-    // public static void constructor(Class objectClass
-    public static Constructor getKotlinConstructor(Class objectClass, String[] paramNames) {
+    public static void getKotlinConstructor(Class objectClass, BeanInfo beanInfo) {
         Constructor[] constructors = constructorCache.get(objectClass);
         if (constructors == null) {
             constructors = objectClass.getDeclaredConstructors();
@@ -69,6 +69,8 @@ public abstract class BeanUtils {
         }
 
         Constructor creatorConstructor = null;
+        String[] paramNames = beanInfo.createParameterNames;
+
         for (Constructor<?> constructor : constructors) {
             Class<?>[] parameterTypes = constructor.getParameterTypes();
             if (paramNames != null && parameterTypes.length != paramNames.length) {
@@ -76,14 +78,18 @@ public abstract class BeanUtils {
             }
 
             if (parameterTypes.length > 0 && "kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterTypes.length - 1].getName())) {
+                beanInfo.markerConstructor = constructor;
                 continue;
             }
+
             if (creatorConstructor != null && creatorConstructor.getParameterTypes().length >= parameterTypes.length) {
                 continue;
             }
+
             creatorConstructor = constructor;
         }
-        return creatorConstructor;
+
+        beanInfo.creatorConstructor = creatorConstructor;
     }
 
     private static volatile boolean kotlinClassKlassError;

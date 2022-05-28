@@ -17,6 +17,7 @@ class ConstructorFunction<T>
     final Constructor constructor;
     final Parameter[] parameters;
     final String[] paramNames;
+    final boolean kotlinMaker;
     final long[] hashCodes;
     final List<Constructor> alternateConstructors;
     Map<Set<Long>, Constructor> alternateConstructorMap;
@@ -25,11 +26,20 @@ class ConstructorFunction<T>
     Map<Set<Long>, Type[]> alternateConstructorArgTypes;
 
     ConstructorFunction(Constructor constructor, String... paramNames) {
-        this(null, constructor, paramNames);
+        this(null, constructor, null, paramNames);
+    }
+
+    ConstructorFunction(Constructor constructor, Constructor markerConstructor, String... paramNames) {
+        this(null, constructor, markerConstructor, paramNames);
     }
 
     ConstructorFunction(List<Constructor> alternateConstructors, Constructor constructor, String... paramNames) {
-        this.constructor = constructor;
+        this(alternateConstructors, constructor, null, paramNames);
+    }
+
+    ConstructorFunction(List<Constructor> alternateConstructors, Constructor constructor, Constructor markerConstructor, String... paramNames) {
+        this.kotlinMaker = markerConstructor != null;
+        this.constructor = kotlinMaker ? markerConstructor : constructor;
         this.parameters = constructor.getParameters();
         this.paramNames = paramNames;
         this.hashCodes = new long[parameters.length];
@@ -103,14 +113,29 @@ class ConstructorFunction<T>
             }
         }
 
-        Object[] args = new Object[parameters.length];
-        for (int i = 0; i < args.length; i++) {
-            Class<?> paramType = parameters[i].getType();
-            Object arg = values.get(hashCodes[i]);
-            if (arg == null) {
-                arg = TypeUtils.getDefaultValue(paramType);
+        Object[] args;
+        if (kotlinMaker) {
+            args = new Object[parameters.length + 2];
+            int i = 0, flag = 0;
+            for (; i < parameters.length; i++) {
+                Object arg = values.get(hashCodes[i]);
+                if (arg != null) {
+                    args[i] = arg;
+                } else {
+                    flag |= (1 << i);
+                }
             }
-            args[i] = arg;
+            args[i] = flag;
+        } else {
+            args = new Object[parameters.length];
+            for (int i = 0; i < args.length; i++) {
+                Class<?> paramType = parameters[i].getType();
+                Object arg = values.get(hashCodes[i]);
+                if (arg == null) {
+                    arg = TypeUtils.getDefaultValue(paramType);
+                }
+                args[i] = arg;
+            }
         }
 
         try {
