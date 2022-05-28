@@ -138,7 +138,15 @@ public enum Feature {
      */
     ErrorOnEnumNotMatch,
 
-    TrimStringFieldValue;
+    /**
+     * @since 2.0.4
+     */
+    TrimStringFieldValue,
+
+    /**
+     * @since 2.0.4
+     */
+    SupportClassForName;
 
     public final int mask;
 
