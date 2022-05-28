@@ -17,8 +17,8 @@ abstract class FieldWriterObject<T>
     final boolean array;
     final boolean number;
 
-    protected FieldWriterObject(String name, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, null, fieldType, fieldClass);
+    protected FieldWriterObject(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass);
         this.unwrapped = (features & FieldInfo.UNWRAPPED_MASK) != 0;
 
         if (fieldClass == Currency.class) {

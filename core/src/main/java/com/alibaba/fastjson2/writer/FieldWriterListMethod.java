@@ -18,11 +18,12 @@ final class FieldWriterListMethod<T>
             int ordinal,
             long features,
             String format,
+            String label,
             Method method,
             Type fieldType,
             Class fieldClass
     ) {
-        super(fieldName, itemType, ordinal, features, format, fieldType, fieldClass);
+        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass);
         this.method = method;
     }
 

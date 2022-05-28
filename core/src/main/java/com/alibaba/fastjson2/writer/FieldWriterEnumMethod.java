@@ -10,8 +10,8 @@ final class FieldWriterEnumMethod
         extends FieldWriterEnum {
     final Method method;
 
-    protected FieldWriterEnumMethod(String name, int ordinal, long features, Class fieldType, Method method) {
-        super(name, ordinal, features, null, fieldType);
+    protected FieldWriterEnumMethod(String name, int ordinal, long features, String format, String label, Class fieldType, Method method) {
+        super(name, ordinal, features, format, label, fieldType);
         this.method = method;
     }
 

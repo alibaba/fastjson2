@@ -57,7 +57,7 @@ public class ObjectWriterCreatorLambda
             Class<?> fieldClass = method.getReturnType();
             Type fieldType = method.getGenericReturnType();
 
-            FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, fieldType, fieldClass, method);
+            FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, label, fieldType, fieldClass, method);
             objMethod.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objMethod.initObjectWriter = initObjectWriter;
@@ -90,28 +90,28 @@ public class ObjectWriterCreatorLambda
         }
 
         if (returnClass == short.class) {
-            return new FieldWriterInt16ValFunc(fieldName, ordinal, format, label, method, (ToShortFunction) lambda);
+            return new FieldWriterInt16ValFunc(fieldName, ordinal, features, format, label, method, (ToShortFunction) lambda);
         }
 
         if (returnClass == byte.class) {
-            return new FieldWriterInt8ValFunc(fieldName, ordinal, format, label, method, (ToByteFunction) lambda);
+            return new FieldWriterInt8ValFunc(fieldName, ordinal, features, format, label, method, (ToByteFunction) lambda);
         }
 
         if (returnClass == float.class) {
-            return new FieldWriterFloatValueFunc(fieldName, ordinal, format, label, method, (ToFloatFunction) lambda);
+            return new FieldWriterFloatValueFunc(fieldName, ordinal, features, format, label, method, (ToFloatFunction) lambda);
         }
 
         if (returnClass == double.class) {
-            return new FieldWriterDoubleValueFunc(fieldName, ordinal, method, (ToDoubleFunction) lambda);
+            return new FieldWriterDoubleValueFunc(fieldName, ordinal, features, format, label, method, (ToDoubleFunction) lambda);
         }
 
         if (returnClass == char.class) {
-            return new FieldWriterCharValFunc(fieldName, ordinal, method, (ToCharFunction) lambda);
+            return new FieldWriterCharValFunc(fieldName, ordinal, features, format, label, method, (ToCharFunction) lambda);
         }
 
         Function function = (Function) lambda;
 
-        return createFieldWriter(objectClass, fieldName, ordinal, features, format, returnType, returnClass, method, function);
+        return createFieldWriter(objectClass, fieldName, ordinal, features, format, label, returnType, returnClass, method, function);
     }
 
     private static Map<Class, LambdaInfo> fieldReaderMapping = new HashMap<>();

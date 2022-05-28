@@ -12,8 +12,8 @@ abstract class FieldWriterInt16<T>
     char[][] utf16ValueCache;
     volatile byte[][] jsonbValueCache;
 
-    FieldWriterInt16(String name, int ordinal, String format, String label, Class fieldClass) {
-        super(name, ordinal, 0, format, label, fieldClass, fieldClass);
+    FieldWriterInt16(String name, int ordinal, long features, String format, String label, Class fieldClass) {
+        super(name, ordinal, features, format, label, fieldClass, fieldClass);
     }
 
     protected void writeInt16(JSONWriter jsonWriter, short value) {

@@ -9,8 +9,8 @@ final class FIeldWriterEnumField
         extends FieldWriterEnum {
     final Field field;
 
-    protected FIeldWriterEnumField(String name, int ordinal, String format, long features, Class fieldType, Field field) {
-        super(name, ordinal, features, format, fieldType);
+    protected FIeldWriterEnumField(String name, int ordinal, long features, String format, String label, Class fieldType, Field field) {
+        super(name, ordinal, features, format, label, fieldType);
         this.field = field;
     }
 

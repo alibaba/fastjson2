@@ -9,8 +9,8 @@ class FieldWriterInt32Val<T>
         extends FieldWriterInt32<T> {
     final Field field;
 
-    FieldWriterInt32Val(String name, int ordinal, long features, String format, Field field) {
-        super(name, ordinal, features, format, null, int.class, int.class);
+    FieldWriterInt32Val(String name, int ordinal, long features, String format, String label, Field field) {
+        super(name, ordinal, features, format, label, int.class, int.class);
         this.field = field;
     }
 

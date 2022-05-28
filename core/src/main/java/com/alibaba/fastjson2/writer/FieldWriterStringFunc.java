@@ -17,10 +17,11 @@ final class FieldWriterStringFunc<T>
             int ordinal,
             long features,
             String format,
+            String label,
             Method method,
             Function<T, String> function
     ) {
-        super(fieldName, ordinal, features, format, null, String.class, String.class);
+        super(fieldName, ordinal, features, format, label, String.class, String.class);
         this.method = method;
         this.function = function;
         this.symbol = "symbol".equals(format);

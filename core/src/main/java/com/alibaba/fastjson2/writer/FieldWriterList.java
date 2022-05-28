@@ -14,8 +14,8 @@ abstract class FieldWriterList<T>
     ObjectWriter listWriter;
     ObjectWriter itemObjectWriter;
 
-    FieldWriterList(String name, Type itemType, int ordinal, long features, String format, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, null, fieldType, fieldClass);
+    FieldWriterList(String name, Type itemType, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass);
 
         this.itemType = itemType == null ? Object.class : itemType;
         if (this.itemType instanceof Class) {

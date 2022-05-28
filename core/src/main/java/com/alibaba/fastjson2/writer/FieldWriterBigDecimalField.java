@@ -10,8 +10,8 @@ final class FieldWriterBigDecimalField<T>
         extends FieldWriterImpl<T> {
     final Field field;
 
-    protected FieldWriterBigDecimalField(String name, int ordinal, long features, Field field) {
-        super(name, ordinal, features, null, null, BigDecimal.class, BigDecimal.class);
+    protected FieldWriterBigDecimalField(String name, int ordinal, long features, String format, String label, Field field) {
+        super(name, ordinal, features, format, label, BigDecimal.class, BigDecimal.class);
         this.field = field;
     }
 

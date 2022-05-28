@@ -10,8 +10,8 @@ final class FieldWriterDoubleValueFunc
     final Method method;
     final ToDoubleFunction function;
 
-    protected FieldWriterDoubleValueFunc(String fieldName, int ordinal, Method method, ToDoubleFunction function) {
-        super(fieldName, ordinal, 0, null, null, double.class, double.class);
+    protected FieldWriterDoubleValueFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToDoubleFunction function) {
+        super(fieldName, ordinal, features, format, label, double.class, double.class);
         this.method = method;
         this.function = function;
     }

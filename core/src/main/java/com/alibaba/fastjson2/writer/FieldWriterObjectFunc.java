@@ -13,8 +13,8 @@ final class FieldWriterObjectFunc<T>
     final Function function;
     final boolean isArray;
 
-    protected FieldWriterObjectFunc(String name, int ordinal, long features, String format, Type fieldType, Class fieldClass, Method method, Function function) {
-        super(name, ordinal, features, format, fieldType, fieldClass);
+    protected FieldWriterObjectFunc(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass, Method method, Function function) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass);
         this.method = method;
         this.function = function;
         isArray = fieldClass == AtomicIntegerArray.class

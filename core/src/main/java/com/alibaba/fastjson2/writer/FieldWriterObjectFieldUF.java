@@ -16,11 +16,12 @@ final class FieldWriterObjectFieldUF
             int ordinal,
             long features,
             String format,
+            String label,
             Type fieldType,
             Class fieldClass,
             Field field
     ) {
-        super(name, ordinal, features, format, fieldType, fieldClass, field);
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field);
 
         fieldOffset = UnsafeUtils.objectFieldOffset(field);
     }

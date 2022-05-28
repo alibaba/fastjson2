@@ -9,8 +9,8 @@ final class FieldWriterInt16Method<T>
         extends FieldWriterInt16<T> {
     final Method method;
 
-    protected FieldWriterInt16Method(String fieldName, int ordinal, String format, String label, Method method, Class fieldClass) {
-        super(fieldName, ordinal, format, label, fieldClass);
+    protected FieldWriterInt16Method(String fieldName, int ordinal, long features, String format, String label, Method method, Class fieldClass) {
+        super(fieldName, ordinal, features, format, label, fieldClass);
         this.method = method;
     }
 

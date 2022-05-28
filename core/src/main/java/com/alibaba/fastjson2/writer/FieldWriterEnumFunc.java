@@ -16,11 +16,13 @@ final class FieldWriterEnumFunc
             String name,
             int ordinal,
             long features,
+            String format,
+            String label,
             Type fieldType,
             Class fieldClass,
             Method method,
             Function function) {
-        super(name, ordinal, features, null, fieldClass);
+        super(name, ordinal, features, format, label, fieldClass);
         this.fieldType = fieldType;
         this.method = method;
         this.function = function;
