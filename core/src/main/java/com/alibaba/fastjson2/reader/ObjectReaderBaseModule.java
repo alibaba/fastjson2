@@ -1643,6 +1643,11 @@ public class ObjectReaderBaseModule
             case "java.net.InetSocketAddress":
             case "java.text.SimpleDateFormat":
                 return new ObjectReaderMisc((Class) type);
+            case "java.io.UncheckedIOException":
+                if (!JDKUtils.UNSAFE_SUPPORT) {
+                    return new ObjectReaderException((Class) type, type.getTypeName(), null);
+                }
+                break;
             default:
                 break;
         }
