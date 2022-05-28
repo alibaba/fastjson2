@@ -30,7 +30,6 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.io.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -966,32 +965,6 @@ public class JSONObject
         return this.map;
     }
 
-    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
-        SecureObjectInputStream.ensureFields();
-        if (SecureObjectInputStream.fields != null && !SecureObjectInputStream.fields_error) {
-            ObjectInputStream secIn = new SecureObjectInputStream(in);
-            try {
-                secIn.defaultReadObject();
-                return;
-            } catch (NotActiveException e) {
-                // skip
-            }
-        }
-
-        in.defaultReadObject();
-        for (Entry entry : map.entrySet()) {
-            final Object key = entry.getKey();
-            if (key != null) {
-                ParserConfig.global.checkAutoType(key.getClass());
-            }
-
-            final Object value = entry.getValue();
-            if (value != null) {
-                ParserConfig.global.checkAutoType(value.getClass());
-            }
-        }
-    }
-
     public <T> T toJavaObject(Type type) {
         if (type instanceof Class) {
             return (T) JSONFactory.getDefaultObjectReaderProvider().getObjectReader(type).createInstance(this, 0L);
@@ -1041,79 +1014,5 @@ public class JSONObject
 
     public String toString(SerializerFeature... features) {
         return JSON.toJSONString(this, features);
-    }
-
-    static class SecureObjectInputStream
-            extends ObjectInputStream {
-        static Field[] fields;
-        static volatile boolean fields_error;
-
-        public SecureObjectInputStream(ObjectInputStream in) throws IOException {
-            super(in);
-            try {
-                for (int i = 0; i < fields.length; i++) {
-                    final Field field = fields[i];
-                    final Object value = field.get(in);
-                    field.set(this, value);
-                }
-            } catch (IllegalAccessException e) {
-                fields_error = true;
-            }
-        }
-
-        static void ensureFields() {
-            if (fields == null && !fields_error) {
-                try {
-                    final Field[] declaredFields = ObjectInputStream.class.getDeclaredFields();
-                    String[] fieldnames = new String[]{"bin", "passHandle", "handles", "curContext"};
-                    Field[] array = new Field[fieldnames.length];
-                    for (int i = 0; i < fieldnames.length; i++) {
-                        Field field = TypeUtils
-                                .getField(
-                                        ObjectInputStream.class,
-                                        fieldnames[i],
-                                        declaredFields
-                                );
-                        field.setAccessible(true);
-                        array[i] = field;
-                    }
-                    fields = array;
-                } catch (Throwable error) {
-                    fields_error = true;
-                }
-            }
-        }
-
-        @Override
-        protected Class<?> resolveClass(ObjectStreamClass desc)
-                throws IOException, ClassNotFoundException {
-            String name = desc.getName();
-            if (name.length() > 2) {
-                int index = name.lastIndexOf('[');
-                if (index != -1) {
-                    name = name.substring(index + 1);
-                }
-                if (name.length() > 2 && name.charAt(0) == 'L' && name.charAt(name.length() - 1) == ';') {
-                    name = name.substring(1, name.length() - 1);
-                }
-//                ParserConfig.global.checkAutoType(name, null, Feature.SupportAutoType.mask);
-            }
-            return super.resolveClass(desc);
-        }
-
-        @Override
-        protected Class<?> resolveProxyClass(String[] interfaces)
-                throws IOException, ClassNotFoundException {
-            for (String interfacename : interfaces) {
-                //检查是否处于黑名单
-//                ParserConfig.global.checkAutoType(interfacename, null);
-            }
-            return super.resolveProxyClass(interfaces);
-        }
-
-        //Hack:默认构造方法会调用这个方法，重写此方法使用反射还原部分关键属性
-        @Override
-        protected void readStreamHeader() throws IOException {
-        }
     }
 }
