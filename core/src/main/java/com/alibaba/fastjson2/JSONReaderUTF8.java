@@ -2013,10 +2013,19 @@ class JSONReaderUTF8
         for (; ; ) {
             if (ch == '\\') {
                 ch = bytes[offset++];
-                if (ch != '\\' && ch != '"') {
-                    char1(ch);
+
+                if (ch == '\\' || ch == '"') {
+                    ch = bytes[offset++];
+                    continue;
                 }
-                ch = bytes[offset++];
+
+                if (ch == 'u') {
+                    offset += 4;
+                    ch = bytes[offset++];
+                    continue;
+                }
+
+                char1(ch);
                 continue;
             }
             if (ch == quote) {

@@ -383,9 +383,26 @@ public class ObjectWriterCreator {
         field.setAccessible(true);
 
         Class<?> fieldClass = field.getType();
+        Type fieldType = field.getGenericType();
 
         if (initObjectWriter != null) {
-            FieldWriterObjectField objImp = new FieldWriterObjectField(fieldName, ordinal, features, format, label, field.getGenericType(), fieldClass, field);
+            if (fieldClass == byte.class) {
+                fieldType = fieldClass = Byte.class;
+            } else if (fieldClass == short.class) {
+                fieldType = fieldClass = Short.class;
+            } else if (fieldClass == int.class) {
+                fieldType = fieldClass = Integer.class;
+            } else if (fieldClass == long.class) {
+                fieldType = fieldClass = Long.class;
+            } else if (fieldClass == float.class) {
+                fieldType = fieldClass = Float.class;
+            } else if (fieldClass == double.class) {
+                fieldType = fieldClass = Double.class;
+            } else if (fieldClass == boolean.class) {
+                fieldType = fieldClass = Boolean.class;
+            }
+
+            FieldWriterObjectField objImp = new FieldWriterObjectField(fieldName, ordinal, features, format, label, fieldType, fieldClass, field);
             objImp.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objImp.initObjectWriter = initObjectWriter;
@@ -470,7 +487,6 @@ public class ObjectWriterCreator {
 
         if (fieldClass == List.class || fieldClass == ArrayList.class) {
             Type itemType = null;
-            Type fieldType = field.getGenericType();
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
             }
