@@ -222,7 +222,7 @@ public class ObjectWriterAdapter<T>
         }
 
         if (jsonWriter
-                .isBeanToArray(features)) {
+                .isBeanToArray(features | this.features)) {
             writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
