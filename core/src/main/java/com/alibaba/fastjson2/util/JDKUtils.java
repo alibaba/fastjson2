@@ -26,7 +26,7 @@ public class JDKUtils {
     public static final Class CLASS_TRANSIENT;
     public static final byte BIG_ENDIAN;
 
-    public static final boolean UNSAFE_SUPPORT;
+    public static final boolean UNSAFE_SUPPORT = false;
     public static final Function<byte[], String> UNSAFE_UTF16_CREATOR;
     public static final Function<byte[], String> UNSAFE_ASCII_CREATOR;
 
@@ -95,16 +95,6 @@ public class JDKUtils {
             FIELD_STRING_VALUE_OFFSET = -1;
         }
 
-        boolean unsafeSupport = false;
-        unsafeSupport = ((Predicate) o -> {
-            try {
-                return UnsafeUtils.UNSAFE != null;
-            } catch (Throwable ignored) {
-                return false;
-            }
-        }).test(null);
-        UNSAFE_SUPPORT = unsafeSupport;
-
         Boolean bigEndian = null;
         if (JDKUtils.JVM_VERSION > 8 && UNSAFE_SUPPORT && LANG_UNNAMED) {
             Class clazz;
@@ -128,16 +118,8 @@ public class JDKUtils {
                 ? -1
                 : bigEndian.booleanValue() ? (byte) 1 : (byte) 0;
 
-        Function<byte[], String> utf16Creator = null, asciiCreator = null;
-        if (unsafeSupport) {
-            try {
-                utf16Creator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorUTF16()).get();
-                asciiCreator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorASCII()).get();
-            } catch (Throwable ignored) {
-            }
-        }
-        UNSAFE_UTF16_CREATOR = utf16Creator;
-        UNSAFE_ASCII_CREATOR = asciiCreator;
+        UNSAFE_UTF16_CREATOR = null;
+        UNSAFE_ASCII_CREATOR = null;
     }
 
     public static boolean isSQLDataSourceOrRowSet(Class type) {

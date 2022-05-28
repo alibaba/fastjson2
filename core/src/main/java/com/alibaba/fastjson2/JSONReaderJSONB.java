@@ -259,6 +259,16 @@ final class JSONReaderJSONB
         throw new JSONException("object not support input " + error(type));
     }
 
+    public List readArray(Type itemType) {
+        int entryCnt = startArray();
+        JSONArray array = new JSONArray(entryCnt);
+        for (int i = 0; i < entryCnt; i++) {
+            Object item = read(itemType);
+            array.add(item);
+        }
+        return array;
+    }
+
     @Override
     public Object readAny() {
         if (offset >= bytes.length) {

@@ -26,7 +26,7 @@ public class AutoTypeTest35_Exception {
                  JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+//        JSONBDump.dump(bytes);
 
         Exception error2 = (Exception) JSONB.parseObject(
                 bytes,

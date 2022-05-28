@@ -63,4 +63,8 @@ public class ObjectReaderMisc
 
         throw new JSONException("not support : " + objectClass.getName());
     }
+
+    public Object readJSONBObject(JSONReader jsonReader, long features) {
+        throw new JSONException("not support : " + objectClass.getName());
+    }
 }
