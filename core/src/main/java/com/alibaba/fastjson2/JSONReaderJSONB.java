@@ -8,7 +8,6 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
-import sun.nio.cs.ext.GB18030;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
