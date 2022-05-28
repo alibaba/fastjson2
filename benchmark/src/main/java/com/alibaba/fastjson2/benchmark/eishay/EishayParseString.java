@@ -65,8 +65,8 @@ public class EishayParseString {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("millis : " + millis);
-        // zulu17.32.13 : 504 460
-        // zulu11.52.13 : 480
+        // zulu11.52.13 :
+        // zulu17.32.13 : 525 513
         // zulu8.58.0.13 : 517
     }
 
@@ -83,6 +83,8 @@ public class EishayParseString {
     }
 
     public static void main(String[] args) throws RunnerException {
+//        new EishayParseString().fastjson2_perf_test();
+//        new EishayParseString().fastjson1_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayParseString.class.getName())
                 .mode(Mode.Throughput)
