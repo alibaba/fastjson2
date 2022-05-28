@@ -93,6 +93,15 @@ public class ObjectReaderCreator {
         return new ConstructorFunction(constructor, paramNames);
     }
 
+    public <T> Function<Map<Long, Object>, T> createFunction(Constructor constructor, Constructor markerConstructor, String... paramNames) {
+        if (markerConstructor == null) {
+            constructor.setAccessible(true);
+        } else {
+            markerConstructor.setAccessible(true);
+        }
+        return new ConstructorFunction(constructor, markerConstructor, paramNames);
+    }
+
     public <T> ObjectReader<T> createObjectReader(
             Class<T> objectType,
             FieldReader... fieldReaders
@@ -359,7 +368,7 @@ public class ObjectReaderCreator {
 
         Function<Map<Long, Object>, Object> function = null;
         if (beanInfo.creatorConstructor != null) {
-            function = createFunction(beanInfo.creatorConstructor, paramNames);
+            function = createFunction(beanInfo.creatorConstructor, beanInfo.markerConstructor, paramNames);
         } else {
             function = createFactoryFunction(beanInfo.createMethod, paramNames);
         }
