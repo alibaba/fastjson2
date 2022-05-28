@@ -1597,6 +1597,10 @@ public class ObjectReaderBaseModule
                 if (rawType == AtomicReference.class) {
                     return new ObjectReaderImplAtomicReference(itemType);
                 }
+
+                if (itemType instanceof WildcardType) {
+                    return getObjectReader(provider, rawType);
+                }
             }
 
             return null;
