@@ -1209,6 +1209,11 @@ final class JSONReaderUTF16
                     ch = chars[offset++];
                     continue;
                 }
+                if (ch == 'u') {
+                    offset += 4;
+                    ch = chars[offset++];
+                    continue;
+                }
                 ch = char1(ch);
                 continue;
             }
