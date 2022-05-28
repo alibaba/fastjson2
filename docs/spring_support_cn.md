@@ -196,7 +196,7 @@ public class RedisConfiguration {
 
 ## 4.3 JSONB Redis Serializer
 
-如果你准备使用 JSONB 作为对象序列/反序列化的方式并对序列化速度有较高的要求的话，可以对jsonb参数进行配置，该参数是 fastjson 2.0.5 版本中新增的支持，配置也很简单。
+如果你准备使用 JSONB 作为对象序列/反序列化的方式并对序列化速度有较高的要求的话，可以对jsonb参数进行配置，该参数是 fastjson 2.0.6-SNAPSHOT 版本中新增的支持，配置也很简单。
 
 **Example**:
 
@@ -255,7 +255,7 @@ public class StreamConfiguration {
 
 ## 5.2 JSONB Message Converter
 
-如果你准备使用 JSONB 作为对象序列/反序列化的方式并对序列化速度有较高的要求的话，可以对 `FastJsonConfig` 的 `jsonb` 参数进行配置，该参数是 fastjson 2.0.5 版本中新增的支持，配置也很简单。
+如果你准备使用 JSONB 作为对象序列/反序列化的方式并对序列化速度有较高的要求的话，可以对 `FastJsonConfig` 的 `jsonb` 参数进行配置，该参数是 fastjson 2.0.6-SNAPSHOT 版本中新增的支持，配置也很简单。
 
 _注意：JSONB仅支持将Message的payload序列化为byte[]_
 

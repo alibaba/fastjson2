@@ -203,7 +203,7 @@ public class RedisConfiguration {
 ## 4.3 JSONB Redis Serializer
 
 If you plan to use JSONB as an object serialization/deserialization method and have higher serialization speed
-requirements, you can configure the `jsonb` parameter, which is a new support in fastjson 2.0.5, and the configuration
+requirements, you can configure the `jsonb` parameter, which is a new support in fastjson 2.0.6-SNAPSHOT, and the configuration
 is also very simple.
 
 **Example**:
@@ -266,7 +266,7 @@ public class StreamConfiguration {
 ## 5.2 JSONB Message Converter
 
 If you plan to use JSONB as the object serialization/deserialization method and have high requirements on serialization
-speed, you can configure the `jsonb` parameter of `FastJsonConfig`, which is a new support in fastjson 2.0.5 version ,
+speed, you can configure the `jsonb` parameter of `FastJsonConfig`, which is a new support in fastjson 2.0.6-SNAPSHOT version ,
 the configuration is also very simple.
 
 _Note: JSONB only supports serializing the payload of Message to byte[]_
