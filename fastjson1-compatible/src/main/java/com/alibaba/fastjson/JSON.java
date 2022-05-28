@@ -197,8 +197,16 @@ public class JSON {
                     break;
                 case ErrorOnEnumNotMatch:
                     context.config(JSONReader.Feature.ErrorOnEnumNotMatch);
+                    break;
                 case SupportNonPublicField:
                     context.config(JSONReader.Feature.FieldBased);
+                    break;
+                case SupportClassForName:
+                    context.config(JSONReader.Feature.SupportClassForName);
+                    break;
+                case TrimStringFieldValue:
+                    context.config(JSONReader.Feature.TrimString);
+                    break;
                 case OrderedField:
                     context.setObjectSupplier(orderedSupplier);
                     break;

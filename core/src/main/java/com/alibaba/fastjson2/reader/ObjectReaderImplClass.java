@@ -33,7 +33,7 @@ final class ObjectReaderImplClass
 
         JSONReader.Context context = jsonReader.getContext();
         if (!context.isEnabled(JSONReader.Feature.SupportClassForName)) {
-            throw new JSONException("not support autoType : " + jsonReader.getString());
+            throw new JSONException("not support ClassForName : " + className + ", you can config 'JSONReader.Feature.SupportClassForName'");
         }
 
         Class mappingClass = TypeUtils.getMapping(className);
