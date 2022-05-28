@@ -69,7 +69,7 @@ class ObjectWriterBaseModule
                         break;
                     case "kotlin.Metadata":
                         beanInfo.kotlin = true;
-                        beanInfo.creatorConstructor = BeanUtils.getKotlinConstructor(objectClass, null);
+                        BeanUtils.getKotlinConstructor(objectClass, beanInfo);
                         beanInfo.createParameterNames = BeanUtils.getKotlinConstructorParameters(objectClass);
                         break;
                     default:
