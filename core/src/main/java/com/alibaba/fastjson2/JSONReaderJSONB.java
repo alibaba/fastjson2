@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
+import sun.nio.cs.ext.GB18030;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -28,6 +29,8 @@ import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 final class JSONReaderJSONB
         extends JSONReader {
+    static Charset GB18030;
+
     private final byte[] bytes;
     private final int length;
     private final int end;
@@ -410,8 +413,11 @@ final class JSONReaderJSONB
                 return str;
             }
             case BC_STR_GB18030: {
+                if (GB18030 == null) {
+                    GB18030 = Charset.forName("GB18030");
+                }
                 int strlen = readLength();
-                String str = new String(bytes, offset, strlen, IOUtils.GB18030);
+                String str = new String(bytes, offset, strlen, GB18030);
                 offset += strlen;
                 return str;
             }
@@ -1764,7 +1770,11 @@ final class JSONReaderJSONB
         } else if (strtype == BC_STR_GB18030) {
             strlen = readLength();
             strBegin = offset;
-            charset = IOUtils.GB18030;
+
+            if (GB18030 == null) {
+                GB18030 = Charset.forName("GB18030");
+            }
+            charset = GB18030;
         } else if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
             return Byte.toString(strtype);
         } else if (strtype >= BC_INT32_BYTE_MIN && strtype <= BC_INT32_BYTE_MAX) {
