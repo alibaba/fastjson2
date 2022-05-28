@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.CACHE_THREAD;
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 final class JSONWriterJSONB
         extends JSONWriter {
