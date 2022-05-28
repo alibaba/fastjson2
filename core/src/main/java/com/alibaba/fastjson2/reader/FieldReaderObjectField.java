@@ -237,7 +237,7 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
-        if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) == 0) {
+        if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
             return;
         }
 
