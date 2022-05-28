@@ -1,8 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.io.IOException;
@@ -11,45 +12,76 @@ import java.util.List;
 
 public class ObjectReaderException
         extends ObjectReaderBean {
+    static final long HASH_TYPE = Fnv.hashCode64("@type");
     static final long HASH_MESSAGE = Fnv.hashCode64("message");
     static final long HASH_DETAIL_MESSAGE = Fnv.hashCode64("detailMessage");
     static final long HASH_CAUSE = Fnv.hashCode64("cause");
     static final long HASH_STACKTRACE = Fnv.hashCode64("stackTrace");
     static final long HASH_SUPPRESSED_EXCEPTIONS = Fnv.hashCode64("suppressedExceptions");
 
-    protected ObjectReaderException(Class objectClass, String typeName, JSONSchema schema) {
-        super(objectClass, typeName, schema);
+    private FieldReader fieldReaderStackTrace;
+
+    protected ObjectReaderException(Class objectClass) {
+        super(objectClass, objectClass.getName(), null);
+        fieldReaderStackTrace = ObjectReaders.fieldReader("stackTrace", StackTraceElement[].class, Throwable::setStackTrace);
     }
 
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
-        throw new JSONException("not support : " + objectClass.getName());
-    }
-
-    @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
-        boolean start = jsonReader.nextIfObjectStart();
+        jsonReader.nextIfObjectStart();
 
         String message = null;
         Throwable cause = null;
         StackTraceElement[] stackTrace = null;
         List<Throwable> suppressedExceptions = null;
 
+        String stackTraceReference = null;
         String suppressedExceptionsReference = null;
+        String causeReference = null;
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
             long hash = jsonReader.readFieldNameHashCode();
-            if (hash == HASH_MESSAGE || hash == HASH_DETAIL_MESSAGE) {
+
+            if (i == 0 && hash == HASH_TYPE && jsonReader.isSupportAutoType(features)) {
+                long typeHash = jsonReader.readTypeHashCode();
+                JSONReader.Context context = jsonReader.getContext();
+                ObjectReader reader = autoType(context, typeHash);
+                String typeName = null;
+                if (reader == null) {
+                    typeName = jsonReader.getString();
+                    reader = context.getObjectReaderAutoType(typeName, objectClass, features);
+
+                    if (reader == null) {
+                        throw new JSONException("No suitable ObjectReader found for" + typeName);
+                    }
+                }
+
+                if (reader == this) {
+                    continue;
+                }
+
+                return reader.readObject(jsonReader);
+            } else if (hash == HASH_MESSAGE || hash == HASH_DETAIL_MESSAGE) {
                 message = jsonReader.readString();
             } else if (hash == HASH_CAUSE) {
-                cause = jsonReader.read(Throwable.class);
+                if (jsonReader.isReference()) {
+                    causeReference = jsonReader.readReference();
+                } else {
+                    cause = jsonReader.read(Throwable.class);
+                }
             } else if (hash == HASH_STACKTRACE) {
-                stackTrace = jsonReader.read(StackTraceElement[].class);
+                if (jsonReader.isReference()) {
+                    stackTraceReference = jsonReader.readReference();
+                } else {
+                    stackTrace = jsonReader.read(StackTraceElement[].class);
+                }
             } else if (hash == HASH_SUPPRESSED_EXCEPTIONS) {
                 if (jsonReader.isReference()) {
                     suppressedExceptionsReference = jsonReader.readReference();
+                } else if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY) {
+                    suppressedExceptions = (List<Throwable>) jsonReader.readAny();
                 } else {
                     suppressedExceptions = jsonReader.readArray(Throwable.class);
                 }
@@ -58,14 +90,7 @@ public class ObjectReaderException
             }
         }
 
-        Throwable object = null;
-        if (objectClass == UncheckedIOException.class) {
-            if (message != null && cause != null) {
-                object = new UncheckedIOException(message, (IOException) cause);
-            } else if (cause != null) {
-                object = new UncheckedIOException((IOException) cause);
-            }
-        }
+        Throwable object = createObject(message, cause);
 
         if (object == null) {
             throw new JSONException("not support : " + objectClass.getName());
@@ -75,6 +100,77 @@ public class ObjectReaderException
             object.setStackTrace(stackTrace);
         }
 
+        if (stackTraceReference != null) {
+            jsonReader.addResolveTask(fieldReaderStackTrace, object, JSONPath.of(stackTraceReference));
+        }
+
+        return object;
+    }
+
+    @Override
+    public Object readJSONBObject(JSONReader jsonReader, long features) {
+        return readObject(jsonReader, features);
+    }
+
+    private Throwable createObject(String message, Throwable cause) {
+        Throwable object = null;
+        if (objectClass == UncheckedIOException.class) {
+            if (message != null && cause != null) {
+                object = new UncheckedIOException(message, (IOException) cause);
+            } else if (cause != null) {
+                object = new UncheckedIOException((IOException) cause);
+            }
+        } else if (objectClass == RuntimeException.class) {
+            if (message != null && cause != null) {
+                object = new RuntimeException(message, cause);
+            } else if (cause != null) {
+                object = new RuntimeException(cause);
+            } else if (message != null) {
+                object = new RuntimeException(message);
+            } else {
+                object = new RuntimeException();
+            }
+        } else if (objectClass == IOException.class) {
+            if (message != null && cause != null) {
+                object = new IOException(message, cause);
+            } else if (cause != null) {
+                object = new IOException(cause);
+            } else if (message != null) {
+                object = new IOException(message);
+            } else {
+                object = new IOException();
+            }
+        } else if (objectClass == Exception.class) {
+            if (message != null && cause != null) {
+                object = new Exception(message, cause);
+            } else if (cause != null) {
+                object = new Exception(cause);
+            } else if (message != null) {
+                object = new Exception(message);
+            } else {
+                object = new Exception();
+            }
+        } else if (objectClass == Throwable.class) {
+            if (message != null && cause != null) {
+                object = new Throwable(message, cause);
+            } else if (cause != null) {
+                object = new Throwable(cause);
+            } else if (message != null) {
+                object = new Throwable(message);
+            } else {
+                object = new Throwable();
+            }
+        } else if (objectClass == IllegalStateException.class) {
+            if (message != null && cause != null) {
+                object = new IllegalStateException(message, cause);
+            } else if (cause != null) {
+                object = new IllegalStateException(cause);
+            } else if (message != null) {
+                object = new IllegalStateException(message);
+            } else {
+                object = new IllegalStateException();
+            }
+        }
         return object;
     }
 }
