@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public class JSONBSizeTest {
@@ -633,7 +634,7 @@ public class JSONBSizeTest {
         for (int i = 0; i < chars.length; i++) {
             chars[i] = (char) ('０' + (i % 9));
             String val = new String(chars, 0, i);
-            byte[] bytes = JSONB.toBytes(val, IOUtils.GB18030);
+            byte[] bytes = JSONB.toBytes(val, Charset.forName("GB18030"));
             Assertions.assertEquals(val, JSONB.parse(bytes));
             Assertions.assertEquals(val, JSONB.parseObject(bytes, String.class));
             Assertions.assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));

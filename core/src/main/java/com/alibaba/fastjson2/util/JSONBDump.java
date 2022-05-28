@@ -18,6 +18,8 @@ import static com.alibaba.fastjson2.JSONB.SymbolTable;
 import static com.alibaba.fastjson2.JSONB.typeName;
 
 public class JSONBDump {
+    static Charset GB18030;
+
     final byte[] bytes;
     final boolean raw;
     int offset;
@@ -236,8 +238,12 @@ public class JSONBDump {
                 return;
             }
             case BC_STR_GB18030: {
+                if (GB18030 == null) {
+                    GB18030 = Charset.forName("GB18030");
+                }
+
                 int strlen = readLength();
-                String str = new String(bytes, offset, strlen, IOUtils.GB18030);
+                String str = new String(bytes, offset, strlen, GB18030);
                 offset += strlen;
                 jsonWriter.writeString(str);
                 return;
