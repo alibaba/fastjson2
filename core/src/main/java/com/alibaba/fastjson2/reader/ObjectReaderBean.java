@@ -107,7 +107,7 @@ public abstract class ObjectReaderBean<T>
                 return null;
             }
 
-            if (ch != '"' && ch != '\'') {
+            if (ch != '"' && ch != '\'' && ch != '}') {
                 throw new JSONException("illegal input " + ch + ", offset " + jsonReader.getOffset());
             }
         }
