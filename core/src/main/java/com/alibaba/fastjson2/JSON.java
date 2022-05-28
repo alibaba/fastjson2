@@ -407,6 +407,34 @@ public interface JSON {
     }
 
     /**
+     * Parse JSON {@link String} into Java Object
+     *
+     * @param text          the JSON {@link String} to be parsed
+     * @param typeReference specify the {@link TypeReference} to be converted
+     * @param filter   specify filters to be enabled
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static <T> T parseObject(String text, TypeReference typeReference, Filter filter, JSONReader.Feature... features) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            JSONReader.Context context = reader.context;
+            context.config(filter, features);
+            Type type = typeReference.getType();
+            boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+            ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
+
+            T object = objectReader.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
      * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
      *
      * @param text     the JSON {@link String} to be parsed
@@ -481,6 +509,32 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(text)) {
             reader.context.config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+
+            T object = objectReader.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param text     the JSON {@link String} to be parsed
+     * @param type     specify the {@link Type} to be converted
+     * @param filter   specify filters to be enabled
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(String text, Type type, Filter filter, JSONReader.Feature... features) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            reader.context.config(filter, features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
 
             T object = objectReader.readObject(reader, 0);
@@ -675,6 +729,31 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(bytes)) {
             reader.context.config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            T object = objectReader.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse UTF8 encoded JSON byte array into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param bytes    UTF8 encoded JSON byte array to parse
+     * @param type     specify the {@link Type} to be converted
+     * @param filter   specify filters to be enabled
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(byte[] bytes, Type type, Filter filter, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(bytes)) {
+            reader.context.config(filter, features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
             T object = objectReader.readObject(reader, 0);
             if (reader.resolveTasks != null) {
