@@ -262,7 +262,7 @@ class FieldReaderObjectField<T>
 
         Function builder = fieldObjectReader.getBuildFunction();
         if (builder != null) {
-            object =builder.apply(object);
+            object = builder.apply(object);
         }
 
         return object;
