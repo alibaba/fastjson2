@@ -237,6 +237,10 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
+        if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
+            return;
+        }
+
         try {
             field.set(object, value);
         } catch (Exception e) {
