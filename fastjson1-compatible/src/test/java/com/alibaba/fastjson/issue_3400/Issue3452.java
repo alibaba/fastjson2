@@ -11,7 +11,7 @@ public class Issue3452 {
     public void test_for_issue() throws Exception {
         String s = "{ \"componentKey\" : \"CMDB_UPDATE_SERVER\"}";
         Step step = JSON.parseObject(s, Step.class);
-        assertEquals("CMDB_UPDATE_SERVER",step.getComponentKey());
+        assertEquals("CMDB_UPDATE_SERVER", step.getComponentKey());
         System.out.println(step.getComponentKey());
     }
 

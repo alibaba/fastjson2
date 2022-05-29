@@ -23,11 +23,11 @@ public class AtomicLongReadOnlyTest {
     public static class V0 {
         private final AtomicLong value;
 
-        public V0(){
+        public V0() {
             this(0);
         }
 
-        public V0(int value){
+        public V0(int value) {
             this.value = new AtomicLong(value);
         }
 

@@ -27,6 +27,5 @@ public class ExceptionTest {
                 JSONReader.Feature.UseNativeObject,
                 JSONReader.Feature.FieldBased);
         assertEquals(objects.length, parsed.length);
-
     }
 }

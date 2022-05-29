@@ -21,9 +21,9 @@ public class IntValueArrayField1Test {
         for (ObjectReaderCreator creator : creators) {
             Field field = IntValueArrayField1.class.getField("values");
             FieldReader fieldWriter = creator.createFieldReader(
-                    "values"
-                    , field.getGenericType()
-                    , field);
+                    "values",
+                    field.getGenericType(),
+                    field);
 
             ObjectReader<IntValueArrayField1> objectReader
                     = creator.createObjectReader(IntValueArrayField1.class, fieldWriter);
@@ -51,9 +51,9 @@ public class IntValueArrayField1Test {
         for (ObjectReaderCreator creator : creators) {
             Field field = IntValueArrayFinalField1.class.getField("values");
             FieldReader fieldWriter = creator.createFieldReader(
-                    "values"
-                    , field.getGenericType()
-                    , field);
+                    "values",
+                    field.getGenericType(),
+                    field);
 
             ObjectReader<IntValueArrayFinalField1> objectReader
                     = creator.createObjectReader(IntValueArrayFinalField1.class, fieldWriter);

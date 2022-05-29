@@ -12,7 +12,7 @@ import java.util.List;
 public class CartItemDO2Test {
     private static List<CartItemDO2> newCartsItem() {
         List<CartItemDO2> list = new ArrayList();
-        for (long i = 90000000000l; i < 90000000000l + 1000; i++) {
+        for (long i = 90000000000L; i < 90000000000L + 1000; i++) {
             CartItemDO2 cartItemDO2 = new CartItemDO2();
             cartItemDO2.setUserId(i);
             cartItemDO2.setAttributes(new HashMap());

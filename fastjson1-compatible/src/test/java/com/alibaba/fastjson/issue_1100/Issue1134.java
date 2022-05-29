@@ -24,11 +24,11 @@ public class Issue1134 {
     }
 
     public static class Model {
-        @JSONField(ordinal = 1, name="Dimension")
+        @JSONField(ordinal = 1, name = "Dimension")
         private int dimension;
-        @JSONField(ordinal = 2, name="PassCode")
+        @JSONField(ordinal = 2, name = "PassCode")
         private String passCode;
-        @JSONField(ordinal = 3, name="BlockPos")
+        @JSONField(ordinal = 3, name = "BlockPos")
         private BlockPos blockpos;
 
         public int getDimension() {

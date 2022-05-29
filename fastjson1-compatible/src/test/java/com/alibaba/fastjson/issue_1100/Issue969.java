@@ -21,7 +21,8 @@ public class Issue969 {
         jsonArray.add(new Model());
         jsonObject.put("models", jsonArray);
 
-        List<Model> list = jsonObject.getObject("models", new TypeReference<List<Model>>(){}.getType());
+        List<Model> list = jsonObject.getObject("models", new TypeReference<List<Model>>() {
+        }.getType());
 
         assertEquals(1, list.size());
         assertEquals(Model.class, list.get(0).getClass());
@@ -35,7 +36,8 @@ public class Issue969 {
         jsonArray.add(new Model());
         jsonObject.put("models", jsonArray);
 
-        List list = jsonObject.getObject("models", new TypeReference<List<Model>>(){}.getType());
+        List list = jsonObject.getObject("models", new TypeReference<List<Model>>() {
+        }.getType());
 
         assertEquals(1, list.size());
         assertEquals(Model.class, list.get(0).getClass());

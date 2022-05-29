@@ -14,8 +14,8 @@ public class Issue3326 {
     public void test_for_issue() throws Exception {
         HashMap<String, Number> map = JSON.parseObject("{\"id\":10.0}",
                 new TypeReference<HashMap<String, Number>>() {
-                    }.getType()
-                );
+                }.getType()
+        );
         assertEquals(BigDecimal.valueOf(10.0), map.get("id"));
     }
 }

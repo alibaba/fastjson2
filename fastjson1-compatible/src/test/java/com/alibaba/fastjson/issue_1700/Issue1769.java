@@ -27,8 +27,7 @@ public class Issue1769 {
     }
 
     @JSONType(orders = {"beginTime"})
-    public static class QueryTaskResultReq
-    {
+    public static class QueryTaskResultReq {
         private Date beginTime;
 
         @JSONField(format = "yyyyMMddHHmmss")

@@ -25,6 +25,7 @@ public class Issue1555 {
 
     /**
      * 当某个字段有JSONField注解，JSONField中name属性不存在，json属性名也要用类上的属性名转换策略
+     *
      * @throws Exception
      */
     @Test

@@ -19,8 +19,8 @@ public class Issue1188 {
         assertNull(info.ids);
     }
 
-    public static class Info{
-        @JSONField(deserialize=false)
+    public static class Info {
+        @JSONField(deserialize = false)
         private List<Integer> ids;
         private String name;
 

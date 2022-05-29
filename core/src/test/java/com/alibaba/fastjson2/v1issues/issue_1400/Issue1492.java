@@ -35,7 +35,6 @@ public class Issue1492 {
         System.out.println(str2);
         DubboResponse resp2 = JSON.parseObject(str2, DubboResponse.class);
         assertEquals(str2, JSON.toJSONString(resp2));
-
     }
 
     public static final class DubboResponse

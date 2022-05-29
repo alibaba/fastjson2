@@ -110,7 +110,6 @@ public class UnwrappedTest {
         assertEquals("val1", bean2.properties.get("attr1"));
 
         assertEquals(bean2.properties, JSON.parseObject(str, ExtendableBean3.class, JSONReader.Feature.SupportSmartMatch).properties);
-
     }
 
     private static class ExtendableBean3 {

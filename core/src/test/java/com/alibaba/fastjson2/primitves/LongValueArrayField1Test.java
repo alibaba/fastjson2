@@ -21,9 +21,9 @@ public class LongValueArrayField1Test {
         for (ObjectReaderCreator creator : creators) {
             Field field = LongValueArrayField1.class.getField("values");
             FieldReader fieldWriter = creator.createFieldReader(
-                    "values"
-                    , field.getGenericType()
-                    , field);
+                    "values",
+                    field.getGenericType(),
+                    field);
 
             ObjectReader<LongValueArrayField1> objectReader
                     = creator.createObjectReader(LongValueArrayField1.class, fieldWriter);
@@ -51,9 +51,9 @@ public class LongValueArrayField1Test {
         for (ObjectReaderCreator creator : creators) {
             Field field = LongValueArrayFinalField1.class.getField("values");
             FieldReader fieldWriter = creator.createFieldReader(
-                    "values"
-                    , field.getGenericType()
-                    , field);
+                    "values",
+                    field.getGenericType(),
+                    field);
 
             ObjectReader<LongValueArrayFinalField1> objectReader
                     = creator.createObjectReader(LongValueArrayFinalField1.class, fieldWriter);

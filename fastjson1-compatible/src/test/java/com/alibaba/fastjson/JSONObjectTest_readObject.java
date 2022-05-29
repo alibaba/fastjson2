@@ -119,7 +119,7 @@ public class JSONObjectTest_readObject {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("val", new Character[]{});
         jsonObject.put("cls", Number.class);
-        jsonObject.put("nums", new Number[] {});
+        jsonObject.put("nums", new Number[]{});
 
         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         ObjectOutputStream objOut = new ObjectOutputStream(bytesOut);

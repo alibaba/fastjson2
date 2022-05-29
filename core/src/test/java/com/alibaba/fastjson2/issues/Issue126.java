@@ -76,6 +76,5 @@ public class Issue126 {
 
         @JSONField(ordinal = 4)
         private int checkedBaggageNum;
-
     }
 }

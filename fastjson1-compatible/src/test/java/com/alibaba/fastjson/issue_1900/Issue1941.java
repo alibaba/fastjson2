@@ -10,7 +10,7 @@ public class Issue1941 {
     @Test
     public void test_for_issue() throws Exception {
         String json = "{\"type\":\"floorV2\",\"templateId\":\"x123\",\"name\":\"floorname2\"}";
-        FloorV2  a=(FloorV2) JSON.parseObject(json,Area.class);
+        FloorV2 a = (FloorV2) JSON.parseObject(json, Area.class);
         assertEquals("floorname2", a.name);
         assertEquals("x123", a.templateId);
     }

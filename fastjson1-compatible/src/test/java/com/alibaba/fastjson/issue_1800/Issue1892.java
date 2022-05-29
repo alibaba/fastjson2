@@ -13,9 +13,9 @@ public class Issue1892 {
     @Test
     public void test_for_issue() throws Exception {
         assertEquals("\"2018-10-10T00:00:00\"",
-            JSON.toJSONString(
-                    LocalDateTime.of(2018, 10, 10, 0, 0), SerializerFeature.UseISO8601DateFormat
-            )
+                JSON.toJSONString(
+                        LocalDateTime.of(2018, 10, 10, 0, 0), SerializerFeature.UseISO8601DateFormat
+                )
         );
     }
 

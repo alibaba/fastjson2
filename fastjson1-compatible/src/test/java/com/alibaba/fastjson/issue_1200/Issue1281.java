@@ -14,8 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 public class Issue1281 {
     @Test
     public void test_for_issue() throws Exception {
-        Type type1 =  new TypeReference<Result<Map<String, Object>>>() {}.getType();
-        Type type2 =  new TypeReference<Result<Map<String, Object>>>() {}.getType();
+        Type type1 = new TypeReference<Result<Map<String, Object>>>() {
+        }.getType();
+        Type type2 = new TypeReference<Result<Map<String, Object>>>() {
+        }.getType();
         assertSame(type1, type2);
     }
 

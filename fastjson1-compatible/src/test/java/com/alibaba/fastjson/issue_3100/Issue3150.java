@@ -16,8 +16,8 @@ public class Issue3150 {
 
         List<Item> items = new ArrayList<Item>(2);
         Category category = new Category("category");
-        items.add(new Item("item1",category));
-        items.add(new Item("item2",category));
+        items.add(new Item("item1", category));
+        items.add(new Item("item2", category));
 
         assertEquals(
                 "[{\"category\":{\"name\":\"category\"},\"name\":\"item1\",\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"}},{\"category\":{\"$ref\":\"$[0].category\"},\"name\":\"item2\",\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"}}]",
@@ -31,7 +31,7 @@ public class Issue3150 {
 
         @Override
         public void writeAfter(Object object) {
-            if(object instanceof  Item){
+            if (object instanceof Item) {
                 this.writeKeyValue("afterFilterCategory", category);
             }
         }
@@ -42,7 +42,7 @@ public class Issue3150 {
 
         private Category category;
 
-        public Item(String name,Category category){
+        public Item(String name, Category category) {
             this.name = name;
             this.category = category;
         }
@@ -59,7 +59,7 @@ public class Issue3150 {
     public static class Category {
         private String name;
 
-        public Category(String name){
+        public Category(String name) {
             this.name = name;
         }
 

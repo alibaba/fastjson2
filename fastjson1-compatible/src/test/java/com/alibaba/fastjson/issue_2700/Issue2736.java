@@ -7,7 +7,7 @@ public class Issue2736 {
     @Test
     public void test_for_issue() throws Exception {
         JSONObject s = JSONObject.parseObject("{1:2,3:4}");
-        for(String s1 : s.keySet()){
+        for (String s1 : s.keySet()) {
             System.out.println(s1);
         }
     }

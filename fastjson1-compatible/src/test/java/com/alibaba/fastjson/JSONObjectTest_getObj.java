@@ -15,7 +15,8 @@ public class JSONObjectTest_getObj {
         obj.put("value", "");
         assertEquals("", obj.get("value"));
         assertNull(obj.getObject("value", Model.class));
-        assertNull(obj.getObject("value", new TypeReference<Model>(){}));
+        assertNull(obj.getObject("value", new TypeReference<Model>() {
+        }));
     }
 
     @Test
@@ -24,7 +25,8 @@ public class JSONObjectTest_getObj {
         obj.put("value", "null");
         assertEquals("null", obj.get("value"));
         assertNull(obj.getObject("value", Model.class));
-        assertNull(obj.getObject("value", new TypeReference<Model>(){}));
+        assertNull(obj.getObject("value", new TypeReference<Model>() {
+        }));
     }
 
     @Test
@@ -39,7 +41,8 @@ public class JSONObjectTest_getObj {
         List<JSONObject> json = JSON.parseArray("[{\"values\":[{}]}]", JSONObject.class);
 
         for (JSONObject obj : json) {
-            Object values = obj.getObject("values", new TypeReference<List<JSONObject>>() {});
+            Object values = obj.getObject("values", new TypeReference<List<JSONObject>>() {
+            });
         }
     }
 

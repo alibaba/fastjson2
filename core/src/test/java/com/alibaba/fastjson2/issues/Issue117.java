@@ -21,6 +21,5 @@ public class Issue117 {
         long times = System.currentTimeMillis() - start;
 
         System.out.println(times);
-
     }
 }

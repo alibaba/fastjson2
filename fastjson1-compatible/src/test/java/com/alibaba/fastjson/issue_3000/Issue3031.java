@@ -11,8 +11,7 @@ public class Issue3031 {
         ResultData obj = JSON.parseObject(str, ResultData.class);
     }
 
-    public static class ResultData
-    {
+    public static class ResultData {
         private boolean success;
         private String message;
         private Object data;

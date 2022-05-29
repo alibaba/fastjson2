@@ -63,4 +63,3 @@ public class MixinAPITest {
         assertEquals(base.b, base2.b);
     }
 }
-

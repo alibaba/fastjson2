@@ -16,8 +16,8 @@ public class Issue3373 {
 
         List<Item> items = new ArrayList<Item>(2);
         Category category = new Category("category");
-        items.add(new Item("item1",category));
-        items.add(new Item("item2",category));
+        items.add(new Item("item1", category));
+        items.add(new Item("item2", category));
 
         assertEquals(
                 "[{\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"},\"afterFilterTwo\":\"two\",\"category\":{\"name\":\"category\"},\"name\":\"item1\"},{\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"},\"afterFilterTwo\":\"two\",\"category\":{\"$ref\":\"$[0].category\"},\"name\":\"item2\"}]",
@@ -45,7 +45,7 @@ public class Issue3373 {
     public static class Category {
         private String name;
 
-        public Category(String name){
+        public Category(String name) {
             this.name = name;
         }
 
@@ -65,7 +65,7 @@ public class Issue3373 {
 
         private String barcode;
 
-        public Item(String name, Category category){
+        public Item(String name, Category category) {
             this.name = name;
             this.category = category;
         }

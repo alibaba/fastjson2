@@ -25,7 +25,7 @@ public class Issue1628 {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("a", 1001);
         map.put("b", 2002);
-        byte[] bytes = JSON.toJSONBytes(map, new SerializeFilter[] {new SimplePropertyPreFilter("a")});
+        byte[] bytes = JSON.toJSONBytes(map, new SerializeFilter[]{new SimplePropertyPreFilter("a")});
         assertEquals("{\"a\":1001}", new String(bytes));
     }
 

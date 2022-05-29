@@ -141,8 +141,7 @@ public class Issue3065 {
         System.out.println(resultData);
     }
 
-    public static class ResultData
-    {
+    public static class ResultData {
         private boolean success;
         private String message;
         private Object data;

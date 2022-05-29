@@ -32,7 +32,6 @@ public class Issue1764_bean {
     }
 
 
-
     @JSONType(serialzeFeatures = BrowserCompatible)
     public static class Model {
         public long value;

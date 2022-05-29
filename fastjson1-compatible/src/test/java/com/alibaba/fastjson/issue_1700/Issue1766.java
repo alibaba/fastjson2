@@ -25,30 +25,25 @@ public class Issue1766 {
         assertNotNull(user.getBirthday());
     }
 
-    public static class User
-    {
+    public static class User {
         private String name;
 
         @JSONField(format = "yyyy-MM-dd HH:mm:ss")
         private Date birthday;
 
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
-        public void setName(String name)
-        {
+        public void setName(String name) {
             this.name = name;
         }
 
-        public Date getBirthday()
-        {
+        public Date getBirthday() {
             return birthday;
         }
 
-        public void setBirthday(Date birthday)
-        {
+        public void setBirthday(Date birthday) {
             this.birthday = birthday;
         }
     }

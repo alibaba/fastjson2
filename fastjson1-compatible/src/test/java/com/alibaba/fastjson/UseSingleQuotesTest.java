@@ -9,7 +9,7 @@ public class UseSingleQuotesTest {
     @Test
     public void test0() {
         assertEquals("'a\\'bc'",
-            JSON.toJSONString("a'bc", SerializerFeature.UseSingleQuotes)
+                JSON.toJSONString("a'bc", SerializerFeature.UseSingleQuotes)
         );
 
         assertEquals("'a\\'bc'",

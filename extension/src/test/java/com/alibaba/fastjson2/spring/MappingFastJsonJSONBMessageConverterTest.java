@@ -39,7 +39,8 @@ public class MappingFastJsonJSONBMessageConverterTest {
         assertThrows(IllegalArgumentException.class, () -> converter.setSerializedPayloadClass(String.class));
     }
 
-    public static class BytesMessage implements Message<byte[]> {
+    public static class BytesMessage
+            implements Message<byte[]> {
         private byte[] payload;
 
         public BytesMessage(byte[] payload) {

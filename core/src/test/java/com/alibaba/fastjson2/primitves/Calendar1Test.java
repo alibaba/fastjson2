@@ -174,8 +174,8 @@ public class Calendar1Test {
         assertEquals(2017,
                 JSON.parseObject(
                         "\"2017年1月13日\""
-                                .getBytes(StandardCharsets.UTF_8)
-                        , Calendar.class
+                                .getBytes(StandardCharsets.UTF_8),
+                        Calendar.class
                 ).get(Calendar.YEAR));
         assertEquals(11,
                 JSON.parseObject(

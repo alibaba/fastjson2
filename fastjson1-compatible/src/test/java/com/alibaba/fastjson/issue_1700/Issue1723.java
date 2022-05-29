@@ -27,12 +27,15 @@ public class Issue1723 {
 
     public static class User {
         private float age;
+
         public float getAge() {
             return age;
         }
+
         public void setAge(float age) {
             this.age = age;
         }
+
         @Override
         public String toString() {
             return "User{" +

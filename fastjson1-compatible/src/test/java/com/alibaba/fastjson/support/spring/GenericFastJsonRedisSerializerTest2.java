@@ -11,7 +11,7 @@ public class GenericFastJsonRedisSerializerTest2 {
         SecurityContextImpl context = new SecurityContextImpl();
 
         GenericFastJsonRedisSerializer serializer = new GenericFastJsonRedisSerializer(
-                new String[] {
+                new String[]{
                         "org.springframework.security.core.context.SecurityContextImpl"
                 }
         );

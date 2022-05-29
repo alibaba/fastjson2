@@ -19,7 +19,7 @@ public class Issue1662_1 {
         String json = "{\"value\":123}";
         Model model = JSON.parseObject(json, Model.class);
         assertEquals(12300, model.value);
-        assertEquals("{\"value\":\"12300元\"}",JSON.toJSONString(model));
+        assertEquals("{\"value\":\"12300元\"}", JSON.toJSONString(model));
     }
 
     public static class Model {

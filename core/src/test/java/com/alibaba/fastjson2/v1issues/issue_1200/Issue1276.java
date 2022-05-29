@@ -20,7 +20,6 @@ public class Issue1276 {
 
         String str1 = JSON.toJSONString(myException1);
         assertEquals(str, str1);
-
     }
 
     public static class MyException

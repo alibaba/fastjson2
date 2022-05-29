@@ -37,6 +37,5 @@ public class JSONArrayTest2 {
 //        assertEquals(new java.sql.Date(time), array2.getSqlDate(2));
 //        assertEquals(new java.sql.Timestamp(time), array2.getTimestamp(2));
         assertEquals(array2.size(), array2.size());
-
     }
 }

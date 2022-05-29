@@ -18,8 +18,8 @@ class TestIssue3264 {
     }
 
     class MyData(
-            @JSONField(name = "is_test")
-            var isTest: Boolean = false
+        @JSONField(name = "is_test")
+        var isTest: Boolean = false
     )
 
     val also = MyData().also {

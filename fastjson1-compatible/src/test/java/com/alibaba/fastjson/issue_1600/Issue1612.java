@@ -25,7 +25,8 @@ public class Issue1612 {
         //把body解析成一个对象
         String body = "{\"retCode\":\"200\", \"result\":{\"name\":\"Zhangsan\",\"password\":\"123\"}}";
 
-        return JSON.parseObject(body, new TypeReference<RegResponse<T>>(clasz) {});
+        return JSON.parseObject(body, new TypeReference<RegResponse<T>>(clasz) {
+        });
     }
 }
 
@@ -69,7 +70,9 @@ class RegResponse<T> {
 }
 
 class User {
-    public User(){}
+    public User() {
+    }
+
     public User(String username, String password) {
         this.username = username;
         this.password = password;

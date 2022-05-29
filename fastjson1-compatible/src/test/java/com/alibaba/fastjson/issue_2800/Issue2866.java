@@ -19,12 +19,12 @@ public class Issue2866 {
         assertEquals(3, a.a3);
     }
 
-    static class A{
-        @JSONField(name="A1")
+    static class A {
+        @JSONField(name = "A1")
         int a1;
 
         int A2;
-        @JSONField(name="A3")
+        @JSONField(name = "A3")
         public int a3;
     }
 }

@@ -102,7 +102,6 @@ public class NumberTest {
                 .get("v");
         assertEquals(str,
                 num.toString());
-
     }
 
     @Test
@@ -119,7 +118,6 @@ public class NumberTest {
                 .get("v");
         assertEquals(str,
                 num.toString());
-
     }
 
     @Test
@@ -136,6 +134,5 @@ public class NumberTest {
                 .get("v");
         assertEquals(str,
                 num.toString());
-
     }
 }

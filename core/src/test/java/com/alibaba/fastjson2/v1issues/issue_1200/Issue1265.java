@@ -27,7 +27,6 @@ public class Issue1265 {
         T2 t2 = ((Response<T2>) JSON.parseObject("{\"value\":{\"id\":123}}", new TypeReference<Response<T2>>() {
         }.getType())).value;
         assertEquals(123, t2.id);
-
     }
 
     public static class Response<T> {

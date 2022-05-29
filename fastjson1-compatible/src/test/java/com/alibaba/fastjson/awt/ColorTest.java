@@ -18,7 +18,7 @@ public class ColorTest {
     @Test
     public void test_color_2() throws Exception {
         Color color = Color.RED;
-        String text = "{\"r\":" + color.getRed() + ",\"g\":" + color.getGreen() + ",\"b\":" + color.getBlue() +"}";
+        String text = "{\"r\":" + color.getRed() + ",\"g\":" + color.getGreen() + ",\"b\":" + color.getBlue() + "}";
         Color color2 = JSON.parseObject(text, Color.class);
         Assertions.assertEquals(color, color2);
     }

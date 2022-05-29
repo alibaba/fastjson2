@@ -10,7 +10,7 @@ public class Issue3109 {
         JSON.parseObject("{\"@type\":\"testxx\",\"dogName\":\"dog1001\"}", Dog.class);
     }
 
-    public static class Dog  {
+    public static class Dog {
         public String dogName;
     }
 }

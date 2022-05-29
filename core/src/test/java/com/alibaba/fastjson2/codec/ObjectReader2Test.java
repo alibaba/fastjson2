@@ -127,8 +127,7 @@ public class ObjectReader2Test {
             Long2 vo = new Long2();
 
             JSONReader.Context readContext
-                    = new JSONReader.Context(
-                    new ObjectReaderProvider(creator));
+                    = new JSONReader.Context(new ObjectReaderProvider(creator));
             JSONPath
                     .of("$.v0000")
                     .setReaderContext(readContext)

@@ -29,7 +29,7 @@ public class Issue1226 {
         assertEquals('c', tb22.getC().charValue());
     }
 
-    static class TestBean{
+    static class TestBean {
         char c;
 
         public char getC() {
@@ -41,7 +41,7 @@ public class Issue1226 {
         }
     }
 
-    static class TestBean2{
+    static class TestBean2 {
         Character c;
 
         public Character getC() {

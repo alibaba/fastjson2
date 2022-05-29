@@ -14,7 +14,7 @@ public class Issue1486 {
         List<Value> parseObject = JSON.parseObject(json, new TypeReference<List<Value>>() {
         }.getType());
         for (Value value : parseObject) {
-            System.out.println(value.songList + "  " );
+            System.out.println(value.songList + "  ");
         }
     }
 

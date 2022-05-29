@@ -4,8 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.junit.jupiter.api.Test;
 
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.GregorianCalendar;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,12 +13,12 @@ public class XMLGregorianCalendarTest {
     public void test_for_issue() throws Exception {
         GregorianCalendar gregorianCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
 
-        XMLGregorianCalendar calendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
+        javax.xml.datatype.XMLGregorianCalendar calendar = javax.xml.datatype.DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianCalendar);
 
         String text = JSON.toJSONString(calendar);
         assertEquals(Long.toString(gregorianCalendar.getTimeInMillis()), text);
 
-        XMLGregorianCalendar calendar1 = JSON.parseObject(text, XMLGregorianCalendar.class);
+        javax.xml.datatype.XMLGregorianCalendar calendar1 = JSON.parseObject(text, javax.xml.datatype.XMLGregorianCalendar.class);
 
         assertEquals(calendar.toGregorianCalendar().getTimeInMillis(), calendar1.toGregorianCalendar().getTimeInMillis());
 

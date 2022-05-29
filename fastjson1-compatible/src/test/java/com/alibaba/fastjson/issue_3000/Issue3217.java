@@ -14,10 +14,10 @@ public class Issue3217 {
 
         List<Item> items = new ArrayList<Item>(2);
         Category category = new Category("category");
-        items.add(new Item("item1",category));
-        items.add(new Item("item2",category));
+        items.add(new Item("item1", category));
+        items.add(new Item("item2", category));
 
-        System.out.println(JSON.toJSONString(items,refAfterFilterTest));
+        System.out.println(JSON.toJSONString(items, refAfterFilterTest));
     }
 
     public static class RefAfterFilterTest
@@ -40,7 +40,7 @@ public class Issue3217 {
     public static class Category {
         private String name;
 
-        public Category(String name){
+        public Category(String name) {
             this.name = name;
         }
 
@@ -60,7 +60,7 @@ public class Issue3217 {
 
         private String barcode;
 
-        public Item(String name,Category category){
+        public Item(String name, Category category) {
             this.name = name;
             this.category = category;
         }

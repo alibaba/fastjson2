@@ -18,14 +18,16 @@ public class Issue1834 {
 
         String json1 = JSON.toJSONString(query_number);
         System.out.println(json1);
-        IndexQuery_Number queryNumber = JSON.parseObject(json1, new TypeReference<IndexQuery_Number>(){});
+        IndexQuery_Number queryNumber = JSON.parseObject(json1, new TypeReference<IndexQuery_Number>() {
+        });
 
         String json2 = JSON.toJSONString(query_comparable);
         System.out.println(json2);
-        IndexQuery_Comparable queryComparable = JSON.parseObject(json2, new TypeReference<IndexQuery_Comparable>(){});
+        IndexQuery_Comparable queryComparable = JSON.parseObject(json2, new TypeReference<IndexQuery_Comparable>() {
+        });
     }
 
-    static class IndexQuery_Comparable{
+    static class IndexQuery_Comparable {
         List<? extends Comparable> keys;
 
         public List<? extends Comparable> getKeys() {
@@ -44,7 +46,7 @@ public class Issue1834 {
         }
     }
 
-    static class IndexQuery_Number{
+    static class IndexQuery_Number {
         List<? extends Number> keys;
 
         public List<? extends Number> getKeys() {

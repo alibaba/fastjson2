@@ -23,6 +23,7 @@ public class Issue3470 {
         public String getPhone() {
             return phone;
         }
+
         public Privacy setPhone(String phone) {
             this.phone = phone;
             return this;
@@ -31,6 +32,7 @@ public class Issue3470 {
         public String get__password() {
             return password;
         }
+
         public Privacy setPassword(String password) {
             this.password = password;
             return this;

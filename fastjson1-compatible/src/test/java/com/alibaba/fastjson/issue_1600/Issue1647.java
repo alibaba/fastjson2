@@ -14,8 +14,8 @@ public class Issue1647 {
     @Test
     public void test_for_issue() throws Exception {
         Params params = new Params()
-        .setVerificationIds(Arrays.asList(new String[]{"a", "b"}))
-        .setWithFields(true);
+                .setVerificationIds(Arrays.asList(new String[]{"a", "b"}))
+                .setWithFields(true);
 
         String json = JSON.toJSONString(params);
         System.out.println(json);

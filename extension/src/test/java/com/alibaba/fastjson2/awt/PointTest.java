@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class PointTest {
     @BeforeEach
     public void setUp() {
-         JSONFactory.getDefaultObjectWriterProvider().register(AwtWriterModule.INSTANCE);
-         JSONFactory.getDefaultObjectReaderProvider().register(AwtRederModule.INSTANCE);
+        JSONFactory.getDefaultObjectWriterProvider().register(AwtWriterModule.INSTANCE);
+        JSONFactory.getDefaultObjectReaderProvider().register(AwtRederModule.INSTANCE);
     }
 
     @Test

@@ -45,9 +45,9 @@ public class FloatValueFieldTest {
 
         for (ObjectReaderCreator creator : creators) {
             FieldReader fieldWriter = creator.createFieldReader(
-                    "v0000"
-                    , float.class
-                    , FloatValueField1.class.getField("v0000"));
+                    "v0000",
+                    float.class,
+                    FloatValueField1.class.getField("v0000"));
 
             ObjectReader<FloatValueField1> objectReader
                     = creator.createObjectReader(FloatValueField1.class, fieldWriter);

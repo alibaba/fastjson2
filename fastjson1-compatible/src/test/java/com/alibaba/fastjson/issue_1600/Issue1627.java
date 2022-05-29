@@ -18,9 +18,9 @@ public class Issue1627 {
     public static String escapeString(String s) {
         StringBuilder buf = new StringBuilder();
 
-        for(int i = 0; i < s.length(); ++i) {
+        for (int i = 0; i < s.length(); ++i) {
             char c = s.charAt(i);
-            if((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
+            if ((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
                 buf.append("\\" + c);
             } else {
                 buf.append(c);

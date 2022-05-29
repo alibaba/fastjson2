@@ -74,7 +74,7 @@ public class Issue1299 {
     public static class SaveUnitInfo {
     }
 
-    public static class BaseResultDo{
+    public static class BaseResultDo {
     }
 
 

@@ -233,7 +233,7 @@ public class BigDecimalTest {
 
             JSONReader.Context readContext
                     = new JSONReader.Context(
-                    new ObjectReaderProvider(creator));
+                            new ObjectReaderProvider(creator));
             JSONPath jsonPath = JSONPath
                     .of("$.id")
                     .setReaderContext(readContext);

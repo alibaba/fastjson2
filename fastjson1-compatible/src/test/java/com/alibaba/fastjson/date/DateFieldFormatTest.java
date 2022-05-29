@@ -34,7 +34,7 @@ public class DateFieldFormatTest {
         Model model = new Model();
         model.serverTime = now;
         model.publishTime = now;
-        model.setStartDate( now );
+        model.setStartDate(now);
 
         String text = JSON.toJSONString(model);
         System.out.println(text);
@@ -51,7 +51,7 @@ public class DateFieldFormatTest {
         String t2 = df2.format(now);
         String t3 = df3.format(now);
 
-        assertEquals("{\"publishTime\":\""+t2+"\",\"serverTime\":\""+t1+"\",\"startDate\":\""+t3+"\"}",text);
+        assertEquals("{\"publishTime\":\"" + t2 + "\",\"serverTime\":\"" + t1 + "\",\"startDate\":\"" + t3 + "\"}", text);
 
         Model model2 = JSON.parseObject(text, Model.class);
         SimpleDateFormat df4 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.CHINA);

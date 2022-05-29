@@ -22,7 +22,6 @@ public class Issue1293 {
         Bean test = JSON.parseObject(data, Bean.class);
         assertNull(test.idType);
         assertNull(test.userType);
-
     }
 
     static class Bean {

@@ -46,7 +46,8 @@ public class Issue2065 {
         @JSONField(name = "code")
         private EnumClass code;
 
-        public Model() {}
+        public Model() {
+        }
 
         public EnumClass getCode() {
             return code;

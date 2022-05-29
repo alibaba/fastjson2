@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 public class Issue3217 {
     @Test
-    public void testException(){
+    public void testException() {
         MyException myException = new MyException();
         myException.enumTest = EnumTest.FIRST;
         TestClass testClass = new TestClass();
@@ -19,9 +19,9 @@ public class Issue3217 {
         System.out.println(testClass1);
     }
 
-    public static enum EnumTest{
-        FIRST("111","111"),
-        SECOND("222","222");
+    public static enum EnumTest {
+        FIRST("111", "111"),
+        SECOND("222", "222");
         private String key;
         private String value;
 
@@ -60,7 +60,7 @@ public class Issue3217 {
         }
     }
 
-    public static class TestClass{
+    public static class TestClass {
         private MyException myException;
 
         public MyException getMyException() {

@@ -75,7 +75,6 @@ public class Issue3689 {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("//dfdfdf", String.class);
         });
-
     }
 
     @Test
@@ -83,7 +82,6 @@ public class Issue3689 {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("///dfdfdf", String.class);
         });
-
     }
 
     @Test
@@ -91,7 +89,6 @@ public class Issue3689 {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("////dfdfdf", String.class);
         });
-
     }
 
     @Test
@@ -99,7 +96,6 @@ public class Issue3689 {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("/////dfdfdf", String.class);
         });
-
     }
 
     @Test

@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Test Issue 1763_2
  * 如果有多层泛型且前面泛型已经实现的情况下，判断下一级泛型
+ *
  * @author cnlyml
  */
 public class TestIssue1763_2<T> {
@@ -29,7 +30,8 @@ public class TestIssue1763_2<T> {
     // 修复test
     @Test
     public void testFixBug1763_2() {
-        BaseResult<PageResult<CouponResult>> data = JSON.parseObject(jsonStr, new TypeReference<BaseResult<PageResult<T>>>(clazz){}.getType());
+        BaseResult<PageResult<CouponResult>> data = JSON.parseObject(jsonStr, new TypeReference<BaseResult<PageResult<T>>>(clazz) {
+        }.getType());
 
         assertTrue(data.isSuccess());
         assertTrue(data.getContent().getList().size() == 2);
@@ -40,7 +42,8 @@ public class TestIssue1763_2<T> {
     // 复现BUG
     @Test
     public void testBug1763_2() {
-        BaseResult<PageResult<CouponResult>> data = JSON.parseObject(jsonStr, new TypeReferenceBug1763_2<BaseResult<PageResult<T>>>(clazz){}.getType());
+        BaseResult<PageResult<CouponResult>> data = JSON.parseObject(jsonStr, new TypeReferenceBug1763_2<BaseResult<PageResult<T>>>(clazz) {
+        }.getType());
 
         assertTrue(data.isSuccess());
         assertTrue(data.getContent().getList().size() == 2);

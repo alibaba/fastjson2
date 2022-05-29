@@ -66,6 +66,5 @@ public class Issue1763 {
 
     public interface ProcurementOrderInteractiveServiceForCloud {
         BaseResult<InteractiveOrderMaterielQueryResult> queryOrderMateriel(Map param);
-
     }
 }

@@ -170,7 +170,7 @@ public class JSONObjectTest {
         assertTrue(json.getJSONObject("obj") == null);
     }
 
-    public void test_bytes () throws Exception {
+    public void test_bytes() throws Exception {
         JSONObject object = new JSONObject();
         assertNull(object.getBytes("bytes"));
     }
@@ -453,17 +453,17 @@ public class JSONObjectTest {
                         .getBoolean("val"));
         assertEquals(
                 Boolean.TRUE,
-                 new JSONObject()
+                new JSONObject()
                         .fluentPut("val", "true")
                         .getBoolean("val"));
         assertEquals(
                 Boolean.FALSE,
-                 new JSONObject()
+                new JSONObject()
                         .fluentPut("val", Boolean.FALSE)
                         .getBoolean("val"));
         assertEquals(
                 Boolean.FALSE,
-                 new JSONObject()
+                new JSONObject()
                         .fluentPut("val", "FALSE")
                         .getBoolean("val"));
     }
@@ -472,47 +472,47 @@ public class JSONObjectTest {
     public void test_getBigInt() {
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONObject()
+                new JSONObject()
                         .fluentPut("val", 12)
                         .getBigInteger("val"));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONObject()
+                new JSONObject()
                         .fluentPut("val", (byte) 12)
                         .getBigInteger("val"));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONObject()
+                new JSONObject()
                         .fluentPut("val", (short) 12)
                         .getBigInteger("val"));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONObject()
+                new JSONObject()
                         .fluentPut("val", 12L)
                         .getBigInteger("val"));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONObject()
+                new JSONObject()
                         .fluentPut("val", 12F)
                         .getBigInteger("val"));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONObject()
+                new JSONObject()
                         .fluentPut("val", 12D)
                         .getBigInteger("val"));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONObject()
+                new JSONObject()
                         .fluentPut("val", new BigDecimal("12"))
                         .getBigInteger("val"));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONObject()
+                new JSONObject()
                         .fluentPut("val", new BigInteger("12"))
                         .getBigInteger("val"));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONObject()
+                new JSONObject()
                         .fluentPut("val", "12")
                         .getBigInteger("val"));
     }
@@ -525,17 +525,19 @@ public class JSONObjectTest {
         assertEquals(0, object.size());
 
         object.put("id", 123);
-        assertEquals(Integer.valueOf(123), object.getObject("id", new TypeReference<Integer>(){}));
+        assertEquals(Integer.valueOf(123), object.getObject("id", new TypeReference<Integer>() {
+        }));
         assertEquals(Integer.valueOf(123), object.getObject("id", (TypeReference) null));
 
-        BeanInterface beanInterface = (BeanInterface) Proxy.newProxyInstance(JSONObject.class.getClassLoader(), new Class[] {BeanInterface.class}, object);
+        BeanInterface beanInterface = (BeanInterface) Proxy.newProxyInstance(JSONObject.class.getClassLoader(), new Class[]{BeanInterface.class}, object);
         assertEquals(123, beanInterface.getId());
     }
 
     @Test
     public void test1() {
         JSONObject object = new JSONObject().fluentPut("root", new JSONObject());
-        Bean bean = object.getObject("root", new TypeReference<Bean>(){});
+        Bean bean = object.getObject("root", new TypeReference<Bean>() {
+        });
         assertNotNull(bean);
     }
 

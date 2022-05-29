@@ -74,8 +74,8 @@ public class Issue2249 {
         assertNotNull(error);
     }
 
-    public enum  Type {
-        Big,Small,Medium
+    public enum Type {
+        Big, Small, Medium
     }
 
     public static class Model {

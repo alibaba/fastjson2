@@ -28,13 +28,15 @@ public class Issue1903 {
         assertEquals("{\"age\":20}", JSON.toJSONString(issues));
     }
 
-    interface Issues1903{
+    interface Issues1903 {
         @Transient
-        @JSONField(serialzeFeatures = { SerializerFeature.SkipTransientField })
+        @JSONField(serialzeFeatures = {SerializerFeature.SkipTransientField})
         String getName();
+
         void setName(String name);
 
         Integer getAge();
+
         void setAge(Integer age);
     }
 
@@ -49,7 +51,7 @@ public class Issue1903 {
             return map.get(name);
         }
 
-        public void add(String key, Object val){
+        public void add(String key, Object val) {
             map.put(key, val);
         }
     }

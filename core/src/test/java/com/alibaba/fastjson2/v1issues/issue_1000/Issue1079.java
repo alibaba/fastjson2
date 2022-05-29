@@ -24,7 +24,6 @@ public class Issue1079 {
                 "}";
 
         JSON.parseObject(text, PdpResponse.class);
-
     }
 
     public static class PdpResponse {

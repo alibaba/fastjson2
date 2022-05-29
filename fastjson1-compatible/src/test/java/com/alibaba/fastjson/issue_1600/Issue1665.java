@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1665 {
     @Test
     public void test_for_issue() throws Exception {
-        TypeReference<Collection<Model>> typeReference = new TypeReference<Collection<Model>>() {};
+        TypeReference<Collection<Model>> typeReference = new TypeReference<Collection<Model>>() {
+        };
 
         Collection<Model> collection = TypeUtils.cast(JSON.parse("[{\"id\":101}]"), typeReference.getType(), ParserConfig.getGlobalInstance());
         assertEquals(1, collection.size());

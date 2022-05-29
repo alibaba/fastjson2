@@ -16,7 +16,8 @@ public class Issue3082 {
     public void test_for_issue_entry() {
         String str = "{\"k\":{\"k\":\"v\"}}";
         Map.Entry<String, Map.Entry<String, String>> entry = JSON.parseObject(str,
-                new TypeReference<Map.Entry<String, Map.Entry<String, String>>>() {});
+                new TypeReference<Map.Entry<String, Map.Entry<String, String>>>() {
+                });
         assertEquals("v", entry.getValue().getValue());
     }
 
@@ -28,7 +29,8 @@ public class Issue3082 {
         String content = JSON.toJSONString(nestedSet);
 
         HashSet<Map.Entry<String, Map.Entry<String, String>>> deserializedNestedSet;
-        Type type = new TypeReference<HashSet<Map.Entry<String, Map.Entry<String, String>>>>() {}.getType();
+        Type type = new TypeReference<HashSet<Map.Entry<String, Map.Entry<String, String>>>>() {
+        }.getType();
         deserializedNestedSet = JSON.parseObject(content, type);
         assertEquals(nestedSet, deserializedNestedSet);
     }

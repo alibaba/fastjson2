@@ -18,7 +18,7 @@ public class Int100Test {
         for (ObjectReaderCreator creator : creators) {
             JSONReader.Context readContext
                     = new JSONReader.Context(
-                    new ObjectReaderProvider(creator));
+                            new ObjectReaderProvider(creator));
             {
                 Int100 vo = new Int100();
 

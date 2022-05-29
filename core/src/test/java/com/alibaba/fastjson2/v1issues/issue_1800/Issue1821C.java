@@ -25,7 +25,6 @@ public class Issue1821C {
         m = JSON.parseObject(str, Model.class);
         assertEquals(expectStr, JSON.toJSONString(m));
         assertEquals("com.alibaba.fastjson", new String(m.data));
-
     }
 
     @JSONType

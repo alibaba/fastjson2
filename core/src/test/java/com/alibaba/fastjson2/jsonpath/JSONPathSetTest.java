@@ -19,7 +19,6 @@ public class JSONPathSetTest {
         String value = "y2";
         JSONPath.set(root, jsonpath, value);
         assertEquals("{\"models\":[{\"x\":\"y2\"},{\"x\":\"y2\"}]}", JSON.toJSONString(root));
-
     }
 
     public static class Root {
