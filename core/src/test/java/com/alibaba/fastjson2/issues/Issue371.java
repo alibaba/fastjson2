@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.util.JDKUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -17,6 +20,10 @@ public class Issue371 {
         byte[] bytes = userInfoBodyString.getBytes(StandardCharsets.UTF_8);
         WeixiaoUserInfoResp userInfoBody1 = JSON.parseObject(bytes, WeixiaoUserInfoResp.class);
         assertEquals("1111111", userInfoBody1.getCard_number());
+
+        JSONReader jsonReaderStr = TestUtils.createJSONReaderStr(userInfoBodyString);
+        WeixiaoUserInfoResp userInfoBody2 = jsonReaderStr.read(WeixiaoUserInfoResp.class);
+        assertEquals("1111111", userInfoBody2.getCard_number());
     }
 
     public static class WeixiaoUserInfoResp {
