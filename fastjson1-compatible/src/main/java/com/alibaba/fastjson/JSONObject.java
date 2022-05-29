@@ -24,6 +24,7 @@ import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -1004,12 +1005,12 @@ public class JSONObject
     }
 
     public String toJSONString() {
-        return com.alibaba.fastjson2.JSON.toJSONString(this);
+        return com.alibaba.fastjson2.JSON.toJSONString(this, JSONWriter.Feature.ReferenceDetection);
     }
 
     @Override
     public String toString() {
-        return com.alibaba.fastjson2.JSON.toJSONString(this);
+        return com.alibaba.fastjson2.JSON.toJSONString(this, JSONWriter.Feature.ReferenceDetection);
     }
 
     public String toString(SerializerFeature... features) {
