@@ -30,6 +30,13 @@ public class LocalDateTimeTest {
     }
 
     @Test
+    public void test1_date() {
+        String str = "{\"birthday\":\"2022-05-03\"}";
+        Student1 student = JSON.parseObject(str, Student1.class);
+        assertEquals("{\"birthday\":\"2022-05-03T00:00:00\"}", JSON.toJSONString(student));
+    }
+
+    @Test
     public void test1_null() {
         String str = "{\"birthday\":null}";
         Student1 student = JSON.parseObject(str, Student1.class);
