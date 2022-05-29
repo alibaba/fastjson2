@@ -13,7 +13,7 @@ public class Issue3682 {
     }
 
     @Data
-    static public class Cid {
+    public static class Cid {
         @JSONField(name = "/")
         private String hash;
     }

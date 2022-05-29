@@ -1,6 +1,6 @@
 package com.alibaba.json.bvtVO;
 
-public class RainbowStats {
+class SearchCenterOfferModel {
     private int id;
     private String name;
 
@@ -8,17 +8,15 @@ public class RainbowStats {
         return id;
     }
 
-    public RainbowStats setId(int id) {
+    public void setId(int id) {
         this.id = id;
-        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public RainbowStats setName(String name) {
+    public void setName(String name) {
         this.name = name;
-        return this;
     }
 }

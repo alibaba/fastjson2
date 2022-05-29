@@ -30,29 +30,29 @@ public class Issue2952 {
     }
 
     public static class Pojo {
-        @JSONField(serialzeFeatures=SerializerFeature.WriteMapNullValue, ordinal=0)
+        @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue, ordinal = 0)
         public Object[] l;
-        @JSONField(serialzeFeatures=SerializerFeature.WriteMapNullValue, ordinal=1)
+        @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue, ordinal = 1)
         public String s;
-        @JSONField(serialzeFeatures=SerializerFeature.WriteMapNullValue, ordinal=2)
+        @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue, ordinal = 2)
         public Boolean b;
-        @JSONField(serialzeFeatures=SerializerFeature.WriteMapNullValue, ordinal=3)
+        @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue, ordinal = 3)
         public Integer i;
-        @JSONField(serialzeFeatures=SerializerFeature.WriteMapNullValue, ordinal=4)
+        @JSONField(serialzeFeatures = SerializerFeature.WriteMapNullValue, ordinal = 4)
         public Object o;
     }
 
-    @JSONType(serialzeFeatures=SerializerFeature.WriteMapNullValue)
+    @JSONType(serialzeFeatures = SerializerFeature.WriteMapNullValue)
     public static class Pojo2 {
-        @JSONField(ordinal=0)
+        @JSONField(ordinal = 0)
         public Object[] l;
-        @JSONField(ordinal=1)
+        @JSONField(ordinal = 1)
         public String s;
-        @JSONField(ordinal=2)
+        @JSONField(ordinal = 2)
         public Boolean b;
-        @JSONField(ordinal=3)
+        @JSONField(ordinal = 3)
         public Integer i;
-        @JSONField(ordinal=4)
+        @JSONField(ordinal = 4)
         public Object o;
     }
 }

@@ -38,11 +38,11 @@ public class Issue_for_gaorui {
         /**
          * 是否能够获取到该优惠
          */
-        private boolean isMatch = false;
+        private boolean isMatch;
         /**
          * 是否选择了该优惠
          */
-        private boolean isChoose = false;
+        private boolean isChoose;
         /**
          * 未获取到优惠的原因
          */

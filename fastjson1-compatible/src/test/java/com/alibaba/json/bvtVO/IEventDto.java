@@ -1,12 +1,12 @@
 /**
  * Project: eve.services
- *
+ * <p>
  * File Created at 2011-12-21
  * $Id$
- *
+ * <p>
  * Copyright 2008 Alibaba.com Corporation Limited.
  * All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Alibaba Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -25,7 +25,7 @@ public class IEventDto
         implements Serializable {
     private static final long serialVersionUID = -3903138261314727539L;
 
-    private String            source;
+    private String source;
 
     private ArrayList<IEvent> eventList = new ArrayList<IEvent>();
 
@@ -49,5 +49,4 @@ public class IEventDto
     public String toString() {
         return "IEventDto [source=" + source + ", eventList=" + eventList + "]";
     }
-
 }

@@ -20,7 +20,7 @@ public class Issue1766 {
 
         // failed
         json = "{\"name\":\"张三\", \"birthday\":\"2017-01-01 01:01:02\"\n}";
-        user = JSON.parseObject(json, User.class);// will exception
+        user = JSON.parseObject(json, User.class); // will exception
         assertEquals("张三", user.getName());
         assertNotNull(user.getBirthday());
     }

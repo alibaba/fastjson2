@@ -162,5 +162,4 @@ public class Issue1341
         Assertions.assertTrue(reponse.indexOf("Python源码剖析") > 0);
         Assertions.assertTrue(reponse.indexOf("电子工业出版社") > 0);
     }
-
 }

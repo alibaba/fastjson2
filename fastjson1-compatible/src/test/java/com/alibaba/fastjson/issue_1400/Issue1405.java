@@ -57,9 +57,8 @@ public class Issue1405 {
     @RequestMapping("fastjson")
     public static class BeanController {
         @RequestMapping(value = "/test1405", method = RequestMethod.GET)
-        public
         @ResponseBody
-        ModelAndView test7() {
+        public ModelAndView test7() {
             AuthIdentityRequest authRequest = new AuthIdentityRequest();
             authRequest.setAppId("cert01");
             authRequest.setUserId(2307643);
@@ -77,7 +76,6 @@ public class Issue1405 {
             return modelAndView;
         }
     }
-
 
     @ComponentScan(basePackages = "com.alibaba.fastjson.issue_1400")
     @Configuration
@@ -171,6 +169,4 @@ public class Issue1405 {
             this.offline = offline;
         }
     }
-
-
 }

@@ -9,7 +9,7 @@ package com.alibaba.json.bvtVO;
 
 /**
  * 类OptionKey.java的实现描述：TODO 类实现描述
- * 
+ *
  * @author lei.yaol 2011-12-27 下午03:40:45
  */
 public enum OptionKey {

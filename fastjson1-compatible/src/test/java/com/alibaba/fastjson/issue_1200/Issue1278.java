@@ -61,6 +61,4 @@ public class Issue1278 {
         public String name;
         public int id;
     }
-
-
 }

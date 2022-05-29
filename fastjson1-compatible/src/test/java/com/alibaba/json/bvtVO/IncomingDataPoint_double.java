@@ -11,25 +11,35 @@ import java.util.Map;
 /**
  * Created by wenshao on 03/08/2017.
  */
-@JSONType(serialzeFeatures= SerializerFeature.BeanToArray,
-        parseFeatures= Feature.SupportArrayToBean,
+@JSONType(serialzeFeatures = SerializerFeature.BeanToArray,
+        parseFeatures = Feature.SupportArrayToBean,
         orders = {"metric", "timestamp", "value", "tags", "tsuid", "granularity", "aggregator"},
         asm = true
-        )
+)
 public class IncomingDataPoint_double {
-    /** The incoming metric name */
+    /**
+     * The incoming metric name
+     */
     private String metric;
 
-    /** The incoming timestamp in Unix epoch seconds or milliseconds */
+    /**
+     * The incoming timestamp in Unix epoch seconds or milliseconds
+     */
     private long timestamp;
 
-    /** The incoming value as a string, we'll parse it to float or int later */
+    /**
+     * The incoming value as a string, we'll parse it to float or int later
+     */
     private double value;
 
-    /** A hash map of tag name/values */
+    /**
+     * A hash map of tag name/values
+     */
     private Map<String, String> tags;
 
-    /** TSUID for the data point */
+    /**
+     * TSUID for the data point
+     */
     private String tsuid;
 
     private String granularity;
@@ -44,6 +54,7 @@ public class IncomingDataPoint_double {
 
     /**
      * Constructor used when working with a metric and tags
+     *
      * @param metric The metric name
      * @param timestamp The Unix epoch timestamp
      * @param value The value as a string
@@ -65,6 +76,7 @@ public class IncomingDataPoint_double {
 
     /**
      * Constructor used when working with tsuids
+     *
      * @param tsuid The TSUID
      * @param timestamp The Unix epoch timestamp
      * @param value The value as a string
@@ -98,27 +110,37 @@ public class IncomingDataPoint_double {
         return buf.toString();
     }
 
-    /** @return the metric */
+    /**
+     * @return the metric
+     */
     public final String getMetric() {
         return metric;
     }
 
-    /** @return the timestamp */
+    /**
+     * @return the timestamp
+     */
     public final long getTimestamp() {
         return timestamp;
     }
 
-    /** @return the value */
+    /**
+     * @return the value
+     */
     public final double getValue() {
         return value;
     }
 
-    /** @return the tags */
+    /**
+     * @return the tags
+     */
     public final Map<String, String> getTags() {
         return tags;
     }
 
-    /** @return the TSUID */
+    /**
+     * @return the TSUID
+     */
     @JSONField(name = "tsuid")
     public final String getTSUID() {
         return tsuid;
@@ -140,27 +162,37 @@ public class IncomingDataPoint_double {
         this.aggregator = aggregator;
     }
 
-    /** @param metric the metric to set */
+    /**
+     * @param metric the metric to set
+     */
     public final void setMetric(String metric) {
         this.metric = metric;
     }
 
-    /** @param timestamp the timestamp to set */
+    /**
+     * @param timestamp the timestamp to set
+     */
     public final void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
-    /** @param value the value to set */
+    /**
+     * @param value the value to set
+     */
     public final void setValue(double value) {
         this.value = value;
     }
 
-    /** @param tags the tags to set */
+    /**
+     * @param tags the tags to set
+     */
     public final void setTags(Map<String, String> tags) {
         this.tags = tags;
     }
 
-    /** @param tsuid the TSUID to set */
+    /**
+     * @param tsuid the TSUID to set
+     */
     @JSONField(name = "tsuid")
     public final void setTSUID(String tsuid) {
         this.tsuid = tsuid;

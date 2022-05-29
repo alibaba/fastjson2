@@ -29,7 +29,8 @@ public class Issue3448 {
         assertEquals("[{\"key1\":[\"item\"]}]", text);
 
         List<Map<String, List<String>>> result = parseObject(text,
-            new SelfTypeReference<Map<String, List<String>>>() {});
+                new SelfTypeReference<Map<String, List<String>>>() {
+                });
         System.out.println("result = " + result);
         assertTrue(result.get(0) instanceof Map);
         assertTrue(result.get(0).get("key1").get(0) instanceof String);
@@ -37,8 +38,9 @@ public class Issue3448 {
 
     public <T> List<T> parseObject(String text, SelfTypeReference<T> selfTypeReference) {
         Type genericSuperclass = selfTypeReference.getClass().getGenericSuperclass();
-        Type[] actualTypeArguments = ((ParameterizedType)genericSuperclass).getActualTypeArguments();
-        return JSON.parseObject(text, new TypeReference<List<T>>(actualTypeArguments) {});
+        Type[] actualTypeArguments = ((ParameterizedType) genericSuperclass).getActualTypeArguments();
+        return JSON.parseObject(text, new TypeReference<List<T>>(actualTypeArguments) {
+        });
     }
 
     @Test

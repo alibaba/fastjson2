@@ -67,7 +67,7 @@ public class Issue283 {
     }
 
     @RestController
-    @RequestMapping()
+    @RequestMapping
     public static class BeanController {
         @PostMapping("/xx/xx")
         public @ResponseBody

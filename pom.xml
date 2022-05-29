@@ -545,7 +545,47 @@
                             <failOnViolation>true</failOnViolation>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                             <configLocation>src/checkstyle/fastjson2-checks.xml</configLocation>
-                            <excludes>**/*NameTest.java,**/*Issue*.java,**/*issue*/**/*.java,com/alibaba/fastjson2_vo/cart/OrderBy.java,com/alibaba/fastjson2_vo/homepage/GetHomePageData.java,com/alibaba/json/bvtVO/</excludes>
+                            <excludes>com/alibaba/fastjson2/codec/UnicodeClassNameTest.java,
+                                com/alibaba/fastjson2/hsf/UCaseNameTest.java,
+                                com/alibaba/json/bvtVO/PushMsg.java,
+                                com/alibaba/json/bvtVO/IncomingDataPoint_ext_double.java,
+                                com/alibaba/json/bvtVO/vip_com/QueryLoanOrderRsp.java,
+                                com/alibaba/json/bvtVO/vip_com/TxnListItsm.java,
+                                com/alibaba/json/bvtVO/一个中文名字的包/User.java,
+                                com/alibaba/fastjson2_vo/cart/OrderBy.java,com/alibaba/fastjson2_vo/homepage/GetHomePageData.java,
+                                com/alibaba/fastjson2/v1issues/issue_4000/Issue4073.java,
+                                com/alibaba/fastjson2/v1issues/issue_1400/Issue1486.java,
+                                com/alibaba/fastjson2/v1issues/issue_1400/Issue1487.java,
+                                com/alibaba/fastjson2/v1issues/issue_1300/Issue1335.java,
+                                com/alibaba/fastjson2/v1issues/issue_1200/Issue1254.java,
+                                com/alibaba/fastjson2/v1issues/issue_1200/Issue1276.java,
+                                com/alibaba/fastjson2/v1issues/issue_1100/Issue1165.java,
+                                com/alibaba/fastjson2/v1issues/issue_1500/Issue1576.java,
+                                com/alibaba/fastjson2/v1issues/issue_1500/Issue1529.java,
+                                com/alibaba/fastjson2/issues/Issue371.java,
+                                com/alibaba/fastjson2/issues/Issue325.java,
+                                com/alibaba/fastjson2/v1issues/issue_1500/Issue1558.java,
+                                com/alibaba/fastjson/issue_2800/Issue2866.java,
+                                com/alibaba/fastjson/issues_compatible/Issue325.java,
+                                com/alibaba/fastjson/issue_3200/Issue3217.java,
+                                com/alibaba/fastjson/issue_2400/Issue2488.java,
+                                com/alibaba/fastjson/issue_1100/Issue1165.java,
+                                com/alibaba/fastjson/issue_1200/Issue1254.java,
+                                com/alibaba/fastjson/issue_1200/Issue1276.java,
+                                com/alibaba/fastjson/issue_1300/Issue1306.java,
+                                com/alibaba/fastjson/issue_1300/Issue1335.java,
+                                com/alibaba/fastjson/issue_1300/Issue1367.java,
+                                com/alibaba/fastjson/issue_1400/Issue1486.java,
+                                com/alibaba/fastjson/issue_1400/Issue1487.java,
+                                com/alibaba/fastjson/issue_1500/Issue1576.java,
+                                com/alibaba/fastjson/issue_1500/Issue1529.java,
+                                com/alibaba/fastjson/issue_1500/Issue1558.java,
+                                com/alibaba/fastjson/issue_1600/Issue*.java,
+                                com/alibaba/fastjson/issue_1700/Issue*.java,
+                                com/alibaba/fastjson/issue_1900/Issue*.java,
+                                com/alibaba/fastjson/issue_2300/Issue*.java,
+                                com/alibaba/json/bvt/**/*.java,
+                            </excludes>
                         </configuration>
                     </execution>
                 </executions>

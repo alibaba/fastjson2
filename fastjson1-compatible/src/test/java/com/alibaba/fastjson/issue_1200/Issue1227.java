@@ -28,6 +28,3 @@ public class Issue1227 {
         public String msg;
     }
 }
-
-
-

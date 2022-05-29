@@ -58,7 +58,7 @@ public class Issue237 {
     }
 
     @RestController
-    @RequestMapping()
+    @RequestMapping
     public static class BeanController {
         @PostMapping(path = "/test", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
         public JSONObject test(@RequestBody JSONObject requestBody) {

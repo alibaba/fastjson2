@@ -15,6 +15,4 @@ public class Issue2982 {
         assertTrue(JSON.isValidArray(jsonStr));
         assertTrue(JSONObject.isValidArray(jsonStr));
     }
-
-
 }

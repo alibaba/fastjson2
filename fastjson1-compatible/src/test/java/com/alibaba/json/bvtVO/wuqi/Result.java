@@ -6,8 +6,8 @@ package com.alibaba.json.bvtVO.wuqi;
 public class Result<T> {
     private T data;
 
-
-    public Result(){}
+    public Result() {
+    }
 
     public T getData() {
         return data;

@@ -59,10 +59,11 @@ public class Canal_Issue4186 {
         assertEquals(position.getClass(), position1.getClass());
     }
 
-    public static abstract class Position
+    public abstract static class Position
             implements Serializable {
     }
 
-    public static class EntryPosition extends Position {
+    public static class EntryPosition
+            extends Position {
     }
 }

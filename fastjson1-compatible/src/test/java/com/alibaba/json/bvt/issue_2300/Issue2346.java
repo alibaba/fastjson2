@@ -26,7 +26,7 @@ public class Issue2346 {
         private int age;
 
         @JSONPOJOBuilder(withPrefix = "")
-        public static class TestEntityBuilder{
+        public static class TestEntityBuilder {
         }
     }
 
@@ -38,10 +38,10 @@ public class Issue2346 {
         private int age;
 
         @JSONPOJOBuilder(withPrefix = "www")
-        public static class TestEntity2Builder{
+        public static class TestEntity2Builder {
             private TestEntity2 testEntity2 = new TestEntity2();
 
-            public TestEntity2 build(){
+            public TestEntity2 build() {
                 return testEntity2;
             }
 
@@ -64,10 +64,10 @@ public class Issue2346 {
 
         private int age;
 
-        public static class TestEntity3Builder{
+        public static class TestEntity3Builder {
             private TestEntity3 testEntity3 = new TestEntity3();
 
-            public TestEntity3 build(){
+            public TestEntity3 build() {
                 return testEntity3;
             }
 

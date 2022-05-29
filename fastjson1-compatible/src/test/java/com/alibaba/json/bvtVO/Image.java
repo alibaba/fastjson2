@@ -15,14 +15,14 @@ import java.io.Serializable;
 public class Image
         implements Serializable {
     private static final long serialVersionUID = -6804500330834961534L;
-    private String            imageUrl;
+    private String imageUrl;
 
-    public Image(String imageUrl){
+    public Image(String imageUrl) {
         super();
         this.imageUrl = imageUrl;
     }
 
-    public Image(){
+    public Image() {
     }
 
     public String getBigImageUrl() {
@@ -32,7 +32,9 @@ public class Image
         return ("img/" + imageUrl).replaceFirst(".jpg", ".310x310.jpg");
     }
 
-    /** �������ͼƬ�����ϵ����·�� 150 * 150 */
+    /**
+     * �������ͼƬ�����ϵ����·�� 150 * 150
+     */
     public String getSearchImageUrl() {
         if (imageUrl == null || imageUrl.length() == 0) {
             return "";
@@ -40,7 +42,9 @@ public class Image
         return ("img/" + imageUrl).replaceFirst(".jpg", ".search.jpg");
     }
 
-    /** �������ͼƬ�����ϵ����·�� 100 * 100 */
+    /**
+     * �������ͼƬ�����ϵ����·�� 100 * 100
+     */
     public String getSummImageUrl() {
         if (imageUrl == null || imageUrl.length() == 0) {
             return "";
@@ -55,5 +59,4 @@ public class Image
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
-
 }

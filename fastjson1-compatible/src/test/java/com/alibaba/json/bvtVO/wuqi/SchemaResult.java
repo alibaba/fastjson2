@@ -57,5 +57,4 @@ public class SchemaResult {
     public void addData(InstanceSchema InstanceSchemaItem) {
         this.data.add(InstanceSchemaItem);
     }
-
 }

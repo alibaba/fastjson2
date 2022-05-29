@@ -14,7 +14,7 @@ public class Issue2132 {
         Cpu cpu = new Cpu("intel", 3.3);
         Screen screen = new Screen(16, 9, "samsung");
         Student student = new Student();
-        Computer computer = student.assembling(cpu,screen);
+        Computer computer = student.assembling(cpu, screen);
         cpu.setName("intell");
 
         Object[] objectArray = new Object[4];

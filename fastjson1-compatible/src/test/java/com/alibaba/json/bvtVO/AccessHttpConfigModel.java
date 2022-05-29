@@ -2,7 +2,6 @@ package com.alibaba.json.bvtVO;
 
 import java.io.Serializable;
 
-
 public class AccessHttpConfigModel {
     /**
      * 上传文件的配置.
@@ -11,7 +10,7 @@ public class AccessHttpConfigModel {
      */
 
     public static class FileUploadConfig
-            implements Serializable{
+            implements Serializable {
         private String tempDir;
 
         private int maxSize;
@@ -23,6 +22,7 @@ public class AccessHttpConfigModel {
         /**
          * 获取不允许上传的文件类型.<br>
          * 多个文件类型之间用','分割.
+         *
          * @return 获取不允许上传的文件类型.
          */
         public String getExclude() {
@@ -33,7 +33,7 @@ public class AccessHttpConfigModel {
          * 设置不允许上传的文件类型.<br>
          * 多个文件类型之间用','分割.
          *
-         * @param exclude　不允许上传的文件类型.
+         * @param exclude 　不允许上传的文件类型.
          */
         public void setExclude(String exclude) {
             this.exclude = exclude;
@@ -51,8 +51,7 @@ public class AccessHttpConfigModel {
         /**
          * 设置上传文件时在内存中最大的字节数.
          *
-         * @param inMemorySize
-         *            上传文件时在内存中最大的字节数.
+         * @param inMemorySize 上传文件时在内存中最大的字节数.
          */
         public void setInMemorySize(int inMemorySize) {
             this.inMemorySize = inMemorySize;
@@ -70,8 +69,7 @@ public class AccessHttpConfigModel {
         /**
          * 设置上传文件的最大字节数.
          *
-         * @param maxSize
-         *            上传文件的最大字节数.
+         * @param maxSize 上传文件的最大字节数.
          */
         public void setMaxSize(int maxSize) {
             this.maxSize = maxSize;
@@ -89,8 +87,7 @@ public class AccessHttpConfigModel {
         /**
          * 设置上传文件的保存的临时目录.
          *
-         * @param tempDir
-         *            上传文件的保存的临时目录.
+         * @param tempDir 上传文件的保存的临时目录.
          */
         public void setTempDir(String tempDir) {
             this.tempDir = tempDir;
@@ -121,6 +118,7 @@ public class AccessHttpConfigModel {
 
     /**
      * 获取上传文件的配置.
+     *
      * @return 上传文件的配置.
      */
     public FileUploadConfig getFileUploadConfig() {
@@ -129,16 +127,18 @@ public class AccessHttpConfigModel {
 
     /**
      * 设置上传文件的配置.
+     *
      * @param fileUploadConfig 上传文件的配置.
      */
     public void setFileUploadConfig(FileUploadConfig fileUploadConfig) {
         this.fileUploadConfig = fileUploadConfig;
     }
 
-    private int suspend=10;
+    private int suspend = 10;
 
     /**
      * 获取请求的挂起的等待时间.<br>
+     *
      * @return 获取请求的挂起的等待时间.
      */
     public int getSuspend() {
@@ -147,6 +147,7 @@ public class AccessHttpConfigModel {
 
     /**
      * 设置请求挂起的等待时间.<br>
+     *
      * @param suspend 请求挂起的等待时间.
      */
     public void setSuspend(int suspend) {
@@ -192,5 +193,4 @@ public class AccessHttpConfigModel {
     public void setLoginIncludeUrls(String loginIncludeUrls) {
         this.loginIncludeUrls = loginIncludeUrls;
     }
-
 }

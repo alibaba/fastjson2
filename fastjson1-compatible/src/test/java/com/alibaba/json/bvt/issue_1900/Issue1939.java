@@ -22,6 +22,7 @@ public class Issue1939 {
         @XmlAnyElement(lax = true)
         public List<Object> any;
     }
+
     private static final String MESSAGE = "<Container>" +
             "<WeightMajor measurementSystem=\"English\" unit=\"lbs\">0</WeightMajor>" +
             "</Container>";

@@ -19,8 +19,7 @@ public class Issue1178 {
                 "}";
 
         JSONObject jsonObject = JSON.parseObject(json);
-        TestModel loginResponse = jsonObject.toJavaObject(TestModel.class); // TODO toJavaObject
-
+        TestModel loginResponse = jsonObject.toJavaObject(TestModel.class);
     }
 
     public static class TestModel

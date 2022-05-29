@@ -16,11 +16,11 @@ public class DataTransaction
         implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Head              head             = new Head();
+    private Head head = new Head();
 
-    private Body              body             = new Body();
+    private Body body = new Body();
 
-    public DataTransaction(){
+    public DataTransaction() {
     }
 
     /**
@@ -33,9 +33,9 @@ public class DataTransaction
 
         private String seqno;
 
-        private User   user = new User();
+        private User user = new User();
 
-        private Ret    ret  = new Ret();
+        private Ret ret = new Ret();
 
         /**
          * 用户信息
@@ -129,20 +129,20 @@ public class DataTransaction
      * Body
      */
     public static class Body {
-        private Param   param = new Param();
+        private Param param = new Param();
 
         private DataSet dataset;
 
-        public Body(){
+        public Body() {
         }
 
         /**
          * 参数
          */
         public static class Param {
-            private Limit               limit = new Limit();
+            private Limit limit = new Limit();
 
-            private Map<String, String> form  = new HashMap<String, String>();
+            private Map<String, String> form = new HashMap<String, String>();
 
             /**
              * 分页信息
@@ -209,7 +209,7 @@ public class DataTransaction
         public static class DataSet {
             private String total;
 
-            private List   rows = new ArrayList();
+            private List rows = new ArrayList();
 
             public String getTotal() {
                 return total;
@@ -281,7 +281,7 @@ public class DataTransaction
         return JSON.toJSONString(this);
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         DataTransaction dt = new DataTransaction();
 
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();

@@ -30,13 +30,14 @@ public class Issue1556 {
         ParserConfig config = new ParserConfig();
 //        config.setAutoTypeSupport(true);
 
-        String jsonString = JSON.toJSONString(apiResult, SerializerFeature.WriteClassName);//这里加上SerializerFeature.DisableCircularReferenceDetect
+        String jsonString = JSON.toJSONString(apiResult, SerializerFeature.WriteClassName); //这里加上SerializerFeature.DisableCircularReferenceDetect
         System.out.println(jsonString);
-        Object obj = JSON.parse(jsonString);//这里加上Feature.DisableCircularReferenceDetect  这样的话 是可以避免空值的  ，但是$ref 还有啥意思呢
+        Object obj = JSON.parse(jsonString); //这里加上Feature.DisableCircularReferenceDetect  这样的话 是可以避免空值的  ，但是$ref 还有啥意思呢
         System.out.println(JSON.toJSONString(obj));
     }
 
-    public static class ApiResult<T> implements Serializable {
+    public static class ApiResult<T>
+            implements Serializable {
         private String msg;
         private int code;
         private T data;
@@ -112,8 +113,9 @@ public class Issue1556 {
         }
     }
 
-    public static class FirstSubClass implements Serializable {
-        private String addr;//仅仅做下和second的区分
+    public static class FirstSubClass
+            implements Serializable {
+        private String addr; //仅仅做下和second的区分
 
         private SubCommonClass commonInfo;
 
@@ -157,8 +159,8 @@ public class Issue1556 {
         }
     }
 
-
-    public static class SubCommonClass implements Serializable {
+    public static class SubCommonClass
+            implements Serializable {
         private Date demoDate;
 
         public SubCommonClass() {

@@ -29,18 +29,22 @@ public class Issue1276 {
 
         public MyException() {
             super();
+            this.code = 0;
         }
 
         public MyException(String message, Throwable cause) {
             super(message, cause);
+            this.code = 0;
         }
 
         public MyException(String message) {
             super(message);
+            this.code = 0;
         }
 
         public MyException(Throwable cause) {
             super(cause);
+            this.code = 0;
         }
 
         public MyException(long code) {

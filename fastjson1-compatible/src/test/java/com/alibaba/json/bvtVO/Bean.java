@@ -2,8 +2,8 @@ package com.alibaba.json.bvtVO;
 
 public class Bean {
     private Integer id;
-    private String  name;
-    private String  desc;
+    private String name;
+    private String desc;
 
     public Integer getId() {
         return id;
@@ -28,5 +28,4 @@ public class Bean {
     public void setDesc(String desc) {
         this.desc = desc;
     }
-
 }

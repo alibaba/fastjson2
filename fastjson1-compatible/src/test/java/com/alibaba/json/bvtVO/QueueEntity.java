@@ -16,8 +16,8 @@ import java.util.Map;
  * @author xiaosong.liangxs
  */
 public class QueueEntity {
-    private int                         id;
-    private String                      description;
+    private int id;
+    private String description;
 
     private Map<Integer, PhysicalQueue> pqMap = new HashMap<Integer, PhysicalQueue>();
 
@@ -35,7 +35,7 @@ public class QueueEntity {
         this.pqMap = pqMap;
     }
 
-    public QueueEntity(){
+    public QueueEntity() {
     }
 
     /**
@@ -67,5 +67,4 @@ public class QueueEntity {
     public void setDescription(String description) {
         this.description = description;
     }
-
 }

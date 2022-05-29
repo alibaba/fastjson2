@@ -12,18 +12,23 @@ public class Issue255 {
     @Test
     public void test0() {
         JSONArray array = new JSONArray();
-        array.add(new JSONObject() {{
-            put("type", "text");
-            put("data", new JSONObject() {{
-                put("content", "hello111");
+        array.add(new JSONObject() {
+            {
+                put("type", "text");
+                put("data", new JSONObject() {
+                    {
+                        put("content", "hello111");
+                    }});
+            }
+        });
+        array.add(new JSONObject() {
+            {
+                put("type", "text");
+                put("data", new JSONObject() {
+                    {
+                        put("content", "hello222");
+                    }});
             }});
-        }});
-        array.add(new JSONObject() {{
-            put("type", "text");
-            put("data", new JSONObject() {{
-                put("content", "hello222");
-            }});
-        }});
 
         // Exception in thread "main" com.alibaba.fastjson2.JSONException: can not convert from class java.lang.String to class java.lang.String
         System.out.println(

@@ -9,20 +9,20 @@ public class Issue2464 {
     @Test
     public void test1() throws Exception {
         String json = "[\"Mjg4NDd8MXxjb20uY2Fpbmlhby5pc2ltdS5xLndvcmtmbG93LmNvbGxlY3Quc2NoZWR1bGUuaW1wbC5UYXNrU3RvcENvbGxlY3RDYWxsQmFja0hhbmRsZXJJbXBsfDB8\",1]";
-        Object result =  JSON.parseArray(json,new Class[]{byte[].class,Integer.class});
+        Object result = JSON.parseArray(json, new Class[]{byte[].class, Integer.class});
         assertEquals(json, JSON.toJSONString(result));
 
-        result = JSON.parseArray(json,new Class[]{char[].class,Integer.class});
+        result = JSON.parseArray(json, new Class[]{char[].class, Integer.class});
         assertEquals(json, JSON.toJSONString(result));
     }
 
     @Test
     public void test2() throws Exception {
         String json = "[1,\"Mjg4NDd8MXxjb20uY2Fpbmlhby5pc2ltdS5xLndvcmtmbG93LmNvbGxlY3Quc2NoZWR1bGUuaW1wbC5UYXNrU3RvcENvbGxlY3RDYWxsQmFja0hhbmRsZXJJbXBsfDB8\"]";
-        Object result =  JSON.parseArray(json,new Class[]{Integer.class,byte[].class});
+        Object result = JSON.parseArray(json, new Class[]{Integer.class, byte[].class});
         assertEquals(json, JSON.toJSONString(result));
 
-        result = JSON.parseArray(json,new Class[]{Integer.class, char[].class});
+        result = JSON.parseArray(json, new Class[]{Integer.class, char[].class});
         assertEquals(json, JSON.toJSONString(result));
     }
 

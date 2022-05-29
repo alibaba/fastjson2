@@ -51,7 +51,6 @@ public class Issue1367 {
                 .build();
     }
 
-
     public static class AbstractController<ID extends Serializable, PO extends GenericEntity<ID>> {
         @PostMapping(path = "/typeVariableBean", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
         public PO save(@RequestBody PO dto) {

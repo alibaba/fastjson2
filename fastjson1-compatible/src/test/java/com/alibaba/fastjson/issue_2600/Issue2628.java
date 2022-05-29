@@ -23,7 +23,6 @@ public class Issue2628 {
         Tobject tobj1 = new Tobject();
         tobj1.setBi(bi2); //没问题
         assertEquals("9423372036854775807", tobj1.getBi().toString());
-        ;
 
         String s2 = JSON.toJSONString(tobj1);
         Tobject tobj2 = JSON.parseObject(s2, Tobject.class);  //有问题

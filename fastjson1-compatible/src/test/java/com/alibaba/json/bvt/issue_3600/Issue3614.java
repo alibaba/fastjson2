@@ -31,5 +31,4 @@ public class Issue3614 {
         gzip.close();
         return bytes;
     }
-
 }

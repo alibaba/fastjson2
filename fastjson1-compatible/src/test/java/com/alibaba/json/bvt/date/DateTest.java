@@ -29,7 +29,7 @@ public class DateTest {
         assertEquals("\"2011-12-18 00:23:07\"", JSON.toJSONString(date, SerializerFeature.WriteDateUseDateFormat));
         assertEquals("\"2011-12-18 00:23:07.429\"", JSON.toJSONStringWithDateFormat(date, "yyyy-MM-dd HH:mm:ss.SSS"));
         assertEquals("'2011-12-18 00:23:07.429'", JSON.toJSONStringWithDateFormat(date, "yyyy-MM-dd HH:mm:ss.SSS",
-                                        SerializerFeature.UseSingleQuotes));
+                SerializerFeature.UseSingleQuotes));
     }
 
     @Test

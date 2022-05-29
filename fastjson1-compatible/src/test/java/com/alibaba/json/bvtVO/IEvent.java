@@ -1,12 +1,12 @@
 /**
  * Project: eve.services
- *
+ * <p>
  * File Created at 2011-12-21
  * $Id$
- *
+ * <p>
  * Copyright 2008 Alibaba.com Corporation Limited.
  * All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Alibaba Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -26,17 +26,17 @@ import java.util.Map;
  */
 public class IEvent
         implements Serializable {
-    private static final long   serialVersionUID = -791431935700654454L;
+    private static final long serialVersionUID = -791431935700654454L;
 
     /**
      * �¼������
      */
-    private String              name;
+    private String name;
 
     /**
      * �¼�����Դ
      */
-    private String              source;
+    private String source;
 
     /**
      * �¼����
@@ -46,12 +46,12 @@ public class IEvent
     /**
      * �¼�����ʱ��
      */
-    private Timestamp           generateTime;
+    private Timestamp generateTime;
 
     /**
      * ���¼����������һ��Ψһ��־��ID.
      */
-    private String              externalId;
+    private String externalId;
 
     public String getExternalId() {
         return externalId;
@@ -98,5 +98,4 @@ public class IEvent
         return "IEvent [name=" + name + ", source=" + source + ", externalId=" + externalId
                 + ", generateTime=" + generateTime + ", detailData=" + detailData + "]";
     }
-
 }

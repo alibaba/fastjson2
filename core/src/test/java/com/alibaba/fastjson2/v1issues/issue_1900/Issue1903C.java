@@ -30,7 +30,7 @@ public class Issue1903C {
 
     interface Issues1903 {
         @Transient
-        @JSONField(serialzeFeatures = {SerializerFeature.SkipTransientField})
+        @JSONField(serialzeFeatures = SerializerFeature.SkipTransientField)
         String getName();
 
         void setName(String name);

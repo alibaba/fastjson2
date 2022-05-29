@@ -4,21 +4,18 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.io.Serializable;
 
-
 public class ContactTemplateParam
         implements Serializable {
     private static final long serialVersionUID = 1L;
-
-
 
     public ContactTemplateParam() {
         // TODO Auto-generated constructor stub
     }
 
-    /** 审核状态 **/
+    /**
+     * 审核状态
+     **/
     private AuditStatusType auditStatus;
-
-
 
     public AuditStatusType getAuditStatus() {
         return auditStatus;
