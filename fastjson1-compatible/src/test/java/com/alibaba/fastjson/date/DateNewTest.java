@@ -1,4 +1,4 @@
-package com.alibaba.json.bvt.date;
+package com.alibaba.fastjson.date;
 
 import com.alibaba.fastjson.JSON;
 import org.junit.jupiter.api.Assertions;

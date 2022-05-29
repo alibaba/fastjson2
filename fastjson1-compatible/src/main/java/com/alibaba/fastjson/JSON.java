@@ -425,7 +425,9 @@ public class JSON {
 
     public static void config(JSONWriter.Context ctx, SerializerFeature[] features) {
         ctx.setDateFormat("millis");
-        ctx.setZoneId(defaultTimeZone.toZoneId());
+        if (defaultTimeZone != null) {
+            ctx.setZoneId(defaultTimeZone.toZoneId());
+        }
         ctx.config(JSONWriter.Feature.ReferenceDetection);
 
         for (SerializerFeature feature : features) {

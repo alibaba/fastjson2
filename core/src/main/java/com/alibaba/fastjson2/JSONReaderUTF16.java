@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -2103,6 +2104,124 @@ final class JSONReaderUTF16
         return true;
     }
 
+    public Date readNullOrNewDate() {
+        Date date = null;
+        if (offset + 2 < end
+                && chars[offset] == 'u'
+                && chars[offset + 1] == 'l'
+                && chars[offset + 2] == 'l') {
+            if (offset + 3 == end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset + 3];
+            }
+            offset += 4;
+        } else if (offset + 1 < end
+                && chars[offset] == 'e'
+                && chars[offset + 1] == 'w') {
+            if (offset + 3 == end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset + 2];
+            }
+            offset += 3;
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+            }
+
+            if (offset + 4 < end
+                    && ch == 'D'
+                    && chars[offset] == 'a'
+                    && chars[offset + 1] == 't'
+                    && chars[offset + 2] == 'e') {
+                if (offset + 3 == end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset + 3];
+                }
+                offset += 4;
+            } else {
+                throw new JSONException("json syntax error, not match new Date" + offset);
+            }
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+            }
+
+            if (ch != '(' || offset >= end) {
+                throw new JSONException("json syntax error, not match new Date" + offset);
+            }
+            ch = chars[offset++];
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+            }
+
+            long millis = readInt64Value();
+
+            if (ch != ')') {
+                throw new JSONException("json syntax error, not match new Date" + offset);
+            }
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+
+            date = new Date(millis);
+        } else {
+            throw new JSONException("json syntax error, not match null or new Date" + offset);
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+        }
+        if (ch == ',') {
+            ch = chars[offset++];
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+            }
+        }
+
+        return date;
+    }
+
+    @Override
+    public boolean isNull() {
+        return ch == 'n' && offset < end && chars[offset] == 'u';
+    }
+
+    @Override
+    public boolean nextIfNull() {
+        if (ch == 'n' && offset < end && chars[offset] == 'u') {
+            this.readNull();
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void readNull() {
         if (chars[offset] == 'u'
@@ -2115,7 +2234,7 @@ final class JSONReaderUTF16
             }
             offset += 4;
         } else {
-            throw new JSONException("json syntax error, not match null" + offset);
+            throw new JSONException("json syntax error, not match null, offset " + offset);
         }
 
         while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
