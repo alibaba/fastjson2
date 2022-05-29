@@ -1,13 +1,13 @@
 package com.alibaba.fastjson2.issues;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -27,11 +27,40 @@ public class Issue378 {
         ApproveConfigJson finalNode = list2LinkedJson2(approveConfigJsons);
         String s = JSON.toJSONString(finalNode, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.PrettyFormat);
 
-        ApproveConfigJson parsed = JSON.parseObject(s, ApproveConfigJson.class);
-        assertEquals(1, parsed.getSort());
+        {
+            ApproveConfigJson parsed = JSON.parseObject(s, ApproveConfigJson.class);
+            assertEquals(1, parsed.getSort());
 
-        assertSame(parsed, parsed.nextNode.preNode);
-        assertSame(parsed.nextNode, parsed.nextNode.nextNode.preNode);
+            assertSame(parsed, parsed.nextNode.preNode);
+            assertSame(parsed.nextNode, parsed.nextNode.nextNode.preNode);
+        }
+
+        {
+            ApproveConfigJson parsed = JSON.parseObject(s.getBytes(StandardCharsets.UTF_8), ApproveConfigJson.class);
+            assertEquals(1, parsed.getSort());
+
+            assertSame(parsed, parsed.nextNode.preNode);
+            assertSame(parsed.nextNode, parsed.nextNode.nextNode.preNode);
+        }
+
+        {
+            JSONReader jsonReader = TestUtils.createJSONReaderStr(s);
+            ApproveConfigJson parsed = jsonReader.read(ApproveConfigJson.class);
+            jsonReader.handleResolveTasks(parsed);
+            assertEquals(1, parsed.getSort());
+
+            assertSame(parsed, parsed.nextNode.preNode);
+            assertSame(parsed.nextNode, parsed.nextNode.nextNode.preNode);
+        }
+
+        {
+            byte[] jsonbBytes = JSONB.toBytes(finalNode, JSONWriter.Feature.ReferenceDetection);
+            ApproveConfigJson parsed = JSONB.parseObject(jsonbBytes, ApproveConfigJson.class);
+            assertEquals(1, parsed.getSort());
+
+            assertSame(parsed, parsed.nextNode.preNode);
+            assertSame(parsed.nextNode, parsed.nextNode.nextNode.preNode);
+        }
     }
 
     public static ApproveConfigJson list2LinkedJson2(List<ApproveConfigJson> approveConfigJsons) {
