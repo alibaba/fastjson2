@@ -76,4 +76,9 @@ public class JSONObjectTest3 {
     public static class Bean4 {
         public String[] websiteList;
     }
+
+    @Test
+    public void test5() {
+        assertEquals("{}", JSONObject.toJSONString(JSONObject.of()));
+    }
 }
