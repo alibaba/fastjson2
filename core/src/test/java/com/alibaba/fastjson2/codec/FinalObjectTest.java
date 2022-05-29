@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FinalObjectTest {
     @Test
     public void test_arrayMapping() {
-        ObjectWriterCreator[] creators = new ObjectWriterCreator[] {
+        ObjectWriterCreator[] creators = new ObjectWriterCreator[]{
                 ObjectWriterCreator.INSTANCE,
 //                ObjectWriterCreatorLambda.INSTANCE,
 //                ObjectWriterCreatorASM.INSTANCE

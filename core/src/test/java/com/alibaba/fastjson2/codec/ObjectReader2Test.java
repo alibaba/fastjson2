@@ -94,9 +94,10 @@ public class ObjectReader2Test {
             assertEquals(Long.valueOf(102), vo.getV0001());
         }
     }
+
     @Test
     public void test_lower_jsonb_rest() {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
+        ObjectReaderCreator[] creators = new ObjectReaderCreator[]{
                 ObjectReaderCreator.INSTANCE,
 //                ObjectReaderCreatorLambda.INSTANCE,
 //                ObjectReaderCreatorASM.INSTANCE

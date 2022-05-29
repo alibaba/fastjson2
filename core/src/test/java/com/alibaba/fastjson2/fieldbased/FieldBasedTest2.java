@@ -16,7 +16,7 @@ public class FieldBasedTest2 {
     public void test_0() {
         A a = new A();
         a.v3 = 'A';
-        a.v7 = new int[] {101};
+        a.v7 = new int[]{101};
         a.v8 = Collections.emptyList();
         a.v9 = Collections.emptyMap();
         a.v10 = Collections.emptyList();
@@ -24,6 +24,7 @@ public class FieldBasedTest2 {
         String str = JSON.toJSONString(a, JSONWriter.Feature.FieldBased);
         assertEquals("{\"v0\":0,\"v1\":0.0,\"v10\":[],\"v2\":0.0,\"v3\":\"A\",\"v4\":0,\"v5\":0,\"v6\":false,\"v7\":[101],\"v8\":[],\"v9\":{}}", str);
     }
+
     static class A {
         long v0;
         float v1;

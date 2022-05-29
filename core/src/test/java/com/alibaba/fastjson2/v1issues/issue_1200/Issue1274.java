@@ -12,15 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1274 {
     @Test
     public void test_for_issue() throws Exception {
-
         User user = new User();
         user.setId(1);
         user.setName("name");
 
-        NameFilter filter =  new NameFilter() {
+        NameFilter filter = new NameFilter() {
             public String process(Object object, String name, Object value) {
-                System.out.println("name="+name+",value="+value);
-                if(name.equals("name")){
+                System.out.println("name=" + name + ",value=" + value);
+                if (name.equals("name")) {
                     return "nt";
                 }
                 return name;
@@ -28,7 +27,7 @@ public class Issue1274 {
         };
 
         // test for  JSON.toJSONString(user,filter);
-        String jsonString = JSON.toJSONString(user,filter);
+        String jsonString = JSON.toJSONString(user, filter);
         System.out.println(jsonString);
         assertEquals("{\"id\":1,\"nt\":\"name\"}", jsonString);
     }

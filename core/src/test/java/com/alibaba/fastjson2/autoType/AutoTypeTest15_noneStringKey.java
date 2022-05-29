@@ -57,9 +57,9 @@ public class AutoTypeTest15_noneStringKey {
         object.put(map, "E");
 
         byte[] bytes = JSONB.toBytes(object, JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);

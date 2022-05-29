@@ -17,7 +17,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BigIntegerTest {
-    static BigInteger[] values = new BigInteger[] {
+    static BigInteger[] values = new BigInteger[]{
             null,
             BigInteger.ZERO,
             BigInteger.ONE,
@@ -106,7 +106,7 @@ public class BigIntegerTest {
 
     @Test
     public void test_jsonb_value_cast() {
-        Number[] values = new Number[] {
+        Number[] values = new Number[]{
                 0,
                 Byte.MIN_VALUE, Byte.MAX_VALUE,
                 Short.MIN_VALUE, Short.MAX_VALUE,
@@ -128,7 +128,7 @@ public class BigIntegerTest {
 
     @Test
     public void test_jsonb_value_cast_str() {
-        Number[] values = new Number[] {
+        Number[] values = new Number[]{
                 0,
                 Byte.MIN_VALUE, Byte.MAX_VALUE,
                 Short.MIN_VALUE, Short.MAX_VALUE,

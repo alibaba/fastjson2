@@ -44,7 +44,7 @@ public class FloatValueArrayTest {
     @Test
     public void test_writeNull() {
         assertEquals("{\"values\":null}",
-                 JSON.toJSONString(new VO(), JSONWriter.Feature.WriteNulls));
+                JSON.toJSONString(new VO(), JSONWriter.Feature.WriteNulls));
         assertEquals("{\"values\":null}",
                 new String(
                         JSON.toJSONBytes(new VO(), JSONWriter.Feature.WriteNulls)));
@@ -53,7 +53,7 @@ public class FloatValueArrayTest {
     @Test
     public void test_writeNull2() {
         assertEquals("{}",
-                 JSON.toJSONString(new VO2()));
+                JSON.toJSONString(new VO2()));
 
         assertEquals("{\"values\":null}",
                 new String(

@@ -91,8 +91,8 @@ public class CartItemDO2Test {
 
         byte[] bytes3 = JSONB.toBytes(
                 newCartsItem(),
-                 JSONB.symbolTable("myId"),
-                 JSONWriter.Feature.BeanToArray
+                JSONB.symbolTable("myId"),
+                JSONWriter.Feature.BeanToArray
         );
         System.out.println("bytes3.length=" + bytes3.length);
 

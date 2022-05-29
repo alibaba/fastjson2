@@ -19,11 +19,11 @@ public class AutoTypeTest27 {
         bean.items = Collections.unmodifiableCollection(collection);
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue
         );
 
         JSONBDump.dump(bytes);
@@ -42,11 +42,11 @@ public class AutoTypeTest27 {
         bean.items = Collections.unmodifiableSet(collection);
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue
         );
 
         JSONBDump.dump(bytes);
@@ -67,11 +67,11 @@ public class AutoTypeTest27 {
         bean.items = Collections.unmodifiableSortedSet(collection);
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue
         );
 
         JSONBDump.dump(bytes);
@@ -91,11 +91,11 @@ public class AutoTypeTest27 {
         bean.items = Collections.unmodifiableNavigableSet(collection);
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue
         );
 
         JSONBDump.dump(bytes);
@@ -114,11 +114,11 @@ public class AutoTypeTest27 {
         bean.items = Collections.emptySet();
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue
         );
 
         JSONBDump.dump(bytes);
@@ -137,11 +137,11 @@ public class AutoTypeTest27 {
         bean.items = Collections.singleton("1");
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue
         );
 
         JSONBDump.dump(bytes);
@@ -164,11 +164,11 @@ public class AutoTypeTest27 {
         bean.items = list.subList(0, 1);
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue
         );
 
         JSONBDump.dump(bytes);
@@ -187,11 +187,11 @@ public class AutoTypeTest27 {
         bean.items = Arrays.asList(0, 1, 2, 3);
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue
         );
 
         JSONBDump.dump(bytes);

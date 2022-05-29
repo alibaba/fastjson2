@@ -20,12 +20,12 @@ public class AutoTypeTest45_ListNullItem {
         bean.items.add(new Item());
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);

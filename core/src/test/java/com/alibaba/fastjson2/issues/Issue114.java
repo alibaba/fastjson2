@@ -17,10 +17,10 @@ public class Issue114 {
                 "}";
         JSONPath rowPath = JSONPath.of("$.row");
         JSONPath colPath = JSONPath.of("$.column");
-        String row = (String)rowPath.extract(JSONReader.of(seatString));
+        String row = (String) rowPath.extract(JSONReader.of(seatString));
         assertEquals("19", row);
 
-        String col = (String)colPath.extract(JSONReader.of(seatString));
+        String col = (String) colPath.extract(JSONReader.of(seatString));
         assertEquals("C", col);
     }
 

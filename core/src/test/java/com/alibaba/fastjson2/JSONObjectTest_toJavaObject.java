@@ -52,7 +52,8 @@ public class JSONObjectTest_toJavaObject {
                 JSONArray
                         .of(JSONObject.of("itemId", 101))
                         .toJavaObject(
-                                new TypeReference<List<Item>>() {}.getType()
+                                new TypeReference<List<Item>>() {
+                                }.getType()
                         );
 
         assertEquals(

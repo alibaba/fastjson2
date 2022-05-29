@@ -18,7 +18,7 @@ public class SkipTest {
                         .fluentPut("v1", this)
                         .fluentPut("v2", new JSONObject())
                         .fluentPut("v3", JSONArray.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, "A", "B", "C", "D", "E", "F")),
-                 JSONWriter.Feature.ReferenceDetection
+                JSONWriter.Feature.ReferenceDetection
         );
 
         JSONBDump.dump(bytes);

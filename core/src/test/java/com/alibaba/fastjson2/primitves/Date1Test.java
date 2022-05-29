@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class Date1Test {
     private TimeZone defaultTimeZone;
 
-    Date[] dates = new Date[] {
+    Date[] dates = new Date[]{
             null,
             new Date(0),
             new Date(1),
@@ -59,7 +59,7 @@ public class Date1Test {
 
     @BeforeEach
     public void before() {
-        defaultTimeZone  = TimeZone.getDefault();
+        defaultTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 
@@ -204,7 +204,7 @@ public class Date1Test {
         for (ObjectWriterCreator creator : creators) {
             FieldWriter fieldWriter = creator
                     .createFieldWriter("date"
-                            ,"iso8601",
+                            , "iso8601",
                             LongValueField1.class.getField("v0000"));
             ObjectWriter<LongValueField1> objectWriter
                     = creator.createObjectWriter(fieldWriter);

@@ -57,7 +57,7 @@ public class StringField20NullsTest {
         ObjectReader<StringField20> objectConsumer = ObjectReaders.ofReflect(StringField20.class);
         {
             JSONReader parser = JSONReader.of(str);
-            StringField20 vo = objectConsumer.readObject(parser, 0);;
+            StringField20 vo = objectConsumer.readObject(parser, 0);
             assertNull(vo.v0000);
             assertNull(vo.v0001);
             assertNull(vo.v0002);
@@ -68,7 +68,7 @@ public class StringField20NullsTest {
 
             for (int j = 0; j < 1000 * 1000; ++j) {
                 JSONReader parser = JSONReader.of(str);
-                StringField20 vo = objectConsumer.readObject(parser, 0);;
+                StringField20 vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -87,7 +87,7 @@ public class StringField20NullsTest {
 
             for (int j = 0; j < 1000 * 1000; ++j) {
                 JSONReader parser = JSONReader.of(str);
-                StringField20 vo = objectConsumer.readObject(parser, 0);;
+                StringField20 vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -97,13 +97,12 @@ public class StringField20NullsTest {
         System.out.println();
     }
 
-
     @Test
     public void test_asm_parse() throws Throwable {
         ObjectReader<StringField20> objectConsumer = TestUtils.of(StringField20.class);
         {
             JSONReader parser = JSONReader.of(str);
-            StringField20 vo = objectConsumer.readObject(parser, 0);;
+            StringField20 vo = objectConsumer.readObject(parser, 0);
             assertNull(vo.v0000);
             assertNull(vo.v0001);
             assertNull(vo.v0002);
@@ -114,7 +113,7 @@ public class StringField20NullsTest {
 
             for (int j = 0; j < 1000 * 1000; ++j) {
                 JSONReader parser = JSONReader.of(str);
-                StringField20 vo = objectConsumer.readObject(parser, 0);;
+                StringField20 vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -150,7 +149,7 @@ public class StringField20NullsTest {
 
             for (int j = 0; j < 1000 * 1000; ++j) {
                 JSONReader parser = JSONReader.of(bytes);
-                StringField20 vo = objectConsumer.readObject(parser, 0);;
+                StringField20 vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -159,7 +158,6 @@ public class StringField20NullsTest {
         }
         System.out.println();
     }
-
 
     @Test
     public void test_asm_parse_ascii_bytes() throws Throwable {
@@ -171,7 +169,7 @@ public class StringField20NullsTest {
 
             for (int j = 0; j < 1000 * 1000; ++j) {
                 JSONReader parser = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.US_ASCII);
-                StringField20 vo = objectConsumer.readObject(parser, 0);;
+                StringField20 vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;

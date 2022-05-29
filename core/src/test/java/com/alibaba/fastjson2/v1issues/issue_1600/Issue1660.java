@@ -11,7 +11,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1660 {
-
     @Test
     public void test_for_issue() throws Exception {
         Model model = new Model();

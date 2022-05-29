@@ -17,7 +17,7 @@ public class Issue1177_1 {
         JSONObject jsonObject = JSON.parseObject(text);
         System.out.println(jsonObject);
         String jsonpath = "$..x";
-        String value="y2";
+        String value = "y2";
         JSONPath.set(jsonObject, jsonpath, value);
         String result = jsonObject.toString();
         assertEquals("{\"a\":{\"x\":\"y2\"},\"b\":{\"x\":\"y2\"}}", result);

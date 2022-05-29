@@ -16,11 +16,11 @@ public class AutoTypeTest28_Short {
         bean.value = (short) 1;
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue
         );
 
         JSONBDump.dump(bytes);
@@ -43,11 +43,11 @@ public class AutoTypeTest28_Short {
         bean.value = (short) 1;
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue
         );
 
         JSONBDump.dump(bytes);
@@ -70,11 +70,11 @@ public class AutoTypeTest28_Short {
         bean.value = (short) 1;
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue
         );
 
         JSONBDump.dump(bytes);

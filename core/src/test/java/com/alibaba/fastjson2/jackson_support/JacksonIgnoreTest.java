@@ -21,7 +21,7 @@ public class JacksonIgnoreTest {
         String str = "{\"id\":\"101\"}";
         assertNull(
                 JSON.parseObject(str, A.class)
-                .id
+                        .id
         );
         assertNull(
                 JSON.parseObject(str, A1.class)

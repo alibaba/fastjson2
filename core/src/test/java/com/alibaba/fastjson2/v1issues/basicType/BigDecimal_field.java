@@ -13,19 +13,19 @@ public class BigDecimal_field {
     @Test
     public void test_for_issue() throws Exception {
         assertEquals("{\"value\":\"9007199254741992\"}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         new Model(9007199254741992L)));
 
         assertEquals("{\"value\":\"-9007199254741992\"}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         new Model(-9007199254741992L)));
 
         assertEquals("{\"value\":9007199254740990}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         new Model(9007199254740990L)));
 
         assertEquals("{\"value\":-9007199254740990}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         new Model(-9007199254740990L)));
 
         assertEquals("{\"value\":100}",

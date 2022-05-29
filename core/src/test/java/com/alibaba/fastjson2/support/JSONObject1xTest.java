@@ -13,10 +13,10 @@ public class JSONObject1xTest {
     public void test_0() {
         JSONObject object = new JSONObject();
         assertEquals("{}",
-                 JSON.toJSONString(object));
+                JSON.toJSONString(object));
 
         assertEquals("{}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         JSONB.parse(
                                 JSONB.toBytes(object))));
     }
@@ -25,10 +25,10 @@ public class JSONObject1xTest {
     public void test_1() {
         JSONArray array = new JSONArray();
         assertEquals("[]",
-                 JSON.toJSONString(array));
+                JSON.toJSONString(array));
 
         assertEquals("[]",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         JSONB.parse(
                                 JSONB.toBytes(array))));
     }

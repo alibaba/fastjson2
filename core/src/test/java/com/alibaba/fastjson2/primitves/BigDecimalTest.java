@@ -16,7 +16,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BigDecimalTest {
-    static BigDecimal[] values = new BigDecimal[] {
+    static BigDecimal[] values = new BigDecimal[]{
             BigDecimal.ZERO,
             BigDecimal.ONE,
             BigDecimal.TEN,
@@ -119,7 +119,7 @@ public class BigDecimalTest {
 
     @Test
     public void test_jsonb_value_cast() {
-        Number[] values = new Number[] {
+        Number[] values = new Number[]{
                 0,
                 Byte.MIN_VALUE, Byte.MAX_VALUE,
                 Short.MIN_VALUE, Short.MAX_VALUE,
@@ -141,7 +141,7 @@ public class BigDecimalTest {
 
     @Test
     public void test_jsonb_value_cast_str() {
-        Number[] values = new Number[] {
+        Number[] values = new Number[]{
                 0,
                 Byte.MIN_VALUE, Byte.MAX_VALUE,
                 Short.MIN_VALUE, Short.MAX_VALUE,

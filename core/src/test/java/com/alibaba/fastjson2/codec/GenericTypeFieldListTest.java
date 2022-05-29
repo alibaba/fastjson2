@@ -83,7 +83,8 @@ public class GenericTypeFieldListTest {
         ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
-            Type objectType = new TypeReference<P31<String>>() {}.getType();
+            Type objectType = new TypeReference<P31<String>>() {
+            }.getType();
             ObjectReader<P31> objectReader = creator.createObjectReader(objectType);
 
             JSONReader jsonReader = JSONReader.of("{\"value\":[101]}");

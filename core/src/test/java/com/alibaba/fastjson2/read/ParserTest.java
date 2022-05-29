@@ -66,7 +66,7 @@ public class ParserTest {
 
         assertEquals(Fnv.hashCode64LCase("name"), lexer.readFieldNameHashCode());
         assertEquals("jobs",
-                 lexer.readString());
+                lexer.readString());
 
         assertEquals('}', lexer.current());
         lexer.next();

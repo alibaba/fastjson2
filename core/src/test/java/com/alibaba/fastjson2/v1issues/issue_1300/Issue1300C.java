@@ -48,6 +48,5 @@ public class Issue1300C {
     }
 
     public static interface Parcelable {
-
     }
 }

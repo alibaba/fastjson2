@@ -17,16 +17,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class AutoTypeTest44_customList {
     @Test
     public void test_arrayList() {
-        ArrayList list = new ArrayList() {};
+        ArrayList list = new ArrayList() {
+        };
         list.add(101);
 
         byte[] bytes = JSONB.toBytes(list,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -44,16 +45,17 @@ public class AutoTypeTest44_customList {
 
     @Test
     public void test_jsonArray() {
-        List list = new JSONArray() {};
+        List list = new JSONArray() {
+        };
         list.add(101);
 
         byte[] bytes = JSONB.toBytes(list,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -71,16 +73,17 @@ public class AutoTypeTest44_customList {
 
     @Test
     public void test_hashMap() {
-        HashMap map = new HashMap() {};
+        HashMap map = new HashMap() {
+        };
         map.put("a", 101);
 
         byte[] bytes = JSONB.toBytes(map,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);

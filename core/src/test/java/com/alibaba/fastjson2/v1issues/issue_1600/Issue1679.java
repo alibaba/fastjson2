@@ -9,7 +9,6 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1679 {
-
     @Test
     public void test_for_issue() throws Exception {
         String json = "{\"create\":\"2018-01-10 08:30:00\"}";
@@ -22,7 +21,7 @@ public class Issue1679 {
         assertEquals("\"2018-01-10T08:30:00+08:00\"", jsonWriter.toString());
     }
 
-    public static class User{
+    public static class User {
         public Date create;
     }
 }

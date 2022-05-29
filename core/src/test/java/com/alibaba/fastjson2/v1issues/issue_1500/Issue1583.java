@@ -24,7 +24,8 @@ public class Issue1583 {
         String jsonString = JSON.toJSONString(mapList);
 
         System.out.println(jsonString);
-        List<Map.Entry<String, List<String>>> parse = JSON.parseObject(jsonString, new TypeReference<List<Map.Entry<String, List<String>>>>() {}.getType());
+        List<Map.Entry<String, List<String>>> parse = JSON.parseObject(jsonString, new TypeReference<List<Map.Entry<String, List<String>>>>() {
+        }.getType());
         System.out.println(parse);
     }
 }

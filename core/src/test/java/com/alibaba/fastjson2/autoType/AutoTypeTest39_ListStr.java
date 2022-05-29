@@ -23,12 +23,12 @@ public class AutoTypeTest39_ListStr {
         bean.items.add(str);
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -52,12 +52,12 @@ public class AutoTypeTest39_ListStr {
         bean.items = Collections.singletonList("abc");
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -81,12 +81,12 @@ public class AutoTypeTest39_ListStr {
         bean.items = Collections.singletonList("abc");
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -110,12 +110,12 @@ public class AutoTypeTest39_ListStr {
         bean.items = Arrays.asList("abc");
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -142,12 +142,12 @@ public class AutoTypeTest39_ListStr {
         bean.items = list;
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);

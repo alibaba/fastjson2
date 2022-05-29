@@ -20,7 +20,8 @@ public class JSONBTableTest {
         list.add(new Employee(3));
 
         byte[] bytes = JSONB.toBytes(list);
-        List<Employee> list2 = JSONB.parseObject(bytes, new TypeReference<List<Employee>>(){}.getType());
+        List<Employee> list2 = JSONB.parseObject(bytes, new TypeReference<List<Employee>>() {
+        }.getType());
         assertEquals(3, list2.size());
         assertEquals(list, list2);
     }
@@ -38,7 +39,8 @@ public class JSONBTableTest {
 
         JSONBDump.dump(bytes);
 
-        List<Org> list2 = JSONB.parseObject(bytes, new TypeReference<List<Org>>(){}.getType());
+        List<Org> list2 = JSONB.parseObject(bytes, new TypeReference<List<Org>>() {
+        }.getType());
         assertEquals(orgs.size(), list2.size());
         assertEquals(org, list2.get(0));
     }

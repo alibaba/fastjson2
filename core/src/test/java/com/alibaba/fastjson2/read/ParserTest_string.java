@@ -101,25 +101,25 @@ public class ParserTest_string {
         assertEquals(Fnv.hashCode64LCase("id"), lexer.getNameHashCodeLCase());
         assertEquals("id", lexer.getFieldName());
         assertEquals("123456789",
-                 lexer.readString());
+                lexer.readString());
 
         assertEquals(Fnv.hashCode64("v0"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v0"), lexer.getNameHashCodeLCase());
         assertEquals("v0", lexer.getFieldName());
         assertEquals("-123",
-                 lexer.readString());
+                lexer.readString());
 
         assertEquals(Fnv.hashCode64("v1"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v1"), lexer.getNameHashCodeLCase());
         assertEquals("v1", lexer.getFieldName());
         assertEquals("123456789012345678",
-                 lexer.readString());
+                lexer.readString());
 
         assertEquals(Fnv.hashCode64("v2"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v2"), lexer.getNameHashCodeLCase());
         assertEquals("v2", lexer.getFieldName());
         assertEquals("-123456789012345678901234567890",
-                 lexer.readString());
+                lexer.readString());
 
         assertEquals(Fnv.hashCode64("v3"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v3"), lexer.getNameHashCodeLCase());
@@ -158,7 +158,7 @@ public class ParserTest_string {
         assertEquals(Fnv.hashCode64LCase("v9"), lexer.getNameHashCodeLCase());
         assertEquals("v9", lexer.getFieldName());
         assertEquals("false",
-                 lexer.readString());
+                lexer.readString());
 
         assertEquals(Fnv.hashCode64("v10"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v10"), lexer.getNameHashCodeLCase());
@@ -167,7 +167,7 @@ public class ParserTest_string {
                 lexer.readString());
 
         assertEquals(Fnv.hashCode64("v11"),
-                 lexer.readFieldNameHashCode());
+                lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v11"), lexer.getNameHashCodeLCase());
         assertEquals("v11", lexer.getFieldName());
         assertEquals("{}", lexer.readString());
@@ -187,13 +187,13 @@ public class ParserTest_string {
         assertEquals(Fnv.hashCode64LCase("v14"), lexer.getNameHashCodeLCase());
         assertEquals("v14", lexer.getFieldName());
         assertEquals("[null]",
-                 lexer.readString());
+                lexer.readString());
 
         assertEquals(Fnv.hashCode64("v15"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v15"), lexer.getNameHashCodeLCase());
         assertEquals("v15", lexer.getFieldName());
         assertEquals("[\"123\"]",
-                 lexer.readString());
+                lexer.readString());
 
         assertEquals('}', lexer.current());
         lexer.next();

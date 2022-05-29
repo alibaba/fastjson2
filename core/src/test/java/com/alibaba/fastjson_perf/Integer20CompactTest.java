@@ -95,7 +95,6 @@ public class Integer20CompactTest {
         System.out.println();
     }
 
-
     @Test
     public void test_asm_parse() throws Throwable {
         ObjectReader<Integer20> objectConsumer = TestUtils.of(Integer20.class);
@@ -121,7 +120,7 @@ public class Integer20CompactTest {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < 1000 * 1000; ++j) {
-                Integer20 vo =JSON.parseObject(str, Integer20.class);
+                Integer20 vo = JSON.parseObject(str, Integer20.class);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -150,7 +149,6 @@ public class Integer20CompactTest {
         }
         System.out.println();
     }
-
 
     @Test
     public void test_asm_parse_ascii_bytes() throws Throwable {

@@ -27,7 +27,7 @@ public class Issue1727 {
     }
 
     public static class Model {
-        @JSONField(format="yyyyMMddHHmmssSSSZ")
+        @JSONField(format = "yyyyMMddHHmmssSSSZ")
         public Date gmtCreate;
     }
 }

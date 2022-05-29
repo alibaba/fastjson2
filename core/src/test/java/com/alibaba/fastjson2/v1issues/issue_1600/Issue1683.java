@@ -20,7 +20,6 @@ public class Issue1683 {
 
     @JSONType(orders = {"bookId", "bookName", "authorName", "wordCount"})
     public static class BookDO {
-
         private Long bookId;
 
         private String bookName;

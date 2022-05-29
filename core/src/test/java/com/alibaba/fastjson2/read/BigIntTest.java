@@ -25,7 +25,7 @@ public class BigIntTest {
     public void test_json_bigint_0() throws Exception {
         String str = "{\"id\":123}";
         Object id = JSONReader.of(str
-                .toCharArray())
+                        .toCharArray())
                 .readObject()
                 .get("id");
 
@@ -39,7 +39,7 @@ public class BigIntTest {
         bigInt.longValue();
         String json = "{\"id\":" + str + "}";
         Object id = JSONReader.of(json
-                .toCharArray())
+                        .toCharArray())
                 .readObject()
                 .get("id");
 
@@ -53,7 +53,7 @@ public class BigIntTest {
         bigInt.longValue();
         String json = "{\"id\":" + str + "}";
         Object id = JSONReader.of(json
-                .toCharArray())
+                        .toCharArray())
                 .readObject()
                 .get("id");
 
@@ -67,7 +67,7 @@ public class BigIntTest {
         bigInt.longValue();
         String json = "{\"id\":" + str + "}";
         Object id = JSONReader.of(json
-                .toCharArray())
+                        .toCharArray())
                 .readObject()
                 .get("id");
 
@@ -82,7 +82,7 @@ public class BigIntTest {
         byte[] bytes = bigInt.toByteArray();
         String json = "{\"id\":" + str + "}";
         Object id = JSONReader.of(json
-                .toCharArray())
+                        .toCharArray())
                 .readObject()
                 .get("id");
 

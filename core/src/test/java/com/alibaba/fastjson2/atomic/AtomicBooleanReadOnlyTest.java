@@ -36,11 +36,11 @@ public class AtomicBooleanReadOnlyTest {
     public static class V0 {
         private final AtomicBoolean value;
 
-        public V0(){
+        public V0() {
             this(false);
         }
 
-        public V0(boolean value){
+        public V0(boolean value) {
             this.value = new AtomicBoolean(value);
         }
 

@@ -67,47 +67,47 @@ public class JSONSchemaResourceTest {
     }
 
     @Test
-    public void test_draft2020_maximum(){
+    public void test_draft2020_maximum() {
         runTest("schema/draft2020-12/maximum.json");
     }
 
     @Test
-    public void test_draft2020_maxItems(){
+    public void test_draft2020_maxItems() {
         runTest("schema/draft2020-12/maxItems.json");
     }
 
     @Test
-    public void test_draft2020_maxLength(){
+    public void test_draft2020_maxLength() {
         runTest("schema/draft2020-12/maxLength.json");
     }
 
     @Test
-    public void test_draft2020_maxProperties(){
+    public void test_draft2020_maxProperties() {
         runTest("schema/draft2020-12/maxProperties.json");
     }
 
     @Test
-    public void test_draft2020_minContains(){
+    public void test_draft2020_minContains() {
         runTest("schema/draft2020-12/minContains.json");
     }
 
     @Test
-    public void test_draft2020_minimum(){
+    public void test_draft2020_minimum() {
         runTest("schema/draft2020-12/minimum.json");
     }
 
     @Test
-    public void test_draft2020_minItems(){
+    public void test_draft2020_minItems() {
         runTest("schema/draft2020-12/minItems.json");
     }
 
     @Test
-    public void test_draft2020_minLength(){
+    public void test_draft2020_minLength() {
         runTest("schema/draft2020-12/minLength.json");
     }
 
     @Test
-    public void test_draft2020_minProperties(){
+    public void test_draft2020_minProperties() {
         runTest("schema/draft2020-12/minProperties.json");
     }
 

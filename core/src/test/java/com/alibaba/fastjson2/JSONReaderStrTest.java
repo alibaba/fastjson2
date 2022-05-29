@@ -23,11 +23,11 @@ public class JSONReaderStrTest {
         );
 
         assertTrue(
-            reader.nextIfMatch(':')
+                reader.nextIfMatch(':')
         );
 
         assertEquals(123,
-                 reader.readInt32()
+                reader.readInt32()
                         .intValue());
 
         reader.skipName();
@@ -67,7 +67,7 @@ public class JSONReaderStrTest {
         );
 
         assertEquals(1238,
-                 reader.readInt64()
+                reader.readInt64()
                         .intValue());
     }
 

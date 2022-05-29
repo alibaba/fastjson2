@@ -15,7 +15,7 @@ public class BuilderTest1_private {
         assertEquals("ljw", vo.getName());
     }
 
-    @JSONType(builder=VOBuilder.class)
+    @JSONType(builder = VOBuilder.class)
     public static class VO {
         private int id;
         private String name;

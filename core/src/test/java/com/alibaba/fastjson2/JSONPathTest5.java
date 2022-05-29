@@ -23,7 +23,7 @@ public class JSONPathTest5 {
         JSONPath path = JSONPath.of("$[0].id");
         assertEquals(
                 101,
-                 path.extract(
+                path.extract(
                         JSONReader.ofJSONB(jsonbBytes)
                 )
         );
@@ -31,13 +31,13 @@ public class JSONPathTest5 {
         JSONArray array = JSONB.parseArray(jsonbBytes);
         assertEquals(
                 101,
-                 path.eval(array)
+                path.eval(array)
         );
 
         JSONArray array2 = (JSONArray) JSONB.parse(jsonbBytes);
         assertEquals(
                 101,
-                 path.eval(array2)
+                path.eval(array2)
         );
     }
 

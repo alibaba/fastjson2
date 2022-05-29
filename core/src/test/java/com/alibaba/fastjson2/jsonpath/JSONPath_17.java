@@ -30,7 +30,7 @@ public class JSONPath_17 {
         map.put(TimeUnit.DAYS, "101");
 
         assertEquals("101",
-                 JSONPath.of("$.DAYS")
+                JSONPath.of("$.DAYS")
                         .eval(map));
     }
 
@@ -42,7 +42,7 @@ public class JSONPath_17 {
         root.put("values", map);
 
         assertEquals("101",
-                 JSONPath.of("$.values.DAYS")
+                JSONPath.of("$.values.DAYS")
                         .eval(root));
     }
 
@@ -52,7 +52,7 @@ public class JSONPath_17 {
         map.put(2748734281L, "101");
 
         assertEquals("101",
-                 JSONPath.of("$.2748734281")
+                JSONPath.of("$.2748734281")
                         .eval(map));
     }
 
@@ -64,7 +64,7 @@ public class JSONPath_17 {
         root.put("values", map);
 
         assertEquals("101",
-                 JSONPath.of("$.values.2748734281")
+                JSONPath.of("$.values.2748734281")
                         .eval(root));
     }
 
@@ -74,7 +74,7 @@ public class JSONPath_17 {
         map.put(1773193982L, "101");
 
         assertEquals("101",
-                 JSONPath.of("$.1773193982")
+                JSONPath.of("$.1773193982")
                         .eval(map));
     }
 
@@ -86,7 +86,7 @@ public class JSONPath_17 {
         root.put("values", map);
 
         assertEquals("101",
-                 JSONPath.of("$.values.1773193982")
+                JSONPath.of("$.values.1773193982")
                         .eval(root));
     }
 }

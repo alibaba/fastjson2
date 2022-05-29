@@ -18,13 +18,13 @@ public class AutoTypeTest46_Pair {
         bean.pair2 = Pair.of("102", Boolean.TRUE);
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                 JSONWriter.Feature.WriteNameAsSymbol
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+                JSONWriter.Feature.WriteNameAsSymbol
         );
 
         JSONBDump.dump(bytes);

@@ -25,7 +25,7 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\"v0000\":100\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test
@@ -40,7 +40,7 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\"v0000\":100\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test
@@ -55,7 +55,7 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\"v0000\":100.0\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test
@@ -70,7 +70,7 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\"v0000\":100.0\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\"id\":100\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test
@@ -100,7 +100,7 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\"id\":100\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test
@@ -115,7 +115,7 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\"id\":\"" + v.getId().toString() + "\"\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test
@@ -130,7 +130,7 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\"v0000\":100\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test
@@ -145,7 +145,7 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\"v0000\":1234567890\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test
@@ -160,7 +160,7 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\"v0000\":1234567890\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test
@@ -174,7 +174,7 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\"v0000\":1000\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test
@@ -185,7 +185,7 @@ public class PrettyTest {
         assertEquals("{\n" +
                         "\t\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test
@@ -208,7 +208,7 @@ public class PrettyTest {
                         "\t\t\n" +
                         "\t}\n" +
                         "}",
-                 jw.toString());
+                jw.toString());
     }
 
     @Test

@@ -48,8 +48,8 @@ public class LocalDateTest {
                 JSONWriter.Feature.FieldBased,
                 JSONWriter.Feature.ReferenceDetection,
                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -71,12 +71,12 @@ public class LocalDateTest {
         LocalDate date = LocalDate.now(utc);
 
         byte[] bytes = JSONB.toBytes(date,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);

@@ -22,7 +22,6 @@ public class JSONWriterTest {
         JSONWriter jsonWriter = JSONWriter.of();
         for (int i = 0; i < COUNT; ++i) {
             jsonWriter.writeComma();
-            ;
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());
@@ -37,7 +36,6 @@ public class JSONWriterTest {
         JSONWriter jsonWriter = JSONWriter.ofUTF8();
         for (int i = 0; i < COUNT; ++i) {
             jsonWriter.writeComma();
-            ;
         }
         String str = jsonWriter.toString();
         assertEquals(COUNT, str.length());

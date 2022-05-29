@@ -22,7 +22,7 @@ public class Issue235 {
         assertThrows(JSONException.class, () -> JSON.parseArray(json, TModal.class));
     }
 
-    public static class TModal{
+    public static class TModal {
         private String namespace;
         private List<String> items;
     }

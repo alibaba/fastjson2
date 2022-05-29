@@ -41,7 +41,6 @@ public class DecodeTest0 {
                 ObjectReaders.fieldReader("v24", Date.class, VO::setV24)
         );
     }
-
     @Test
     public void test_0() {
         long start = System.currentTimeMillis();
@@ -53,7 +52,6 @@ public class DecodeTest0 {
         System.out.println("asm millis : " + millis);
         System.out.println(vo.v0);
     }
-
     @Test
     public void test_reflect() {
         for (int i = 0; i < 1; ++i) {
@@ -68,7 +66,6 @@ public class DecodeTest0 {
             System.out.println(vo.v0);
         }
     }
-
     @Test
     public void test_invoke() {
         for (int i = 0; i < 1; ++i) {
@@ -82,7 +79,6 @@ public class DecodeTest0 {
             System.out.println(vo.v0);
         }
     }
-
     public static class VO {
         private boolean v0;
         private byte v1;
@@ -111,95 +107,72 @@ public class DecodeTest0 {
         public boolean isV0() {
             return v0;
         }
-
         public void setV0(boolean v0) {
             this.v0 = v0;
         }
-
         public byte getV1() {
             return v1;
         }
-
         public void setV1(byte v1) {
             this.v1 = v1;
         }
-
         public short getV2() {
             return v2;
         }
-
         public void setV2(short v2) {
             this.v2 = v2;
         }
-
         public int getV3() {
             return v3;
         }
-
         public void setV3(int v3) {
             this.v3 = v3;
         }
-
         public long getV4() {
             return v4;
         }
-
         public void setV4(long v4) {
             this.v4 = v4;
         }
-
         public char getV5() {
             return v5;
         }
-
         public void setV5(char v5) {
             this.v5 = v5;
         }
-
         public float getV6() {
             return v6;
         }
-
         public void setV6(float v6) {
             this.v6 = v6;
         }
-
         public double getV7() {
             return v7;
         }
-
         public void setV7(double v7) {
             this.v7 = v7;
         }
-
         public Boolean getV10() {
             return v10;
         }
-
         public void setV10(Boolean v10) {
             this.v10 = v10;
         }
-
         public Byte getV11() {
             return v11;
         }
-
         public void setV11(Byte v11) {
             this.v11 = v11;
         }
-
         public Short getV12() {
             return v12;
         }
-
         public void setV12(Short v12) {
             this.v12 = v12;
         }
-
         public Integer getV13() {
             return v13;
         }
-
         public void setV13(Integer v13) {
             this.v13 = v13;
         }

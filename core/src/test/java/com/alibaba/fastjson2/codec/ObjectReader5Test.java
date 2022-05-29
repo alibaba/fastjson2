@@ -133,7 +133,7 @@ public class ObjectReader5Test {
         map.put("x0001", ZonedDateTime.now());
         map.put("x0002", new Date());
         map.put("x0003", UUID.randomUUID());
-        map.put("x0004", new byte[]{1,2,3,4,5,6,7,8});
+        map.put("x0004", new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
         map.put("x0005", false);
         map.put("x0006", true);
         byte[] jsonbBytes = JSONB.toBytes(map);

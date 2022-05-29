@@ -16,7 +16,7 @@ public class BuilderTest3_private {
         assertEquals("ljw", vo.getName());
     }
 
-    @JSONType(builder=VOBuilder.class)
+    @JSONType(builder = VOBuilder.class)
     public static class VO {
         private int id;
         private String name;
@@ -37,13 +37,13 @@ public class BuilderTest3_private {
             return vo;
         }
 
-        @JSONField(name="id")
+        @JSONField(name = "id")
         public VOBuilder kkId(int id) {
             vo.id = id;
             return this;
         }
 
-        @JSONField(name="name")
+        @JSONField(name = "name")
         public VOBuilder kkName(String name) {
             vo.name = name;
             return this;

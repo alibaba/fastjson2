@@ -14,7 +14,7 @@ public class Issue3266_str {
         vo.type = Color.Black;
 
         assertEquals("\"黑色\"",
-                 JSON.toJSONString(vo.type));
+                JSON.toJSONString(vo.type));
 
         String str = JSON.toJSONString(vo);
         assertEquals("{\"type\":\"黑色\"}", str);

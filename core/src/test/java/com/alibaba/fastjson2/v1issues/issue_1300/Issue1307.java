@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1307 {
     ValueFilter contextValueFilter = new ValueFilter() {
         public Object apply(Object obj, String name, Object value) {
-            return "mark-"+value;
+            return "mark-" + value;
         }
     };
     ValueFilter valueFilter = new ValueFilter() {
@@ -28,14 +28,14 @@ public class Issue1307 {
     };
 
     @Test
-    public void test_context_value_filter_not_effected () {
+    public void test_context_value_filter_not_effected() {
         List<Object> params = new ArrayList<Object>();
         Map data = new HashMap();
         data.put("name", "ace");
         params.add(data);
         //fail Actual   :[{"name":"ace"}]
         assertEquals("[{\"name\":\"mark-ace\"}]",
-                 JSON.toJSONString(params,
+                JSON.toJSONString(params,
                         new Filter[]{
                                 contextValueFilter
                         })

@@ -14,35 +14,27 @@ public class Float10 {
 
     public Float10() {
     }
-
     public float getV0000() {
         return v0000;
     }
-
     public void setV0000(float v0000) {
         this.v0000 = v0000;
     }
-
     public float getV0001() {
         return v0001;
     }
-
     public void setV0001(float v0001) {
         this.v0001 = v0001;
     }
-
     public float getV0002() {
         return v0002;
     }
-
     public void setV0002(float v0002) {
         this.v0002 = v0002;
     }
-
     public float getV0003() {
         return v0003;
     }
-
     public void setV0003(float v0003) {
         this.v0003 = v0003;
     }

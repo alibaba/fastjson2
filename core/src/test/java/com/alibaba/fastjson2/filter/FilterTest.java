@@ -27,15 +27,15 @@ public class FilterTest {
     public void test_2() {
         assertEquals("{\"id\":123}", JSON.toJSONString(
                 new JSONObject()
-                .fluentPut("id", 123)
-                .fluentPut("name", "DataWorks"),
-                 new SimplePropertyPreFilter("id")));
+                        .fluentPut("id", 123)
+                        .fluentPut("name", "DataWorks"),
+                new SimplePropertyPreFilter("id")));
 
         assertEquals("{\"id\":123,\"name\":\"DataWorks\"}", JSON.toJSONString(
                 new JSONObject()
                         .fluentPut("id", 123)
                         .fluentPut("name", "DataWorks"),
-                 new SimplePropertyPreFilter(JSONObject.class)));
+                new SimplePropertyPreFilter(JSONObject.class)));
     }
 
     @Test
@@ -46,7 +46,7 @@ public class FilterTest {
         filter.setMaxLevel(1);
         assertEquals(1, filter.getMaxLevel());
         assertEquals("{\"value\":{}}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         new JSONObject()
                                 .fluentPut("value",
                                         new JSONObject()
@@ -64,7 +64,7 @@ public class FilterTest {
                 new JSONObject()
                         .fluentPut("id", 123)
                         .fluentPut("name", "DataWorks"),
-                 filter));
+                filter));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class FilterTest {
                 new JSONObject()
                         .fluentPut("id", 123)
                         .fluentPut("name", "DataWorks"),
-                 filter));
+                filter));
     }
 
     @Test
@@ -83,7 +83,7 @@ public class FilterTest {
         SimplePropertyPreFilter filter = new SimplePropertyPreFilter(JSONArray.class);
         assertNotNull(filter.getClazz());
         assertEquals("{}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         new JSONObject()
                                 .fluentPut("value",
                                         new JSONObject()

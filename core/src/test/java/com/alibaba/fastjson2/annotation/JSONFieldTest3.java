@@ -14,7 +14,7 @@ public class JSONFieldTest3 {
     public void test_deciaml_BrowserCompatible() {
         ObjectWriterCreator[] creators = TestUtils.writerCreators();
 
-        BigDecimal[] values = new BigDecimal[] {null, BigDecimal.TEN, new BigDecimal("90071992547409910")};
+        BigDecimal[] values = new BigDecimal[]{null, BigDecimal.TEN, new BigDecimal("90071992547409910")};
         VO vo = new VO();
         vo.value = new BigDecimal("90071992547409910");
 

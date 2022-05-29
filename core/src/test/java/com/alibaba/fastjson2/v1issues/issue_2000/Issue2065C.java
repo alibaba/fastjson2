@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Issue2065C {
-
     @Test
     public void test_for_issue() throws Exception {
         Exception error = null;
@@ -47,7 +46,8 @@ public class Issue2065C {
         @JSONField(name = "code")
         private EnumClass code;
 
-        public Model() {}
+        public Model() {
+        }
 
         public EnumClass getCode() {
             return code;

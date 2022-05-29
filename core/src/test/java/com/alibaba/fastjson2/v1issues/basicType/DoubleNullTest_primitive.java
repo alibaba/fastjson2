@@ -15,23 +15,23 @@ public class DoubleNullTest_primitive {
         Model model = JSON.parseObject("{\"v1\":null,\"v2\":null}", Model.class);
         assertNotNull(model);
         assertEquals(0D, model.v1);
-        assertEquals(0D,model.v2);
+        assertEquals(0D, model.v2);
     }
 
     @Test
     public void test_null_1() {
         Model model = JSON.parseObject("{\"v1\":null ,\"v2\":null }", Model.class);
         assertNotNull(model);
-        assertEquals(0D,model.v1);
-        assertEquals(0D,model.v2);
+        assertEquals(0D, model.v1);
+        assertEquals(0D, model.v2);
     }
 
     @Test
     public void test_null_2() {
         Model model = JSON.parseObject("{\"v1\":\"null\",\"v2\":\"null\" }", Model.class);
         assertNotNull(model);
-        assertEquals(0D,model.v1);
-        assertEquals(0D,model.v2);
+        assertEquals(0D, model.v1);
+        assertEquals(0D, model.v2);
     }
 
     public static class Model {

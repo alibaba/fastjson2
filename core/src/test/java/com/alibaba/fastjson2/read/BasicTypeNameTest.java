@@ -41,7 +41,7 @@ public class BasicTypeNameTest {
 
     @Test
     public void test1() {
-        String[] strings = new String[] {"1", "2L", "3F", "4D"};
+        String[] strings = new String[]{"1", "2L", "3F", "4D"};
 
         for (int i = 0; i < strings.length; i++) {
             String string = strings[i];

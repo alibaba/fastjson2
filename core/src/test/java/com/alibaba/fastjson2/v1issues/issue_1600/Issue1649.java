@@ -17,7 +17,6 @@ public class Issue1649 {
 
     @JSONType(serializeFeatures = {Feature.NullAsDefaultValue})
     public static class Apple {
-
         private String color;
         private String productCity;
         private int size;

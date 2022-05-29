@@ -20,6 +20,7 @@ public class OverrideTest {
     public static class B
             extends A {
         private String value;
+
         public String getValue() {
             return value;
         }

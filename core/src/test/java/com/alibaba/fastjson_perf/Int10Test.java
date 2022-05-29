@@ -18,7 +18,6 @@ public class Int10Test {
         str = IOUtils.toString(is, "UTF-8");
     }
 
-
     @Test
     public void test_invoke_createObjectConsumer() {
         for (int i = 0; i < 10; ++i) {
@@ -33,7 +32,6 @@ public class Int10Test {
         }
         System.out.println();
     }
-
 
     @Test
     public void test_reflect_createObjectConsumer() {
@@ -87,7 +85,6 @@ public class Int10Test {
         }
         System.out.println();
     }
-
 
     @Test
     public void test_asm_parse() throws Throwable {

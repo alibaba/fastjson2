@@ -11,7 +11,8 @@ public class Issue28 {
     public void test_generic() {
         String str = "{}";
 
-        Result result = JSON.parseObject(str, new TypeReference<Result>(){});
+        Result result = JSON.parseObject(str, new TypeReference<Result>() {
+        });
         assertNotNull(result);
     }
 
@@ -19,7 +20,8 @@ public class Issue28 {
     public void test_generic_1() {
         String str = "{}";
 
-        Result result = JSON.parseObject(str, new TypeReference<Result>(){}.getType());
+        Result result = JSON.parseObject(str, new TypeReference<Result>() {
+        }.getType());
         assertNotNull(result);
     }
 

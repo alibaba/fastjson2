@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue3679 {
     private static final String list_map_st_obj = "[{\"123\":951753},{\"456\":\"second\"},{\"789\":777},{\"999\":[1,2,3]}]";
+
     @Test
     public void test_for_issue3679() {
         List<Object> temp = JSON.parseArray(list_map_st_obj, new Type[]{

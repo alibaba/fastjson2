@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class BooleanArrayFieldTest_primitive_private {
     @Test
     public void test_array() throws Exception {
-        assertEquals("[true]", JSON.toJSONString(new boolean[] { true }));
+        assertEquals("[true]", JSON.toJSONString(new boolean[]{true}));
 
     }
 

@@ -59,7 +59,7 @@ public class LongField20Test {
 
             for (int j = 0; j < 1000 * 1000; ++j) {
                 JSONReader parser = JSONReader.of(str);
-                Long20Field vo = objectConsumer.readObject(parser, 0);;
+                Long20Field vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -78,7 +78,7 @@ public class LongField20Test {
 
             for (int j = 0; j < 1000 * 1000; ++j) {
                 JSONReader parser = JSONReader.of(str);
-                Long20Field vo = objectConsumer.readObject(parser, 0);;
+                Long20Field vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -87,7 +87,6 @@ public class LongField20Test {
         }
         System.out.println();
     }
-
 
     @Test
     public void test_asm_parse() throws Throwable {
@@ -98,7 +97,7 @@ public class LongField20Test {
 
             for (int j = 0; j < 1000 * 1000; ++j) {
                 JSONReader parser = JSONReader.of(str);
-                Long20Field vo = objectConsumer.readObject(parser, 0);;
+                Long20Field vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -114,7 +113,7 @@ public class LongField20Test {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < 1000 * 1000; ++j) {
-                Long20Field vo =JSON.parseObject(str, Long20Field.class);
+                Long20Field vo = JSON.parseObject(str, Long20Field.class);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -134,7 +133,7 @@ public class LongField20Test {
 
             for (int j = 0; j < 1000 * 1000; ++j) {
                 JSONReader parser = JSONReader.of(bytes);
-                Long20Field vo = objectConsumer.readObject(parser, 0);;
+                Long20Field vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -143,7 +142,6 @@ public class LongField20Test {
         }
         System.out.println();
     }
-
 
     @Test
     public void test_asm_parse_ascii_bytes() throws Throwable {
@@ -155,7 +153,7 @@ public class LongField20Test {
 
             for (int j = 0; j < 1000 * 1000; ++j) {
                 JSONReader parser = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.US_ASCII);
-                Long20Field vo = objectConsumer.readObject(parser, 0);;
+                Long20Field vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;

@@ -16,7 +16,7 @@ public class Issue3266_mixedin {
         vo.type = Color.Black;
 
         assertEquals("1003",
-                 JSON.toJSONString(vo.type));
+                JSON.toJSONString(vo.type));
 
         String str = JSON.toJSONString(vo);
         assertEquals("{\"type\":1003}", str);
@@ -33,7 +33,7 @@ public class Issue3266_mixedin {
         vo.type = Color.Black;
 
         assertEquals("1003",
-                 JSON.toJSONString(vo.type));
+                JSON.toJSONString(vo.type));
 
         String str = JSON.toJSONString(vo);
         assertEquals("{\"type\":1003}", str);

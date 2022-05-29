@@ -19,7 +19,6 @@ public class Int20CompactTest {
         str = IOUtils.toString(is, "UTF-8");
     }
 
-
     @Test
     public void test_invoke_createObjectConsumer() {
         for (int i = 0; i < 10; ++i) {
@@ -34,7 +33,6 @@ public class Int20CompactTest {
         }
         System.out.println();
     }
-
 
     @Test
     public void test_reflect_createObjectConsumer() {
@@ -88,7 +86,6 @@ public class Int20CompactTest {
         }
         System.out.println();
     }
-
 
     @Test
     public void test_asm_parse() throws Throwable {

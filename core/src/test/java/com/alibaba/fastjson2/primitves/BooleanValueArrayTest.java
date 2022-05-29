@@ -49,7 +49,7 @@ public class BooleanValueArrayTest {
     @Test
     public void test_writeNull_0() {
         assertEquals("{}",
-                 JSON.toJSONString(new VO()));
+                JSON.toJSONString(new VO()));
         assertEquals("{}",
                 new String(
                         JSON.toJSONBytes(new VO())));
@@ -58,7 +58,7 @@ public class BooleanValueArrayTest {
     @Test
     public void test_writeNull() {
         assertEquals("{\"values\":null}",
-                 JSON.toJSONString(new VO(), JSONWriter.Feature.WriteNulls));
+                JSON.toJSONString(new VO(), JSONWriter.Feature.WriteNulls));
         assertEquals("{\"values\":null}",
                 new String(
                         JSON.toJSONBytes(new VO(), JSONWriter.Feature.WriteNulls)));
@@ -67,7 +67,7 @@ public class BooleanValueArrayTest {
     @Test
     public void test_writeNull2() {
         assertEquals("{\"values\":null}",
-                 JSON.toJSONString(new VO2(), JSONWriter.Feature.WriteNulls));
+                JSON.toJSONString(new VO2(), JSONWriter.Feature.WriteNulls));
         assertEquals("{\"values\":null}",
                 new String(
                         JSON.toJSONBytes(new VO2(), JSONWriter.Feature.WriteNulls)));

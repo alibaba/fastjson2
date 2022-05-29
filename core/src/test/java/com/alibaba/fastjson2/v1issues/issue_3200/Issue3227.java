@@ -40,7 +40,7 @@ public class Issue3227 {
     }
 
     static class Child
-            extends Parent<Integer>{
+            extends Parent<Integer> {
         @Override
         public Integer getCode() {
             return code;

@@ -35,7 +35,7 @@ public class AutoTypeTest8 {
 
     @Test
     public void test_2() {
-        Object[] array = new Object[] {
+        Object[] array = new Object[]{
                 new A(), new B()
         };
 
@@ -50,7 +50,7 @@ public class AutoTypeTest8 {
     @Test
     public void test_3() {
         Bean bean = new Bean();
-        bean.values = new A1[] {new A1()};
+        bean.values = new A1[]{new A1()};
 
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         JSONBDump.dump(bytes);

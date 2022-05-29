@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue4073 {
     //CS304 (manually written) Issue link: https://github.com/alibaba/fastjson/issues/4073
     @Test
-    public void test1(){
+    public void test1() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("aBc", "abc");
         jsonObject.put("i_d_d", "123456");

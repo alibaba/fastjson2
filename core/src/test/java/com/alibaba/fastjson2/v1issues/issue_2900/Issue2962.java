@@ -20,7 +20,7 @@ public class Issue2962 {
     }
 
     @AfterEach
-    public void tearDown () {
+    public void tearDown() {
         TimeZone.setDefault(original);
     }
 

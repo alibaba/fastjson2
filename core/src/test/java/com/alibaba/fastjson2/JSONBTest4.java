@@ -91,7 +91,7 @@ public class JSONBTest4 {
         );
 
         assertEquals(expected,
-                 path
+                path
                         .eval(
                                 JSON.parseObject(str2))
                         .toString());
@@ -119,7 +119,7 @@ public class JSONBTest4 {
         );
 
         assertEquals(expected,
-                 path
+                path
                         .eval(
                                 JSON.parseObject(str2))
                         .toString());
@@ -148,7 +148,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -177,7 +177,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -206,7 +206,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -235,7 +235,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -264,7 +264,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -293,7 +293,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -322,7 +322,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -351,7 +351,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -380,7 +380,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -409,7 +409,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -438,7 +438,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -467,7 +467,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -496,7 +496,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -525,7 +525,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -554,7 +554,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -583,7 +583,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -612,7 +612,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 path.eval(
+                path.eval(
                         JSON.parseObject(str2)
                 ).toString()
         );
@@ -684,7 +684,7 @@ public class JSONBTest4 {
         );
 
         assertEquals("[\"iPhone\"]",
-                 path
+                path
                         .eval(
                                 JSON.parseObject(str3))
                         .toString());
@@ -714,7 +714,7 @@ public class JSONBTest4 {
         );
 
         assertEquals("[\"iPhone\",\"home\"]",
-                 path
+                path
                         .eval(
                                 JSON.parseObject(str3))
                         .toString());
@@ -741,7 +741,7 @@ public class JSONBTest4 {
         );
 
         assertEquals("[\"iPhone\",\"home\"]",
-                 path
+                path
                         .eval(
                                 JSON.parseObject(str3))
                         .toString());
@@ -793,7 +793,7 @@ public class JSONBTest4 {
         );
 
         assertEquals("[\"iPhone\",\"0123-4567-8888\"]",
-                 path
+                path
                         .eval(
                                 JSON.parseObject(str3))
                         .toString());
@@ -822,7 +822,7 @@ public class JSONBTest4 {
         );
 
         assertEquals("[\"home\"]",
-                 path
+                path
                         .eval(
                                 JSON.parseObject(str3))
                         .toString());
@@ -850,7 +850,7 @@ public class JSONBTest4 {
         );
 
         assertEquals(expected,
-                 path
+                path
                         .eval(
                                 JSON.parseObject(str3))
                         .toString());
@@ -883,7 +883,7 @@ public class JSONBTest4 {
 
         assertEquals(
                 expected,
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         path.eval(
                                 JSON.parseObject(str3)
                         )
@@ -913,7 +913,7 @@ public class JSONBTest4 {
         );
 
         assertEquals(expected,
-                 path
+                path
                         .eval(
                                 JSON.parseObject(str3))
                         .toString());

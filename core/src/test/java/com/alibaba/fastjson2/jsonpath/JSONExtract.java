@@ -11,6 +11,7 @@ import java.util.Map;
 
 public class JSONExtract {
     private static JSONWritable[] cache = new JSONWritable[512];
+
     static {
         for (int i = -1; i < 511; ++i) {
             int size = (i < 0) ? IOUtils.stringSize(-i) + 1 : IOUtils.stringSize(i);
@@ -22,8 +23,8 @@ public class JSONExtract {
         }
     }
 
-    static final byte[] BYTES_TRUE = new byte[] {'"', 't', 'r', 'u', 'e', '"'};
-    static final byte[] BYTES_FALSE = new byte[] {'"', 'f', 'a', 'l', 's', 'e', '"'};
+    static final byte[] BYTES_TRUE = new byte[]{'"', 't', 'r', 'u', 'e', '"'};
+    static final byte[] BYTES_FALSE = new byte[]{'"', 'f', 'a', 'l', 's', 'e', '"'};
 
     private final JSONPath path;
     private JSONWritable text = new JSONWritable();
@@ -36,8 +37,8 @@ public class JSONExtract {
 
     public JSONWritable eval(byte[] input) {
         JSONReader parser = JSONReader.of(input,
-                 0,
-                 input.length, StandardCharsets.UTF_8
+                0,
+                input.length, StandardCharsets.UTF_8
         );
 
         path.extract(parser, valueConsumer);

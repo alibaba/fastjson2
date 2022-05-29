@@ -17,7 +17,7 @@ public class Issue100 {
 
         String tmp = json.toString();
         JSONObject json2 = JSON.parseObject(tmp);
-        assertEquals("{\"t1\":3234567890}",json2.toString());
+        assertEquals("{\"t1\":3234567890}", json2.toString());
     }
 
     @Test
@@ -27,7 +27,7 @@ public class Issue100 {
 
         String tmp = json.toString();
         JSONObject json2 = JSON.parseObject(tmp);
-        assertEquals("{\"t1\":-3234567890}",json2.toString());
+        assertEquals("{\"t1\":-3234567890}", json2.toString());
     }
 
     @Test
@@ -37,7 +37,7 @@ public class Issue100 {
 
         String tmp = json.toString();
         JSONObject json2 = JSON.parseObject(tmp);
-        assertEquals("{\"t1\":10223372036854775808}",json2.toString());
+        assertEquals("{\"t1\":10223372036854775808}", json2.toString());
     }
 
     @Test
@@ -47,7 +47,7 @@ public class Issue100 {
 
         String tmp = json.toString();
         JSONObject json2 = JSON.parseObject(tmp);
-        assertEquals("{\"t1\":-10223372036854775808}",json2.toString());
+        assertEquals("{\"t1\":-10223372036854775808}", json2.toString());
     }
 
     @Test

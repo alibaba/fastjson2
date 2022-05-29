@@ -42,7 +42,7 @@ public class Issue1556 {
         public ApiResult() {
         }
 
-        public ApiResult(int code, String msg,T data) {
+        public ApiResult(int code, String msg, T data) {
             this.code = code;
             this.msg = msg;
             this.data = data;
@@ -51,9 +51,11 @@ public class Issue1556 {
         public String getMsg() {
             return msg;
         }
+
         public int getCode() {
             return code;
         }
+
         public void setMsg(String msg) {
             this.msg = msg;
         }
@@ -77,7 +79,6 @@ public class Issue1556 {
 
     public static class ClassForData
             implements Serializable {
-
         private String dataName;
 
         private FirstSubClass first;
@@ -109,11 +110,10 @@ public class Issue1556 {
         }
     }
 
-    public static class FirstSubClass  implements Serializable{
-
+    public static class FirstSubClass implements Serializable {
         private String addr;//仅仅做下和second的区分
 
-        private  SubCommonClass commonInfo;
+        private SubCommonClass commonInfo;
 
         public String getAddr() {
             return addr;
@@ -133,11 +133,10 @@ public class Issue1556 {
     }
 
     public static class SecondSubClass
-            implements Serializable{
-
+            implements Serializable {
         private String name;
 
-        private  SubCommonClass commonInfo;
+        private SubCommonClass commonInfo;
 
         public String getName() {
             return name;
@@ -156,14 +155,13 @@ public class Issue1556 {
         }
     }
 
-    public static class SubCommonClass  implements Serializable {
-
+    public static class SubCommonClass implements Serializable {
         private Date demoDate;
 
-        public SubCommonClass(){
+        public SubCommonClass() {
         }
 
-        public SubCommonClass(Date demoDate){
+        public SubCommonClass(Date demoDate) {
             this.demoDate = demoDate;
         }
 

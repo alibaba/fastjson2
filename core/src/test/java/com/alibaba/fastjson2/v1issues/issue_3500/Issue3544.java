@@ -10,7 +10,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class Issue3544 {
-
     @Test
     public void test_errorType() {
         assertNull(JSON.toJavaObject(
@@ -23,7 +22,6 @@ public class Issue3544 {
     @Getter
     @Setter
     static class TestVO {
-
         Map<String, String> result;
 
     }

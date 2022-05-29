@@ -18,12 +18,12 @@ public class Issue1205 {
         JSONArray array = new JSONArray();
         array.add(new JSONObject());
 
-        List<Model> list = array.toJavaObject(new TypeReference<List<Model>>(){}.getType());
+        List<Model> list = array.toJavaObject(new TypeReference<List<Model>>() {
+        }.getType());
         assertEquals(1, list.size());
         assertEquals(Model.class, list.get(0).getClass());
     }
 
     public static class Model {
-
     }
 }

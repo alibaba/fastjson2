@@ -36,11 +36,11 @@ public class AtomicIntegerReadOnlyTest {
     public static class V0 {
         private final AtomicInteger value;
 
-        public V0(){
+        public V0() {
             this(0);
         }
 
-        public V0(int value){
+        public V0(int value) {
             this.value = new AtomicInteger(value);
         }
 

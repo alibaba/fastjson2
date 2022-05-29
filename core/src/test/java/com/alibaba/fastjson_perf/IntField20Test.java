@@ -37,7 +37,6 @@ public class IntField20Test {
         System.out.println();
     }
 
-
     @Test
     public void test_reflect_createObjectConsumer() {
         for (int i = 0; i < 10; ++i) {
@@ -77,7 +76,7 @@ public class IntField20Test {
 
             for (int j = 0; j < 1000000; ++j) {
                 JSONReader parser = JSONReader.of(str);
-                Int20Field vo = objectConsumer.readObject(parser, 0);;
+                Int20Field vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -96,7 +95,7 @@ public class IntField20Test {
 
             for (int j = 0; j < 1000000; ++j) {
                 JSONReader parser = JSONReader.of(str);
-                Int20Field vo = objectConsumer.readObject(parser, 0);;
+                Int20Field vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -115,7 +114,7 @@ public class IntField20Test {
 
             for (int j = 0; j < 1000000; ++j) {
                 JSONReader parser = JSONReader.of(str);
-                Int20Field vo = objectConsumer.readObject(parser, 0);;
+                Int20Field vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;

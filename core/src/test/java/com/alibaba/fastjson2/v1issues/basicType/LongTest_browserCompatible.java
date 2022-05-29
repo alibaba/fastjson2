@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class LongTest_browserCompatible {
     @Test
     public void test_array() throws Exception {
-        long[] values = new long[] {Long.MIN_VALUE, -1, 0, 1, Long.MAX_VALUE};
+        long[] values = new long[]{Long.MIN_VALUE, -1, 0, 1, Long.MAX_VALUE};
         String text = JSON.toJSONString(values, JSONWriter.Feature.BrowserCompatible);
         long[] values_2 = JSON.parseObject(text, long[].class);
         assertEquals(values_2.length, values.length);
@@ -54,7 +54,7 @@ public class LongTest_browserCompatible {
 
     @Test
     public void test_map() throws Exception {
-        long[] values = new long[] {Long.MIN_VALUE, -1, 0, 1, Long.MAX_VALUE};
+        long[] values = new long[]{Long.MIN_VALUE, -1, 0, 1, Long.MAX_VALUE};
         Map<String, Object> map = new HashMap<String, Object>();
         for (int i = 0; i < values.length; ++i) {
             map.put(Long.toString(i), values[i]);

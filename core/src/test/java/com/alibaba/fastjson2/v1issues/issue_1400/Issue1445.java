@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 public class Issue1445 {
     @Test
     public void test_for_issue() throws Exception {
-
         JSONObject obj = new JSONObject();
         obj.put("data", new JSONObject());
         obj.getJSONObject("data").put("data", new JSONObject());

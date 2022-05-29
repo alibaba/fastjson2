@@ -14,10 +14,8 @@ import java.util.List;
  * Created by SongLing.Dong on 11/7/2017.
  */
 public class Issue1565 {
-
     @Test
-    public void test_testLargeBeanContainsOver256Field(){
-
+    public void test_testLargeBeanContainsOver256Field() {
 //        SmallBean smallBean = new SmallBean();
 //        smallBean.setId("S35669xxxxxxxxxxxxxx");
 //        smallBean.setNetValueDate(20171105);
@@ -37,7 +35,7 @@ public class Issue1565 {
     }
 
     public static class SmallBean
-            implements Serializable{
+            implements Serializable {
         private String id;
 
         public String getId() {

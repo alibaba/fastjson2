@@ -58,7 +58,7 @@ public class JSONTest_register {
 
             int id = 0;
             String name = null;
-            for (;;) {
+            for (; ; ) {
                 if (jsonReader.nextIfObjectEnd()) {
                     break;
                 }

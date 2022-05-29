@@ -332,9 +332,9 @@ public class TypeUtilsTest {
         assertSame(instant, TypeUtils.cast(instant, Instant.class));
 
         assertEquals(Instant.ofEpochSecond(instant.getEpochSecond()),
-                 TypeUtils.cast(JSONObject.of("epochSecond", instant.getEpochSecond()), Instant.class));
+                TypeUtils.cast(JSONObject.of("epochSecond", instant.getEpochSecond()), Instant.class));
         assertEquals(instant,
-                 TypeUtils.cast(JSONObject.of("epochMilli", instant.toEpochMilli()), Instant.class));
+                TypeUtils.cast(JSONObject.of("epochMilli", instant.toEpochMilli()), Instant.class));
 
         Exception error = null;
         try {

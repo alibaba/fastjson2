@@ -34,7 +34,6 @@ public class Int20Test {
         System.out.println();
     }
 
-
     @Test
     public void test_reflect_createObjectConsumer() {
         for (int i = 0; i < 10; ++i) {

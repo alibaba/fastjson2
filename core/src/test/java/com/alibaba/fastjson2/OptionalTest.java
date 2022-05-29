@@ -49,84 +49,98 @@ public class OptionalTest {
     @Test
     public void testOptional_Integer() {
         assertEquals(Integer.valueOf(123),
-                new TypeReference<Optional<Integer>>() {}
+                new TypeReference<Optional<Integer>>() {
+                }
                         .parseObject("\"123\"")
                         .get()
         );
 
         assertEquals(Integer.valueOf(123),
-                new TypeReference<Optional<Integer>>() {}
+                new TypeReference<Optional<Integer>>() {
+                }
                         .parseObject("'123'")
                         .get()
         );
 
         assertEquals(Integer.valueOf(123),
-                new TypeReference<Optional<Integer>>() {}
+                new TypeReference<Optional<Integer>>() {
+                }
                         .parseObject("123")
                         .get()
         );
 
         assertEquals(Integer.valueOf(123),
-                new TypeReference<Optional<Integer>>() {}
+                new TypeReference<Optional<Integer>>() {
+                }
                         .parseObject("123.0")
                         .get()
         );
 
-        assertFalse(new TypeReference<Optional<Integer>>() {}
+        assertFalse(new TypeReference<Optional<Integer>>() {
+                }
                         .parseObject("null")
                         .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Integer>>() {}
-                .parseObject("\"\"")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Integer>>() {
+                }
+                        .parseObject("\"\"")
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Integer>>() {}
-                .parseObject("''")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Integer>>() {
+                }
+                        .parseObject("''")
+                        .isPresent()
         );
     }
 
     @Test
     public void testOptional_Integer_utf8() {
         assertEquals(Integer.valueOf(123),
-                new TypeReference<Optional<Integer>>() {}
+                new TypeReference<Optional<Integer>>() {
+                }
                         .parseObject("\"123\"".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(Integer.valueOf(123),
-                new TypeReference<Optional<Integer>>() {}
+                new TypeReference<Optional<Integer>>() {
+                }
                         .parseObject("'123'".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(Integer.valueOf(123),
-                new TypeReference<Optional<Integer>>() {}
+                new TypeReference<Optional<Integer>>() {
+                }
                         .parseObject("123".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(Integer.valueOf(123),
-                new TypeReference<Optional<Integer>>() {}
+                new TypeReference<Optional<Integer>>() {
+                }
                         .parseObject("123.0".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
-        assertFalse(new TypeReference<Optional<Integer>>() {}
-                .parseObject("null".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Integer>>() {
+                }
+                        .parseObject("null".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Integer>>() {}
-                .parseObject("\"\"".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Integer>>() {
+                }
+                        .parseObject("\"\"".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Integer>>() {}
-                .parseObject("''".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Integer>>() {
+                }
+                        .parseObject("''".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
     }
 
@@ -167,336 +181,392 @@ public class OptionalTest {
     @Test
     public void testOptional_Long() {
         assertEquals(Long.valueOf(123),
-                new TypeReference<Optional<Long>>() {}
+                new TypeReference<Optional<Long>>() {
+                }
                         .parseObject("\"123\"")
                         .get()
         );
 
         assertEquals(Long.valueOf(123),
-                new TypeReference<Optional<Long>>() {}
+                new TypeReference<Optional<Long>>() {
+                }
                         .parseObject("'123'")
                         .get()
         );
 
         assertEquals(Long.valueOf(123),
-                new TypeReference<Optional<Long>>() {}
+                new TypeReference<Optional<Long>>() {
+                }
                         .parseObject("123")
                         .get()
         );
 
         assertEquals(Long.valueOf(123),
-                new TypeReference<Optional<Long>>() {}
+                new TypeReference<Optional<Long>>() {
+                }
                         .parseObject("123.0")
                         .get()
         );
 
-        assertFalse(new TypeReference<Optional<Long>>() {}
-                .parseObject("null")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Long>>() {
+                }
+                        .parseObject("null")
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Long>>() {}
-                .parseObject("\"\"")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Long>>() {
+                }
+                        .parseObject("\"\"")
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Long>>() {}
-                .parseObject("''")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Long>>() {
+                }
+                        .parseObject("''")
+                        .isPresent()
         );
     }
 
     @Test
     public void testOptional_Long_utf8() {
         assertEquals(Long.valueOf(123),
-                new TypeReference<Optional<Long>>() {}
+                new TypeReference<Optional<Long>>() {
+                }
                         .parseObject("\"123\"".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(Long.valueOf(123),
-                new TypeReference<Optional<Long>>() {}
+                new TypeReference<Optional<Long>>() {
+                }
                         .parseObject("'123'".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(Long.valueOf(123),
-                new TypeReference<Optional<Long>>() {}
+                new TypeReference<Optional<Long>>() {
+                }
                         .parseObject("123".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(Long.valueOf(123),
-                new TypeReference<Optional<Long>>() {}
+                new TypeReference<Optional<Long>>() {
+                }
                         .parseObject("123.0".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
-        assertFalse(new TypeReference<Optional<Long>>() {}
-                .parseObject("null".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Long>>() {
+                }
+                        .parseObject("null".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Long>>() {}
-                .parseObject("\"\"".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Long>>() {
+                }
+                        .parseObject("\"\"".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Long>>() {}
-                .parseObject("''".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Long>>() {
+                }
+                        .parseObject("''".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
     }
 
     @Test
     public void testOptional_Float() {
         assertEquals(Float.valueOf(123),
-                new TypeReference<Optional<Float>>() {}
+                new TypeReference<Optional<Float>>() {
+                }
                         .parseObject("\"123\"")
                         .get()
         );
 
         assertEquals(Float.valueOf(123),
-                new TypeReference<Optional<Float>>() {}
+                new TypeReference<Optional<Float>>() {
+                }
                         .parseObject("'123'")
                         .get()
         );
 
         assertEquals(Float.valueOf(123),
-                new TypeReference<Optional<Float>>() {}
+                new TypeReference<Optional<Float>>() {
+                }
                         .parseObject("123")
                         .get()
         );
 
         assertEquals(Float.valueOf(123),
-                new TypeReference<Optional<Float>>() {}
+                new TypeReference<Optional<Float>>() {
+                }
                         .parseObject("123.0")
                         .get()
         );
 
-        assertFalse(new TypeReference<Optional<Float>>() {}
-                .parseObject("null")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Float>>() {
+                }
+                        .parseObject("null")
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Float>>() {}
-                .parseObject("\"\"")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Float>>() {
+                }
+                        .parseObject("\"\"")
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Float>>() {}
-                .parseObject("''")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Float>>() {
+                }
+                        .parseObject("''")
+                        .isPresent()
         );
     }
 
     @Test
     public void testOptional_Float_utf8() {
         assertEquals(Float.valueOf(123),
-                new TypeReference<Optional<Float>>() {}
+                new TypeReference<Optional<Float>>() {
+                }
                         .parseObject("\"123\"".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(Float.valueOf(123),
-                new TypeReference<Optional<Float>>() {}
+                new TypeReference<Optional<Float>>() {
+                }
                         .parseObject("'123'".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(Float.valueOf(123),
-                new TypeReference<Optional<Float>>() {}
+                new TypeReference<Optional<Float>>() {
+                }
                         .parseObject("123".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(Float.valueOf(123),
-                new TypeReference<Optional<Float>>() {}
+                new TypeReference<Optional<Float>>() {
+                }
                         .parseObject("123.0".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
-        assertFalse(new TypeReference<Optional<Float>>() {}
-                .parseObject("null".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Float>>() {
+                }
+                        .parseObject("null".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Float>>() {}
-                .parseObject("\"\"".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Float>>() {
+                }
+                        .parseObject("\"\"".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Float>>() {}
-                .parseObject("''".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Float>>() {
+                }
+                        .parseObject("''".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
     }
 
     @Test
     public void testOptional_Double() {
         assertEquals(Double.valueOf(123),
-                new TypeReference<Optional<Double>>() {}
+                new TypeReference<Optional<Double>>() {
+                }
                         .parseObject("\"123\"")
                         .get()
         );
 
         assertEquals(Double.valueOf(123),
-                new TypeReference<Optional<Double>>() {}
+                new TypeReference<Optional<Double>>() {
+                }
                         .parseObject("'123'")
                         .get()
         );
 
         assertEquals(Double.valueOf(123),
-                new TypeReference<Optional<Double>>() {}
+                new TypeReference<Optional<Double>>() {
+                }
                         .parseObject("123")
                         .get()
         );
 
         assertEquals(Double.valueOf(123),
-                new TypeReference<Optional<Double>>() {}
+                new TypeReference<Optional<Double>>() {
+                }
                         .parseObject("123.0")
                         .get()
         );
 
-        assertFalse(new TypeReference<Optional<Double>>() {}
-                .parseObject("null")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Double>>() {
+                }
+                        .parseObject("null")
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Double>>() {}
-                .parseObject("\"\"")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Double>>() {
+                }
+                        .parseObject("\"\"")
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Double>>() {}
-                .parseObject("''")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Double>>() {
+                }
+                        .parseObject("''")
+                        .isPresent()
         );
     }
 
     @Test
     public void testOptional_Double_utf8() {
         assertEquals(Double.valueOf(123),
-                new TypeReference<Optional<Double>>() {}
+                new TypeReference<Optional<Double>>() {
+                }
                         .parseObject("\"123\"".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(Double.valueOf(123),
-                new TypeReference<Optional<Double>>() {}
+                new TypeReference<Optional<Double>>() {
+                }
                         .parseObject("'123'".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(Double.valueOf(123),
-                new TypeReference<Optional<Double>>() {}
+                new TypeReference<Optional<Double>>() {
+                }
                         .parseObject("123".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(Double.valueOf(123),
-                new TypeReference<Optional<Double>>() {}
+                new TypeReference<Optional<Double>>() {
+                }
                         .parseObject("123.0".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
-        assertFalse(new TypeReference<Optional<Double>>() {}
-                .parseObject("null".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Double>>() {
+                }
+                        .parseObject("null".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Double>>() {}
-                .parseObject("\"\"".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Double>>() {
+                }
+                        .parseObject("\"\"".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<Double>>() {}
-                .parseObject("''".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<Double>>() {
+                }
+                        .parseObject("''".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
     }
 
     @Test
     public void testOptional_BigDecimal() {
         assertEquals(BigDecimal.valueOf(123),
-                new TypeReference<Optional<BigDecimal>>() {}
+                new TypeReference<Optional<BigDecimal>>() {
+                }
                         .parseObject("\"123\"")
                         .get()
         );
 
         assertEquals(BigDecimal.valueOf(123),
-                new TypeReference<Optional<BigDecimal>>() {}
+                new TypeReference<Optional<BigDecimal>>() {
+                }
                         .parseObject("'123'")
                         .get()
         );
 
         assertEquals(BigDecimal.valueOf(123),
-                new TypeReference<Optional<BigDecimal>>() {}
+                new TypeReference<Optional<BigDecimal>>() {
+                }
                         .parseObject("123")
                         .get()
         );
 
         assertEquals(new BigDecimal("123.0"),
-                new TypeReference<Optional<BigDecimal>>() {}
+                new TypeReference<Optional<BigDecimal>>() {
+                }
                         .parseObject("123.0")
                         .get()
         );
 
-        assertFalse(new TypeReference<Optional<BigDecimal>>() {}
-                .parseObject("null")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<BigDecimal>>() {
+                }
+                        .parseObject("null")
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<BigDecimal>>() {}
-                .parseObject("\"\"")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<BigDecimal>>() {
+                }
+                        .parseObject("\"\"")
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<BigDecimal>>() {}
-                .parseObject("''")
-                .isPresent()
+        assertFalse(new TypeReference<Optional<BigDecimal>>() {
+                }
+                        .parseObject("''")
+                        .isPresent()
         );
     }
 
     @Test
     public void testOptional_BigDecimal_utf8() {
         assertEquals(BigDecimal.valueOf(123),
-                new TypeReference<Optional<BigDecimal>>() {}
+                new TypeReference<Optional<BigDecimal>>() {
+                }
                         .parseObject("\"123\"".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(BigDecimal.valueOf(123),
-                new TypeReference<Optional<BigDecimal>>() {}
+                new TypeReference<Optional<BigDecimal>>() {
+                }
                         .parseObject("'123'".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(BigDecimal.valueOf(123),
-                new TypeReference<Optional<BigDecimal>>() {}
+                new TypeReference<Optional<BigDecimal>>() {
+                }
                         .parseObject("123".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
         assertEquals(new BigDecimal("123.0"),
-                new TypeReference<Optional<BigDecimal>>() {}
+                new TypeReference<Optional<BigDecimal>>() {
+                }
                         .parseObject("123.0".getBytes(StandardCharsets.UTF_8))
                         .get()
         );
 
-        assertFalse(new TypeReference<Optional<BigDecimal>>() {}
-                .parseObject("null".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<BigDecimal>>() {
+                }
+                        .parseObject("null".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<BigDecimal>>() {}
-                .parseObject("\"\"".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<BigDecimal>>() {
+                }
+                        .parseObject("\"\"".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
 
-        assertFalse(new TypeReference<Optional<BigDecimal>>() {}
-                .parseObject("''".getBytes(StandardCharsets.UTF_8))
-                .isPresent()
+        assertFalse(new TypeReference<Optional<BigDecimal>>() {
+                }
+                        .parseObject("''".getBytes(StandardCharsets.UTF_8))
+                        .isPresent()
         );
     }
 

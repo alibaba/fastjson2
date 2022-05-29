@@ -60,8 +60,8 @@ public class JSONSchemaTest {
         assertFalse(
                 schema.isValid(JSONObject
                         .of(
-                            "id", 1,
-                            "name", ""
+                                "id", 1,
+                                "name", ""
                         )
                 )
         );
@@ -557,7 +557,7 @@ public class JSONSchemaTest {
                 .to(JSONSchema::of);
         assertTrue(jsonSchema.isValid(new Object[0]));
 
-        assertFalse(jsonSchema.isValid(new Object[] {0, 1, 2, 3}));
+        assertFalse(jsonSchema.isValid(new Object[]{0, 1, 2, 3}));
     }
 
     @Test
@@ -568,8 +568,8 @@ public class JSONSchemaTest {
         assertTrue(jsonSchema.isValid(new Object[]{0, 1, 2}));
         assertTrue(jsonSchema.isValid(new Object[]{0, 1, 2, 3}));
 
-        assertFalse(jsonSchema.isValid(new Object[] {}));
-        assertFalse(jsonSchema.isValid(new Object[] {0}));
+        assertFalse(jsonSchema.isValid(new Object[]{}));
+        assertFalse(jsonSchema.isValid(new Object[]{0}));
     }
 
     @Test
@@ -580,10 +580,10 @@ public class JSONSchemaTest {
         assertTrue(jsonSchema.isValid(JSON.parse("[3, \"different\", { \"types\" : \"of values\" }]")));
         assertTrue(JSON.parseArray("[1, 2, 3, 4, 5]").isValid(jsonSchema));
 
-        assertFalse (
+        assertFalse(
                 jsonSchema.isValid(
-                    JSON.parse("{\"Not\": \"an array\"}")
-        ));
+                        JSON.parse("{\"Not\": \"an array\"}")
+                ));
     }
 
     @Test
@@ -602,7 +602,7 @@ public class JSONSchemaTest {
         assertFalse(
                 jsonSchema.isValid(
                         JSON.parse("[1, 2, \"3\", 4, 5]")
-        ));
+                ));
     }
 
     @Test
@@ -630,22 +630,22 @@ public class JSONSchemaTest {
                         JSON.parse("[1600, \"Pennsylvania\", \"Avenue\", \"NW\", \"Washington\"]"))
         );
         assertTrue(
-                jsonSchema.isValid(new Object[] {10, "Downing", "Street"})
+                jsonSchema.isValid(new Object[]{10, "Downing", "Street"})
         );
 
         assertFalse(
                 jsonSchema.isValid(
-                JSON.parse("[24, \"Sussex\", \"Drive\"]")
-        ));
+                        JSON.parse("[24, \"Sussex\", \"Drive\"]")
+                ));
         assertFalse(
                 jsonSchema.isValid(
                         JSON.parse("[\"Palais de l'Élysée\"]")
-        ));
+                ));
 
         assertFalse(
                 jsonSchema.isValid(
-                        new String[] {"Palais de l'Élysée"}
-        ));
+                        new String[]{"Palais de l'Élysée"}
+                ));
     }
 
     @Test
@@ -670,14 +670,14 @@ public class JSONSchemaTest {
                         JSON.parse("[10, \"Downing\", \"Street\"]")));
         assertTrue(
                 jsonSchema.isValid(
-                        new Object[] {10, "Downing", "Street"}));
+                        new Object[]{10, "Downing", "Street"}));
 
         assertFalse(jsonSchema.isValid(
                         JSON.parse("[1600, \"Pennsylvania\", \"Avenue\", \"NW\", \"Washington\"]")
                 )
         );
         assertFalse(jsonSchema.isValid(
-                new Object[] {1600, "Pennsylvania", "Avenue", "NW", "Washington"}
+                new Object[]{1600, "Pennsylvania", "Avenue", "NW", "Washington"}
         ));
     }
 
@@ -699,10 +699,10 @@ public class JSONSchemaTest {
                         JSON.parse("[1, 2, 3, 4, 5]")));
         assertTrue(
                 jsonSchema.isValid(
-                        new Object[] {10, "Downing", "Street"}));
+                        new Object[]{10, "Downing", "Street"}));
         assertTrue(
                 jsonSchema.isValid(
-                        new Object[] {"Downing", "Street", 10}));
+                        new Object[]{"Downing", "Street", 10}));
 
         assertFalse(
                 jsonSchema.isValid(
@@ -710,7 +710,7 @@ public class JSONSchemaTest {
                 )
         );
         assertFalse(jsonSchema.isValid(
-                new Object[] {"life", "universe", "everything", "forty-two"}
+                new Object[]{"life", "universe", "everything", "forty-two"}
         ));
     }
 
@@ -734,10 +734,10 @@ public class JSONSchemaTest {
                         JSON.parse("[\"apple\", \"orange\", 2, 4, 8]")));
         assertTrue(
                 jsonSchema.isValid(
-                        new Object[] {"apple", "orange", 2, 4}));
+                        new Object[]{"apple", "orange", 2, 4}));
         assertTrue(
                 jsonSchema.isValid(
-                        new Object[] {"apple", "orange", 2, 4, 8}));
+                        new Object[]{"apple", "orange", 2, 4, 8}));
 
         assertFalse(jsonSchema.isValid(
                         JSON.parse("[\"apple\", \"orange\", 2]")
@@ -748,10 +748,10 @@ public class JSONSchemaTest {
                 )
         );
         assertFalse(jsonSchema.isValid(
-                new Object[] {"apple", "orange", 2}
+                new Object[]{"apple", "orange", 2}
         ));
         assertFalse(jsonSchema.isValid(
-                new Object[] {"apple", "orange", 2, 4, 8, 16}
+                new Object[]{"apple", "orange", 2, 4, 8, 16}
         ));
     }
 
@@ -771,26 +771,26 @@ public class JSONSchemaTest {
                         JSON.parse("[]")));
         assertTrue(
                 jsonSchema.isValid(
-                        new Object[] {1, 2, 3, 4, 5}));
+                        new Object[]{1, 2, 3, 4, 5}));
         assertTrue(
                 jsonSchema.isValid(
-                        new Object[] {}));
+                        new Object[]{}));
         assertTrue(
                 jsonSchema.isValid(
-                        new int[] {}));
+                        new int[]{}));
         assertTrue(
                 jsonSchema.isValid(
-                        new int[] {1, 2, 3, 4, 5}));
+                        new int[]{1, 2, 3, 4, 5}));
 
         assertFalse(jsonSchema.isValid(
                         JSON.parse("[1, 2, 3, 3, 4]")
                 )
         );
         assertFalse(jsonSchema.isValid(
-                new Object[] {1, 2, 3, 3, 4}
+                new Object[]{1, 2, 3, 3, 4}
         ));
         assertFalse(jsonSchema.isValid(
-                new int[] {1, 2, 3, 3, 4}
+                new int[]{1, 2, 3, 3, 4}
         ));
     }
 
@@ -802,7 +802,7 @@ public class JSONSchemaTest {
 
         assertTrue(jsonSchema.isValid(JSONObject.of()));
         assertTrue(jsonSchema.isValid(new Bean()));
-        assertFalse(jsonSchema.isValid(new Object[] {}));
+        assertFalse(jsonSchema.isValid(new Object[]{}));
         assertFalse(jsonSchema.isValid(1));
         assertFalse(jsonSchema.isValid(1L));
         assertFalse(jsonSchema.isValid('A'));
@@ -821,7 +821,7 @@ public class JSONSchemaTest {
         JSONSchema jsonSchema = JSONObject
                 .of(
                         "type", "Object",
-                        "required", new String[] {"id"}
+                        "required", new String[]{"id"}
                 )
                 .to(JSONSchema::of);
 
@@ -875,7 +875,7 @@ public class JSONSchemaTest {
 
         assertFalse(
                 jsonSchema.validate(
-                    JSON.parseObject("{ \"number\": \"1600\", \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\" }")
+                        JSON.parseObject("{ \"number\": \"1600\", \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\" }")
                 ).isSuccess()
         );
     }
@@ -1036,13 +1036,13 @@ public class JSONSchemaTest {
                 .isValid(jsonSchema));
 
         assertFalse(JSON.parseObject("{}")
-                        .isValid(jsonSchema)
+                .isValid(jsonSchema)
         );
         assertFalse(JSON.parseObject("{ \"a\": 0 }")
-                        .isValid(jsonSchema)
+                .isValid(jsonSchema)
         );
         assertFalse(JSON.parseObject("{ \"a\": 0, \"b\": 1, \"c\": 2, \"d\": 3 }")
-                        .isValid(jsonSchema)
+                .isValid(jsonSchema)
         );
     }
 
@@ -1060,7 +1060,7 @@ public class JSONSchemaTest {
                 .isValid(jsonSchema));
 
         assertFalse(JSON.parseObject("{ \"country\": \"Canada\" }")
-                        .isValid(jsonSchema)
+                .isValid(jsonSchema)
         );
     }
 
@@ -1134,10 +1134,10 @@ public class JSONSchemaTest {
         assertTrue(
                 jsonSchema.isValid(
                         JSON.parseObject("{\n" +
-                                "  \"name\": \"John Doe\",\n" +
-                                "  \"credit_card\": 5555555555555555,\n" +
-                                "  \"billing_address\": \"555 Debtor's Lane\"\n" +
-                                "}"
+                                        "  \"name\": \"John Doe\",\n" +
+                                        "  \"credit_card\": 5555555555555555,\n" +
+                                        "  \"billing_address\": \"555 Debtor's Lane\"\n" +
+                                        "}"
                                 , Bean2.class
                         )
                 )
@@ -1277,10 +1277,10 @@ public class JSONSchemaTest {
         assertTrue(
                 jsonSchema.isValid(
                         JSON.parseObject("{\n" +
-                                "  \"name\": \"John Doe\",\n" +
-                                "  \"credit_card\": 5555555555555555,\n" +
-                                "  \"billing_address\": \"555 Debtor's Lane\"\n" +
-                                "}",
+                                        "  \"name\": \"John Doe\",\n" +
+                                        "  \"credit_card\": 5555555555555555,\n" +
+                                        "  \"billing_address\": \"555 Debtor's Lane\"\n" +
+                                        "}",
                                 Bean2.class
                         )
                 )
@@ -1964,6 +1964,7 @@ public class JSONSchemaTest {
                 )
         );
     }
+
     @Test
     public void test_ref_0() {
         JSONSchema jsonSchema = JSONSchema.parseSchema("{\n" +

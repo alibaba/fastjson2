@@ -95,7 +95,8 @@ public class GenericTypeFieldArrayDecimalTest {
         ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
-            Type objectType = new TypeReference<P31<BigDecimal>>() {}.getType();
+            Type objectType = new TypeReference<P31<BigDecimal>>() {
+            }.getType();
             ObjectReader<P31> objectReader = creator.createObjectReader(objectType);
 
             {

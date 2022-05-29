@@ -73,7 +73,7 @@ public class Issue239 {
 
         // parseObject 校验失败，longitude超过最大值
         assertThrows(JSONSchemaValidException.class, () ->
-            JSON.parseObject("{\"longitude\":220.1552,\"latitude\":30.2741}", Point1.class)
+                JSON.parseObject("{\"longitude\":220.1552,\"latitude\":30.2741}", Point1.class)
         );
 
         // 校验JSONObject失败，longitude超过最大值

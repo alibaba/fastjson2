@@ -47,14 +47,14 @@ public class ParserTest_2 {
         assertEquals('{', lexer.current());
         lexer.next();
         assertEquals(Fnv.hashCode64("序号"),
-                 lexer.readFieldNameHashCode());
+                lexer.readFieldNameHashCode());
         assertEquals("序号", lexer.getFieldName());
         assertEquals(123, lexer.readInt32Value());
 
         assertEquals(Fnv.hashCode64("名称"), lexer.readFieldNameHashCode());
         assertEquals("名称", lexer.getFieldName());
         assertEquals("计算平台",
-                 lexer.readString());
+                lexer.readString());
 
         assertEquals('}', lexer.current());
         lexer.next();

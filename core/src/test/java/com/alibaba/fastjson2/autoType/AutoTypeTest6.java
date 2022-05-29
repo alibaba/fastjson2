@@ -30,6 +30,7 @@ public class AutoTypeTest6 {
     public static class C
             extends B {
         public int id;
+
         public C() {
         }
 

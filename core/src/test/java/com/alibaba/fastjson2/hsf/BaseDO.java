@@ -19,11 +19,13 @@ public class BaseDO {
     }
 
     public Boolean getIsRemoved() {
-        /*33*/         return this.isRemoved;
+        /*33*/
+        return this.isRemoved;
     }
 
     public void setIsRemoved(Boolean isRemoved) {
-        /*37*/         this.isRemoved = isRemoved;
+        /*37*/
+        this.isRemoved = isRemoved;
     }
 
     public Long getCreatorId() {
@@ -51,10 +53,13 @@ public class BaseDO {
     }
 
     public String getGmtCreateString() {
-        /*18*/         if (this.gmtCreate != null) {
-            /*19*/             return this.gmtCreate.toLocaleString();
+        /*18*/
+        if (this.gmtCreate != null) {
+            /*19*/
+            return this.gmtCreate.toLocaleString();
         }
-        /*21*/         return null;
+        /*21*/
+        return null;
     }
 
     public void setGmtCreateString(String gmtCreateString) {

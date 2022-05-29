@@ -47,7 +47,6 @@ public class Issue1548 {
         }
     }
 
-    public static enum DocType{
-
+    public static enum DocType {
     }
 }
