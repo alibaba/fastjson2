@@ -1,8 +1,10 @@
-package com.alibaba.json.bvt.issue_1100;
+package com.alibaba.fastjson.issue_1100;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by wenshao on 08/05/2017.
@@ -16,6 +18,6 @@ public class Issue1153 {
                 "}";
 
         JSONObject jsonObject = JSON.parseObject(json);
-        System.out.println(jsonObject);
+        assertEquals("{\"test\":\"//helo\",\"name\":\"zhangshan\"}", jsonObject.toString());
     }
 }
