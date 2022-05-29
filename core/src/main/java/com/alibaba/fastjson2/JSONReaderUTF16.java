@@ -1508,6 +1508,9 @@ final class JSONReaderUTF16
             } else {
                 _for:
                 for (int i = 0; ; ++i) {
+                    if (offset >= end) {
+                        throw new JSONException("invalid escape character EOI");
+                    }
                     char c = chars[offset];
                     if (c == '\\') {
                         valueEscape = true;

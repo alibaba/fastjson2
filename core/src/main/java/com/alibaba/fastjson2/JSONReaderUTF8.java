@@ -2185,6 +2185,10 @@ class JSONReaderUTF8
 
             _for:
             for (int i = 0; ; ++i) {
+                if (offset >= end) {
+                    throw new JSONException("invalid escape character EOI");
+                }
+
                 int c = bytes[offset];
                 if (c == '\\') {
                     valueEscape = true;
