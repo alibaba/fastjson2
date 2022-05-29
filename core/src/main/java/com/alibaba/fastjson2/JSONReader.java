@@ -111,6 +111,10 @@ public abstract class JSONReader
         return context;
     }
 
+    public boolean isEnabled(Feature feature) {
+        return (context.features & feature.mask) != 0;
+    }
+
     public Locale getLocale() {
         return context.getLocale();
     }
@@ -2378,7 +2382,8 @@ public abstract class JSONReader
         UseBigDecimalForFloats(1 << 10),
         UseBigDecimalForDoubles(1 << 11),
         ErrorOnEnumNotMatch(1 << 12),
-        TrimString(1 << 13);
+        TrimString(1 << 13),
+        ErrorOnNotSupportAutoType(1 << 14);
 
         public final long mask;
 

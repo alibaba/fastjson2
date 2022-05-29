@@ -62,6 +62,10 @@ final class ObjectReaderImplObject
                 } else {
                     String typeName = jsonReader.readString();
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
+
+                    if (autoTypeObjectReader == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
+                        throw new JSONException("autoType not support : " + typeName);
+                    }
                 }
 
                 if (autoTypeObjectReader != null) {
