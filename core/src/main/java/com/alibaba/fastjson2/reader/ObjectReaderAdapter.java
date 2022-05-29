@@ -222,6 +222,8 @@ public class ObjectReaderAdapter<T>
             if (hasDefaultValue) {
                 initDefaultValue(object);
             }
+
+            return object;
         }
 
         InstantiationException error;
