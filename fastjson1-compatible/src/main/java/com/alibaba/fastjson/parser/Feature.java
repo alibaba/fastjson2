@@ -146,7 +146,13 @@ public enum Feature {
     /**
      * @since 2.0.4
      */
-    SupportClassForName;
+    SupportClassForName,
+
+    /**
+     * @since 2.0.6
+     */
+    ErrorOnNotSupportAutoType
+    ;
 
     public final int mask;
 
