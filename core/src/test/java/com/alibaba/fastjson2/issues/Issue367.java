@@ -10,22 +10,29 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Issue367 {
-    @Test
-    public void test() {
-        String json = "{\n" +
-                "    \"name\": \"123\",\n" +
-                "    \"age\": 3,\n" +
-                "    \"subDTO\": {\n" +
-                "        \"id\": \"222\",\n" +
-                "        \"thiDTO\": {\n" +
-                "            \"h\": \"444\"\n" +
-                "        }\n" +
-                "    }\n" +
-                "}";
 
-        String s = "{\"name\":\"123\",\"age\":3,\"subDTO\":{\"id\":\"222\",\"thiDTO\":{\"h\":\"444\"}}}";
-        TestDTO testDTO2 = JSON.parseObject(s, TestDTO.class, JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.UseDefaultConstructorAsPossible);
+    @Test
+    public void test0() {
+        String text = "{\"name\":\"123\",\"age\":3,\"subDTO\":{\"id\":\"222\",\"thiDTO\":{\"h\":\"444\"}}}";
+        TestDTO testDTO2 = JSON.parseObject(
+                text, TestDTO.class,
+                JSONReader.Feature.SupportSmartMatch
+        );
+
         assertNotNull(testDTO2.subDTO.fouDTO);
+        assertNotNull(testDTO2.subDTO2.fouDTO);
+    }
+
+    @Test
+    public void test1() {
+        String text = "{\"name\":\"123\",\"age\":3,\"subDTO2\":{\"id\":\"222\",\"thiDTO\":{\"h\":\"444\"}}}";
+        TestDTO testDTO2 = JSON.parseObject(
+                text, TestDTO.class,
+                JSONReader.Feature.SupportSmartMatch
+        );
+
+        assertNotNull(testDTO2.subDTO.fouDTO);
+        assertNotNull(testDTO2.subDTO2.fouDTO);
     }
 
     @Data
@@ -36,11 +43,21 @@ public class Issue367 {
         private String name;
         private int age;
         private SubDTO subDTO = new SubDTO();
+        private SubDTO2 subDTO2 = new SubDTO2();
+
+        @Data
+        @NoArgsConstructor
+        public class SubDTO {
+            private String id;
+            private String nickName;
+            private ThiDTO thiDTO = new ThiDTO();
+            private FouDTO fouDTO = new FouDTO();
+        }
 
         @Data
         @AllArgsConstructor
         @NoArgsConstructor
-        public static class SubDTO {
+        public static class SubDTO2 {
             private String id;
             private String nickName;
             private ThiDTO thiDTO = new ThiDTO();
