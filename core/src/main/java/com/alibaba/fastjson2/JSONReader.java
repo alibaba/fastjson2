@@ -351,7 +351,7 @@ public abstract class JSONReader
         if (resolveTasks == null) {
             resolveTasks = new ArrayList<>();
         }
-        resolveTasks.add(new ResolveTask(fieldReader, object, null, path));
+        resolveTasks.add(new ResolveTask(fieldReader, object, fieldReader.getFieldName(), path));
     }
 
     public void addResolveTask(Map object, Object key, JSONPath reference) {
