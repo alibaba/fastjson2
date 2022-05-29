@@ -18,27 +18,27 @@ public class JSONPath_16 {
         String str = "[{\"id\":1001,\"salary\":4000,\"name\":\"jobs\",\"valid\":false},{\"id\":1001,\"salary\":5000}]";
         System.out.println(str);
         assertEquals(2,
-                 JSONPath.extract(str, "$.size()"));
+                JSONPath.extract(str, "$.size()"));
 
         assertEquals("array",
-                 JSONPath.extract(str, "$.type()"));
+                JSONPath.extract(str, "$.type()"));
 
         assertEquals("object",
-                 JSONPath.of("$[0].type()")
+                JSONPath.of("$[0].type()")
                         .extract(
                                 JSONReader.of(str)));
 
         assertEquals("number",
-                 JSONPath.extract(str, "$[0].id.type()"));
+                JSONPath.extract(str, "$[0].id.type()"));
 
         assertEquals("string",
-                 JSONPath.extract(str, "$[0].name.type()"));
+                JSONPath.extract(str, "$[0].name.type()"));
 
         assertEquals("boolean",
-                 JSONPath.extract(str, "$[0].valid.type()"));
+                JSONPath.extract(str, "$[0].valid.type()"));
 
         assertEquals("null",
-                 JSONPath.extract(str, "$[0].xx.type()"));
+                JSONPath.extract(str, "$[0].xx.type()"));
     }
 
     @Test
@@ -48,10 +48,10 @@ public class JSONPath_16 {
         root.put("unit", TimeUnit.SECONDS);
 
         assertEquals("string",
-                 JSONPath.eval(root, "$.id.type()"));
+                JSONPath.eval(root, "$.id.type()"));
 
         assertEquals("string",
-                 JSONPath.eval(root, "$.unit.type()"));
+                JSONPath.eval(root, "$.unit.type()"));
     }
 
     @Test
@@ -82,7 +82,7 @@ public class JSONPath_16 {
     @Test
     public void test_for_jsonpath_array() throws Exception {
         Object root = Arrays.asList(
-                new Object[] {10, 20}, new Object[] {100}
+                new Object[]{10, 20}, new Object[]{100}
         );
         Object object = JSONPath.of("$[? (@.size() > 1)]").eval(root);
         assertEquals("[[10,20]]", JSON.toJSONString(object));

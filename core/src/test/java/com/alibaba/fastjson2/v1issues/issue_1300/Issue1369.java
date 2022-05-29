@@ -18,7 +18,7 @@ public class Issue1369 {
         foo.bars.c = 3;
         String json = JSON.toJSONString(foo);
         System.out.println(json);
-        assertTrue(json.indexOf("\\")<0);
+        assertTrue(json.indexOf("\\") < 0);
     }
 
     public static class Foo {
@@ -26,6 +26,7 @@ public class Issue1369 {
         public String b;
         public Bar bars;
     }
+
     public static class Bar {
         public int c;
     }

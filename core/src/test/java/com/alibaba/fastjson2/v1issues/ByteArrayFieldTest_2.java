@@ -24,10 +24,10 @@ public class ByteArrayFieldTest_2 {
     public static class Entity {
         private byte[] value;
 
-        public Entity(){
+        public Entity() {
         }
 
-        public Entity(String value) throws UnsupportedEncodingException{
+        public Entity(String value) throws UnsupportedEncodingException {
             this.value = value.getBytes("UTF-8");
         }
 

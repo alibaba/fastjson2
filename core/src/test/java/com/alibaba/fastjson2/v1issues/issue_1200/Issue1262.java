@@ -20,6 +20,5 @@ public class Issue1262 {
     }
 
     public static class Chatter {
-
     }
 }

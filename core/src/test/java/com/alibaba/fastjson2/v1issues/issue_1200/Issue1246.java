@@ -15,30 +15,30 @@ public class Issue1246 {
         B b = new B();
         b.setX("xx");
 
-        String test = JSON.toJSONString( b );
+        String test = JSON.toJSONString(b);
         System.out.println(test);
         assertEquals("{}", test);
 
         C c = new C();
-        c.ab = b ;
+        c.ab = b;
 
-        String testC = JSON.toJSONString( c );
+        String testC = JSON.toJSONString(c);
         System.out.println(testC);
-        assertEquals("{\"ab\":{}}",testC);
+        assertEquals("{\"ab\":{}}", testC);
 
         D d = new D();
-        d.setAb( b );
+        d.setAb(b);
 
-        String testD = JSON.toJSONString( d );
+        String testD = JSON.toJSONString(d);
         System.out.println(testD);
-        assertEquals("{\"ab\":{}}",testD);
+        assertEquals("{\"ab\":{}}", testD);
     }
 
-    public static class C{
+    public static class C {
         public A ab;
     }
 
-    public static class D{
+    public static class D {
         private A ab;
 
         public A getAb() {
@@ -50,7 +50,7 @@ public class Issue1246 {
         }
     }
 
-    public static class A{
+    public static class A {
         private String x;
 
         public String getX() {
@@ -63,7 +63,7 @@ public class Issue1246 {
     }
 
     public static class B
-            extends A{
+            extends A {
         private String x;
 
         @Override

@@ -28,7 +28,7 @@ public class DateTest {
 
     @Test
     public void testDateNull() {
-        Date[] dates = new Date[] {null};
+        Date[] dates = new Date[]{null};
         assertEquals("[null]", JSON.toJSONString(dates));
     }
 

@@ -45,7 +45,6 @@ public class EishayTest {
 
     @Test
     public void test_write_0_asm() {
-
         for (int i = 0; i < 10; ++i) {
             long start = System.currentTimeMillis();
 
@@ -162,8 +161,6 @@ public class EishayTest {
     public void test_write_jsonb_default2() {
         mc = JSONReader.of(str)
                 .read(MediaContent.class);
-
-
         {
             jsonbBytes = JSONB.toBytes(
                     mc,
@@ -341,8 +338,6 @@ public class EishayTest {
 
     @Test
     public void test_write_jsonb_array_mapping_default2() {
-
-
         ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(MediaContent.class, MediaContent.class);
 
         for (int i = 0; i < 10; ++i) {
@@ -601,22 +596,22 @@ public class EishayTest {
 
         JSONB.SymbolTable symbolTable = JSONB.symbolTable(
                 "images",
-                 "height",
-                 "size",
-                 "title",
-                 "uri",
-                 "width",
-                 "media",
-                 "bitrate",
-                 "duration",
-                 "format",
-                 "persons",
-                 "player",
-                 "LARGE",
-                 "SMALL",
-                 "JAVA",
-                 "FLASH",
-                 "copyright"
+                "height",
+                "size",
+                "title",
+                "uri",
+                "width",
+                "media",
+                "bitrate",
+                "duration",
+                "format",
+                "persons",
+                "player",
+                "LARGE",
+                "SMALL",
+                "JAVA",
+                "FLASH",
+                "copyright"
         );
 
         JSONWriter writer = JSONWriter.ofJSONB(symbolTable);
@@ -650,18 +645,15 @@ public class EishayTest {
 
             {
                 FieldReader[] fieldReaders = creator.createFieldReaders(Media.class);
-                provider.register(Media.class
-                        , new Media_ObjectReader((fieldReaders)));
+                provider.register(Media.class, new Media_ObjectReader((fieldReaders)));
             }
             {
                 FieldReader[] fieldReaders = creator.createFieldReaders(Image.class);
-                provider.register(Image.class
-                        , new Image_ObjectReader((fieldReaders)));
+                provider.register(Image.class, new Image_ObjectReader((fieldReaders)));
             }
             {
                 FieldReader[] fieldReaders = creator.createFieldReaders(MediaContent.class);
-                provider.register(MediaContent.class
-                        , new MediaContent_ObjectReader((fieldReaders)));
+                provider.register(MediaContent.class, new MediaContent_ObjectReader((fieldReaders)));
             }
         }
 
@@ -692,22 +684,20 @@ public class EishayTest {
 
             {
                 FieldReader[] fieldReaders = creator.createFieldReaders(Media.class);
-                provider.register(Media.class
-                        , new Media_ObjectReader((fieldReaders)));
+                provider.register(Media.class, new Media_ObjectReader((fieldReaders)));
             }
             {
                 FieldReader[] fieldReaders = creator.createFieldReaders(Image.class);
-                provider.register(Image.class
-                        , new Image_ObjectReader((fieldReaders)));
+                provider.register(Image.class, new Image_ObjectReader((fieldReaders)));
             }
             {
                 FieldReader[] fieldReaders = creator.createFieldReaders(MediaContent.class);
-                provider.register(MediaContent.class
-                        , new MediaContent_ObjectReader((fieldReaders)));
+                provider.register(MediaContent.class, new MediaContent_ObjectReader((fieldReaders)));
             }
         }
 
-        mc = JSONReader.of(str)
+        mc = JSONReader
+                .of(str)
                 .read(MediaContent.class);
 
         JSONWriter writer = JSONWriter.ofJSONB();

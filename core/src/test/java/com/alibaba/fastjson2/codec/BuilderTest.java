@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+
 public class BuilderTest {
     @Test
     public void test_build() throws Exception {
@@ -87,11 +88,11 @@ public class BuilderTest {
         Function<Object, Object> buildFunction = creator.createBuildFunction(VOBuilder.class.getMethod("build"));
         ObjectReader objectReader = creator.createObjectReader(
                 VOBuilder.class,
-                 0, instanceSupplier,
-                 buildFunction,
-                 fieldReader1,
-                 fieldReader2,
-                 fieldReader3);
+                0, instanceSupplier,
+                buildFunction,
+                fieldReader1,
+                fieldReader2,
+                fieldReader3);
 
         {
             VO o = (VO) objectReader.readObject(JSONReader.of("{\"id\":123,\"name\":\"bill\",\"age\":56}"), 0);
@@ -134,13 +135,13 @@ public class BuilderTest {
         Function<Object, Object> buildFunction = creator.createBuildFunction(VOBuilder.class.getMethod("build"));
         ObjectReader objectReader = creator.createObjectReader(
                 VOBuilder.class,
-                 0,
-                 instanceSupplier,
-                 buildFunction,
-                 fieldReader1,
-                 fieldReader2,
-                 fieldReader3,
-                 fieldReader4
+                0,
+                instanceSupplier,
+                buildFunction,
+                fieldReader1,
+                fieldReader2,
+                fieldReader3,
+                fieldReader4
         );
 
         {
@@ -188,14 +189,14 @@ public class BuilderTest {
         Function<Object, Object> buildFunction = creator.createBuildFunction(VOBuilder.class.getMethod("build"));
         ObjectReader objectReader = creator.createObjectReader(
                 VOBuilder.class,
-                 0, instanceSupplier,
-                 buildFunction,
-                 fieldReader1,
-                 fieldReader2,
-                 fieldReader3,
-                 fieldReader4,
-                 fieldReader5,
-                 fieldReader6
+                0, instanceSupplier,
+                buildFunction,
+                fieldReader1,
+                fieldReader2,
+                fieldReader3,
+                fieldReader4,
+                fieldReader5,
+                fieldReader6
         );
 
         {

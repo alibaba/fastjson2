@@ -16,11 +16,12 @@ public class JSONPathSetTest {
         Root root = JSONObject.parseObject(text, Root.class);
         //System.out.println(JSON.toJSONString(root));
         String jsonpath = "$..x";
-        String value="y2";
+        String value = "y2";
         JSONPath.set(root, jsonpath, value);
         assertEquals("{\"models\":[{\"x\":\"y2\"},{\"x\":\"y2\"}]}", JSON.toJSONString(root));
 
     }
+
     public static class Root {
         public List<Model> models;
     }

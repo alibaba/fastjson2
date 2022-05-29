@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class Calendar1Test {
     private TimeZone defaultTimeZone;
 
-    Calendar[] dates = new Calendar[] {
+    Calendar[] dates = new Calendar[]{
             null,
             calendar(0),
             calendar(1),
@@ -66,7 +66,7 @@ public class Calendar1Test {
 
     @BeforeEach
     public void before() {
-        defaultTimeZone  = TimeZone.getDefault();
+        defaultTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 
@@ -79,67 +79,67 @@ public class Calendar1Test {
     public void test_jsonb_0() {
         assertEquals(11, JSONB.parseObject(
                 JSONB.toBytes("20171213"),
-                 Calendar.class).get(Calendar.MONTH));
+                Calendar.class).get(Calendar.MONTH));
         assertEquals(1, JSONB.parseObject(
                 JSONB.toBytes("2017-2-3"),
-                 Calendar.class).get(Calendar.MONTH));
+                Calendar.class).get(Calendar.MONTH));
         assertEquals(11, JSONB.parseObject(
                 JSONB.toBytes("2017-12-13"),
-                 Calendar.class).get(Calendar.MONTH));
+                Calendar.class).get(Calendar.MONTH));
         assertEquals(11, JSONB.parseObject(
                 JSONB.toBytes("2017-12-3"),
-                 Calendar.class).get(Calendar.MONTH));
+                Calendar.class).get(Calendar.MONTH));
         assertEquals(6, JSONB.parseObject(
                 JSONB.toBytes("2017-7-13"),
-                 Calendar.class).get(Calendar.MONTH));
+                Calendar.class).get(Calendar.MONTH));
         assertEquals(11, JSONB.parseObject(
                 JSONB.toBytes("2017/12/13"),
-                 Calendar.class).get(Calendar.MONTH));
+                Calendar.class).get(Calendar.MONTH));
         assertEquals(11, JSONB.parseObject(
                 JSONB.toBytes("13.12.2017"),
-                 Calendar.class).get(Calendar.MONTH));
+                Calendar.class).get(Calendar.MONTH));
         assertEquals(11, JSONB.parseObject(
                 JSONB.toBytes("13-12-2017"),
-                 Calendar.class).get(Calendar.MONTH));
+                Calendar.class).get(Calendar.MONTH));
 
         assertEquals(2017, JSONB.parseObject(
                 JSONB.toBytes("2017-12-13 00:00:00"),
-                 Calendar.class).get(Calendar.YEAR));
+                Calendar.class).get(Calendar.YEAR));
         assertEquals(2017, JSONB.parseObject(
                 JSONB.toBytes("2017/12/13 00:00:00"),
-                 Calendar.class).get(Calendar.YEAR));
+                Calendar.class).get(Calendar.YEAR));
     }
 
     @Test
     public void test_utf16_0() {
         assertEquals(6,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"2017년7월3일\"",
                         Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(6,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"2017년7월13일\"",
                         Calendar.class
                 ).get(Calendar.MONTH));
 
         assertEquals(6,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"2017-7-13\"",
                         Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(11,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"2017-12-7\"",
                         Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(11,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"2017-12-17\"",
                         Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(11,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"2017年12月17日\"",
                         Calendar.class
                 ).get(Calendar.MONTH));
@@ -148,43 +148,43 @@ public class Calendar1Test {
     @Test
     public void test_utf8_0() {
         assertEquals(2017,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"20171213\""
                                 .getBytes(StandardCharsets.UTF_8),
                         Calendar.class
                 ).get(Calendar.YEAR));
         assertEquals(2017,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"2017-2-3\""
                                 .getBytes(StandardCharsets.UTF_8),
                         Calendar.class
                 ).get(Calendar.YEAR));
         assertEquals(11,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"2017-12-3\""
                                 .getBytes(StandardCharsets.UTF_8),
                         Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(2,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"2017-3-13\""
                                 .getBytes(StandardCharsets.UTF_8),
                         Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(2017,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"2017年1月13日\""
                                 .getBytes(StandardCharsets.UTF_8)
-                                , Calendar.class
-                        ).get(Calendar.YEAR));
+                        , Calendar.class
+                ).get(Calendar.YEAR));
         assertEquals(11,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"2017年12月13日\""
                                 .getBytes(StandardCharsets.UTF_8),
                         Calendar.class
                 ).get(Calendar.MONTH));
         assertEquals(2017,
-                 JSON.parseObject(
+                JSON.parseObject(
                         "\"2017年11月9日\""
                                 .getBytes(StandardCharsets.UTF_8),
                         Calendar.class

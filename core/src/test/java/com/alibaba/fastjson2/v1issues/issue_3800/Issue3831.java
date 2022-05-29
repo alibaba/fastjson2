@@ -37,6 +37,6 @@ public class Issue3831 {
         Map<String, Object> result = new HashMap<>();
         result.put("properties", properties);
 
-        assertEquals(com.alibaba.fastjson2.JSON.toJSONString(result),new com.google.gson.Gson().toJson(result));
+        assertEquals(com.alibaba.fastjson2.JSON.toJSONString(result), new com.google.gson.Gson().toJson(result));
     }
 }

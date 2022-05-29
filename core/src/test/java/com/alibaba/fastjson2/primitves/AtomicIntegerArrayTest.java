@@ -36,7 +36,7 @@ public class AtomicIntegerArrayTest {
     @Test
     public void test_parse_jsonb() {
         byte[] jsonbBytes = JSONB.toBytes(
-                Arrays.asList(new Integer[] {101, null, 102}));
+                Arrays.asList(new Integer[]{101, null, 102}));
         AtomicIntegerArray array = JSONB.parseObject(jsonbBytes, AtomicIntegerArray.class);
         assertEquals(3, array.length());
         assertEquals(101, array.get(0));

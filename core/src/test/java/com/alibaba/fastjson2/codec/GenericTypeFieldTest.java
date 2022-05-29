@@ -83,7 +83,8 @@ public class GenericTypeFieldTest {
         ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
-            Type objectType = new TypeReference<P31<String>>() {}.getType();
+            Type objectType = new TypeReference<P31<String>>() {
+            }.getType();
             ObjectReader<P31> objectReader = creator.createObjectReader(objectType);
 
             JSONReader jsonReader = JSONReader.of("{\"value\":101}");
@@ -94,7 +95,8 @@ public class GenericTypeFieldTest {
 
     @Test
     public void testRead31_wild() throws Exception {
-        Type objectType = new TypeReference<P31<? extends String>>() {}.getType();
+        Type objectType = new TypeReference<P31<? extends String>>() {
+        }.getType();
 
         P31 p31 = JSON.parseObject("{\"value\":101}", objectType);
         assertEquals("101", p31.value);

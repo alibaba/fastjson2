@@ -8,10 +8,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1500 {
-
     @Test
     public void test_for_issue() throws Exception {
-
         // test aa
         Aa aa = new Aa();
         aa.setName("aa");
@@ -30,8 +28,8 @@ public class Issue1500 {
 
         C c2 = JSON.parseObject(jsonC, C.class, JSONReader.Feature.SupportAutoType);
 
-        assertEquals("Aa",c2.getE().getClass().getSimpleName());
-        assertEquals("aa",((Aa)c2.getE()).getName());
+        assertEquals("Aa", c2.getE().getClass().getSimpleName());
+        assertEquals("aa", ((Aa) c2.getE()).getName());
     }
 
     public static class Aa
@@ -51,7 +49,6 @@ public class Issue1500 {
     }
 
     public static class C {
-
         private Exception e;
 
         public Exception getE() {

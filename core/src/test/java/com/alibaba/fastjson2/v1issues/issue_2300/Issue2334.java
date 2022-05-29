@@ -22,7 +22,7 @@ public class Issue2334 {
         JSONObject object = JSON.parseObject(json);
 
         assertEquals("aaa",
-                 JSONPath.eval(object, "$.EXTINFO.bct_loan_account_status\\[15\\]"));
+                JSONPath.eval(object, "$.EXTINFO.bct_loan_account_status\\[15\\]"));
 
         Object result = JSONPath.extract(json, "$.EXTINFO.bct_loan_account_status\\[15\\]");
         assertEquals("aaa", result.toString());

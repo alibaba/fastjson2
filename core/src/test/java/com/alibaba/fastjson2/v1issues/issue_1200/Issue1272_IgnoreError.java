@@ -17,7 +17,6 @@ public class Issue1272_IgnoreError {
     }
 
     public static class Point {
-
         private Long userId;
 
         public long getUserId() {

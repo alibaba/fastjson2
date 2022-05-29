@@ -17,11 +17,11 @@ public class Issue1303 {
         JSONArray jsonArray = JSON.parseArray(jsonString);
         //jsonArray = new JSONArray(jsonArray);//这一句打开也一样是正确的
         double total = 0;
-        for (int i = 0; i <jsonArray.size() ; i++) {
-            JSONObject object=jsonArray.getJSONObject(i);
-            assertEquals("衣架",object.getString("name"));
-            total=total+ Double.valueOf(object.getString("prices"));
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject object = jsonArray.getJSONObject(i);
+            assertEquals("衣架", object.getString("name"));
+            total = total + Double.valueOf(object.getString("prices"));
         }
-        assertEquals(1.0d,total);
+        assertEquals(1.0d, total);
     }
 }

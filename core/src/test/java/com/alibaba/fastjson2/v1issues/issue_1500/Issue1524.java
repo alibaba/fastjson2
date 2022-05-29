@@ -113,13 +113,11 @@ public class Issue1524 {
     }
 
     public static class Value {
-
     }
 
     public static class ValueSerializer
             implements ObjectWriter {
         public ValueSerializer() {
-
         }
 
         @Override

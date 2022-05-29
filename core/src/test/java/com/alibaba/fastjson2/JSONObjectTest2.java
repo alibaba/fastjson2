@@ -45,15 +45,18 @@ public class JSONObjectTest2 {
     public void testSqlDate2() {
         assertNotNull(JSONObject
                 .of("date", "0000-00-00 00:00:00")
-                .toJavaObject(new TypeReference<Bean<Date>>(){}.getType()));
+                .toJavaObject(new TypeReference<Bean<Date>>() {
+                }.getType()));
 
         assertNotNull(JSONObject
                 .of("date", "0000-00-00 00:00:00")
-                .toJavaObject(new TypeReference<Bean<Timestamp>>(){}.getType()));
+                .toJavaObject(new TypeReference<Bean<Timestamp>>() {
+                }.getType()));
 
         assertNotNull(JSONObject
                 .of("date", "0000-00-00 00:00:00")
-                .toJavaObject(new TypeReference<Bean<Time>>(){}.getType()));
+                .toJavaObject(new TypeReference<Bean<Time>>() {
+                }.getType()));
     }
 
     @Test
@@ -107,6 +110,7 @@ public class JSONObjectTest2 {
 
     public interface BeanInterface {
         int getId();
+
         void setId(String id);
     }
 

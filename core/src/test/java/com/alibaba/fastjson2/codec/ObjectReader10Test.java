@@ -45,7 +45,7 @@ public class ObjectReader10Test {
     public void test_array_jsonb() {
         ObjectReaderCreator[] creators = TestUtils.readerCreators2();
 
-        byte[] jsonbBytes = JSONB.toBytes(new Object[]{101, 102L, 103, 104, "105", 106,107,108,109,110});
+        byte[] jsonbBytes = JSONB.toBytes(new Object[]{101, 102L, 103, 104, "105", 106, 107, 108, 109, 110});
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<LongValueField10> objectReader = creator.createObjectReader(LongValueField10.class);
@@ -169,7 +169,7 @@ public class ObjectReader10Test {
         map.put("x0001", ZonedDateTime.now());
         map.put("x0002", new Date());
         map.put("x0003", UUID.randomUUID());
-        map.put("x0004", new byte[]{1,2,3,4,5,6,7,8});
+        map.put("x0004", new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
         map.put("x0005", false);
         map.put("x0006", true);
         byte[] jsonbBytes = JSONB.toBytes(map);

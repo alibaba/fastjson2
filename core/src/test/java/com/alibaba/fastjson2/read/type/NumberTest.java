@@ -74,7 +74,7 @@ public class NumberTest {
                 .readObject()
                 .get("v");
         assertEquals(str,
-                 num.toString());
+                num.toString());
     }
 
     @Test
@@ -89,7 +89,7 @@ public class NumberTest {
                 .readObject()
                 .get("v");
         assertEquals(str,
-                 num.toString());
+                num.toString());
     }
 
     @Test
@@ -101,7 +101,7 @@ public class NumberTest {
                 .readObject()
                 .get("v");
         assertEquals(str,
-                 num.toString());
+                num.toString());
 
     }
 
@@ -118,7 +118,7 @@ public class NumberTest {
                 .readObject()
                 .get("v");
         assertEquals(str,
-                 num.toString());
+                num.toString());
 
     }
 
@@ -135,7 +135,7 @@ public class NumberTest {
                 .readObject()
                 .get("v");
         assertEquals(str,
-                 num.toString());
+                num.toString());
 
     }
 }

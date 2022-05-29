@@ -43,7 +43,7 @@ public class Image_ObjectReader
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         jsonReader.nextIfObjectStart();
         Image object = new Image();
-        for (;;) {
+        for (; ; ) {
             if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
@@ -97,7 +97,7 @@ public class Image_ObjectReader
         jsonReader.next();
         Image object = new Image();
         for_:
-        for (;;) {
+        for (; ; ) {
             if (jsonReader.current() == '}') {
                 jsonReader.next();
                 break;

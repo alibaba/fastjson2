@@ -69,10 +69,10 @@ public class ParserTest_3 {
         lexer.next();
         assertEquals(Fnv.hashCode64("Object Id"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("object id"),
-                 lexer.getNameHashCodeLCase());
+                lexer.getNameHashCodeLCase());
         assertEquals("Object Id", lexer.getFieldName());
         assertEquals(-123,
-                 lexer.readInt32Value());
+                lexer.readInt32Value());
 
         assertEquals(Fnv.hashCode64("Full \" Name"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("full \" name"), lexer.getNameHashCodeLCase());

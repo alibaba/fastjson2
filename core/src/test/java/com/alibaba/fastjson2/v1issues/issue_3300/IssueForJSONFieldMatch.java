@@ -10,13 +10,13 @@ public class IssueForJSONFieldMatch {
     @Test
     public void test_for_issue() throws Exception {
         assertEquals(123,
-                 JSON.parseObject("{\"user_id\":123}", VO.class)
+                JSON.parseObject("{\"user_id\":123}", VO.class)
                         .userId);
         assertEquals(123,
-                 JSON.parseObject("{\"userId\":123}", VO.class)
+                JSON.parseObject("{\"userId\":123}", VO.class)
                         .userId);
         assertEquals(123,
-                 JSON.parseObject("{\"user-id\":123}", VO.class)
+                JSON.parseObject("{\"user-id\":123}", VO.class)
                         .userId);
     }
 

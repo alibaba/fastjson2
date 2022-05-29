@@ -11,34 +11,32 @@ public class Issue1764_bean {
     @Test
     public void test_for_issue() throws Exception {
         assertEquals("{\"value\":\"9007199254741992\"}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         new Model(9007199254741992L)));
 
         assertEquals("{\"value\":\"9007199254741990\"}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         new Model(9007199254741990L)));
 
         assertEquals("{\"value\":100}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         new Model(100L)));
 
         assertEquals("{\"value\":\"-9007199254741990\"}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         new Model(-9007199254741990L)));
 
         assertEquals("{\"value\":-9007199254740990}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         new Model(-9007199254740990L)));
 
     }
-
 
     @JSONType(serializeFeatures = JSONWriter.Feature.BrowserCompatible)
     public static class Model {
         public long value;
 
         public Model() {
-
         }
 
         public Model(long value) {

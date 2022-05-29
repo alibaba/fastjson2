@@ -19,12 +19,15 @@ public class Issue_for_wuye {
         public Date getTime1() {
             return time1;
         }
+
         public void setTime1(Date time1) {
             this.time1 = time1;
         }
+
         public Date getTime2() {
             return time2;
         }
+
         public void setTime2(Date time2) {
             this.time2 = time2;
         }
@@ -35,12 +38,15 @@ public class Issue_for_wuye {
         public Date getGmtCreate() {
             return gmtCreate;
         }
+
         public void setGmtCreate(Date gmtCreate) {
             this.gmtCreate = gmtCreate;
         }
+
         public Date getGmtModified() {
             return gmtModified;
         }
+
         public void setGmtModified(Date gmtModified) {
             this.gmtModified = gmtModified;
         }

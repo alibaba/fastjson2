@@ -11,11 +11,11 @@ public class Issue117 {
         String text = ("{code:1,msg:'Hello world',data:{list:[1,2,3,4,5], ary2:[{a:2},{a:3,b:{c:'ddd'}}]}}");
         JSONObject obj = JSON.parseObject(text);
 
-        JSONPath.eval(obj,"$..ary2[0].a");
+        JSONPath.eval(obj, "$..ary2[0].a");
 
         long start = System.currentTimeMillis();
-        for(int i=0,len=1000000; i<len; i++) {
-            JSONPath.eval(obj,"$..ary2[0].a");
+        for (int i = 0, len = 1000000; i < len; i++) {
+            JSONPath.eval(obj, "$..ary2[0].a");
         }
 
         long times = System.currentTimeMillis() - start;

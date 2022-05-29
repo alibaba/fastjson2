@@ -49,7 +49,4 @@ public class UUIDTest {
         }
         System.out.println();
     }
-
-
-
 }

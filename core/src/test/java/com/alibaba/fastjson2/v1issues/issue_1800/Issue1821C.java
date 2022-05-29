@@ -30,10 +30,10 @@ public class Issue1821C {
 
     @JSONType
     public static class Model {
-        @JSONField(name="type", ordinal = 1)
+        @JSONField(name = "type", ordinal = 1)
         public int type;
 
-        @JSONField(name="data", ordinal = 2, format = "base64")
+        @JSONField(name = "data", ordinal = 2, format = "base64")
         public byte[] data;
     }
 }

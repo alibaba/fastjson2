@@ -25,8 +25,8 @@ public class JSONExtractScalar {
 
     public JSONWritable eval(byte[] input) {
         JSONReader parser = JSONReader.of(input,
-                 0,
-                 input.length, StandardCharsets.UTF_8
+                0,
+                input.length, StandardCharsets.UTF_8
         );
 
         path.extractScalar(parser, valueConsumer);

@@ -18,13 +18,14 @@ public class Issue1146C {
 
     @JSONType(ignores = {"id2", "id3"})
     public static class Bean {
-
         public int getId() {
             return 101;
         }
+
         public int getId2() {
             return 102;
         }
+
         public int getId3() {
             return 103;
         }

@@ -24,7 +24,7 @@ public class JSONExtractTest {
 
         JSONWritable result = udf.eval(utf8Bytes);
         assertEquals("\"1\"",
-                 result.toString());
+                result.toString());
     }
 
     @Test
@@ -33,6 +33,6 @@ public class JSONExtractTest {
 
         JSONWritable result = udf.eval(utf8Bytes);
         assertEquals("\"2020-01-06 17:00:00\"",
-                 result.toString());
+                result.toString());
     }
 }

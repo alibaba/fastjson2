@@ -46,7 +46,8 @@ public class JSONArrayTest {
         assertNotNull(obj);
         assertEquals("{\"v0000\":101}", JSON.toJSONString(obj));
 
-        List<Long1> list = array.toJavaObject(new TypeReference<List<Long1>>(){}.getType());
+        List<Long1> list = array.toJavaObject(new TypeReference<List<Long1>>() {
+        }.getType());
         Long1 long1 = list.get(0);
         assertEquals(Long.valueOf(101), long1.getV0000());
     }
@@ -56,7 +57,8 @@ public class JSONArrayTest {
         JSONArray array = new JSONArray();
         array.add(Collections.singletonList(Collections.emptyMap()));
         List<Integer1> list = array.getObject(0,
-                 new TypeReference<List<Integer1>>(){}.getType());
+                new TypeReference<List<Integer1>>() {
+                }.getType());
         assertNotNull(list);
         assertEquals(Integer1.class, list.get(0).getClass());
         assertEquals("[{}]", JSON.toJSONString(list));
@@ -67,7 +69,8 @@ public class JSONArrayTest {
         JSONArray array = new JSONArray();
         array.add(Collections.singletonMap("val", Collections.emptyMap()));
         Map<String, Integer1> map = array.getObject(
-                0, new TypeReference<Map<String, Integer1>>(){}.getType());
+                0, new TypeReference<Map<String, Integer1>>() {
+                }.getType());
         assertNotNull(map);
         assertEquals(Integer1.class, map.get("val").getClass());
         assertEquals("{\"val\":{}}", JSON.toJSONString(map));
@@ -390,47 +393,47 @@ public class JSONArrayTest {
     public void test_getBigInt() {
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12)
                         .getBigInteger(0));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((byte) 12)
                         .getBigInteger(0));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((short) 12)
                         .getBigInteger(0));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12L)
                         .getBigInteger(0));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12F)
                         .getBigInteger(0));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12D)
                         .getBigInteger(0));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigDecimal("12"))
                         .getBigInteger(0));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigInteger("12"))
                         .getBigInteger(0));
         assertEquals(
                 BigInteger.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("12")
                         .getBigInteger(0));
     }
@@ -439,102 +442,102 @@ public class JSONArrayTest {
     public void test_getBigDecimal() {
         assertEquals(
                 BigDecimal.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12)
                         .getBigDecimal(0));
         assertEquals(
                 BigDecimal.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((byte) 12)
                         .getBigDecimal(0));
         assertEquals(
                 BigDecimal.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((short) 12)
                         .getBigDecimal(0));
         assertEquals(
                 BigDecimal.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12L)
                         .getBigDecimal(0));
         assertEquals(
                 BigDecimal.valueOf(12F),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12F)
                         .getBigDecimal(0));
         assertEquals(
                 BigDecimal.valueOf(12D),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12D)
                         .getBigDecimal(0));
         assertEquals(
                 BigDecimal.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigDecimal("12"))
                         .getBigDecimal(0));
         assertEquals(
                 BigDecimal.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigInteger("12"))
                         .getBigDecimal(0));
         assertEquals(
                 BigDecimal.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("12")
                         .getBigDecimal(0));
         assertEquals(
                 BigDecimal.ONE,
-                 JSONArray.of(true).getBigDecimal(0));
+                JSONArray.of(true).getBigDecimal(0));
         assertEquals(
                 BigDecimal.ZERO,
-                 JSONArray.of(false).getBigDecimal(0));
+                JSONArray.of(false).getBigDecimal(0));
     }
 
     @Test
     public void test_getFloatValue() {
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12)
                         .getFloatValue(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((byte) 12)
                         .getFloatValue(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((short) 12)
                         .getFloatValue(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12L)
                         .getFloatValue(0));
         assertEquals(
                 Float.valueOf(12F),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12F)
                         .getFloatValue(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12D)
                         .getFloatValue(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigDecimal("12"))
                         .getFloatValue(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigInteger("12"))
                         .getFloatValue(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("12")
                         .getFloatValue(0));
     }
@@ -543,47 +546,47 @@ public class JSONArrayTest {
     public void test_getFloat() {
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12)
                         .getFloat(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((byte) 12)
                         .getFloat(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((short) 12)
                         .getFloat(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12L)
                         .getFloat(0));
         assertEquals(
                 Float.valueOf(12F),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12F)
                         .getFloat(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12D)
                         .getFloat(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigDecimal("12"))
                         .getFloat(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigInteger("12"))
                         .getFloat(0));
         assertEquals(
                 Float.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("12")
                         .getFloat(0));
     }
@@ -592,47 +595,47 @@ public class JSONArrayTest {
     public void test_getDoubleValue() {
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12)
                         .getDoubleValue(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((byte) 12)
                         .getDoubleValue(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((short) 12)
                         .getDoubleValue(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12L)
                         .getDoubleValue(0));
         assertEquals(
                 Double.valueOf(12F),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12F)
                         .getDoubleValue(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12D)
                         .getDoubleValue(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigDecimal("12"))
                         .getDoubleValue(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigInteger("12"))
                         .getDoubleValue(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("12")
                         .getDoubleValue(0));
     }
@@ -641,47 +644,47 @@ public class JSONArrayTest {
     public void test_getDouble() {
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12)
                         .getDouble(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((byte) 12)
                         .getDouble(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((short) 12)
                         .getDouble(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12L)
                         .getDouble(0));
         assertEquals(
                 Double.valueOf(12F),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12F)
                         .getDouble(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12D)
                         .getDouble(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigDecimal("12"))
                         .getDouble(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigInteger("12"))
                         .getDouble(0));
         assertEquals(
                 Double.valueOf(12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("12")
                         .getDouble(0));
     }
@@ -690,22 +693,22 @@ public class JSONArrayTest {
     public void test_getBoolean() {
         assertEquals(
                 Boolean.TRUE,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(1)
                         .getBoolean(0));
         assertEquals(
                 Boolean.TRUE,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("true")
                         .getBoolean(0));
         assertEquals(
                 Boolean.FALSE,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(Boolean.FALSE)
                         .getBoolean(0));
         assertEquals(
                 Boolean.FALSE,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("FALSE")
                         .getBoolean(0));
     }
@@ -714,22 +717,22 @@ public class JSONArrayTest {
     public void test_getBooleanValue() {
         assertEquals(
                 true,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(1)
                         .getBooleanValue(0));
         assertEquals(
                 true,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("true")
                         .getBooleanValue(0));
         assertEquals(
                 false,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("FALSE")
                         .getBooleanValue(0));
         assertEquals(
                 false,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(Boolean.FALSE)
                         .getBooleanValue(0));
     }
@@ -738,47 +741,47 @@ public class JSONArrayTest {
     public void test_getShortValue() {
         assertEquals(
                 (short) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12)
                         .getShortValue(0));
         assertEquals(
                 (short) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((byte) 12)
                         .getShortValue(0));
         assertEquals(
                 (short) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((short) 12)
                         .getShortValue(0));
         assertEquals(
                 (short) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12L)
                         .getShortValue(0));
         assertEquals(
                 (short) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12F)
                         .getShortValue(0));
         assertEquals(
                 (short) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12D)
                         .getShortValue(0));
         assertEquals(
                 (short) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigDecimal("12"))
                         .getShortValue(0));
         assertEquals(
                 (short) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigInteger("12"))
                         .getShortValue(0));
         assertEquals(
                 (short) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("12")
                         .getShortValue(0));
     }
@@ -787,57 +790,57 @@ public class JSONArrayTest {
     public void test_getShort() {
         assertEquals(
                 Short.valueOf((short) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12)
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((byte) 12)
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((short) 12)
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12L)
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12F)
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12D)
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigDecimal("12"))
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigInteger("12"))
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(Short.valueOf((short) 12))
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(Byte.valueOf((byte) 12))
                         .getShort(0));
         assertEquals(
                 Short.valueOf((short) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("12")
                         .getShort(0));
     }
@@ -846,47 +849,47 @@ public class JSONArrayTest {
     public void test_getByteValue() {
         assertEquals(
                 (byte) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12)
                         .getByteValue(0));
         assertEquals(
                 (byte) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((byte) 12)
                         .getByteValue(0));
         assertEquals(
                 (byte) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((short) 12)
                         .getByteValue(0));
         assertEquals(
                 (byte) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12L)
                         .getByteValue(0));
         assertEquals(
                 (byte) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12F)
                         .getByteValue(0));
         assertEquals(
                 (byte) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12D)
                         .getByteValue(0));
         assertEquals(
                 (byte) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigDecimal("12"))
                         .getByteValue(0));
         assertEquals(
                 (byte) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigInteger("12"))
                         .getByteValue(0));
         assertEquals(
                 (byte) 12,
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("12")
                         .getByteValue(0));
     }
@@ -895,57 +898,57 @@ public class JSONArrayTest {
     public void test_getByte() {
         assertEquals(
                 Byte.valueOf((byte) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12)
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((byte) 12)
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd((short) 12)
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12L)
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12F)
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(12D)
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigDecimal("12"))
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(new BigInteger("12"))
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(Short.valueOf((short) 12))
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd(Byte.valueOf((byte) 12))
                         .getByte(0));
         assertEquals(
                 Byte.valueOf((byte) 12),
-                 new JSONArray()
+                new JSONArray()
                         .fluentAdd("12")
                         .getByte(0));
     }
@@ -1113,7 +1116,7 @@ public class JSONArrayTest {
 
         assertEquals(new ArrayList(),
                 JSONArray
-                        .of( new ArrayList())
+                        .of(new ArrayList())
                         .getObject(0, List.class)
         );
     }
@@ -1123,50 +1126,50 @@ public class JSONArrayTest {
         JSONArray array = new JSONArray();
         array.set(-1, -1);
         assertEquals(
-            "[-1]", array.toString()
+                "[-1]", array.toString()
         );
 
         array.set(0, 1);
         array.add(2);
 
         assertEquals(
-            "[1,2]", array.toString()
+                "[1,2]", array.toString()
         );
 
         array.set(4, 3);
         assertEquals(
-            "[1,2,null,null,3]", array.toString()
+                "[1,2,null,null,3]", array.toString()
         );
 
         array.set(-1, -1);
         assertEquals(
-            "[1,2,null,null,-1]", array.toString()
+                "[1,2,null,null,-1]", array.toString()
         );
 
         array.set(-2, -2);
         assertEquals(
-            "[1,2,null,-2,-1]", array.toString()
+                "[1,2,null,-2,-1]", array.toString()
         );
 
         // out of range
         array.set(-6, -6);
         assertEquals(
-            "[-6,1,2,null,-2,-1]", array.toString()
+                "[-6,1,2,null,-2,-1]", array.toString()
         );
 
         // size = 6
         // Integer.MAX_VALUE out of range (6 + 4096 = 4102)
         array.set(
-            Integer.MAX_VALUE, Integer.MAX_VALUE
+                Integer.MAX_VALUE, Integer.MAX_VALUE
         );
         assertEquals(
-            "[-6,1,2,null,-2,-1]", array.toString()
+                "[-6,1,2,null,-2,-1]", array.toString()
         );
         array.set(
-            4102, 4102
+                4102, 4102
         );
         assertEquals(
-            "[-6,1,2,null,-2,-1]", array.toString()
+                "[-6,1,2,null,-2,-1]", array.toString()
         );
     }
 
@@ -1181,7 +1184,8 @@ public class JSONArrayTest {
         {
             Set<Integer> set = JSONArray
                     .of("1", "2", "3")
-                    .to(new TypeReference<Set<Integer>>() {}.getType());
+                    .to(new TypeReference<Set<Integer>>() {
+                    }.getType());
             assertEquals(3, set.size());
             assertTrue(set.contains(1));
             assertTrue(set.contains(2));
@@ -1190,7 +1194,8 @@ public class JSONArrayTest {
         {
             TreeSet<Integer> set = JSONArray
                     .of("1", "2", "3")
-                    .to(new TypeReference<TreeSet<Integer>>() {}.getType());
+                    .to(new TypeReference<TreeSet<Integer>>() {
+                    }.getType());
             assertEquals(3, set.size());
             assertTrue(set.contains(1));
             assertTrue(set.contains(2));

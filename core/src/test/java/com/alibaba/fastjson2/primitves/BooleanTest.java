@@ -102,7 +102,7 @@ public class BooleanTest {
     public void test_true_jsonb() {
         byte[] jsonbBytes = JSONB.toBytes(true);
         assertEquals(Boolean.TRUE,
-                 JSONB.parseObject(jsonbBytes, Boolean.class));
+                JSONB.parseObject(jsonbBytes, Boolean.class));
     }
 
     @Test
@@ -161,13 +161,13 @@ public class BooleanTest {
         assertEquals("[true,false]", str);
 
         assertTrue(Arrays.equals(array,
-                 JSONReader.of(str)
+                JSONReader.of(str)
                         .read(array.getClass())));
     }
 
     @Test
     public void test_array_dim2() {
-        boolean[][] array = new boolean[][] {{true, false, true}, {false, true}, {true, false}};
+        boolean[][] array = new boolean[][]{{true, false, true}, {false, true}, {true, false}};
         JSONWriter jw = JSONWriter.of();
         jw.writeAny(array);
         String str = jw.toString();
@@ -190,7 +190,7 @@ public class BooleanTest {
         assertEquals("[true,false]", str);
 
         assertTrue(Arrays.equals(array,
-                 JSONReader.of(str)
+                JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -204,7 +204,7 @@ public class BooleanTest {
         assertEquals("[1,0]", str);
 
         assertTrue(Arrays.equals(array,
-                 JSONReader.of(str)
+                JSONReader.of(str)
                         .read(array.getClass())));
     }
 
@@ -218,7 +218,7 @@ public class BooleanTest {
         assertEquals("[1,0]", str);
 
         assertTrue(Arrays.equals(array,
-                 JSONReader.of(str)
+                JSONReader.of(str)
                         .read(array.getClass())));
     }
 }

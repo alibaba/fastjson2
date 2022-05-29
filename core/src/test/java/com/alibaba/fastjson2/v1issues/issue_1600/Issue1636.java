@@ -25,9 +25,9 @@ public class Issue1636 {
         private int modelId;
 
         @JSONCreator
-        public Item1(@JSONField int modelId){
+        public Item1(@JSONField int modelId) {
             // 这里为零
-            this.modelId=modelId;
+            this.modelId = modelId;
         }
     }
 
@@ -35,9 +35,9 @@ public class Issue1636 {
         private int modelId;
 
         @JSONCreator
-        public Item2(int modelId){
+        public Item2(int modelId) {
             // 这里为零
-            this.modelId=modelId;
+            this.modelId = modelId;
         }
     }
 }

@@ -10,6 +10,6 @@ public class Issue3924 {
     public void test_for_issue3924() {
         String json_string = "[3,{\"tag\": [\"tag1\", \"tag2\"]},[\"tag1\",\"tag2\"],6]";
         Object r = JSONPath.extract(json_string, " $[1].tag[*] ");
-        assertEquals("[\"tag1\",\"tag2\"]",r.toString());
+        assertEquals("[\"tag1\",\"tag2\"]", r.toString());
     }
 }

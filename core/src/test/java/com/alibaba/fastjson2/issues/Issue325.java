@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue325 {
     @Test
-    public void parse(){
+    public void parse() {
         String text = "{\"IsSuccess\":true,\"Data\":\"1fd1717837744bd2ba967167a6f6f417\",\"Message\":\"获取身份令牌成功\"}";
         JSONObject obj = JSON.parseObject(text);
         assertEquals(true, obj.getBoolean("IsSuccess"));
@@ -23,7 +23,7 @@ public class Issue325 {
         assertEquals("获取身份令牌成功", result.getMessage());
     }
 
-    public static class TokenResult{
+    public static class TokenResult {
         String Data;
         String Message;
         boolean IsSuccess;
@@ -31,20 +31,25 @@ public class Issue325 {
         public String getData() {
             return Data;
         }
+
         public TokenResult setData(String data) {
             Data = data;
             return this;
         }
+
         public String getMessage() {
             return Message;
         }
+
         public TokenResult setMessage(String message) {
             Message = message;
             return this;
         }
+
         public boolean isIsSuccess() {
             return IsSuccess;
         }
+
         public TokenResult setIsSuccess(boolean success) {
             IsSuccess = success;
             return this;

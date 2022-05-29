@@ -36,7 +36,7 @@ public class BooleanArrayTest {
 
     @Test
     public void test_parse_jsonb() {
-        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Object[] {1, 0, null, true, false}));
+        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Object[]{1, 0, null, true, false}));
         Boolean[] array = JSONB.parseObject(jsonbBytes, Boolean[].class);
         assertEquals(Boolean.TRUE, array[0]);
         assertEquals(Boolean.FALSE, array[1]);

@@ -31,7 +31,6 @@ public class ASMCodeGen {
             int index = Arrays.binarySearch(hashCodes, hashCode);
             mapping[index] = (short) i;
         }
-
         Map<Integer, List<Long>> map = new HashMap<>();
         BeanUtils.setters(Int1000.class, e -> {
             String propertyName = BeanUtils.setterName(e.getName());
@@ -49,16 +48,16 @@ public class ASMCodeGen {
         System.out.println("switch(hashCode32) {");
         map.forEach(
                 (hashCode32, relatedHashCodes) -> {
-                        System.out.println("\tcase " + hashCode32 + ":");
-                        relatedHashCodes.forEach(
-                                e -> {
-                                    System.out.println("\t\tif (hashCode64 == " + e + "L) {");
-                                    int m = Arrays.binarySearch(hashCodes, e);
-                                    int indx = mapping[m];
-                                    System.out.println("\t\t\tindx = " + indx + ";");
-                                    System.out.println("\t\t\tbreak;");
-                                    System.out.println("\t\t}");
-                                });
+                    System.out.println("\tcase " + hashCode32 + ":");
+                    relatedHashCodes.forEach(
+                            e -> {
+                                System.out.println("\t\tif (hashCode64 == " + e + "L) {");
+                                int m = Arrays.binarySearch(hashCodes, e);
+                                int indx = mapping[m];
+                                System.out.println("\t\t\tindx = " + indx + ";");
+                                System.out.println("\t\t\tbreak;");
+                                System.out.println("\t\t}");
+                            });
                 });
         System.out.println("\tdefault:");
         System.out.println("\t\treturn null;");

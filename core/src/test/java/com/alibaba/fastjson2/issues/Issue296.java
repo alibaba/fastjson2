@@ -314,7 +314,7 @@ public class Issue296 {
                 JSONArray.of((Object) null),
                 JSONArray.of("null"),
                 JSONArray.of(""),
-                new String[] {""}
+                new String[]{""}
         );
 
         {
@@ -442,10 +442,10 @@ public class Issue296 {
     @Test
     public void test4() {
         JSONArray array = JSONArray.of(
-                new boolean[] {true},
-                new byte[] {2},
-                new short[] {3},
-                new int[] {4}
+                new boolean[]{true},
+                new byte[]{2},
+                new short[]{3},
+                new int[]{4}
         );
 
         {
@@ -573,10 +573,10 @@ public class Issue296 {
     @Test
     public void test5() {
         JSONArray array = JSONArray.of(
-                new long[] {1},
-                new float[] {2F},
-                new double[] {3},
-                new BigDecimal[] {BigDecimal.valueOf(4)}
+                new long[]{1},
+                new float[]{2F},
+                new double[]{3},
+                new BigDecimal[]{BigDecimal.valueOf(4)}
         );
 
         {

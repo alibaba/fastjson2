@@ -23,13 +23,11 @@ public class JsonGen {
             } else {
                 field = "v" + i;
             }
-
             char[] chars = new char[10];
             for (int j = chars.length - 1; j >= 0; j--) {
                 int r = this.r.nextInt(26);
                 chars[j] = (char) ('a' + r);
             }
-
             String value = new String(chars);
             System.out.print("\t\"" + field + "\" : \"" + value + "\"");
             if (i != COUNT - 1) {
@@ -39,7 +37,6 @@ public class JsonGen {
         }
         System.out.println("}");
     }
-
     @Test
     public void gen_int() {
         System.out.println("{");
@@ -65,7 +62,6 @@ public class JsonGen {
         }
         System.out.println("}");
     }
-
     @Test
     public void gen_bool() {
         System.out.println("{");

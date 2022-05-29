@@ -35,7 +35,7 @@ public class AtomicLongArrayTest {
 
     @Test
     public void test_parse_jsonb() {
-        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Integer[] {101, null, 102}));
+        byte[] jsonbBytes = JSONB.toBytes(Arrays.asList(new Integer[]{101, null, 102}));
         AtomicLongArray array = JSONB.parseObject(jsonbBytes, AtomicLongArray.class);
         assertEquals(3, array.length());
         assertEquals(101, array.get(0));

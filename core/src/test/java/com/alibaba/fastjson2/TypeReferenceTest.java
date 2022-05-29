@@ -21,7 +21,8 @@ public class TypeReferenceTest {
 
         assertEquals(text, JSON.toJSONString(user));
 
-        User user1 = new TypeReference<User>() {}
+        User user1 = new TypeReference<User>() {
+        }
                 .toJavaObject(JSON.parseObject(text));
 
         assertEquals(user.id, user1.id);
@@ -77,28 +78,31 @@ public class TypeReferenceTest {
     @Test
     public void testError() {
         assertThrows(NullPointerException.class,
-                 () -> TypeReference.get(null)
+                () -> TypeReference.get(null)
         );
     }
 
     @Test
     public void testError1() {
         assertThrows(NullPointerException.class,
-                 () -> error1(User.class)
+                () -> error1(User.class)
         );
     }
 
     @Test
     public void testError2() {
         assertThrows(NullPointerException.class,
-                 () -> error1(User.class)
+                () -> error1(User.class)
         );
     }
 
     public static <T> void error1(Class<T> clazz) {
-        new TypeReference<List<T>>((Type[]) null) {};
+        new TypeReference<List<T>>((Type[]) null) {
+        };
     }
+
     public static <T> void error2(Class<T> clazz) {
-        new TypeReference<List<T>>(new Type[0]) {};
+        new TypeReference<List<T>>(new Type[0]) {
+        };
     }
 }

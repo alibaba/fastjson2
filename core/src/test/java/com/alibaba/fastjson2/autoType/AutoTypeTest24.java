@@ -21,10 +21,10 @@ public class AutoTypeTest24 {
         bean.items.add("2");
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.NotWriteDefaultValue
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.NotWriteDefaultValue
         );
 
         JSONBDump.dump(bytes);

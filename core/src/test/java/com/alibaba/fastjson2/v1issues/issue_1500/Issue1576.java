@@ -17,7 +17,6 @@ public class Issue1576 {
     }
 
     public static class NewsDetail {
-
         public int code;
         public String in_msg;
         public String out_msg;

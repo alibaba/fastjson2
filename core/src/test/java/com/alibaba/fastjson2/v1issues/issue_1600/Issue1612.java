@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @since 2017/11/27
  */
 public class Issue1612 {
-
     @Test
     public void test() {
         RegResponse<User> userRegResponse = testFastJson(User.class);
@@ -26,16 +25,15 @@ public class Issue1612 {
     }
 
     public static <T> RegResponse<T> testFastJson(Class<T> clazz) {
-
         //把body解析成一个对象
         String body = "{\"retCode\":\"200\", \"result\":{\"name\":\"Zhangsan\",\"password\":\"123\"}}";
 
-        return JSON.parseObject(body, new TypeReference<RegResponse<T>>(new Type[]{clazz}) {});
+        return JSON.parseObject(body, new TypeReference<RegResponse<T>>(new Type[]{clazz}) {
+        });
     }
 }
 
 class RegResponse<T> {
-
     private String retCode;
     private String retDesc;
     private T result;
@@ -75,8 +73,9 @@ class RegResponse<T> {
 }
 
 class User {
+    public User() {
+    }
 
-    public User(){}
     public User(String username, String password) {
         this.username = username;
         this.password = password;

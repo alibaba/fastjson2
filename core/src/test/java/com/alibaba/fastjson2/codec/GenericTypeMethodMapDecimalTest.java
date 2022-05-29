@@ -84,7 +84,8 @@ public class GenericTypeMethodMapDecimalTest {
         ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
-            Type objectType = new TypeReference<P31<BigDecimal>>() {}.getType();
+            Type objectType = new TypeReference<P31<BigDecimal>>() {
+            }.getType();
             ObjectReader<P31> objectReader = creator.createObjectReader(objectType);
 
             JSONReader jsonReader = JSONReader.of("{\"value\":{\"0\":101}}");
@@ -94,7 +95,7 @@ public class GenericTypeMethodMapDecimalTest {
     }
 
     public static class P<T> {
-        private Map<String,T> value;
+        private Map<String, T> value;
 
         public Map<String, T> getValue() {
             return value;
@@ -106,7 +107,7 @@ public class GenericTypeMethodMapDecimalTest {
     }
 
     public static class P0<T extends BigDecimal> {
-        private Map<String,T> value;
+        private Map<String, T> value;
 
         public Map<String, T> getValue() {
             return value;

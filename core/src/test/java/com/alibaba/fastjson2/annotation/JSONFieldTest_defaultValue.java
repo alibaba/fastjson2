@@ -15,14 +15,14 @@ public class JSONFieldTest_defaultValue {
     @Test
     public void test_0() {
         assertEquals(Boolean.TRUE,
-                 JSON.parseObject("{}", Bean0.class).value
+                JSON.parseObject("{}", Bean0.class).value
         );
     }
 
     @Test
     public void test_0_jsonb() {
         assertEquals(Boolean.TRUE,
-                 JSONB.parseObject(JSONB.toBytes(new HashMap<>()), Bean0.class).value
+                JSONB.parseObject(JSONB.toBytes(new HashMap<>()), Bean0.class).value
         );
     }
 
@@ -34,7 +34,7 @@ public class JSONFieldTest_defaultValue {
     @Test
     public void test_1() {
         assertEquals(Byte.valueOf((byte) 1),
-                 JSON.parseObject("{}", Bean1.class).value
+                JSON.parseObject("{}", Bean1.class).value
         );
     }
 
@@ -46,7 +46,7 @@ public class JSONFieldTest_defaultValue {
     @Test
     public void test_2() {
         assertEquals(Short.valueOf((short) 2),
-                 JSON.parseObject("{}", Bean2.class).value
+                JSON.parseObject("{}", Bean2.class).value
         );
     }
 

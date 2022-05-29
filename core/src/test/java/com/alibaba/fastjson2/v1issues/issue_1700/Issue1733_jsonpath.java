@@ -62,7 +62,6 @@ public class Issue1733_jsonpath {
         public String category;
 
         public Book() {
-
         }
 
         public Book(int price, String category) {

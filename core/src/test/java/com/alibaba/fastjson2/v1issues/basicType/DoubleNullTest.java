@@ -51,7 +51,6 @@ public class DoubleNullTest {
         assertNull(model.v2);
     }
 
-
     public static class Model {
         public Double v1;
         public Double v2;

@@ -144,6 +144,7 @@ public class UnwrappedTest {
 
     private static class ExtendableBeanF1 {
         private final Map<String, String> properties = new HashMap<>();
+
         @JSONField(unwrapped = true)
         public void setProperty(String name, String value) {
             properties.put(name, value);
@@ -163,6 +164,7 @@ public class UnwrappedTest {
     private static class ExtendableBeanF2 {
         public int f1;
         private final Map<String, String> properties = new HashMap<>();
+
         @JSONField(unwrapped = true)
         public void setProperty(String name, String value) {
             properties.put(name, value);
@@ -183,6 +185,7 @@ public class UnwrappedTest {
         public int f1;
         public int f2;
         private final Map<String, String> properties = new HashMap<>();
+
         @JSONField(unwrapped = true)
         public void setProperty(String name, String value) {
             properties.put(name, value);
@@ -204,6 +207,7 @@ public class UnwrappedTest {
         public int f2;
         public int f3;
         private final Map<String, String> properties = new HashMap<>();
+
         @JSONField(unwrapped = true)
         public void setProperty(String name, String value) {
             properties.put(name, value);
@@ -226,6 +230,7 @@ public class UnwrappedTest {
         public int f3;
         public int f4;
         private final Map<String, String> properties = new HashMap<>();
+
         @JSONField(unwrapped = true)
         public void setProperty(String name, String value) {
             properties.put(name, value);
@@ -249,6 +254,7 @@ public class UnwrappedTest {
         public int f4;
         public int f5;
         private final Map<String, String> properties = new HashMap<>();
+
         @JSONField(unwrapped = true)
         public void setProperty(String name, String value) {
             properties.put(name, value);
@@ -273,6 +279,7 @@ public class UnwrappedTest {
         public int f5;
         public int f6;
         private final Map<String, String> properties = new HashMap<>();
+
         @JSONField(unwrapped = true)
         public void setProperty(String name, String value) {
             properties.put(name, value);

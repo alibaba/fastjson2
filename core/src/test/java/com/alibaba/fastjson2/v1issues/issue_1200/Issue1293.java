@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * Created by kimmking on 27/06/2017.
  */
 public class Issue1293 {
-
     @Test
     public void test_for_issue() {
         String data = "{\"idType\":\"123123\",\"userType\":\"134\",\"count\":\"123123\"}";
@@ -56,10 +55,11 @@ public class Issue1293 {
         }
     }
 
-    static enum IdType{
-        A,B
+    static enum IdType {
+        A, B
     }
-    static enum UserType{
-        C,D
+
+    static enum UserType {
+        C, D
     }
 }

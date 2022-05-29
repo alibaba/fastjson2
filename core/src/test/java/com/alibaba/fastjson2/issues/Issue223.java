@@ -21,7 +21,8 @@ public class Issue223 {
                 JSONPath.eval(
                         JSON.parseObject(message), "$.appList"
                 ).toString(),
-                new TypeReference<List<app>>() {}.getType()
+                new TypeReference<List<app>>() {
+                }.getType()
         );
     }
 
@@ -37,7 +38,8 @@ public class Issue223 {
                 JSONPath.eval(
                         JSON.parseObject(message.getBytes(StandardCharsets.UTF_8)), "$.appList"
                 ).toString(),
-                new TypeReference<List<app>>() {}.getType()
+                new TypeReference<List<app>>() {
+                }.getType()
         );
     }
 }

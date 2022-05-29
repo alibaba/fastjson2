@@ -24,6 +24,7 @@ public class OverrideTest {
 
     public static class Animal {
         int id;
+
         public void setId(int id) {
             this.id = id;
         }
@@ -36,6 +37,7 @@ public class OverrideTest {
     public static class Cat
             extends Animal {
         private int catId;
+
         public void setId(int id) {
             this.catId = id;
         }

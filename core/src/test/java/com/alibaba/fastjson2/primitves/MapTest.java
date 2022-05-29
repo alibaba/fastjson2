@@ -186,7 +186,7 @@ public class MapTest {
 
         byte[] utf8Bytes = JSON.toJSONBytes(map);
         assertEquals(1,
-                 JSON.parseObject(utf8Bytes)
+                JSON.parseObject(utf8Bytes)
                         .get(key));
     }
 

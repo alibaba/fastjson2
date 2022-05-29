@@ -94,31 +94,31 @@ public class ParserTest_bigInt {
         assertEquals(Fnv.hashCode64LCase("id"), lexer.getNameHashCodeLCase());
         assertEquals("id", lexer.getFieldName());
         assertEquals(BigInteger.valueOf(123456789),
-                 lexer.readBigInteger());
+                lexer.readBigInteger());
 
         assertEquals(Fnv.hashCode64("v0"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v0"), lexer.getNameHashCodeLCase());
         assertEquals("v0", lexer.getFieldName());
         assertEquals(BigInteger.valueOf(123),
-                 lexer.readBigInteger());
+                lexer.readBigInteger());
 
         assertEquals(Fnv.hashCode64("v1"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v1"), lexer.getNameHashCodeLCase());
         assertEquals("v1", lexer.getFieldName());
         assertEquals(BigInteger.valueOf(123456789012345678L),
-                 lexer.readBigInteger());
+                lexer.readBigInteger());
 
         assertEquals(Fnv.hashCode64("v2"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v2"), lexer.getNameHashCodeLCase());
         assertEquals("v2", lexer.getFieldName());
         assertEquals(new BigInteger("123456789012345678901234567890"),
-                 lexer.readBigInteger());
+                lexer.readBigInteger());
 
         assertEquals(Fnv.hashCode64("v3"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v3"), lexer.getNameHashCodeLCase());
         assertEquals("v3", lexer.getFieldName());
         assertEquals(BigInteger.valueOf(123),
-                 lexer.readBigInteger());
+                lexer.readBigInteger());
 
         assertEquals(Fnv.hashCode64("v4"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v4"), lexer.getNameHashCodeLCase());
@@ -153,7 +153,7 @@ public class ParserTest_bigInt {
         assertEquals(Fnv.hashCode64LCase("v8"), lexer.getNameHashCodeLCase());
         assertEquals("v8", lexer.getFieldName());
         assertEquals(BigInteger.ONE,
-                 lexer.readBigInteger());
+                lexer.readBigInteger());
 
         assertEquals(Fnv.hashCode64("v9"), lexer.readFieldNameHashCode());
         assertEquals(Fnv.hashCode64LCase("v9"), lexer.getNameHashCodeLCase());

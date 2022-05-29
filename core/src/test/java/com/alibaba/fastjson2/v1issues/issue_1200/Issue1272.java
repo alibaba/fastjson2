@@ -17,7 +17,7 @@ public class Issue1272 {
 
         try {
             JSON.toJSONString(new Point());
-        }catch (JSONException ex) {
+        } catch (JSONException ex) {
             exception = ex;
         }
         assertNotNull(exception);
@@ -25,7 +25,6 @@ public class Issue1272 {
     }
 
     public static class Point {
-
         private Long userId;
 
         public long getUserId() {

@@ -36,11 +36,11 @@ public class AtomicReferenceReadOnlyTest {
     public static class V0 {
         private final AtomicReference<Value> value;
 
-        public V0(){
+        public V0() {
             this(new Value(0));
         }
 
-        public V0(Value value){
+        public V0(Value value) {
             this.value = new AtomicReference(value);
         }
 

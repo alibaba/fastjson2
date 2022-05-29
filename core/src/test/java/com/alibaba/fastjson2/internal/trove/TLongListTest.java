@@ -43,8 +43,8 @@ public class TLongListTest {
 
     static class TLongSet {
         long[] symbolHashCodes;
-        int    symbolHashCodesSize;
-        int[]  symbolIndexes;
+        int symbolHashCodesSize;
+        int[] symbolIndexes;
 
         public TLongSet() {
             int capacity = 16;

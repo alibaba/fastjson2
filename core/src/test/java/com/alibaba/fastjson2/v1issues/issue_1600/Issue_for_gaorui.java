@@ -126,6 +126,5 @@ public class Issue_for_gaorui {
     }
 
     public static class Money {
-
     }
 }

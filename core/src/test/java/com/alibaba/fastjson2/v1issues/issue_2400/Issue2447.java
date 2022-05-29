@@ -10,7 +10,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue2447 {
-
     @Test
     public void test_for_issue() {
         VO vo = new VO();
@@ -35,7 +34,6 @@ public class Issue2447 {
     }
 
     public static class VO {
-
         @JSONField(ordinal = 1)
         public int id;
 
@@ -55,7 +53,8 @@ public class Issue2447 {
         public int longitude;
         public int latitude;
 
-        public Location() {}
+        public Location() {
+        }
 
         public Location(int longitude, int latitude) {
             this.longitude = longitude;

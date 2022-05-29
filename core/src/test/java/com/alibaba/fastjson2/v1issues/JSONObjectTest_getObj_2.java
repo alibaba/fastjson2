@@ -27,6 +27,7 @@ public class JSONObjectTest_getObj_2 {
     }
 
     public static <T> Type getType() {
-        return new TypeReference<T[]>() {}.getType();
+        return new TypeReference<T[]>() {
+        }.getType();
     }
 }

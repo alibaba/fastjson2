@@ -24,21 +24,21 @@ public class RefTest7 {
         bean.values1.put(new Key(), value);
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
 
         Bean bean2 = (Bean) JSONB.parseObject(bytes,
-                 Object.class,
-                 JSONReader.Feature.SupportAutoType,
-                 JSONReader.Feature.FieldBased,
-                 JSONReader.Feature.UseNativeObject
+                Object.class,
+                JSONReader.Feature.SupportAutoType,
+                JSONReader.Feature.FieldBased,
+                JSONReader.Feature.UseNativeObject
         );
         assertNotNull(bean2);
         assertNotNull(bean2.values);

@@ -23,7 +23,7 @@ public class Issue304 {
         tt.setName("testtt");
 
         List<Bean> list = new LinkedList<>();
-        for(int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) {
             Bean t = new Bean();
             t.setItem(tt);
             t.setName("test");
@@ -34,7 +34,7 @@ public class Issue304 {
                 JSONWriter.Feature.ReferenceDetection,
                 //JSONWriter.Feature.FieldBased
         };
-        result = JSON.toJSONString(list,features );
+        result = JSON.toJSONString(list, features);
     }
 
     @Test
@@ -69,7 +69,8 @@ public class Issue304 {
     @Test
     public void readStr() {
         JSONReader jsonReaderStr = TestUtils.createJSONReaderStr(result);
-        Type type = new TypeReference<List<Bean>>() {}.getType();
+        Type type = new TypeReference<List<Bean>>() {
+        }.getType();
         List<Bean> list4 = jsonReaderStr.read(type);
         jsonReaderStr.handleResolveTasks(list4);
         assertSame(list4.get(0).item, list4.get(1).item);
@@ -82,7 +83,7 @@ public class Issue304 {
         tt.setName("testtt");
 
         List<Bean> list = new LinkedList<>();
-        for(int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) {
             Bean t = new Bean();
             t.setItem(tt);
             t.setName("test");

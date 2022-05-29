@@ -18,7 +18,6 @@ public class MappingDemo {
         System.out.println(JSON.toJSONString(product));
         System.out.println(JSON.toJSONString(product, JSONWriter.Feature.BeanToArray));
     }
-
     @Test
     public void test_0_jsonb() {
         Product product = new Product();
@@ -27,7 +26,6 @@ public class MappingDemo {
         System.out.println(Arrays.toString(JSONB.toBytes(product)));
         System.out.println(Arrays.toString(JSONB.toBytes(product, JSONWriter.Feature.BeanToArray)));
     }
-
     @Test
     public void test_list() {
         List<Product> productList = new ArrayList<>();
@@ -39,7 +37,6 @@ public class MappingDemo {
         System.out.println(JSON.toJSONString(productList));
         System.out.println(JSON.toJSONString(productList, JSONWriter.Feature.BeanToArray));
     }
-
     @Test
     public void test_list_jsonb() {
         List<Product> productList = new ArrayList<>();
@@ -51,14 +48,12 @@ public class MappingDemo {
         System.out.println(Arrays.toString(JSONB.toBytes(productList)));
         System.out.println(Arrays.toString(JSONB.toBytes(productList, JSONWriter.Feature.BeanToArray)));
     }
-
     public static class Product {
         public int id;
         public String name;
 
         public Product() {
         }
-
         public Product(int id, String name) {
             this.id = id;
             this.name = name;

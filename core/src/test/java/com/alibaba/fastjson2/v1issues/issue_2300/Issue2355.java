@@ -21,7 +21,6 @@ public class Issue2355 {
     }
 
     static class VO {
-
         @JSONField(serializeFeatures = {JSONWriter.Feature.WriteBigDecimalAsPlain})
         private BigDecimal num;
 

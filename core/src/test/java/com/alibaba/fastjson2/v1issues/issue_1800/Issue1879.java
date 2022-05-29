@@ -34,7 +34,7 @@ public class Issue1879 {
 
     @Test
     public void test_for_issue_2_creators() throws Exception {
-        ObjectReaderCreator[] creators = new ObjectReaderCreator[] {
+        ObjectReaderCreator[] creators = new ObjectReaderCreator[]{
                 ObjectReaderCreator.INSTANCE,
 //                ObjectReaderCreatorLambda.INSTANCE,
 //                ObjectReaderCreatorASM.INSTANCE,
@@ -61,7 +61,7 @@ public class Issue1879 {
         @JSONCreator
         public M1(@JSONField(name = "ids") String ids) {
             this.ids = new ArrayList<Long>();
-            for(String id : ids.split(",")) {
+            for (String id : ids.split(",")) {
                 this.ids.add(Long.valueOf(id));
             }
         }

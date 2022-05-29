@@ -67,7 +67,7 @@ public class ZonedDateTimeTest {
 //        System.out.println("=========>zonedDateTime1:" + zonedDateTime1);
 
         String s = "\"2022-04-24T12:29:11.729+03:00[Europe/Moscow]\"";
-        ZonedDateTime zonedDateTime2 = JSON.parseObject(s,ZonedDateTime.class);
+        ZonedDateTime zonedDateTime2 = JSON.parseObject(s, ZonedDateTime.class);
         assertEquals(s, '"' + zonedDateTime2.toString() + '"');
     }
 

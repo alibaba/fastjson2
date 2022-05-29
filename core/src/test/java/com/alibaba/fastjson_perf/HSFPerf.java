@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 public class HSFPerf {
     byte[] bytes;
+
     public HSFPerf() {
         VeryComplexDO vo = VeryComplexDO.getFixedComplexDO();
         bytes = JSONB.toBytes(vo, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteClassName);

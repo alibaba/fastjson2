@@ -79,7 +79,7 @@ public class JSONPathSetCallbackTest {
 
     @Test
     public void testObjectArray() {
-        JSONObject object = JSONObject.of("items", new Integer[] {101});
+        JSONObject object = JSONObject.of("items", new Integer[]{101});
 
         JSONPath.setCallback(object, "$.items[0]",
                 o -> ((Integer) o).intValue() + 1
@@ -95,7 +95,7 @@ public class JSONPathSetCallbackTest {
 
     @Test
     public void testObjectArray1() {
-        JSONArray array = JSONArray.of().fluentAdd(new Integer[] {101}).fluentAdd(null);
+        JSONArray array = JSONArray.of().fluentAdd(new Integer[]{101}).fluentAdd(null);
 
         JSONPath.setCallback(array, "$[0][0]",
                 o -> ((Integer) o).intValue() + 1
@@ -106,7 +106,7 @@ public class JSONPathSetCallbackTest {
 
     @Test
     public void testIntArray() {
-        JSONObject object = JSONObject.of("items", new int[] {101});
+        JSONObject object = JSONObject.of("items", new int[]{101});
 
         JSONPath.setCallback(object, "$.items[0]",
                 o -> ((Integer) o).intValue() + 1
@@ -123,7 +123,7 @@ public class JSONPathSetCallbackTest {
 
     @Test
     public void testIntArray2() {
-        JSONArray array = JSONArray.of().fluentAdd(new int[] {101}).fluentAdd(null);
+        JSONArray array = JSONArray.of().fluentAdd(new int[]{101}).fluentAdd(null);
 
         JSONPath.setCallback(array, "$[0][0]",
                 o -> ((Integer) o).intValue() + 1

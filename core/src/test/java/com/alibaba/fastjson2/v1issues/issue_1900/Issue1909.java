@@ -50,6 +50,5 @@ public class Issue1909 {
     }
 
     public static class Request {
-
     }
 }

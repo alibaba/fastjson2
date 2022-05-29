@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ByteArrayFieldTest_1 {
     @Test
     public void test_array() throws Exception {
-        assertEquals("\"AQ==\"", JSON.toJSONString(new byte[] { 1 }, "base64"));
+        assertEquals("\"AQ==\"", JSON.toJSONString(new byte[]{1}, "base64"));
     }
 
     @Test

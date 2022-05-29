@@ -11,14 +11,14 @@ public class Issue116 {
 
     @Test
     public void test() {
-        Object result = JSONPath.extract(testJson,"$['soap:Envelope']['soap:Body'].getCountryCityByIpResponse.getCountryCityByIpResult.string[*]");
+        Object result = JSONPath.extract(testJson, "$['soap:Envelope']['soap:Body'].getCountryCityByIpResponse.getCountryCityByIpResult.string[*]");
         assertNotNull(result);
         assertEquals("[\"30.40.202.23\",\"美国 俄亥俄州哥伦布市国防部网络信息中心\"]", result.toString());
     }
 
     @Test
     public void test1() {
-        Object result = JSONPath.extract(testJson,"$.soap\\:Envelope.soap\\:Body.getCountryCityByIpResponse.getCountryCityByIpResult.string[*]");
+        Object result = JSONPath.extract(testJson, "$.soap\\:Envelope.soap\\:Body.getCountryCityByIpResponse.getCountryCityByIpResult.string[*]");
         assertNotNull(result);
         assertEquals("[\"30.40.202.23\",\"美国 俄亥俄州哥伦布市国防部网络信息中心\"]", result.toString());
     }

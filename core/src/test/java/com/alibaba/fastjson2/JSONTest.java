@@ -43,54 +43,54 @@ public class JSONTest {
     @Test
     public void test_parseObject_0() {
         IntField1 intField1 = JSON.parseObject("{\"v0000\":101}",
-                 (Type) IntField1.class, JSONReader.Feature.SupportSmartMatch);
+                (Type) IntField1.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(101, intField1.v0000);
         Date1 date1 = JSON.parseObject("{\"date\":\"20180131022733000-0800\"}",
-                 (Type) Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
+                (Type) Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
         assertNotNull(date1.getDate());
         assertThrows(JSONException.class, () -> JSON.parseObject("{\"date\":\"20180131022733000-0800\"}",
-                 (Type) Date1.class, ""));
+                (Type) Date1.class, ""));
     }
 
     @Test
     public void test_parseObject_2() {
         IntField1 vo = JSON.parseObject("{\"v0000\":101}".getBytes(StandardCharsets.UTF_8),
-                 (Type) IntField1.class);
+                (Type) IntField1.class);
         assertEquals(101, vo.v0000);
     }
 
     @Test
     public void test_parseObject_1() {
         IntField1 intField1 = JSON.parseObject("{\"v0000\":101}".getBytes(StandardCharsets.UTF_8),
-                 (Type) IntField1.class, JSONReader.Feature.SupportSmartMatch);
+                (Type) IntField1.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(101, intField1.v0000);
         Date1 date1 = JSON.parseObject("{\"date\":\"20180131022733000-0800\"}".getBytes(StandardCharsets.UTF_8),
-                 (Type) Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
+                (Type) Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
         assertNotNull(date1.getDate());
         assertThrows(JSONException.class, () -> JSON.parseObject("{\"date\":\"20180131022733000-0800\"}".getBytes(StandardCharsets.UTF_8),
-                 (Type) Date1.class, ""));
+                (Type) Date1.class, ""));
     }
 
     @Test
     public void test_parseObject_inputStream() {
         byte[] intBytes = "{\"v0000\":101}".getBytes(StandardCharsets.UTF_8);
         IntField1 intField1 = JSON.parseObject(new ByteArrayInputStream(intBytes),
-                 IntField1.class, JSONReader.Feature.SupportSmartMatch);
+                IntField1.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(101, intField1.v0000);
         byte[] dateBytes = "{\"date\":\"20180131022733000-0800\"}".getBytes(StandardCharsets.UTF_8);
         Date1 date1 = JSON.parseObject(new ByteArrayInputStream(dateBytes),
-                 Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
+                Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
         assertNotNull(date1.getDate());
         assertThrows(JSONException.class, () -> JSON.parseObject(new ByteArrayInputStream(dateBytes),
-                 Date1.class, ""));
+                Date1.class, ""));
     }
 
     @Test
     public void test_parseObject_inputStream_charset() {
         byte[] bytes = "{\"v0000\":101}".getBytes(StandardCharsets.UTF_8);
         IntField1 vo = JSON.parseObject(new ByteArrayInputStream(bytes),
-                 StandardCharsets.UTF_8,
-                 IntField1.class, JSONReader.Feature.SupportSmartMatch);
+                StandardCharsets.UTF_8,
+                IntField1.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(101, vo.v0000);
     }
 
@@ -98,32 +98,32 @@ public class JSONTest {
     public void test_parseObject_inputStream_charset1() {
         byte[] bytes = "{\"v0000\":101}".getBytes(StandardCharsets.UTF_8);
         IntField1 vo = JSON.parseObject(new ByteArrayInputStream(bytes),
-                 null,
-                 IntField1.class, JSONReader.Feature.SupportSmartMatch);
+                null,
+                IntField1.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(101, vo.v0000);
     }
 
     @Test
     public void test_parseObject_inputStream_consumer() {
         ByteArrayInputStream input = new ByteArrayInputStream(
-            "{\"id\":1,\"name\":\"fastjson\"}\n{\"id\":2,\"name\":\"fastjson2\"}\n".getBytes(StandardCharsets.UTF_8)
+                "{\"id\":1,\"name\":\"fastjson\"}\n{\"id\":2,\"name\":\"fastjson2\"}\n".getBytes(StandardCharsets.UTF_8)
         );
 
         JSON.parseObject(
-            input, StandardCharsets.UTF_8,
-            '\n', User.class, (Consumer<User>) user -> {
-                assertNotNull(user);
-                switch (user.id) {
-                    case 1: {
-                        assertEquals("fastjson", user.name);
-                        break;
+                input, StandardCharsets.UTF_8,
+                '\n', User.class, (Consumer<User>) user -> {
+                    assertNotNull(user);
+                    switch (user.id) {
+                        case 1: {
+                            assertEquals("fastjson", user.name);
+                            break;
+                        }
+                        case 2: {
+                            assertEquals("fastjson2", user.name);
+                            break;
+                        }
                     }
-                    case 2: {
-                        assertEquals("fastjson2", user.name);
-                        break;
-                    }
-                }
-        });
+                });
     }
 
     @Test
@@ -498,13 +498,13 @@ public class JSONTest {
     @Test
     public void test_writeNull() {
         assertEquals("null",
-                 JSON.toJSONString(null, JSONWriter.Feature.WriteNulls));
+                JSON.toJSONString(null, JSONWriter.Feature.WriteNulls));
     }
 
     @Test
     public void test_writeNull_utf8() {
         assertEquals("null",
-                 new String(JSON.toJSONBytes(null, JSONWriter.Feature.WriteNulls)));
+                new String(JSON.toJSONBytes(null, JSONWriter.Feature.WriteNulls)));
     }
 
     @Test
@@ -512,7 +512,7 @@ public class JSONTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         JSON.writeTo(out, Collections.singleton(1));
         assertEquals("[1]",
-                 new String(out.toByteArray()));
+                new String(out.toByteArray()));
     }
 
     @Test
@@ -521,7 +521,7 @@ public class JSONTest {
         JSON.writeTo(out,
                 null, new Filter[0], JSONWriter.Feature.WriteNulls);
         assertEquals("null",
-                 new String(out.toByteArray()));
+                new String(out.toByteArray()));
     }
 
     @Test
@@ -530,7 +530,7 @@ public class JSONTest {
         JSON.writeTo(out,
                 Collections.singleton(1), new Filter[0], JSONWriter.Feature.WriteNulls);
         assertEquals("[1]",
-                 new String(out.toByteArray()));
+                new String(out.toByteArray()));
     }
 
     @Test
@@ -539,7 +539,7 @@ public class JSONTest {
         JSON.writeTo(out,
                 Collections.singleton(1), Arrays.asList(new SimplePropertyPreFilter()).toArray(new Filter[0]), JSONWriter.Feature.WriteNulls);
         assertEquals("[1]",
-                 new String(out.toByteArray()));
+                new String(out.toByteArray()));
     }
 
     @Test
@@ -548,11 +548,11 @@ public class JSONTest {
         JSON.writeTo(out,
                 Collections.singleton(1), "millis", new Filter[0], JSONWriter.Feature.WriteNulls);
         assertEquals("[1]",
-                 new String(out.toByteArray()));
+                new String(out.toByteArray()));
         JSON.writeTo(out,
                 Collections.singleton(1), "", new Filter[0], JSONWriter.Feature.WriteNulls);
         assertEquals("[1][1]",
-                 new String(out.toByteArray()));
+                new String(out.toByteArray()));
     }
 
     @Test
@@ -580,16 +580,16 @@ public class JSONTest {
     public void test_num_int() {
         int[] numbers = new int[]{
                 1,
-                 10,
-                 100,
-                 1000,
-                 10000,
-                 100000,
-                 1000000,
-                 10000000,
-                 100000000,
-                 1000000000,
-                 1000000000
+                10,
+                100,
+                1000,
+                10000,
+                100000,
+                1000000,
+                10000000,
+                100000000,
+                1000000000,
+                1000000000
         };
         for (int i : numbers) {
             assertEquals(i, JSON.parse(Integer.toString(i)));
@@ -600,14 +600,14 @@ public class JSONTest {
     public void test_num_long() {
         long[] numbers = new long[]{
                 10000000000L,
-                 100000000000L,
-                 1000000000000L,
-                 10000000000000L,
-                 100000000000000L,
-                 1000000000000000L,
-                 10000000000000000L,
-                 100000000000000000L,
-                 1000000000000000000L
+                100000000000L,
+                1000000000000L,
+                10000000000000L,
+                100000000000000L,
+                1000000000000000L,
+                10000000000000000L,
+                100000000000000000L,
+                1000000000000000000L
         };
         for (long i : numbers) {
             assertEquals(i, JSON.parse(Long.toString(i)));
@@ -621,22 +621,22 @@ public class JSONTest {
         assertEquals(Fnv.hashCode64("@type"), ObjectReaderImplList.INSTANCE.getTypeKeyHash());
 
         assertEquals(123,
-                 ((List) JSON.parseObject("\"123\""
+                ((List) JSON.parseObject("\"123\""
                         , new TypeReference<List<Integer>>() {
                         }.getType()))
                         .get(0));
         assertEquals(123,
-                 ((List) JSON.parseObject("\"123\""
+                ((List) JSON.parseObject("\"123\""
                         , new TypeReference<LinkedList<Integer>>() {
                         }.getType()))
                         .get(0));
         assertEquals(123,
-                 ((List) JSON.parseObject("\"123\""
+                ((List) JSON.parseObject("\"123\""
                         , new TypeReference<ArrayList<Integer>>() {
                         }.getType()))
                         .get(0));
         assertEquals(123,
-                 ((List) JSON.parseObject("\"123\""
+                ((List) JSON.parseObject("\"123\""
                         , new TypeReference<AbstractList<Integer>>() {
                         }.getType()))
                         .get(0));
@@ -650,22 +650,22 @@ public class JSONTest {
     @Test
     public void test_list_str_0() {
         assertEquals("123",
-                 ((List) JSON.parseObject("[\"123\"]"
+                ((List) JSON.parseObject("[\"123\"]"
                         , new TypeReference<List<String>>() {
                         }.getType()))
                         .get(0));
         assertEquals("123",
-                 ((List) JSON.parseObject("[\"123\"]"
+                ((List) JSON.parseObject("[\"123\"]"
                         , new TypeReference<LinkedList<String>>() {
                         }.getType()))
                         .get(0));
         assertEquals("123",
-                 ((List) JSON.parseObject("[\"123\"]"
+                ((List) JSON.parseObject("[\"123\"]"
                         , new TypeReference<ArrayList<String>>() {
                         }.getType()))
                         .get(0));
         assertEquals("123",
-                 ((List) JSON.parseObject("[\"123\"]"
+                ((List) JSON.parseObject("[\"123\"]"
                         , new TypeReference<AbstractList<String>>() {
                         }.getType()))
                         .get(0));
@@ -748,8 +748,10 @@ public class JSONTest {
         assertNull(JSON.parseObject((String) null, (Type) User.class, ""));
         assertNull(JSON.parseObject((String) null, (Type) User.class, "", JSONReader.Feature.SupportAutoType));
 
-        assertNull(JSON.parseObject((String) null, new TypeReference<List<User>>(){}));
-        assertNull(JSON.parseObject((String) null, new TypeReference<List<User>>(){}, JSONReader.Feature.SupportAutoType));
+        assertNull(JSON.parseObject((String) null, new TypeReference<List<User>>() {
+        }));
+        assertNull(JSON.parseObject((String) null, new TypeReference<List<User>>() {
+        }, JSONReader.Feature.SupportAutoType));
 
         assertNull(JSON.parseArray((String) null));
         assertNull(JSON.parseArray((String) null, JSONReader.Feature.SupportAutoType));
@@ -762,7 +764,7 @@ public class JSONTest {
 
         assertNull(JSON.parseArray("", User.class));
         assertNull(JSON.parseArray("", User.class, JSONReader.Feature.SupportAutoType));
-        assertNull(JSON.parseArray("", new Type[] {User.class}, JSONReader.Feature.SupportAutoType));
+        assertNull(JSON.parseArray("", new Type[]{User.class}, JSONReader.Feature.SupportAutoType));
 
         assertEquals("null", JSON.toJSONString(null, (Filter) null));
         assertEquals("null", JSON.toJSONString(null, (Filter[]) null));
@@ -804,7 +806,7 @@ public class JSONTest {
         }
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            JSON.writeTo(out, 12, "", new Filter[] {new PascalNameFilter()});
+            JSON.writeTo(out, 12, "", new Filter[]{new PascalNameFilter()});
             assertEquals("12", new String(out.toByteArray()));
         }
         {
@@ -819,17 +821,17 @@ public class JSONTest {
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             assertThrows(JSONException.class, () ->
-            JSON.writeTo(out, JSONObject.of("id", 123), new Filter[] {new NameFilter() {
-                @Override
-                public String process(Object object, String name, Object value) {
-                    throw new UnsupportedOperationException();
-                }
-            }}));
+                    JSON.writeTo(out, JSONObject.of("id", 123), new Filter[]{new NameFilter() {
+                        @Override
+                        public String process(Object object, String name, Object value) {
+                            throw new UnsupportedOperationException();
+                        }
+                    }}));
         }
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             assertThrows(JSONException.class, () ->
-                    JSON.writeTo(out, JSONObject.of("id", 123), "", new Filter[] {new NameFilter() {
+                    JSON.writeTo(out, JSONObject.of("id", 123), "", new Filter[]{new NameFilter() {
                         @Override
                         public String process(Object object, String name, Object value) {
                             throw new UnsupportedOperationException();
@@ -840,7 +842,7 @@ public class JSONTest {
 
     @Test
     public void test_toJSONBytes() {
-        JSON.toJSONBytes(123, "", new Filter[] {new PascalNameFilter()});
+        JSON.toJSONBytes(123, "", new Filter[]{new PascalNameFilter()});
     }
 
     @Test

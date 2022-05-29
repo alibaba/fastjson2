@@ -72,7 +72,7 @@ public class JSONCreatorTest {
         int id32;
         long id64;
 
-        @JSONCreator(parameterNames = {"id8","id16","id32","id64"})
+        @JSONCreator(parameterNames = {"id8", "id16", "id32", "id64"})
         public VO1(byte id8, short id16, int id32, long id64) {
             this.id8 = id8;
             this.id16 = id16;
@@ -87,7 +87,7 @@ public class JSONCreatorTest {
         Integer id32;
         Long id64;
 
-        @JSONCreator(parameterNames = {"id8","id16","id32","id64"})
+        @JSONCreator(parameterNames = {"id8", "id16", "id32", "id64"})
         public VO2(byte id8, short id16, int id32, long id64) {
             this.id8 = id8;
             this.id16 = id16;

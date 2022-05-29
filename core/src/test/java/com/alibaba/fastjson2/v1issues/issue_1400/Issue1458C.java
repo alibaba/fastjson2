@@ -25,7 +25,6 @@ public class Issue1458C {
 
     public static class HostPoint
             implements Serializable {
-
         private final HostAddress address;
 
         @JSONField(name = "fingerprint")

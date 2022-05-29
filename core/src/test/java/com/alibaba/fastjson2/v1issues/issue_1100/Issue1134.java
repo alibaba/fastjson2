@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Created by wenshao on 09/04/2017.
  */
 public class Issue1134 {
-
     @Test
     public void test_for_issue() throws Exception {
         Model model = new Model();
@@ -25,11 +24,11 @@ public class Issue1134 {
     }
 
     public static class Model {
-        @JSONField(ordinal = 1, name="Dimension")
+        @JSONField(ordinal = 1, name = "Dimension")
         private int dimension;
-        @JSONField(ordinal = 2, name="PassCode")
+        @JSONField(ordinal = 2, name = "PassCode")
         private String passCode;
-        @JSONField(ordinal = 3, name="BlockPos")
+        @JSONField(ordinal = 3, name = "BlockPos")
         private BlockPos blockpos;
 
         public int getDimension() {

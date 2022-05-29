@@ -62,10 +62,10 @@ public class AtomicReferenceTest {
     public static class V0 {
         private AtomicReference<Value> value;
 
-        public V0(){
+        public V0() {
         }
 
-        public V0(Value value){
+        public V0(Value value) {
             this.value = new AtomicReference(value);
         }
 

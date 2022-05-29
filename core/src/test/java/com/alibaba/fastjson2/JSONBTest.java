@@ -38,7 +38,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_empty() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Object.class,
                 Cloneable.class,
                 Closeable.class,
@@ -55,7 +55,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_map_str_str() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Map.class,
                 AbstractMap.class,
                 ConcurrentMap.class,
@@ -80,7 +80,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_map_str_long() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Map.class,
                 AbstractMap.class,
                 ConcurrentMap.class,
@@ -105,7 +105,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_list() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Object.class,
                 Iterable.class,
                 Collection.class,
@@ -126,7 +126,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_list_parm_emtpy() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Object.class,
                 Iterable.class,
                 Collection.class,
@@ -149,7 +149,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_list_str() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Iterable.class,
                 Collection.class,
                 List.class,
@@ -171,7 +171,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_list_long() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Iterable.class,
                 Collection.class,
                 List.class,
@@ -193,7 +193,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_queue() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Queue.class,
                 Deque.class,
                 AbstractSequentialList.class,
@@ -213,7 +213,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_queue_str() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Queue.class,
                 Deque.class,
                 AbstractSequentialList.class,
@@ -234,7 +234,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_queue_long() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Queue.class,
                 Deque.class,
                 AbstractSequentialList.class,
@@ -255,7 +255,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_set() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Set.class,
                 NavigableSet.class,
                 SortedSet.class,
@@ -276,7 +276,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_set_str() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Set.class,
                 NavigableSet.class,
                 SortedSet.class,
@@ -298,7 +298,7 @@ public class JSONBTest {
 
     @Test
     public void test_parse_object_typed_set_long() {
-        Type[] types = new Type[] {
+        Type[] types = new Type[]{
                 Set.class,
                 NavigableSet.class,
                 SortedSet.class,
@@ -416,18 +416,18 @@ public class JSONBTest {
 
     @Test
     public void test_num_int() {
-        int[] numbers = new int[] {
+        int[] numbers = new int[]{
                 1,
-                 10,
-                 100,
-                 1000,
-                 10000,
-                 100000,
-                 1000000,
-                 10000000,
-                 100000000,
-                 1000000000,
-                 1000000000
+                10,
+                100,
+                1000,
+                10000,
+                100000,
+                1000000,
+                10000000,
+                100000000,
+                1000000000,
+                1000000000
         };
         for (int i : numbers) {
             byte[] jsonbBytes = JSONB.toBytes(i);
@@ -437,18 +437,18 @@ public class JSONBTest {
 
     @Test
     public void test_num_int_cast_str() {
-        int[] numbers = new int[] {
+        int[] numbers = new int[]{
                 1,
-                 10,
-                 100,
-                 1000,
-                 10000,
-                 100000,
-                 1000000,
-                 10000000,
-                 100000000,
-                 1000000000,
-                 1000000000
+                10,
+                100,
+                1000,
+                10000,
+                100000,
+                1000000,
+                10000000,
+                100000000,
+                1000000000,
+                1000000000
         };
         for (int i : numbers) {
             byte[] jsonbBytes = JSONB.toBytes(i);
@@ -458,18 +458,18 @@ public class JSONBTest {
 
     @Test
     public void test_num_str_cast_int() {
-        int[] numbers = new int[] {
+        int[] numbers = new int[]{
                 1,
-                 10,
-                 100,
-                 1000,
-                 10000,
-                 100000,
-                 1000000,
-                 10000000,
-                 100000000,
-                 1000000000,
-                 1000000000
+                10,
+                100,
+                1000,
+                10000,
+                100000,
+                1000000,
+                10000000,
+                100000000,
+                1000000000,
+                1000000000
         };
         for (int i : numbers) {
             byte[] jsonbBytes = JSONB.toBytes(Integer.toString(i));
@@ -479,16 +479,16 @@ public class JSONBTest {
 
     @Test
     public void test_num_long() {
-        long[] numbers = new long[] {
+        long[] numbers = new long[]{
                 10000000000L,
-                 100000000000L,
-                 1000000000000L,
-                 10000000000000L,
-                 100000000000000L,
-                 1000000000000000L,
-                 10000000000000000L,
-                 100000000000000000L,
-                 1000000000000000000L
+                100000000000L,
+                1000000000000L,
+                10000000000000L,
+                100000000000000L,
+                1000000000000000L,
+                10000000000000000L,
+                100000000000000000L,
+                1000000000000000000L
         };
         for (long i : numbers) {
             byte[] jsonbBytes = JSONB.toBytes(i);
@@ -498,7 +498,7 @@ public class JSONBTest {
 
     @Test
     public void test_num_long_1() {
-        long[] numbers = new long[] {
+        long[] numbers = new long[]{
                 2000
         };
         for (long i : numbers) {
@@ -509,16 +509,16 @@ public class JSONBTest {
 
     @Test
     public void test_num_long_cast_str() {
-        long[] numbers = new long[] {
+        long[] numbers = new long[]{
                 10000000000L,
-                 100000000000L,
-                 1000000000000L,
-                 10000000000000L,
-                 100000000000000L,
-                 1000000000000000L,
-                 10000000000000000L,
-                 100000000000000000L,
-                 1000000000000000000L
+                100000000000L,
+                1000000000000L,
+                10000000000000L,
+                100000000000000L,
+                1000000000000000L,
+                10000000000000000L,
+                100000000000000000L,
+                1000000000000000000L
         };
         for (long i : numbers) {
             byte[] jsonbBytes = JSONB.toBytes(i);
@@ -528,16 +528,16 @@ public class JSONBTest {
 
     @Test
     public void test_num_str_cast_long() {
-        long[] numbers = new long[] {
+        long[] numbers = new long[]{
                 10000000000L,
-                 100000000000L,
-                 1000000000000L,
-                 10000000000000L,
-                 100000000000000L,
-                 1000000000000000L,
-                 10000000000000000L,
-                 100000000000000000L,
-                 1000000000000000000L
+                100000000000L,
+                1000000000000L,
+                10000000000000L,
+                100000000000000L,
+                1000000000000000L,
+                10000000000000000L,
+                100000000000000000L,
+                1000000000000000000L
         };
         for (long i : numbers) {
             byte[] jsonbBytes = JSONB.toBytes(Long.toString(i));
@@ -547,7 +547,7 @@ public class JSONBTest {
 
     @Test
     public void test_bigint_cast_str() {
-        BigInteger[] numbers = new BigInteger[] {
+        BigInteger[] numbers = new BigInteger[]{
                 BigInteger.ZERO,
                 BigInteger.ONE,
                 BigInteger.TEN,
@@ -563,34 +563,34 @@ public class JSONBTest {
 
     @Test
     public void test_bigdecimal_cast_str() {
-         BigDecimal[] numbers = new BigDecimal[] {
-                 BigDecimal.ZERO,
-                 BigDecimal.ONE,
-                 BigDecimal.TEN,
-                 BigDecimal.valueOf(Byte.MIN_VALUE),
-                 BigDecimal.valueOf(Byte.MAX_VALUE),
-                 BigDecimal.valueOf(INT24_MIN),
-                 BigDecimal.valueOf(INT24_MAX),
-                 BigDecimal.valueOf(Short.MIN_VALUE),
-                 BigDecimal.valueOf(Short.MAX_VALUE),
-                 BigDecimal.valueOf(Integer.MIN_VALUE),
-                 BigDecimal.valueOf(Integer.MAX_VALUE),
-                 BigDecimal.valueOf(Long.MIN_VALUE),
-                 BigDecimal.valueOf(Long.MAX_VALUE),
-                 BigDecimal.valueOf(Byte.MIN_VALUE, 1),
-                 BigDecimal.valueOf(Byte.MAX_VALUE, 2),
-                 BigDecimal.valueOf(INT24_MIN, 1),
-                 BigDecimal.valueOf(INT24_MAX, 2),
-                 BigDecimal.valueOf(Short.MIN_VALUE, 1),
-                 BigDecimal.valueOf(Short.MAX_VALUE, 2),
-                 BigDecimal.valueOf(Integer.MIN_VALUE, 3),
-                 BigDecimal.valueOf(Integer.MAX_VALUE, 4),
-                 BigDecimal.valueOf(Long.MIN_VALUE, 5),
-                 BigDecimal.valueOf(Long.MAX_VALUE, 6),
-                 new BigDecimal("1.23"),
-                 new BigDecimal("123456789.0123456789"),
-                 new BigDecimal("12345678901234567890123456789012345678901234567890123456789012345678901234567890"),
-                 new BigDecimal("1234567890.1234567890123456789012345678901234567890123456789012345678901234567890"),
+        BigDecimal[] numbers = new BigDecimal[]{
+                BigDecimal.ZERO,
+                BigDecimal.ONE,
+                BigDecimal.TEN,
+                BigDecimal.valueOf(Byte.MIN_VALUE),
+                BigDecimal.valueOf(Byte.MAX_VALUE),
+                BigDecimal.valueOf(INT24_MIN),
+                BigDecimal.valueOf(INT24_MAX),
+                BigDecimal.valueOf(Short.MIN_VALUE),
+                BigDecimal.valueOf(Short.MAX_VALUE),
+                BigDecimal.valueOf(Integer.MIN_VALUE),
+                BigDecimal.valueOf(Integer.MAX_VALUE),
+                BigDecimal.valueOf(Long.MIN_VALUE),
+                BigDecimal.valueOf(Long.MAX_VALUE),
+                BigDecimal.valueOf(Byte.MIN_VALUE, 1),
+                BigDecimal.valueOf(Byte.MAX_VALUE, 2),
+                BigDecimal.valueOf(INT24_MIN, 1),
+                BigDecimal.valueOf(INT24_MAX, 2),
+                BigDecimal.valueOf(Short.MIN_VALUE, 1),
+                BigDecimal.valueOf(Short.MAX_VALUE, 2),
+                BigDecimal.valueOf(Integer.MIN_VALUE, 3),
+                BigDecimal.valueOf(Integer.MAX_VALUE, 4),
+                BigDecimal.valueOf(Long.MIN_VALUE, 5),
+                BigDecimal.valueOf(Long.MAX_VALUE, 6),
+                new BigDecimal("1.23"),
+                new BigDecimal("123456789.0123456789"),
+                new BigDecimal("12345678901234567890123456789012345678901234567890123456789012345678901234567890"),
+                new BigDecimal("1234567890.1234567890123456789012345678901234567890123456789012345678901234567890"),
         };
         for (BigDecimal i : numbers) {
             byte[] jsonbBytes = JSONB.toBytes(i);
@@ -617,7 +617,7 @@ public class JSONBTest {
 
     @Test
     public void testWriteInt() {
-        int[] values = new int[] {
+        int[] values = new int[]{
                 0,
                 1,
                 10,
@@ -662,7 +662,7 @@ public class JSONBTest {
 
     @Test
     public void testWriteLong() {
-        long[] values = new long[] {
+        long[] values = new long[]{
                 0,
                 1,
                 10,
@@ -702,7 +702,7 @@ public class JSONBTest {
                 99999999999999999L,
                 999999999999999999L,
                 Long.MAX_VALUE
-                -1,
+                        - 1,
                 -10,
                 -100,
                 -1000,
@@ -790,13 +790,13 @@ public class JSONBTest {
     @Test
     public void testToBytesNull() {
         assertArrayEquals(new byte[]{JSONB.Constants.BC_NULL},
-                 JSONB.toBytes((String) null));
+                JSONB.toBytes((String) null));
         assertArrayEquals(new byte[]{JSONB.Constants.BC_NULL},
-                 JSONB.toBytes((String) null, (Charset) null));
+                JSONB.toBytes((String) null, (Charset) null));
         assertArrayEquals(new byte[]{JSONB.Constants.BC_NULL},
-                 JSONB.toBytes((BigInteger) null));
+                JSONB.toBytes((BigInteger) null));
         assertArrayEquals(new byte[]{JSONB.Constants.BC_NULL},
-                 JSONB.toBytes((BigDecimal) null));
+                JSONB.toBytes((BigDecimal) null));
     }
 
     @Test
@@ -914,7 +914,7 @@ public class JSONBTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         JSONB.writeTo(out, Collections.singleton(1));
         assertEquals("[1]",
-                 JSON.toJSONString(JSONB.parse(out.toByteArray())));
+                JSON.toJSONString(JSONB.parse(out.toByteArray())));
     }
 
     @Test

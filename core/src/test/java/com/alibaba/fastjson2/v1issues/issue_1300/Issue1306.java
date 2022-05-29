@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Created by kimmking on 02/07/2017.
  */
 public class Issue1306 {
-
     @Test
     public void test_for_issue() {
         Goods goods = new Goods();
@@ -29,19 +28,19 @@ public class Issue1306 {
         assertNotNull(n.getGoodsList().get(0).getProperties());
     }
 
-    public abstract static class IdEntity<ID extends Serializable> implements Cloneable, Serializable{
-
+    public abstract static class IdEntity<ID extends Serializable> implements Cloneable, Serializable {
         private static final long serialVersionUID = 4877536176216854937L;
 
-        public IdEntity() {}
+        public IdEntity() {
+        }
 
         public abstract ID getId();
+
         public abstract void setId(ID id);
     }
 
     public static class LongEntity
             extends IdEntity<Long> {
-
         private static final long serialVersionUID = -2740365657805589848L;
 
         private Long id;
@@ -57,7 +56,7 @@ public class Issue1306 {
     }
 
     public static class Goods
-            extends LongEntity{
+            extends LongEntity {
         private static final long serialVersionUID = -5751106975913625097L;
         private List<Property> properties;
 
@@ -70,7 +69,7 @@ public class Issue1306 {
         }
 
         public static class Property
-                extends LongEntity{
+                extends LongEntity {
             private static final long serialVersionUID = 7941148286688199390L;
         }
     }
@@ -79,8 +78,10 @@ public class Issue1306 {
             extends LongEntity {
         private static final long serialVersionUID = 2988415809510669142L;
 
-        public TT(){}
-        public TT(Goods goods){
+        public TT() {
+        }
+
+        public TT(Goods goods) {
             goodsList = Arrays.asList(goods);
         }
 

@@ -16,7 +16,7 @@ public class BuilderTest3 {
         assertEquals("ljw", vo.getName());
     }
 
-    @JSONType(builder=VOBuilder.class)
+    @JSONType(builder = VOBuilder.class)
     public static class VO {
         private int id;
         private String name;
@@ -30,7 +30,7 @@ public class BuilderTest3 {
         }
     }
 
-    @JSONPOJOBuilder(withPrefix="kk", buildMethod="mmm")
+    @JSONPOJOBuilder(withPrefix = "kk", buildMethod = "mmm")
     public static class VOBuilder {
         private VO vo = new VO();
 

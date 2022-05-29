@@ -23,8 +23,7 @@ public class Issue1319C {
     }
 
     @JSONType(seeAlso = {OtherEnum.class, MyEnum.class})
-    interface EnumInterface{
-
+    interface EnumInterface {
     }
 
     @JSONType(typeName = "myEnum")
@@ -38,7 +37,7 @@ public class Issue1319C {
         Other
     }
 
-    static class MyTest{
+    static class MyTest {
         private int value;
         private EnumInterface myEnum;
 
@@ -49,15 +48,19 @@ public class Issue1319C {
             this.value = property;
             this.myEnum = enumProperty;
         }
+
         public int getValue() {
             return value;
         }
+
         public EnumInterface getMyEnum() {
             return myEnum;
         }
+
         public void setMyEnum(EnumInterface myEnum) {
             this.myEnum = myEnum;
         }
+
         public void setValue(int value) {
             this.value = value;
         }

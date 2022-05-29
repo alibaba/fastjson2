@@ -6,7 +6,7 @@ import java.util.Properties;
 
 /**
  * 卡槽
- * */
+ */
 public class Item {
     public List<Text> title; // 标题
     public List<Image> imageUrl; // 显示图片

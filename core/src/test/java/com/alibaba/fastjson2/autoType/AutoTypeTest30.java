@@ -20,21 +20,21 @@ public class AutoTypeTest30 {
         bean.items = list;
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
 
         Bean1 bean2 = (Bean1) JSONB.parseObject(bytes,
-                 Object.class,
-                 JSONReader.Feature.SupportAutoType,
-                 JSONReader.Feature.FieldBased,
-                 JSONReader.Feature.UseNativeObject
+                Object.class,
+                JSONReader.Feature.SupportAutoType,
+                JSONReader.Feature.FieldBased,
+                JSONReader.Feature.UseNativeObject
         );
         assertNotNull(bean2);
         assertNotNull(bean2.items);
@@ -67,21 +67,21 @@ public class AutoTypeTest30 {
         }
 
         byte[] bytes = JSONB.toBytes(list,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
 
         List list2 = (List) JSONB.parseObject(bytes,
-                 Object.class,
-                 JSONReader.Feature.SupportAutoType,
-                 JSONReader.Feature.FieldBased,
-                 JSONReader.Feature.UseNativeObject
+                Object.class,
+                JSONReader.Feature.SupportAutoType,
+                JSONReader.Feature.FieldBased,
+                JSONReader.Feature.UseNativeObject
         );
 
         Bean1 bean = (Bean1) list.get(0);
@@ -105,12 +105,12 @@ public class AutoTypeTest30 {
         bean.value = "1001";
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -122,10 +122,10 @@ public class AutoTypeTest30 {
                 JSONB.toJSONString(bytes));
 
         Bean2 bean2 = (Bean2) JSONB.parseObject(bytes,
-                 Object.class,
-                 JSONReader.Feature.SupportAutoType,
-                 JSONReader.Feature.FieldBased,
-                 JSONReader.Feature.UseNativeObject
+                Object.class,
+                JSONReader.Feature.SupportAutoType,
+                JSONReader.Feature.FieldBased,
+                JSONReader.Feature.UseNativeObject
         );
         assertNotNull(bean2);
         assertNotNull(bean2.value);

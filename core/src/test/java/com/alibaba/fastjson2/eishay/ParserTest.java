@@ -23,7 +23,7 @@ public class ParserTest {
 
     public ParserTest() {
         JSONReader p = null;
-        final ObjectReader<Media> mediaConsumer = ObjectReaders.of (
+        final ObjectReader<Media> mediaConsumer = ObjectReaders.of(
                 Media::new,
                 fieldReaderInt("bitrate", Media::setBitrate),
                 fieldReaderLong("duration", Media::setDuration),
@@ -37,7 +37,7 @@ public class ParserTest {
                 fieldReaderInt("width", Media::setWidth)
         );
 
-        final ObjectReader<Image> imageConsumer = ObjectReaders.of (
+        final ObjectReader<Image> imageConsumer = ObjectReaders.of(
                 Image::new,
                 fieldReaderInt("height", Image::setHeight),
                 fieldReader("size", Image.Size.class, Image::setSize),
@@ -199,22 +199,22 @@ public class ParserTest {
 
         JSONB.SymbolTable symbolTable = JSONB.symbolTable(
                 "images",
-                 "height",
-                 "size",
-                 "title",
-                 "uri",
-                 "width",
-                 "media",
-                 "bitrate",
-                 "duration",
-                 "format",
-                 "persons",
-                 "player",
-                 "LARGE",
-                 "SMALL",
-                 "JAVA",
-                 "FLASH",
-                 "copyright"
+                "height",
+                "size",
+                "title",
+                "uri",
+                "width",
+                "media",
+                "bitrate",
+                "duration",
+                "format",
+                "persons",
+                "player",
+                "LARGE",
+                "SMALL",
+                "JAVA",
+                "FLASH",
+                "copyright"
         );
 
         JSONWriter jsonWriter = JSONWriter.ofJSONB(symbolTable);

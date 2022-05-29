@@ -11,7 +11,7 @@ public class Issue27 {
     public void test_parse() {
         char a = 0x5c;
         HashMap<Object, Object> hashMap = new HashMap<>();
-        hashMap.put("1",a);
+        hashMap.put("1", a);
 
         String string = JSON.toJSONString(hashMap);
         Assertions.assertEquals("{\"1\":\"\\\\\"}", string);
@@ -22,7 +22,7 @@ public class Issue27 {
     public void test_parse1() {
         char a = '"';
         HashMap<Object, Object> hashMap = new HashMap<>();
-        hashMap.put("1",a);
+        hashMap.put("1", a);
 
         String string = JSON.toJSONString(hashMap);
         Assertions.assertEquals("{\"1\":\"\\\"\"}", string);

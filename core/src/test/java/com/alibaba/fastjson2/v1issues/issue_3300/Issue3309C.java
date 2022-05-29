@@ -15,7 +15,7 @@ public class Issue3309C {
     @Test
     public void test_for_issue() {
         JSONObject jsonObj = new JSONObject();
-        jsonObj.put("formatDate","20200623 15:20:01");
+        jsonObj.put("formatDate", "20200623 15:20:01");
         DateFormatTest dateFormatTest = jsonObj.toJavaObject(DateFormatTest.class);
         JSON.toJSONString(dateFormatTest);
     }

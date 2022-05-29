@@ -24,7 +24,7 @@ public class Issue3206C {
     }
 
     public static class VO {
-        @JSONField(format="yyyy-MM-dd")
+        @JSONField(format = "yyyy-MM-dd")
         public java.util.Date date;
     }
 }

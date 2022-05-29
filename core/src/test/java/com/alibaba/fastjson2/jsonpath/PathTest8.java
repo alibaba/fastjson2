@@ -12,7 +12,7 @@ public class PathTest8 {
     @Test
     public void test0() {
         assertEquals("{\"color\":\"red\",\"price\":19.95,\"gears\":[23,50],\"extra\":{\"x\":0},\"escape\":\"Esc\\b\\f\\n\\r\\t*\",\"nullValue\":null}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         JSONPath.extract(STR, "$.store.bicycle[?(@.color == 'red' )]"),
                         JSONWriter.Feature.WriteNulls
                 )
@@ -22,7 +22,7 @@ public class PathTest8 {
     @Test
     public void test1() {
         assertEquals("{\"color\":\"red\",\"price\":19.95,\"gears\":[23,50],\"extra\":{\"x\":0},\"escape\":\"Esc\\b\\f\\n\\r\\t*\",\"nullValue\":null}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         JSONPath.extract(STR, "$.store.bicycle[?(@.gears == [23, 50])]"),
                         JSONWriter.Feature.WriteNulls
                 )
@@ -30,14 +30,14 @@ public class PathTest8 {
         assertNull(JSONPath.extract(STR, "$.store.bicycle[?(@.gears == [23, 77])]"));
 
         assertEquals("{\"color\":\"red\",\"price\":19.95,\"gears\":[23,50],\"extra\":{\"x\":0},\"escape\":\"Esc\\b\\f\\n\\r\\t*\",\"nullValue\":null}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         JSONPath.extract(STR, "$.store.bicycle[?(@.extra == {\"x\":0})]"),
                         JSONWriter.Feature.WriteNulls
                 )
         );
 
         assertEquals("{\"color\":\"red\",\"price\":19.95,\"gears\":[23,50],\"extra\":{\"x\":0},\"escape\":\"Esc\\b\\f\\n\\r\\t*\",\"nullValue\":null}",
-                 JSON.toJSONString(
+                JSON.toJSONString(
                         JSONPath.extract(STR, "$.store.bicycle[?(@.escape == 'Esc\\b\\f\\n\\r\\t\\u002A')]"),
                         JSONWriter.Feature.WriteNulls
                 )

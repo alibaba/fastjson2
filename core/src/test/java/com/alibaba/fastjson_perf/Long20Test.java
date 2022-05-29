@@ -33,7 +33,6 @@ public class Long20Test {
         System.out.println();
     }
 
-
     @Test
     public void test_reflect_createObjectConsumer() {
         for (int i = 0; i < 10; ++i) {
@@ -77,7 +76,7 @@ public class Long20Test {
 
             for (int j = 0; j < 1000 * 1000; ++j) {
                 JSONReader parser = JSONReader.of(str);
-                Long20 vo = objectConsumer.readObject(parser, 0);;
+                Long20 vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;
@@ -86,7 +85,6 @@ public class Long20Test {
         }
         System.out.println();
     }
-
 
     @Test
     public void test_asm_parse() throws Throwable {
@@ -97,7 +95,7 @@ public class Long20Test {
 
             for (int j = 0; j < 1000 * 1000; ++j) {
                 JSONReader parser = JSONReader.of(str);
-                Long20 vo = objectConsumer.readObject(parser, 0);;
+                Long20 vo = objectConsumer.readObject(parser, 0);
             }
 
             long millis = System.currentTimeMillis() - start;
