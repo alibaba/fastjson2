@@ -33,6 +33,6 @@ public class XMLGregorianCalendarTest {
     }
 
     public static class Model {
-        public XMLGregorianCalendar calendar;
+        public java.util.GregorianCalendar calendar;
     }
 }
