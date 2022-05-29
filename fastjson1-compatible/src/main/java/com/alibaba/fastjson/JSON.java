@@ -207,6 +207,9 @@ public class JSON {
                 case TrimStringFieldValue:
                     context.config(JSONReader.Feature.TrimString);
                     break;
+                case ErrorOnNotSupportAutoType:
+                    context.config(JSONReader.Feature.ErrorOnNotSupportAutoType);
+                    break;
                 case OrderedField:
                     context.setObjectSupplier(orderedSupplier);
                     break;
