@@ -625,6 +625,10 @@ final class JSONReaderASCII
 
             _for:
             for (int i = 0; ; ++i) {
+                if (offset >= end) {
+                    throw new JSONException("invalid escape character EOI");
+                }
+
                 byte c = bytes[offset];
                 if (c == '\\') {
                     valueEscape = true;

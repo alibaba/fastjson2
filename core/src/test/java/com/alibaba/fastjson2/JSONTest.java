@@ -705,7 +705,8 @@ public class JSONTest {
     @Test
     public void testNulls() {
         assertNull(JSON.parse(null));
-        assertNull(JSON.parse(null, JSONReader.Feature.SupportAutoType));
+        assertNull(JSON.parse((byte[]) null, JSONReader.Feature.SupportAutoType));
+        assertNull(JSON.parse((String) null, JSONReader.Feature.SupportAutoType));
 
         assertNull(JSON.parseObject((String) null));
         assertNull(JSON.parseObject((String) null, JSONReader.Feature.SupportAutoType));
