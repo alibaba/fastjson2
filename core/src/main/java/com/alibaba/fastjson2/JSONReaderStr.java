@@ -1324,6 +1324,10 @@ final class JSONReaderStr
 
             _for:
             for (int i = 0; ; ++i) {
+                if (offset >= end) {
+                    throw new JSONException("invalid escape character EOI");
+                }
+
                 char c = str.charAt(offset);
                 if (c == '\\') {
                     valueEscape = true;

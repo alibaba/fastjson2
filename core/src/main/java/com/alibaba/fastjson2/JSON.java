@@ -66,6 +66,25 @@ public interface JSON {
     }
 
     /**
+     * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param bytes     the UTF8 Bytes to be parsed
+     * @param features features to be enabled in parsing
+     * @return Object
+     */
+    static Object parse(byte[] bytes, JSONReader.Feature... features) {
+        if (bytes == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(bytes)) {
+            reader.context.config(features);
+            ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
+            return objectReader.readObject(reader, 0);
+        }
+    }
+
+    /**
      * Parse JSON {@link String} into {@link JSONObject}
      *
      * @param text the JSON {@link String} to be parsed
