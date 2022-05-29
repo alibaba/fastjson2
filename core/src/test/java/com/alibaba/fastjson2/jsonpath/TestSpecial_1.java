@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSpecial_1 {
-
     @Test
     public void test_special() {
         String x = "{\"10.0.0.1\":{\"region\":\"xxx\"}}";
@@ -18,5 +17,4 @@ public class TestSpecial_1 {
         assertTrue(JSONPath.contains(o, "$.10\\.0\\.0\\.1.region"));
         assertEquals("xxx", JSONPath.eval(o, "$.10\\.0\\.0\\.1.region"));
     }
-
 }

@@ -44,7 +44,6 @@ public class AutoTypeTest9 {
         Set<Long> values;
     }
 
-
     @Test
     public void test_3() {
         Bean3 bean = new Bean3();
@@ -93,7 +92,6 @@ public class AutoTypeTest9 {
 
     public static class Bean4 {
         java.util.ArrayList values;
-
     }
 
     @Test
@@ -119,5 +117,4 @@ public class AutoTypeTest9 {
     public static class Bean5 {
         com.alibaba.fastjson.JSONObject values;
     }
-
 }

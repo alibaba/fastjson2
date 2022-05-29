@@ -28,5 +28,4 @@ public class WriteMapTest {
     public void test_unmodifiableMap() {
         assertEquals("{}", JSON.toJSONString(Collections.unmodifiableMap(new HashMap<>())));
     }
-
 }

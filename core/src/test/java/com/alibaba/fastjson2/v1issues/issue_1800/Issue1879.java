@@ -65,7 +65,6 @@ public class Issue1879 {
                 this.ids.add(Long.valueOf(id));
             }
         }
-
     }
 
     public static class M2 {

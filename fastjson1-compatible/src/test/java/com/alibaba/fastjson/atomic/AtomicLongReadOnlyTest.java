@@ -34,6 +34,5 @@ public class AtomicLongReadOnlyTest {
         public AtomicLong getValue() {
             return value;
         }
-
     }
 }

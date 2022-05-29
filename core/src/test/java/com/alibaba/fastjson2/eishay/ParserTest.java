@@ -133,7 +133,6 @@ public class ParserTest {
         JSONReader jr = JSONReader.of(utf8Bytes);
         MediaContent o = jr.read(MediaContent.class);
 
-
         byte[] jsonbBytes = JSONB
                 .toBytes(
                         o,

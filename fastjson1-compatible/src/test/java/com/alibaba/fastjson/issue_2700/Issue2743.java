@@ -47,5 +47,4 @@ public class Issue2743 {
 //        assertArrayEquals(strs, "'id'    ,'name'".split(strArrayRegex));
 //        assertArrayEquals(strs, "'id',    'name'".split(strArrayRegex));
 //    }
-
 }

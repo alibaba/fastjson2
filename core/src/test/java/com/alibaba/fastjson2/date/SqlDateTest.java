@@ -52,7 +52,6 @@ public class SqlDateTest {
         public java.sql.Date birthday;
     }
 
-
     @Test
     public void test3() {
         long millis = System.currentTimeMillis();

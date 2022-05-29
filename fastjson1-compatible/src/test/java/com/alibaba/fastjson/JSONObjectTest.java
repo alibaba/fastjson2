@@ -537,8 +537,6 @@ public class JSONObjectTest {
         JSONObject object = new JSONObject().fluentPut("root", new JSONObject());
         Bean bean = object.getObject("root", new TypeReference<Bean>(){});
         assertNotNull(bean);
-
-
     }
 
     public static class Bean {

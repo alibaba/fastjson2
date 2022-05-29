@@ -136,7 +136,6 @@ public class ArrayNumberTest {
                         .read(array.getClass())));
     }
 
-
     @Test
     public void test_array_int_dim2() {
         int[][] array = new int[][] {{0, 1, 2, 3, 4}, {5, 6}, {7, 8}};
@@ -151,7 +150,6 @@ public class ArrayNumberTest {
             assertTrue(
                     Arrays.equals(array[i], array2[i]));
         }
-
     }
 
     @Test

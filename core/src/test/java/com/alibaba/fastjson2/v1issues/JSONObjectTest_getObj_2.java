@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class JSONObjectTest_getObj_2 {
-
     @Test
     public void test_get_empty() {
         JSONObject obj = new JSONObject();
@@ -25,7 +24,6 @@ public class JSONObjectTest_getObj_2 {
     }
 
     public static class Model {
-
     }
 
     public static <T> Type getType() {

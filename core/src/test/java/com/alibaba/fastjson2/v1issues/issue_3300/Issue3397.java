@@ -35,6 +35,5 @@ public class Issue3397 {
         public void setDate(LocalDateTime date) {
             this.date = date;
         }
-
     }
 }

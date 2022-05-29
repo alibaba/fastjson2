@@ -36,5 +36,4 @@ public class TLongIntHashMapTest {
             assertEquals(0, map.get(value));
         }
     }
-
 }

@@ -346,7 +346,6 @@ public class JSONSchemaTest2 {
         public int[] value;
     }
 
-
     @Test
     public void test20() {
         JSON.parseObject("{\"value\":true}", Bean20.class);

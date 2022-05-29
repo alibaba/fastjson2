@@ -61,7 +61,6 @@ public class SqlTimestampTest {
         public java.sql.Timestamp birthday;
     }
 
-
     @Test
     public void test3() {
         long millis = System.currentTimeMillis();

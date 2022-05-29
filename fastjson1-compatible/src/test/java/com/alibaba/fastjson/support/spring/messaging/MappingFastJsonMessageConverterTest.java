@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
-
 public class MappingFastJsonMessageConverterTest {
     @Test
     public void test_1() throws Exception {
@@ -80,6 +79,5 @@ public class MappingFastJsonMessageConverterTest {
         public void setId(int id) {
             this.id = id;
         }
-
     }
 }

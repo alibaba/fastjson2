@@ -11,13 +11,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Int100Test {
-
     @Test
     public void test_jsonpath() {
         ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
-
             JSONReader.Context readContext
                     = new JSONReader.Context(
                     new ObjectReaderProvider(creator));

@@ -16,7 +16,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-
 public class GenericFastJsonRedisSerializerTest {
     private GenericFastJsonRedisSerializer serializer;
 

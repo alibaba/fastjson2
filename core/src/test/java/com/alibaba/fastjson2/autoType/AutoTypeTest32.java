@@ -112,5 +112,4 @@ public class AutoTypeTest32 {
     public static class Item {
         public int id;
     }
-
 }

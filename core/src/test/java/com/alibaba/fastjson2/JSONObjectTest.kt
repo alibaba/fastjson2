@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class JSONObjectKtTest {
-
     @Test
     fun test_getObject() {
         // JSONObject

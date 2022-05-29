@@ -25,7 +25,6 @@ public class Issue1821 {
         m = JSON.parseObject(str, Model.class);
         assertEquals(expectStr, JSON.toJSONString(m));
         assertEquals("com.alibaba.fastjson", new String(m.data));
-
     }
 
     @JSONType
@@ -36,5 +35,4 @@ public class Issue1821 {
         @JSONField(name="data", ordinal = 2, format = "base64")
         public byte[] data;
     }
-
 }

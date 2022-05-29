@@ -72,7 +72,6 @@ public class UUIDTest {
         }
     }
 
-
     @Test
     public void test_2() {
         {
@@ -105,7 +104,6 @@ public class UUIDTest {
 
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter objectWriter = creator.createObjectWriter(UUIDFIeld2.class);
-
 
             {
                 UUIDFIeld2 vo = new UUIDFIeld2();

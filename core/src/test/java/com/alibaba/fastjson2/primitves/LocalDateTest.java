@@ -114,7 +114,6 @@ public class LocalDateTest {
         assertEquals(11, vo.getDate().getDayOfMonth());
     }
 
-
     @Test
     public void test_str_6() {
         String str = "\r\t\b\f {\"date\":\"2021-2-1\"}";

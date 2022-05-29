@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BuilderTest2 {
-
     @Test
     public void test_create() throws Exception {
         VO vo = JSON.parseObject("{\"id\":12304,\"name\":\"ljw\"}", VO.class);
@@ -41,7 +40,6 @@ public class BuilderTest2 {
 
     @JSONPOJOBuilder(buildMethod="xxx")
     public static class VOBuilder {
-
         private VO vo = new VO();
 
         public VO xxx() {

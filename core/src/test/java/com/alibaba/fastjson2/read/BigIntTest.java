@@ -74,7 +74,6 @@ public class BigIntTest {
         assertEquals(-123456789012345678L, id);
     }
 
-
     @Test
     public void test_json_bigint_2_negative() throws Exception {
         String str = "-12345678901234567890";
@@ -147,7 +146,6 @@ public class BigIntTest {
         assertEquals(mag2, -1420514932);
         assertEquals(mag3, -350287150);
     }
-
 
     @Test
     public void test_bigInt_4() throws Exception {
@@ -309,7 +307,6 @@ public class BigIntTest {
             }
         }
     }
-
 
     //int[] mag = new int[] {mag0, mag1, mag2, mag3};
     private int firstNonzeroIntNum(int[] mag) {

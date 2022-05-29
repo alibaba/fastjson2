@@ -37,7 +37,8 @@ public class Issue1763 {
         }
     }
 
-    public static class BasePageQueryResult<T> extends BaseResult<T>{
+    public static class BasePageQueryResult<T>
+            extends BaseResult<T>{
         private List<T> modelList;
 
         public List<T> getModelList() {
@@ -66,7 +67,5 @@ public class Issue1763 {
 
     public interface ProcurementOrderInteractiveServiceForCloud {
         BaseResult<InteractiveOrderMaterielQueryResult> queryOrderMateriel(Map param);
-
     }
-
 }

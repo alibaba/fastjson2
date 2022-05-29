@@ -869,7 +869,6 @@ public class JSONSchemaTest {
                 .isValid(jsonSchema)
         );
 
-
         assertTrue(JSON
                 .parseObject("{ \"number\": 1600, \"street_name\": \"Pennsylvania\", \"street_type\": \"Avenue\", \"direction\": \"NW\" }")
                 .isValid(jsonSchema));
@@ -1311,7 +1310,6 @@ public class JSONSchemaTest {
         );
     }
 
-
     public static class Bean3 {
         @JSONField(name = "street_address")
         public String streetAddress;
@@ -1321,7 +1319,6 @@ public class JSONSchemaTest {
         @JSONField(name = "postal_code")
         public String postalCode;
     }
-
 
     @Test
     public void test_if0() {

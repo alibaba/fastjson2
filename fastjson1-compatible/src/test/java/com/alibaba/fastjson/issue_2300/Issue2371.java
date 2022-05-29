@@ -35,7 +35,5 @@ public class Issue2371 {
         public Integer resourceId;
         public String resourceName;
         public String systemCode;
-
-
     }
 }

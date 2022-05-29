@@ -70,5 +70,4 @@ public class Issue2260 {
     public static class M3 {
         public LocalDateTime date;
     }
-
 }

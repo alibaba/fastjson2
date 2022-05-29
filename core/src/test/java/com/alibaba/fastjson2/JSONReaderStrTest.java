@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2;
 
-
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
@@ -58,7 +57,6 @@ public class JSONReaderStrTest {
                 reader.readUUID()
         );
 
-
         assertFalse(
                 reader.nextIfMatch(',')
         );
@@ -72,7 +70,6 @@ public class JSONReaderStrTest {
                  reader.readInt64()
                         .intValue());
     }
-
 
     @Test
     public void test1_str() {

@@ -114,7 +114,6 @@ public class JSONBTableTest2 {
         assertFalse(d1.list2.get(0) instanceof Item);
     }
 
-
     public static class A {
         public ArrayList list0;
         public JSONArray list1;

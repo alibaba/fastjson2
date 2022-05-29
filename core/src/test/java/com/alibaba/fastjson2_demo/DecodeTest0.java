@@ -5,8 +5,6 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaders;
 import org.junit.jupiter.api.Test;
 
-import static com.alibaba.fastjson2.reader.ObjectReaders.*;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
@@ -18,14 +16,14 @@ public class DecodeTest0 {
     public DecodeTest0() {
         objectConsumer = ObjectReaders.of(
                 VO::new,
-                fieldReaderBool("v0", VO::setV0),
-                fieldReaderByte("v1", VO::setV1),
-                fieldReaderShort("v2", VO::setV2),
-                fieldReaderInt("v3", VO::setV3),
-                fieldReaderLong("v4", VO::setV4),
-                fieldReaderChar("v5", VO::setV5),
-                fieldReaderFloat("v6", VO::setV6),
-                fieldReaderDouble("v7", VO::setV7),
+                ObjectReaders.fieldReaderBool("v0", VO::setV0),
+                ObjectReaders.fieldReaderByte("v1", VO::setV1),
+                ObjectReaders.fieldReaderShort("v2", VO::setV2),
+                ObjectReaders.fieldReaderInt("v3", VO::setV3),
+                ObjectReaders.fieldReaderLong("v4", VO::setV4),
+                ObjectReaders.fieldReaderChar("v5", VO::setV5),
+                ObjectReaders.fieldReaderFloat("v6", VO::setV6),
+                ObjectReaders.fieldReaderDouble("v7", VO::setV7),
 
                 ObjectReaders.fieldReader("v10", Boolean.class, VO::setV10),
                 ObjectReaders.fieldReader("v11", Byte.class, VO::setV11),

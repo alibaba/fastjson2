@@ -16,7 +16,6 @@ public class Issue3682 {
     static public class Cid {
         @JSONField(name = "/")
         private String hash;
-
     }
 
     static final String SOURCE = "{\n" +

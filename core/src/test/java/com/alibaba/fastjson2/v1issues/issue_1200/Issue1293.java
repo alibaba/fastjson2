@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-
 /**
  * Created by kimmking on 27/06/2017.
  */
@@ -63,5 +62,4 @@ public class Issue1293 {
     static enum UserType{
         C,D
     }
-
 }

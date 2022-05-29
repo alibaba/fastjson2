@@ -33,7 +33,7 @@ public class AutoTypeTest23 {
         public Item[] items1;
     }
 
-    public abstract static class  Item {
+    public abstract static class Item {
         public int id;
     }
 
@@ -47,7 +47,7 @@ public class AutoTypeTest23 {
     @Test
     public void test_2() throws Exception {
         Bean2 bean = new Bean2();
-        bean.items = new String[] {"a", "b"};
+        bean.items = new String[]{"a", "b"};
         bean.items1 = bean.items;
 
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased, JSONWriter.Feature.ReferenceDetection);

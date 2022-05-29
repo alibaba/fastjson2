@@ -10,7 +10,6 @@ public class TLongListTest {
         TLongSet set = new TLongSet();
         HashMap map = new HashMap();
 
-
         set.addSymbol(1);
         set.addSymbol(3);
         set.addSymbol(2);
@@ -42,12 +41,10 @@ public class TLongListTest {
         System.out.println();
     }
 
-
     static class TLongSet {
         long[] symbolHashCodes;
         int    symbolHashCodesSize;
         int[]  symbolIndexes;
-
 
         public TLongSet() {
             int capacity = 16;
@@ -78,6 +75,4 @@ public class TLongListTest {
             return -symbolHashCodesSize;
         }
     }
-
-
 }

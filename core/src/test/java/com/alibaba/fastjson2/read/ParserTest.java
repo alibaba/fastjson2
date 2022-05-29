@@ -72,5 +72,4 @@ public class ParserTest {
         lexer.next();
         assertEquals(0x1A, lexer.current());
     }
-
 }

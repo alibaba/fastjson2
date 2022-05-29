@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class Issue1227 {
     @Test
     public void test_for_issue() throws Exception {

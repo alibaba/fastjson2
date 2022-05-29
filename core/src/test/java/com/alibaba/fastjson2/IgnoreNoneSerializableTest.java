@@ -7,7 +7,6 @@ import java.io.Serializable;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class IgnoreNoneSerializableTest {
-
     @Test
     public void test_feature() {
         Bean bean = new Bean();

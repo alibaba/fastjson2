@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONFieldTest4 {
-
     @Test
     public void test_2() {
         ObjectReaderCreator[] readerCreators = TestUtils.readerCreators();
@@ -67,6 +66,4 @@ public class JSONFieldTest4 {
         @JSONField(ordinal = 1)
         public int v2;
     }
-
-
 }

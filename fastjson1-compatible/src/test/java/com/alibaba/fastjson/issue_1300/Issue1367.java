@@ -61,14 +61,12 @@ public class Issue1367 {
             //do something
             return dto;
         }
-
     }
 
     @RestController
     @RequestMapping()
     public static class BeanController
             extends AbstractController<Long, TypeVariableBean> {
-
 
         @PostMapping(path = "/parameterizedTypeBean",consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
         public String parameterizedTypeBean(@RequestBody ParameterizedTypeBean<String> parameterizedTypeBean){
@@ -108,7 +106,6 @@ public class Issue1367 {
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .content("{\"id\": 1}")
                         )).andExpect(status().isOk()).andDo(print());
-
     }
 
     public abstract static class GenericEntity<ID

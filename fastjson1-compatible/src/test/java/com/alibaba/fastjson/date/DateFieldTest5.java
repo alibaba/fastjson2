@@ -107,6 +107,5 @@ public class DateFieldTest5 {
         public static Object getB() {
             return true;
         }
-
     }
 }

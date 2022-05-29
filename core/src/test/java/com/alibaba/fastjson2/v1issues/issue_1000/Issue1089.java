@@ -27,5 +27,4 @@ public class Issue1089 {
             this.ab = ab;
         }
     }
-
 }

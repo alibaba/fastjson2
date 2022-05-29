@@ -25,7 +25,6 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONTest {
-
     @Test
     public void test_isValidArray_0() {
         assertTrue(JSON.isValidArray("[]"));
@@ -650,8 +649,6 @@ public class JSONTest {
 
     @Test
     public void test_list_str_0() {
-
-
         assertEquals("123",
                  ((List) JSON.parseObject("[\"123\"]"
                         , new TypeReference<List<String>>() {
@@ -706,11 +703,9 @@ public class JSONTest {
     }
 
     public static class MyList<T> extends ArrayList<T> {
-
     }
 
     private static class MyList0<T> extends ArrayList<T> {
-
     }
 
     @Test

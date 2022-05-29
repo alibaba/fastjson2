@@ -46,7 +46,6 @@ public class RefTest3 {
             A a1 = JSONB.parseObject(bytes, A.class);
             assertSame(a1, a1.ref);
         }
-
     }
 
     public static class A {

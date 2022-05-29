@@ -94,7 +94,7 @@ public class AutoTypeTest8 {
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         JSONBDump.dump(bytes);
 
-        ListBean bean2 = (ListBean) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);;
+        ListBean bean2 = (ListBean) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         LinkedList list2 = (LinkedList) bean2.values;
         assertEquals(A.class, list2.get(0).getClass());
     }
@@ -110,7 +110,7 @@ public class AutoTypeTest8 {
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         JSONBDump.dump(bytes);
 
-        ListBean2 bean2 = (ListBean2) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);;
+        ListBean2 bean2 = (ListBean2) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         com.alibaba.fastjson.JSONArray list2 = (com.alibaba.fastjson.JSONArray) bean2.values;
         assertEquals(A.class, list2.get(0).getClass());
     }

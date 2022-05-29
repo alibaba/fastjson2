@@ -46,7 +46,6 @@ public class JSONPathTest5 {
         public String name;
 
         public A() {
-
         }
 
         public A(int id, String name) {

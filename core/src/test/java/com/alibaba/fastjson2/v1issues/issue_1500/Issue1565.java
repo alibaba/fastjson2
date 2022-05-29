@@ -24,7 +24,6 @@ public class Issue1565 {
 //
 //        System.out.println(JSON.toJSONString(smallBean, serializeConfig));
 
-
         LargeBean expectedBean = new LargeBean();
         expectedBean.setId("S35669");
         expectedBean.setNetValueDate(20171105);

@@ -40,6 +40,5 @@ public class Issue1188 {
         public void setName(String name) {
             this.name = name;
         }
-
     }
 }

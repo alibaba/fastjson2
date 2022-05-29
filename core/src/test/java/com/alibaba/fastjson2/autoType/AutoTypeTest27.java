@@ -181,7 +181,6 @@ public class AutoTypeTest27 {
         assertSame(bean.items.stream().findFirst().get(), bean2.items.stream().findFirst().get());
     }
 
-
     @Test
     public void test_arrayList() throws Exception {
         Bean1 bean = new Bean1();
@@ -205,7 +204,6 @@ public class AutoTypeTest27 {
         assertSame(bean.items.size(), bean2.items.size());
         assertSame(bean.items.stream().findFirst().get(), bean2.items.stream().findFirst().get());
     }
-
 
     public static class Bean1 {
         Collection items;

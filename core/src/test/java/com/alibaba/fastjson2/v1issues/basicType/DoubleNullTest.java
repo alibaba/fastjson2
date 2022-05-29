@@ -52,7 +52,6 @@ public class DoubleNullTest {
     }
 
 
-
     public static class Model {
         public Double v1;
         public Double v2;

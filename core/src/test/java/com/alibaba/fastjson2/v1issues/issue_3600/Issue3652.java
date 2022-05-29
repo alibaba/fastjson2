@@ -62,5 +62,4 @@ public class Issue3652 {
     public class Model4 {
         private String goodBoy;
     }
-
 }

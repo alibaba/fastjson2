@@ -18,7 +18,6 @@ public class Issue1611 {
             Model model = sss.toJavaObject(Model.class);
             assertEquals("Mark", model.name);
         }
-
     }
 
     public static class Model {

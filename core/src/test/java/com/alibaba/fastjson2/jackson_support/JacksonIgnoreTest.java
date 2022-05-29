@@ -37,7 +37,6 @@ public class JacksonIgnoreTest {
         private String id;
 
         public A() {
-
         }
 
         public A(String id) {
@@ -55,13 +54,11 @@ public class JacksonIgnoreTest {
         }
     }
 
-
     public static class A1 {
         @JsonIgnore
         private String id;
 
         public A1() {
-
         }
 
         public A1(String id) {
@@ -82,7 +79,6 @@ public class JacksonIgnoreTest {
         public String id;
 
         public A2() {
-
         }
 
         public A2(String id) {

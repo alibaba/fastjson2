@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BooleanArrayFieldTest {
-
     @Test
     public void test_codec_null() throws Exception {
         V0 v = new V0();
@@ -29,7 +28,6 @@ public class BooleanArrayFieldTest {
     }
 
     public static class V0 {
-
         private Boolean[] value;
 
         public Boolean[] getValue() {
@@ -39,6 +37,5 @@ public class BooleanArrayFieldTest {
         public void setValue(Boolean[] value) {
             this.value = value;
         }
-
     }
 }

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ByteFieldTest {
-
     @Test
     public void test_codec() throws Exception {
         V0 v = new V0();
@@ -58,7 +57,6 @@ public class ByteFieldTest {
     }
 
     public static class V0 {
-
         private Byte value;
 
         public Byte getValue() {
@@ -68,6 +66,5 @@ public class ByteFieldTest {
         public void setValue(Byte value) {
             this.value = value;
         }
-
     }
 }

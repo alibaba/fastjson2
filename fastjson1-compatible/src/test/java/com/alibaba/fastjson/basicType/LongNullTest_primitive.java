@@ -15,23 +15,23 @@ public class LongNullTest_primitive {
         Model model = JSON.parseObject("{\"v1\":null,\"v2\":null}", Model.class);
         assertNotNull(model);
         assertEquals(0, model.v1);
-        assertEquals(0,model.v2);
+        assertEquals(0, model.v2);
     }
 
     @Test
     public void test_null_1() throws Exception {
         Model model = JSON.parseObject("{\"v1\":null ,\"v2\":null }", Model.class);
         assertNotNull(model);
-        assertEquals(0,model.v1);
-        assertEquals(0,model.v2);
+        assertEquals(0, model.v1);
+        assertEquals(0, model.v2);
     }
 
     @Test
     public void test_null_2() throws Exception {
         Model model = JSON.parseObject("{\"v1\":\"null\",\"v2\":\"null\" }", Model.class);
         assertNotNull(model);
-        assertEquals(0,model.v1);
-        assertEquals(0,model.v2);
+        assertEquals(0, model.v1);
+        assertEquals(0, model.v2);
     }
 
     public static class Model {

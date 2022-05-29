@@ -12,11 +12,11 @@ public class JSONObjectTest4 {
         assertEquals(123, vo.getId());
     }
 
-    public static interface VO {
-        @JSONField()
+    public interface VO {
+        @JSONField
         int getId();
 
-        @JSONField()
+        @JSONField
         void setId(int val);
     }
 }

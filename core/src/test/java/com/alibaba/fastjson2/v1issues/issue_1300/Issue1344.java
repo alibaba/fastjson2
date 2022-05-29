@@ -29,6 +29,5 @@ public class Issue1344 {
         public TestException(String data) {
             super("Data : " + data);
         }
-
     }
 }

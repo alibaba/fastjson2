@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ByteArrayFieldTest_4 {
-
     @Test
     public void test_0() throws Exception {
         Model model = new Model();
@@ -25,10 +24,8 @@ public class ByteArrayFieldTest_4 {
     }
 
     private static class Model {
-
         @JSONField(format = "hex")
         public byte[] value;
-
 
     }
 }

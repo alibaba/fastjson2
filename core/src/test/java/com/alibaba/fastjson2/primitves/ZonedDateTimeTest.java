@@ -35,7 +35,6 @@ public class ZonedDateTimeTest {
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_99, ZoneId.of("UTC")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_999, ZoneId.of("UTC")),
 
-
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 0, ZoneId.of("Asia/Shanghai")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1, ZoneId.of("Asia/Shanghai")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 10, ZoneId.of("Asia/Shanghai")),
@@ -60,7 +59,6 @@ public class ZonedDateTimeTest {
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 140__000_000, ZoneId.of("UTC+8")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 200__000_000, ZoneId.of("UTC-8")),
 
-
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 0, ZoneId.of("-07:00")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1, ZoneId.of("-07:00")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 10, ZoneId.of("-07:00")),
@@ -71,7 +69,6 @@ public class ZonedDateTimeTest {
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_000, ZoneId.of("-07:00")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_000_0, ZoneId.of("-07:00")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_000_00, ZoneId.of("-07:00")),
-
 
     };
 
@@ -124,5 +121,4 @@ public class ZonedDateTimeTest {
             assertEquals(vo.getV0000(), v1.getV0000());
         }
     }
-
 }

@@ -215,7 +215,6 @@ public class JSONReaderTest {
         String str = "{" + ch;
         byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
 
-
         {
             JSONReader reader = JSONReader.of(str);
             reader.next();
@@ -311,7 +310,6 @@ public class JSONReaderTest {
             assertNotNull(error);
             assertEquals('1', reader.current());
         }
-
     }
 
     @Test
@@ -333,7 +331,6 @@ public class JSONReaderTest {
             assertEquals(")中abcdef", reader.readString());
             assertEquals('1', reader.current());
         }
-
     }
 
     @Test
@@ -356,7 +353,6 @@ public class JSONReaderTest {
             boolean space1 = ch <= ' ' && ((1L << ch) & SPACE) != 0;
             assertEquals(space0, space1);
         }
-
     }
 
     @Test

@@ -38,7 +38,6 @@ public class Issue1764_bean_biginteger {
 
 
 
-
     public static class Model {
         public BigInteger value;
 

@@ -29,7 +29,6 @@ public class Issue1683 {
 
         private Integer wordCount;
 
-
         public Long getBookId() {
             return bookId;
         }
@@ -61,7 +60,5 @@ public class Issue1683 {
         public void setWordCount(Integer wordCount) {
             this.wordCount = wordCount;
         }
-
     }
-
 }

@@ -87,7 +87,6 @@ public class Issue239 {
         @JSONField(schema = "{'minimum':-180,'maximum':180}")
         public double longitude;
 
-
         @JSONField(schema = "{'minimum':-90,'maximum':90}")
         public double latitude;
     }
@@ -117,7 +116,6 @@ public class Issue239 {
     public static class Point2 {
         @JSONField(schema = "{'minimum':-180,'maximum':180}")
         public float longitude;
-
 
         @JSONField(schema = "{'minimum':-90,'maximum':90}")
         public float latitude;

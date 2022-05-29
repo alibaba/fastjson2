@@ -18,6 +18,5 @@ public class Issue1357 {
 
     public static class Test2Bean{
         private LocalDateTime d2;
-
     }
 }

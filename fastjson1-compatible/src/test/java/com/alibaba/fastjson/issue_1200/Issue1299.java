@@ -24,7 +24,9 @@ public class Issue1299 {
         System.out.println(dataClass);
     }
 
-    public static class ServiceResult<T> extends BaseResultDo implements Serializable {
+    public static class ServiceResult<T>
+            extends BaseResultDo
+            implements Serializable {
         @JSONField(
                 name = "data"
         )

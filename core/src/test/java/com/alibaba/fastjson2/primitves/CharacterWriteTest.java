@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CharacterWriteTest {
-
     @Test
     public void test_array_char() {
         char[] array = new char[]{'a', 'b', 'c'};

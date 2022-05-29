@@ -16,7 +16,6 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-
 public class FastJsonRedisSerializerTest {
     private FastJsonRedisSerializer<User> serializer;
 

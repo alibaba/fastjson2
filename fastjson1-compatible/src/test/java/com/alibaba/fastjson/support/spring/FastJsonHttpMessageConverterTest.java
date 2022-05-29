@@ -40,7 +40,6 @@ public class FastJsonHttpMessageConverterTest {
                 return new ByteArrayInputStream("{\"id\":123}".getBytes(Charset
                         .forName("UTF-8")));
             }
-
         };
         VO vo = (VO) converter.read(VO.class, input);
         Assertions.assertEquals(123, vo.getId());
@@ -83,7 +82,6 @@ public class FastJsonHttpMessageConverterTest {
                 return new ByteArrayInputStream("{\"id\":123}".getBytes(Charset
                         .forName("UTF-8")));
             }
-
         };
         VO vo = (VO) converter.read(VO.class, VO.class, input);
         Assertions.assertEquals(123, vo.getId());
@@ -133,7 +131,6 @@ public class FastJsonHttpMessageConverterTest {
         };
 
         converter.write(vo, VO.class, MediaType.ALL, out2);
-
     }
 
     private SerializeFilter serializeFilter = new ValueFilter() {
@@ -159,6 +156,5 @@ public class FastJsonHttpMessageConverterTest {
         public void setId(int id) {
             this.id = id;
         }
-
     }
 }

@@ -29,7 +29,6 @@ public class JdbcTimeTest {
         TimeZone.setDefault(defaultTimeZone);
     }
 
-
     @Test
     public void test_time() {
         A a = JSON.parseObject("{\"value\":\"12:13:14\"}", A.class);
@@ -82,7 +81,6 @@ public class JdbcTimeTest {
         assertEquals(now, ts1.toLocalDateTime());
         assertEquals(now.getNano(), ts1.toLocalDateTime().getNano());
 
-
         String str3 = JSON.toJSONString(ts);
         Timestamp ts2 = JSON.parseObject(str3, Timestamp.class);
         assertEquals(now, ts2.toLocalDateTime());
@@ -111,7 +109,6 @@ public class JdbcTimeTest {
         Timestamp ts1 = JSON.parseObject(str2, Timestamp.class);
         assertEquals(ts, ts1);
         assertEquals(ts.getNanos(), ts1.toLocalDateTime().getNano());
-
 
         String str3 = JSON.toJSONString(ts);
         Timestamp ts2 = JSON.parseObject(str3, Timestamp.class);
@@ -147,7 +144,6 @@ public class JdbcTimeTest {
         D d2 = JSONB.parseObject(bytes, D.class);
         assertEquals(d.value.toString(), d2.value.toString());
     }
-
 
     @Test
     public void test_date_1() {

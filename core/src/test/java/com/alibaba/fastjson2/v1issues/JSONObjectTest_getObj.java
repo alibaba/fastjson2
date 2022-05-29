@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.v1issues;
 
-
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
@@ -13,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class JSONObjectTest_getObj {
-
     @Test
     public void test_get_empty() throws Exception {
         JSONObject obj = new JSONObject();
@@ -49,6 +47,5 @@ public class JSONObjectTest_getObj {
     }
 
     public static class Model {
-
     }
 }

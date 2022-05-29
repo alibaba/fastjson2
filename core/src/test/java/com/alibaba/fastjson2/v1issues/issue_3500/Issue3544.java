@@ -9,7 +9,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-
 public class Issue3544 {
 
     @Test

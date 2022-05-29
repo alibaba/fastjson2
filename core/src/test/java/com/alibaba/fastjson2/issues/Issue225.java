@@ -19,7 +19,6 @@ public class Issue225 {
         assertEquals(1, jsonObject.size());
         assertEquals(101, jsonObject.get("item_id"));
 
-
         jsonObject.nameFilter(
                 (Object object, String name, Object value) -> null
         );

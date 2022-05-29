@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Issue367 {
-
     @Test
     public void test0() {
         String text = "{\"name\":\"123\",\"age\":3,\"subDTO\":{\"id\":\"222\",\"thiDTO\":{\"h\":\"444\"}}}";
@@ -39,7 +38,6 @@ public class Issue367 {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class TestDTO {
-
         private String name;
         private int age;
         private SubDTO subDTO = new SubDTO();

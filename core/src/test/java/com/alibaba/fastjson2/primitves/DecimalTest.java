@@ -36,7 +36,6 @@ public class DecimalTest {
                         jsonWriter.toString());
             }
         }
-
     }
 
     @Test
@@ -85,5 +84,4 @@ public class DecimalTest {
                  new String(
                         JSON.toJSONBytes(decimal, JSONWriter.Feature.BrowserCompatible)));
     }
-
 }

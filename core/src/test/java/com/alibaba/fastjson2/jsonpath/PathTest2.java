@@ -205,5 +205,4 @@ public class PathTest2 {
 
         assertEquals(4, path.eval(rootObject));
     }
-
 }

@@ -19,12 +19,12 @@ public class AutoTypeTest36_MapLong {
         bean.values.put("abc", 100L);
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -40,13 +40,10 @@ public class AutoTypeTest36_MapLong {
         assertEquals(bean.getClass(), bean2.getClass());
         assertEquals(bean.values.getClass(), bean2.values.getClass());
         assertEquals(bean.values.size(), bean2.values.size());
-        assertEquals(bean.values.get("abc") , bean2.values.get("abc"));
+        assertEquals(bean.values.get("abc"), bean2.values.get("abc"));
     }
 
     public static class Bean {
         public Map<String, Long> values;
     }
-
-
-
 }

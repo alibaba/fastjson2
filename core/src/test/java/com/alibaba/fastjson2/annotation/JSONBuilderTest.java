@@ -67,7 +67,6 @@ public class JSONBuilderTest {
 
     @JSONBuilder(buildMethod = "xxx")
     public static class VOBuilder {
-
         private VO vo = new VO();
 
         public VO xxx() {

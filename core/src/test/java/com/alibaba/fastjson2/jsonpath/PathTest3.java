@@ -44,7 +44,6 @@ public class PathTest3 {
                         .eval(values));
     }
 
-
     @Test
     public void test_isRef() {
         assertFalse(JSONPath

@@ -17,7 +17,6 @@ public class PathTest7 {
                 .setInt(vo, 11);
         assertEquals(11D, vo.v1);
 
-
         JSONPath.of("$.v2")
                 .setInt(vo, 12);
         assertEquals(12F, vo.v2.floatValue());
@@ -58,7 +57,6 @@ public class PathTest7 {
                 .setLong(vo, 11);
         assertEquals(11D, vo.v1);
 
-
         JSONPath.of("$.v2")
                 .setLong(vo, 12);
         assertEquals(12F, vo.v2.floatValue());
@@ -67,7 +65,6 @@ public class PathTest7 {
                 .setLong(vo, 13);
         assertEquals(13D, vo.v3.doubleValue());
     }
-
 
     @Test
     public void test_set_int_0_private() {
@@ -79,7 +76,6 @@ public class PathTest7 {
         JSONPath.of("$.v1")
                 .setInt(vo, 11);
         assertEquals(11D, vo.v1);
-
 
         JSONPath.of("$.v2")
                 .setInt(vo, 12);
@@ -120,7 +116,6 @@ public class PathTest7 {
         JSONPath.of("$.v1")
                 .setLong(vo, 11);
         assertEquals(11D, vo.v1);
-
 
         JSONPath.of("$.v2")
                 .setLong(vo, 12);

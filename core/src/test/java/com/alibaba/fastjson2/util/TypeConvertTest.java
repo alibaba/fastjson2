@@ -45,7 +45,6 @@ public class TypeConvertTest {
         assertNull(provider.getTypeConvert(String.class, Integer.class).apply(null));
         assertNull(provider.getTypeConvert(String.class, Long.class).apply(null));
 
-
         assertEquals(1, provider.getTypeConvert(String.class, Integer.class).apply("1"));
         assertEquals(1L, provider.getTypeConvert(String.class, Long.class).apply("1"));
     }

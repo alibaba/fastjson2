@@ -13,7 +13,6 @@ public class AtomicLongArrayFieldTest {
     public void test_codec_null() {
         V0 v = new V0();
 
-
         String text = JSON.toJSONString(v, JSONWriter.Feature.WriteNulls);
         assertEquals("{\"value\":null}", text);
 
@@ -48,6 +47,5 @@ public class AtomicLongArrayFieldTest {
         public void setValue(AtomicLongArray value) {
             this.value = value;
         }
-
     }
 }

@@ -71,5 +71,4 @@ public class AutoTypeTest16_pairKey {
     public static class Bean {
         public Map<Pair<Long, Long>, Object> map;
     }
-
 }

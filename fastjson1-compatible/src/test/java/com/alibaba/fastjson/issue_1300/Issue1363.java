@@ -64,6 +64,5 @@ public class Issue1363 {
         public String toString() {
             return "DataSimpleVO [name=" + name + ", value=" + value + ", value1=" + value1 + "]";
         }
-
     }
 }

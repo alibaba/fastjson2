@@ -38,7 +38,6 @@ public class FastJsonJsonViewTest {
 
         view.setRenderedAttributes(new HashSet<String>(Collections.singletonList("abc")));
         view.render(Collections.singletonMap("abc", "cde"), request, response);
-
     }
 
     @Test
@@ -64,7 +63,6 @@ public class FastJsonJsonViewTest {
 
         view.setDisableCaching(true);
         view.render(Collections.singletonMap("abc", "cde"), request, response);
-
     }
 
     @Test
@@ -107,7 +105,6 @@ public class FastJsonJsonViewTest {
         view.render(Collections.singletonMap("doesn't matter", Collections.singletonMap("abc", "cde中文")), request, response);
         String contentAsString = response.getContentAsString();
         Assertions.assertTrue(contentAsString.startsWith("{\"abc\":\"cde中文\"}"));
-
     }
 
     private SerializeFilter serializeFilter = new ValueFilter() {

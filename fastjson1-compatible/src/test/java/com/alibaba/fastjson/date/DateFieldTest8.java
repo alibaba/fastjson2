@@ -52,6 +52,5 @@ public class DateFieldTest8 {
         public void setValue(Date value) {
             this.value = value;
         }
-
     }
 }

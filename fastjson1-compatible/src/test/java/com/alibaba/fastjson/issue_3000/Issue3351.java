@@ -21,5 +21,4 @@ public class Issue3351 {
         boolean jsonValid = JSONValidator.from(jsonString).validate();
         assertTrue(jsonValid);
     }
-
 }

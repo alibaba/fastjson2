@@ -20,15 +20,12 @@ public class Issue1344 {
 
     public static class TestException
             extends Exception {
-
         @JSONCreator
         public TestException() {
-
         }
 
         public TestException(String data) {
             super("Data : " + data);
         }
-
     }
 }

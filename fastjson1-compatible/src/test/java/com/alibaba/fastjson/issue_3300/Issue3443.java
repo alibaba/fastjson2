@@ -45,7 +45,6 @@ public class Issue3443 {
             this.parameterName = parameterName;
             this.parameterUsage = parameterUsage;
         }
-
     }
 
     static class CustomFilter

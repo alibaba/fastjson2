@@ -48,6 +48,5 @@ public class Issue1649 {
             this.productCity = productCity;
             return this;
         }
-
     }
 }

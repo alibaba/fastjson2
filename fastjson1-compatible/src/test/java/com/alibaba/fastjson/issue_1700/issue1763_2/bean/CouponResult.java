@@ -1,6 +1,5 @@
 package com.alibaba.fastjson.issue_1700.issue1763_2.bean;
 
-
 /**
  *
  * @author cnlyml
@@ -15,7 +14,6 @@ public class CouponResult{
      * 优惠券名称
      */
     private String couponName;
-
 
     public Long getId() {
         return id;
@@ -32,5 +30,4 @@ public class CouponResult{
     public void setCouponName(String couponName) {
         this.couponName = couponName;
     }
-
 }

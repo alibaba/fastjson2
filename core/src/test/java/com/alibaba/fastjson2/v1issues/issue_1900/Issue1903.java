@@ -35,7 +35,6 @@ public class Issue1903 {
         void setAge(Integer age);
     }
 
-
     class MapHandler
             implements InvocationHandler {
         Map<String, Object> map = new HashMap<String, Object>();

@@ -19,7 +19,6 @@ public class AutoTypeTest45_ListNullItem {
         bean.items.add(null);
         bean.items.add(new Item());
 
-
         byte[] bytes = JSONB.toBytes(bean,
                  JSONWriter.Feature.WriteClassName,
                  JSONWriter.Feature.FieldBased,
@@ -41,7 +40,6 @@ public class AutoTypeTest45_ListNullItem {
 
         assertEquals(bean.items.size(), bean2.items.size());
     }
-
 
     public static class Bean {
         List<Item> items;

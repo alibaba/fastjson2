@@ -84,7 +84,6 @@ public class Issue1306 {
             goodsList = Arrays.asList(goods);
         }
 
-
         private List<Goods> goodsList;
 
         public List<Goods> getGoodsList() {

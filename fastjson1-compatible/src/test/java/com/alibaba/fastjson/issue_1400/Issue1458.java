@@ -67,7 +67,6 @@ public class Issue1458 {
         public void setUnkown(boolean unkown) {
             this.unkown = unkown;
         }
-
     }
 
     public static class Fingerprint
@@ -84,7 +83,6 @@ public class Issue1458 {
         public String getSource() {
             return source;
         }
-
     }
 
     public static class HostAddress {

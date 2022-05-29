@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 public class Issue1764 {
     @Test
     public void test_for_issue() throws Exception {

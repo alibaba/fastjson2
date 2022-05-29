@@ -28,5 +28,4 @@ public class Issue1089_private {
             this.ab = ab;
         }
     }
-
 }

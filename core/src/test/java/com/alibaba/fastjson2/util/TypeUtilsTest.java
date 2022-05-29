@@ -31,7 +31,6 @@ public class TypeUtilsTest {
         assertEquals(Byte.valueOf((byte) 0), TypeUtils.toByte((short) 0));
         assertEquals(Byte.valueOf((byte) 0), TypeUtils.toByte((byte) 0));
 
-
         assertNull(TypeUtils.toDouble(null));
         assertNull(TypeUtils.toDouble(""));
         assertNull(TypeUtils.toDouble("null"));
@@ -50,7 +49,6 @@ public class TypeUtilsTest {
         assertEquals(0D, TypeUtils.toDoubleValue((byte) 0));
         assertEquals(0D, TypeUtils.toDouble((short) 0));
         assertEquals(0D, TypeUtils.toDouble((byte) 0));
-
 
         assertNull(TypeUtils.toFloat(null));
         assertNull(TypeUtils.toFloat(""));
@@ -87,7 +85,6 @@ public class TypeUtilsTest {
 
         assertEquals(0, TypeUtils.toShortValue((short) 0));
         assertEquals(Short.valueOf((short) 0), TypeUtils.toShort((short) 0));
-
 
         assertNull(TypeUtils.toInteger(null));
         assertNull(TypeUtils.toInteger(""));

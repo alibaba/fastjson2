@@ -105,7 +105,6 @@ public class IntTest {
         }
     }
 
-
     @Test
     public void test_jsonb_value_cast_str() {
         Number[] values = new Number[]{
@@ -196,8 +195,6 @@ public class IntTest {
         ObjectReaderCreator[] creators = TestUtils.readerCreators();
 
         for (ObjectReaderCreator creator : creators) {
-
-
             JSONReader.Context readContext
                     = new JSONReader.Context(
                     new ObjectReaderProvider(creator));

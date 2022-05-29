@@ -20,7 +20,7 @@ public class JSONObjectTest2 {
         assertEquals(obj.size(), map.size());
         assertEquals(obj.get("a"), map.get("a"));
 
-        map.put("b", new int[] { 1 });
+        map.put("b", new int[]{1});
         JSONArray array = obj.getJSONArray("b");
         assertEquals(array.size(), 1);
 

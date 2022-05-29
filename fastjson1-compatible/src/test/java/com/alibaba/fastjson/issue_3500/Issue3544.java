@@ -23,6 +23,5 @@ public class Issue3544 {
     @Setter
     static class TestVO {
         Map<String, String> result;
-
     }
 }

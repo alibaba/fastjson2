@@ -62,6 +62,5 @@ public class JSONBTableTest5 {
         public B(JSONObject values) {
             this.values = values;
         }
-
     }
 }

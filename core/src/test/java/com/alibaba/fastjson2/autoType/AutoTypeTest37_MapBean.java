@@ -28,12 +28,12 @@ public class AutoTypeTest37_MapBean {
         bean.items.put("z", item);
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -52,7 +52,7 @@ public class AutoTypeTest37_MapBean {
         assertEquals(bean.getClass(), bean2.getClass());
         assertEquals(bean.items.getClass(), bean2.items.getClass());
         assertEquals(bean.items.size(), bean2.items.size());
-        assertEquals(bean.items.values().stream().findFirst().get().getClass() , bean2.items.values().stream().findFirst().get().getClass());
+        assertEquals(bean.items.values().stream().findFirst().get().getClass(), bean2.items.values().stream().findFirst().get().getClass());
     }
 
     @Test
@@ -66,12 +66,12 @@ public class AutoTypeTest37_MapBean {
         map.put("c", item);
 
         byte[] bytes = JSONB.toBytes(map,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -85,7 +85,7 @@ public class AutoTypeTest37_MapBean {
         );
 
         assertEquals(map.getClass(), map2.getClass());
-        assertEquals(map.values().stream().findFirst().get().getClass() , map2.values().stream().findFirst().get().getClass());
+        assertEquals(map.values().stream().findFirst().get().getClass(), map2.values().stream().findFirst().get().getClass());
     }
 
     public static class Bean {

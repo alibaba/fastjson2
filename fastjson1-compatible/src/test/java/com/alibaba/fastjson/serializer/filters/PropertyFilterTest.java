@@ -11,10 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PropertyFilterTest extends TestCase {
-
     public void test_0() throws Exception {
         PropertyFilter filter = new PropertyFilter() {
-
             public boolean apply(Object source, String name, Object value) {
                 return false;
             }
@@ -33,7 +31,6 @@ public class PropertyFilterTest extends TestCase {
 
     public void test_toJSONString() throws Exception {
         PropertyFilter filter = new PropertyFilter() {
-
             public boolean apply(Object source, String name, Object value) {
                 return false;
             }
@@ -44,7 +41,6 @@ public class PropertyFilterTest extends TestCase {
 
     public void test_1() throws Exception {
         PropertyFilter filter = new PropertyFilter() {
-
             public boolean apply(Object source, String name, Object value) {
                 if ("id".equals(name)) {
                     return true;
@@ -66,7 +62,6 @@ public class PropertyFilterTest extends TestCase {
 
     public void test_2() throws Exception {
         PropertyFilter filter = new PropertyFilter() {
-
             public boolean apply(Object source, String name, Object value) {
                 if ("name".equals(name)) {
                     return true;
@@ -89,7 +84,6 @@ public class PropertyFilterTest extends TestCase {
 
     public void test_3() throws Exception {
         PropertyFilter filter = new PropertyFilter() {
-
             public boolean apply(Object source, String name, Object value) {
                 if ("name".equals(name)) {
                     return true;
@@ -112,7 +106,6 @@ public class PropertyFilterTest extends TestCase {
 
     public void test_4() throws Exception {
         PropertyFilter filter = new PropertyFilter() {
-
             public boolean apply(Object source, String name, Object value) {
                 if ("name".equals(name)) {
                     return false;
@@ -135,7 +128,6 @@ public class PropertyFilterTest extends TestCase {
     }
 
     public static class A {
-
         private int id;
         private String name;
 
@@ -154,6 +146,5 @@ public class PropertyFilterTest extends TestCase {
         public void setName(String name) {
             this.name = name;
         }
-
     }
 }

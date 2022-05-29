@@ -29,5 +29,4 @@ public class JSONObjectFluentTest {
 
         assertEquals(0, object.size());
     }
-
 }

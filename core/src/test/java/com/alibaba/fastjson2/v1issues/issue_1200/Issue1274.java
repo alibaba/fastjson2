@@ -53,5 +53,4 @@ public class Issue1274 {
             this.name = name;
         }
     }
-
 }

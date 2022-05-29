@@ -33,5 +33,4 @@ public class Issue3602 {
             throw new UnsupportedEncodingException();
         }
     }
-
 }

@@ -30,7 +30,6 @@ public class Issue1225 {
         assertEquals("2", o.data.get(1));
     }
 
-
     @Test
     public void test_parseObject_2() {
         SimpleGenericObject object = JSON.parseObject("{\"data\":[\"1\",\"2\",\"3\"],\"a\":\"a\"}",
@@ -38,7 +37,6 @@ public class Issue1225 {
 
         assertEquals("2", object.data.get(1));
     }
-
 
     static class BaseGenericType<T> {
         public T data;
@@ -51,5 +49,4 @@ public class Issue1225 {
     static class SimpleGenericObject
             extends ExtendGenericType<String> {
     }
-
 }

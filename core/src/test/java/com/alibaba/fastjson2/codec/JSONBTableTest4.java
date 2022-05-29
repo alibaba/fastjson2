@@ -90,7 +90,6 @@ public class JSONBTableTest4 {
 //        assertEquals(JSON.toJSONString(a), JSON.toJSONString(a1));
     }
 
-
     @Test
     public void test_b10() {
         B10 a = new B10();

@@ -15,5 +15,4 @@ public class Issue236 {
         assertNotNull(testJson.getJSONObject("result"));
         assertNull(testJson.getJSONObject("result2"));
     }
-
 }

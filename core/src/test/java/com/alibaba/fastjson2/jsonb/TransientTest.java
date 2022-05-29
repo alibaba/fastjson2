@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TransientTest {
-
     @Test
     public void test_for_transient() {
         Bean bean = new Bean();
@@ -46,7 +45,6 @@ public class TransientTest {
         );
         assertNotNull(target2.getAtomicBoolean());
     }
-
 
     public static class Bean
             implements Serializable {

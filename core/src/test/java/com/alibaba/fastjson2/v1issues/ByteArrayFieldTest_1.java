@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ByteArrayFieldTest_1 {
-
     @Test
     public void test_array() throws Exception {
         assertEquals("\"AQ==\"", JSON.toJSONString(new byte[] { 1 }, "base64"));
@@ -29,13 +28,11 @@ public class ByteArrayFieldTest_1 {
     public void test_codec_null_1() throws Exception {
         V0 v = new V0();
 
-
         String text = JSON.toJSONString(v, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.NullAsDefaultValue);
         assertEquals("{\"value\":[]}", text);
     }
 
     public static class V0 {
-
         private byte[] value;
 
         public byte[] getValue() {
@@ -45,6 +42,5 @@ public class ByteArrayFieldTest_1 {
         public void setValue(byte[] value) {
             this.value = value;
         }
-
     }
 }

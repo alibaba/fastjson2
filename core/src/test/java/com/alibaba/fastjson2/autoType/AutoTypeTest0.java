@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.autoType;
 
-
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
@@ -117,7 +116,6 @@ public class AutoTypeTest0 {
         assertEquals(1, model.size());
         assertEquals(16, model.get("v0000"));
     }
-
 
     @Test
     public void test_jsonb_7() throws Exception {

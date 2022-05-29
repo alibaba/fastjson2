@@ -72,7 +72,6 @@ public class AutoTypeTest17 {
         public Object[] values;
     }
 
-
     @Test
     public void test_3() throws Exception {
         Bean3 bean = new Bean3();

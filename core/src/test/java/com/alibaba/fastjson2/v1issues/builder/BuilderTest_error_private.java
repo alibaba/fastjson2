@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BuilderTest_error_private {
-
     @Test
     public void test_0() throws Exception {
         Exception error = null;

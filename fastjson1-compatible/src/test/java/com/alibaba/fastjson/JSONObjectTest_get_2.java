@@ -30,11 +30,11 @@ public class JSONObjectTest_get_2 {
         assertEquals(1001, value.getId());
     }
 
-    public static interface VO {
-        @JSONField()
+    public interface VO {
+        @JSONField
         int getId();
 
-        @JSONField()
+        @JSONField
         void setId(int val);
     }
 }

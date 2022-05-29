@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BooleanArrayFieldTest_primitive_private {
-
     @Test
     public void test_array() throws Exception {
         assertEquals("[true]", JSON.toJSONString(new boolean[] { true }));
@@ -42,7 +41,6 @@ public class BooleanArrayFieldTest_primitive_private {
     }
 
     private static class V0 {
-
         private boolean[] value;
 
         public boolean[] getValue() {
@@ -52,6 +50,5 @@ public class BooleanArrayFieldTest_primitive_private {
         public void setValue(boolean[] value) {
             this.value = value;
         }
-
     }
 }

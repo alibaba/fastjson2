@@ -65,7 +65,6 @@ public class DateFieldFormatTest {
         assertEquals(t2, df4.format(model2.publishTime));
         assertEquals(t1, df5.format(model2.serverTime));
         assertEquals(t3, df6.format(model2.getStartDate()));
-
     }
 
     public static class Model {

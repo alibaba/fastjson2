@@ -8,7 +8,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 public class TestSpecial_0 {
     @Test
     public void test_special() {
@@ -18,5 +17,4 @@ public class TestSpecial_0 {
 
         assertEquals((Integer) vo.get("a.b"), (Integer) JSONPath.eval(vo, "a\\.b"));
     }
-
 }

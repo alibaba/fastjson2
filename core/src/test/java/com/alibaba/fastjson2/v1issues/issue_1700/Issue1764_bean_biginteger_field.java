@@ -39,7 +39,6 @@ public class Issue1764_bean_biginteger_field {
 
 
 
-
     public static class Model {
         @JSONField(serializeFeatures = JSONWriter.Feature.BrowserCompatible)
         public BigInteger value;

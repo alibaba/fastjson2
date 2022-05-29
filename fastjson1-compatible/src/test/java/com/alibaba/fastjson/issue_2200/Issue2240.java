@@ -18,7 +18,6 @@ public class Issue2240 {
         String json = JSON.toJSONString(resultMap);
         System.out.println(json);
         assertTrue("{\"a\":{},\"b\":{}}".equals(json) || "{\"a\":{},\"b\":{\"$ref\":\"$.a\"}}".equals(json));
-
     }
 
     public static class ResultMap {
@@ -41,5 +40,4 @@ public class Issue2240 {
             this.b = b;
         }
     }
-
 }

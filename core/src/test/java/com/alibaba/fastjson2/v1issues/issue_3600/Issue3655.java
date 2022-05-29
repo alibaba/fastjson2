@@ -163,5 +163,4 @@ public class Issue3655 {
 
         public abstract Object getData9();
     }
-
 }

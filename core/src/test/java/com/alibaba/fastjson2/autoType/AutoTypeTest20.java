@@ -11,8 +11,6 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-;
-
 public class AutoTypeTest20 {
     @Test
     public void test_1() throws Exception {
@@ -48,7 +46,6 @@ public class AutoTypeTest20 {
     public static enum XItem implements Item {
         A, B, C, D
     }
-
 
     @Test
     public void test_2() throws Exception {

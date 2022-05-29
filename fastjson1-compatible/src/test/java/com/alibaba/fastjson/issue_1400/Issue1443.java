@@ -10,7 +10,6 @@ public class Issue1443 {
     public void test_for_issue() throws Exception {
         String json = "{\"date\":\"3017-08-28T00:00:00+08:00\"}";
         Model model = JSON.parseObject(json, Model.class);
-
     }
 
     public static class Model {

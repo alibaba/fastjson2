@@ -53,7 +53,6 @@ public class JSONBTest {
         }
     }
 
-
     @Test
     public void test_parse_object_typed_map_str_str() {
         Type[] types = new Type[] {
@@ -615,7 +614,6 @@ public class JSONBTest {
         assertNull(symbolTable.getNameByHashCode(-1));
         assertEquals(-1, symbolTable.getOrdinalByHashCode(-1));
     }
-
 
     @Test
     public void testWriteInt() {

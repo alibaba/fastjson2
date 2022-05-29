@@ -80,7 +80,6 @@ public class JSONBTest1 {
     void jsonbTest(JSONReader p) {
         Map<String, Object> object = p.readObject();
 
-
         JSONWriter writer = JSONWriter.ofJSONB();
         writer.writeAny(object);
         byte[] bytes = writer.getBytes();

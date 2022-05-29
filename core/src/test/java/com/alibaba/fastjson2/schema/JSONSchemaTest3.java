@@ -417,7 +417,6 @@ public class JSONSchemaTest3 {
         }
     }
 
-
     @Test
     public void test16() {
         JSON.parseObject("{\"value\":[1,2,3]}", Bean16.class);

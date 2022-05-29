@@ -52,7 +52,5 @@ public class Issue1500 {
         public void setE(Exception e) {
             this.e = e;
         }
-
     }
-
 }

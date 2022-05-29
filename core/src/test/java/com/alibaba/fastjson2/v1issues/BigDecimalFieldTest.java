@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BigDecimalFieldTest {
-
     @Test
     public void test_codec_null() throws Exception {
         V0 v = new V0();
@@ -30,7 +29,6 @@ public class BigDecimalFieldTest {
     }
 
     public static class V0 {
-
         private BigDecimal value;
 
         public BigDecimal getValue() {
@@ -40,6 +38,5 @@ public class BigDecimalFieldTest {
         public void setValue(BigDecimal value) {
             this.value = value;
         }
-
     }
 }
