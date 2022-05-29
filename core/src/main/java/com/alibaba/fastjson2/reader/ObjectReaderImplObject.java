@@ -8,9 +8,9 @@ import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
-final class ObjectReaderImplObject
+public final class ObjectReaderImplObject
         extends ObjectReaderBaseModule.PrimitiveImpl {
-    static final ObjectReaderImplObject INSTANCE = new ObjectReaderImplObject();
+    public static final ObjectReaderImplObject INSTANCE = new ObjectReaderImplObject();
 
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
@@ -21,7 +21,7 @@ final class ObjectReaderImplObject
         JSONReader.Context context = jsonReader.getContext();
 
         if (jsonReader.isObject()) {
-            jsonReader.next();
+            jsonReader.nextIfObjectStart();
 
             long hash = jsonReader.readFieldNameHashCode();
 
