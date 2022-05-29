@@ -448,6 +448,24 @@ class JSONWriterUTF16
         off += chars.length;
     }
 
+    public void writeRaw(char ch) {
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = ch;
+    }
+
     @Override
     public void writeNameRaw(char[] chars) {
         {

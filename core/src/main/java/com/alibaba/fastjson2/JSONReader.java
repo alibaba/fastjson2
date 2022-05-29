@@ -88,17 +88,14 @@ public abstract class JSONReader
         return ch == '-' || ch == '+' || (ch >= '0' && ch <= '9');
     }
 
-    public boolean isNull() {
-        return ch == 'n';
+    public abstract boolean isNull();
+
+    public Date readNullOrNewDate() {
+        readNull();
+        return null;
     }
 
-    public boolean nextIfNull() {
-        if (ch == 'n') {
-            this.readNull();
-            return true;
-        }
-        return false;
-    }
+    public abstract boolean nextIfNull();
 
     public JSONReader(Context context) {
         this.context = context;

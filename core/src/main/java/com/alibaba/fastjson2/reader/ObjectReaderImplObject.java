@@ -176,8 +176,7 @@ public final class ObjectReaderImplObject
                 value = jsonReader.readBoolValue();
                 break;
             case 'n':
-                jsonReader.readNull();
-                value = null;
+                value = jsonReader.readNullOrNewDate();
                 break;
             default:
                 throw new JSONException("illegal input : " + jsonReader.current() + ", offset " + jsonReader.getOffset());

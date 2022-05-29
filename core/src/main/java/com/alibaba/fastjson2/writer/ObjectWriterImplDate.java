@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -14,7 +15,9 @@ final class ObjectWriterImplDate
         extends DateTimeCodec
         implements ObjectWriter {
     static final ObjectWriterImplDate INSTANCE = new ObjectWriterImplDate(null);
-    static final ObjectWriterImplDate INSTANCE_UNIXTIME = new ObjectWriterImplDate("unixtime");
+
+    static final char[] PREFIX_CHARS = "new Date(".toCharArray();
+    static final byte[] PREFIX_BYTES = "new Date(".getBytes(StandardCharsets.UTF_8);
 
     public ObjectWriterImplDate(String format) {
         super(format);
@@ -42,6 +45,17 @@ final class ObjectWriterImplDate
 
         Date date = (Date) object;
         long millis = date.getTime();
+
+        if (jsonWriter.isWriteTypeInfo(object, fieldType)) {
+            if (jsonWriter.isUTF16()) {
+                jsonWriter.writeRaw(PREFIX_CHARS);
+            } else {
+                jsonWriter.writeRaw(PREFIX_BYTES);
+            }
+            jsonWriter.writeInt64(millis);
+            jsonWriter.writeRaw(')');
+            return;
+        }
 
         if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
             jsonWriter.writeInt64(millis);

@@ -12,6 +12,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -2914,6 +2915,124 @@ class JSONReaderUTF8
         }
 
         return true;
+    }
+
+    @Override
+    public boolean isNull() {
+        return ch == 'n' && offset < end && bytes[offset] == 'u';
+    }
+
+    public Date readNullOrNewDate() {
+        Date date = null;
+        if (offset + 2 < end
+                && bytes[offset] == 'u'
+                && bytes[offset + 1] == 'l'
+                && bytes[offset + 2] == 'l') {
+            if (offset + 3 == end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset + 3];
+            }
+            offset += 4;
+        } else if (offset + 1 < end
+                && bytes[offset] == 'e'
+                && bytes[offset + 1] == 'w') {
+            if (offset + 3 == end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset + 2];
+            }
+            offset += 3;
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[offset++];
+                }
+            }
+
+            if (offset + 4 < end
+                    && ch == 'D'
+                    && bytes[offset] == 'a'
+                    && bytes[offset + 1] == 't'
+                    && bytes[offset + 2] == 'e') {
+                if (offset + 3 == end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[offset + 3];
+                }
+                offset += 4;
+            } else {
+                throw new JSONException("json syntax error, not match new Date" + offset);
+            }
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[offset++];
+                }
+            }
+
+            if (ch != '(' || offset >= end) {
+                throw new JSONException("json syntax error, not match new Date" + offset);
+            }
+            ch = (char) bytes[offset++];
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[offset++];
+                }
+            }
+
+            long millis = readInt64Value();
+
+            if (ch != ')') {
+                throw new JSONException("json syntax error, not match new Date" + offset);
+            }
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+
+            date = new Date(millis);
+        } else {
+            throw new JSONException("json syntax error, not match null or new Date" + offset);
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+        }
+        if (ch == ',') {
+            ch = (char) bytes[offset++];
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[offset++];
+                }
+            }
+        }
+
+        return date;
+    }
+
+    @Override
+    public boolean nextIfNull() {
+        if (ch == 'n' && offset < end && bytes[offset] == 'u') {
+            this.readNull();
+            return true;
+        }
+        return false;
     }
 
     @Override
