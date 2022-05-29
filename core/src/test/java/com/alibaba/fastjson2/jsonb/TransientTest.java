@@ -12,8 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TransientTest {
+
     @Test
-    public void test_for_transient() throws Exception {
+    public void test_for_transient() {
         Bean bean = new Bean();
         bean.atomicBoolean.set(true);
 
@@ -25,7 +26,7 @@ public class TransientTest {
                 Feature.NotWriteHashMapArrayListClassName,
                 Feature.WriteNameAsSymbol);
 
-        Bean target = (Bean)JSONB.parseObject(
+        Bean target = (Bean) JSONB.parseObject(
                 bytes,
                 Object.class,
                 JSONReader.Feature.SupportAutoType,
@@ -35,7 +36,7 @@ public class TransientTest {
 
         assertTrue(target.getAtomicBoolean() == null || !target.getAtomicBoolean().get());
 
-        Bean target2 = (Bean)JSONB.parseObject(
+        Bean target2 = (Bean) JSONB.parseObject(
                 bytes,
                 Object.class,
                 JSONReader.Feature.SupportAutoType,
