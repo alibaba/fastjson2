@@ -22,13 +22,9 @@ public class Issue4175 {
     public static class ApproveConfigJson
             implements Serializable {
         private String postId;
-
-        private boolean hasPreNode = false;
-
+        private boolean hasPreNode;
         private ApproveConfigJson preNode;
-
-        private boolean hasNextNode = false;
-
+        private boolean hasNextNode;
         private ApproveConfigJson nextNode;
     }
 }

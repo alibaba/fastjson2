@@ -55,7 +55,6 @@ public class Issue1496 {
             public SetupStatus refuse() {
                 return EDIT;
             }
-
         }, FIRST_TRAIL(1, "FIRST_TRAIL", "初审") {
             public List<SetupStatus> nextList() {
                 return Arrays.asList(EXPERT, FINAL_TRAIL);
@@ -65,17 +64,14 @@ public class Issue1496 {
             public SetupStatus refuse() {
                 return EDIT;
             }
-
         }, EXPERT(2, "EXPERT", "专家补充意见", false) {
             public List<SetupStatus> nextList() {
                 return Arrays.asList(FINAL_TRAIL);
             }
-
         }, FINAL_TRAIL(3, "FINAL_TRAIL", "公益委员会/理事会/理事长审核") {
             public List<SetupStatus> nextList() {
                 return Arrays.asList(PASS);
             }
-
             @Override
             public SetupStatus refuse() {
                 return EDIT;

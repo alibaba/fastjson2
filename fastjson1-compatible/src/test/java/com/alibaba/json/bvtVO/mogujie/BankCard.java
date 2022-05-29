@@ -23,7 +23,6 @@ public class BankCard
         this.id = id;
     }
 
-
     public String getBankId() {
         return bankId;
     }
@@ -31,5 +30,4 @@ public class BankCard
     public void setBankId(String bankId) {
         this.bankId = bankId;
     }
-
 }

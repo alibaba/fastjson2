@@ -15,7 +15,7 @@ public class Issue1153 {
                 "test : '//helo'\n" +
                 "}";
 
-        JSONObject jsonObject =JSON.parseObject(json);
+        JSONObject jsonObject = JSON.parseObject(json);
         System.out.println(jsonObject);
     }
 }

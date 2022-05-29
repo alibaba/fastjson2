@@ -26,7 +26,7 @@ public class Issue1233 {
         assertEquals("x123", floorV2.templateId);
     }
 
-    @JSONType(seeAlso = {FloorV2.class}, typeKey = "type")
+    @JSONType(seeAlso = FloorV2.class, typeKey = "type")
     public interface AreaMixIn {
     }
 

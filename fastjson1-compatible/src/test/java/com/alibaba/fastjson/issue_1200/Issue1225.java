@@ -37,7 +37,6 @@ public class Issue1225 {
         assertEquals("2", object.data.get(1));
     }
 
-
     static class BaseGenericType<T> {
         public T data;
     }

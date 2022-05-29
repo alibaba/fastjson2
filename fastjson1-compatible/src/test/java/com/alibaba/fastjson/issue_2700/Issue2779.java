@@ -113,8 +113,6 @@ public class Issue2779 {
         private List f097;
         private List f098;
         private List f099;
-
-
         private List f100;
         private List f101;
         private List f102;

@@ -23,10 +23,11 @@ class TestFJ {
 }
 
 data class Data(
-        val id: Int = 0,
-        val name: String = "",
-        val date: Date? = null
+    val id: Int = 0,
+    val name: String = "",
+    val date: Date? = null
 )
+
 data class Data2(
-        val data: Data
+    val data: Data
 )

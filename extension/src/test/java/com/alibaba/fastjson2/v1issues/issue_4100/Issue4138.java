@@ -37,7 +37,6 @@ public class Issue4138 {
         assertEquals(org.springframework.security.core.authority.SimpleGrantedAuthority.class, object.getClass());
     }
 
-
     @Test
     public void test1() {
         String json = "{\"@type\":\"org.springframework.util.LinkedCaseInsensitiveMap\"}";

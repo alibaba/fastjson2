@@ -1,6 +1,5 @@
 package com.alibaba.json.bvtVO;
 
-
 import com.alibaba.fastjson.JSON;
 
 import java.io.Serializable;
@@ -13,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * 交易消息体
- * */
+ */
 public class DataTransaction2
         implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -56,7 +55,7 @@ public class DataTransaction2
 
         /**
          * 处理结果
-         * */
+         */
         class Ret {
             private String code;
             private String msg;
@@ -129,7 +128,7 @@ public class DataTransaction2
 
     /**
      * Body
-     * */
+     */
     @SuppressWarnings("rawtypes")
     class Body {
         private Param param = new Param();
@@ -141,7 +140,7 @@ public class DataTransaction2
 
         /**
          * 参数
-         * */
+         */
         class Param {
             private Limit limit = new Limit();
 
@@ -196,7 +195,7 @@ public class DataTransaction2
 
         /**
          * 数据集
-         * */
+         */
         class DataSet {
             private String total;
 
@@ -261,7 +260,7 @@ public class DataTransaction2
 
     /**
      * 设置返回的消息信息
-     * */
+     */
     public void setRetMsgCode(String code, String msg) {
         this.head.setRetCode(code);
         this.head.setRetMsg(msg);
@@ -287,7 +286,7 @@ public class DataTransaction2
         return JSON.toJSONString(this);
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         String jsonString = "{'head' : {'appid':'epas','transcode' : '000000','seqno' : '111111111',        'user' : {          'id' : '00000'},        'ret' : {           'code' : '1',           'msg' : 'txt'}  },  'body' : {      param : {           form:{              name : '111',               sex : '1',              address : 'street1',                array : [ {                 id : '1',                   name : 'tom1'               }, {                    id : '2',                   name : 'tom2'               } ]},           limit : {               start : 1,              size : 25,              total : 100}        },      dataset : {         total : 1000,           rows : [ {              id : 'id',              name : 'name'           }, {                id : 'id',              name : 'name'           } ]     }   }}";
         DataTransaction2 dt = DataTransaction2.fromJSON(jsonString);
         System.out.println(dt.toJSON());

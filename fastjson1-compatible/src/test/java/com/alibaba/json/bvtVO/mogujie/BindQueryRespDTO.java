@@ -7,12 +7,12 @@ public class BindQueryRespDTO {
     /**
      * version
      */
-    public int            f0;
+    public int f0;
 
     /**
      * is online test
      */
-    public int           f1;
+    public int f1;
 
     /**
      * http referer
@@ -27,7 +27,7 @@ public class BindQueryRespDTO {
     /**
      * 签约银行卡ID
      */
-    public int    bankCardId;
+    public int bankCardId;
 
     /**
      * 签约号
@@ -37,12 +37,12 @@ public class BindQueryRespDTO {
     /**
      * 用户ID
      */
-    public Long  userId;
+    public Long userId;
 
     /**
      * 签约状态
      */
-    public Integer  status;
+    public Integer status;
 
     /**
      * 签约时间（10位时间戳）
@@ -52,7 +52,7 @@ public class BindQueryRespDTO {
     /**
      * 签约银行卡号
      */
-    public String   cardNo;
+    public String cardNo;
 
     /**
      * 签约银行卡号标记
@@ -144,25 +144,22 @@ public class BindQueryRespDTO {
     /**
      * 渠道签约ID
      */
-    public Long     channelBindId;
+    public Long channelBindId;
 
     /**
      * 渠道签约号
      */
-    public String   channelBindNo;
+    public String channelBindNo;
 
     /**
      * 渠道签约类型
      */
-    public Integer  channelBindType;
+    public Integer channelBindType;
 
-    public String  subBankDesc;
-
+    public String subBankDesc;
 
     /**
      * 银行卡信息
      */
     public BankCard bankCard;
-
-
 }

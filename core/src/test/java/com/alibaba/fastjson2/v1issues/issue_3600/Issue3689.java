@@ -108,6 +108,6 @@ public class Issue3689 {
     @Test
     public void test_for_issue() {
         JSON.parseArray("[\"////dfdfdf\"]"); //不会抛异常
-        JSON.parse("[\"dfdfdf\"]");//不会抛异常
+        JSON.parse("[\"dfdfdf\"]"); //不会抛异常
     }
 }

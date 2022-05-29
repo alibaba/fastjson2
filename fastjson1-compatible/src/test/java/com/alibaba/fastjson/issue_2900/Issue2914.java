@@ -44,7 +44,6 @@ public class Issue2914 {
         assertEquals(3, complex1.getBlockQueue().size());
     }
 
-
     public static class Complex {
         private Queue<String> blockQueue;
 
@@ -68,6 +67,4 @@ public class Issue2914 {
             this.blockQueue = blockQueue;
         }
     }
-
-
 }

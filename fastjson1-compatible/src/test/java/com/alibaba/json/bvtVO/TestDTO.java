@@ -3,12 +3,12 @@ package com.alibaba.json.bvtVO;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
+ *
  */
 @XmlRootElement(name = "TestDTO")
 public class TestDTO {
-    private String       channel;
-    private String       txCode;
-
+    private String channel;
+    private String txCode;
 
     public String getChannel() {
         return channel;
@@ -25,6 +25,4 @@ public class TestDTO {
     public void setTxCode(String txCode) {
         this.txCode = txCode;
     }
-
-
 }

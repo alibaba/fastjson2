@@ -23,7 +23,7 @@ public class Issue1486 {
         @JSONField(alternateNames = {"song_list", "songList"})
         List<Value2> songList;
 
-        @JSONField(alternateNames = {"songlist"})
+        @JSONField(alternateNames = "songlist")
         String songlist;
 
         public List<Value2> getSongList() {

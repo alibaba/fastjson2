@@ -76,6 +76,4 @@ public class Issue1299 {
 
     public static class BaseResultDo {
     }
-
-
 }

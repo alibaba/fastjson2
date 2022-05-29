@@ -11,7 +11,7 @@ public class Issue3131 {
     @Test
     public void test_for_issue() throws Exception {
         List orgs = new ArrayList();
-        UserOrg org = new UserOrg("111","222" );
+        UserOrg org = new UserOrg("111", "222");
         orgs.add(org);
         String s = JSON.toJSONString(new Orgs("111", orgs));
         System.out.println(s);
@@ -19,9 +19,9 @@ public class Issue3131 {
         System.out.println(JSON.toJSONString(userOrgs));
     }
 
-    public static class Orgs<T extends Org> implements Serializable
-    {
+    public static class Orgs<T extends Org> implements Serializable {
         /**
+         *
          */
         private static final long serialVersionUID = -1L;
 
@@ -32,29 +32,24 @@ public class Issue3131 {
         public Orgs() {
         }
 
-        public Orgs(String name, List<T> orgs)
-        {
+        public Orgs(String name, List<T> orgs) {
             this.name = name;
             this.orgs = orgs;
         }
 
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
-        public void setName(String name)
-        {
+        public void setName(String name) {
             this.name = name;
         }
 
-        public List<T> getOrgs()
-        {
+        public List<T> getOrgs() {
             return orgs;
         }
 
-        public void setOrgs(List<T> orgs)
-        {
+        public void setOrgs(List<T> orgs) {
             this.orgs = orgs;
         }
 
@@ -68,7 +63,7 @@ public class Issue3131 {
 
     public static class UserOrg
             extends Org
-            implements Serializable{
+            implements Serializable {
         private String name;
 
         private String idcard;
@@ -76,53 +71,45 @@ public class Issue3131 {
         public UserOrg() {
         }
 
-        public UserOrg(String name, String idcard)
-        {
-            super (name);
+        public UserOrg(String name, String idcard) {
+            super(name);
             this.name = name;
             this.idcard = idcard;
         }
 
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
-        public void setName(String name)
-        {
+        public void setName(String name) {
             this.name = name;
         }
 
-        public String getIdcard()
-        {
+        public String getIdcard() {
             return idcard;
         }
 
-        public void setIdcard(String idcard)
-        {
+        public void setIdcard(String idcard) {
             this.idcard = idcard;
         }
     }
 
     public abstract static class Org
-            implements Serializable{
+            implements Serializable {
         private String name;
 
         public Org() {
         }
 
-        public Org(String name)
-        {
+        public Org(String name) {
             this.name = name;
         }
 
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
-        public void setName(String name)
-        {
+        public void setName(String name) {
             this.name = name;
         }
     }

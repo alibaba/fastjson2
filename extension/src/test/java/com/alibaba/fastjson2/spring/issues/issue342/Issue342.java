@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class Issue342 {
-
     private SearchPage<User> searchPage;
 
     public Issue342() {
@@ -79,5 +78,4 @@ public class Issue342 {
             this.age = age;
         }
     }
-
 }

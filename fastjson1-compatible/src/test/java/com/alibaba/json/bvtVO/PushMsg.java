@@ -114,7 +114,7 @@ public class PushMsg
 
     /**
      * 条件 1. isValid 2. st <= now <= et
-     * */
+     */
     public boolean isActiveNow() {
         if (!isValid()) {
             return false;
@@ -143,8 +143,7 @@ public class PushMsg
      */
     public boolean hasUrl() {
         boolean result = true;
-        if (null != msg) {
-        } else {
+        if (msg == null) {
             result = false;
         }
 
@@ -153,8 +152,7 @@ public class PushMsg
 
     public boolean hasText() {
         boolean result = true;
-        if (null != msg) {
-        } else {
+        if (msg == null) {
             result = false;
         }
 
@@ -190,7 +188,7 @@ public class PushMsg
      * 获取需要下载图片的URL列表
      *
      * @return list of image URL which image's URL is not cached, otherwise
-     *         return null.
+     * return null.
      */
     private List<String> getNewImageUrlList() {
         return null;
@@ -357,7 +355,6 @@ public class PushMsg
             }
 
             private final int COUNT = INDEX_TYPE.values().length;
-
             public static final int CTR_UNKNOWN = 0;
             private String text;
 
@@ -513,6 +510,7 @@ public class PushMsg
             }
 
             /* control of share */
+
             /**
              * 首页是否支持通知显示分享按钮
              *
@@ -565,7 +563,6 @@ public class PushMsg
             }
 
             /**
-             *
              * 控制字不能为空<br/>
              * 控制字长度不少于所需长度
              *

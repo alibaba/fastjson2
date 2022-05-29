@@ -11,21 +11,21 @@ public class WareHouseInfo
         implements Serializable {
     private static final long serialVersionUID = 6102232214244738211L;
     // ʡ��ID
-    private String            provinceId;
+    private String provinceId;
     // ʡ�����
-    private String            provinceName;
+    private String provinceName;
     // ����ID
-    private String            cityId;
+    private String cityId;
     // �������
-    private String            cityName;
+    private String cityName;
     // ����ID
-    private String            areaId;
+    private String areaId;
     // ��������
-    private String            areaName;
+    private String areaName;
     // �ֿ����
-    private String            houseArea;
+    private String houseArea;
     // �ֿ�ͼƬ
-    private Image[]           images;
+    private Image[] images;
 
     public String getProvinceId() {
         return provinceId;
@@ -90,5 +90,4 @@ public class WareHouseInfo
     public void setImages(Image[] images) {
         this.images = images;
     }
-
 }

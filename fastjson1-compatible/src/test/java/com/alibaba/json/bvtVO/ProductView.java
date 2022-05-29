@@ -2,11 +2,11 @@ package com.alibaba.json.bvtVO;
 
 public class ProductView {
     private Integer id;
-    private String  keyword;
+    private String keyword;
     private boolean hasProduct;
     private boolean hasCompany;
     private boolean hasBuyLead;
-    private String  country;
+    private String country;
 
     public Integer getId() {
         return id;

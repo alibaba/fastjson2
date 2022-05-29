@@ -15,12 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class Issue1152 {
     @Test
     public void test_for_issue() throws Exception {
-        TestBean tb = JSONObject.parseObject("{shijian:\"0000-00-00T00:00:00\"}",TestBean.class);
+        TestBean tb = JSONObject.parseObject("{shijian:\"0000-00-00T00:00:00\"}", TestBean.class);
         assertNull(tb.getShijian());
     }
 
     public void test_for_issue_2() throws Exception {
-        TestBean tb = JSONObject.parseObject("{shijian:\"0001-01-01T00:00:00+08:00\"}",TestBean.class);
+        TestBean tb = JSONObject.parseObject("{shijian:\"0001-01-01T00:00:00+08:00\"}", TestBean.class);
         assertNotNull(tb.getShijian());
     }
 
@@ -30,7 +30,8 @@ public class Issue1152 {
         public Date getShijian() {
             return shijian;
         }
-        @JSONField(name="shijian" )
+
+        @JSONField(name = "shijian")
         public void setShijian(Date shijian) {
             this.shijian = shijian;
         }

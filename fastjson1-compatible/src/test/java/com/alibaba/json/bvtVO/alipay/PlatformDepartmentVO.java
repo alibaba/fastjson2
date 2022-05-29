@@ -4,55 +4,62 @@ import com.alibaba.fastjson.annotation.JSONField;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class PlatformDepartmentVO {
-    @JSONField(ordinal=1)
-    private String id ;
-    @JSONField(ordinal=2)
-    private String label ;
-    @JSONField(ordinal=3)
+    @JSONField(ordinal = 1)
+    private String id;
+    @JSONField(ordinal = 2)
+    private String label;
+    @JSONField(ordinal = 3)
     private String value;
-    @JSONField(ordinal=4)
-    private String  parentId;
-    @JSONField(ordinal=5)
-    private String  parentLabel;
-    @JSONField(ordinal=6)
+    @JSONField(ordinal = 4)
+    private String parentId;
+    @JSONField(ordinal = 5)
+    private String parentLabel;
+    @JSONField(ordinal = 6)
     private String companyId;
-    @JSONField(ordinal=7)
+    @JSONField(ordinal = 7)
     private String departCode;
-    @JSONField(ordinal=8)
+    @JSONField(ordinal = 8)
     private String memo;
-    @JSONField(ordinal=9)
+    @JSONField(ordinal = 9)
     private String departOrgCode;
-    @JSONField(ordinal=10)
+    @JSONField(ordinal = 10)
     private String contact;
-    @JSONField(ordinal=11)
+    @JSONField(ordinal = 11)
     private String mobile;
-    @JSONField(ordinal=12)
+    @JSONField(ordinal = 12)
     private String departType;
-    @JSONField(serialize=false)
+    @JSONField(serialize = false)
     private String ipId;
-    @JSONField(serialize=false)
+    @JSONField(serialize = false)
     private String ipRoleId;
-    @JSONField(serialize=false)
+    @JSONField(serialize = false)
     private PlatformDepartmentVO parent;
-    @JSONField(ordinal=6,name="ChildNodes")
-    private List<PlatformDepartmentVO> childNodes =new ArrayList<PlatformDepartmentVO>();
+    @JSONField(ordinal = 6, name = "ChildNodes")
+    private List<PlatformDepartmentVO> childNodes = new ArrayList<PlatformDepartmentVO>();
+
     public String getId() {
         return id;
     }
+
     public void setId(String id) {
         this.id = id;
     }
+
     public String getLabel() {
         return label;
     }
+
     public void setLabel(String label) {
         this.label = label;
     }
+
     public String getValue() {
         return value;
     }
+
     public void setValue(String value) {
         this.value = value;
     }
@@ -60,12 +67,15 @@ public class PlatformDepartmentVO {
     public String getParentId() {
         return parentId;
     }
+
     public void setParentId(String parentId) {
         this.parentId = parentId;
     }
+
     public String getCompanyId() {
         return companyId;
     }
+
     public void setCompanyId(String companyId) {
         this.companyId = companyId;
     }
@@ -73,24 +83,31 @@ public class PlatformDepartmentVO {
     public String getDepartCode() {
         return departCode;
     }
+
     public void setDepartCode(String departCode) {
         this.departCode = departCode;
     }
+
     public String getMemo() {
         return memo;
     }
+
     public void setMemo(String memo) {
         this.memo = memo;
     }
+
     public PlatformDepartmentVO getParent() {
         return parent;
     }
+
     public void setParent(PlatformDepartmentVO parent) {
         this.parent = parent;
     }
+
     public List<PlatformDepartmentVO> getChildNodes() {
         return childNodes;
     }
+
     public void setChildNodes(List<PlatformDepartmentVO> childNodes) {
         this.childNodes = childNodes;
     }
@@ -107,7 +124,7 @@ public class PlatformDepartmentVO {
     /**
      * Setter method for property <tt>departType</tt>.
      *
-     * @param departType  value to be assigned to property departType
+     * @param departType value to be assigned to property departType
      */
     public void setDepartType(String departType) {
         this.departType = departType;
@@ -125,7 +142,7 @@ public class PlatformDepartmentVO {
     /**
      * Setter method for property <tt>parentLabel</tt>.
      *
-     * @param parentLabel  value to be assigned to property parentLabel
+     * @param parentLabel value to be assigned to property parentLabel
      */
     public void setParentLabel(String parentLabel) {
         this.parentLabel = parentLabel;
@@ -143,7 +160,7 @@ public class PlatformDepartmentVO {
     /**
      * Setter method for property <tt>departOrgCode</tt>.
      *
-     * @param departOrgCode  value to be assigned to property departOrgCode
+     * @param departOrgCode value to be assigned to property departOrgCode
      */
     public void setDepartOrgCode(String departOrgCode) {
         this.departOrgCode = departOrgCode;
@@ -161,7 +178,7 @@ public class PlatformDepartmentVO {
     /**
      * Setter method for property <tt>contact</tt>.
      *
-     * @param contact  value to be assigned to property contact
+     * @param contact value to be assigned to property contact
      */
     public void setContact(String contact) {
         this.contact = contact;
@@ -179,7 +196,7 @@ public class PlatformDepartmentVO {
     /**
      * Setter method for property <tt>mobile</tt>.
      *
-     * @param mobile  value to be assigned to property mobile
+     * @param mobile value to be assigned to property mobile
      */
     public void setMobile(String mobile) {
         this.mobile = mobile;
@@ -197,7 +214,7 @@ public class PlatformDepartmentVO {
     /**
      * Setter method for property <tt>ipRoleId</tt>.
      *
-     * @param ipRoleId  value to be assigned to property ipRoleId
+     * @param ipRoleId value to be assigned to property ipRoleId
      */
     public void setIpRoleId(String ipRoleId) {
         this.ipRoleId = ipRoleId;
@@ -215,7 +232,7 @@ public class PlatformDepartmentVO {
     /**
      * Setter method for property <tt>ipId</tt>.
      *
-     * @param ipId  value to be assigned to property ipId
+     * @param ipId value to be assigned to property ipId
      */
     public void setIpId(String ipId) {
         this.ipId = ipId;
@@ -223,15 +240,11 @@ public class PlatformDepartmentVO {
 
     public PlatformDepartmentVO() {
     }
-//    public PlatformDepartmentVO(String id, String label, String value, String parentId,
-//                                String companyId) {
-//        this.id = id;
-//        this.label = label;
-//        this.value = value;
-//        this.parentId = parentId;
-//        this.companyId = companyId;
-//    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, label, value, parentId, parentLabel, companyId, departCode, memo, departOrgCode, contact, mobile, departType, ipId, ipRoleId, parent, childNodes);
+    }
 
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -243,14 +256,13 @@ public class PlatformDepartmentVO {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        if(null==this.getId()){
+        if (null == this.getId()) {
             return false;
         }
         final PlatformDepartmentVO other = (PlatformDepartmentVO) obj;
-        if(!this.getId().equals(other.getId())) {
+        if (!this.getId().equals(other.getId())) {
             return false;
         }
         return true;
     }
-
 }

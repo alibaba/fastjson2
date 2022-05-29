@@ -4,16 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class VirtualTopic {
-    private static final long         serialVersionUID = 1115397330651723322L;
+    private static final long serialVersionUID = 1115397330651723322L;
 
-    private Map<Integer, QueueEntity> queueMap         = new HashMap<Integer, QueueEntity>();
-    private Integer                   queueCount;
+    private Map<Integer, QueueEntity> queueMap = new HashMap<Integer, QueueEntity>();
+    private Integer queueCount;
 
-    private int                       queueLimit;
+    private int queueLimit;
 
-    private String                    description;
+    private String description;
 
-    public VirtualTopic(){
+    public VirtualTopic() {
     }
 
     public String getDescription() {
@@ -104,5 +104,4 @@ public class VirtualTopic {
     public void setQueueLimit(int queueLimit) {
         this.queueLimit = queueLimit;
     }
-
 }

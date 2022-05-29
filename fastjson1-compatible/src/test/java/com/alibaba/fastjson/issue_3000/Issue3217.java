@@ -32,7 +32,6 @@ public class Issue3217 {
                  *这两个write换个顺序就不会报错
                  */
                 this.writeKeyValue("afterFilterTwo", "two");
-
             }
         }
     }

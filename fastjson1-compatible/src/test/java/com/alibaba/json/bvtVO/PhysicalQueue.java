@@ -2,16 +2,16 @@ package com.alibaba.json.bvtVO;
 
 public class PhysicalQueue {
     private QueueEntity queue;
-    private Integer     weight;
-    private Integer     capacity;
-    private int         inRate;
-    private int         outRate;
+    private Integer weight;
+    private Integer capacity;
+    private int inRate;
+    private int outRate;
 
     // Napoli 1.1 新加属性
-    private boolean     sendable;
-    private boolean     receivable;
+    private boolean sendable;
+    private boolean receivable;
 
-    public PhysicalQueue(){
+    public PhysicalQueue() {
     }
 
     public Integer getCapacity() {
@@ -73,5 +73,4 @@ public class PhysicalQueue {
     public void setReceivable(boolean receivable) {
         this.receivable = receivable;
     }
-
 }

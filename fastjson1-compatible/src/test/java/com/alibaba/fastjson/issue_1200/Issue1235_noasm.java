@@ -27,7 +27,7 @@ public class Issue1235_noasm {
         assertEquals("{\"type\":\"floorV2\",\"templateId\":\"x123\"}", json2);
     }
 
-    @JSONType(seeAlso = {FloorV2.class}, typeKey = "type")
+    @JSONType(seeAlso = FloorV2.class, typeKey = "type")
     public interface Area {
         public static final String TYPE_SECTION = "section";
         public static final String TYPE_FLOORV1 = "floorV1";

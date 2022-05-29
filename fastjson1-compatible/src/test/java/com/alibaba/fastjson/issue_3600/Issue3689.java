@@ -108,7 +108,7 @@ public class Issue3689 {
     @Test
     public void test_for_issue() {
         JSONArray.parseArray("[\"////dfdfdf\"]"); //不会抛异常
-        JSONArray objects = JSONArray.parseArray("[\"dfdfdf\"]");//不会抛异常
+        JSONArray objects = JSONArray.parseArray("[\"dfdfdf\"]"); //不会抛异常
         System.out.println(JSONArray.parseArray("[\"////dfdfdf\"]"));
         System.out.println(JSONArray.parseArray("[\"dfdfdf\"]"));
     }

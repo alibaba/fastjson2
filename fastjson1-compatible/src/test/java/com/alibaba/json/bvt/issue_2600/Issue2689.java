@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class Issue2689
-{
+public class Issue2689 {
     @Test
     public void test_0() throws Exception {
         Exception error = null;

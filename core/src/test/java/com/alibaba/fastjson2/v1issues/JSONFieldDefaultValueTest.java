@@ -256,6 +256,5 @@ public class JSONFieldDefaultValueTest {
         public void setaDouble2(Double aDouble2) {
             this.aDouble2 = aDouble2;
         }
-
     }
 }

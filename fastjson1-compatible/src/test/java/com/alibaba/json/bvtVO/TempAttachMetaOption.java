@@ -1,12 +1,12 @@
 /**
  * Project: rowan.server.biz.service-1.0-SNAPSHOT
- *
+ * <p>
  * File Created at 2011-12-9
  * $Id$
- *
+ * <p>
  * Copyright 1999-2100 Alibaba.com Corporation Limited.
  * All rights reserved.
- *
+ * <p>
  * This software is the confidential and proprietary information of
  * Alibaba Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -26,11 +26,11 @@ public class TempAttachMetaOption
         implements Serializable {
     private static final long serialVersionUID = -8786217160252057362L;
 
-    private Integer           id;
+    private Integer id;
 
-    private String            name;
+    private String name;
 
-    private String            path;
+    private String path;
 
     public Integer getId() {
         return id;
@@ -55,5 +55,4 @@ public class TempAttachMetaOption
     public void setPath(String path) {
         this.path = path;
     }
-
 }

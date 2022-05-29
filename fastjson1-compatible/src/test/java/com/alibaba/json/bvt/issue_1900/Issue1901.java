@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1901 {
     protected Locale locale;
     protected TimeZone timeZone;
+
     protected void setUp() throws Exception {
         locale = JSON.defaultLocale;
         timeZone = JSON.defaultTimeZone;

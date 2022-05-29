@@ -24,7 +24,8 @@ public class Issue2253 {
 
         assertEquals("[{\"3\":3,\"2\":2,\"7\":7}]", JSON.toJSONString(result, SerializerFeature.WriteMapNullValue));
 
-        result = JSON.parseObject(JSON.toJSONString(result, SerializerFeature.WriteMapNullValue), new TypeReference<List<Map<String, Object>>>() {}, Feature.OrderedField);
+        result = JSON.parseObject(JSON.toJSONString(result, SerializerFeature.WriteMapNullValue), new TypeReference<List<Map<String, Object>>>() {
+        }, Feature.OrderedField);
 
         assertEquals("[{\"3\":3,\"2\":2,\"7\":7}]", JSON.toJSONString(result, SerializerFeature.WriteMapNullValue));
     }

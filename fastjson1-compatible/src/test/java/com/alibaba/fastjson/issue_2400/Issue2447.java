@@ -48,7 +48,6 @@ public class Issue2447 {
         public Map<String, Object> properties = new LinkedHashMap<String, Object>();
     }
 
-
     public static class Location {
         public int longitude;
         public int latitude;

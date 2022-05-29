@@ -91,6 +91,4 @@ public class Issue1066 {
                     '}';
         }
     }
-
-
 }

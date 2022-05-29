@@ -1,7 +1,7 @@
 package com.alibaba.fastjson.v2issues;
 
-import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -16,7 +16,7 @@ public class Issue3452 {
     }
 
     private static class Step {
-        @JSONField(name = "component_key", alternateNames = {"componentKey"})
+        @JSONField(name = "component_key", alternateNames = "componentKey")
         private String componentKey;
 
         public String getComponentKey() {
