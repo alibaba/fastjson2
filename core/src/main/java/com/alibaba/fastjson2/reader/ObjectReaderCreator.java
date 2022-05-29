@@ -366,7 +366,7 @@ public class ObjectReaderCreator {
             }
         }
 
-        Function<Map<Long, Object>, Object> function = null;
+        Function<Map<Long, Object>, Object> function;
         if (beanInfo.creatorConstructor != null) {
             function = createFunction(beanInfo.creatorConstructor, beanInfo.markerConstructor, paramNames);
         } else {

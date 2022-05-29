@@ -142,8 +142,7 @@ public class ObjectReaderAdapter<T>
         jsonReader.nextIfMatch('[');
         Object object = creator.get();
 
-        for (int i = 0; i < fieldReaders.length; i++) {
-            FieldReader fieldReader = fieldReaders[i];
+        for (FieldReader fieldReader : fieldReaders) {
             fieldReader.readFieldValue(jsonReader, object);
         }
 
@@ -156,16 +155,16 @@ public class ObjectReaderAdapter<T>
         if (buildFunction != null) {
             return (T) buildFunction.apply(object);
         }
+
         return (T) object;
     }
 
     @Override
     public T readArrayMappingJSONBObject(JSONReader jsonReader) {
-        int entryCnt = jsonReader.startArray();
+        jsonReader.startArray();
         Object object = creator.get();
 
-        for (int i = 0; i < fieldReaders.length; i++) {
-            FieldReader fieldReader = fieldReaders[i];
+        for (FieldReader fieldReader : fieldReaders) {
             fieldReader.readFieldValue(jsonReader, object);
         }
 
@@ -195,39 +194,33 @@ public class ObjectReaderAdapter<T>
 
     @Override
     public T createInstance(long features) {
-        if (instantiationError) {
-            if (constructor != null) {
-                T object;
-                try {
-                    object = (T) constructor.newInstance();
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
-                    throw new JSONException("create instance error, " + objectClass, ex);
-                }
-
-                if (hasDefaultValue) {
-                    initDefaultValue(object);
-                }
-
-                return object;
+        if (instantiationError && constructor != null) {
+            T object;
+            try {
+                object = (T) constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+                throw new JSONException("create instance error, " + objectClass, ex);
             }
+
+            if (hasDefaultValue) {
+                initDefaultValue(object);
+            }
+
+            return object;
         }
 
         if ((features & JSONReader.Feature.UseDefaultConstructorAsPossible.mask) != 0
                 && constructor != null
                 && constructor.getParameterCount() == 0) {
-            if (constructor != null) {
-                T object;
-                try {
-                    object = (T) constructor.newInstance();
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
-                    throw new JSONException("create instance error, " + objectClass, ex);
-                }
+            T object;
+            try {
+                object = (T) constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+                throw new JSONException("create instance error, " + objectClass, ex);
+            }
 
-                if (hasDefaultValue) {
-                    initDefaultValue(object);
-                }
-
-                return object;
+            if (hasDefaultValue) {
+                initDefaultValue(object);
             }
         }
 
