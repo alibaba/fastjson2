@@ -1,4 +1,4 @@
-package com.alibaba.json.bvt.issue_2200;
+package com.alibaba.fastjson.issue_2200;
 
 import com.alibaba.fastjson.serializer.JSONSerializer;
 import org.junit.jupiter.api.Test;
@@ -22,8 +22,8 @@ public class Issue2289 {
     public static class A {
     }
 
-    public static class
-    B extends A {
+    public static class B
+            extends A {
         public int id;
     }
 }
