@@ -2,10 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import com.alibaba.fastjson2.filter.Filter;
-import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.reader.ValueConsumer;
+import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.ReferenceKey;
@@ -1186,7 +1183,7 @@ public abstract class JSONReader
         }
 
         for_:
-        for (; ; ) {
+        for (int i = 0; ; ++i) {
             if (ch == '}') {
                 next();
                 break;
@@ -1196,6 +1193,11 @@ public abstract class JSONReader
             if (name == null) {
                 name = readFieldNameUnquote();
                 nextIfMatch(':');
+            }
+
+            if (i == 0 && (context.features & Feature.ErrorOnNotSupportAutoType.mask) != 0 && name.equals("@type")) {
+                String typeName = readString();
+                throw new JSONException("autoType not support : " + typeName);
             }
             Object val;
             switch (ch) {
@@ -1389,7 +1391,11 @@ public abstract class JSONReader
                     val = readArray();
                     break;
                 case '{':
-                    val = readObject();
+                    if (context.autoTypeBeforeHandler != null || (context.features & Feature.SupportAutoType.mask) != 0) {
+                        val = ObjectReaderImplObject.INSTANCE.readObject(this, 0);
+                    } else {
+                        val = readObject();
+                    }
                     break;
                 case '\'':
                 case '"':
