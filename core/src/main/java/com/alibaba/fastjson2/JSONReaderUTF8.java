@@ -5158,6 +5158,50 @@ class JSONReaderUTF8
         this.offset = referenceBegin;
         this.ch = (char) bytes[offset++];
         String reference = readString();
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            offset++;
+            if (offset >= length) {
+                this.ch = EOI;
+                return reference;
+            }
+            ch = (char) bytes[offset];
+        }
+
+        if (ch != '}') {
+            throw new JSONException("illegal reference : " + reference);
+        }
+
+        if (offset == end) {
+            ch = EOI;
+        } else {
+            ch = (char) bytes[offset++];
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        if (ch == ',') {
+            this.ch = (char) bytes[this.offset++];
+            // next inline
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = (char) bytes[offset++];
+                    }
+                }
+            }
+        }
+
         return reference;
     }
 }
