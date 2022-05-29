@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class Issue1565 {
     @Test
-    public void test_testLargeBeanContainsOver256Field(){
+    public void test_testLargeBeanContainsOver256Field() {
         SerializeConfig serializeConfig = new SerializeConfig();
         serializeConfig.propertyNamingStrategy = PropertyNamingStrategy.SnakeCase;
 
@@ -39,7 +39,7 @@ public class Issue1565 {
     }
 
     public static class SmallBean
-            implements Serializable{
+            implements Serializable {
         private String id;
 
         public String getId() {

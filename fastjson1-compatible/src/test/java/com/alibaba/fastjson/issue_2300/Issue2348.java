@@ -97,9 +97,9 @@ public class Issue2348 {
         private int count;
         static RoomPersonnel roompersonnel;
 
-        public static RoomPersonnel getRoomPersonnel(){
-            if(roompersonnel==null){
-                roompersonnel=new  RoomPersonnel();
+        public static RoomPersonnel getRoomPersonnel() {
+            if (roompersonnel == null) {
+                roompersonnel = new RoomPersonnel();
             }
             return roompersonnel;
         }
@@ -107,6 +107,7 @@ public class Issue2348 {
         public void setCode(String code) {
             this.code = code;
         }
+
         public String getCode() {
             return code;
         }
@@ -114,6 +115,7 @@ public class Issue2348 {
         public void setData(List<PersonnelModel> data) {
             this.data = data;
         }
+
         public List<PersonnelModel> getData() {
             return data;
         }
@@ -121,6 +123,7 @@ public class Issue2348 {
         public void setCount(int count) {
             this.count = count;
         }
+
         public int getCount() {
             return count;
         }
@@ -185,6 +188,7 @@ public class Issue2348 {
         private String badw;
         private String type;
         private String rsxz;
+
         public String getType() {
             return type;
         }

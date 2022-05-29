@@ -26,7 +26,7 @@ public class TypeReferenceBug1763_2<T> {
      * parameter in the anonymous class's type hierarchy so we can reconstitute it
      * at runtime despite erasure.
      */
-    protected TypeReferenceBug1763_2(){
+    protected TypeReferenceBug1763_2() {
         Type superClass = getClass().getGenericSuperclass();
 
         Type type = ((ParameterizedType) superClass).getActualTypeArguments()[0];
@@ -41,10 +41,10 @@ public class TypeReferenceBug1763_2<T> {
     }
 
     /**
-     * @since 1.2.9
      * @param actualTypeArguments
+     * @since 1.2.9
      */
-    protected TypeReferenceBug1763_2(Type... actualTypeArguments){
+    protected TypeReferenceBug1763_2(Type... actualTypeArguments) {
         Class<?> thisClass = this.getClass();
         Type superClass = thisClass.getGenericSuperclass();
 
@@ -82,5 +82,6 @@ public class TypeReferenceBug1763_2<T> {
         return type;
     }
 
-    public static final Type LIST_STRING = new TypeReference<List<String>>() {}.getType();
+    public static final Type LIST_STRING = new TypeReference<List<String>>() {
+    }.getType();
 }

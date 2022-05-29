@@ -17,10 +17,11 @@ public class Issue1177_3 {
     @Test
     public void test_for_issue() throws Exception {
         String text = "[{\"x\":\"y\"},{\"x\":\"y\"}]";
-        List<Model> jsonObject = JSONObject.parseObject(text, new TypeReference<List<Model>>(){}.getType());
+        List<Model> jsonObject = JSONObject.parseObject(text, new TypeReference<List<Model>>() {
+        }.getType());
         System.out.println(JSON.toJSONString(jsonObject));
         String jsonpath = "$..x";
-        String value="y2";
+        String value = "y2";
         JSONPath.set(jsonObject, jsonpath, value);
         assertEquals("[{\"x\":\"y2\"},{\"x\":\"y2\"}]", JSON.toJSONString(jsonObject));
     }

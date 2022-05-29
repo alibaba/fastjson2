@@ -12,13 +12,13 @@ public class Issue1580_private {
     @Test
     public void test_for_issue() throws Exception {
         SimplePropertyPreFilter classAFilter = new SimplePropertyPreFilter(Model.class, "code");
-        SerializeFilter[] filters =new SerializeFilter[]{classAFilter};
+        SerializeFilter[] filters = new SerializeFilter[]{classAFilter};
 
         Model model = new Model();
         model.code = 1001;
         model.name = "N1";
 
-        String json = JSON.toJSONString(model, filters, SerializerFeature.BeanToArray );
+        String json = JSON.toJSONString(model, filters, SerializerFeature.BeanToArray);
         assertEquals("[1001,null]", json);
     }
 

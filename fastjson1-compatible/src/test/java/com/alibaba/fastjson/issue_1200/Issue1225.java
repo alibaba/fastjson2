@@ -23,7 +23,8 @@ public class Issue1225 {
 
     @Test
     public void test_parseObject_1() {
-        Type type = new TypeReference<ExtendGenericType<String>>() {}.getType();
+        Type type = new TypeReference<ExtendGenericType<String>>() {
+        }.getType();
         ExtendGenericType<String> o = JSON.parseObject("{\"data\":[\"1\",\"2\",\"3\"]}", type);
         assertEquals("2", o.data.get(1));
     }

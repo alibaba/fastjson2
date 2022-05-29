@@ -53,7 +53,8 @@ public class Issue2447 {
         public int longitude;
         public int latitude;
 
-        public Location() {}
+        public Location() {
+        }
 
         public Location(int longitude, int latitude) {
             this.longitude = longitude;

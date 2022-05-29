@@ -19,7 +19,7 @@ public class Issue3344 {
 
     @BeforeEach
     public void before() {
-        defaultTimeZone  = TimeZone.getDefault();
+        defaultTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
     }
 

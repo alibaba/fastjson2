@@ -621,24 +621,20 @@ public class JSONTest {
         assertEquals(Fnv.hashCode64("@type"), ObjectReaderImplList.INSTANCE.getTypeKeyHash());
 
         assertEquals(123,
-                ((List) JSON.parseObject("\"123\""
-                        , new TypeReference<List<Integer>>() {
-                        }.getType()))
+                ((List) JSON.parseObject("\"123\"",
+                        new TypeReference<List<Integer>>() {}.getType())
+                ).get(0));
+        assertEquals(123,
+                ((List) JSON.parseObject("\"123\"",
+                        new TypeReference<LinkedList<Integer>>() {}.getType()))
                         .get(0));
         assertEquals(123,
-                ((List) JSON.parseObject("\"123\""
-                        , new TypeReference<LinkedList<Integer>>() {
-                        }.getType()))
+                ((List) JSON.parseObject("\"123\"",
+                        new TypeReference<ArrayList<Integer>>() {}.getType()))
                         .get(0));
         assertEquals(123,
-                ((List) JSON.parseObject("\"123\""
-                        , new TypeReference<ArrayList<Integer>>() {
-                        }.getType()))
-                        .get(0));
-        assertEquals(123,
-                ((List) JSON.parseObject("\"123\""
-                        , new TypeReference<AbstractList<Integer>>() {
-                        }.getType()))
+                ((List) JSON.parseObject("\"123\"",
+                        new TypeReference<AbstractList<Integer>>() {}.getType()))
                         .get(0));
 
         new ObjectReaderImplList(MyList.class, MyList.class, MyList.class, Integer.class, null).createInstance();
@@ -650,24 +646,20 @@ public class JSONTest {
     @Test
     public void test_list_str_0() {
         assertEquals("123",
-                ((List) JSON.parseObject("[\"123\"]"
-                        , new TypeReference<List<String>>() {
-                        }.getType()))
+                ((List) JSON.parseObject("[\"123\"]",
+                        new TypeReference<List<String>>() {}.getType()))
                         .get(0));
         assertEquals("123",
-                ((List) JSON.parseObject("[\"123\"]"
-                        , new TypeReference<LinkedList<String>>() {
-                        }.getType()))
+                ((List) JSON.parseObject("[\"123\"]",
+                        new TypeReference<LinkedList<String>>() {}.getType()))
                         .get(0));
         assertEquals("123",
-                ((List) JSON.parseObject("[\"123\"]"
-                        , new TypeReference<ArrayList<String>>() {
-                        }.getType()))
+                ((List) JSON.parseObject("[\"123\"]",
+                        new TypeReference<ArrayList<String>>() {}.getType()))
                         .get(0));
         assertEquals("123",
-                ((List) JSON.parseObject("[\"123\"]"
-                        , new TypeReference<AbstractList<String>>() {
-                        }.getType()))
+                ((List) JSON.parseObject("[\"123\"]",
+                        new TypeReference<AbstractList<String>>() {}.getType()))
                         .get(0));
 
         new ObjectReaderImplListStr(MyList.class, MyList.class).createInstance();
@@ -702,10 +694,12 @@ public class JSONTest {
         public String name;
     }
 
-    public static class MyList<T> extends ArrayList<T> {
+    public static class MyList<T>
+            extends ArrayList<T> {
     }
 
-    private static class MyList0<T> extends ArrayList<T> {
+    private static class MyList0<T>
+            extends ArrayList<T> {
     }
 
     @Test
@@ -811,7 +805,7 @@ public class JSONTest {
         }
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream() {
-                public void write(byte b[], int off, int len) {
+                public void write(byte[] b, int off, int len) {
                     throw new UnsupportedOperationException();
                 }
             };

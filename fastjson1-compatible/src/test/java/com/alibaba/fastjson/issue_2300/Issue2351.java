@@ -33,7 +33,7 @@ public class Issue2351 {
         public List<Bean2> b;
     }
 
-    public static class Bean2  {
+    public static class Bean2 {
         private String c;
 
         public String getC() {

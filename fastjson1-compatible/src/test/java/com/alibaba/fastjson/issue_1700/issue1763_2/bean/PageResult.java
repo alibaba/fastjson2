@@ -4,8 +4,8 @@ import java.util.List;
 
 /**
  * 分页信息
- * @param <T>
  *
+ * @param <T>
  * @author cnlyml
  */
 public class PageResult<T> {

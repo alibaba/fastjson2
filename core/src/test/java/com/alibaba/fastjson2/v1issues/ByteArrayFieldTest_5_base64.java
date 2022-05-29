@@ -25,6 +25,5 @@ public class ByteArrayFieldTest_5_base64 {
     private static class Model {
         @JSONField(format = "base64")
         public byte[] value;
-
     }
 }

@@ -20,9 +20,11 @@ public class Issue1146 {
         public boolean isXxx() {
             return true;
         }
+
         public Boolean getYyy() {
             return true;
         }
+
         public Boolean getZzz() {
             return true;
         }

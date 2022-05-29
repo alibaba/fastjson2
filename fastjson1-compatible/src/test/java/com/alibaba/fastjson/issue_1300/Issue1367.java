@@ -52,11 +52,8 @@ public class Issue1367 {
     }
 
 
-
-
-
     public static class AbstractController<ID extends Serializable, PO extends GenericEntity<ID>> {
-        @PostMapping(path = "/typeVariableBean",consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+        @PostMapping(path = "/typeVariableBean", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
         public PO save(@RequestBody PO dto) {
             //do something
             return dto;
@@ -68,8 +65,8 @@ public class Issue1367 {
     public static class BeanController
             extends AbstractController<Long, TypeVariableBean> {
 
-        @PostMapping(path = "/parameterizedTypeBean",consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-        public String parameterizedTypeBean(@RequestBody ParameterizedTypeBean<String> parameterizedTypeBean){
+        @PostMapping(path = "/parameterizedTypeBean", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+        public String parameterizedTypeBean(@RequestBody ParameterizedTypeBean<String> parameterizedTypeBean) {
             return parameterizedTypeBean.t;
         }
 
@@ -96,7 +93,7 @@ public class Issue1367 {
                 (post("/parameterizedTypeBean").characterEncoding("UTF-8")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .content("{\"t\": \"neil dong\"}")
-                        )).andExpect(status().isOk()).andDo(print());
+                )).andExpect(status().isOk()).andDo(print());
     }
 
     @Test
@@ -105,7 +102,7 @@ public class Issue1367 {
                 (post("/typeVariableBean").characterEncoding("UTF-8")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .content("{\"id\": 1}")
-                        )).andExpect(status().isOk()).andDo(print());
+                )).andExpect(status().isOk()).andDo(print());
     }
 
     public abstract static class GenericEntity<ID
@@ -137,7 +134,6 @@ public class Issue1367 {
         public void setT(T t) {
             this.t = t;
         }
-
 
 
     }

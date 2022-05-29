@@ -12,11 +12,11 @@ public class Issue1357 {
     @Test
     public void test_for_issue() throws Exception {
         String str = "{\"d2\":null}";
-        Test2Bean b = JSONObject.parseObject(str,Test2Bean.class);
+        Test2Bean b = JSONObject.parseObject(str, Test2Bean.class);
         System.out.println(b);
     }
 
-    public static class Test2Bean{
+    public static class Test2Bean {
         private LocalDateTime d2;
     }
 }

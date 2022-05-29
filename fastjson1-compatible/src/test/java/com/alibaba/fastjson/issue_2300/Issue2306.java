@@ -13,7 +13,7 @@ public class Issue2306 {
         object.put("help_score_avg.cbm", 123);
 
         assertEquals(123,
-            JSONPath.extract(
-                    object.toJSONString(), "['help_score_avg.cbm']"));
+                JSONPath.extract(
+                        object.toJSONString(), "['help_score_avg.cbm']"));
     }
 }

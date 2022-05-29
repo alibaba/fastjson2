@@ -44,18 +44,23 @@ public class Issue_20201016_01 {
         public UserConfig getCreator() {
             return creator;
         }
+
         public void setCreator(UserConfig creator) {
             this.creator = creator;
         }
+
         public UserConfig getOwner() {
             return owner;
         }
+
         public void setOwner(UserConfig owner) {
             this.owner = owner;
         }
+
         public UserConfig getAgent() {
             return agent;
         }
+
         public void setAgent(UserConfig agent) {
             this.agent = agent;
         }
@@ -69,18 +74,23 @@ public class Issue_20201016_01 {
         public String getWorkid() {
             return workid;
         }
+
         public void setWorkid(String workid) {
             this.workid = workid;
         }
+
         public String getName() {
             return name;
         }
+
         public void setName(String name) {
             this.name = name;
         }
+
         public String getAccount() {
             return account;
         }
+
         public void setAccount(String account) {
             this.account = account;
         }

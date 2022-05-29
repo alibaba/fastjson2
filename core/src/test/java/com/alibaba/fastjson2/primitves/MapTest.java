@@ -50,8 +50,8 @@ public class MapTest {
                 0,
                 JSONB.parseObject(
                         JSONB.toBytes(
-                                new JSONObject().fluentPut("id", null)
-                                , JSONWriter.Feature.BeanToArray
+                                new JSONObject().fluentPut("id", null),
+                                JSONWriter.Feature.BeanToArray
                         )
                 ).size()
         );
@@ -60,8 +60,8 @@ public class MapTest {
                 1,
                 JSONB.parseObject(
                         JSONB.toBytes(
-                                new JSONObject().fluentPut("id", null)
-                                , JSONWriter.Feature.WriteNulls
+                                new JSONObject().fluentPut("id", null),
+                                JSONWriter.Feature.WriteNulls
                         )
                 ).size()
         );
@@ -70,8 +70,8 @@ public class MapTest {
                 1,
                 JSONB.parseObject(
                         JSONB.toBytes(
-                                new JSONObject().fluentPut("id", null)
-                                , JSONWriter.Feature.WriteNulls, JSONWriter.Feature.BeanToArray
+                                new JSONObject().fluentPut("id", null),
+                                JSONWriter.Feature.WriteNulls, JSONWriter.Feature.BeanToArray
                         )
                 ).size()
         );
@@ -97,14 +97,14 @@ public class MapTest {
                 .fluentPut("id_16", 116)
                 .fluentPut("id_17", 117)
                 .fluentPut("id_18", 118)
-                .fluentPut("id_19", 119)
-        ;
+                .fluentPut("id_19", 119);
+
         assertEquals(
                 20,
                 JSONB.parseObject(
                         JSONB.toBytes(
-                                object
-                                , JSONWriter.Feature.WriteNulls, JSONWriter.Feature.BeanToArray
+                                object,
+                                JSONWriter.Feature.WriteNulls, JSONWriter.Feature.BeanToArray
                         )
                 ).size()
         );

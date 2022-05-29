@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 public class Issue2238 {
     @Test
     public void test_for_issue() throws Exception {
-        CapitalLimitMonenyDTO capitalLimitMonenyDTO =new CapitalLimitMonenyDTO();
+        CapitalLimitMonenyDTO capitalLimitMonenyDTO = new CapitalLimitMonenyDTO();
         capitalLimitMonenyDTO.setMaxChargeMoney(new BigDecimal("200000"));
         capitalLimitMonenyDTO.setMinChargeMoney(new BigDecimal(0.01));
         capitalLimitMonenyDTO.setMaxWithdrawMoney(new BigDecimal(0.01));

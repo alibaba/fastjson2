@@ -75,7 +75,7 @@ public class JSONFromObjectTest {
     }
 
     public static class User {
-        private long   id;
+        private long id;
         private String name;
 
         public long getId() {

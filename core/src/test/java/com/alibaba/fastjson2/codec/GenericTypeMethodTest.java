@@ -120,10 +120,12 @@ public class GenericTypeMethodTest {
             extends P<String> {
     }
 
-    public static class P2<T extends String> extends P<T> {
+    public static class P2<T extends String>
+            extends P<T> {
     }
 
-    public static class P21<T extends String> extends P2<T> {
+    public static class P21<T extends String>
+            extends P2<T> {
     }
 
     public static class P3<T>
@@ -134,6 +136,7 @@ public class GenericTypeMethodTest {
             extends P3<T> {
     }
 
-    public static class P311<T extends String> extends P31<T> {
+    public static class P311<T extends String>
+            extends P31<T> {
     }
 }

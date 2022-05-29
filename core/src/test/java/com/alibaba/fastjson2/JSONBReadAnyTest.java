@@ -20,17 +20,17 @@ public class JSONBReadAnyTest {
         };
 
         for (Object value : values) {
-            assertEquals(value
-                    , JSONB.parse(
+            assertEquals(value,
+                    JSONB.parse(
                             JSONB.toBytes(value)));
-            assertEquals(value
-                    , JSONReader
+            assertEquals(value,
+                    JSONReader
                             .ofJSONB(
                                     JSONB.toBytes(value))
                             .readAny());
 
-            assertEquals(value
-                    , JSONB.parse(
+            assertEquals(value,
+                    JSONB.parse(
                             JSONB.toBytes(value, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.NotWriteRootClassName),
                             JSONReader.Feature.SupportAutoType
                     ));

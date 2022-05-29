@@ -20,11 +20,11 @@ public class Issue1256 {
         a.name = "Mike";
         a.age = 39;
 
-        Map<String,Object> map = new HashMap<String,Object>();
-        map.put("key_obj",a);
-        map.put("key_string","Hello");
-        map.put("key_random",-1193959466L);
-        map.put("key_int",10000);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("key_obj", a);
+        map.put("key_string", "Hello");
+        map.put("key_random", -1193959466L);
+        map.put("key_int", 10000);
 
         String jsonString = JSON.toJSONString(map);
         assertTrue(jsonString.contains("Mike"));

@@ -32,12 +32,13 @@ public class Issue1151 {
         public List<B> list = new ArrayList<B>();
     }
 
-    public static  interface B {
+    public static interface B {
     }
 
     public static class C
             implements B {
         public int id;
+
         public C() {
         }
 

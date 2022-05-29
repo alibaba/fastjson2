@@ -27,7 +27,7 @@ public class Issue1079 {
     }
 
     public static class PdpResponse {
-        @JSONField(name ="Response")
+        @JSONField(name = "Response")
         public List<Response> response;
 
         public static class Response {
@@ -52,7 +52,7 @@ public class Issue1079 {
         }
 
         @JSONField(deserialize = false)
-        public String retrieveDecision(){
+        public String retrieveDecision() {
             return this.response.get(0).innerObjects.get(0).decision;
         }
     }

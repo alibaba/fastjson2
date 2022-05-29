@@ -19,7 +19,7 @@ public class Issue1177_4 {
         Root root = JSONObject.parseObject(text, Root.class);
         System.out.println(JSON.toJSONString(root));
         String jsonpath = "$..x";
-        String value="y2";
+        String value = "y2";
         JSONPath.set(root, jsonpath, value);
         assertEquals("{\"models\":[{\"x\":\"y2\"},{\"x\":\"y2\"}]}", JSON.toJSONString(root));
     }

@@ -11,12 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue2397 {
     @Test
-    public void test_for_bug(){
+    public void test_for_bug() {
         String jsonStr = "{\"items\":[{\"id\":1,\"name\":\"kata\"}]}";
         TestReply testReply = JSON.parseObject(jsonStr, new TypeReference<TestReply>() {
         });
 
-        assertEquals(testReply.getItems().get(0).getId() , 1);
+        assertEquals(testReply.getItems().get(0).getId(), 1);
     }
 
     public static class SuperBaseReply<T> {

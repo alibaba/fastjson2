@@ -20,12 +20,10 @@ public class ByteArrayFieldTest_4 {
 
         Model model1 = JSON.parseObject(json, Model.class);
         assertArrayEquals(model.value, model1.value);
-
     }
 
     private static class Model {
         @JSONField(format = "hex")
         public byte[] value;
-
     }
 }

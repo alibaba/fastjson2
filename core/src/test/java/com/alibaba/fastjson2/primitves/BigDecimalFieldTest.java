@@ -91,8 +91,7 @@ public class BigDecimalFieldTest {
                 jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 BigDecimalField1 vo = new BigDecimalField1();
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"id\":null}"
-                        , jsonWriter.toString());
+                assertEquals("{\"id\":null}", jsonWriter.toString());
             }
         }
     }
@@ -106,7 +105,7 @@ public class BigDecimalFieldTest {
 
             JSONReader.Context readContext
                     = new JSONReader.Context(
-                    new ObjectReaderProvider(creator));
+                            new ObjectReaderProvider(creator));
             JSONPath jsonPath = JSONPath
                     .of("$.id")
                     .setReaderContext(readContext);

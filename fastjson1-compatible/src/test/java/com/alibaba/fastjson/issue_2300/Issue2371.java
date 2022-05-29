@@ -18,7 +18,8 @@ public class Issue2371 {
 
     public static <T> RpcRespObj<List<T>> convertResult(Class<T> type) {
         String str = "{\"status\":0,\"data\":[{\"resourceId\":2,\"resourceName\":\"own佛恩\",\"systemCode\":\"ad\"}]}";
-        RpcRespObj<List<T>> result = JSON.parseObject(str, new TypeReference<RpcRespObj<List<T>>>(type) {});
+        RpcRespObj<List<T>> result = JSON.parseObject(str, new TypeReference<RpcRespObj<List<T>>>(type) {
+        });
         return result;
     }
 

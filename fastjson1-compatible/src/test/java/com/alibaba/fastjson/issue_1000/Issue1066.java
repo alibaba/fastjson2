@@ -28,15 +28,15 @@ public class Issue1066 {
 
         System.out.println("序列化前的参数为:" + map);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try{
+        try {
             serialize(map, bos);
 
             Object desRes = deserialize(bos.toByteArray());
             System.out.println("反序列化后的结果为:" + JSON.toJSONString(desRes));
-        }finally {
-            try{
+        } finally {
+            try {
                 bos.close();
-            }catch (IOException e){
+            } catch (IOException e) {
             }
         }
     }
@@ -73,13 +73,12 @@ public class Issue1066 {
     public static enum EnumType {
         ONE(1, "1"),
 
-        TWO(2, "2")
-        ;
+        TWO(2, "2");
 
         private int code;
         private String desc;
 
-        EnumType(int code, String desc){
+        EnumType(int code, String desc) {
             this.code = code;
             this.desc = desc;
         }

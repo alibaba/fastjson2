@@ -1137,8 +1137,8 @@ public class JSONSchemaTest {
                                         "  \"name\": \"John Doe\",\n" +
                                         "  \"credit_card\": 5555555555555555,\n" +
                                         "  \"billing_address\": \"555 Debtor's Lane\"\n" +
-                                        "}"
-                                , Bean2.class
+                                        "}",
+                                Bean2.class
                         )
                 )
         );
@@ -1147,8 +1147,8 @@ public class JSONSchemaTest {
                         JSON.parseObject("{\n" +
                                         "  \"name\": \"John Doe\",\n" +
                                         "  \"credit_card\": 5555555555555555\n" +
-                                        "}"
-                                , Bean2.class
+                                        "}",
+                                Bean2.class
                         )
                 )
         );
@@ -1156,8 +1156,8 @@ public class JSONSchemaTest {
                 jsonSchema.isValid(
                         JSON.parseObject("{\n" +
                                         "  \"name\": \"John Doe\"\n" +
-                                        "}"
-                                , Bean2.class
+                                        "}",
+                                Bean2.class
                         )
                 )
         );
@@ -1166,8 +1166,8 @@ public class JSONSchemaTest {
                         JSON.parseObject("{\n" +
                                         "  \"name\": \"John Doe\",\n" +
                                         "  \"billing_address\": \"555 Debtor's Lane\"\n" +
-                                        "}"
-                                , Bean2.class
+                                        "}",
+                                Bean2.class
                         )
                 )
         );

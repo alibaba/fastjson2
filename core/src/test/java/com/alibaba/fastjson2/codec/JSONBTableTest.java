@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -49,9 +50,18 @@ public class JSONBTableTest {
         public List<Employee> employees;
 
         @Override
+        public int hashCode() {
+            return Objects.hash(employees);
+        }
+
+        @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             Org org = (Org) o;
 
@@ -71,8 +81,12 @@ public class JSONBTableTest {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             Employee employee = (Employee) o;
 

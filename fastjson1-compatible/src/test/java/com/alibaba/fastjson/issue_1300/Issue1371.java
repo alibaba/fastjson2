@@ -12,12 +12,12 @@ import java.util.TreeMap;
  * Created by wenshao on 05/08/2017.
  */
 public class Issue1371 {
-    private enum Rooms{
-        A, B, C, D ,E ;
+    private enum Rooms {
+        A, B, C, D, E;
     }
 
     @Test
-    public void testFastjsonEnum(){
+    public void testFastjsonEnum() {
         Map<Rooms, Rooms> enumMap = new TreeMap<Rooms, Rooms>();
 
         enumMap.put(Rooms.C, Rooms.D);
@@ -25,8 +25,6 @@ public class Issue1371 {
 
         Assertions.assertEquals(JSON.toJSONString(enumMap, SerializerFeature.WriteNonStringKeyAsString), "{\"C\":\"D\",\"E\":\"A\"}");
     }
-
-
 
 
 //    public void testParsed(){

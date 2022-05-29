@@ -1,10 +1,9 @@
 package com.alibaba.fastjson.issue_1700.issue1763_2.bean;
 
 /**
- *
  * @author cnlyml
  */
-public class CouponResult{
+public class CouponResult {
     /**
      * 优惠券ID
      */

@@ -23,12 +23,12 @@ public class Issue1500 {
         c.setE(aa);
         String jsonC = JSON.toJSONString(c, SerializerFeature.WriteClassName);
         C c2 = JSON.parseObject(jsonC, C.class);
-        assertEquals("java.lang.Exception",c2.getE().getClass().getName());
+        assertEquals("java.lang.Exception", c2.getE().getClass().getName());
     }
 
     public static class Aa
             extends Exception {
-        public Aa(){
+        public Aa() {
         }
 
         private String name;

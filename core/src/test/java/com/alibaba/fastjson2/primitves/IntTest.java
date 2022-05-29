@@ -197,7 +197,7 @@ public class IntTest {
         for (ObjectReaderCreator creator : creators) {
             JSONReader.Context readContext
                     = new JSONReader.Context(
-                    new ObjectReaderProvider(creator));
+                            new ObjectReaderProvider(creator));
             {
                 Int1 vo = new Int1();
 

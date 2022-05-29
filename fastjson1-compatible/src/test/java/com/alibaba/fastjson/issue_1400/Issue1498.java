@@ -23,21 +23,18 @@ public class Issue1498 {
         public BuFlag flag;
     }
 
-    public enum BuFlag
-    {
-        IS_NEED_CHECK_IDENTITY(1L, "a"),  HAS_CHECK_IDENTITY(2L, "b");
+    public enum BuFlag {
+        IS_NEED_CHECK_IDENTITY(1L, "a"), HAS_CHECK_IDENTITY(2L, "b");
 
         private long bit;
         private String desc;
 
-        private BuFlag(long bit, String desc)
-        {
+        private BuFlag(long bit, String desc) {
             this.bit = bit;
             this.desc = desc;
         }
 
-        public long getBit()
-        {
+        public long getBit() {
             return this.bit;
         }
     }

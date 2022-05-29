@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1276 {
     @Test
     public void test_for_issue() throws Exception {
-        MyException myException = new MyException(100,"error msg");
+        MyException myException = new MyException(100, "error msg");
         String str = JSON.toJSONString(myException);
         System.out.println(str);
 
@@ -23,7 +23,7 @@ public class Issue1276 {
     }
 
     public static class MyException
-            extends RuntimeException{
+            extends RuntimeException {
         private static final long serialVersionUID = 7815426752583648734L;
         private long code;
 

@@ -23,7 +23,6 @@ public class Issue1177_3 {
         String value = "y2";
         JSONPath.set(jsonObject, jsonpath, value);
         assertEquals("[{\"x\":\"y2\"},{\"x\":\"y2\"}]", JSON.toJSONString(jsonObject));
-
     }
 
     public static class Model {

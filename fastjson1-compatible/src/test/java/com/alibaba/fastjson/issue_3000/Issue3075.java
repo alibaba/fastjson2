@@ -12,25 +12,25 @@ public class Issue3075 {
     @Test
     public void test_for_issue() throws Exception {
         SerializerFeature[] features = {
-            SerializerFeature.BrowserSecure,
-                    // 消除对同一对象重复引用的优化
-                    SerializerFeature.DisableCircularReferenceDetect,
-                    // 将中文都会序列化为\Uxxxx 格式
-                    // 超过 −9007199254740992 到 9007199254740992 区间使用字符串，如："9007199254740993"
-                    // FIXME: 序列化的时候会导致空指针。
-                    SerializerFeature.BrowserCompatible,
-                    // 不隐藏为空的字段
-                    SerializerFeature.IgnoreNonFieldGetter,
-                    // map为Null，置为{}
-                    SerializerFeature.WriteMapNullValue,
-                    // Long、Integer、Short等number类型为Null，置为0
-                    SerializerFeature.WriteNullNumberAsZero,
-                    // Boolean为Null，置为false
-                    SerializerFeature.WriteNullBooleanAsFalse,
-                    // List为Null，置为[]
-                    SerializerFeature.WriteNullListAsEmpty,
-                    // String为Null，置为""
-                    SerializerFeature.WriteNullStringAsEmpty
+                SerializerFeature.BrowserSecure,
+                // 消除对同一对象重复引用的优化
+                SerializerFeature.DisableCircularReferenceDetect,
+                // 将中文都会序列化为\Uxxxx 格式
+                // 超过 −9007199254740992 到 9007199254740992 区间使用字符串，如："9007199254740993"
+                // FIXME: 序列化的时候会导致空指针。
+                SerializerFeature.BrowserCompatible,
+                // 不隐藏为空的字段
+                SerializerFeature.IgnoreNonFieldGetter,
+                // map为Null，置为{}
+                SerializerFeature.WriteMapNullValue,
+                // Long、Integer、Short等number类型为Null，置为0
+                SerializerFeature.WriteNullNumberAsZero,
+                // Boolean为Null，置为false
+                SerializerFeature.WriteNullBooleanAsFalse,
+                // List为Null，置为[]
+                SerializerFeature.WriteNullListAsEmpty,
+                // String为Null，置为""
+                SerializerFeature.WriteNullStringAsEmpty
         };
 
         JSON.toJSONString(new TestBasicBO(), features);
@@ -277,7 +277,7 @@ public class Issue3075 {
     @Data
 
     public static class TestBO
-            extends TestBasicBO{
+            extends TestBasicBO {
         public String mlbkyxy;
         public List<Integer> sqhgpd;
         public List<Integer> nikawljmoafb;

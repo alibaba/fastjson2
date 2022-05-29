@@ -40,7 +40,6 @@ public class Issue139 {
         items.forEach(item -> {
             assertTrue(item instanceof Item);
         });
-
     }
 
     public static class Bean {

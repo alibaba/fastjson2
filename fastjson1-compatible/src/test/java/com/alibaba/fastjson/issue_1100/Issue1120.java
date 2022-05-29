@@ -19,7 +19,7 @@ public class Issue1120 {
     }
 
     public static class Model {
-        @JSONField(name="REQ_NO")
+        @JSONField(name = "REQ_NO")
         private String reqNo;
 
         public String getReqNo() {

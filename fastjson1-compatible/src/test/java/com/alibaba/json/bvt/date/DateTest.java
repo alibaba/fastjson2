@@ -37,5 +37,4 @@ public class DateTest {
         Date date = JSON.parseObject("\"2018-10-12 09:48:22 +0800\"", Date.class);
         assertEquals(1539308902000L, date.getTime());
     }
-
 }

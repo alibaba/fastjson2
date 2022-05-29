@@ -25,7 +25,7 @@ public class Issue1679 {
         assertEquals("\"2018-01-10T08:30:00+08:00\"", JSON.toJSONString(user.create, SerializerFeature.UseISO8601DateFormat));
     }
 
-    public static class User{
+    public static class User {
         public Date create;
     }
 }

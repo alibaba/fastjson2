@@ -16,8 +16,8 @@ public class Issue1492 {
 
         // test for JSONObject
         JSONObject obj = new JSONObject();
-        obj.put("key1","value1");
-        obj.put("key2","value2");
+        obj.put("key1", "value1");
+        obj.put("key2", "value2");
         resp.setData(obj);
 
         String str = JSON.toJSONString(resp);

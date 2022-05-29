@@ -12,12 +12,12 @@ public class Issue1227 {
 
         try {
             Bean model = JSON.parseObject(t2, Bean.class);
-            assertEquals("\uFEFFmsg2222",model.msg);
+            assertEquals("\uFEFFmsg2222", model.msg);
 
             model.msg = "\uFEFFss";
             String t3 = JSON.toJSONString(model);
             assertTrue(t3.contains(model.msg));
-        } catch ( Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

@@ -203,8 +203,9 @@ public class Date1Test {
 
         for (ObjectWriterCreator creator : creators) {
             FieldWriter fieldWriter = creator
-                    .createFieldWriter("date"
-                            , "iso8601",
+                    .createFieldWriter(
+                            "date",
+                            "iso8601",
                             LongValueField1.class.getField("v0000"));
             ObjectWriter<LongValueField1> objectWriter
                     = creator.createObjectWriter(fieldWriter);

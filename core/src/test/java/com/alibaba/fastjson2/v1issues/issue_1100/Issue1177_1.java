@@ -21,6 +21,5 @@ public class Issue1177_1 {
         JSONPath.set(jsonObject, jsonpath, value);
         String result = jsonObject.toString();
         assertEquals("{\"a\":{\"x\":\"y2\"},\"b\":{\"x\":\"y2\"}}", result);
-
     }
 }

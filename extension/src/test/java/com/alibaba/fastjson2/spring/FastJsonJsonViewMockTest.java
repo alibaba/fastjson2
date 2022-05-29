@@ -62,9 +62,9 @@ public class FastJsonJsonViewMockTest {
     @RequestMapping("fastjson")
     public static class BeanController {
         @RequestMapping(value = "/mocktest", method = RequestMethod.GET)
-        public
+
         @ResponseBody
-        ModelAndView test7() {
+        public ModelAndView test7() {
             AuthIdentityRequest authRequest = new AuthIdentityRequest();
             authRequest.setAppId("cert01");
             authRequest.setUserId(2307643);

@@ -66,16 +66,16 @@ public class FastJsonHttpMessageConverterMockTest {
                 )).andExpect(status().isOk()).andDo(print());
     }
 
-    public static class AbstractController<ID extends Serializable, PO extends GenericEntity<ID>> {
+    public static class AbstractController<D extends Serializable, P extends GenericEntity<D>> {
         @PostMapping(path = "/typeVariableBean", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-        public PO save(@RequestBody PO dto) {
+        public P save(@RequestBody P dto) {
             //do something
             return dto;
         }
     }
 
     @RestController
-    @RequestMapping()
+    @RequestMapping
     public static class BeanController
             extends AbstractController<Long, TypeVariableBean> {
         @PostMapping(path = "/parameterizedTypeBean", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -97,8 +97,8 @@ public class FastJsonHttpMessageConverterMockTest {
         }
     }
 
-    abstract static class GenericEntity<ID extends Serializable> {
-        public abstract ID getId();
+    abstract static class GenericEntity<I extends Serializable> {
+        public abstract I getId();
     }
 
     static class TypeVariableBean

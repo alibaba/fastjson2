@@ -9,7 +9,7 @@ public class Issue1761 {
     @Test
     public void test_for_issue() throws Exception {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("null","");
+        jsonObject.put("null", "");
         double d = jsonObject.getDoubleValue("null");
         assertEquals(d, 0.0D);
     }

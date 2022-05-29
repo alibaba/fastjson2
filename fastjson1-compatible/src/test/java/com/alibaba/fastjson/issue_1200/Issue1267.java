@@ -20,7 +20,7 @@ public class Issue1267 {
                 LinkedMultiValueMap.class
         );  // 这是可以反序列化通过的
 
-        assertEquals("0.01",message.get("pay_fee").get(0));
+        assertEquals("0.01", message.get("pay_fee").get(0));
 
         PushHttpMessage pushHttpMessage = JSON.parseObject(json, PushHttpMessage.class);
 
@@ -34,7 +34,7 @@ public class Issue1267 {
 
     public static class PushHttpMessage {
         private LinkedMultiValueMap<String, String> message;
-        private String                              url;
+        private String url;
 
         public LinkedMultiValueMap<String, String> getMessage() {
             return message;

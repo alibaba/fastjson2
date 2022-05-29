@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1725 {
     @Test
     public void test_for_issue() throws Exception {
-        Map<String, Object> map= new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<String, Object>();
         map.put("enumField", 0);
 
         AbstractBean bean = JSON.parseObject(JSON.toJSONString(map), ConcreteBean.class);
@@ -26,5 +26,5 @@ public class Issue1725 {
             extends AbstractBean {
     }
 
-    public static enum FieldEnum { A, B }
+    public static enum FieldEnum {A, B}
 }

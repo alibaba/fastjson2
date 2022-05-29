@@ -28,30 +28,27 @@ public class MappingFastJsonMessageConverterTest {
         VO vo = (VO) converter.fromMessage(message, VO.class);
         Assertions.assertEquals(1, vo.getId());
 
-        // test toMessage/convertToInternal
         Message message1 = converter.toMessage(vo, null);
         System.out.println(message1.getPayload());
         Assertions.assertEquals("{\"id\":1}", new String((byte[]) message1.getPayload()));
 
-//		// test toMessage/convertToInternal
         Message message2 = converter.toMessage("{\"id\":1}", null);
         System.out.println(message2.getPayload());
         Assertions.assertEquals("{\"id\":1}", new String((byte[]) message2.getPayload()));
 
         converter.setSerializedPayloadClass(String.class);
 
-        // test toMessage/convertToInternal
         Message message3 = converter.toMessage(vo, null);
         System.out.println(message3.getPayload());
         Assertions.assertEquals("{\"id\":1}", message3.getPayload());
 
-//		// test toMessage/convertToInternal
         Message message4 = converter.toMessage("{\"id\":1}", null);
         System.out.println(message4.getPayload());
         Assertions.assertEquals("{\"id\":1}", message4.getPayload());
     }
 
-    public static class TestMessage<T> implements Message<T> {
+    public static class TestMessage<T>
+            implements Message<T> {
         private T payload;
 
         public TestMessage(T payload) {

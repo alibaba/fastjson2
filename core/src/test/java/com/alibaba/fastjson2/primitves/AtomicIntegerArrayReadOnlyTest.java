@@ -19,11 +19,11 @@ public class AtomicIntegerArrayReadOnlyTest {
 
         for (ObjectReaderCreator creator : creators) {
             FieldReader fieldWriter = creator.createFieldReader(
-                    AtomicIntegerArrayReadOnly1.class
-                    , "value"
-                    , AtomicIntegerArray.class
-                    , AtomicIntegerArray.class
-                    , AtomicIntegerArrayReadOnly1.class.getMethod("getValue"));
+                    AtomicIntegerArrayReadOnly1.class,
+                    "value",
+                    AtomicIntegerArray.class,
+                    AtomicIntegerArray.class,
+                    AtomicIntegerArrayReadOnly1.class.getMethod("getValue"));
             ObjectReader<AtomicIntegerArrayReadOnly1> objectReader
                     = creator.createObjectReader(AtomicIntegerArrayReadOnly1.class, fieldWriter);
 

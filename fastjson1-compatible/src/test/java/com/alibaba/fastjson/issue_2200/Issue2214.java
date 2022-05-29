@@ -24,7 +24,7 @@ public class Issue2214 {
     }
 
     public static class User {
-        public List[][] testGenericArrayArray2(List[][] res){
+        public List[][] testGenericArrayArray2(List[][] res) {
             return res;
         }
     }

@@ -25,7 +25,8 @@ public class Issue1583 {
         String jsonString = JSON.toJSONString(mapList, SerializerFeature.DisableCircularReferenceDetect);
 
         System.out.println(jsonString);
-        List<Map.Entry<String, List<String>>> parse = JSON.parseObject(jsonString, new TypeReference<List<Map.Entry<String, List<String>>>>() {});
+        List<Map.Entry<String, List<String>>> parse = JSON.parseObject(jsonString, new TypeReference<List<Map.Entry<String, List<String>>>>() {
+        });
         System.out.println(parse);
     }
 }

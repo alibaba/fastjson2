@@ -15,8 +15,8 @@ public class ArgCheckTest {
     }
 
     public static class TestDTO {
-        private String       channel;
-        private String       txCode;
+        private String channel;
+        private String txCode;
 
         public String getChannel() {
             return channel;

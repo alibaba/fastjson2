@@ -60,6 +60,7 @@ public class Issue1423 {
 
     public static class LongVal {
         private long v;
+
         public void setV(long v) {
             this.v = v;
         }

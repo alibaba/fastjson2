@@ -81,6 +81,5 @@ public class TypeNameTest {
         assertEquals("OBJECT_END " + BC_OBJECT_END, typeName(BC_OBJECT_END));
         assertEquals("SYMBOL " + BC_SYMBOL, typeName(BC_SYMBOL));
         assertEquals("-128", typeName((byte) -128));
-
     }
 }

@@ -59,7 +59,8 @@ public class Issue2754 {
         sdf.setTimeZone(TimeZone.getTimeZone("Australia/Eucla"));
         assertEquals("2019-09-18T20:35:00+08:45", sdf.format(c.p1.getTime()));
     }
-    public static class C{
+
+    public static class C {
         public Calendar p1;
     }
 }

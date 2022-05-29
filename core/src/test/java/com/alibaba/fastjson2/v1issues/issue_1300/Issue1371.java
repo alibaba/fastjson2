@@ -25,7 +25,6 @@ public class Issue1371 {
 
         assertEquals(JSON.toJSONString(enumMap),
                 "{\"C\":\"D\",\"E\":\"A\"}");
-
     }
 
 //    public void testParsed(){

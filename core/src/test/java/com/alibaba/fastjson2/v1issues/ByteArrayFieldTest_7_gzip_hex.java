@@ -28,6 +28,5 @@ public class ByteArrayFieldTest_7_gzip_hex {
     private static class Model {
         @JSONField(format = "gzip,base64")
         public byte[] value;
-
     }
 }

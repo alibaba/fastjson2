@@ -115,7 +115,7 @@ public class BooleanValueTest {
 
             JSONReader.Context readContext
                     = new JSONReader.Context(
-                    new ObjectReaderProvider(creator));
+                            new ObjectReaderProvider(creator));
             JSONPath jsonPath = JSONPath
                     .of("$.v0000")
                     .setReaderContext(readContext);

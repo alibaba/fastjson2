@@ -24,7 +24,7 @@ public class Issue1293 {
         assertNull(test.userType);
     }
 
-    static class Bean{
+    static class Bean {
         private long count;
         private IdType idType;
         private UserType userType;
@@ -54,10 +54,11 @@ public class Issue1293 {
         }
     }
 
-    static enum IdType{
-        A,B
+    static enum IdType {
+        A, B
     }
-    static enum UserType{
-        C,D
+
+    static enum UserType {
+        C, D
     }
 }

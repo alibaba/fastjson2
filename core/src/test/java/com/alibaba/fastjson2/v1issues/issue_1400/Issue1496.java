@@ -37,7 +37,6 @@ public class Issue1496 {
          * @return
          */
         SetupStatus next(String name);
-
     }
 
     @JSONType(writeEnumAsJavaBean = true)

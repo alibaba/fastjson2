@@ -13,7 +13,7 @@ public class Issue1645 {
         JSON.toJSONString(JSON.parseObject(test).toJavaObject(TestDateClass.class), SerializerFeature.PrettyFormat);
     }
 
-    public static class TestDateClass{
+    public static class TestDateClass {
         public String name;
         public LocalDateTime testDateTime;
     }

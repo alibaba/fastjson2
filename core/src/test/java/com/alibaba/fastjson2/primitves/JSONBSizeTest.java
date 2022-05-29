@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.util.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

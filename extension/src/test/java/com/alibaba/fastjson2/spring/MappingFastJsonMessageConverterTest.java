@@ -54,7 +54,8 @@ public class MappingFastJsonMessageConverterTest {
         assertEquals("{\"id\":1}", message4.getPayload());
     }
 
-    public static class TestMessage implements Message<String> {
+    public static class TestMessage
+            implements Message<String> {
         private String payload;
 
         public TestMessage(String payload) {

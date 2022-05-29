@@ -27,7 +27,7 @@ public class DateFieldTest8 {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", JSON.defaultLocale);
         format.setTimeZone(JSON.defaultTimeZone);
         assertEquals("{\"value\":\"" + format.format(object.getValue()) + "\"}",
-                            text);
+                text);
     }
 
     @Test
@@ -38,7 +38,7 @@ public class DateFieldTest8 {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", JSON.defaultLocale);
         format.setTimeZone(JSON.defaultTimeZone);
         assertEquals("{\"value\":\"" + format.format(object.getValue()) + "\"}",
-                            text);
+                text);
     }
 
     public static class Entity {

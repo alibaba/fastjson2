@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1474 {
     @Test
     public void test_for_issue() {
-        Map<String,Object> extraData = new HashMap<String,Object>();
+        Map<String, Object> extraData = new HashMap<String, Object>();
         extraData.put("ext_1", null);
         extraData.put("ext_2", null);
 
@@ -24,27 +24,32 @@ public class Issue1474 {
         assertEquals("{\"id\":\"001\",\"name\":\"顾客\"}", JSON.toJSONString(p));
     }
 
-    static class People{
+    static class People {
         private String name;
         private String id;
-        @JSONField(unwrapped=true)
+        @JSONField(unwrapped = true)
         private Object extraData;
 
         public String getName() {
             return name;
         }
+
         public void setName(String name) {
             this.name = name;
         }
+
         public String getId() {
             return id;
         }
+
         public void setId(String id) {
             this.id = id;
         }
+
         public Object getExtraData() {
             return extraData;
         }
+
         public void setExtraData(Object extraData) {
             this.extraData = extraData;
         }

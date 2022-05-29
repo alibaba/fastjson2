@@ -25,33 +25,43 @@ public class Issue1558 {
         private String _interface;
         private String method;
         private Object[] params;
+
         public String getId() {
             return id;
         }
+
         public void setId(String id) {
             this.id = id;
         }
+
         public String getInstance() {
             return instance;
         }
+
         public void setInstance(String instance) {
             this.instance = instance;
         }
+
         public String getInterface() {
             return _interface;
         }
+
         public void setInterface(String _interface) {
             this._interface = _interface;
         }
+
         public String getMethod() {
             return method;
         }
+
         public void setMethod(String method) {
             this.method = method;
         }
+
         public Object[] getParams() {
             return params;
         }
+
         public void setParams(Object[] params) {
             this.params = params;
         }

@@ -38,7 +38,7 @@ public class Issue1763 {
     }
 
     public static class BasePageQueryResult<T>
-            extends BaseResult<T>{
+            extends BaseResult<T> {
         private List<T> modelList;
 
         public List<T> getModelList() {

@@ -38,8 +38,6 @@ public class Issue1764_bean_biginteger_field {
     }
 
 
-
-
     public static class Model {
         @JSONField(serialzeFeatures = BrowserCompatible)
         public BigInteger value;

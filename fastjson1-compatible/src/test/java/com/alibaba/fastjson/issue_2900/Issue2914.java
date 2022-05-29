@@ -21,7 +21,7 @@ public class Issue2914 {
 
         String jsonInt = JSON.toJSONString(complexInt);
 
-        assertEquals("{\"blockQueue\":[1,2,3]}",jsonInt);
+        assertEquals("{\"blockQueue\":[1,2,3]}", jsonInt);
 
         ComplexInt complexInt1 = JSON.parseObject(jsonInt, ComplexInt.class);
 
@@ -37,7 +37,7 @@ public class Issue2914 {
 
         String json = JSON.toJSONString(complex);
 
-        assertEquals("{\"blockQueue\":[\"BlockQueue 1\",\"BlockQueue 2\",\"BlockQueue 3\"]}",json);
+        assertEquals("{\"blockQueue\":[\"BlockQueue 1\",\"BlockQueue 2\",\"BlockQueue 3\"]}", json);
 
         Complex complex1 = JSON.parseObject(json, Complex.class);
 
@@ -45,7 +45,7 @@ public class Issue2914 {
     }
 
 
-    public static class Complex  {
+    public static class Complex {
         private Queue<String> blockQueue;
 
         public Queue<String> getBlockQueue() {
@@ -57,7 +57,7 @@ public class Issue2914 {
         }
     }
 
-    public static class ComplexInt  {
+    public static class ComplexInt {
         private Queue<Integer> blockQueue;
 
         public Queue<Integer> getBlockQueue() {
@@ -68,7 +68,6 @@ public class Issue2914 {
             this.blockQueue = blockQueue;
         }
     }
-
 
 
 }
