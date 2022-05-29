@@ -12,5 +12,4 @@ public class Issue3132 {
         user.setName("asdffsf");
         System.out.println(JSONObject.toJSONString(user));
     }
-
 }

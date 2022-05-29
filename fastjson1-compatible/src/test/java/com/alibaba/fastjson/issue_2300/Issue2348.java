@@ -632,6 +632,5 @@ public class Issue2348 {
         public String getRsxz() {
             return rsxz;
         }
-
     }
 }

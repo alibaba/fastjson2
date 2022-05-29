@@ -51,7 +51,6 @@ public class Canal_Issue4186 {
     @Test
     public void test1() {
         Position position = new Position() {
-
         };
 
         String jsonString = JSON.toJSONString(position, JSONWriter.Feature.WriteClassName);
@@ -62,10 +61,8 @@ public class Canal_Issue4186 {
 
     public static abstract class Position
             implements Serializable {
-
     }
 
     public static class EntryPosition extends Position {
-
     }
 }

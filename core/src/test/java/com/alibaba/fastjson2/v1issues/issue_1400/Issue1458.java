@@ -48,7 +48,6 @@ public class Issue1458 {
             return false;
         }
 
-
         public HostAddress getAddress() {
             return address;
         }
@@ -81,11 +80,9 @@ public class Issue1458 {
             this.source = fingerprint;
         }
 
-
         public String getSource() {
             return source;
         }
-
     }
 
     public static class HostAddress {

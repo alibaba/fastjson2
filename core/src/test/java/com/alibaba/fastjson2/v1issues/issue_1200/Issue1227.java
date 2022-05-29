@@ -31,4 +31,3 @@ public class Issue1227 {
 }
 
 
-

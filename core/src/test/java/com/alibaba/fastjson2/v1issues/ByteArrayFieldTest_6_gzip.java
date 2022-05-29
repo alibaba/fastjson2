@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class ByteArrayFieldTest_6_gzip {
-
     @Test
     public void test_0() throws Exception {
         Model model = new Model();

@@ -19,7 +19,6 @@ public class Issue1612 {
 
         User user = userRegResponse.getResult();
         System.out.println(user);
-
     }
 
     public static <T> RegResponse<T> testFastJson(Class<T> clasz) {

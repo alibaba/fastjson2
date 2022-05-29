@@ -545,7 +545,7 @@
                             <failOnViolation>true</failOnViolation>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                             <configLocation>src/checkstyle/fastjson2-checks.xml</configLocation>
-                            <excludes>**/*Test*.java,**/*Issue*.java,**/*issue*/**/*.java,com/alibaba/fastjson2_vo/cart/OrderBy.java,com/alibaba/fastjson2_vo/homepage/GetHomePageData.java,com/alibaba/json/bvtVO/</excludes>
+                            <excludes>**/*Test.java,**/*Issue*.java,**/*issue*/**/*.java,com/alibaba/fastjson2_vo/cart/OrderBy.java,com/alibaba/fastjson2_vo/homepage/GetHomePageData.java,com/alibaba/json/bvtVO/</excludes>
                         </configuration>
                     </execution>
                 </executions>

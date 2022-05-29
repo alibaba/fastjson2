@@ -980,7 +980,6 @@ public class JSONArrayTest {
         assertEquals(instant, JSONArray.of(new Date(millis)).getInstant(0));
     }
 
-
     @Test
     public void test_fluentAdd() {
         JSONArray array = JSONArray.of().fluentAdd("1").fluentAdd(null);
@@ -1354,6 +1353,5 @@ public class JSONArrayTest {
     }
 
     public static class Bean {
-
     }
 }

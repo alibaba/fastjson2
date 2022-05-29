@@ -42,7 +42,6 @@ class TestIssue3223 {
         Assertions.assertTrue(n == d)
 
     }
-
 }
 
 

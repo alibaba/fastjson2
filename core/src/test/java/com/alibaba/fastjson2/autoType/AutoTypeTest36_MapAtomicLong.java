@@ -74,7 +74,6 @@ public class AutoTypeTest36_MapAtomicLong {
         assertEquals(bean.map.get("123").getClass(), bean2.map.get("123").getClass());
     }
 
-
     public static class Bean {
         public Map<String, Object> map;
     }

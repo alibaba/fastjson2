@@ -18,29 +18,24 @@ public class DateFieldTest7 {
     }
 
     @Test
-	public void test_0() throws Exception {
-//		SerializeConfig config = new SerializeConfig();
-//		config.put(Date.class, new SimpleDateFormatSerializer("yyyy-MM-dd"));
-//		config.setAsmEnable(false);
-
-		Entity object = new Entity();
-		object.setValue(new Date());
-		String text = JSON.toJSONStringWithDateFormat(object, "yyyy-MM-dd");
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", JSON.defaultLocale);
+    public void test_0() throws Exception {
+        Entity object = new Entity();
+        object.setValue(new Date());
+        String text = JSON.toJSONStringWithDateFormat(object, "yyyy-MM-dd");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", JSON.defaultLocale);
         format.setTimeZone(JSON.defaultTimeZone);
-		Assertions.assertEquals("{\"value\":\"" + format.format(object.getValue()) + "\"}", text);
-	}
+        Assertions.assertEquals("{\"value\":\"" + format.format(object.getValue()) + "\"}", text);
+    }
 
-	public static class Entity {
-		private Date value;
+    public static class Entity {
+        private Date value;
 
-		public Date getValue() {
-			return value;
-		}
+        public Date getValue() {
+            return value;
+        }
 
-		public void setValue(Date value) {
-			this.value = value;
-		}
-
-	}
+        public void setValue(Date value) {
+            this.value = value;
+        }
+    }
 }

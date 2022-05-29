@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BuilderTest_error {
-
     @Test
     public void test_0() throws Exception {
         Exception error = null;
@@ -22,7 +21,6 @@ public class BuilderTest_error {
 
     @JSONType(builder = VOBuilder.class)
     public static class VO {
-
         private int    id;
         private String name;
 
@@ -36,7 +34,6 @@ public class BuilderTest_error {
     }
 
     public static class VOBuilder {
-
         private VO vo = new VO();
 
         public VO build() {

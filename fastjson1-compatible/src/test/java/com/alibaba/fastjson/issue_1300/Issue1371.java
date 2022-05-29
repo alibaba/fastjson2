@@ -24,7 +24,6 @@ public class Issue1371 {
         enumMap.put(Rooms.E, Rooms.A);
 
         Assertions.assertEquals(JSON.toJSONString(enumMap, SerializerFeature.WriteNonStringKeyAsString), "{\"C\":\"D\",\"E\":\"A\"}");
-
     }
 
 

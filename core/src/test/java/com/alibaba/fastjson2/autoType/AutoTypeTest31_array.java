@@ -72,7 +72,6 @@ public class AutoTypeTest31_array {
         assertEquals(array[0], array2[0]);
     }
 
-
     @Test
     public void test_LongValueArray() throws Exception {
         long[] array = new long[] {101L};

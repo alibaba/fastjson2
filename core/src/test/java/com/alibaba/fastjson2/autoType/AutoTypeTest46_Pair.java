@@ -49,7 +49,6 @@ public class AutoTypeTest46_Pair {
                 "\t}\n" +
                 "}", new JSONBDump(bytes, true).toString());
 
-
         Bean bean2 = (Bean) JSONB.parseObject(
                 bytes,
                 Object.class,
@@ -70,6 +69,4 @@ public class AutoTypeTest46_Pair {
         public Pair<String, Boolean> pair1;
         public Pair<String, Boolean> pair2;
     }
-
-
 }

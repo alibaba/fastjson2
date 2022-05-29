@@ -64,6 +64,5 @@ public class CalendarTest {
         public void setCalendar(Calendar calendar) {
             this.calendar = calendar;
         }
-
     }
 }

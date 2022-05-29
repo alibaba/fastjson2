@@ -20,7 +20,6 @@ public class JSONWriterJSONBTest {
         }
     }
 
-
     @Test
     public void test_writeRaw() {
         JSONWriter jsonWriter = JSONWriter.ofJSONB();

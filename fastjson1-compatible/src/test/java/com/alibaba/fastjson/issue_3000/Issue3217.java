@@ -88,6 +88,5 @@ public class Issue3217 {
         public void setBarcode(String barcode) {
             this.barcode = barcode;
         }
-
     }
 }

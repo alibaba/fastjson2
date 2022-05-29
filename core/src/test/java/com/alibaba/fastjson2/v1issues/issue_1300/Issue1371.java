@@ -31,7 +31,6 @@ public class Issue1371 {
 
 
 
-
 //    public void testParsed(){
 //
 //        String oldStyleJson = "{1:'abc', 2:'cde'}";

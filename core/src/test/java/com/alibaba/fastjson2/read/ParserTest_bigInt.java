@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class ParserTest_bigInt {
     String str = " { \n" +
             "     \"id\" : 123456789 ,\n" +

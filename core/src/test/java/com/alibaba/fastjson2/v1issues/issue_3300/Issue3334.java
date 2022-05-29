@@ -14,7 +14,6 @@ public class Issue3334 {
         assertEquals(1,
                 JSON.parseObject("{\"id\":true}", VO.class).id);
 
-
         assertEquals(0,
                 JSON.parseObject("{\"id64\":false}", VO.class).id64);
 
@@ -27,13 +26,11 @@ public class Issue3334 {
         assertEquals(1,
                 JSON.parseObject("{\"id16\":true}", VO.class).id16);
 
-
         assertEquals(0,
                 JSON.parseObject("{\"id8\":false}", VO.class).id8);
 
         assertEquals(1,
                 JSON.parseObject("{\"id8\":true}", VO.class).id8);
-
 
         assertEquals(0F,
                 JSON.parseObject("{\"floatValue\":false}", VO.class).floatValue);

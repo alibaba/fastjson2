@@ -85,11 +85,12 @@ public class TypeReferenceTest2 {
         Object[] value = (Object[]) bean.value;
         assertEquals(2, value.length);
         assertEquals(1, ((int[]) ((Object[]) value[0])[0])[0]);
-        assertEquals(2,  ((int[]) ((Object[]) value[1])[0])[0]);
+        assertEquals(2, ((int[]) ((Object[]) value[1])[0])[0]);
     }
 
     public static <T> Bean<T> parse(String str, Type type) {
-        return JSON.parseObject(str, new TypeReference<Bean<T>>(new Type[]{type}) {});
+        return JSON.parseObject(str, new TypeReference<Bean<T>>(new Type[]{type}) {
+        });
     }
 
     @Test

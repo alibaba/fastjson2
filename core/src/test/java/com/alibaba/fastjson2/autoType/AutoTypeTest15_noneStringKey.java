@@ -27,7 +27,6 @@ public class AutoTypeTest15_noneStringKey {
         Differ.diff(object, object2);
     }
 
-
     @Test
     public void test_1() throws Exception {
         LinkedHashMap object = new LinkedHashMap();
@@ -44,7 +43,6 @@ public class AutoTypeTest15_noneStringKey {
 
         Differ.diff(object, object2);
     }
-
 
     @Test
     public void test_3() throws Exception {
@@ -78,6 +76,4 @@ public class AutoTypeTest15_noneStringKey {
 
         Differ.diff(object, object2);
     }
-
-
 }

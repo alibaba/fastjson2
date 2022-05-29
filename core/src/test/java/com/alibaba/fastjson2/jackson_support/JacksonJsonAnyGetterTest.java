@@ -29,6 +29,5 @@ public class JacksonJsonAnyGetterTest {
         public Map<String, String> getProperties() {
             return properties;
         }
-
     }
 }

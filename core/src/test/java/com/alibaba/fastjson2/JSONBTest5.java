@@ -160,7 +160,6 @@ public class JSONBTest5 {
 
     public static class A {
         private A() {
-
         }
     }
 }

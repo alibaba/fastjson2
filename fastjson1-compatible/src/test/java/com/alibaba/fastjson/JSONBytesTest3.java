@@ -1,6 +1,5 @@
 package com.alibaba.fastjson;
 
-
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;

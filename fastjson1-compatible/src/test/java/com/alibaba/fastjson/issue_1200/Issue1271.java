@@ -21,7 +21,6 @@ public class Issue1271 {
             }
         };
 
-
 //        A a = JSON.parseObject(json,A.class,extraProcessor);
 //        assertEquals(1,a.a);
 //        assertEquals(1, count.intValue());
@@ -29,7 +28,6 @@ public class Issue1271 {
 //        B b = JSON.parseObject(json,B.class,extraProcessor);
 //        assertEquals(1,b.a);
 //        assertEquals(2, count.intValue());
-
     }
 
     public static class A {

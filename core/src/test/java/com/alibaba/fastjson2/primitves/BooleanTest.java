@@ -165,7 +165,6 @@ public class BooleanTest {
                         .read(array.getClass())));
     }
 
-
     @Test
     public void test_array_dim2() {
         boolean[][] array = new boolean[][] {{true, false, true}, {false, true}, {true, false}};

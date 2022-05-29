@@ -40,7 +40,6 @@ public class Issue1307 {
                                 contextValueFilter
                         })
         );
-
     }
 
     @Test

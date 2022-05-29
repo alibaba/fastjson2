@@ -73,5 +73,4 @@ public class UUIDTest3 {
             assertEquals(vo.getId(), v1.getId());
         }
     }
-
 }

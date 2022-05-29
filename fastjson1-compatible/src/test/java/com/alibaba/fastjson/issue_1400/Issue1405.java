@@ -76,7 +76,6 @@ public class Issue1405 {
 
             return modelAndView;
         }
-
     }
 
 

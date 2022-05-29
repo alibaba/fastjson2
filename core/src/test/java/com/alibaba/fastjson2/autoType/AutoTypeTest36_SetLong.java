@@ -25,12 +25,12 @@ public class AutoTypeTest36_SetLong {
         bean.values1.add(100L);
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -46,14 +46,13 @@ public class AutoTypeTest36_SetLong {
         assertEquals(bean.getClass(), bean2.getClass());
         assertEquals(bean.values.getClass(), bean2.values.getClass());
         assertEquals(bean.values.size(), bean2.values.size());
-        assertEquals(bean.values.stream().findFirst().get() , bean2.values.stream().findFirst().get());
+        assertEquals(bean.values.stream().findFirst().get(), bean2.values.stream().findFirst().get());
     }
 
     public static class Bean {
         public Set<Long> values;
         public Set<Long> values1;
     }
-
 
     @Test
     public void test_2() throws Exception {
@@ -78,12 +77,12 @@ public class AutoTypeTest36_SetLong {
         }
 
         byte[] bytes = JSONB.toBytes(list,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -101,7 +100,7 @@ public class AutoTypeTest36_SetLong {
         assertEquals(bean.getClass(), bean2.getClass());
         assertEquals(bean.values.getClass(), bean2.values.getClass());
         assertEquals(bean.values.size(), bean2.values.size());
-        assertEquals(bean.values.stream().findFirst().get() , bean2.values.stream().findFirst().get());
+        assertEquals(bean.values.stream().findFirst().get(), bean2.values.stream().findFirst().get());
     }
 
     @Test
@@ -112,12 +111,12 @@ public class AutoTypeTest36_SetLong {
         bean.values = set;
 
         byte[] bytes = JSONB.toBytes(bean,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -141,6 +140,4 @@ public class AutoTypeTest36_SetLong {
     public static class Bean2 {
         public Set<Long> values;
     }
-
-
 }

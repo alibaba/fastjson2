@@ -27,7 +27,6 @@ public class LocalDateTimeTest {
 
         JSONBDump.dump(bytes);
 
-
         LocalDateTime date2 = (LocalDateTime) JSONB.parseObject(
                 bytes,
                 Object.class,
@@ -81,7 +80,6 @@ public class LocalDateTimeTest {
         );
 
         JSONBDump.dump(bytes);
-
 
         LocalDateTime date2 = (LocalDateTime) JSONB.parseObject(
                 bytes,

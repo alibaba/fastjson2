@@ -53,6 +53,5 @@ public class ListRefTest {
     }
 
     public static class Item {
-
     }
 }

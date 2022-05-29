@@ -36,5 +36,4 @@ public class Issue1821C {
         @JSONField(name="data", ordinal = 2, format = "base64")
         public byte[] data;
     }
-
 }

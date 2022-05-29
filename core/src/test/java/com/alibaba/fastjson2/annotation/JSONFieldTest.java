@@ -63,7 +63,6 @@ public class JSONFieldTest {
         public long date;
     }
 
-
     public static class VO_Method {
         private long date;
 

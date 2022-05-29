@@ -70,6 +70,5 @@ public class Issue_for_dianxing {
         public void setMaxAlarmCount(int maxAlarmCount) {
             this.maxAlarmCount = maxAlarmCount;
         }
-
     }
 }

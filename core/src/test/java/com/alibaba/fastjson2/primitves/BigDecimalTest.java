@@ -139,7 +139,6 @@ public class BigDecimalTest {
         }
     }
 
-
     @Test
     public void test_jsonb_value_cast_str() {
         Number[] values = new Number[] {
@@ -258,7 +257,6 @@ public class BigDecimalTest {
         }
     }
 
-
     @Test
     public void test_bool_true() {
         byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("id", true));
@@ -279,5 +277,4 @@ public class BigDecimalTest {
         BigDecimal1 vo = JSONB.parseObject(jsonbBytes, BigDecimal1.class);
         assertEquals(new BigDecimal("638860.1"), vo.getId());
     }
-
 }

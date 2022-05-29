@@ -17,7 +17,6 @@ public class PathTest4 {
                 .setInt(vo, 11);
         assertEquals(11, vo.v1);
 
-
         JSONPath.of("$.v2")
                 .setInt(vo, 12);
         assertEquals(12, vo.v2.byteValue());
@@ -38,7 +37,6 @@ public class PathTest4 {
                 .set(vo, 11);
         assertEquals(11, vo.v1);
 
-
         JSONPath.of("$.v2")
                 .set(vo, 12);
         assertEquals(12, vo.v2.byteValue());
@@ -58,7 +56,6 @@ public class PathTest4 {
         JSONPath.of("$.v1")
                 .setLong(vo, 11);
         assertEquals(11, vo.v1);
-
 
         JSONPath.of("$.v2")
                 .setLong(vo, 12);

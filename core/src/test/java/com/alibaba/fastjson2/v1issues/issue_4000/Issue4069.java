@@ -21,5 +21,4 @@ public class Issue4069 {
         assertFalse(JSON.isValidArray("["));
         assertFalse(JSON.isValidArray("[[]"));
     }
-
 }

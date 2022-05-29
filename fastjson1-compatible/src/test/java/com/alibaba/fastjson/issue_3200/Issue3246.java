@@ -14,7 +14,6 @@ public class Issue3246 {
         Order parseOrder = JSON.parseObject(jsonStr,Order.class);
         assertEquals(Integer.valueOf(4), parseOrder.getAmount());
         assertEquals("3", parseOrder.getAddMoney());
-
     }
 
     @Data
@@ -59,6 +58,5 @@ public class Issue3246 {
         private Integer sceneType;
         @JSONField(name = "t_t", ordinal = 16)
         private Integer tradingType;
-
     }
 }

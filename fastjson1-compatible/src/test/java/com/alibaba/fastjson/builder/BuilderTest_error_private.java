@@ -20,7 +20,7 @@ public class BuilderTest_error_private {
 
     @JSONType(builder = VOBuilder.class)
     public static class VO {
-        private int    id;
+        private int id;
         private String name;
 
         public int getId() {

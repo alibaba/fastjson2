@@ -29,7 +29,6 @@ public class Issue1764_bean {
         assertEquals("{\"value\":-9007199254740990}",
                 JSON.toJSONString(
                         new Model(-9007199254740990L)));
-
     }
 
 

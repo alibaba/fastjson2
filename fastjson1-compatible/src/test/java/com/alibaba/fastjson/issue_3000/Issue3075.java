@@ -443,6 +443,5 @@ public class Issue3075 {
         public List<Integer> mdbyf;
         public Float anpevc;
         public String krtrsevahzu;
-
     }
 }

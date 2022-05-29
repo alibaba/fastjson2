@@ -25,7 +25,6 @@ public class Issue1189 {
         private String headernotificationtype;
         private String notificationType;
 
-
         public Map<String, String> getBody() {
             return body;
         }
@@ -70,6 +69,5 @@ public class Issue1189 {
             super();
             // TODO Auto-generated constructor stub
         }
-
     }
 }

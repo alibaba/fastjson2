@@ -62,5 +62,4 @@ public class Issue3453 {
         JSONValidator.Type type = validator.getType();
         Assertions.assertEquals("Array", type.name());
     }
-
 }

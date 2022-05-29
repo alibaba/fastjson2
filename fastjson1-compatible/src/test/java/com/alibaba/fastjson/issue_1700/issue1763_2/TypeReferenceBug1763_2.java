@@ -63,7 +63,6 @@ public class TypeReferenceBug1763_2<T> {
                 argTypes[i] = TypeUtils.checkPrimitiveArray(
                         (GenericArrayType) argTypes[i]);
             }
-
         }
 
         Type key = new ParameterizedTypeImpl(argTypes, thisClass, rawType);
@@ -74,7 +73,6 @@ public class TypeReferenceBug1763_2<T> {
         }
 
         type = cachedType;
-
     }
 
     /**

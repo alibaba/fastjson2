@@ -137,7 +137,8 @@ public class JSONPathValueConsumerTest2 {
         AtomicReference ref = new AtomicReference();
         path.extractScalar(
                 JSONReader
-                        .of("{\"id\":\"123\"}".getBytes(StandardCharsets.UTF_8)), new ValueConsumer() {
+                        .of("{\"id\":\"123\"}".getBytes(StandardCharsets.UTF_8)),
+                new ValueConsumer() {
                     @Override
                     public void accept(String val) {
                         ref.set(val);
@@ -157,7 +158,8 @@ public class JSONPathValueConsumerTest2 {
         AtomicReference ref = new AtomicReference();
         path.extractScalar(
                 JSONReader
-                        .of("{\"id\":\"\\x29123\uD83D\uDE09®中国\"}".getBytes(StandardCharsets.UTF_8)), new ValueConsumer() {
+                        .of("{\"id\":\"\\x29123\uD83D\uDE09®中国\"}".getBytes(StandardCharsets.UTF_8)),
+                new ValueConsumer() {
                     @Override
                     public void accept(String val) {
                         ref.set(val);

@@ -21,5 +21,4 @@ public class Issue3460 {
                 JSONValidator.from(body)
                         .validate());
     }
-
 }

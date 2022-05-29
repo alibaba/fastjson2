@@ -33,7 +33,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 @ContextConfiguration
@@ -100,7 +99,6 @@ public class Issue1701 {
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .content("{\"name\": \"1.txt\"}")
                 )).andExpect(status().isOk()).andDo(print());
-
     }
 
     static class TestBean {

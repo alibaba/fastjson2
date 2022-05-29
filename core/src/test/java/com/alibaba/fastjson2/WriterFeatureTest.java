@@ -45,7 +45,5 @@ public class WriterFeatureTest {
             assertNull(map.get("v0001"));
             assertNotNull(map.get("v0002"));
         }
-
-
     }
 }

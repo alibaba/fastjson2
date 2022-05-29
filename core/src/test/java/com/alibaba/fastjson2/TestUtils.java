@@ -9,17 +9,17 @@ import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 import java.nio.charset.StandardCharsets;
 
 public class TestUtils {
-
     public static ObjectReaderCreator[] readerCreators() {
-        return new ObjectReaderCreator[] {
+        return new ObjectReaderCreator[]{
                 ObjectReaderCreator.INSTANCE,
                 ObjectReaderCreatorLambda.INSTANCE,
                 ObjectReaderCreatorASM.INSTANCE,
                 ObjectReaderCreatorDynamicCompile.INSTANCE,
         };
     }
+
     public static ObjectWriterCreator[] writerCreators() {
-        return new ObjectWriterCreator[] {
+        return new ObjectWriterCreator[]{
                 ObjectWriterCreator.INSTANCE,
                 ObjectWriterCreatorLambda.INSTANCE,
                 ObjectWriterCreatorASM.INSTANCE,
@@ -27,7 +27,7 @@ public class TestUtils {
     }
 
     public static ObjectReaderCreator[] readerCreators2() {
-        return new ObjectReaderCreator[] {
+        return new ObjectReaderCreator[]{
                 ObjectReaderCreator.INSTANCE,
                 ObjectReaderCreatorLambda.INSTANCE,
                 ObjectReaderCreatorASM.INSTANCE,
@@ -59,7 +59,9 @@ public class TestUtils {
 
         // Check special case
         int sLen = sArr != null ? sArr.length : 0;
-        if (sLen == 0) return new char[0];
+        if (sLen == 0) {
+            return new char[0];
+        }
 
         int eLen = (sLen / 3) * 3; // Length of even 24-bits.
         int cCnt = ((sLen - 1) / 3 + 1) << 2; // Returned character count
@@ -67,7 +69,7 @@ public class TestUtils {
         char[] dArr = new char[dLen];
 
         // Encode even 24-bits
-        for (int s = 0, d = 0, cc = 0; s < eLen;) {
+        for (int s = 0, d = 0, cc = 0; s < eLen; ) {
             // Copy next three bytes into lower 24 bits of int, paying attension to sign.
             int i = (sArr[s++] & 0xff) << 16 | (sArr[s++] & 0xff) << 8 | (sArr[s++] & 0xff);
 

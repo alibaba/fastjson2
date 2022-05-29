@@ -80,7 +80,6 @@ public class JSONWriterUTF8JDK9Test {
         assertEquals(origin, str);
     }
 
-
     @Test
     public void test_writeString_utf8_3() {
         JSONWriterUTF8JDK9 jsonWriter = new JSONWriterUTF8JDK9(JSONFactory.createWriteContext());

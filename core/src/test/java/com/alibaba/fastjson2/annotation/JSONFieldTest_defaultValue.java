@@ -282,7 +282,6 @@ public class JSONFieldTest_defaultValue {
         public JSONArray list;
 
         public Bean9() {
-
         }
     }
 }

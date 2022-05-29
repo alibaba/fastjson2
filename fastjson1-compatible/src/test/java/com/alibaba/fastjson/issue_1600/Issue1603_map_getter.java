@@ -37,5 +37,4 @@ public class Issue1603_map_getter {
             return values;
         }
     }
-
 }

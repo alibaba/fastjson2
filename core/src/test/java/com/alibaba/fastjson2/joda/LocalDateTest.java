@@ -27,7 +27,6 @@ public class LocalDateTest {
 
         JSONBDump.dump(bytes);
 
-
         LocalDate date2 = (LocalDate) JSONB.parseObject(
                 bytes,
                 Object.class,
@@ -55,7 +54,6 @@ public class LocalDateTest {
 
         JSONBDump.dump(bytes);
 
-
         LocalDate date2 = (LocalDate) JSONB.parseObject(
                 bytes,
                 Object.class,
@@ -66,7 +64,6 @@ public class LocalDateTest {
 
         assertEquals(date, date2);
     }
-
 
     @Test
     public void test_2_jsonb() throws Exception {
@@ -83,7 +80,6 @@ public class LocalDateTest {
         );
 
         JSONBDump.dump(bytes);
-
 
         LocalDate date2 = (LocalDate) JSONB.parseObject(
                 bytes,

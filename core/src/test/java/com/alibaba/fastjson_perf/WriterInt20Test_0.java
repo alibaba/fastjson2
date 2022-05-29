@@ -24,6 +24,7 @@ public class WriterInt20Test_0 {
         vo.setV0008(8);
         vo.setV0009(9);
     }
+
     @Test
     public void test_reflect_utf8() throws Exception {
         ObjectWriter ow = ObjectWriters.ofReflect(Int10.class);
@@ -59,8 +60,9 @@ public class WriterInt20Test_0 {
             ow.write(w, vo);
 
             String json = w.toString();
-            assertEquals("{\"v0000\":0,\"v0001\":1,\"v0002\":2,\"v0003\":3,\"v0004\":4,\"v0005\":5,\"v0006\":6,\"v0007\":7,\"v0008\":8,\"v0009\":9}"
-                    , json);
+            assertEquals(
+                    "{\"v0000\":0,\"v0001\":1,\"v0002\":2,\"v0003\":3,\"v0004\":4,\"v0005\":5,\"v0006\":6,\"v0007\":7,\"v0008\":8,\"v0009\":9}",
+                    json);
         }
 
         {
@@ -80,7 +82,6 @@ public class WriterInt20Test_0 {
 
     @Test
     public void test_manual_utf8() throws Exception {
-
         ObjectWriter ow = ObjectWriters.objectWriter(
                 fieldWriter("v0000", Int10::getV0000),
                 fieldWriter("v0001", Int10::getV0001),
@@ -98,8 +99,9 @@ public class WriterInt20Test_0 {
             ow.write(w, vo);
 
             String json = w.toString();
-            assertEquals("{\"v0000\":0,\"v0001\":1,\"v0002\":2,\"v0003\":3,\"v0004\":4,\"v0005\":5,\"v0006\":6,\"v0007\":7,\"v0008\":8,\"v0009\":9}"
-                    , json);
+            assertEquals(
+                    "{\"v0000\":0,\"v0001\":1,\"v0002\":2,\"v0003\":3,\"v0004\":4,\"v0005\":5,\"v0006\":6,\"v0007\":7,\"v0008\":8,\"v0009\":9}",
+                    json);
         }
 
         {

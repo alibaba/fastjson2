@@ -55,7 +55,5 @@ public class Issue2685 {
         public int getFastMatchToken() {
             return JSONToken.LITERAL_STRING;
         }
-
     }
-
 }

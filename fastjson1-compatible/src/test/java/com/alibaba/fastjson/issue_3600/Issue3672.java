@@ -56,5 +56,4 @@ public class Issue3672 {
     private class Issue3672D {
         private ArrayList<Issue3672C> e;
     }
-
 }

@@ -9,7 +9,6 @@ import java.math.BigInteger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BigIntegerFieldTest {
-
     @Test
     public void test_codec_null() throws Exception {
         V0 v = new V0();
@@ -31,7 +30,6 @@ public class BigIntegerFieldTest {
     }
 
     public static class V0 {
-
         private BigInteger value;
 
         public BigInteger getValue() {
@@ -41,6 +39,5 @@ public class BigIntegerFieldTest {
         public void setValue(BigInteger value) {
             this.value = value;
         }
-
     }
 }

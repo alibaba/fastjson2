@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JacksonJsonCreatorTest {
-
     @Test
     public void test() {
         String json = "{\"id\":1,\"theName\":\"My bean\"}";

@@ -50,7 +50,6 @@ public class Issue1278 {
 
         assertEquals("user",c2.name);
         assertEquals(2,c2.id);
-
     }
 
     /**

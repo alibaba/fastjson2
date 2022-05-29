@@ -24,7 +24,7 @@ public class MixinTest5 {
     }
 
     public abstract class ProductMixin {
-        @JSONField(name =  "productName")
+        @JSONField(name = "productName")
         String name;
     }
 }

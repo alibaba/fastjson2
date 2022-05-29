@@ -29,5 +29,4 @@ public class Issue1138 {
         public int id;
         public String name;
     }
-
 }

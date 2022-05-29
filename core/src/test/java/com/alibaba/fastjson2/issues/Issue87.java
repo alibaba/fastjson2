@@ -59,7 +59,6 @@ public class Issue87 {
         assertTrue(valid);
     }
 
-
     @Test
     public void valid_utf8() {
         byte[] errorJson = "[{\"a\":1}{\"b\":2}null undefined 676]".getBytes(StandardCharsets.UTF_8);

@@ -15,7 +15,6 @@ public class Issue1763 {
     public void test_for_issue() throws Exception {
         String s = "{\"result\":{\"modelList\":[{\"sourceId\":\"81900002\"},{\"sourceId\":\"81900002\"},{\"sourceId\":\"81892012\"},{\"sourceId\":\"2062014\"},{\"sourceId\":\"2082007\"},{\"sourceId\":\"2082007\"},{\"sourceId\":\"2082007\"}]}}";
 
-
         Method method = ProcurementOrderInteractiveServiceForCloud.class.getMethod("queryOrderMateriel", Map.class);
         Type type = method.getGenericReturnType();
 
@@ -71,5 +70,4 @@ public class Issue1763 {
         BaseResult<InteractiveOrderMaterielQueryResult> queryOrderMateriel(Map param);
 
     }
-
 }

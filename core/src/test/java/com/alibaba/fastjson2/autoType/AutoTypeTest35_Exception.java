@@ -48,7 +48,6 @@ public class AutoTypeTest35_Exception {
 
         JSONBDump.dump(bytes);
 
-
         Exception error2 = (Exception) JSONB.parseObject(
                 bytes,
                 Object.class,
@@ -59,6 +58,4 @@ public class AutoTypeTest35_Exception {
 
         assertNotNull(error2.getStackTrace());
     }
-
-
 }

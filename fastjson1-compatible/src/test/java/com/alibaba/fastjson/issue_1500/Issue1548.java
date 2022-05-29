@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 
-
 public class Issue1548 {
     @Test
     public void test_for_issue() throws Exception {

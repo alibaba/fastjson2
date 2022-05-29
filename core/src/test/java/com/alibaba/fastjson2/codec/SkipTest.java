@@ -47,7 +47,6 @@ public class SkipTest {
         public int id;
     }
 
-
     private static class A1 {
         public int id;
     }

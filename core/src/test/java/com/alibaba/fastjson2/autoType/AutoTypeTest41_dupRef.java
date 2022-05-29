@@ -82,5 +82,4 @@ public class AutoTypeTest41_dupRef {
             this.id = id;
         }
     }
-
 }

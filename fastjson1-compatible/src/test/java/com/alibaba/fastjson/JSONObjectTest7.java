@@ -13,5 +13,4 @@ public class JSONObjectTest7 {
         assertTrue(jsonObject.containsValue("cc"));
         assertFalse(jsonObject.isEmpty());
     }
-
 }

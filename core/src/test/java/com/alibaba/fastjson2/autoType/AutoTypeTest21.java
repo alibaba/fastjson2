@@ -59,8 +59,12 @@ public class AutoTypeTest21 {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             Item item = (Item) o;
             return id == item.id;
         }
@@ -152,6 +156,6 @@ public class AutoTypeTest21 {
         assertEquals(bean.values.size(), bean2.values.size());
 
         assertEquals(bean2.item, bean2.values.keySet().iterator().next());
-        assertEquals(bean2.item, ((Map.Entry)bean2.values2.entrySet().iterator().next()).getKey());
+        assertEquals(bean2.item, ((Map.Entry) bean2.values2.entrySet().iterator().next()).getKey());
     }
 }

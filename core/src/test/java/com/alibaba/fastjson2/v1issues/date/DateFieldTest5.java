@@ -11,7 +11,6 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateFieldTest5 {
-
     @Test
     public void test_codec() {
         V0 v = new V0();
@@ -30,7 +29,6 @@ public class DateFieldTest5 {
         String text = JSON.toJSONString(v, JSONWriter.Feature.WriteNulls);
         assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
     }
-
 
     @Test
     public void test_codec_null_asm() {
@@ -60,7 +58,6 @@ public class DateFieldTest5 {
     }
 
     public static class V0 {
-
         private Date value;
 
         @JSONField(format = " millis")
@@ -96,6 +93,5 @@ public class DateFieldTest5 {
         public static Object getB() {
             return true;
         }
-
     }
 }

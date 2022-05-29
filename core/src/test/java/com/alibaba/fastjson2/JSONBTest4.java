@@ -560,7 +560,6 @@ public class JSONBTest4 {
         );
     }
 
-
     @Test
     public void test_2_path_17_not_in() {
         JSONPath path = JSONPath.of("$..book[?(@.author not in ('J. R. R. Tolkien', 'Herman Melville'))]");
@@ -839,7 +838,6 @@ public class JSONBTest4 {
                         JSONReader.of(str3)
                 ).toString()
         );
-
 
         assertEquals(expected,
                 path.extract(

@@ -75,7 +75,6 @@ public class Issue3689 {
         assertThrows(com.alibaba.fastjson.JSONException.class, () -> {
             JSONArray.parseArray("//dfdfdf", String.class);
         });
-
     }
 
     @Test

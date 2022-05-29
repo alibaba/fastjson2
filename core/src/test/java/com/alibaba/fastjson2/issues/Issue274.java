@@ -27,7 +27,6 @@ public class Issue274 {
         assertEquals("1", bean2.roleList.get(0));
         assertEquals(null, bean2.roleList.get(1));
 
-
         Bean bean3 = JSON
                 .parseObject("{\"roleList\": [1,\"2\"]}")
                 .to(Bean.class);

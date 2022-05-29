@@ -10,13 +10,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 
-
 public class TestExternal {
     @Test
-    public void test_0 () throws Exception {
+    public void test_0() throws Exception {
         ExtClassLoader classLoader = new ExtClassLoader();
         Class<?> clazz = classLoader.loadClass("external.VO");
-        Method method = clazz.getMethod("setName", new Class[] {String.class});
+        Method method = clazz.getMethod("setName", new Class[]{String.class});
         Object obj = clazz.newInstance();
         method.invoke(obj, "jobs");
 
@@ -26,7 +25,7 @@ public class TestExternal {
     }
 
     @Test
-    public void test_1 () throws Exception {
+    public void test_1() throws Exception {
         ExtClassLoader classLoader = new ExtClassLoader();
         try {
             JSONFactory.setContextReaderCreator(TestUtils.readerCreator(classLoader));
@@ -48,7 +47,7 @@ public class TestExternal {
 
     public static class ExtClassLoader
             extends ClassLoader {
-        public ExtClassLoader() throws IOException{
+        public ExtClassLoader() throws IOException {
             super(Thread.currentThread().getContextClassLoader());
 
             byte[] bytes;

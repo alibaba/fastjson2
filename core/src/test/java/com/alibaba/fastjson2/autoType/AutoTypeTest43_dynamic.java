@@ -17,7 +17,7 @@ public class AutoTypeTest43_dynamic {
     public void test_0() throws Exception {
         JSONObject object = new JSONObject();
 
-        Model proxy = (Model) Proxy.newProxyInstance(Model.class.getClassLoader(), new Class<?>[] { Model.class , Map.class}, object);
+        Model proxy = (Model) Proxy.newProxyInstance(Model.class.getClassLoader(), new Class<?>[]{Model.class, Map.class}, object);
 
         proxy.setId(101);
         assertEquals(101, proxy.getId());
@@ -29,12 +29,12 @@ public class AutoTypeTest43_dynamic {
         assertEquals(false, ((Map) proxy).isEmpty());
 
         byte[] bytes = JSONB.toBytes(proxy,
-                 JSONWriter.Feature.WriteClassName,
-                 JSONWriter.Feature.FieldBased,
-                 JSONWriter.Feature.ReferenceDetection,
-                 JSONWriter.Feature.WriteNulls,
-                 JSONWriter.Feature.NotWriteDefaultValue,
-                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
         JSONBDump.dump(bytes);
@@ -57,6 +57,7 @@ public class AutoTypeTest43_dynamic {
 
     public interface Model {
         int getId();
+
         void setId(int id);
     }
 }

@@ -60,6 +60,5 @@ public class Issue1856 {
         public void setInfo(String info) {
             this.info = info;
         }
-
     }
 }

@@ -17,7 +17,6 @@ public class Issue2866 {
         assertEquals(1, a.a1);
         assertEquals(2, a.A2);
         assertEquals(3, a.a3);
-
     }
 
     static class A{

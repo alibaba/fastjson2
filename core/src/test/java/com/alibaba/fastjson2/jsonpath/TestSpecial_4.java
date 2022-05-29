@@ -15,5 +15,4 @@ public class TestSpecial_4 {
         Object obj = JSONPath.eval(object, "$.大小");
         assertEquals(123, obj);
     }
-
 }

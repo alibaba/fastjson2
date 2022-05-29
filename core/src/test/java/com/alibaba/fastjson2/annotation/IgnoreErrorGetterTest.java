@@ -14,7 +14,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IgnoreErrorGetterTest {
-
     @Test
     public void test_feature() throws Exception {
         Model model = new Model();
@@ -32,7 +31,6 @@ public class IgnoreErrorGetterTest {
     }
 
     public static class Model {
-
         public int getId() {
             throw new IllegalStateException();
         }

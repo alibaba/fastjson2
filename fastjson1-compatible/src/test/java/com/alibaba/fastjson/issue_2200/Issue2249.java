@@ -39,7 +39,6 @@ public class Issue2249 {
         assertSame(Type.Medium, JSON.parseObject("{\"type\":\"MediuM\"}", Model.class).type);
         assertSame(Type.Medium, JSON.parseObject("{\"type\":\"medium\"}", Model.class).type);
         assertSame(Type.Medium, JSON.parseObject("{\"type\":\"MEDIUM\"}", Model.class).type);
-
     }
 
     @Test

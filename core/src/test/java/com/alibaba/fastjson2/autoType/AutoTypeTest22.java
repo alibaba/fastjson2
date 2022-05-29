@@ -34,7 +34,7 @@ public class AutoTypeTest22 {
         Item item1;
     }
 
-    public abstract static class  Item {
+    public abstract static class Item {
         public int id;
     }
 

@@ -95,5 +95,4 @@ public class AutoTypeTest44_customList {
 
         assertEquals(101, map2.get("a"));
     }
-
 }

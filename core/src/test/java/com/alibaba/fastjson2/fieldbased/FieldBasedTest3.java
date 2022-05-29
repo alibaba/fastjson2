@@ -20,8 +20,8 @@ public class FieldBasedTest3 {
 
     public static class A {
         private int id;
-        private A() {
 
+        private A() {
         }
 
         private A(int id) {
@@ -86,7 +86,7 @@ public class FieldBasedTest3 {
     @Test
     public void test_2_toJavaObject() {
         assertEquals(101,
-                 JSONObject
+                JSONObject
                         .of("id", 101)
                         .toJavaObject(Bean2.class, JSONReader.Feature.FieldBased)
                         .id
@@ -96,8 +96,8 @@ public class FieldBasedTest3 {
     @Test
     public void test_2_getObject() {
         assertEquals(101,
-                 JSONObject.of("root", JSONObject
-                        .of("id", 101)
+                JSONObject.of("root", JSONObject
+                                .of("id", 101)
                         )
                         .getObject("root", Bean2.class, JSONReader.Feature.FieldBased)
                         .id
@@ -107,15 +107,15 @@ public class FieldBasedTest3 {
     @Test
     public void test_2_getObject_type() {
         assertEquals(101,
-                 ((Bean2) JSONObject.of("root", JSONObject
-                        .of("id", 101)
+                ((Bean2) JSONObject.of("root", JSONObject
+                                .of("id", 101)
                         )
                         .getObject("root", (Type) Bean2.class, JSONReader.Feature.FieldBased))
                         .id
         );
 
         assertEquals(101,
-                 ((Bean2) JSONArray.of(JSONObject
+                ((Bean2) JSONArray.of(JSONObject
                                 .of("id", 101)
                         )
                         .getObject(0, Bean2.class, JSONReader.Feature.FieldBased))
@@ -123,7 +123,7 @@ public class FieldBasedTest3 {
         );
 
         assertEquals(101,
-                 ((Bean2) JSONArray.of(JSONObject
+                ((Bean2) JSONArray.of(JSONObject
                                 .of("id", 101)
                         )
                         .getObject(0, (Type) Bean2.class, JSONReader.Feature.FieldBased))
@@ -134,7 +134,7 @@ public class FieldBasedTest3 {
     @Test
     public void test_2_toJavaObjectType() {
         assertEquals(101,
-                 ((Bean2) JSONObject
+                ((Bean2) JSONObject
                         .of("id", 101)
                         .toJavaObject((Type) Bean2.class, JSONReader.Feature.FieldBased))
                         .id
@@ -144,9 +144,9 @@ public class FieldBasedTest3 {
     @Test
     public void test_2_toJavaList() {
         assertEquals(101,
-                 JSONArray.of(
-                        JSONObject
-                                .of("id", 101)
+                JSONArray.of(
+                                JSONObject
+                                        .of("id", 101)
                         )
                         .toJavaList(Bean2.class, JSONReader.Feature.FieldBased)
                         .get(0)

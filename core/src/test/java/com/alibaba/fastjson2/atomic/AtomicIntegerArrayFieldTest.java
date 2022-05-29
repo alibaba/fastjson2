@@ -57,6 +57,5 @@ public class AtomicIntegerArrayFieldTest {
         public void setValue(AtomicIntegerArray value) {
             this.value = value;
         }
-
     }
 }

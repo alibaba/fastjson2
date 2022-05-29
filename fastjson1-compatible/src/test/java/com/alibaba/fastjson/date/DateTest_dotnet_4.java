@@ -26,6 +26,5 @@ public class DateTest_dotnet_4 {
         public void setDate(Date date) {
             this.date = date;
         }
-
     }
 }

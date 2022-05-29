@@ -84,7 +84,6 @@ public class Issue1556 {
 
         private SecondSubClass second;
 
-
         public String getDataName() {
             return dataName;
         }
@@ -116,7 +115,6 @@ public class Issue1556 {
 
         private  SubCommonClass commonInfo;
 
-
         public String getAddr() {
             return addr;
         }
@@ -141,7 +139,6 @@ public class Issue1556 {
 
         private  SubCommonClass commonInfo;
 
-
         public String getName() {
             return name;
         }
@@ -158,7 +155,6 @@ public class Issue1556 {
             this.commonInfo = commonInfo;
         }
     }
-
 
     public static class SubCommonClass  implements Serializable {
 

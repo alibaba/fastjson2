@@ -315,7 +315,6 @@ public class JSONBSizeTest {
             Assertions.assertEquals(Float.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
-
         float[] values_4 = new float[]{
                 -2049, -4096, -8192, -16384, -32768, -65536, -131072, -262144,
                 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262143
@@ -458,7 +457,6 @@ public class JSONBSizeTest {
 
             Assertions.assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
         }
-
 
         double[] values_6 = new double[]{
                 -262145, Integer.MIN_VALUE, 262144, Integer.MAX_VALUE

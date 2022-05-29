@@ -104,6 +104,5 @@ public class DateFieldTest4 {
         public void setValue(Date value) {
             this.value = value;
         }
-
     }
 }

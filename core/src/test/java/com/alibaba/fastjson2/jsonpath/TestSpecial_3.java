@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class TestSpecial_3 {
-
     @Test
     public void test_special() {
         String json = "[{\"@type\":\"NAME_CORRECTION\",\"value\":23}]";

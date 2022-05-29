@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 
-
 public class ColorTest {
     @Test
     public void test_color() throws Exception {

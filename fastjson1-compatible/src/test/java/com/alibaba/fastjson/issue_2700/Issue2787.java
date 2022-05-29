@@ -56,6 +56,5 @@ public class Issue2787 {
                 return null;
             }
         }
-
     }
 }

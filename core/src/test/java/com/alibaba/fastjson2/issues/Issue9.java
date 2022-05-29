@@ -25,7 +25,6 @@ public class Issue9 {
         public String name;
     }
 
-
     @Test
     public void test_ordinal_1x() {
         B b = new B();

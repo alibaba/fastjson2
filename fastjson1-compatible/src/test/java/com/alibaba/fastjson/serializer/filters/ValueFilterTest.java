@@ -11,11 +11,10 @@ import org.junit.Assert;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ValueFilterTest extends TestCase {
-
+public class ValueFilterTest
+        extends TestCase {
     public void test_valuefilter() throws Exception {
         ValueFilter filter = new ValueFilter() {
-
             public Object process(Object source, String name, Object value) {
                 if (name.equals("id")) {
                     return "AAA";
@@ -23,7 +22,6 @@ public class ValueFilterTest extends TestCase {
 
                 return value;
             }
-
         };
 
         SerializeWriter out = new SerializeWriter();
@@ -39,7 +37,6 @@ public class ValueFilterTest extends TestCase {
 
     public void test_toJSONString() throws Exception {
         ValueFilter filter = new ValueFilter() {
-
             public Object process(Object source, String name, Object value) {
                 if (name.equals("id")) {
                     return "AAA";
@@ -47,7 +44,6 @@ public class ValueFilterTest extends TestCase {
 
                 return value;
             }
-
         };
 
         Assert.assertEquals("{\"id\":\"AAA\"}", JSON.toJSONString(new A(), filter));
@@ -55,7 +51,6 @@ public class ValueFilterTest extends TestCase {
 
     public void test_valuefilter_1() throws Exception {
         ValueFilter filter = new ValueFilter() {
-
             public Object process(Object source, String name, Object value) {
                 if (name.equals("name")) {
                     return "AAA";
@@ -63,7 +58,6 @@ public class ValueFilterTest extends TestCase {
 
                 return value;
             }
-
         };
 
         SerializeWriter out = new SerializeWriter();
@@ -79,7 +73,6 @@ public class ValueFilterTest extends TestCase {
 
     public void test_valuefilter_2() throws Exception {
         ValueFilter filter = new ValueFilter() {
-
             public Object process(Object source, String name, Object value) {
                 if (name.equals("name")) {
                     return "AAA";
@@ -87,7 +80,6 @@ public class ValueFilterTest extends TestCase {
 
                 return value;
             }
-
         };
 
         SerializeWriter out = new SerializeWriter();
@@ -104,7 +96,6 @@ public class ValueFilterTest extends TestCase {
 
     public void test_valuefilter_3() throws Exception {
         ValueFilter filter = new ValueFilter() {
-
             public Object process(Object source, String name, Object value) {
                 if (name.equals("name")) {
                     return null;
@@ -112,7 +103,6 @@ public class ValueFilterTest extends TestCase {
 
                 return value;
             }
-
         };
 
         SerializeWriter out = new SerializeWriter();
@@ -128,7 +118,6 @@ public class ValueFilterTest extends TestCase {
     }
 
     public static class Bean {
-
         private int id;
         private String name;
 
@@ -147,6 +136,5 @@ public class ValueFilterTest extends TestCase {
         public void setName(String name) {
             this.name = name;
         }
-
     }
 }

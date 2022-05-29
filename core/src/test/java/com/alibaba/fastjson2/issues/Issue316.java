@@ -34,7 +34,6 @@ public class Issue316 {
         assertEquals("2", array[1]);
     }
 
-
     @Test
     public void getList() {
         JSONObject object = JSON.parseObject("{\"values\":[1,\"2\"]}");

@@ -23,7 +23,6 @@ public class Issue2239 {
     public static class BaseResponse<T> {
         private PageBean<T> page;
 
-
         public PageBean<T> getPage() {
             return page;
         }

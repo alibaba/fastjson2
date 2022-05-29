@@ -30,7 +30,6 @@ public class PathJSONBTest2 {
         JSONReader parser = JSONReader.ofJSONB(jsonbBytes);
         Object result = path.extract(parser);
         assertEquals(Arrays.asList("Nigel Rees", "Evelyn Waugh", "Herman Melville", "J. R. R. Tolkien"), result);
-
     }
 
     @Test
@@ -39,6 +38,5 @@ public class PathJSONBTest2 {
         JSONReader parser = JSONReader.ofJSONB(jsonbBytes);
         Object result = path.extract(parser);
         assertEquals(Arrays.asList("Nigel Rees", "Evelyn Waugh", "Herman Melville", "J. R. R. Tolkien"), result);
-
     }
 }

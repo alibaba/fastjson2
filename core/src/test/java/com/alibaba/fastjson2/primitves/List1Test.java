@@ -110,7 +110,6 @@ public class List1Test {
             assertEquals(1, vo.getV0000().size());
             assertEquals(Integer.valueOf(1001), vo.getV0000().get(0));
         }
-
     }
 
     @Test

@@ -20,7 +20,6 @@ public class Issue139 {
         Bean bean = jsonObject.toJavaObject(Bean.class);
         Bean bean1 = JSON.toJavaObject(jsonObject, Bean.class);
 
-
         assertNotNull(bean);
 
         // 可以打印对象tostring
@@ -36,16 +35,13 @@ public class Issue139 {
             assertTrue(k.getValue() instanceof BigDecimal);
         });
 
-
         List<Item> items = bean.getData();
 
         items.forEach(item -> {
             assertTrue(item instanceof Item);
         });
 
-
     }
-
 
     public static class Bean {
         public int code;

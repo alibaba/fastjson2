@@ -36,7 +36,6 @@ public class OptinalLongTest {
         assertEquals(str, str2);
     }
 
-
     @Test
     public void test_enpty_jsonb() {
         byte[] bytes = JSONB.toBytes(Collections.singletonMap("value", null), JSONWriter.Feature.WriteNulls);

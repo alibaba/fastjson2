@@ -171,7 +171,6 @@ public class JSONSchemaResourceTest {
         runTest("schema/draft2020-12/uniqueItems.json");
     }
 
-
     public void runTest(String path) {
         URL url = JSONSchemaResourceTest.class.getClassLoader().getResource(path);
         JSONArray array = JSON.parseArray(url);
@@ -192,7 +191,6 @@ public class JSONSchemaResourceTest {
         } catch (Exception ex) {
             throw new IllegalStateException("parse schema " + i + " error : " + object, ex);
         }
-
 
         JSONArray tests = item.getJSONArray("tests");
         for (int j = 0; j < tests.size(); j++) {

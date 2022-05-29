@@ -42,7 +42,6 @@ public class FloatTest3_array_random {
         public float[] value;
 
         public Model() {
-
         }
 
         public Model(float[] value) {

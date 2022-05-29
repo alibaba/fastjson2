@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 public class MixinAPITest4 {
     static class BaseClass {
         public final int a;
@@ -48,4 +47,3 @@ public class MixinAPITest4 {
         assertEquals(base.b, base2.b);
     }
 }
-

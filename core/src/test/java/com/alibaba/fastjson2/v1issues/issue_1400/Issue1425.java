@@ -40,6 +40,4 @@ public class Issue1425 {
             this.name = name;
         }
     }
-
-
 }

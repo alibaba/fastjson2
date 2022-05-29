@@ -31,5 +31,4 @@ public class ZoneIdTest {
         ZoneId1 v2 = JSONB.parseObject(jsonbBytes, ZoneId1.class);
         assertEquals(vo.getV0000(), v2.getV0000());
     }
-
 }

@@ -59,7 +59,5 @@ public class Issue1683 {
         public void setWordCount(Integer wordCount) {
             this.wordCount = wordCount;
         }
-
     }
-
 }

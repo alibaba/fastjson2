@@ -40,6 +40,4 @@ public class AutoTypeTest24 {
     public static class Bean1 {
         Set items;
     }
-
-
 }

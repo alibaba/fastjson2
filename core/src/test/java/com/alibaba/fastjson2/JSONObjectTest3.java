@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JSONObjectTest3 {
-
     @Test
     public void test0() {
         assertEquals(

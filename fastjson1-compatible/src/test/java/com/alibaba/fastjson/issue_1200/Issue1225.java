@@ -48,5 +48,4 @@ public class Issue1225 {
     static class SimpleGenericObject
             extends ExtendGenericType<String> {
     }
-
 }

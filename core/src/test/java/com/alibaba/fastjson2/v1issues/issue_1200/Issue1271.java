@@ -22,7 +22,6 @@ public class Issue1271 {
             }
         };
 
-
 //        A a = JSON.parseObject(json,A.class,extraProcessor);
 //        assertEquals(1,a.a);
 //        assertEquals(1, count.intValue());

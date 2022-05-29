@@ -103,7 +103,6 @@ public class DoubleTest3_random {
         public double value;
 
         public Model() {
-
         }
 
         public Model(double value) {

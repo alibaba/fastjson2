@@ -11,7 +11,7 @@ import java.util.Map;
 public class LongTest {
     @Test
     public void test_array() throws Exception {
-        long[] values = new long[] {Long.MIN_VALUE, -1, 0, 1, Long.MAX_VALUE};
+        long[] values = new long[]{Long.MIN_VALUE, -1, 0, 1, Long.MAX_VALUE};
         String text = JSON.toJSONString(values);
         long[] values_2 = JSON.parseObject(text, long[].class);
         Assertions.assertEquals(values_2.length, values.length);
@@ -22,7 +22,7 @@ public class LongTest {
 
     @Test
     public void test_map() throws Exception {
-        long[] values = new long[] {Long.MIN_VALUE, -1, 0, 1, Long.MAX_VALUE};
+        long[] values = new long[]{Long.MIN_VALUE, -1, 0, 1, Long.MAX_VALUE};
         Map<String, Object> map = new HashMap<String, Object>();
         for (int i = 0; i < values.length; ++i) {
             map.put(Long.toString(i), values[i]);

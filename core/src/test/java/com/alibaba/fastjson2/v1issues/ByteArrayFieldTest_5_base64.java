@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ByteArrayFieldTest_5_base64 {
-
     @Test
     public void test_0() throws Exception {
         Model model = new Model();
@@ -24,10 +23,8 @@ public class ByteArrayFieldTest_5_base64 {
     }
 
     private static class Model {
-
         @JSONField(format = "base64")
         public byte[] value;
-
 
     }
 }

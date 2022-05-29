@@ -28,16 +28,16 @@ public class RefTest4 {
         A a2 = JSONB.parseObject(bytes, 0, bytes.length, A.class, JSONReader.Feature.SupportAutoType);
         assertSame(a2, a2.values.get(0));
 
-        A a3 = JSONB.parseObject(bytes, 0, bytes.length, (Type)A.class, JSONReader.Feature.SupportAutoType);
+        A a3 = JSONB.parseObject(bytes, 0, bytes.length, (Type) A.class, JSONReader.Feature.SupportAutoType);
         assertSame(a3, a3.values.get(0));
 
-        A a4 = JSONB.parseObject(bytes, 0, bytes.length, (Type)A.class, JSONB.symbolTable(""));
+        A a4 = JSONB.parseObject(bytes, 0, bytes.length, (Type) A.class, JSONB.symbolTable(""));
         assertSame(a4, a4.values.get(0));
 
         A a5 = JSONB.parseObject(bytes, 0, bytes.length, A.class, JSONB.symbolTable(""), JSONReader.Feature.SupportAutoType);
         assertSame(a5, a5.values.get(0));
 
-        A a6 = JSONB.parseObject(bytes, 0, bytes.length, (Type)A.class, JSONB.symbolTable(""), JSONReader.Feature.SupportAutoType);
+        A a6 = JSONB.parseObject(bytes, 0, bytes.length, (Type) A.class, JSONB.symbolTable(""), JSONReader.Feature.SupportAutoType);
         assertSame(a6, a6.values.get(0));
     }
 

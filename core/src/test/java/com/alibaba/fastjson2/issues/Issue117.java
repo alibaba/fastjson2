@@ -22,6 +22,5 @@ public class Issue117 {
 
         System.out.println(times);
 
-
     }
 }

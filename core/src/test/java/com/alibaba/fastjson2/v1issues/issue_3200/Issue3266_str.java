@@ -41,7 +41,6 @@ public class Issue3266_str {
             this.name = name;
         }
 
-
         public int getCode() {
             return code;
         }

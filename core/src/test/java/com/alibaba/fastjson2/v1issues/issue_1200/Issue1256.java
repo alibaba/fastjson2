@@ -15,7 +15,6 @@ public class Issue1256 {
     @Test
     public void test_for_issue() throws Exception {
 
-
         // params ={"key_obj":{"age":39,"name":"Mike"},"key_string":"Hello","key_random":-1193959466,"key_int":10000}
 
         A a = new A();

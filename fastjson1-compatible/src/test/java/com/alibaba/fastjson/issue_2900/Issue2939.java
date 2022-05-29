@@ -23,7 +23,5 @@ public class Issue2939 {
 
         LinkedMultiValueMap map = (LinkedMultiValueMap) obj;
         assertSame(3, map.get("k1").size());
-
     }
-
 }

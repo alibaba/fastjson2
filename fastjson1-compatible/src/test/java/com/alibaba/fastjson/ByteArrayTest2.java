@@ -11,7 +11,6 @@ import java.nio.charset.Charset;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 public class ByteArrayTest2 {
     public static class CertFile {
         public String name;
@@ -37,7 +36,7 @@ public class ByteArrayTest2 {
 
         byte[] data = bos.toByteArray();
         Charset charset = Charset.forName("UTF-8");
-        CertFile convertFile =  (CertFile)JSON.parse(data, 0, data.length, charset.newDecoder(), Feature.AllowArbitraryCommas,
+        CertFile convertFile = (CertFile) JSON.parse(data, 0, data.length, charset.newDecoder(), Feature.AllowArbitraryCommas,
                 Feature.IgnoreNotMatch, Feature.SortFeidFastMatch, Feature.DisableCircularReferenceDetect,
                 Feature.AutoCloseSource, Feature.SupportAutoType
         );

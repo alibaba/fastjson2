@@ -76,5 +76,4 @@ public class Issue2241 {
         @JSONField(format = "unixtime")
         public ZonedDateTime createTime;
     }
-
 }

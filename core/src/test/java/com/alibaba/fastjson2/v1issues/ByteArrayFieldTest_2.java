@@ -10,7 +10,6 @@ import java.io.UnsupportedEncodingException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ByteArrayFieldTest_2 {
-
     @Test
     public void test_0() throws Exception {
         Entity entity = new Entity("中华人民共和国");
@@ -23,11 +22,9 @@ public class ByteArrayFieldTest_2 {
     }
 
     public static class Entity {
-
         private byte[] value;
 
         public Entity(){
-
         }
 
         public Entity(String value) throws UnsupportedEncodingException{
@@ -41,6 +38,5 @@ public class ByteArrayFieldTest_2 {
         public void setValue(byte[] value) {
             this.value = value;
         }
-
     }
 }

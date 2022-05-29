@@ -87,7 +87,6 @@ public class Issue261 {
                 .getObject("datetime", java.sql.Date.class)
         );
 
-
         assertNull(
                 JSON.parseObject("\"\"", java.sql.Timestamp.class));
         assertNull(JSON.parseObject("\"null\"", java.sql.Timestamp.class));

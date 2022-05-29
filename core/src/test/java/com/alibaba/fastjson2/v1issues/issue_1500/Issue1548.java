@@ -41,8 +41,6 @@ public class Issue1548 {
             return this.meta.get(name);
         }
 
-
-
         @Override
         public String toString() {
             return JSON.toJSONString(this);

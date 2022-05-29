@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class ByteArrayFieldTest_7_gzip_hex {
-
     @Test
     public void test_0() throws Exception {
         Model model = new Model();
@@ -27,10 +26,8 @@ public class ByteArrayFieldTest_7_gzip_hex {
     }
 
     private static class Model {
-
         @JSONField(format = "gzip,base64")
         public byte[] value;
-
 
     }
 }

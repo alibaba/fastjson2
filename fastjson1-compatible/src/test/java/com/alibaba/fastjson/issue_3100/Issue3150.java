@@ -35,7 +35,6 @@ public class Issue3150 {
                 this.writeKeyValue("afterFilterCategory", category);
             }
         }
-
     }
 
     public static class Item {
@@ -72,5 +71,4 @@ public class Issue3150 {
             this.name = name;
         }
     }
-
 }

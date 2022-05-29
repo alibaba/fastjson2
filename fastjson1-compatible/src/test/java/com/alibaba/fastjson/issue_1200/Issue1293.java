@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-
 /**
  * Created by kimmking on 27/06/2017.
  */
@@ -23,7 +22,6 @@ public class Issue1293 {
         Bean test = JSON.parseObject(data, Bean.class);
         assertNull(test.idType);
         assertNull(test.userType);
-
     }
 
     static class Bean{
@@ -62,5 +60,4 @@ public class Issue1293 {
     static enum UserType{
         C,D
     }
-
 }

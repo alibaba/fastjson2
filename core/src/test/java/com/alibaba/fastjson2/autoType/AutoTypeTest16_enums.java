@@ -34,7 +34,6 @@ public class AutoTypeTest16_enums {
         assertEquals(bean.values.size(), bean2.values.size());
         assertEquals(bean.values.get(0), bean2.values.get(0));
         assertEquals(bean.values.get(1), bean2.values.get(1));
-
     }
 
     public static class Bean1 {
@@ -59,7 +58,6 @@ public class AutoTypeTest16_enums {
         assertEquals(bean.values.get(0).getClass(), bean2.values.get(0).getClass());
 
         JSONBDump.dump(bytes);
-
     }
 
     public static class Bean2 {

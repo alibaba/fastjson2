@@ -142,7 +142,6 @@ public class ShortTest {
         }
     }
 
-
     @Test
     public void test_jsonb_value_cast_str() {
         Number[] values = new Number[]{

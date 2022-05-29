@@ -11,7 +11,6 @@ import java.util.Map;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-
 public class Issue1945 {
     @Test
     public void test_0() throws Exception {

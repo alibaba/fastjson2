@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONFieldTest3 {
-
     @Test
     public void test_deciaml_BrowserCompatible() {
         ObjectWriterCreator[] creators = TestUtils.writerCreators();
@@ -56,6 +55,4 @@ public class JSONFieldTest3 {
         @JSONField(serializeFeatures = JSONWriter.Feature.BrowserCompatible)
         public BigDecimal value;
     }
-
-
 }

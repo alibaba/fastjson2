@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author kraity
  */
 public class TypeReferenceTest {
-
     @Test
     public void test_parseObject() {
         String text = "{\"id\":1,\"name\":\"kraity\"}";
