@@ -1618,7 +1618,7 @@ public interface JSON {
 
             return writer.flushTo(out);
         } catch (Exception e) {
-            throw new JSONException(e.getMessage(), e);
+            throw new JSONException("FASTJSON-" + JSON.VERSION + " write JSON error" + e.getMessage(), e);
         }
     }
 
@@ -1652,7 +1652,7 @@ public interface JSON {
 
             return writer.flushTo(out);
         } catch (Exception e) {
-            throw new JSONException(e.getMessage(), e);
+            throw new JSONException("FASTJSON-" + JSON.VERSION + " write JSON error" + e.getMessage(), e);
         }
     }
 
