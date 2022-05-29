@@ -1064,6 +1064,13 @@ final class JSONReaderStr
                     ch = str.charAt(offset++);
                     continue;
                 }
+
+                if (ch == 'u') {
+                    offset += 4;
+                    ch = str.charAt(offset++);
+                    continue;
+                }
+
                 char1(ch);
                 continue;
             }
@@ -1384,6 +1391,10 @@ final class JSONReaderStr
                 str = new String(chars);
             } else {
                 str = this.str.substring(this.offset, offset);
+            }
+
+            if ((context.features & Feature.TrimString.mask) != 0) {
+                str = str.trim();
             }
 
             if (offset + 1 == end) {
