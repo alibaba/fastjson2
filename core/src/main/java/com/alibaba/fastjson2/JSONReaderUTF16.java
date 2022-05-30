@@ -598,8 +598,11 @@ final class JSONReaderUTF16
             }
 
             offset++;
-            if (c == '_') {
-                continue;
+            if (c == '_' || c == '-') {
+                char c1 = chars[offset];
+                if (c1 != '"' && c1 != '\'' && c1 != c) {
+                    continue;
+                }
             }
 
             if (c >= 'A' && c <= 'Z') {

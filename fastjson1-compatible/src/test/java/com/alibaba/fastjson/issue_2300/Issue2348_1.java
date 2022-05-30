@@ -1,14 +1,16 @@
-package com.alibaba.json.bvt.issue_2300;
+package com.alibaba.fastjson.issue_2300;
 
 import com.alibaba.fastjson.JSON;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class Issue2348 {
+public class Issue2348_1 {
     @Test
     public void test_for_issue() throws Exception {
         String json = "{\n" +
@@ -87,6 +89,18 @@ public class Issue2348 {
         assertEquals("23", p.getRfid());
         assertEquals("1", p.getBhlx());
         assertEquals(null, p.getJdxj());
+
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+
+        PersonnelModel p1 = JSON.parseObject(bytes, PersonnelModel.class);
+        assertEquals("23", p1.getRfid());
+        assertEquals("1", p1.getBhlx());
+        assertEquals(null, p1.getJdxj());
+
+        PersonnelModel p2 = JSON.parseObject(bytes, 0, bytes.length, StandardCharsets.US_ASCII, PersonnelModel.class);
+        assertEquals("23", p1.getRfid());
+        assertEquals("1", p1.getBhlx());
+        assertEquals(null, p1.getJdxj());
     }
 
     public static class RoomPersonnel {

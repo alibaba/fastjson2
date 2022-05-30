@@ -102,8 +102,10 @@ public class TestUtils {
         return dArr;
     }
 
-    public static JSONReader createJSONReaderStr(String str) {
-        return new JSONReaderStr(JSONFactory.createReadContext(), str);
+    public static JSONReader createJSONReaderStr(String str, JSONReader.Feature... features) {
+        JSONReader.Context readContext = JSONFactory.createReadContext();
+        readContext.config(features);
+        return new JSONReaderStr(readContext, str);
     }
 
     public static JSONReader[] createJSONReaders(String str) {

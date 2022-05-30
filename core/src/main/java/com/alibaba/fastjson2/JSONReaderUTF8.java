@@ -628,14 +628,17 @@ class JSONReaderUTF8
         long hashCode = Fnv.MAGIC_HASH_CODE;
         int offset = nameBegin;
         if (nameAscii && !nameEscape) {
-            for (int i = 0; i < nameLength; ++i) {
-                char c = (char) bytes[offset + i];
+            for (int i = nameBegin; i < nameEnd; ++i) {
+                char c = (char) bytes[i];
                 if (c >= 'A' && c <= 'Z') {
                     c = (char) (c + 32);
                 }
 
-                if (c == '_') {
-                    continue;
+                if (c == '_' || c == '-') {
+                    byte c1 = bytes[i + 1];
+                    if (c1 != '"' && c1 != '\'' && c1 != c) {
+                        continue;
+                    }
                 }
 
                 hashCode ^= c;
