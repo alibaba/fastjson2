@@ -1818,7 +1818,7 @@ public class ObjectReaderCreator {
         Enum[] ordinalEnums = (Enum[]) objectClass.getEnumConstants();
 
         Map<Long, Enum> enumMap = new HashMap();
-        for (int i = 0; i < ordinalEnums.length; ++i) {
+        for (int i = 0; ordinalEnums != null && i < ordinalEnums.length; ++i) {
             Enum e = ordinalEnums[i];
             String name = e.name();
             long hash = Fnv.hashCode64(name);
@@ -1851,7 +1851,7 @@ public class ObjectReaderCreator {
             }
         }
 
-        for (int i = 0; i < ordinalEnums.length; ++i) {
+        for (int i = 0; ordinalEnums != null && i < ordinalEnums.length; ++i) {
             Enum e = ordinalEnums[i];
             String name = e.name();
             long hashLCase = Fnv.hashCode64LCase(name);
@@ -1897,7 +1897,7 @@ public class ObjectReaderCreator {
         }
 
         if (createMethod == null && enumValueField == null) {
-            if (ordinalEnums.length == 2) {
+            if (ordinalEnums != null && ordinalEnums.length == 2) {
                 Enum first = ordinalEnums[0];
 
                 int matchCount = 0;

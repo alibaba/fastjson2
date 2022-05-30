@@ -52,37 +52,6 @@ class FieldReaderListField<T>
     }
 
     @Override
-    public ObjectReader checkObjectAutoType(JSONReader jsonReader) {
-        if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
-            long typeHash = jsonReader.readTypeHashCode();
-
-            boolean isSupportAutoType = jsonReader.isSupportAutoType(features);
-            if (!isSupportAutoType) {
-                throw new JSONException("autoType not support input " + jsonReader.getString());
-            }
-
-            ObjectReader autoTypeObjectReader = jsonReader.getContext().getObjectReaderAutoType(typeHash);
-            if (autoTypeObjectReader == null) {
-                String typeName = jsonReader.getString();
-                autoTypeObjectReader = jsonReader.getContext().getObjectReaderAutoType(typeName, getFieldClass(), features);
-            }
-
-            if (autoTypeObjectReader instanceof ObjectReaderImplList) {
-                ObjectReaderImplList listReader = (ObjectReaderImplList) autoTypeObjectReader;
-
-                autoTypeObjectReader = new ObjectReaderImplList(fieldType, fieldClass, listReader.instanceType, itemType, listReader.builder);
-            }
-
-            if (autoTypeObjectReader == null) {
-                throw new JSONException("auotype not support : " + jsonReader.getString());
-            }
-
-            return autoTypeObjectReader;
-        }
-        return null;
-    }
-
-    @Override
     public ObjectReader getItemObjectReader(JSONReader.Context ctx) {
         if (itemReader != null) {
             return itemReader;

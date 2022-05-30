@@ -252,10 +252,6 @@ public interface FieldReader<T>
                 autoTypeObjectReader = jsonReader.getContext().getObjectReaderAutoType(typeName, getFieldClass(), features);
             }
 
-            if (autoTypeObjectReader instanceof ObjectReaderImplList) {
-                ObjectReaderImplList listReader = (ObjectReaderImplList) autoTypeObjectReader;
-            }
-
             if (autoTypeObjectReader == null) {
                 throw new JSONException("auotype not support : " + jsonReader.getString());
             }

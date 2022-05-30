@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
@@ -149,5 +150,37 @@ public interface FieldReaderList<T, V>
         }
 
         throw new JSONException("TODO : " + this.getClass());
+    }
+
+    @Override
+    default ObjectReader checkObjectAutoType(JSONReader jsonReader) {
+        if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
+            long typeHash = jsonReader.readTypeHashCode();
+            long features = getFeatures();
+
+            boolean isSupportAutoType = jsonReader.isSupportAutoType(features);
+            if (!isSupportAutoType) {
+                throw new JSONException("autoType not support input " + jsonReader.getString());
+            }
+
+            ObjectReader autoTypeObjectReader = jsonReader.getContext().getObjectReaderAutoType(typeHash);
+            if (autoTypeObjectReader == null) {
+                String typeName = jsonReader.getString();
+                autoTypeObjectReader = jsonReader.getContext().getObjectReaderAutoType(typeName, getFieldClass(), features);
+            }
+
+            if (autoTypeObjectReader instanceof ObjectReaderImplList) {
+                ObjectReaderImplList listReader = (ObjectReaderImplList) autoTypeObjectReader;
+
+                autoTypeObjectReader = new ObjectReaderImplList(getFieldType(), getFieldClass(), listReader.instanceType, getItemType(), listReader.builder);
+            }
+
+            if (autoTypeObjectReader == null) {
+                throw new JSONException("auotype not support : " + jsonReader.getString());
+            }
+
+            return autoTypeObjectReader;
+        }
+        return null;
     }
 }
