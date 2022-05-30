@@ -2150,7 +2150,7 @@ public abstract class JSONPath {
                         }
                     }
 
-                    if(duplicateKeyValueAsArray) {
+                    if (duplicateKeyValueAsArray) {
                         if (origin instanceof Collection) {
                             ((Collection) origin).add(value);
                             map.put(name, value);
@@ -3486,7 +3486,7 @@ public abstract class JSONPath {
                 Map map = (Map) object;
                 Object origin = map.put(name, value);
                 if (origin != null) {
-                    if((context.readerFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                    if ((context.readerFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                         if (origin instanceof Collection) {
                             ((Collection) origin).add(value);
                             map.put(name, value);
