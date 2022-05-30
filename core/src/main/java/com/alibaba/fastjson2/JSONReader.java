@@ -2386,7 +2386,8 @@ public abstract class JSONReader
         UseBigDecimalForDoubles(1 << 11),
         ErrorOnEnumNotMatch(1 << 12),
         TrimString(1 << 13),
-        ErrorOnNotSupportAutoType(1 << 14);
+        ErrorOnNotSupportAutoType(1 << 14),
+        DuplicateKeyValueAsArray(1 << 15);
 
         public final long mask;
 
