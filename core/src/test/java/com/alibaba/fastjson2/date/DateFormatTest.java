@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,5 +58,14 @@ public class DateFormatTest {
     public static class Bean1 {
         @JSONField(format = "yyyy-MM-dd")
         public Date date;
+    }
+
+    @Test
+    public void testFormat0() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        String json = JSON.toJSONString(format);
+        assertEquals("\"yyyy-MM-dd\"", json);
+        SimpleDateFormat format1 = JSON.parseObject(json, SimpleDateFormat.class);
+        assertEquals(format, format1);
     }
 }

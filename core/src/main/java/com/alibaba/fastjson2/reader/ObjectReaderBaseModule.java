@@ -24,6 +24,7 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.*;
+import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -879,6 +880,11 @@ public class ObjectReaderBaseModule
                 fieldInfo.ordinal = ordinal;
             }
 
+            boolean value = jsonField.value();
+            if (value) {
+                fieldInfo.features |= FieldInfo.VALUE_MASK;
+            }
+
             if (jsonField.unwrapped()) {
                 fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
             }
@@ -1643,10 +1649,18 @@ public class ObjectReaderBaseModule
                 return MoneySupport.createMonetaryAmountReader();
             case "javax.money.NumberValue":
                 return MoneySupport.createNumberValueReader();
-            case "java.net.InetAddress":
             case "java.net.InetSocketAddress":
-            case "java.text.SimpleDateFormat":
                 return new ObjectReaderMisc((Class) type);
+            case "java.net.InetAddress":
+                return ObjectReaderImplValue.of((Class<InetAddress>) type, String.class, address -> {
+                    try {
+                        return InetAddress.getByName(address);
+                    } catch (UnknownHostException e) {
+                        throw new JSONException("create address error", e);
+                    }
+                });
+            case "java.text.SimpleDateFormat":
+                return ObjectReaderImplValue.of((Class<SimpleDateFormat>) type, String.class, SimpleDateFormat::new);
             case "java.lang.Throwable":
             case "java.lang.Exception":
             case "java.lang.IllegalStateException":

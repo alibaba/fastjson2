@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 
 public class ObjectReaderMisc
         implements ObjectReader {
@@ -45,20 +44,6 @@ public class ObjectReaderMisc
             }
             jsonReader.nextIfMatch(',');
             return new InetSocketAddress(inetAddress, port);
-        }
-
-        if (objectClass == InetAddress.class) {
-            String address = jsonReader.readString();
-            try {
-                return InetAddress.getByName(address);
-            } catch (UnknownHostException e) {
-                throw new JSONException("read InetAddress error", e);
-            }
-        }
-
-        if (objectClass == java.text.SimpleDateFormat.class) {
-            String str = jsonReader.readString();
-            return new java.text.SimpleDateFormat(str);
         }
 
         throw new JSONException("not support : " + objectClass.getName());
