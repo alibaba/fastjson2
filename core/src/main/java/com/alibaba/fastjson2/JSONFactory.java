@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class JSONFactory {
     public static final String CREATOR;
@@ -252,6 +253,26 @@ public final class JSONFactory {
     public static JSONReader.Context createReadContext() {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         return new JSONReader.Context(provider);
+    }
+
+    public static JSONReader.Context createReadContext(Supplier<Map> objectSupplier, JSONReader.Feature... features) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        JSONReader.Context context = new JSONReader.Context(provider);
+        context.setObjectSupplier(objectSupplier);
+        context.config(features);
+        return context;
+    }
+
+    public static JSONReader.Context createReadContext(
+            Supplier<Map> objectSupplier,
+            Supplier<List> arraySupplier,
+            JSONReader.Feature... features) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        JSONReader.Context context = new JSONReader.Context(provider);
+        context.setObjectSupplier(objectSupplier);
+        context.setArraySupplier(arraySupplier);
+        context.config(features);
+        return context;
     }
 
     public static ObjectWriterProvider getDefaultObjectWriterProvider() {
