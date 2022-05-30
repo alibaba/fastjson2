@@ -69,7 +69,7 @@ public interface JSON {
      * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
      *
      * @param text     the JSON {@link String} to be parsed
-     * @param context
+     * @param context specify the context use by JSONReader
      * @return Object
      */
     static Object parse(String text, JSONReader.Context context) {
@@ -720,8 +720,7 @@ public interface JSON {
      *
      * @param utf8Bytes UTF8 encoded JSON byte array to parse
      * @param clazz    specify the Class to be converted
-     * @param context
-     * @param features features to be enabled in parsing
+     * @param context specify the context use by JSONReader
      * @return Class
      */
     @SuppressWarnings("unchecked")
