@@ -1,8 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -139,7 +141,20 @@ public final class ObjectReaderImplObject
                     default:
                         throw new JSONException("error, offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
                 }
-                object.put(name, value);
+
+                Object origin = object.put(name, value);
+                if (origin != null) {
+                    long contextFeatures = features | context.getFeatures();
+                    if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                        if (origin instanceof Collection) {
+                            ((Collection) origin).add(value);
+                            object.put(name, value);
+                        } else {
+                            JSONArray array = JSONArray.of(origin, value);
+                            object.put(name, array);
+                        }
+                    }
+                }
             }
 
             jsonReader.nextIfMatch(',');
