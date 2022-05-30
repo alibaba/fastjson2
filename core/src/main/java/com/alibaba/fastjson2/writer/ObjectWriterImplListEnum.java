@@ -40,6 +40,13 @@ final class ObjectWriterImplListEnum
         boolean writeEnumUsingToString = jsonWriter.isEnabled(JSONWriter.Feature.WriteEnumUsingToString);
         for (int i = 0; i < size; i++) {
             Enum e = (Enum) list.get(i);
+            Class enumClass = e.getClass();
+            if (enumClass != enumType) {
+                ObjectWriter enumWriter = jsonWriter.getObjectWriter(enumClass);
+                enumWriter.writeJSONB(jsonWriter, e, null, enumType, this.features | features);
+                continue;
+            }
+
             String str;
             if (writeEnumUsingToString) {
                 str = e.toString();
