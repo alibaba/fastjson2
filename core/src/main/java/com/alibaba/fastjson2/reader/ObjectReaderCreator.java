@@ -311,6 +311,10 @@ public class ObjectReaderCreator {
                 }
             }
 
+            if (parameters.length == 1 && (fieldInfo.features & FieldInfo.VALUE_MASK) != 0) {
+                break;
+            }
+
             String fieldName = fieldInfo.fieldName;
             if (fieldName == null || fieldName.isEmpty()) {
                 if (beanInfo.createParameterNames != null && i < beanInfo.createParameterNames.length) {
@@ -364,6 +368,48 @@ public class ObjectReaderCreator {
                             ));
                 }
             }
+        }
+
+        if (parameters.length == 1 && (fieldInfo.features & FieldInfo.VALUE_MASK) != 0) {
+            Type valueType = beanInfo.creatorConstructor == null
+                    ? beanInfo.createMethod.getGenericParameterTypes()[0]
+                    : beanInfo.creatorConstructor.getGenericParameterTypes()[0];
+            Class valueClass = beanInfo.creatorConstructor == null
+                    ? beanInfo.createMethod.getParameterTypes()[0]
+                    : beanInfo.creatorConstructor.getParameterTypes()[0];
+
+            JSONSchema jsonSchema = null;
+            if (fieldInfo.schema != null && !fieldInfo.schema.isEmpty()) {
+                JSONObject object = JSON.parseObject(fieldInfo.schema);
+                if (!object.isEmpty()) {
+                    jsonSchema = JSONSchema.of(object, valueClass);
+                }
+            }
+
+            Object defaultValue = fieldInfo.defaultValue;
+            if (defaultValue != null && defaultValue.getClass() != valueClass) {
+                Function typeConvert = JSONFactory
+                        .getDefaultObjectReaderProvider()
+                        .getTypeConvert(defaultValue.getClass(), valueType);
+                if (typeConvert != null) {
+                    defaultValue = typeConvert.apply(defaultValue);
+                } else {
+                    throw new JSONException("illegal defaultValue : " + defaultValue + ", class " + valueClass.getName());
+                }
+            }
+
+            return new ObjectReaderImplValue(
+                    objectClass,
+                    valueType,
+                    valueClass,
+                    fieldInfo.features,
+                    fieldInfo.format,
+                    defaultValue,
+                    jsonSchema,
+                    beanInfo.creatorConstructor,
+                    beanInfo.createMethod,
+                    null
+            );
         }
 
         Function<Map<Long, Object>, Object> function;
@@ -662,6 +708,53 @@ public class ObjectReaderCreator {
                     && !(Throwable.class.isAssignableFrom(objectClass))
                     && defaultConstructor == null
                     && matchCount != parameterNames.length) {
+                if (creatorConstructor.getParameterCount() == 1) {
+                    FieldInfo fieldInfo = new FieldInfo();
+                    for (ObjectReaderModule module : modules) {
+                        ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+                        if (annotationProcessor != null) {
+                            annotationProcessor.getFieldInfo(fieldInfo, objectClass, creatorConstructor, 0, creatorConstructor.getParameters()[0]);
+                        }
+                    }
+                    if ((fieldInfo.features & FieldInfo.VALUE_MASK) != 0) {
+                        Type valueType = creatorConstructor.getGenericParameterTypes()[0];
+                        Class valueClass = creatorConstructor.getParameterTypes()[0];
+
+                        JSONSchema jsonSchema = null;
+                        if (fieldInfo.schema != null && !fieldInfo.schema.isEmpty()) {
+                            JSONObject object = JSON.parseObject(fieldInfo.schema);
+                            if (!object.isEmpty()) {
+                                jsonSchema = JSONSchema.of(object, valueClass);
+                            }
+                        }
+
+                        Object defaultValue = fieldInfo.defaultValue;
+                        if (defaultValue != null && defaultValue.getClass() != valueClass) {
+                            Function typeConvert = JSONFactory
+                                    .getDefaultObjectReaderProvider()
+                                    .getTypeConvert(defaultValue.getClass(), valueType);
+                            if (typeConvert != null) {
+                                defaultValue = typeConvert.apply(defaultValue);
+                            } else {
+                                throw new JSONException("illegal defaultValue : " + defaultValue + ", class " + valueClass.getName());
+                            }
+                        }
+
+                        return new ObjectReaderImplValue(
+                                objectClass,
+                                valueType,
+                                valueClass,
+                                fieldInfo.features,
+                                fieldInfo.format,
+                                defaultValue,
+                                jsonSchema,
+                                creatorConstructor,
+                                null,
+                                null
+                        );
+                    }
+                }
+
                 Function<Map<Long, Object>, T> function = new ConstructorFunction(alternateConstructors, creatorConstructor, parameterNames);
                 FieldReader[] paramFieldReaders = createFieldReaders(creatorConstructor.getParameters(), parameterNames);
                 return new ObjectReaderNoneDefaultConstrutor(
