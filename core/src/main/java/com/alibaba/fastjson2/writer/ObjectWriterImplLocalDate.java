@@ -1,13 +1,26 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.codec.DateTimeCodec;
 
 import java.lang.reflect.Type;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 final class ObjectWriterImplLocalDate
-        extends ObjectWriterBaseModule.PrimitiveImpl {
-    static final ObjectWriterImplLocalDate INSTANCE = new ObjectWriterImplLocalDate();
+        extends DateTimeCodec
+        implements ObjectWriter {
+    static final ObjectWriterImplLocalDate INSTANCE = new ObjectWriterImplLocalDate(null, null);
+
+    final boolean yyyyMMdd10;
+
+    public ObjectWriterImplLocalDate(String format, Locale locale) {
+        super(format, locale);
+        yyyyMMdd10 = "yyyy-MM-dd".equals(format);
+    }
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -25,24 +38,54 @@ final class ObjectWriterImplLocalDate
 
         LocalDate date = (LocalDate) object;
 
-        String dateFormat = ctx.getDateFormat();
-        if (dateFormat == null) {
+        if (formatUnixTime || ctx.isDateFormatUnixTime()) {
+            LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
+            long millis = dateTime.atZone(ctx.getZoneId())
+                    .toInstant()
+                    .toEpochMilli();
+            jsonWriter.writeInt64(millis / 1000);
+            return;
+        }
+
+        if (formatMillis || ctx.isDateFormatMillis()) {
+            LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
+            long millis = dateTime.atZone(ctx.getZoneId())
+                    .toInstant()
+                    .toEpochMilli();
+            jsonWriter.writeInt64(millis);
+            return;
+        }
+
+        if (yyyyMMdd10) {
             jsonWriter.writeDateYYYMMDD10(
                     date.getYear(),
                     date.getMonthValue(),
                     date.getDayOfMonth());
-        } else {
-            String str;
-            if ("yyyy-MM-dd HH:mm:ss".equals(dateFormat)) {
-                jsonWriter.writeDateTime19(
-                        date.getYear(),
-                        date.getMonthValue(),
-                        date.getDayOfMonth(), 0, 0, 0);
-                return;
-            }
-
-            str = ctx.getDateFormatter().format(date);
-            jsonWriter.writeString(str);
+            return;
         }
+
+        if (yyyyMMddhhmmss19) {
+            jsonWriter.writeDateTime19(
+                    date.getYear(),
+                    date.getMonthValue(),
+                    date.getDayOfMonth(), 0, 0, 0);
+            return;
+        }
+
+        DateTimeFormatter formatter = this.getDateFormatter();
+        if (formatter == null) {
+            formatter = ctx.getDateFormatter();
+        }
+
+        if (formatter == null) {
+            jsonWriter.writeDateYYYMMDD10(
+                    date.getYear(),
+                    date.getMonthValue(),
+                    date.getDayOfMonth());
+            return;
+        }
+
+        String str = formatter.format(date);
+        jsonWriter.writeString(str);
     }
 }

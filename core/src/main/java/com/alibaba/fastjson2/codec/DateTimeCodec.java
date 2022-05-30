@@ -15,6 +15,8 @@ public abstract class DateTimeCodec {
 
     public final Locale locale;
 
+    public final boolean yyyyMMddhhmmss19;
+
     DateTimeFormatter dateFormatter;
 
     public DateTimeCodec(String format) {
@@ -28,6 +30,7 @@ public abstract class DateTimeCodec {
 
         this.format = format;
         this.locale = locale;
+        yyyyMMddhhmmss19 = "yyyy-MM-dd HH:mm:ss".equals(format);
 
         boolean formatUnixTime = false, formatISO8601 = false, formatMillis = false, hasDay = false, hasHour = false;
         if (format != null) {
