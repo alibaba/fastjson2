@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONPath;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.ReferenceKey;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -132,9 +129,12 @@ class ObjectReaderImplMapTyped
             jsonReader.next();
         }
 
+        JSONReader.Context context = jsonReader.getContext();
+        long contextFeatures = features | context.getFeatures();
+
         Map object;
         if (objectReader != null) {
-            object = (Map) objectReader.createInstance(jsonReader.getContext().getFeatures() | features);
+            object = (Map) objectReader.createInstance(contextFeatures);
         } else {
             object = instanceType == HashMap.class
                     ? new HashMap<>()
@@ -218,10 +218,12 @@ class ObjectReaderImplMapTyped
             throw new JSONException("expect '{', but '['");
         }
 
+        JSONReader.Context context = jsonReader.getContext();
+        long contextFeatures = context.getFeatures() | features;
         Map object
                 = instanceType == HashMap.class
                 ? new HashMap<>()
-                : (Map) createInstance(jsonReader.getContext().getFeatures() | features);
+                : (Map) createInstance(contextFeatures);
 
         for (; ; ) {
             if (jsonReader.nextIfMatch('}')) {
@@ -239,7 +241,18 @@ class ObjectReaderImplMapTyped
                 valueObjectReader = jsonReader.getObjectReader(valueType);
             }
             Object value = valueObjectReader.readObject(jsonReader, 0);
-            object.put(name, value);
+            Object origin = object.put(name, value);
+            if (origin != null) {
+                if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                    if (origin instanceof Collection) {
+                        ((Collection) origin).add(value);
+                        object.put(name, value);
+                    } else {
+                        JSONArray array = JSONArray.of(origin, value);
+                        object.put(name, array);
+                    }
+                }
+            }
         }
 
         jsonReader.nextIfMatch(',');
