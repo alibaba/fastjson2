@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.util.List;
 import java.util.Locale;
@@ -314,11 +315,25 @@ public class JSON {
             int position = charByte.position();
 
             JSONReader reader = JSONReader.of(chars, 0, position);
+            config(reader.getContext(), features);
             return reader.read(clazz);
         } finally {
             if (chars.length <= 1024 * 64) {
                 CHARS_UPDATER.set(CACHE, chars);
             }
+        }
+    }
+
+    public static <T> T parseObject(
+            byte[] input,
+            int off,
+            int len,
+            Charset charset,
+            Type clazz,
+            Feature... features) {
+        try (JSONReader reader = JSONReader.of(input, off, len, charset)) {
+            config(reader.getContext(), features);
+            return reader.read(clazz);
         }
     }
 

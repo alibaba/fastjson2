@@ -954,6 +954,34 @@ public interface JSON {
     }
 
     /**
+     * Parses the JSON byte array of the specified {@link Charset} into a Java Object
+     *
+     * @param bytes   JSON byte array to parse
+     * @param offset  the index of the first byte to parse
+     * @param length  the number of bytes to parse
+     * @param charset specify {@link Charset} to parse
+     * @param type    specify the {@link Class} to be converted
+     * @param features features to be enabled in parsing
+     * @throws IndexOutOfBoundsException If the offset and the length arguments index characters outside the bounds of the bytes array
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(byte[] bytes, int offset, int length, Charset charset, Class<T> type, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(bytes, offset, length, charset)) {
+            reader.context.config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            T object = objectReader.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
      * Parse {@link InputStream} into a Java object with specified {@link JSONReader.Feature}s enabled and consume it
      *
      * @param input    the JSON {@link InputStream} to be parsed

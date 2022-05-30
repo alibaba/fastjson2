@@ -411,8 +411,11 @@ final class JSONReaderStr
             }
 
             offset++;
-            if (c == '_') {
-                continue;
+            if (c == '_' || c == '-') {
+                char c1 = str.charAt(offset);
+                if (c1 != '"' && c1 != '\'' && c1 != c) {
+                    continue;
+                }
             }
 
             if (c >= 'A' && c <= 'Z') {
