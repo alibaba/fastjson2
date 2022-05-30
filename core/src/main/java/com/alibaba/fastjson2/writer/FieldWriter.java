@@ -466,6 +466,14 @@ public interface FieldWriter<T>
                 }
             }
 
+            if (LocalDate.class.isAssignableFrom(valueClass)) {
+                if (format == null || format.isEmpty()) {
+                    return ObjectWriterImplLocalDate.INSTANCE;
+                } else {
+                    return new ObjectWriterImplLocalDate(format, locale);
+                }
+            }
+
             if (Optional.class == valueClass) {
                 return ObjectWriterImplOptional.of(format, locale);
             }
