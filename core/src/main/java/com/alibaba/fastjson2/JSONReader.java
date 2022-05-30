@@ -2428,7 +2428,8 @@ public abstract class JSONReader
         ErrorOnEnumNotMatch(1 << 12),
         TrimString(1 << 13),
         ErrorOnNotSupportAutoType(1 << 14),
-        DuplicateKeyValueAsArray(1 << 15);
+        DuplicateKeyValueAsArray(1 << 15),
+        AllowUnQuotedFieldNames(1 << 16);
 
         public final long mask;
 

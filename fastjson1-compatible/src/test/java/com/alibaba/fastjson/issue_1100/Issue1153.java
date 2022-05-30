@@ -1,10 +1,10 @@
 package com.alibaba.fastjson.issue_1100;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONException;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Created by wenshao on 08/05/2017.
@@ -17,7 +17,6 @@ public class Issue1153 {
                 "test : '//helo'\n" +
                 "}";
 
-        JSONObject jsonObject = JSON.parseObject(json);
-        assertEquals("{\"test\":\"//helo\",\"name\":\"zhangshan\"}", jsonObject.toString());
+        assertThrows(JSONException.class, () -> JSON.parseObject(json));
     }
 }

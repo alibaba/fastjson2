@@ -22,10 +22,6 @@ public class JSONReaderStrTest {
                 reader.readFieldNameHashCodeUnquote()
         );
 
-        assertTrue(
-                reader.nextIfMatch(':')
-        );
-
         assertEquals(123,
                 reader.readInt32()
                         .intValue());

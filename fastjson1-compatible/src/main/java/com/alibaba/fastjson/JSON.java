@@ -211,6 +211,9 @@ public class JSON {
                 case ErrorOnNotSupportAutoType:
                     context.config(JSONReader.Feature.ErrorOnNotSupportAutoType);
                     break;
+                case AllowUnQuotedFieldNames:
+                    context.config(JSONReader.Feature.AllowUnQuotedFieldNames);
+                    break;
                 case OrderedField:
                     context.setObjectSupplier(orderedSupplier);
                     break;
@@ -581,6 +584,25 @@ public class JSON {
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
 
         try (JSONReader reader = JSONReader.of(text)) {
+            return reader.read(paramType);
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
+    public static <T> List<T> parseArray(String text, Class<T> type, Feature... features) {
+        if (text == null || text.length() == 0) {
+            return null;
+        }
+        ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            config(reader.getContext(), features);
+
             return reader.read(paramType);
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();

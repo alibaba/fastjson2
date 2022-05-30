@@ -210,13 +210,28 @@ final class JSONReaderStr
                     : str.charAt(offset++);
         }
 
+        if (ch == ':') {
+            ch = str.charAt(offset++);
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                offset++;
+                ch = str.charAt(offset);
+            }
+        }
+
         return hashCode;
     }
 
     @Override
     public long readFieldNameHashCode() {
         if (ch != '"' && ch != '\'') {
-            return -1;
+            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
+                return readFieldNameHashCodeUnquote();
+            }
+            if (ch == '}' || isNull()) {
+                return -1;
+            }
+            throw new JSONException("illegal character " + ch);
         }
 
         final char quote = ch;

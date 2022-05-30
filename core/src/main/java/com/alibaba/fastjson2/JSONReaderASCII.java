@@ -64,7 +64,13 @@ final class JSONReaderASCII
     @Override
     public long readFieldNameHashCode() {
         if (ch != '"' && ch != '\'') {
-            return -1;
+            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
+                return readFieldNameHashCodeUnquote();
+            }
+            if (ch == '}' || isNull()) {
+                return -1;
+            }
+            throw new JSONException("illegal character " + ch);
         }
 
         final char quote = ch;
