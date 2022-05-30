@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -82,7 +83,11 @@ public final class ObjectReaderImplObject
             if (objectSupplier != null) {
                 object = objectSupplier.get();
             } else {
-                object = (Map) ObjectReaderImplMap.INSTANCE_OBJECT.createInstance(jsonReader.features(features));
+                if (((features | context.getFeatures()) & JSONReader.Feature.UseNativeObject.mask) != 0) {
+                    object = new HashMap();
+                } else {
+                    object = (Map) ObjectReaderImplMap.INSTANCE_OBJECT.createInstance(jsonReader.features(features));
+                }
             }
 
             for (int i = 0; ; ++i) {

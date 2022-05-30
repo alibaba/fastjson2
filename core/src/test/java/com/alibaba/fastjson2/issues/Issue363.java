@@ -16,7 +16,7 @@ public class Issue363 {
         ProgramGridOutput vo = new ProgramGridOutput();
         vo.validDate = LocalDate.of(2022, 5, 27);
         String str = JSON.toJSONString(vo, "yyyy-MM-dd HH:mm:ss");
-        assertEquals("{\"validDate\":\"2022-05-27 00:00:00\"}", str);
+        assertEquals("{\"validDate\":\"2022-05-27\"}", str);
 
         ProgramGridOutput vo2 = JSON.parseObject(str, ProgramGridOutput.class);
         assertEquals(vo.validDate, vo2.validDate);

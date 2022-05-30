@@ -68,6 +68,24 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
      *
+     * @param text     the JSON {@link String} to be parsed
+     * @param context
+     * @return Object
+     */
+    static Object parse(String text, JSONReader.Context context) {
+        if (text == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(context, text)) {
+            ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
+            return objectReader.readObject(reader, 0);
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
+     *
      * @param bytes     the UTF8 Bytes to be parsed
      * @param features features to be enabled in parsing
      * @return Object
@@ -486,6 +504,31 @@ public interface JSON {
      *
      * @param text     the JSON {@link String} to be parsed
      * @param clazz    specify the Class to be converted
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(String text, Class<T> clazz, JSONReader.Context context) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(context, text)) {
+            boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+
+            ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
+
+            T object = objectReader.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param text     the JSON {@link String} to be parsed
+     * @param clazz    specify the Class to be converted
      * @param format   the specified date format
      * @param features features to be enabled in parsing
      */
@@ -661,6 +704,36 @@ public interface JSON {
             JSONReader.Context context = reader.context;
             reader.context.config(filter, features);
 
+            boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+            ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
+
+            T object = objectReader.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse UTF8 encoded JSON byte array into a Java object
+     *
+     * @param utf8Bytes UTF8 encoded JSON byte array to parse
+     * @param clazz    specify the Class to be converted
+     * @param context
+     * @param features features to be enabled in parsing
+     * @return Class
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(
+            byte[] utf8Bytes,
+            Class<T> clazz,
+            JSONReader.Context context) {
+        if (utf8Bytes == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(context, utf8Bytes)) {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 

@@ -1743,6 +1743,10 @@ public abstract class JSONReader
         return new JSONReaderUTF8(JSONFactory.createReadContext(), utf8Bytes, 0, utf8Bytes.length);
     }
 
+    public static JSONReader of(JSONReader.Context context, byte[] utf8Bytes) {
+        return new JSONReaderUTF8(context, utf8Bytes, 0, utf8Bytes.length);
+    }
+
     public static JSONReader of(char[] chars) {
         return new JSONReaderUTF16(
                 JSONFactory.createReadContext(),
@@ -1765,6 +1769,14 @@ public abstract class JSONReader
     public static JSONReader ofJSONB(byte[] jsonbBytes) {
         return new JSONReaderJSONB(
                 JSONFactory.createReadContext(),
+                jsonbBytes,
+                0,
+                jsonbBytes.length, null);
+    }
+
+    public static JSONReader ofJSONB(JSONReader.Context context, byte[] jsonbBytes) {
+        return new JSONReaderJSONB(
+                context,
                 jsonbBytes,
                 0,
                 jsonbBytes.length, null);
@@ -1895,28 +1907,57 @@ public abstract class JSONReader
                 JSONFactory.createReadContext(), null, chars, 0, off);
     }
 
-    public static JSONReader of(String str) {
+    public static JSONReader of(Context context, String str) {
         if (str == null) {
             throw new NullPointerException();
         }
 
-        Context ctx = JSONFactory.createReadContext();
         if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
             try {
                 byte coder = UnsafeUtils.getStringCoder(str);
                 if (coder == 0) {
                     byte[] bytes = UnsafeUtils.getStringValue(str);
-                    return new JSONReaderASCII(ctx, str, bytes, 0, bytes.length);
+                    return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
             }
 
-            return new JSONReaderStr(ctx, str, 0, str.length());
+            return new JSONReaderStr(context, str, 0, str.length());
         } else {
             char[] chars = JDKUtils.getCharArray(str);
             return new JSONReaderUTF16(
-                    ctx,
+                    context,
+                    str,
+                    chars,
+                    0,
+                    chars.length
+            );
+        }
+    }
+
+    public static JSONReader of(String str) {
+        if (str == null) {
+            throw new NullPointerException();
+        }
+
+        Context context = JSONFactory.createReadContext();
+        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+            try {
+                byte coder = UnsafeUtils.getStringCoder(str);
+                if (coder == 0) {
+                    byte[] bytes = UnsafeUtils.getStringValue(str);
+                    return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
+                }
+            } catch (Exception e) {
+                throw new JSONException("unsafe get String.coder error");
+            }
+
+            return new JSONReaderStr(context, str, 0, str.length());
+        } else {
+            char[] chars = JDKUtils.getCharArray(str);
+            return new JSONReaderUTF16(
+                    context,
                     str,
                     chars,
                     0,
