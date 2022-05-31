@@ -17,7 +17,6 @@ public class Issue2065C {
             error = e;
         }
         assertNotNull(error);
-        error.printStackTrace();
     }
 
     @Test
