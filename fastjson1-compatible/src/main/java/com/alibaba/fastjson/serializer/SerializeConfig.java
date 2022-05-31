@@ -20,7 +20,7 @@ public class SerializeConfig {
     public boolean put(Type type, ObjectSerializer value) {
         return JSONFactory
                 .getDefaultObjectWriterProvider()
-                .register(type, new ObjectSerializerAdapter(value));
+                .register(type, new ObjectSerializerAdapter(value)) == null;
     }
 
     public void setAsmEnable(boolean value) {
