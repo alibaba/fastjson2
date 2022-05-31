@@ -24,6 +24,5 @@ public class SwaggerJsonWriterTest {
         JSONFactory.getDefaultObjectWriterProvider().register(Json.class, SwaggerJsonWriter.INSTANCE);
         assertEquals(jsonStr, JSON.toJSONString(new Json(jsonStr)));
         JSONFactory.getDefaultObjectWriterProvider().unregister(Json.class, SwaggerJsonWriter.INSTANCE);
-
     }
 }
