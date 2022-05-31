@@ -267,6 +267,15 @@ class JSONReaderUTF8
                     : (char) bytes[offset++];
         }
 
+        if (ch == ':') {
+            ch = (char) bytes[offset++];
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                offset++;
+                ch = (char) bytes[offset];
+            }
+        }
+
         return hashCode;
     }
 
@@ -360,7 +369,13 @@ class JSONReaderUTF8
     @Override
     public long readFieldNameHashCode() {
         if (ch != '"' && ch != '\'') {
-            return -1;
+            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
+                return readFieldNameHashCodeUnquote();
+            }
+            if (ch == '}' || isNull()) {
+                return -1;
+            }
+            throw new JSONException("illegal character " + ch);
         }
 
         final char quote = ch;
@@ -4779,7 +4794,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalDateTime readLocalDateTime19() {
-        if (ch != '"') {
+        if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
         }
 

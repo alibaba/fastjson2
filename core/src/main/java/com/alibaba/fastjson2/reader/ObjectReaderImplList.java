@@ -72,6 +72,9 @@ public final class ObjectReaderImplList
             instanceClass = LinkedList.class;
         } else if (listClass == Set.class || listClass == AbstractSet.class) {
             instanceClass = HashSet.class;
+        } else if (listClass == EnumSet.class) {
+            instanceClass = HashSet.class;
+            builder = (o) -> EnumSet.copyOf((Collection) o);
         } else if (listClass == NavigableSet.class || listClass == SortedSet.class) {
             instanceClass = TreeSet.class;
         } else if (listClass == CLASS_SINGLETON) {

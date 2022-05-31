@@ -1395,6 +1395,7 @@ public interface JSON {
             return list;
         }
     }
+
     /**
      * Parse UTF8 encoded JSON byte array into {@link List} with specified {@link JSONReader.Feature}s enabled
      *
@@ -1408,6 +1409,31 @@ public interface JSON {
         }
 
         try (JSONReader reader = JSONReader.of(bytes)) {
+            reader.context.config(features);
+            List<T> list = reader.readArray(type);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            return list;
+        }
+    }
+
+    /**
+     * Parse UTF8 encoded JSON byte array into {@link List} with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param bytes    UTF8 encoded JSON byte array to parse
+     * @param offset  the index of the first byte to validate
+     * @param length  the number of bytes to validate
+     * @param charset specify {@link Charset} to validate
+     * @param type     specify the {@link Class} to be converted
+     * @param features features to be enabled in parsing
+     */
+    static <T> List<T> parseArray(byte[] bytes, int offset, int length, Charset charset, Class<T> type, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(bytes, offset, length, charset)) {
             reader.context.config(features);
             List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
