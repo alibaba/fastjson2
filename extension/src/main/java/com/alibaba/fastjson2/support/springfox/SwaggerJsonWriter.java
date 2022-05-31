@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import springfox.documentation.spring.web.json.Json;
 
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 
 /**
  * SwaggerJsonWriter: Swagger的Json处理，解决/v2/api-docs获取不到内容导致获取不到API页面内容的问题
