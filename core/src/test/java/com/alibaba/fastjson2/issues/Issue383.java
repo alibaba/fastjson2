@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -31,9 +32,16 @@ public class Issue383 {
             assertEquals(2, employees.size());
         }
 
+        {
+            JSONReader jsonReaderStr = TestUtils.createJSONReaderStr(str, JSONReader.Feature.AllowUnQuotedFieldNames);
+            List<Employee> employees = jsonReaderStr.readArray(Employee.class);
+            assertEquals(2, employees.size());
+        }
+
         assertThrows(JSONException.class, () -> JSON.parseArray(str, Employee.class));
         assertThrows(JSONException.class, () -> JSON.parseArray(utf8, Employee.class));
         assertThrows(JSONException.class, () -> JSON.parseArray(utf8, 0, utf8.length, StandardCharsets.US_ASCII, Employee.class));
+        assertThrows(JSONException.class, () -> TestUtils.createJSONReaderStr(str).readArray(Employee.class));
     }
 
     private static class Employee {
