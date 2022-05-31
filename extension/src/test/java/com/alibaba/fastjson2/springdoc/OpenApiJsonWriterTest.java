@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.springdoc;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.support.springdoc.OpenApiJsonWriter;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,8 @@ public class OpenApiJsonWriterTest {
 
     @Test
     public void test1() {
-        JSON.register(String.class, OpenApiJsonWriter.INSTANCE);
+        JSONFactory.getDefaultObjectWriterProvider().register(String.class, OpenApiJsonWriter.INSTANCE);
         assertEquals(jsonStr, JSON.toJSONString(jsonStr));
+        JSONFactory.getDefaultObjectWriterProvider().unregister(String.class, OpenApiJsonWriter.INSTANCE);
     }
 }
