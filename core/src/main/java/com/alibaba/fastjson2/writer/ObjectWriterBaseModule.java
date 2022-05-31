@@ -252,6 +252,11 @@ class ObjectWriterBaseModule
             if (ObjectWriter.class.isAssignableFrom(writeUsing)) {
                 fieldInfo.writeUsing = writeUsing;
             }
+
+            Class serializeUsing = jsonField.serializeUsing();
+            if (ObjectWriter.class.isAssignableFrom(serializeUsing)) {
+                fieldInfo.writeUsing = serializeUsing;
+            }
         }
 
         private void processJacksonJsonProperty(FieldInfo fieldInfo, Annotation annotation) {
