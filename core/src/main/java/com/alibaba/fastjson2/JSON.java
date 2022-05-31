@@ -152,6 +152,10 @@ public interface JSON {
     @SuppressWarnings("unchecked")
     static JSONObject parseObject(InputStream input, JSONReader.Feature... features) {
         try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8)) {
+            if (reader.isEnd()) {
+                return null;
+            }
+
             reader.getContext().config(features);
             JSONObject object = JSONObject.READER.readObject(reader, 0);
             if (reader.resolveTasks != null) {
