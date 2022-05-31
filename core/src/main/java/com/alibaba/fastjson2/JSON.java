@@ -36,7 +36,7 @@ public interface JSON {
      * @return Object
      */
     static Object parse(String text) {
-        if (text == null) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -54,7 +54,7 @@ public interface JSON {
      * @return Object
      */
     static Object parse(String text, JSONReader.Feature... features) {
-        if (text == null) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -73,7 +73,7 @@ public interface JSON {
      * @return Object
      */
     static Object parse(String text, JSONReader.Context context) {
-        if (text == null) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -91,7 +91,7 @@ public interface JSON {
      * @return Object
      */
     static Object parse(byte[] bytes, JSONReader.Feature... features) {
-        if (bytes == null) {
+        if (bytes == null || bytes.length == 0) {
             return null;
         }
 
@@ -128,12 +128,61 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static JSONObject parseObject(String text, JSONReader.Feature... features) {
-        if (text == null) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
         try (JSONReader reader = JSONReader.of(text)) {
             reader.context.config(features);
+            JSONObject object = JSONObject.READER.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link JSONObject}
+     *
+     * @param text     the JSON {@link String} to be parsed
+     * @param context specify the context use by JSONReader
+     * @return JSONObject
+     */
+    @SuppressWarnings("unchecked")
+    static JSONObject parseObject(String text, JSONReader.Context context) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(context, text)) {
+            JSONObject object = JSONObject.READER.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse Reader into into {@link JSONObject}
+     *
+     * @param input    the JSON {@link InputStream} to be parsed
+     * @param features features to be enabled in parsing
+     * @return JSONObject
+     */
+    @SuppressWarnings("unchecked")
+    static JSONObject parseObject(Reader input, JSONReader.Feature... features) {
+        if (input == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(input)) {
+            if (reader.isEnd()) {
+                return null;
+            }
+
+            reader.getContext().config(features);
             JSONObject object = JSONObject.READER.readObject(reader, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -151,7 +200,15 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static JSONObject parseObject(InputStream input, JSONReader.Feature... features) {
+        if (input == null) {
+            return null;
+        }
+
         try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8)) {
+            if (reader.isEnd()) {
+                return null;
+            }
+
             reader.getContext().config(features);
             JSONObject object = JSONObject.READER.readObject(reader, 0);
             if (reader.resolveTasks != null) {
@@ -305,7 +362,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz) {
-        if (text == null) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -338,7 +395,7 @@ public interface JSON {
             Class<T> clazz,
             Filter filter,
             JSONReader.Feature... features) {
-        if (text == null) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -374,7 +431,7 @@ public interface JSON {
             String format,
             Filter[] filters,
             JSONReader.Feature... features) {
-        if (text == null) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
 
@@ -886,6 +943,35 @@ public interface JSON {
     }
 
     /**
+     * Parse Reader into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param input    the JSON {@link InputStream} to be parsed
+     * @param type     specify the {@link Type} to be converted
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(Reader input, Type type, JSONReader.Feature... features) {
+        if (input == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(input)) {
+            if (reader.isEnd()) {
+                return null;
+            }
+
+            reader.context.config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+
+            T object = objectReader.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
      * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
      *
      * @param input    the JSON {@link InputStream} to be parsed
@@ -894,7 +980,15 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Type type, JSONReader.Feature... features) {
+        if (input == null) {
+            return null;
+        }
+
         try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8)) {
+            if (reader.isEnd()) {
+                return null;
+            }
+
             reader.context.config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
 
@@ -2013,8 +2107,19 @@ public interface JSON {
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader)
      * @since 2.0.2
      */
-    static boolean register(Type type, ObjectReader<?> objectReader) {
+    static ObjectReader register(Type type, ObjectReader<?> objectReader) {
         return JSONFactory.getDefaultObjectReaderProvider().register(type, objectReader);
+    }
+
+    /**
+     * Register if absent an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     *
+     * @see JSONFactory#getDefaultObjectReaderProvider()
+     * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader)
+     * @since 2.0.6
+     */
+    static ObjectReader registerIfAbsent(Type type, ObjectReader<?> objectReader) {
+        return JSONFactory.getDefaultObjectReaderProvider().registerIfAbsent(type, objectReader);
     }
 
     /**
@@ -2044,8 +2149,19 @@ public interface JSON {
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
      * @since 2.0.2
      */
-    static boolean register(Type type, ObjectWriter<?> objectWriter) {
+    static ObjectWriter register(Type type, ObjectWriter<?> objectWriter) {
         return JSONFactory.getDefaultObjectWriterProvider().register(type, objectWriter);
+    }
+
+    /**
+     * Register if absent an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     *
+     * @see JSONFactory#getDefaultObjectWriterProvider()
+     * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
+     * @since 2.0.6
+     */
+    static ObjectWriter registerIfAbsent(Type type, ObjectWriter<?> objectWriter) {
+        return JSONFactory.getDefaultObjectWriterProvider().registerIfAbsent(type, objectWriter);
     }
 
     static void config(JSONReader.Feature... features) {

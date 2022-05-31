@@ -58,8 +58,20 @@ public class ObjectWriterProvider {
         return creator;
     }
 
-    public boolean register(Type type, ObjectWriter objectWriter) {
-        return cache.put(type, objectWriter) == null;
+    public ObjectWriter register(Type type, ObjectWriter objectWriter) {
+        return cache.put(type, objectWriter);
+    }
+
+    public ObjectWriter registerIfAbsent(Type type, ObjectWriter objectWriter) {
+        return cache.putIfAbsent(type, objectWriter);
+    }
+
+    public ObjectWriter unregister(Type type) {
+        return cache.remove(type);
+    }
+
+    public boolean unregister(Type type, ObjectWriter objectWriter) {
+        return cache.remove(type, objectWriter);
     }
 
     public boolean register(ObjectWriterModule module) {
@@ -73,6 +85,10 @@ public class ObjectWriterProvider {
 
         modules.add(0, module);
         return true;
+    }
+
+    public boolean unregister(ObjectWriterModule module) {
+        return modules.remove(module);
     }
 
     public Class getMixIn(Class target) {
