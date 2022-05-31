@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.springfox;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.support.springfox.SwaggerJsonWriter;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,9 @@ public class SwaggerJsonWriterTest {
 
     @Test
     public void test1() {
-        JSON.register(Json.class, SwaggerJsonWriter.INSTANCE);
+        JSONFactory.getDefaultObjectWriterProvider().register(Json.class, SwaggerJsonWriter.INSTANCE);
         assertEquals(jsonStr, JSON.toJSONString(new Json(jsonStr)));
+        JSONFactory.getDefaultObjectWriterProvider().unregister(Json.class, SwaggerJsonWriter.INSTANCE);
+
     }
 }
