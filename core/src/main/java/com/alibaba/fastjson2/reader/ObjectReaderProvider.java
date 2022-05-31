@@ -306,10 +306,16 @@ public class ObjectReaderProvider {
                 9144212112462101475L
         };
 
-        long[] hashCodes = new long[AUTO_TYPE_ACCEPT_LIST.length + 1];
-        for (int i = 0; i < AUTO_TYPE_ACCEPT_LIST.length; i++) {
-            hashCodes[i] = Fnv.hashCode64(AUTO_TYPE_ACCEPT_LIST[i]);
+        long[] hashCodes;
+        if (AUTO_TYPE_ACCEPT_LIST == null) {
+            hashCodes = new long[1];
+        } else {
+            hashCodes = new long[AUTO_TYPE_ACCEPT_LIST.length + 1];
+            for (int i = 0; i < AUTO_TYPE_ACCEPT_LIST.length; i++) {
+                hashCodes[i] = Fnv.hashCode64(AUTO_TYPE_ACCEPT_LIST[i]);
+            }
         }
+
         hashCodes[hashCodes.length - 1] = -6293031534589903644L;
 
         Arrays.sort(hashCodes);
@@ -367,8 +373,24 @@ public class ObjectReaderProvider {
         cacheFieldBased.remove(target);
     }
 
-    public boolean register(Type type, ObjectReader objectReader) {
-        return cache.put(type, objectReader) == null;
+    public ObjectReader register(Type type, ObjectReader objectReader) {
+        return cache.put(type, objectReader);
+    }
+
+    public ObjectReader registerIfAbsent(Type type, ObjectReader objectReader) {
+        return cache.putIfAbsent(type, objectReader);
+    }
+
+    public ObjectReader unregisterObjectReader(Type type) {
+        return cache.remove(type);
+    }
+
+    public boolean unregisterObjectReader(Type type, ObjectReader reader) {
+        return cache.remove(type, reader);
+    }
+
+    public boolean unregisterModule(ObjectReaderModule module) {
+        return modules.remove(module);
     }
 
     public boolean register(ObjectReaderModule module) {
@@ -382,6 +404,10 @@ public class ObjectReaderProvider {
 
         modules.add(0, module);
         return true;
+    }
+
+    public boolean unregister(ObjectReaderModule module) {
+        return modules.remove(module);
     }
 
     public ObjectReaderCreator getCreator() {

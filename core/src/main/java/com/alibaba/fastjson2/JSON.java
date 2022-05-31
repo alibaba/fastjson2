@@ -2013,8 +2013,19 @@ public interface JSON {
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader)
      * @since 2.0.2
      */
-    static boolean register(Type type, ObjectReader<?> objectReader) {
+    static ObjectReader register(Type type, ObjectReader<?> objectReader) {
         return JSONFactory.getDefaultObjectReaderProvider().register(type, objectReader);
+    }
+
+    /**
+     * Register if absent an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     *
+     * @see JSONFactory#getDefaultObjectReaderProvider()
+     * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader)
+     * @since 2.0.6
+     */
+    static ObjectReader registerIfAbsent(Type type, ObjectReader<?> objectReader) {
+        return JSONFactory.getDefaultObjectReaderProvider().registerIfAbsent(type, objectReader);
     }
 
     /**
@@ -2044,8 +2055,19 @@ public interface JSON {
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
      * @since 2.0.2
      */
-    static boolean register(Type type, ObjectWriter<?> objectWriter) {
+    static ObjectWriter register(Type type, ObjectWriter<?> objectWriter) {
         return JSONFactory.getDefaultObjectWriterProvider().register(type, objectWriter);
+    }
+
+    /**
+     * Register if absent an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     *
+     * @see JSONFactory#getDefaultObjectWriterProvider()
+     * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
+     * @since 2.0.6
+     */
+    static ObjectWriter registerIfAbsent(Type type, ObjectWriter<?> objectWriter) {
+        return JSONFactory.getDefaultObjectWriterProvider().registerIfAbsent(type, objectWriter);
     }
 
     static void config(JSONReader.Feature... features) {
