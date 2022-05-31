@@ -482,6 +482,10 @@ public interface JSONB {
         }
     }
 
+    static <T> T parseObject(byte[] jsonbBytes, TypeReference typeReference, JSONReader.Feature... features) {
+        return parseObject(jsonbBytes, typeReference.getType(), features);
+    }
+
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass, JSONReader.Feature... features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);

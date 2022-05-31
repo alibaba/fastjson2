@@ -1366,7 +1366,7 @@ public class ObjectReaderBaseModule
             return ObjectReaderImplList.of(type, null, 0);
         }
 
-        if (type == Set.class || type == AbstractSet.class) {
+        if (type == Set.class || type == AbstractSet.class || type == EnumSet.class) {
 //            return new ObjectReaderImplList(type, (Class) type, HashSet.class, Object.class, null);
             return ObjectReaderImplList.of(type, null, 0);
         }
@@ -1550,7 +1550,7 @@ public class ObjectReaderBaseModule
                     }
                 }
 
-                if (rawType == Set.class || rawType == AbstractSet.class) {
+                if (rawType == Set.class || rawType == AbstractSet.class || rawType == EnumSet.class) {
                     if (itemClass == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, HashSet.class);
                     } else if (itemClass == Long.class) {
