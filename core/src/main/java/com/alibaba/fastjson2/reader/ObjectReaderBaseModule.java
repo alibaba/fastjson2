@@ -893,6 +893,11 @@ public class ObjectReaderBaseModule
             if (!schema.isEmpty()) {
                 fieldInfo.schema = schema;
             }
+
+            Class deserializeUsing = jsonField.deserializeUsing();
+            if (ObjectReader.class.isAssignableFrom(deserializeUsing)) {
+                fieldInfo.readUsing = deserializeUsing;
+            }
         }
     }
 

@@ -60,7 +60,20 @@ public @interface JSONField {
      * Specifies that {@link com.alibaba.fastjson2.writer.ObjectWriter} is used when serializing
      */
     @SuppressWarnings("rawtypes")
+    @Deprecated
     Class writeUsing() default Void.class;
+
+    /**
+     * Specifies that {@link com.alibaba.fastjson2.writer.ObjectWriter} is used when serializing
+     */
+    @SuppressWarnings("rawtypes")
+    Class serializeUsing() default Void.class;
+
+    /**
+     * Specifies that {@link com.alibaba.fastjson2.writer.ObjectWriter} is used when serializing
+     */
+    @SuppressWarnings("rawtypes")
+    Class deserializeUsing() default Void.class;
 
     /**
      * Specify {@link JSONReader.Feature}s to use features when deserializing
