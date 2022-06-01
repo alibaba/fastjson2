@@ -362,6 +362,11 @@ public abstract class JSONPath {
         return ((Integer) converted).intValue();
     }
 
+    @Deprecated
+    public static JSONPath compile(String path) {
+        return of(path);
+    }
+
     public static JSONPath of(String path) {
         if ("#-1".equals(path)) {
             return PreviousPath.INSTANCE;
@@ -3471,6 +3476,9 @@ public abstract class JSONPath {
                                             JSONReader.of(str));
                     return;
                 }
+
+                context.value = null;
+                return;
             }
 
             throw new JSONException("not support : " + object.getClass());
