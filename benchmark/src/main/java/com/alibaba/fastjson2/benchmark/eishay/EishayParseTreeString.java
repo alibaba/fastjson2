@@ -66,9 +66,9 @@ public class EishayParseTreeString {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("millis : " + millis);
-        // zulu17.32.13 : 769
-        // zulu11.52.13 : 796
-        // zulu8.58.0.13 : 720
+        // zulu17.32.13 : 769 777
+        // zulu11.52.13 : 796 900
+        // zulu8.58.0.13 : 720 745 750 713
     }
 
     public static void fastjson1_perf() {
@@ -84,6 +84,7 @@ public class EishayParseTreeString {
     }
 
     public static void main(String[] args) throws RunnerException {
+//        new EishayParseTreeString().fastjson2_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayParseTreeString.class.getName())
                 .mode(Mode.Throughput)
