@@ -83,14 +83,14 @@ public class EishayParseString {
     }
 
     public static void main(String[] args) throws RunnerException {
-//        new EishayParseString().fastjson2_perf_test();
+        new EishayParseString().fastjson2_perf_test();
 //        new EishayParseString().fastjson1_perf_test();
-        Options options = new OptionsBuilder()
-                .include(EishayParseString.class.getName())
-                .mode(Mode.Throughput)
-                .timeUnit(TimeUnit.MILLISECONDS)
-                .forks(1)
-                .build();
-        new Runner(options).run();
+//        Options options = new OptionsBuilder()
+//                .include(EishayParseString.class.getName())
+//                .mode(Mode.Throughput)
+//                .timeUnit(TimeUnit.MILLISECONDS)
+//                .forks(1)
+//                .build();
+//        new Runner(options).run();
     }
 }
