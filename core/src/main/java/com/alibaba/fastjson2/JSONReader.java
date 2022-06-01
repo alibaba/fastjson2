@@ -419,6 +419,10 @@ public abstract class JSONReader
         return true;
     }
 
+    public boolean nextIfSet() {
+        return false;
+    }
+
     public abstract String readPattern();
 
     public final int getOffset() {

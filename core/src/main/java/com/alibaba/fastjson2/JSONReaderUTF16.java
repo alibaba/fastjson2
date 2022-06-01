@@ -281,6 +281,22 @@ final class JSONReaderUTF16
         return true;
     }
 
+    public boolean nextIfSet() {
+        if (ch == 'S'
+                && offset + 2 < end
+                && chars[offset] == 'e'
+                && chars[offset + 1] == 't') {
+            offset += 2;
+            if (offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = chars[offset++];
+            }
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void next() {
         if (offset >= end) {

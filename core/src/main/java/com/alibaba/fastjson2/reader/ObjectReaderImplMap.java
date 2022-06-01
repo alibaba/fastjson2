@@ -429,11 +429,18 @@ public final class ObjectReaderImplMap
                     if (ch == '/') {
                         jsonReader.skipLineComment();
                     } else {
-                        throw new JSONException("input not support " + ch + ", offset " + jsonReader.getOffset());
+                        throw new JSONException("FASTJSON" + JSON.VERSION + "input not support " + ch + ", offset " + jsonReader.getOffset());
                     }
                     continue for_;
+                case 'S':
+                    if (jsonReader.nextIfSet()) {
+                        value = jsonReader.readArray(HashSet.class);
+                    } else {
+                        throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
+                    }
+                    break;
                 default:
-                    throw new JSONException("error, offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
+                    throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
             }
             Object origin = object.put(name, value);
             if (origin != null) {

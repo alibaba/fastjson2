@@ -156,12 +156,16 @@ public final class ObjectReaderImplListStr
             return null;
         }
 
+        boolean set = jsonReader.nextIfSet();
+
         if (jsonReader.current() != '[') {
             throw new JSONException("offset " + jsonReader.getOffset() + ", char : " + jsonReader.current());
         }
         jsonReader.next();
 
-        Collection list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
+        Collection list = set
+                ? new HashSet()
+                : (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
         for (; ; ) {
             if (jsonReader.nextIfMatch(']')) {
                 break;
