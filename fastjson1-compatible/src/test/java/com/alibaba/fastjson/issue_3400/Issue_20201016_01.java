@@ -20,11 +20,11 @@ public class Issue_20201016_01 {
         String s = JSON.toJSONString(config, SerializerFeature.WriteMapNullValue,
                 SerializerFeature.QuoteFieldNames, SerializerFeature.WriteNullListAsEmpty);
 
-        if ("{\"agent\":null,\"creator\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"},\"owner\":{\"$ref\":\"$.creator\"}}".equals(s)) {
+        if ("{\"agent\":null,\"creator\":{\"account\":\"account\",\"name\":\"name\",\"workid\":null},\"owner\":{\"$ref\":\"$.creator\"}}".equals(s)) {
             return;
         }
 
-        assertEquals("{\"agent\":null,\"creator\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"},\"owner\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"}}", s);
+        assertEquals("{\"agent\":null,\"creator\":{\"account\":\"account\",\"name\":\"name\",\"workid\":null},\"owner\":{\"account\":\"account\",\"name\":\"name\",\"workid\":\"\"}}", s);
     }
 
     @Test

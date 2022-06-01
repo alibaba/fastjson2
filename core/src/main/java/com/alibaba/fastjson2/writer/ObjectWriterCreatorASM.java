@@ -2454,8 +2454,15 @@ public class ObjectWriterCreatorASM
 
         Label writeNullValue_ = new Label(), writeNull_ = new Label();
 
+        final long defaultValueMask = JSONWriter.Feature.NullAsDefaultValue.mask
+                | JSONWriter.Feature.WriteNullNumberAsZero.mask
+                | JSONWriter.Feature.WriteNullBooleanAsFalse.mask
+                | JSONWriter.Feature.WriteNullListAsEmpty.mask
+                | JSONWriter.Feature.WriteNullStringAsEmpty.mask;
+
         // if (!jw.isWriteNulls())
-        if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) == 0) {
+        if ((features & (JSONWriter.Feature.WriteNulls.mask
+                | defaultValueMask)) == 0) {
             mw.visitVarInsn(Opcodes.ILOAD, mwc.var(WRITE_NULLS));
             mw.visitJumpInsn(Opcodes.IFNE, writeNull_);
 
@@ -2466,9 +2473,20 @@ public class ObjectWriterCreatorASM
         // writeFieldName(w);
         gwFieldName(mwc, i);
 
-        if ((features & JSONWriter.Feature.NullAsDefaultValue.mask) == 0) {
+        if ((features & defaultValueMask) == 0) {
+            long mask = JSONWriter.Feature.NullAsDefaultValue.mask;
+            if (fieldClass == String.class) {
+                mask |= JSONWriter.Feature.WriteNullStringAsEmpty.mask;
+            } else if (fieldClass == Boolean.class) {
+                mask |= JSONWriter.Feature.WriteNullBooleanAsFalse.mask;
+            } else if (Number.class.isAssignableFrom(fieldClass)) {
+                mask |= JSONWriter.Feature.WriteNullNumberAsZero.mask;
+            } else if (Collection.class.isAssignableFrom(fieldClass)) {
+                mask |= JSONWriter.Feature.WriteNullListAsEmpty.mask;
+            }
+
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitLdcInsn(JSONWriter.Feature.NullAsDefaultValue.mask);
+            mw.visitLdcInsn(mask);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isEnabled", "(J)Z", false);
             mw.visitJumpInsn(Opcodes.IFEQ, writeNullValue_);
         }

@@ -413,8 +413,16 @@ class ObjectWriterBaseModule
                         fieldInfo.features |= JSONWriter.Feature.WriteNulls.mask;
                         break;
                     case "WriteNullListAsEmpty":
+                        fieldInfo.features |= JSONWriter.Feature.WriteNullListAsEmpty.mask;
+                        break;
                     case "WriteNullStringAsEmpty":
-                        fieldInfo.features |= JSONWriter.Feature.NullAsDefaultValue.mask;
+                        fieldInfo.features |= JSONWriter.Feature.WriteNullStringAsEmpty.mask;
+                        break;
+                    case "WriteNullNumberAsZero":
+                        fieldInfo.features |= JSONWriter.Feature.WriteNullNumberAsZero.mask;
+                        break;
+                    case "WriteNullBooleanAsFalse":
+                        fieldInfo.features |= JSONWriter.Feature.WriteNullBooleanAsFalse.mask;
                         break;
                     case "BrowserCompatible":
                         fieldInfo.features |= JSONWriter.Feature.BrowserCompatible.mask;
@@ -640,8 +648,16 @@ class ObjectWriterBaseModule
                                 beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
                                 break;
                             case "WriteNullListAsEmpty":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullListAsEmpty.mask;
+                                break;
                             case "WriteNullStringAsEmpty":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.NullAsDefaultValue.mask;
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullStringAsEmpty.mask;
+                                break;
+                            case "WriteNullNumberAsZero":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullNumberAsZero.mask;
+                                break;
+                            case "WriteNullBooleanAsFalse":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullBooleanAsFalse.mask;
                                 break;
                             case "BrowserCompatible":
                                 beanInfo.writerFeatures |= JSONWriter.Feature.BrowserCompatible.mask;

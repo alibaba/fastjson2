@@ -14,8 +14,11 @@ final class FieldReaderDateMethod<T>
     DateTimeFormatter formatter;
     ObjectReaderImplDate dateReader;
 
+    boolean unixtime;
+
     FieldReaderDateMethod(String fieldName, Class fieldClass, int ordinal, long features, String format, Locale locale, JSONSchema schema, Method method) {
         super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, null, schema, method);
+        this.unixtime = "unixtime".equals(format);
     }
 
     @Override
@@ -60,6 +63,9 @@ final class FieldReaderDateMethod<T>
         java.util.Date fieldValue;
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();
+            if (unixtime) {
+                millis *= 1000L;
+            }
             fieldValue = new java.util.Date(millis);
         } else if (jsonReader.isNull()) {
             jsonReader.readNull();
