@@ -7,6 +7,7 @@ import java.util.Locale;
 public class FieldInfo {
     public static final long VALUE_MASK = 1L << 48;
     public static final long UNWRAPPED_MASK = 1L << 49;
+    public static final long RAW_VALUE_MASK = 1L << 50;
 
     public String fieldName;
     public String format;

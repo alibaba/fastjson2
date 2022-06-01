@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.io.Serializable;
@@ -75,11 +74,6 @@ abstract class FieldWriterImpl<T>
         name.getChars(0, name.length(), nameWithColonUTF16, 1);
         nameWithColonUTF16[nameWithColonUTF16.length - 2] = '"';
         nameWithColonUTF16[nameWithColonUTF16.length - 1] = ':';
-    }
-
-    @Override
-    public boolean isValue() {
-        return (features & FieldInfo.VALUE_MASK) != 0;
     }
 
     @Override

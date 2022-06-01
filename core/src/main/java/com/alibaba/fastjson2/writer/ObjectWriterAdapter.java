@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -71,7 +72,7 @@ public class ObjectWriterAdapter<T>
         this.fieldWriterArray = new FieldWriter[fieldWriters.size()];
         fieldWriters.toArray(fieldWriterArray);
 
-        this.hasValueField = fieldWriterArray.length == 1 && fieldWriterArray[0].isValue();
+        this.hasValueField = fieldWriterArray.length == 1 && (fieldWriterArray[0].getFeatures() & FieldInfo.VALUE_MASK) != 0;
 
         long[] hashCodes = new long[fieldWriterArray.length];
         for (int i = 0; i < fieldWriterArray.length; i++) {
@@ -102,7 +103,8 @@ public class ObjectWriterAdapter<T>
         this.fieldWriters = Arrays.asList(fieldWriters);
         this.fieldWriterArray = fieldWriters;
         this.features = features;
-        this.hasValueField = fieldWriterArray.length == 1 && fieldWriterArray[0].isValue();
+        this.hasValueField = fieldWriterArray.length == 1
+                && (fieldWriterArray[0].getFeatures() & FieldInfo.VALUE_MASK) != 0;
 
         String typeName = null;
         if (objectType != null) {

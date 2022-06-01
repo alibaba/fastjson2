@@ -231,6 +231,9 @@ class ObjectWriterBaseModule
                     case "com.fasterxml.jackson.annotation.JsonValue":
                         fieldInfo.features |= FieldInfo.VALUE_MASK;
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonRawValue":
+                        fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
+                        break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
@@ -256,6 +259,10 @@ class ObjectWriterBaseModule
             Class serializeUsing = jsonField.serializeUsing();
             if (ObjectWriter.class.isAssignableFrom(serializeUsing)) {
                 fieldInfo.writeUsing = serializeUsing;
+            }
+
+            if (jsonField.jsonDirect()) {
+                fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
             }
         }
 
@@ -377,6 +384,13 @@ class ObjectWriterBaseModule
                             Class writeUsing = (Class) result;
                             if (ObjectWriter.class.isAssignableFrom(writeUsing)) {
                                 fieldInfo.writeUsing = writeUsing;
+                            }
+                            break;
+                        }
+                        case "jsonDirect": {
+                            Boolean jsonDirect = (Boolean) result;
+                            if (jsonDirect) {
+                                fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
                             }
                             break;
                         }
