@@ -30,7 +30,7 @@ final class ObjectWriterImplStringArray
 
             String item = list[i];
             if (item == null) {
-                if (jsonWriter.isEnabled(JSONWriter.Feature.NullAsDefaultValue)) {
+                if (jsonWriter.isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) {
                     jsonWriter.writeString("");
                 } else {
                     jsonWriter.writeNull();
@@ -59,7 +59,7 @@ final class ObjectWriterImplStringArray
         for (int i = 0; i < list.length; i++) {
             String item = list[i];
             if (item == null) {
-                if (jsonWriter.isEnabled(JSONWriter.Feature.NullAsDefaultValue)) {
+                if (jsonWriter.isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) {
                     jsonWriter.writeString("");
                 } else {
                     jsonWriter.writeNull();

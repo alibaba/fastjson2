@@ -434,7 +434,7 @@ public final class ObjectReaderImplMap
                     continue for_;
                 case 'S':
                     if (jsonReader.nextIfSet()) {
-                        value = jsonReader.readArray(HashSet.class);
+                        value = jsonReader.read(HashSet.class);
                     } else {
                         throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
                     }
