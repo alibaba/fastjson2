@@ -94,6 +94,22 @@ final class JSONReaderStr
         return true;
     }
 
+    public boolean nextIfSet() {
+        if (ch == 'S'
+                && offset + 2 < end
+                && str.charAt(offset) == 'e'
+                && str.charAt(offset + 1) == 't') {
+            offset += 2;
+            if (offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = str.charAt(offset++);
+            }
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public void next() {
         if (offset >= end) {

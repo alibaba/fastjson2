@@ -407,7 +407,12 @@ public final class ObjectReaderImplList
             return null;
         }
 
-        Collection list = (Collection) createInstance(context.getFeatures() | features);
+        Collection list;
+        if (jsonReader.nextIfSet()) {
+            list = new HashSet();
+        } else {
+            list = (Collection) createInstance(context.getFeatures() | features);
+        }
         char ch = jsonReader.current();
         if (ch == '"') {
             String str = jsonReader.readString();

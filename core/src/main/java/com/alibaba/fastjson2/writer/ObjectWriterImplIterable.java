@@ -6,6 +6,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 class ObjectWriterImplIterable
         extends ObjectWriterBaseModule.PrimitiveImpl {
@@ -74,6 +75,10 @@ class ObjectWriterImplIterable
         if (object == null) {
             jsonWriter.writeNull();
             return;
+        }
+
+        if (object instanceof Set && jsonWriter.isWriteTypeInfo(object, features | this.features)) {
+            jsonWriter.writeRaw("Set");
         }
 
         Iterable iterable = (Iterable) object;
