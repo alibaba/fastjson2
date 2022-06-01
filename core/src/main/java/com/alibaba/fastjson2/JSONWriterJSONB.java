@@ -1344,7 +1344,7 @@ final class JSONWriterJSONB
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
 
-        if ((this.context.features & Feature.NullAsDefaultValue.mask) != 0) {
+        if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullListAsEmpty.mask)) != 0) {
             bytes[off++] = BC_ARRAY_FIX_MIN;
         } else {
             bytes[off++] = BC_NULL;
