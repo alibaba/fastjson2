@@ -25,10 +25,6 @@ public interface FieldWriter<T>
 
     Class getFieldClass();
 
-    default boolean isValue() {
-        return false;
-    }
-
     default ObjectWriter getInitWriter() {
         return null;
     }

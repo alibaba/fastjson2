@@ -298,14 +298,13 @@ public class ObjectWriterCreatorASM
         }
 
         for (FieldWriter fieldWriter : fieldWriters) {
-            if (fieldWriter.getInitWriter() != null) {
+            if (fieldWriter.getInitWriter() != null
+                    || (fieldWriter.getFeatures() & FieldInfo.VALUE_MASK) != 0
+                    || (fieldWriter.getFeatures() & FieldInfo.RAW_VALUE_MASK) != 0
+            ) {
                 match = false;
                 break;
             }
-        }
-
-        if (fieldWriters.size() == 1 && fieldWriters.get(0).isValue()) {
-            match = false;
         }
 
         if (!match) {

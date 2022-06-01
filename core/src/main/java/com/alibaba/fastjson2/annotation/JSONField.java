@@ -96,4 +96,6 @@ public @interface JSONField {
     String locale() default "";
 
     String schema() default "";
+
+    boolean jsonDirect() default false;
 }
