@@ -576,9 +576,12 @@ class ObjectWriterBaseModule
                 fieldInfo.ordinal = ordinal;
             }
 
-            boolean value = jsonField.value();
-            if (value) {
+            if (jsonField.value()) {
                 fieldInfo.features |= FieldInfo.VALUE_MASK;
+            }
+
+            if (jsonField.jsonDirect()) {
+                fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
             }
         }
 
