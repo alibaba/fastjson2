@@ -408,21 +408,9 @@ class JSONWriterUTF16
 
     @Override
     public void writeRaw(String str) {
-        int utflen = 0;
-        final int strlen = str.length();
-        for (int i = 0; i < strlen; i++) {
-            char c = str.charAt(i);
-            if ((c >= 0x0001) && (c <= 0x007F)) {
-                utflen++;
-            } else if (c > 0x07FF) {
-                utflen += 3;
-            } else {
-                utflen += 2;
-            }
-        }
-        ensureCapacity(off + utflen);
-        str.getChars(0, strlen, chars, off);
-        off += utflen;
+        ensureCapacity(off + str.length());
+        str.getChars(0, str.length(), chars, off);
+        off += str.length();
     }
 
     @Override

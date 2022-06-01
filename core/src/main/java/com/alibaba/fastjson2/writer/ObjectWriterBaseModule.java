@@ -523,6 +523,12 @@ class ObjectWriterBaseModule
                         processJacksonJsonProperty(fieldInfo, annotation);
                         break;
                     }
+                    case "com.fasterxml.jackson.annotation.JsonValue":
+                        fieldInfo.features |= FieldInfo.VALUE_MASK;
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonRawValue":
+                        fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
+                        break;
                     default:
                         break;
                 }

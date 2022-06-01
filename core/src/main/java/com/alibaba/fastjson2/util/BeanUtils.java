@@ -661,6 +661,25 @@ public abstract class BeanUtils {
             }
 
             if (!nameMatch) {
+                Annotation[] annotations = method.getAnnotations();
+                for (Annotation annotation : annotations) {
+                    Class<? extends Annotation> annotationType = annotation.annotationType();
+                    String annotationTypeName = annotationType.getName();
+                    switch (annotationTypeName) {
+                        case "com.alibaba.fastjson.annotation.JSONField":
+                        case "com.alibaba.fastjson.annotation2.JSONField":
+                        case "com.fasterxml.jackson.annotation.JsonValue":
+                        case "com.fasterxml.jackson.annotation.JsonRawValue":
+                        case "com.fasterxml.jackson.annotation.JsonProperty":
+                            nameMatch = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            if (!nameMatch) {
                 continue;
             }
 
