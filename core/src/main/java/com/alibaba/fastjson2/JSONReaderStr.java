@@ -700,7 +700,7 @@ final class JSONReaderStr
             ch = str.charAt(offset++);
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -816,7 +816,7 @@ final class JSONReaderStr
             }
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -924,7 +924,7 @@ final class JSONReaderStr
             ch = str.charAt(offset++);
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -1037,7 +1037,7 @@ final class JSONReaderStr
             }
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -1815,7 +1815,7 @@ final class JSONReaderStr
             }
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {

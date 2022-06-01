@@ -897,7 +897,7 @@ final class JSONReaderUTF16
             ch = chars[offset++];
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -1011,7 +1011,7 @@ final class JSONReaderUTF16
             }
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -1117,7 +1117,7 @@ final class JSONReaderUTF16
             ch = chars[offset++];
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -1227,7 +1227,7 @@ final class JSONReaderUTF16
             }
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -2054,7 +2054,7 @@ final class JSONReaderUTF16
             }
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {

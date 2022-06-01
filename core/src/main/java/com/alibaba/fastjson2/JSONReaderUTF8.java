@@ -1056,7 +1056,7 @@ class JSONReaderUTF8
             ch = (char) bytes[offset++];
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -1172,7 +1172,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -1279,7 +1279,7 @@ class JSONReaderUTF8
             this.ch = (char) bytes[offset++];
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -1403,7 +1403,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -2672,7 +2672,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (ch == 'L' || ch == 'F' || ch == 'D') {
+        if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
             if (offset >= end) {
                 ch = EOI;
             } else {

@@ -15,33 +15,39 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class BasicTypeNameTest {
     @Test
     public void test0() {
-        String json = "[1,2L,3F,4D]";
+        String json = "[1,2L,3F,4D,5B,6S]";
         JSONArray array = JSON.parseArray(json);
-        assertEquals(4, array.size());
+        assertEquals(6, array.size());
         assertEquals(1, array.get(0));
         assertEquals(2, array.get(1));
         assertEquals(3, array.get(2));
         assertEquals(4, array.get(3));
+        assertEquals(5, array.get(4));
+        assertEquals(6, array.get(5));
 
         JSONArray array2 = JSON.parseArray(json.getBytes(StandardCharsets.UTF_8));
-        assertEquals(4, array2.size());
+        assertEquals(6, array2.size());
         assertEquals(1, array2.get(0));
         assertEquals(2, array2.get(1));
         assertEquals(3, array2.get(2));
         assertEquals(4, array2.get(3));
+        assertEquals(5, array2.get(4));
+        assertEquals(6, array2.get(5));
 
         JSONReader jsonReaderStr = TestUtils.createJSONReaderStr(json);
         List array3 = jsonReaderStr.readArray();
-        assertEquals(4, array3.size());
+        assertEquals(6, array3.size());
         assertEquals(1, array3.get(0));
         assertEquals(2, array3.get(1));
         assertEquals(3, array3.get(2));
         assertEquals(4, array3.get(3));
+        assertEquals(5, array3.get(4));
+        assertEquals(6, array3.get(5));
     }
 
     @Test
     public void test1() {
-        String[] strings = new String[]{"1", "2L", "3F", "4D"};
+        String[] strings = new String[]{"1", "2L", "3F", "4D", "5B", "6S"};
 
         for (int i = 0; i < strings.length; i++) {
             String string = strings[i];
