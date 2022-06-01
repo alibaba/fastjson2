@@ -3481,6 +3481,11 @@ public abstract class JSONPath {
                 return;
             }
 
+            if (object instanceof Number || object instanceof Boolean) {
+                context.value = null;
+                return;
+            }
+
             throw new JSONException("not support : " + object.getClass());
         }
 

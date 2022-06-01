@@ -13,4 +13,25 @@ public class Issue4191 {
         Object readResult = JSONPath.of("$.path.docExt.a").eval(jsonObject);
         assertNull(readResult);
     }
+
+    @Test
+    public void test1() {
+        Object jsonObject = JSON.parse("{\"path\":1}");
+        Object readResult = JSONPath.of("$.path.docExt.a").eval(jsonObject);
+        assertNull(readResult);
+    }
+
+    @Test
+    public void test2() {
+        Object jsonObject = JSON.parse("{\"path\":true}");
+        Object readResult = JSONPath.of("$.path.docExt.a").eval(jsonObject);
+        assertNull(readResult);
+    }
+
+    @Test
+    public void test3() {
+        Object jsonObject = JSON.parse("{\"path\":null}");
+        Object readResult = JSONPath.of("$.path.docExt.a").eval(jsonObject);
+        assertNull(readResult);
+    }
 }
