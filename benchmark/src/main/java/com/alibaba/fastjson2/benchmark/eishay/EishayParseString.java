@@ -67,7 +67,7 @@ public class EishayParseString {
         System.out.println("millis : " + millis);
         // zulu11.52.13 :
         // zulu17.32.13 : 525 513
-        // zulu8.58.0.13 : 517
+        // zulu8.58.0.13 : 517 552 507
     }
 
     public static void fastjson1_perf() {
@@ -83,14 +83,14 @@ public class EishayParseString {
     }
 
     public static void main(String[] args) throws RunnerException {
-        new EishayParseString().fastjson2_perf_test();
+//        new EishayParseString().fastjson2_perf_test();
 //        new EishayParseString().fastjson1_perf_test();
-//        Options options = new OptionsBuilder()
-//                .include(EishayParseString.class.getName())
-//                .mode(Mode.Throughput)
-//                .timeUnit(TimeUnit.MILLISECONDS)
-//                .forks(1)
-//                .build();
-//        new Runner(options).run();
+        Options options = new OptionsBuilder()
+                .include(EishayParseString.class.getName())
+                .mode(Mode.Throughput)
+                .timeUnit(TimeUnit.MILLISECONDS)
+                .forks(1)
+                .build();
+        new Runner(options).run();
     }
 }

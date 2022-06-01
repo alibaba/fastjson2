@@ -1374,15 +1374,12 @@ public abstract class JSONReader
     public List readArray() {
         next();
 
-        List<Object> list;
-        if (context.arraySupplier != null) {
-            list = context.arraySupplier.get();
-        } else {
-            list = new JSONArray();
-        }
+        int i = 0;
+        List<Object> list = null;
+        Object first = null, second = null;
 
         _for:
-        for (; ; ) {
+        for (; ; ++i) {
             Object val;
             switch (ch) {
                 case ']':
@@ -1429,7 +1426,39 @@ public abstract class JSONReader
                 default:
                     throw new JSONException("TODO : " + ch);
             }
-            list.add(val);
+
+            if (i == 0) {
+                first = val;
+            } else if (i == 1) {
+                second = val;
+            } else if (i == 2) {
+                if (context.arraySupplier != null) {
+                    list = context.arraySupplier.get();
+                } else {
+                    list = new JSONArray();
+                }
+
+                list.add(first);
+                list.add(second);
+                list.add(val);
+            } else {
+                list.add(val);
+            }
+        }
+
+        if (list == null) {
+            if (context.arraySupplier != null) {
+                list = context.arraySupplier.get();
+            } else {
+                list = i == 2 ? new JSONArray(2) : new JSONArray(1);
+            }
+
+            if (i == 1) {
+                list.add(first);
+            } else if (i == 2) {
+                list.add(first);
+                list.add(second);
+            }
         }
 
         if (ch == ',') {

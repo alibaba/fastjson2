@@ -705,7 +705,7 @@ final class JSONReaderASCII
 
                 str = new String(chars);
             } else {
-                if (this.str != null) {
+                if (this.str != null && JDKUtils.JVM_VERSION != 11) {
                     str = this.str.substring(this.offset, offset);
                 } else if (JDKUtils.JVM_VERSION == 11) {
                     if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {

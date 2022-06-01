@@ -133,14 +133,12 @@ class FieldReaderListField<T>
             JSONReader.Context ctx = context;
             ObjectReader itemObjectReader = null;
 
-            Collection list;
-            if (fieldClass == java.util.List.class) {
-                list = new ArrayList();
-            } else {
-                list = (Collection) this.fieldObjectReader.createInstance(context.getFeatures() | features);
-            }
+            Collection list = null;
             jsonReader.next();
-            for (; ; ) {
+
+            Object first = null, second = null;
+            int i = 0;
+            for (; ; ++i) {
                 if (jsonReader.nextIfMatch(']')) {
                     break;
                 }
@@ -149,12 +147,41 @@ class FieldReaderListField<T>
                     itemObjectReader = getItemObjectReader(ctx);
                 }
 
-                list.add(
-                        itemObjectReader.readObject(jsonReader, features)
-                );
+                Object itemObject = itemObjectReader.readObject(jsonReader, features);
+                if (i == 0) {
+                    first = itemObject;
+                } else if (i == 1) {
+                    second = itemObject;
+                } else if (i == 2) {
+                    if (fieldClass == java.util.List.class) {
+                        list = new ArrayList();
+                    } else {
+                        list = (Collection) this.fieldObjectReader.createInstance(context.getFeatures() | features);
+                    }
+                    list.add(first);
+                    list.add(second);
+                    list.add(itemObject);
+                } else {
+                    list.add(itemObject);
+                }
 
                 if (jsonReader.nextIfMatch(',')) {
                     continue;
+                }
+            }
+
+            if (list == null) {
+                if (fieldClass == java.util.List.class) {
+                    list = new ArrayList(i);
+                } else {
+                    list = (Collection) this.fieldObjectReader.createInstance(context.getFeatures() | features);
+                }
+
+                if (i == 1) {
+                    list.add(first);
+                } else if (i == 2) {
+                    list.add(first);
+                    list.add(second);
                 }
             }
 
