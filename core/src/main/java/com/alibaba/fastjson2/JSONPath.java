@@ -4671,7 +4671,7 @@ public abstract class JSONPath {
             extends Segment {
         public static final RandomIndexSegment INSTANCE = new RandomIndexSegment();
 
-        Random random = new Random();
+        Random random;
 
         @Override
         public void accept(JSONReader jsonReader, Context context) {
@@ -4690,6 +4690,11 @@ public abstract class JSONPath {
                     for (int i = 0; i < itemCnt; i++) {
                         array.add(jsonReader.readAny());
                     }
+                }
+
+                // lazy init for graalvm
+                if (random == null) {
+                    random = new Random();
                 }
 
                 int index = Math.abs(random.nextInt()) % array.size();
@@ -4749,6 +4754,11 @@ public abstract class JSONPath {
                 array.add(val);
             }
 
+            // lazy init for graalvm
+            if (random == null) {
+                random = new Random();
+            }
+
             int index = Math.abs(random.nextInt()) % array.size();
             context.value = array.get(index);
             context.eval = true;
@@ -4766,6 +4776,11 @@ public abstract class JSONPath {
                     return;
                 }
 
+                // lazy init for graalvm
+                if (random == null) {
+                    random = new Random();
+                }
+
                 int randomIndex = Math.abs(random.nextInt()) % list.size();
                 context.value = list.get(randomIndex);
                 context.eval = true;
@@ -4776,6 +4791,11 @@ public abstract class JSONPath {
                 Object[] array = (Object[]) object;
                 if (array.length == 0) {
                     return;
+                }
+
+                // lazy init for graalvm
+                if (random == null) {
+                    random = new Random();
                 }
 
                 int randomIndex = random.nextInt() % array.length;
