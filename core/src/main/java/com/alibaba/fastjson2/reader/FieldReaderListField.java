@@ -9,10 +9,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Function;
 
 class FieldReaderListField<T>
@@ -97,9 +94,9 @@ class FieldReaderListField<T>
 
             Collection list;
             if (autoTypeReader != null) {
-                list = (Collection) autoTypeReader.createInstance(jsonReader.getContext().getFeatures() | features);
+                list = (Collection) autoTypeReader.createInstance(context.getFeatures() | features);
             } else {
-                list = (Collection) this.fieldObjectReader.createInstance(jsonReader.getContext().getFeatures() | features);
+                list = (Collection) this.fieldObjectReader.createInstance(context.getFeatures() | features);
             }
 
             int entryCnt = jsonReader.startArray();
@@ -134,17 +131,26 @@ class FieldReaderListField<T>
 
         if (jsonReader.current() == '[') {
             JSONReader.Context ctx = context;
-            ObjectReader itemObjectReader = getItemObjectReader(ctx);
+            ObjectReader itemObjectReader = null;
 
-            Collection list = (Collection) this.fieldObjectReader.createInstance(jsonReader.getContext().getFeatures() | features);
+            Collection list;
+            if (fieldClass == java.util.List.class) {
+                list = new ArrayList();
+            } else {
+                list = (Collection) this.fieldObjectReader.createInstance(context.getFeatures() | features);
+            }
             jsonReader.next();
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
                     break;
                 }
 
+                if (itemObjectReader == null) {
+                    itemObjectReader = getItemObjectReader(ctx);
+                }
+
                 list.add(
-                        itemObjectReader.readObject(jsonReader, 0)
+                        itemObjectReader.readObject(jsonReader, features)
                 );
 
                 if (jsonReader.nextIfMatch(',')) {
