@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.annotation;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -80,6 +80,43 @@ public class JSONDirectTest {
 
         @JSONField(jsonDirect = true)
         public String getValue() {
+            return value;
+        }
+    }
+
+    @Test
+    public void test_feature4() {
+        Model4 model = new Model4();
+        model.value = "{}";
+
+        String json = JSON.toJSONString(model);
+        assertEquals("{}", json);
+    }
+
+    public static class Model4 {
+        private String value;
+
+        @JsonValue
+        @JsonRawValue
+        public String value() {
+            return value;
+        }
+    }
+
+    @Test
+    public void test_feature5() {
+        Model5 model = new Model5();
+        model.value = "{}";
+
+        String json = JSON.toJSONString(model);
+        assertEquals("{}", json);
+    }
+
+    public static class Model5 {
+        private String value;
+
+        @JSONField(jsonDirect = true, value = true)
+        public String value() {
             return value;
         }
     }
