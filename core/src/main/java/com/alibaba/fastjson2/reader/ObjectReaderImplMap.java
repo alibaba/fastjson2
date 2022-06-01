@@ -345,7 +345,7 @@ public final class ObjectReaderImplMap
         JSONReader.Context context = jsonReader.getContext();
         Supplier<Map> objectSupplier = jsonReader.getContext().getObjectSupplier();
         Map object;
-        if ((mapType == null || mapType == JSONObject.class) && objectSupplier != null) {
+        if (objectSupplier != null && (mapType == null || mapType == JSONObject.class || mapType.getName().equals("com.alibaba.fastjson.JSONObject"))) {
             object = objectSupplier.get();
         } else {
             object = (Map) createInstance(context.getFeatures() | features);

@@ -11,6 +11,6 @@ public class Issue334 {
     public void test() {
         String a = "{\"resultCode\":\"200013\",\"message\":\"查询成功\",\"data\":{\"clientName\":\"张三\",\"clientId\":\"3002674743\",\"phoneNumber\":\"13412345678\",\"gender\":2,\"age\":59}}";
         JSONObject jsonObject = JSONObject.parseObject(a, Feature.OrderedField);
-        assertEquals("{\"data\":{\"clientName\":\"张三\",\"clientId\":\"3002674743\",\"phoneNumber\":\"13412345678\",\"gender\":2,\"age\":59},\"resultCode\":\"200013\",\"message\":\"查询成功\"}", jsonObject.toJSONString());
+        assertEquals("{\"resultCode\":\"200013\",\"message\":\"查询成功\",\"data\":{\"clientName\":\"张三\",\"clientId\":\"3002674743\",\"phoneNumber\":\"13412345678\",\"gender\":2,\"age\":59}}", jsonObject.toJSONString());
     }
 }
