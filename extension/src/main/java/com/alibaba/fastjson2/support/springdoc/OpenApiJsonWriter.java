@@ -1,29 +1,27 @@
-package com.alibaba.fastjson2.support.springfox;
+package com.alibaba.fastjson2.support.springdoc;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
-import springfox.documentation.spring.web.json.Json;
 
 import java.lang.reflect.Type;
 
 /**
- * SwaggerJsonWriter: Swagger的Json处理，解决/v2/api-docs获取不到内容导致获取不到API页面内容的问题
+ * OpenApiJsonWriter: SpringDoc的Json处理，解决json对象转成了json字符串，导致接口文档无法显示
  *
  * @author Victor.Zxy
- * @since 2.0.5
+ * @since 2.0.6
  */
-public class SwaggerJsonWriter
+public class OpenApiJsonWriter
         implements ObjectWriter<Object> {
-    public static final SwaggerJsonWriter INSTANCE = new SwaggerJsonWriter();
+    public static final OpenApiJsonWriter INSTANCE = new OpenApiJsonWriter();
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
             jsonWriter.writeNull();
-        } else if (object instanceof Json) {
-            Json json = (Json) object;
-            String value = json.value();
+        } else {
+            String value = object.toString();
             jsonWriter.writeAny(JSON.parse(value));
         }
     }
