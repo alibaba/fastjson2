@@ -2,12 +2,16 @@ package com.alibaba.fastjson2.autoType;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.filter.Filter;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -60,5 +64,25 @@ public class SetTest {
             assertNotNull(object.get("content"));
             assertEquals(0, object.getJSONArray("content").size());
         }
+    }
+
+    @Test
+    public void test3() throws Exception {
+        String str = "{\"@type\":\"java.util.HashMap\",\"content\":Set[]}";
+        HashMap map = (HashMap) JSON.parseObject(str, Object.class);
+        assertNotNull(map.get("content"));
+        Set set = (Set) map.get("content");
+        assertEquals(0, set.size());
+    }
+
+    @Test
+    public void test4() throws Exception {
+        String str = "{\"@type\":\"java.util.HashMap\",\"content\":Set[]}";
+
+        Filter file = JSONReader.autoTypeFilter("java.util.HashMap");
+        HashMap map = (HashMap) JSON.parseObject(str, Object.class, file);
+        assertNotNull(map.get("content"));
+        Set set = (Set) map.get("content");
+        assertEquals(0, set.size());
     }
 }

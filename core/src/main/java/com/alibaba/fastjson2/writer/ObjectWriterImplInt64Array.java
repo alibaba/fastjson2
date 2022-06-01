@@ -15,7 +15,7 @@ final class ObjectWriterImplInt64Array
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
-            if (jsonWriter.isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask)) {
+            if (jsonWriter.isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullListAsEmpty.mask)) {
                 jsonWriter.startArray();
                 jsonWriter.endArray();
             } else {

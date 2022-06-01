@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -23,6 +25,7 @@ public final class ObjectReaderImplObject
 
         JSONReader.Context context = jsonReader.getContext();
 
+        String typeName = null;
         if (jsonReader.isObject()) {
             jsonReader.nextIfObjectStart();
 
@@ -45,7 +48,7 @@ public final class ObjectReaderImplObject
                             if (objectClassLoader != contextClassLoader) {
                                 Class contextClass = null;
 
-                                String typeName = jsonReader.getString();
+                                typeName = jsonReader.getString();
                                 try {
                                     contextClass = contextClassLoader.loadClass(typeName);
                                 } catch (ClassNotFoundException ignored) {
@@ -59,11 +62,11 @@ public final class ObjectReaderImplObject
                     }
 
                     if (autoTypeObjectReader == null) {
-                        String typeName = jsonReader.getString();
+                        typeName = jsonReader.getString();
                         autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
                     }
                 } else {
-                    String typeName = jsonReader.readString();
+                    typeName = jsonReader.readString();
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
                     if (autoTypeObjectReader == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
@@ -90,13 +93,17 @@ public final class ObjectReaderImplObject
                 }
             }
 
+            if (typeName != null) {
+                object.put("@type", typeName);
+            }
+
             for (int i = 0; ; ++i) {
                 if (jsonReader.nextIfMatch('}')) {
                     break;
                 }
 
                 String name;
-                if (i == 0) {
+                if (i == 0 && typeName == null) {
                     name = jsonReader.getFieldName();
                 } else {
                     name = jsonReader.readFieldName();
@@ -143,8 +150,15 @@ public final class ObjectReaderImplObject
                         jsonReader.readNull();
                         value = null;
                         break;
+                    case 'S':
+                        if (jsonReader.nextIfSet()) {
+                            value = jsonReader.read(HashSet.class);
+                        } else {
+                            throw new JSONException("FASTJSON-" + JSON.VERSION + "error, offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
+                        }
+                        break;
                     default:
-                        throw new JSONException("error, offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
+                        throw new JSONException("FASTJSON-" + JSON.VERSION + "error, offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
                 }
 
                 Object origin = object.put(name, value);

@@ -166,7 +166,13 @@ public abstract class JSONWriter
     }
 
     public boolean isWriteNulls() {
-        return (context.features & (Feature.WriteNulls.mask | Feature.NullAsDefaultValue.mask)) != 0;
+        long mask = Feature.WriteNulls.mask
+                | Feature.NullAsDefaultValue.mask
+                | Feature.WriteNullBooleanAsFalse.mask
+                | Feature.WriteNullStringAsEmpty.mask
+                | Feature.WriteNullNumberAsZero.mask
+                | Feature.WriteNullListAsEmpty.mask;
+        return (context.features & mask) != 0;
     }
 
     public boolean isNotWriteDefaultValue() {
@@ -734,7 +740,7 @@ public abstract class JSONWriter
 
     public void writeStringNull() {
         String raw;
-        if ((this.context.features & Feature.NullAsDefaultValue.mask) != 0) {
+        if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) != 0) {
             raw = "";
         } else {
             raw = "null";
@@ -744,7 +750,7 @@ public abstract class JSONWriter
 
     public void writeArrayNull() {
         String raw;
-        if ((this.context.features & Feature.NullAsDefaultValue.mask) != 0) {
+        if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullListAsEmpty.mask)) != 0) {
             raw = "[]";
         } else {
             raw = "null";
@@ -754,7 +760,7 @@ public abstract class JSONWriter
 
     public void writeNumberNull() {
         String raw;
-        if ((this.context.features & Feature.NullAsDefaultValue.mask) != 0) {
+        if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullNumberAsZero.mask)) != 0) {
             writeInt32(0);
         } else {
             writeNull();
@@ -762,7 +768,7 @@ public abstract class JSONWriter
     }
 
     public void writeBooleanNull() {
-        if ((this.context.features & Feature.NullAsDefaultValue.mask) != 0) {
+        if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullBooleanAsFalse.mask)) != 0) {
             writeBool(false);
         } else {
             writeNull();
@@ -1594,7 +1600,20 @@ public abstract class JSONWriter
         WriteNameAsSymbol(1 << 17),
         WriteBigDecimalAsPlain(1 << 18),
         UseSingleQuotes(1 << 19),
-        MapSortField(1 << 20);
+        MapSortField(1 << 20),
+        WriteNullListAsEmpty(1 << 21),
+        /**
+         * @since 1.1
+         */
+        WriteNullStringAsEmpty(1 << 22),
+        /**
+         * @since 1.1
+         */
+        WriteNullNumberAsZero(1 << 23),
+        /**
+         * @since 1.1
+         */
+        WriteNullBooleanAsFalse(1 << 24);
 
         public final long mask;
 

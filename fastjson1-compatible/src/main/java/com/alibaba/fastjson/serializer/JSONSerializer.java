@@ -44,10 +44,16 @@ public class JSONSerializer {
                 ctx.config(JSONWriter.Feature.WriteNulls);
                 break;
             case WriteNullListAsEmpty:
+                ctx.config(JSONWriter.Feature.WriteNullListAsEmpty);
+                break;
             case WriteNullStringAsEmpty:
+                ctx.config(JSONWriter.Feature.WriteNullStringAsEmpty);
+                break;
             case WriteNullNumberAsZero:
+                ctx.config(JSONWriter.Feature.WriteNullNumberAsZero);
+                break;
             case WriteNullBooleanAsFalse:
-                ctx.config(JSONWriter.Feature.NullAsDefaultValue);
+                ctx.config(JSONWriter.Feature.WriteNullBooleanAsFalse);
                 break;
             case BrowserCompatible:
                 ctx.config(JSONWriter.Feature.BrowserCompatible);
