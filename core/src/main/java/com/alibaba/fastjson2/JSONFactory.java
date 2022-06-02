@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
@@ -241,6 +242,9 @@ public final class JSONFactory {
     static final ThreadLocal<ObjectReaderCreator> readerCreatorLocal = new ThreadLocal<>();
     static final ThreadLocal<ObjectReaderProvider> readerProviderLocal = new ThreadLocal<>();
     static final ThreadLocal<ObjectWriterCreator> writerCreatorLocal = new ThreadLocal<>();
+
+    static final ObjectReader<JSONArray> ARRAY_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONArray.class);
+    static final ObjectReader<JSONObject> OBJECT_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
 
     public static JSONWriter.Context createWriteContext() {
         return new JSONWriter.Context(defaultObjectWriterProvider);
