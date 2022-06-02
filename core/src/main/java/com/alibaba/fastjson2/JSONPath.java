@@ -3548,6 +3548,25 @@ public abstract class JSONPath {
                 return;
             }
 
+            if (object instanceof Sequence) {
+                List sequence = ((Sequence) object).values;
+                JSONArray values = new JSONArray(sequence.size());
+                for (int i = 0; i < sequence.size(); i++) {
+                    Object item = sequence.get(i);
+                    context.value = item;
+                    Context itemContext = new Context(context.path, context, context.current, context.next, context.readerFeatures);
+                    eval(itemContext);
+                    values.add(itemContext.value);
+                }
+                if (context.next != null) {
+                    context.value = new Sequence(values);
+                } else {
+                    context.value = values;
+                }
+                context.eval = true;
+                return;
+            }
+
             JSONWriter.Context writerContext = context.path.getWriterContext();
             ObjectWriter<?> objectWriter = writerContext.getObjectWriter(object.getClass());
             if (objectWriter instanceof ObjectWriterAdapter) {
@@ -4407,6 +4426,25 @@ public abstract class JSONPath {
                 return;
             }
 
+            if (object instanceof Sequence) {
+                List sequence = ((Sequence) object).values;
+                JSONArray values = new JSONArray(sequence.size());
+                for (int i = 0; i < sequence.size(); i++) {
+                    Object item = sequence.get(i);
+                    context.value = item;
+                    Context itemContext = new Context(context.path, context, context.current, context.next, context.readerFeatures);
+                    eval(itemContext);
+                    values.add(itemContext.value);
+                }
+                if (context.next != null) {
+                    context.value = new Sequence(values);
+                } else {
+                    context.value = values;
+                }
+                context.eval = true;
+                return;
+            }
+
             if (Map.class.isAssignableFrom(objectClass)) {
                 Map map = (Map) object;
                 Object value = map.get(index);
@@ -4448,6 +4486,13 @@ public abstract class JSONPath {
                     }
                 }
                 context.value = value;
+                context.eval = true;
+                return;
+            }
+
+            // lax mode
+            if (index == 0) {
+                context.value = object;
                 context.eval = true;
                 return;
             }
@@ -5468,9 +5513,8 @@ public abstract class JSONPath {
                 return;
             }
 
-            List<Object> values = new JSONArray();
-
             if (jsonReader.isJSONB()) {
+                List<Object> values = new JSONArray();
                 if (jsonReader.nextIfMatch(BC_OBJECT)) {
                     while (!jsonReader.nextIfMatch(BC_OBJECT_END)) {
                         if (jsonReader.skipName()) {
@@ -5495,6 +5539,8 @@ public abstract class JSONPath {
 
                 throw new JSONException("TODO");
             }
+
+            List<Object> values = new JSONArray();
 
             if (jsonReader.nextIfMatch('{')) {
                 _for:
@@ -5562,11 +5608,6 @@ public abstract class JSONPath {
             }
 
             if (jsonReader.ch == '[') {
-                // skip
-                if (context.next != null) {
-                    return;
-                }
-
                 jsonReader.next();
                 for (; ; ) {
                     if (jsonReader.ch == ']') {
@@ -5579,7 +5620,13 @@ public abstract class JSONPath {
                         jsonReader.next();
                     }
                 }
-                context.value = values;
+
+                if (context.next != null) {
+                    context.value = new Sequence(values);
+                } else {
+                    context.value = values;
+                }
+                context.eval = true;
                 return;
             }
 
@@ -5598,6 +5645,14 @@ public abstract class JSONPath {
         @Override
         public Object apply(Object o1, Object o2) {
             return function.apply(o2);
+        }
+    }
+
+    static class Sequence {
+        final List values;
+
+        public Sequence(List values) {
+            this.values = values;
         }
     }
 }
