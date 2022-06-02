@@ -5,10 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PathTest9 {
+public class SequenceTest {
     @Test
-    public void test0() {
-        String str = "[1,2,3,4,5]";
-        assertEquals("[1,2,3,4,5]", JSONPath.extract(str, "$[*][0]").toString());
+    public void test() {
+        assertEquals("[1.1,2.1]", JSONPath.extract("[[1.1,1.2],[2.1,1.2]]", "$[*][0]").toString());
     }
 }
