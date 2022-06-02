@@ -409,10 +409,13 @@ public abstract class JSONPath {
                                     segment = MaxSegment.INSTANCE;
                                     break;
                                 case "type":
-                                    segment = TypeSegment.INSTANCE;
+                                    segment = FUNCTION_TYPE;
                                     break;
                                 case "floor":
                                     segment = FloorSegment.INSTANCE;
+                                    break;
+                                case "double":
+                                    segment = FUNCTION_DOUBLE;
                                     break;
                                 default:
                                     throw new JSONException("not support syntax, path : " + path);
@@ -486,10 +489,13 @@ public abstract class JSONPath {
                                 segment = MaxSegment.INSTANCE;
                                 break;
                             case "type":
-                                segment = TypeSegment.INSTANCE;
+                                segment = FUNCTION_TYPE;
                                 break;
                             case "floor":
                                 segment = FloorSegment.INSTANCE;
+                                break;
+                            case "double":
+                                segment = FUNCTION_DOUBLE;
                                 break;
                             default:
                                 throw new JSONException("not support syntax, path : " + path);
@@ -642,7 +648,7 @@ public abstract class JSONPath {
                             segment = MaxSegment.INSTANCE;
                             break;
                         case "type":
-                            segment = TypeSegment.INSTANCE;
+                            segment = FUNCTION_TYPE;
                             break;
                         case "floor":
                             segment = FloorSegment.INSTANCE;
@@ -3176,10 +3182,17 @@ public abstract class JSONPath {
         }
     }
 
-    static final class TypeSegment
+    static FunctionSegment FUNCTION_TYPE = new FunctionSegment(JSONPath::type);
+    static FunctionSegment FUNCTION_DOUBLE = new FunctionSegment(new TypeConverts.ToDouble(null));
+
+    static final class FunctionSegment
             extends Segment
             implements EvalSegment {
-        static final TypeSegment INSTANCE = new TypeSegment();
+        final Function function;
+
+        public FunctionSegment(Function function) {
+            this.function = function;
+        }
 
         @Override
         public void accept(JSONReader jsonReader, Context context) {
@@ -3196,7 +3209,7 @@ public abstract class JSONPath {
                     ? context.root
                     : context.parent.value;
 
-            context.value = type(value);
+            context.value = function.apply(value);
         }
     }
 
