@@ -29,7 +29,6 @@ public class JSONObject
 
     static ObjectReader<JSONArray> arrayReader;
     static ObjectWriter<JSONObject> objectWriter;
-    static final ObjectReader<JSONObject> READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
 
     /**
      * default
@@ -246,7 +245,7 @@ public class JSONObject
             }
 
             JSONReader reader = JSONReader.of(str);
-            return READER.readObject(reader, 0);
+            return JSONFactory.OBJECT_READER.readObject(reader, 0);
         }
 
         if (value instanceof Map) {
