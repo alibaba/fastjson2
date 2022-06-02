@@ -112,6 +112,12 @@ public final class ObjectReaderImplList
                     instanceClass = ArrayList.class;
                     builder = GuavaSupport.immutableSetConverter();
                     break;
+                case "com.google.common.collect.Lists$TransformingRandomAccessList":
+                    instanceClass = ArrayList.class;
+                    break;
+                case "com.google.common.collect.Lists.TransformingSequentialList":
+                    instanceClass = LinkedList.class;
+                    break;
                 default:
                     instanceClass = listClass;
                     break;
