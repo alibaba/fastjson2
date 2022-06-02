@@ -588,7 +588,7 @@ public abstract class JSONPath {
                             jsonReader.next();
                             segments.add(parseFilter(jsonReader));
                             break;
-                        case 'r':
+                        case 'r': {
                             String fieldName = jsonReader.readFieldNameUnquote();
                             if ("randomIndex".equals(fieldName)) {
                                 if (!jsonReader.nextIfMatch('(')
@@ -600,6 +600,16 @@ public abstract class JSONPath {
                                 break;
                             }
                             throw new JSONException("not support : " + fieldName);
+                        }
+                        case 'l': {
+                            String fieldName = jsonReader.readFieldNameUnquote();
+                            if ("last".equals(fieldName)) {
+                                segments.add(IndexSegment.of(-1));
+                            } else {
+                                throw new JSONException("not support : " + fieldName);
+                            }
+                            break;
+                        }
                         default:
                             throw new JSONException("TODO : " + jsonReader.current());
                     }
@@ -680,6 +690,20 @@ public abstract class JSONPath {
                     if (number instanceof Integer || number instanceof Long) {
                         segment = new NameIntOpSegment(null, 0, null, operator, number.longValue());
                     }
+                } else if (jsonReader.isString()) {
+                    String string = jsonReader.readString();
+
+                    switch (operator) {
+                        case STARTS_WITH:
+                            segment = new StartsWithSegment(null, 0, string);
+                            break;
+                        default:
+                            throw new JSONException("syntax error, " + string);
+                    }
+                }
+
+                while (jsonReader.ch == '&' || jsonReader.ch == '|') {
+                    segment = parseFilterRest(segment, jsonReader);
                 }
 
                 if (segment != null) {
@@ -1122,6 +1146,22 @@ public abstract class JSONPath {
                 }
                 break;
             }
+            case 's':
+            case 'S': {
+                jsonReader.readFieldNameHashCodeUnquote();
+                String fieldName = jsonReader.getFieldName();
+                if (!fieldName.equalsIgnoreCase("starts")) {
+                    throw new JSONException("not support operator : " + fieldName);
+                }
+
+                jsonReader.readFieldNameHashCodeUnquote();
+                fieldName = jsonReader.getFieldName();
+                if (!fieldName.equalsIgnoreCase("with")) {
+                    throw new JSONException("not support operator : " + fieldName);
+                }
+                operator = Operator.STARTS_WITH;
+                break;
+            }
             default: {
                 jsonReader.readFieldNameHashCodeUnquote();
                 throw new JSONException("not support operator : " + jsonReader.getFieldName());
@@ -1147,7 +1187,8 @@ public abstract class JSONPath {
         NOT_BETWEEN,
         AND,
         OR,
-        REG_MATCH
+        REG_MATCH,
+        STARTS_WITH
     }
 
     abstract static class FilterSegment
@@ -1341,6 +1382,22 @@ public abstract class JSONPath {
             }
 
             return match;
+        }
+    }
+
+    static final class StartsWithSegment
+            extends NameFilter {
+        final String prefix;
+
+        public StartsWithSegment(String fieldName, long fieldNameNameHash, String prefix) {
+            super(fieldName, fieldNameNameHash);
+            this.prefix = prefix;
+        }
+
+        @Override
+        boolean apply(Object fieldValue) {
+            String propertyValue = fieldValue.toString();
+            return propertyValue != null && propertyValue.startsWith(prefix);
         }
     }
 
@@ -4205,6 +4262,8 @@ public abstract class JSONPath {
         static final IndexSegment ONE = new IndexSegment(1);
         static final IndexSegment TWO = new IndexSegment(2);
 
+        static final IndexSegment LAST = new IndexSegment(-1);
+
         final int index;
 
         public IndexSegment(int index) {
@@ -4220,6 +4279,9 @@ public abstract class JSONPath {
             }
             if (index == 2) {
                 return TWO;
+            }
+            if (index == -1) {
+                return LAST;
             }
             return new IndexSegment(index);
         }
@@ -4602,7 +4664,7 @@ public abstract class JSONPath {
                     break;
                 }
 
-                boolean match = index == i;
+                boolean match = index == -1 || index == i;
 
                 if (!match) {
                     jsonReader.skipValue();
@@ -4658,7 +4720,13 @@ public abstract class JSONPath {
                         throw new JSONException("TODO : " + jsonReader.ch);
                 }
 
-                context.value = val;
+                if (index == -1) {
+                    if (jsonReader.ch == ']') {
+                        context.value = val;
+                    }
+                } else {
+                    context.value = val;
+                }
             }
         }
 
