@@ -309,25 +309,10 @@ final class JSONReaderASCII
     public String getFieldName() {
         int length = nameEnd - nameBegin;
         if (!nameEscape) {
-            if (JDKUtils.JVM_VERSION == 11) {
-                if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {
-                    try {
-                        STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
-                    } catch (Throwable e) {
-                        STRING_CREATOR_ERROR = true;
-                    }
-                }
-
-                if (STRING_CREATOR_JDK11 != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, this.nameBegin, nameEnd);
-                    return STRING_CREATOR_JDK11.apply(bytes);
-                }
+            if (this.str != null) {
+                return this.str.substring(nameBegin, nameEnd);
             } else {
-                if (this.str != null) {
-                    return this.str.substring(nameBegin, nameEnd);
-                } else {
-                    return new String(bytes, nameBegin, length, StandardCharsets.US_ASCII);
-                }
+                return new String(bytes, nameBegin, length, StandardCharsets.US_ASCII);
             }
         }
 
@@ -705,7 +690,7 @@ final class JSONReaderASCII
 
                 str = new String(chars);
             } else {
-                if (this.str != null && JDKUtils.JVM_VERSION != 11) {
+                if (this.str != null) {
                     str = this.str.substring(this.offset, offset);
                 } else if (JDKUtils.JVM_VERSION == 11) {
                     if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {
