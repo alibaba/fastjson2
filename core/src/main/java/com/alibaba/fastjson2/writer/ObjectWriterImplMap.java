@@ -339,7 +339,7 @@ final class ObjectWriterImplMap
             String strKey = key == null ? "null" : key.toString();
 
             if (value == null) {
-                if (jsonWriter.isWriteNulls()) {
+                if ((jsonWriter.getFeatures(features) & JSONWriter.Feature.WriteNulls.mask) != 0) {
                     jsonWriter.writeName(strKey);
                     jsonWriter.writeColon();
                     jsonWriter.writeNull();
