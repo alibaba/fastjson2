@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.jsonpath;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import org.junit.jupiter.api.Test;
 
@@ -48,6 +50,37 @@ public class TrinoSupportTest {
         assertEquals(
                 2D,
                 JSONPath.extract("2", "$.double()")
+        );
+        assertEquals(
+                "2",
+                JSONPath.extract("2.1", "$.floor()").toString()
+        );
+        assertEquals(
+                "-1",
+                JSONPath.extract("-1.5", "$.ceiling()").toString()
+        );
+
+        // size
+        assertEquals(
+                3,
+                JSONPath.eval(
+                        JSONArray.of(1, "a", null),
+                        "$.size()"
+                )
+        );
+        assertEquals(
+                2,
+                JSONPath.eval(
+                        JSONObject.of("key1", 1.0, "key2", true),
+                        "$.size()"
+                )
+        );
+        assertEquals(
+                1,
+                JSONPath.eval(
+                        -2e3,
+                        "$.size()"
+                )
         );
     }
 }

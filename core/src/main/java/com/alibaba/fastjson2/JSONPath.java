@@ -51,7 +51,8 @@ public abstract class JSONPath {
     }
 
     public static Object eval(Object rootObject, String path) {
-        return JSONPath.of(path).eval(rootObject);
+        return JSONPath.of(path)
+                .eval(rootObject);
     }
 
     public static String set(String json, String path, Object value) {
@@ -412,7 +413,11 @@ public abstract class JSONPath {
                                     segment = FUNCTION_TYPE;
                                     break;
                                 case "floor":
-                                    segment = FloorSegment.INSTANCE;
+                                    segment = FUNCTION_FLOOR;
+                                    break;
+                                case "ceil":
+                                case "ceiling":
+                                    segment = FUNCTION_CEIL;
                                     break;
                                 case "double":
                                     segment = FUNCTION_DOUBLE;
@@ -492,7 +497,11 @@ public abstract class JSONPath {
                                 segment = FUNCTION_TYPE;
                                 break;
                             case "floor":
-                                segment = FloorSegment.INSTANCE;
+                                segment = FUNCTION_FLOOR;
+                                break;
+                            case "ceil":
+                            case "ceiling":
+                                segment = FUNCTION_CEIL;
                                 break;
                             case "double":
                                 segment = FUNCTION_DOUBLE;
@@ -651,7 +660,11 @@ public abstract class JSONPath {
                             segment = FUNCTION_TYPE;
                             break;
                         case "floor":
-                            segment = FloorSegment.INSTANCE;
+                            segment = FUNCTION_FLOOR;
+                            break;
+                        case "ceil":
+                        case "ceiling":
+                            segment = FUNCTION_CEIL;
                             break;
                         default:
                             throw new JSONException("not support syntax, path : " + path);
@@ -1655,7 +1668,7 @@ public abstract class JSONPath {
                 return ((Map) value).size();
             }
 
-            return -1;
+            return 1;
         }
     }
 
@@ -3125,65 +3138,24 @@ public abstract class JSONPath {
                 return;
             }
 
+            int length = 1;
             if (value instanceof Collection) {
-                context.value = ((Collection<?>) value).size();
+                length = ((Collection<?>) value).size();
             } else if (value.getClass().isArray()) {
-                context.value = Array.getLength(value);
+                length = Array.getLength(value);
             } else if (value instanceof Map) {
-                context.value = ((Map<?, ?>) value).size();
+                length = ((Map<?, ?>) value).size();
             } else if (value instanceof String) {
-                context.value = ((String) value).length();
+                length = ((String) value).length();
             }
-        }
-    }
-
-    static final class FloorSegment
-            extends Segment
-            implements EvalSegment {
-        static final FloorSegment INSTANCE = new FloorSegment();
-
-        @Override
-        public void accept(JSONReader jsonReader, Context context) {
-            if (context.parent == null) {
-                context.root = jsonReader.readAny();
-                context.eval = true;
-            }
-            eval(context);
-        }
-
-        @Override
-        public void eval(Context context) {
-            Object value = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-
-            if (value instanceof Double) {
-                value = Math.floor((Double) value);
-            } else if (value instanceof Float) {
-                value = Math.floor((Float) value);
-            } else if (value instanceof BigDecimal) {
-                value = ((BigDecimal) value).setScale(0, RoundingMode.FLOOR);
-            }
-
-            if (value instanceof List) {
-                List list = (List) value;
-                for (int i = 0, l = list.size(); i < l; i++) {
-                    Object item = list.get(i);
-                    if (item instanceof Double) {
-                        list.set(i, Math.floor((Double) item));
-                    } else if (item instanceof Float) {
-                        list.set(i, Math.floor((Float) item));
-                    } else if (item instanceof BigDecimal) {
-                        list.set(i, ((BigDecimal) item).setScale(0, RoundingMode.FLOOR));
-                    }
-                }
-            }
-            context.value = value;
+            context.value = length;
         }
     }
 
     static FunctionSegment FUNCTION_TYPE = new FunctionSegment(JSONPath::type);
     static FunctionSegment FUNCTION_DOUBLE = new FunctionSegment(new TypeConverts.ToDouble(null));
+    static FunctionSegment FUNCTION_FLOOR = new FunctionSegment(JSONPath::floor);
+    static FunctionSegment FUNCTION_CEIL = new FunctionSegment(JSONPath::ceil);
 
     static final class FunctionSegment
             extends Segment
@@ -3237,6 +3209,66 @@ public abstract class JSONPath {
         }
 
         return "object";
+    }
+
+    static Object floor(Object value) {
+        if (value instanceof Double) {
+            return Math.floor((Double) value);
+        }
+
+        if (value instanceof Float) {
+            return Math.floor((Float) value);
+        }
+
+        if (value instanceof BigDecimal) {
+            return ((BigDecimal) value).setScale(0, RoundingMode.FLOOR);
+        }
+
+        if (value instanceof List) {
+            List list = (List) value;
+            for (int i = 0, l = list.size(); i < l; i++) {
+                Object item = list.get(i);
+                if (item instanceof Double) {
+                    list.set(i, Math.floor((Double) item));
+                } else if (item instanceof Float) {
+                    list.set(i, Math.floor((Float) item));
+                } else if (item instanceof BigDecimal) {
+                    list.set(i, ((BigDecimal) item).setScale(0, RoundingMode.FLOOR));
+                }
+            }
+        }
+
+        return value;
+    }
+
+    static Object ceil(Object value) {
+        if (value instanceof Double) {
+            return Math.ceil((Double) value);
+        }
+
+        if (value instanceof Float) {
+            return Math.ceil((Float) value);
+        }
+
+        if (value instanceof BigDecimal) {
+            return ((BigDecimal) value).setScale(0, RoundingMode.CEILING);
+        }
+
+        if (value instanceof List) {
+            List list = (List) value;
+            for (int i = 0, l = list.size(); i < l; i++) {
+                Object item = list.get(i);
+                if (item instanceof Double) {
+                    list.set(i, Math.floor((Double) item));
+                } else if (item instanceof Float) {
+                    list.set(i, Math.floor((Float) item));
+                } else if (item instanceof BigDecimal) {
+                    list.set(i, ((BigDecimal) item).setScale(0, RoundingMode.FLOOR));
+                }
+            }
+        }
+
+        return value;
     }
 
     static final class MinSegment
