@@ -42,4 +42,12 @@ public class TrinoSupportTest {
                 JSONPath.extract("['abc','aaa','abb']", "$[?(@ starts with 'ab')]").toString()
         );
     }
+
+    @Test
+    public void test_function() {
+        assertEquals(
+                2D,
+                JSONPath.extract("2", "$.double()")
+        );
+    }
 }

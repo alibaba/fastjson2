@@ -168,11 +168,11 @@ public class TypeConverts {
         }
     }
 
-    static class ToDouble
+    public static class ToDouble
             implements Function {
         final Double defaultValue;
 
-        ToDouble(Double defaultValue) {
+        public ToDouble(Double defaultValue) {
             this.defaultValue = defaultValue;
         }
 
