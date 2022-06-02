@@ -4446,45 +4446,7 @@ public abstract class JSONPath {
             }
 
             if (Map.class.isAssignableFrom(objectClass)) {
-                Map map = (Map) object;
-                Object value = map.get(index);
-                if (value == null) {
-                    value = map.get(Integer.toString(index));
-                }
-
-                if (value == null) {
-                    int size = map.size();
-                    Iterator it = map.entrySet().iterator();
-                    if (size == 1 || map instanceof LinkedHashMap || map instanceof SortedMap) {
-                        for (int i = 0; i <= index && i < size && it.hasNext(); ++i) {
-                            Map.Entry entry = (Map.Entry) it.next();
-                            Object entryKey = entry.getKey();
-                            Object entryValue = entry.getValue();
-                            if (entryKey instanceof Long) {
-                                if (entryKey.equals(Long.valueOf(index))) {
-                                    value = entryValue;
-                                    break;
-                                }
-                            } else {
-                                if (i == index) {
-                                    value = entryValue;
-                                }
-                            }
-                        }
-                    } else {
-                        for (int i = 0; i <= index && i < map.size() && it.hasNext(); ++i) {
-                            Map.Entry entry = (Map.Entry) it.next();
-                            Object entryKey = entry.getKey();
-                            Object entryValue = entry.getValue();
-                            if (entryKey instanceof Long) {
-                                if (entryKey.equals(Long.valueOf(index))) {
-                                    value = entryValue;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
+                Object value = eval((Map) object);
                 context.value = value;
                 context.eval = true;
                 return;
@@ -4498,6 +4460,49 @@ public abstract class JSONPath {
             }
 
             throw new JSONException("jsonpath not support operate : " + context.path + ", objectClass" + objectClass.getName());
+        }
+
+        private Object eval(Map object) {
+            Map map = object;
+            Object value = map.get(index);
+            if (value == null) {
+                value = map.get(Integer.toString(index));
+            }
+
+            if (value == null) {
+                int size = map.size();
+                Iterator it = map.entrySet().iterator();
+                if (size == 1 || map instanceof LinkedHashMap || map instanceof SortedMap) {
+                    for (int i = 0; i <= index && i < size && it.hasNext(); ++i) {
+                        Map.Entry entry = (Map.Entry) it.next();
+                        Object entryKey = entry.getKey();
+                        Object entryValue = entry.getValue();
+                        if (entryKey instanceof Long) {
+                            if (entryKey.equals(Long.valueOf(index))) {
+                                value = entryValue;
+                                break;
+                            }
+                        } else {
+                            if (i == index) {
+                                value = entryValue;
+                            }
+                        }
+                    }
+                } else {
+                    for (int i = 0; i <= index && i < map.size() && it.hasNext(); ++i) {
+                        Map.Entry entry = (Map.Entry) it.next();
+                        Object entryKey = entry.getKey();
+                        Object entryValue = entry.getValue();
+                        if (entryKey instanceof Long) {
+                            if (entryKey.equals(Long.valueOf(index))) {
+                                value = entryValue;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            return value;
         }
 
         @Override
@@ -4743,6 +4748,13 @@ public abstract class JSONPath {
                     context.eval = true;
                     break;
                 }
+                return;
+            }
+
+            if (jsonReader.ch == '{') {
+                Map object = jsonReader.readObject();
+                context.value = eval(object);
+                context.eval = true;
                 return;
             }
 
@@ -5604,6 +5616,7 @@ public abstract class JSONPath {
                     }
                 }
                 context.value = values;
+                context.eval = true;
                 return;
             }
 
