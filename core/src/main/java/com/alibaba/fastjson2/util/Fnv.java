@@ -8,9 +8,14 @@ public class Fnv {
         long hashCode = MAGIC_HASH_CODE;
         for (int i = 0; i < name.length(); ++i) {
             char ch = name.charAt(i);
-            if (ch == '_') {
-                continue;
+
+            if ((ch == '_' || ch == '-') && i + 1 < name.length()) {
+                char c1 = name.charAt(i + 1);
+                if (c1 != '"' && c1 != '\'' && c1 != ch) {
+                    continue;
+                }
             }
+
             if (ch >= 'A' && ch <= 'Z') {
                 ch = (char) (ch + 32);
             }
@@ -19,6 +24,7 @@ public class Fnv {
         }
         return hashCode;
     }
+
     public static long hashCode64(String name) {
         long hashCode = MAGIC_HASH_CODE;
         for (int i = 0; i < name.length(); ++i) {
