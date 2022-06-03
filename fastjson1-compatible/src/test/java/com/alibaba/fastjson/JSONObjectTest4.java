@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONObjectTest4 {
+    // GraalVM not support
+    // Android not support
     @Test
     public void test_interface() {
         VO vo = JSON.parseObject("{\"id\":123}", VO.class);
