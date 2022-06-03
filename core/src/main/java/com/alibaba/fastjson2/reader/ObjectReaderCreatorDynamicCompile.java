@@ -19,6 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ObjectReaderCreatorDynamicCompile
         extends ObjectReaderCreator {
+    // GraalVM not support
+    // Android not support
     public static final ObjectReaderCreatorDynamicCompile INSTANCE = new ObjectReaderCreatorDynamicCompile();
 
     @Override
