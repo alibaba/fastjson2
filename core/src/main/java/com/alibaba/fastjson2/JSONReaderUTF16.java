@@ -1512,6 +1512,9 @@ final class JSONReaderUTF16
             if (JDKUtils.JVM_VERSION > 8) {
                 _for:
                 for (int i = 0; ; ++i) {
+                    if (offset >= end) {
+                        throw new JSONException("invalid escape character EOI");
+                    }
                     char c = chars[offset];
                     if (c == '\\') {
                         valueEscape = true;
