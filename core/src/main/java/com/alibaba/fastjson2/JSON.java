@@ -69,6 +69,27 @@ public interface JSON {
      * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
      *
      * @param text     the JSON {@link String} to be parsed
+     * @param offset   the index of the first byte to parse
+     * @param length   the number of bytes to parse
+     * @param features features to be enabled in parsing
+     * @return Object
+     */
+    static Object parse(String text, int offset, int length, JSONReader.Feature... features) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(text, offset, length)) {
+            reader.context.config(features);
+            ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
+            return objectReader.readObject(reader, 0);
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param text     the JSON {@link String} to be parsed
      * @param context specify the context use by JSONReader
      * @return Object
      */
@@ -133,6 +154,31 @@ public interface JSON {
         }
 
         try (JSONReader reader = JSONReader.of(text)) {
+            reader.context.config(features);
+            JSONObject object = JSONFactory.OBJECT_READER.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link JSONObject}
+     *
+     * @param text     the JSON {@link String} to be parsed
+     * @param offset   the index of the first byte to parse
+     * @param length   the number of bytes to parse
+     * @param features features to be enabled in parsing
+     * @return JSONObject
+     */
+    @SuppressWarnings("unchecked")
+    static JSONObject parseObject(String text, int offset, int length, JSONReader.Feature... features) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(text, offset, length)) {
             reader.context.config(features);
             JSONObject object = JSONFactory.OBJECT_READER.readObject(reader, 0);
             if (reader.resolveTasks != null) {
@@ -542,6 +588,36 @@ public interface JSON {
         }
 
         try (JSONReader reader = JSONReader.of(text)) {
+            JSONReader.Context context = reader.context;
+            context.config(features);
+            boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+
+            ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
+
+            T object = objectReader.readObject(reader, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param text     the JSON {@link String} to be parsed
+     * @param offset   the index of the first byte to parse
+     * @param length   the number of bytes to parse
+     * @param clazz    specify the Class to be converted
+     * @param features features to be enabled in parsing
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(String text, int offset, int length, Class<T> clazz, JSONReader.Feature... features) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(text, offset, length)) {
             JSONReader.Context context = reader.context;
             context.config(features);
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;

@@ -26,6 +26,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONTest {
     @Test
+    public void test_parseStringOffset() {
+        String str = "a {\"id\":123} b";
+        {
+            JSONObject object = (JSONObject) JSON.parse(str, 2, str.length() - 4);
+            assertEquals(123, object.get("id"));
+        }
+        {
+            JSONObject object = JSON.parseObject(str, 2, str.length() - 4);
+            assertEquals(123, object.get("id"));
+        }
+        {
+            JSONObject object = JSON.parseObject(str, 2, str.length() - 4, JSONObject.class);
+            assertEquals(123, object.get("id"));
+        }
+    }
+
+    @Test
     public void test_isValidArray_0() {
         assertTrue(JSON.isValidArray("[]"));
         assertFalse(JSON.isValidArray("{}"));
