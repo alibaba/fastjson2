@@ -1618,6 +1618,8 @@ final class JSONReaderJSONB
         return getString();
     }
 
+    // GraalVM not support
+    // Android not support
     private static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
     private static Function<byte[], String> STRING_CREATOR_JDK11;
     private static volatile boolean STRING_CREATOR_ERROR;
