@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicLongArray;
 
 public class ObjectWriterCreatorASM
         extends ObjectWriterCreator {
+    // GraalVM not support
+    // Android not support
     public static final ObjectWriterCreatorASM INSTANCE = new ObjectWriterCreatorASM();
 
     protected static final AtomicLong seed = new AtomicLong();

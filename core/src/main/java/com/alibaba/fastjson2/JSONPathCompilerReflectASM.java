@@ -18,6 +18,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 class JSONPathCompilerReflectASM
         extends JSONPathCompilerReflect {
+    // GraalVM not support
+    // Android not support
     static final AtomicLong seed = new AtomicLong();
     static final JSONPathCompilerReflectASM INSTANCE = new JSONPathCompilerReflectASM();
 

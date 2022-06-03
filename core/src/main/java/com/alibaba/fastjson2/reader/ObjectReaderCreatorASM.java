@@ -23,6 +23,8 @@ import static com.alibaba.fastjson2.reader.ObjectReader.HASH_TYPE;
 
 public class ObjectReaderCreatorASM
         extends ObjectReaderCreator {
+    // GraalVM not support
+    // Android not support
     public static ObjectReaderCreatorASM INSTANCE = new ObjectReaderCreatorASM();
 
     protected static final AtomicLong seed = new AtomicLong();

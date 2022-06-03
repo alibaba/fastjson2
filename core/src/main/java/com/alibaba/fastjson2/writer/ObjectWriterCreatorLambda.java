@@ -16,6 +16,7 @@ import java.util.function.*;
 
 public class ObjectWriterCreatorLambda
         extends ObjectWriterCreator {
+    // Android not support
     public static ObjectWriterCreatorLambda INSTANCE = new ObjectWriterCreatorLambda();
 
     static boolean isExternalClass(Class<?> clazz) {
