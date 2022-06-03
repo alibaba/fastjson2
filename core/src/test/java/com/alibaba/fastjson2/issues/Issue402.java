@@ -25,7 +25,7 @@ public class Issue402 {
     @Test
     public void test1() {
         JSONArray jsonArray = JSON.parseArray(str);
-        DeptTreeJson test = jsonArray.getObject(0, DeptTreeJson.class, JSONReader.Feature.SupportSmartMatch);
+        DeptTreeJson test = jsonArray.getObject(0, DeptTreeJson.class);
         assertEquals("测试公司", test.getDeptName());
     }
 

@@ -67,7 +67,21 @@ public class SmartMatchTest {
         assertEquals(123, bean.userId);
     }
 
+    @Test
+    public void test5() {
+        String str = "[{\"user-id\":123,\"item\":{\"item_id\":201}}]";
+        JSONArray array = JSON.parseArray(str);
+        Bean bean = array.getObject(0, Bean.class);
+        assertEquals(123, bean.userId);
+        assertEquals(201, bean.item.itemId);
+    }
+
     public static class Bean {
         public int userId;
+        public Item item;
+    }
+
+    public static class Item {
+        public int itemId;
     }
 }
