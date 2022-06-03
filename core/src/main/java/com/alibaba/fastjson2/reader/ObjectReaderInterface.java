@@ -30,12 +30,14 @@ public final class ObjectReaderInterface<T>
         }
 
         JSONObject object = jsonReader.read(JSONObject.class);
+        // GraalVM not support
         return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
     }
 
     @Override
     public T createInstance(long features) {
         JSONObject object = new JSONObject();
+        // GraalVM not support
         return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
     }
 
@@ -47,6 +49,7 @@ public final class ObjectReaderInterface<T>
         } else {
             object = new JSONObject(map);
         }
+        // GraalVM not support
         return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
     }
 }

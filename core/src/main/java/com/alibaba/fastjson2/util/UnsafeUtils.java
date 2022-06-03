@@ -35,6 +35,8 @@ public class UnsafeUtils {
     }
 
     public static Function<byte[], String> getStringCreatorUTF16() {
+        // GraalVM not support
+        // Android not support
         if (STRING_CREATOR_UTF16 == null) {
             if (!STRING_CREATOR_UTF16_ERROR) {
                 try {
@@ -48,6 +50,8 @@ public class UnsafeUtils {
     }
 
     public static Function<byte[], String> getStringCreatorASCII() {
+        // GraalVM not support
+        // Android not support
         if (STRING_CREATOR_ASCII == null) {
             if (!STRING_CREATOR_ASCII_ERROR) {
                 try {
