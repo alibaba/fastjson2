@@ -16,7 +16,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class JSONPathCompilerReflectASM
+class JSONPathCompilerReflectASM
         extends JSONPathCompilerReflect {
     static final AtomicLong seed = new AtomicLong();
     static final JSONPathCompilerReflectASM INSTANCE = new JSONPathCompilerReflectASM();
