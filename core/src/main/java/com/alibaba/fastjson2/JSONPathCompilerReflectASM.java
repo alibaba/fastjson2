@@ -36,30 +36,23 @@ class JSONPathCompilerReflectASM
         this.classLoader = new DynamicClassLoader();
     }
 
-    public JSONPath compile(Class objectClass, JSONPath path) {
+    private boolean support(Class objectClass) {
         boolean externalClass = classLoader.isExternalClass(objectClass);
         int objectClassModifiers = objectClass.getModifiers();
-
-        if (Modifier.isAbstract(objectClassModifiers)
+        return Modifier.isAbstract(objectClassModifiers)
                 || Modifier.isInterface(objectClassModifiers)
                 || !Modifier.isPublic(objectClassModifiers)
-                || externalClass
-        ) {
-            return super.compile(objectClass, path);
-        }
-
-        if (path instanceof JSONPath.SingleNamePath) {
-            return compile(objectClass, (JSONPath.SingleNamePath) path);
-        }
-
-        return super.compile(objectClass, path);
+                || externalClass;
     }
 
-    JSONPath compile(Class objectClass, JSONPath.SingleNamePath path) {
+    protected JSONPath compileSingleNamePath(Class objectClass, JSONPath.SingleNamePath path) {
+        if (support(objectClass)) {
+            return super.compileSingleNamePath(objectClass, path);
+        }
+
         String fieldName = path.name;
 
         String TYPE_OBJECT = ASMUtils.type(objectClass);
-        String DESC_OBJECT = ASMUtils.desc(objectClass);
 
         ObjectReader objectReader = path.getReaderContext().getObjectReader(objectClass);
         FieldReader fieldReader = objectReader.getFieldReader(fieldName);

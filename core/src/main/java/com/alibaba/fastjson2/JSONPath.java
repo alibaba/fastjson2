@@ -372,8 +372,8 @@ public abstract class JSONPath {
 
     public static JSONPath compile(String strPath, Class objectClass) {
         JSONPath path = of(strPath);
-        JSONFactory.JSONPathCompiler comiler = JSONFactory.getDefaultJSONPathCompiler();
-        return comiler.compile(objectClass, path);
+        JSONFactory.JSONPathCompiler compiler = JSONFactory.getDefaultJSONPathCompiler();
+        return compiler.compile(objectClass, path);
     }
 
     public static JSONPath of(String path) {
@@ -2853,7 +2853,7 @@ public abstract class JSONPath {
         }
     }
 
-    static final class TwoSegmentPath
+    static class TwoSegmentPath
             extends JSONPath {
         final Segment first;
         final Segment second;
@@ -3619,7 +3619,7 @@ public abstract class JSONPath {
         }
     }
 
-    static final class NameSegment
+    static class NameSegment
             extends Segment {
         static final long HASH_NAME = Fnv.hashCode64("name");
         static final long HASH_ORDINAL = Fnv.hashCode64("ordinal");
