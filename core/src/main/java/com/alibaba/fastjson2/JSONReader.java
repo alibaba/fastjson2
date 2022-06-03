@@ -1999,6 +1999,36 @@ public abstract class JSONReader
         }
     }
 
+    public static JSONReader of(String str, int offset, int length) {
+        if (str == null) {
+            throw new NullPointerException();
+        }
+
+        Context context = JSONFactory.createReadContext();
+        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+            try {
+                byte coder = UnsafeUtils.getStringCoder(str);
+                if (coder == 0) {
+                    byte[] bytes = UnsafeUtils.getStringValue(str);
+                    return new JSONReaderASCII(context, str, bytes, offset, length);
+                }
+            } catch (Exception e) {
+                throw new JSONException("unsafe get String.coder error");
+            }
+
+            return new JSONReaderStr(context, str, 0, str.length());
+        } else {
+            char[] chars = JDKUtils.getCharArray(str);
+            return new JSONReaderUTF16(
+                    context,
+                    str,
+                    chars,
+                    offset,
+                    length
+            );
+        }
+    }
+
     void bigInt(char[] chars, int off, int len) {
         int cursor = off, numDigits;
 
