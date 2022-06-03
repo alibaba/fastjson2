@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class InterfaceTest {
+    // GraalVM not support
+    // Android not support
     @Test
     public void test() {
         String str = "{\"item\":{\"id\":123}}";

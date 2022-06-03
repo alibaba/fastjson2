@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JSONObjectTest3C {
+    // GraalVM not support
+    // Android not support
     @Test
     public void test_0() {
         String text = "{'value':'123','big':false}";

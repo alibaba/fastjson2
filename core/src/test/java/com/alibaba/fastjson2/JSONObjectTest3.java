@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JSONObjectTest3 {
+    // GraalVM not support
+    // Android not support
     @Test
     public void test0() {
         assertEquals(

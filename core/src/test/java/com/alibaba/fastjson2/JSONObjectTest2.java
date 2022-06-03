@@ -101,6 +101,8 @@ public class JSONObjectTest2 {
 
     @Test
     public void testInterface() {
+        // GraalVM not support
+        // Android not support
         BeanInterface bean =
                 JSONObject
                         .of("id", 123)

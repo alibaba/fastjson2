@@ -15,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class AutoTypeTest43_dynamic {
     @Test
     public void test_0() throws Exception {
+        // GraalVM not support
+        // Android not support
         JSONObject object = new JSONObject();
 
         Model proxy = (Model) Proxy.newProxyInstance(Model.class.getClassLoader(), new Class<?>[]{Model.class, Map.class}, object);
