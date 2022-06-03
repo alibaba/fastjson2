@@ -11,8 +11,8 @@ import java.util.function.*;
 public class JDKUtils {
     public static final int JVM_VERSION;
 
-    public static final boolean JAVAC_UNNAMED;
-    public static final boolean ILLEGAL_ACCESS_PERMIT;
+    // GraalVM not support
+    // Android not support
     public static final boolean LANG_UNNAMED;
 
     static final Field FIELD_STRING_VALUE;
@@ -27,7 +27,13 @@ public class JDKUtils {
     public static final byte BIG_ENDIAN;
 
     public static final boolean UNSAFE_SUPPORT;
+
+    // GraalVM not support
+    // Android not support
     public static final Function<byte[], String> UNSAFE_UTF16_CREATOR;
+
+    // GraalVM not support
+    // Android not support
     public static final Function<byte[], String> UNSAFE_ASCII_CREATOR;
 
     static {
@@ -69,10 +75,6 @@ public class JDKUtils {
         JVM_VERSION = jvmVersion;
 
         List<String> inputArguments = ManagementFactory.getRuntimeMXBean().getInputArguments();
-
-        JAVAC_UNNAMED = inputArguments.contains("--add-opens=com.sun.tools.javac.processing=ALL-UNNAMED");
-        ILLEGAL_ACCESS_PERMIT = inputArguments.contains("--illegal-access=permit");
-
         LANG_UNNAMED = !vmVendor.contains("GraalVM") && !vmName.contains("Substrate")
                 && (inputArguments.contains("--add-opens=java.base/java.lang=ALL-UNNAMED") || JVM_VERSION <= 11);
 
@@ -95,7 +97,7 @@ public class JDKUtils {
             FIELD_STRING_VALUE_OFFSET = -1;
         }
 
-        boolean unsafeSupport = false;
+        boolean unsafeSupport;
         unsafeSupport = ((Predicate) o -> {
             try {
                 return UnsafeUtils.UNSAFE != null;
@@ -146,6 +148,8 @@ public class JDKUtils {
     }
 
     public static char[] getCharArray(String str) {
+        // GraalVM not support
+        // Android not support
         if (!FIELD_STRING_ERROR) {
             try {
                 return (char[]) UnsafeUtils.UNSAFE.getObject(str, FIELD_STRING_VALUE_OFFSET);
@@ -158,6 +162,8 @@ public class JDKUtils {
     }
 
     public static BiFunction<char[], Boolean, String> getStringCreatorJDK8() throws Throwable {
+        // GraalVM not support
+        // Android not support
         MethodHandles.Lookup lookup = getLookup();
 
         MethodHandles.Lookup caller = lookup.in(String.class);
@@ -178,6 +184,8 @@ public class JDKUtils {
     }
 
     public static Function<byte[], String> getStringCreatorJDK11() throws Throwable {
+        // GraalVM not support
+        // Android not support
         MethodHandles.Lookup lookup = getLookup();
 
         Class clazz = Class.forName("java.lang.StringCoding");
@@ -200,6 +208,8 @@ public class JDKUtils {
     }
 
     public static BiFunction<byte[], Charset, String> getStringCreatorJDK17() throws Throwable {
+        // GraalVM not support
+        // Android not support
         MethodHandles.Lookup lookup = getLookup();
 
         MethodHandles.Lookup caller = lookup.in(String.class);
@@ -219,6 +229,8 @@ public class JDKUtils {
     }
 
     private static MethodHandles.Lookup getLookup() throws Exception {
+        // GraalVM not support
+        // Android not support
         MethodHandles.Lookup lookup;
         if (JDKUtils.JVM_VERSION >= 17) {
             Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, Class.class, int.class);
