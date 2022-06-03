@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.annotation.NamingStrategy;
 import org.junit.jupiter.api.Test;
