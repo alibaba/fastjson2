@@ -65,6 +65,8 @@ public class UnsafeUtils {
     }
 
     public static byte getStringCoder(String str) {
+        // GraalVM not support
+        // Android not support
         if (str == null) {
             throw new NullPointerException();
         }
@@ -86,6 +88,8 @@ public class UnsafeUtils {
     }
 
     public static byte[] getStringValue(String str) {
+        // GraalVM not support
+        // Android not support
         if (str == null) {
             throw new NullPointerException();
         }
