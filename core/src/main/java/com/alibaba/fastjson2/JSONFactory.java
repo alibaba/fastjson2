@@ -36,6 +36,8 @@ public final class JSONFactory {
     static long defaultWriterFeatures;
 
     static final class Utils {
+        // GraalVM not support
+        // Android not support
         static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
         static Function<byte[], String> STRING_CREATOR_JDK11;
         static BiFunction<byte[], Charset, String> STRING_CREATOR_JDK17;
