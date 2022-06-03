@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.features;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TestUtils;
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,14 @@ public class SmartMatchTest {
         assertEquals(101, JSON.parseObject(bytes, 0, bytes.length, StandardCharsets.US_ASCII, Bean.class, JSONReader.Feature.SupportSmartMatch).userId);
 
         assertEquals(101, TestUtils.createJSONReaderStr(str, JSONReader.Feature.SupportSmartMatch).read(Bean.class).userId);
+    }
+
+    @Test
+    public void test4() {
+        String str = "[{\"user-id\":123}]";
+        JSONArray array = JSON.parseArray(str);
+        Bean bean = array.getObject(0, Bean.class);
+        assertEquals(123, bean.userId);
     }
 
     public static class Bean {

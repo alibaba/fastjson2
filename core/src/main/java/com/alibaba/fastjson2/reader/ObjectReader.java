@@ -77,9 +77,8 @@ public interface ObjectReader<T> {
 
         T object = createInstance(0L);
         for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
-            FieldReader fieldReader = getFieldReader(
-                    entry.getKey().toString()
-            );
+            String entryKey = entry.getKey().toString();
+            FieldReader fieldReader = getFieldReader(entryKey);
             if (fieldReader == null) {
                 continue;
             }
@@ -182,17 +181,13 @@ public interface ObjectReader<T> {
     }
 
     default FieldReader getFieldReader(String fieldName) {
-        FieldReader fieldReader = getFieldReader(
-                Fnv.hashCode64(fieldName)
-        );
+        long fieldNameHash = Fnv.hashCode64(fieldName);
+        FieldReader fieldReader = getFieldReader(fieldNameHash);
 
         if (fieldReader == null) {
-            String fieldNameLCase = fieldName.toLowerCase();
-
-            if (!fieldNameLCase.equals(fieldName)) {
-                fieldReader = getFieldReader(
-                        Fnv.hashCode64(fieldNameLCase)
-                );
+            long fieldNameHashLCase = Fnv.hashCode64LCase(fieldName);
+            if (fieldNameHashLCase != fieldNameHash) {
+                fieldReader = getFieldReaderLCase(fieldNameHashLCase);
             }
         }
 

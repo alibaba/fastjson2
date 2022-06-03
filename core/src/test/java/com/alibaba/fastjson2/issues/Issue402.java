@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.annotation.NamingStrategy;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,13 @@ public class Issue402 {
         DeptTreeJson test = jsonArray.getObject(0, DeptTreeJson.class);
         assertEquals("测试公司", test.getDeptName());
         JSON.mixIn(DeptTreeJson.class, null);
+    }
+
+    @Test
+    public void test1() {
+        JSONArray jsonArray = JSON.parseArray(str);
+        DeptTreeJson test = jsonArray.getObject(0, DeptTreeJson.class, JSONReader.Feature.SupportSmartMatch);
+        assertEquals("测试公司", test.getDeptName());
     }
 
     @JSONType(naming = NamingStrategy.SnakeCase)
