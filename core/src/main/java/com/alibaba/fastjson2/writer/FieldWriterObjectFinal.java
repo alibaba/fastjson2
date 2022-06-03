@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 
 abstract class FieldWriterObjectFinal<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriterObject<T> {
     final Type fieldType;
     final Class fieldClass;
     volatile ObjectWriter objectWriter;
@@ -21,13 +21,13 @@ abstract class FieldWriterObjectFinal<T>
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (fieldClass != valueClass) {
-            return jsonWriter.getObjectWriter(valueClass);
+            return super.getObjectWriter(jsonWriter, valueClass);
         }
 
         if (objectWriter != null) {
             return objectWriter;
         } else {
-            return objectWriter = jsonWriter.getObjectWriter(valueClass);
+            return objectWriter = super.getObjectWriter(jsonWriter, valueClass);
         }
     }
 
@@ -59,8 +59,7 @@ abstract class FieldWriterObjectFinal<T>
             }
         }
 
-        ObjectWriter valueWriter = jsonWriter.getObjectWriter(fieldClass);
-
+        ObjectWriter valueWriter = getObjectWriter(jsonWriter, fieldClass);
         writeFieldName(jsonWriter);
         if (jsonWriter.isJSONB()) {
             valueWriter.writeJSONB(jsonWriter, value, name, fieldType, features);

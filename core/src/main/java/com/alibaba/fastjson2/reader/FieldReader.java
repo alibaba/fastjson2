@@ -175,6 +175,18 @@ public interface FieldReader<T>
         return null;
     }
 
+    default Class getItemClass() {
+        return TypeUtils.getClass(getItemType());
+    }
+
+    default long getItemClassHash() {
+        Class itemClass = getItemClass();
+        if (itemClass == null) {
+            return 0;
+        }
+        return Fnv.hashCode64(itemClass.getName());
+    }
+
     default ObjectReader getItemObjectReader(JSONReader.Context ctx) {
         throw new UnsupportedOperationException();
     }

@@ -31,21 +31,24 @@ public interface FieldReaderList<T, V>
 
     @Override
     default ObjectReader<V> getItemObjectReader(JSONReader.Context ctx) {
-        return ctx.getObjectReader(
-                getItemType());
+        return ctx.getObjectReader(getItemType());
     }
 
     @Override
     default void readFieldValue(JSONReader jsonReader, T object) {
+        JSONReader.Context context = jsonReader.getContext();
         if (jsonReader.isJSONB()) {
             int entryCnt = jsonReader.startArray();
 
             Object[] array = new Object[entryCnt];
-            ObjectReader itemObjectReader
-                    = getItemObjectReader(
-                    jsonReader.getContext());
+            ObjectReader itemObjectReader = getItemObjectReader(context);
             for (int i = 0; i < entryCnt; ++i) {
-                array[i] = itemObjectReader.readObject(jsonReader, 0);
+                ObjectReader autoTypeReader = jsonReader.checkAutoType(getItemClass(), getItemClassHash(), getFeatures());
+                if (autoTypeReader != null) {
+                    array[i] = autoTypeReader.readJSONBObject(jsonReader, 0);
+                } else {
+                    array[i] = itemObjectReader.readJSONBObject(jsonReader, 0);
+                }
             }
             List list = Arrays.asList(array);
             accept(object, list);
@@ -53,7 +56,7 @@ public interface FieldReaderList<T, V>
         }
 
         if (jsonReader.current() == '[') {
-            JSONReader.Context ctx = jsonReader.getContext();
+            JSONReader.Context ctx = context;
             ObjectReader itemObjectReader = getItemObjectReader(ctx);
 
             List list = createList();

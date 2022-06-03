@@ -86,7 +86,7 @@ final class FieldWriterListFunc<T>
                     previousObjectWriter = itemObjectWriter;
                 }
 
-                itemObjectWriter.write(jsonWriter, item);
+                itemObjectWriter.writeJSONB(jsonWriter, item, null, itemType, 0);
             }
             return true;
         }

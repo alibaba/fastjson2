@@ -51,10 +51,20 @@ final class FieldReaderListStrMethod<T>
             } else if (listType == JSONArray.class) {
                 value = new JSONArray(itemCnt);
             } else {
-                try {
-                    value = (List) listType.newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new JSONException("create instance error " + listType, e);
+                switch (listType.getName()) {
+                    case "com.google.common.collect.Lists$TransformingRandomAccessList":
+                        value = new ArrayList();
+                        break;
+                    case "com.google.common.collect.Lists.TransformingSequentialList":
+                        value = new LinkedList();
+                        break;
+                    default:
+                        try {
+                            value = (List) listType.newInstance();
+                        } catch (InstantiationException | IllegalAccessException e) {
+                            throw new JSONException("create instance error " + listType, e);
+                        }
+                        break;
                 }
             }
 

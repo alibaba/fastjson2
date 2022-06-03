@@ -17,6 +17,7 @@ final class FieldReaderDateFunc<T>
     DateTimeFormatter formatter;
 
     ObjectReader dateReader;
+    boolean unixtime;
 
     public FieldReaderDateFunc(
             String fieldName,
@@ -32,6 +33,7 @@ final class FieldReaderDateFunc<T>
         super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema);
         this.method = method;
         this.function = function;
+        this.unixtime = "unixtime".equals(format);
     }
 
     @Override
@@ -83,6 +85,9 @@ final class FieldReaderDateFunc<T>
         Date fieldValue;
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();
+            if (unixtime) {
+                millis *= 1000L;
+            }
             fieldValue = new Date(millis);
         } else if (jsonReader.isNull()) {
             jsonReader.readNull();

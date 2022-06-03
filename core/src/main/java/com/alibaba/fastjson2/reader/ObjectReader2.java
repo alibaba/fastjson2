@@ -287,4 +287,16 @@ public class ObjectReader2<T>
 
         return null;
     }
+
+    public FieldReader getFieldReaderLCase(long hashCode) {
+        if (hashCode == firstHashCodeLCase) {
+            return first;
+        }
+
+        if (hashCode == secondHashCodeLCase) {
+            return second;
+        }
+
+        return null;
+    }
 }

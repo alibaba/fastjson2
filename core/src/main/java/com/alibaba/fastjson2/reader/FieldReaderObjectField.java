@@ -73,7 +73,7 @@ class FieldReaderObjectField<T>
         int offset = jsonReader.getOffset();
         try {
             Object value;
-            if (jsonReader.isNull()) {
+            if (jsonReader.nextIfNull()) {
                 if (fieldClass == OptionalInt.class) {
                     value = OptionalInt.empty();
                 } else if (fieldClass == OptionalLong.class) {
