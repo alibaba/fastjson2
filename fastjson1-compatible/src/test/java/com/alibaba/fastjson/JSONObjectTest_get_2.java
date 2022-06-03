@@ -10,6 +10,8 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONObjectTest_get_2 {
+    // GraalVM not support
+    // Android not support
     @Test
     public void test_get() throws Exception {
         JSONObject obj = JSON.parseObject("{\"value\":{}}");
