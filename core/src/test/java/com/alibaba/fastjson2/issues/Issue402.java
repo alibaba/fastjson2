@@ -18,6 +18,7 @@ public class Issue402 {
         JSONArray jsonArray = JSON.parseArray(str);
         DeptTreeJson test = jsonArray.getObject(0, DeptTreeJson.class);
         assertEquals("测试公司", test.getDeptName());
+        JSON.mixIn(DeptTreeJson.class, null);
     }
 
     @JSONType(naming = NamingStrategy.SnakeCase)

@@ -593,6 +593,7 @@
                                 com/alibaba/fastjson2/v1issues/issue_1500/Issue1529.java,
                                 com/alibaba/fastjson2/issues/Issue371.java,
                                 com/alibaba/fastjson2/issues/Issue325.java,
+                                com/alibaba/fastjson2/issues/Issue402.java,
                                 com/alibaba/fastjson2/v1issues/issue_1500/Issue1558.java,
                                 com/alibaba/fastjson/issue_2800/Issue2866.java,
                                 com/alibaba/fastjson/issues_compatible/Issue325.java,

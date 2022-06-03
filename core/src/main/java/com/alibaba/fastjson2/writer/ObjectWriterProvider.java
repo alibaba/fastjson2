@@ -46,7 +46,11 @@ public class ObjectWriterProvider {
     }
 
     public void mixIn(Class target, Class mixinSource) {
-        mixInCache.put(target, mixinSource);
+        if (mixinSource == null) {
+            mixInCache.remove(target);
+        } else {
+            mixInCache.put(target, mixinSource);
+        }
         cache.remove(target);
     }
 
