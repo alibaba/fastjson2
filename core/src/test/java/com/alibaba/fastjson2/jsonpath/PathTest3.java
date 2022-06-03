@@ -634,28 +634,28 @@ public class PathTest3 {
 
     @Test
     public void test_seg_toString() throws Exception {
-        JSONPath path = JSONPath.of("$..book[?(@.isbn)]");
-        assertEquals("$..book[?(@.isbn)]", path.toString());
+        JSONPath path = JSONPath.of("$..book[?(@.isbn)][0]");
+        assertEquals("$..book[?(@.isbn)][0]", path.toString());
 
         Class<?> clazz = Class.forName("com.alibaba.fastjson2.JSONPath$MultiSegmentPath");
         Field field = clazz.getDeclaredField("segments");
         field.setAccessible(true);
         List segments = (List) field.get(path);
-        assertEquals(2, segments.size());
+        assertEquals(3, segments.size());
         assertEquals("..book", segments.get(0).toString());
         assertEquals("?isbn", segments.get(1).toString());
     }
 
     @Test
     public void test_seg_toString_1() throws Exception {
-        JSONPath path = JSONPath.of("$.book.author");
-        assertEquals("$.book.author", path.toString());
+        JSONPath path = JSONPath.of("$.book.author.id");
+        assertEquals("$.book.author.id", path.toString());
 
         Class<?> clazz = Class.forName("com.alibaba.fastjson2.JSONPath$MultiSegmentPath");
         Field field = clazz.getDeclaredField("segments");
         field.setAccessible(true);
         List segments = (List) field.get(path);
-        assertEquals(2, segments.size());
+        assertEquals(3, segments.size());
         assertEquals("book", segments.get(0).toString());
         assertEquals("author", segments.get(1).toString());
     }
