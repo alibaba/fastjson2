@@ -239,9 +239,13 @@ public final class JSONFactory {
     static ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
     static ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
 
+    static JSONPathCompiler defaultJSONPathCompiler = JSONPathCompilerReflectASM.INSTANCE;
+
     static final ThreadLocal<ObjectReaderCreator> readerCreatorLocal = new ThreadLocal<>();
     static final ThreadLocal<ObjectReaderProvider> readerProviderLocal = new ThreadLocal<>();
     static final ThreadLocal<ObjectWriterCreator> writerCreatorLocal = new ThreadLocal<>();
+
+    static final ThreadLocal<JSONPathCompiler> jsonPathCompilerLocal = new ThreadLocal<>();
 
     static final ObjectReader<JSONArray> ARRAY_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONArray.class);
     static final ObjectReader<JSONObject> OBJECT_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
@@ -292,6 +296,15 @@ public final class JSONFactory {
         return defaultObjectReaderProvider;
     }
 
+    public static JSONPathCompiler getDefaultJSONPathCompiler() {
+        JSONPathCompiler compilerLocal = jsonPathCompilerLocal.get();
+        if (compilerLocal != null) {
+            return compilerLocal;
+        }
+
+        return defaultJSONPathCompiler;
+    }
+
     public static void setContextReaderCreator(ObjectReaderCreator creator) {
         readerCreatorLocal.set(creator);
     }
@@ -304,11 +317,23 @@ public final class JSONFactory {
         return readerCreatorLocal.get();
     }
 
+    public static void setContextJSONPathCompiler(JSONPathCompiler compiler) {
+        jsonPathCompilerLocal.set(compiler);
+    }
+
+    public static JSONPathCompiler getContextJSONPathCompiler() {
+        return jsonPathCompilerLocal.get();
+    }
+
     public static void setContextWriterCreator(ObjectWriterCreator creator) {
         writerCreatorLocal.set(creator);
     }
 
     public static ObjectWriterCreator getContextWriterCreator() {
         return writerCreatorLocal.get();
+    }
+
+    public interface JSONPathCompiler {
+        JSONPath compile(Class objectClass, JSONPath path);
     }
 }

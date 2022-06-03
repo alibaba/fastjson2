@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.PropertyFilter;
 import com.alibaba.fastjson2.filter.PropertyPreFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
+import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -20,6 +21,18 @@ public interface ObjectWriter<T> {
 
     default FieldWriter getFieldWriter(long hashCode) {
         return null;
+    }
+
+    default FieldWriter getFieldWriter(String name) {
+        long nameHash = Fnv.hashCode64(name);
+        FieldWriter fieldWriter = getFieldWriter(nameHash);
+        if (fieldWriter == null) {
+            long nameHashLCase = Fnv.hashCode64LCase(name);
+            if (nameHashLCase != nameHash) {
+                fieldWriter = getFieldWriter(nameHashLCase);
+            }
+        }
+        return fieldWriter;
     }
 
     default boolean writeTypeInfo(JSONWriter jsonWriter) {

@@ -31,7 +31,7 @@ public abstract class JSONPath {
     JSONWriter.Context writerContext;
     final String path;
 
-    JSONPath(String path) {
+    protected JSONPath(String path) {
         this.path = path;
     }
 
@@ -216,9 +216,9 @@ public abstract class JSONPath {
         }
     }
 
-    public abstract boolean contains(Object rootObject);
+    public abstract boolean contains(Object object);
 
-    public abstract Object eval(Object rootObject);
+    public abstract Object eval(Object object);
 
     public abstract Object extract(JSONReader jsonReader);
 
@@ -248,22 +248,24 @@ public abstract class JSONPath {
         return this;
     }
 
-    public abstract void set(Object rootObject, Object value, JSONReader.Feature... readerFeatures);
+    public abstract void set(Object object, Object value);
 
-    public void setCallback(Object rootObject, Function callback) {
+    public abstract void set(Object object, Object value, JSONReader.Feature... readerFeatures);
+
+    public void setCallback(Object object, Function callback) {
         setCallback(
-                rootObject,
+                object,
                 new BiFunctionAdapter(callback)
         );
     }
 
-    public abstract void setCallback(Object rootObject, BiFunction callback);
+    public abstract void setCallback(Object object, BiFunction callback);
 
-    public abstract void setInt(Object rootObject, int value);
+    public abstract void setInt(Object object, int value);
 
-    public abstract void setLong(Object rootObject, long value);
+    public abstract void setLong(Object object, long value);
 
-    public abstract boolean remove(Object rootObject);
+    public abstract boolean remove(Object object);
 
     public void extract(JSONReader jsonReader, ValueConsumer consumer) {
         Object object = extract(jsonReader);
@@ -366,6 +368,12 @@ public abstract class JSONPath {
     @Deprecated
     public static JSONPath compile(String path) {
         return of(path);
+    }
+
+    public static JSONPath compile(String strPath, Class objectClass) {
+        JSONPath path = of(strPath);
+        JSONFactory.JSONPathCompiler comiler = JSONFactory.getDefaultJSONPathCompiler();
+        return comiler.compile(objectClass, path);
     }
 
     public static JSONPath of(String path) {
@@ -690,6 +698,10 @@ public abstract class JSONPath {
             }
 
             return new SingleSegmentPath(segment, path);
+        }
+
+        if (segments.size() == 2) {
+            return new TwoSegmentPath(path, segments.get(0), segments.get(1));
         }
 
         return new MultiSegmentPath(path, segments);
@@ -2082,6 +2094,11 @@ public abstract class JSONPath {
         }
 
         @Override
+        public void set(Object rootObject, Object value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public void set(Object rootObject, Object value, JSONReader.Feature... readerFeatures) {
             throw new UnsupportedOperationException();
         }
@@ -2215,6 +2232,39 @@ public abstract class JSONPath {
             }
 
             return fieldWriter.getFieldValue(root) != null;
+        }
+
+        @Override
+        public void set(Object rootObject, Object value) {
+            if (rootObject instanceof Map) {
+                Map map = (Map) rootObject;
+                Object origin = map.put(name, value);
+                if (origin != null) {
+                    if (origin instanceof Collection) {
+                        ((Collection) origin).add(value);
+                        map.put(name, value);
+                    } else {
+                        JSONArray array = JSONArray.of(origin, value);
+                        map.put(name, array);
+                    }
+                }
+                return;
+            }
+            ObjectReaderProvider provider = getReaderContext().getProvider();
+            ObjectReader objectReader = provider.getObjectReader(rootObject.getClass());
+            FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
+
+            if (value != null) {
+                Class<?> valueClass = value.getClass();
+                Class fieldClass = fieldReader.getFieldClass();
+                if (valueClass != fieldClass) {
+                    java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+                    if (typeConvert != null) {
+                        value = typeConvert.apply(value);
+                    }
+                }
+            }
+            fieldReader.accept(rootObject, value);
         }
 
         @Override
@@ -2754,6 +2804,13 @@ public abstract class JSONPath {
         }
 
         @Override
+        public void set(Object root, Object value) {
+            Context context = new Context(this, null, segment, null, 0);
+            context.root = root;
+            segment.set(context, value);
+        }
+
+        @Override
         public void set(Object root, Object value, JSONReader.Feature... readerFeatures) {
             Context context = new Context(this, null, segment, null, 0);
             context.root = root;
@@ -2793,6 +2850,162 @@ public abstract class JSONPath {
             Context context = new Context(this, null, segment, null, 0);
             segment.accept(jsonReader, context);
             return JSON.toJSONString(context.value);
+        }
+    }
+
+    static final class TwoSegmentPath
+            extends JSONPath {
+        final Segment first;
+        final Segment second;
+        final boolean ref;
+
+        public TwoSegmentPath(String path, Segment first, Segment second) {
+            super(path);
+            this.first = first;
+            this.second = second;
+            this.ref = (first instanceof IndexSegment || first instanceof NameSegment)
+                    && (second instanceof IndexSegment || second instanceof NameSegment);
+        }
+
+        @Override
+        public boolean remove(Object root) {
+            Context context0 = new Context(this, null, first, second, 0);
+            context0.root = root;
+            first.eval(context0);
+            if (context0.value == null) {
+                return false;
+            }
+
+            Context context1 = new Context(this, context0, second, null, 0);
+            return second.remove(context1);
+        }
+
+        @Override
+        public boolean contains(Object root) {
+            Context context0 = new Context(this, null, first, second, 0);
+            context0.root = root;
+            first.eval(context0);
+            if (context0.value == null) {
+                return false;
+            }
+
+            Context context1 = new Context(this, context0, second, null, 0);
+            return second.contains(context1);
+        }
+
+        @Override
+        public boolean isRef() {
+            return ref;
+        }
+
+        @Override
+        public Object eval(Object root) {
+            Context context0 = new Context(this, null, first, second, 0);
+            context0.root = root;
+            first.eval(context0);
+            if (context0.value == null) {
+                return null;
+            }
+
+            Context context1 = new Context(this, context0, second, null, 0);
+            second.eval(context1);
+            return context1.value;
+        }
+
+        @Override
+        public void set(Object root, Object value) {
+            Context context0 = new Context(this, null, first, second, 0);
+            context0.root = root;
+            first.eval(context0);
+            if (context0.value == null) {
+                return;
+            }
+
+            Context context1 = new Context(this, context0, second, null, 0);
+            second.set(context1, value);
+        }
+
+        @Override
+        public void set(Object root, Object value, JSONReader.Feature... readerFeatures) {
+            long features = 0;
+            for (JSONReader.Feature feature : readerFeatures) {
+                features |= feature.mask;
+            }
+
+            Context context0 = new Context(this, null, first, second, features);
+            context0.root = root;
+            first.eval(context0);
+            if (context0.value == null) {
+                return;
+            }
+
+            Context context1 = new Context(this, context0, second, null, features);
+            second.set(context1, value);
+        }
+
+        @Override
+        public void setCallback(Object root, BiFunction callback) {
+            Context context0 = new Context(this, null, first, second, 0);
+            context0.root = root;
+            first.eval(context0);
+            if (context0.value == null) {
+                return;
+            }
+
+            Context context1 = new Context(this, context0, second, null, 0);
+            second.setCallback(context1, callback);
+        }
+
+        @Override
+        public void setInt(Object root, int value) {
+            Context context0 = new Context(this, null, first, second, 0);
+            context0.root = root;
+            first.eval(context0);
+            if (context0.value == null) {
+                return;
+            }
+
+            Context context1 = new Context(this, context0, second, null, 0);
+            second.setInt(context1, value);
+        }
+
+        @Override
+        public void setLong(Object root, long value) {
+            Context context0 = new Context(this, null, first, second, 0);
+            context0.root = root;
+            first.eval(context0);
+            if (context0.value == null) {
+                return;
+            }
+
+            Context context1 = new Context(this, context0, second, null, 0);
+            second.setLong(context1, value);
+        }
+
+        @Override
+        public Object extract(JSONReader jsonReader) {
+            if (jsonReader == null) {
+                return null;
+            }
+
+            Context context0 = new Context(this, null, first, second, 0);
+            first.accept(jsonReader, context0);
+
+            Context context1 = new Context(this, context0, second, null, 0);
+            second.accept(jsonReader, context1);
+
+            return context1.value;
+        }
+
+        @Override
+        public String extractScalar(JSONReader jsonReader) {
+            Context context0 = new Context(this, null, first, second, 0);
+            first.accept(jsonReader, context0);
+
+            Context context1 = new Context(this, context0, second, null, 0);
+            second.accept(jsonReader, context1);
+
+            return JSON.toJSONString(context1.value);
         }
     }
 
@@ -2910,6 +3123,31 @@ public abstract class JSONPath {
                 segment.eval(context);
             }
             return context.value;
+        }
+
+        @Override
+        public void set(Object root, Object value) {
+            Context context = null;
+            int size = segments.size();
+            for (int i = 0; i < size - 1; i++) {
+                Segment segment = segments.get(i);
+                Segment nextSegment = null;
+                int nextIndex = i + 1;
+                if (nextIndex < size) {
+                    nextSegment = segments.get(nextIndex);
+                }
+                context = new Context(this, context, segment, nextSegment, 0L);
+                if (i == 0) {
+                    context.root = root;
+                }
+
+                segment.eval(context);
+            }
+            context = new Context(this, context, segments.get(0), null, 0L);
+            context.root = root;
+
+            Segment segment = segments.get(size - 1);
+            segment.set(context, value);
         }
 
         @Override
