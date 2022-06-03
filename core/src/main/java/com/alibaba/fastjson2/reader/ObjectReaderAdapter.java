@@ -310,7 +310,7 @@ public class ObjectReaderAdapter<T>
             }
         }
 
-        jsonReader.nextIfObjectStart();
+        boolean objectStart = jsonReader.nextIfObjectStart();
 
         Object object = null;
         for (int i = 0; ; ++i) {

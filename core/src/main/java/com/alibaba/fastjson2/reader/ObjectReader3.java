@@ -320,4 +320,20 @@ class ObjectReader3<T>
 
         return null;
     }
+
+    public FieldReader getFieldReaderLCase(long hashCode) {
+        if (hashCode == hashCode0LCase) {
+            return fieldReader0;
+        }
+
+        if (hashCode == hashCode1LCase) {
+            return fieldReader1;
+        }
+
+        if (hashCode == hashCode2LCase) {
+            return fieldReader2;
+        }
+
+        return null;
+    }
 }

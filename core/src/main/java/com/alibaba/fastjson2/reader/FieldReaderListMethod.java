@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
@@ -12,6 +13,7 @@ final class FieldReaderListMethod<T>
         implements FieldReaderList<T, Object> {
     final Type itemType;
     final Class itemClass;
+    final long itemClassHash;
 
     FieldReaderListMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Method method) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, method);
@@ -21,16 +23,28 @@ final class FieldReaderListMethod<T>
             itemType = Object.class;
         }
         this.itemClass = TypeUtils.getClass(itemType);
+        this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
     }
 
     FieldReaderListMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, JSONSchema schema, Type itemType, Method method) {
         super(fieldName, fieldType, fieldClass, ordinal, features, null, null, null, null, method);
         this.itemType = itemType;
         this.itemClass = TypeUtils.getClass(itemType);
+        this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
     }
 
     @Override
     public Type getItemType() {
         return itemType;
+    }
+
+    @Override
+    public Class getItemClass() {
+        return itemClass;
+    }
+
+    @Override
+    public long getItemClassHash() {
+        return itemClassHash;
     }
 }

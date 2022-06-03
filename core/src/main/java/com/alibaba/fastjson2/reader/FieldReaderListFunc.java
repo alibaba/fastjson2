@@ -2,6 +2,8 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -15,6 +17,8 @@ final class FieldReaderListFunc<T, V>
     final Method method;
     final BiConsumer<T, V> function;
     final Type itemType;
+    final Class itemClass;
+    final long itemClassHash;
     private ObjectReader itemObjectReader;
 
     FieldReaderListFunc(
@@ -37,6 +41,8 @@ final class FieldReaderListFunc<T, V>
         } else {
             itemType = null;
         }
+        this.itemClass = TypeUtils.getClass(itemType);
+        this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
     }
 
     @Override
@@ -64,5 +70,15 @@ final class FieldReaderListFunc<T, V>
     @Override
     public Type getItemType() {
         return itemType;
+    }
+
+    @Override
+    public Class getItemClass() {
+        return itemClass;
+    }
+
+    @Override
+    public long getItemClassHash() {
+        return itemClassHash;
     }
 }

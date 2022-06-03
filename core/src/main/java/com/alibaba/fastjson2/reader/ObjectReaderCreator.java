@@ -1540,6 +1540,10 @@ public class ObjectReaderCreator {
             return new FieldReaderDoubleField(fieldName, fieldClass, ordinal, features, format, (Double) defaultValue, jsonSchema, field);
         }
 
+        if (fieldClass == char.class) {
+            return new FieldReaderCharValueField(fieldName, ordinal, features, format, (Character) defaultValue, jsonSchema, field);
+        }
+
         if (fieldClass == BigDecimal.class) {
             return new FieldReaderBigDecimalField(fieldName, fieldClass, ordinal, features, format, (BigDecimal) defaultValue, jsonSchema, field);
         }
