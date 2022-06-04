@@ -236,7 +236,7 @@ public class ObjectWriterAdapter<T>
 
         jsonWriter.startObject();
 
-        if (jsonWriter.isWriteTypeInfo(object, features)) {
+        if (((this.features | features) & JSONWriter.Feature.WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
             writeTypeInfo(jsonWriter);
         }
 
