@@ -22,7 +22,7 @@
 - 支持`Java`服务端、客户端`Android`、大数据场景。
 - 支持`Kotlin` [https://alibaba.github.io/fastjson2/kotlin_cn](https://alibaba.github.io/fastjson2/kotlin_cn)
 - 支持`JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
-- 支持`Android` [(2.0.6.android)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.6.android/)
+- 支持`Android 8+` [(2.0.6.android)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.6.android/)
 - 支持`Graal Native-Image` [(2.0.6.graal)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.6.graal/)
 
 ![fastjson](docs/logo.jpg "fastjson")
