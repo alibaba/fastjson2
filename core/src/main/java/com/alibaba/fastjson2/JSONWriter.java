@@ -164,6 +164,10 @@ public abstract class JSONWriter
     }
 
     public boolean isWriteNulls() {
+        return (context.features & Feature.WriteNulls.mask) != 0;
+    }
+
+    public boolean isWriteNullsAny() {
         long mask = Feature.WriteNulls.mask
                 | Feature.NullAsDefaultValue.mask
                 | Feature.WriteNullBooleanAsFalse.mask
