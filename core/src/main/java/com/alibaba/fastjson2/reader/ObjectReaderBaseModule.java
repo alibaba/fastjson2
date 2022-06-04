@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONBuilder;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONField;
@@ -233,6 +230,15 @@ public class ObjectReaderBaseModule
                     case "com.alibaba.fastjson.annotation.JSONType":
                         getBeanInfo1x(beanInfo, annotation);
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonTypeInfo":
+                        processJacksonJsonTypeInfo(beanInfo, annotation);
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonTypeName":
+                        processJacksonJsonTypeName(beanInfo, annotation);
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonSubTypes":
+                        processJacksonJsonSubTypes(beanInfo, annotation);
+                        break;
                     case "kotlin.Metadata":
                         beanInfo.kotlin = true;
                         break;
@@ -252,6 +258,107 @@ public class ObjectReaderBaseModule
             if (beanInfo.creatorConstructor == null && beanInfo.kotlin) {
                 BeanUtils.getKotlinConstructor(objectClass, beanInfo);
             }
+        }
+
+        private void processJacksonJsonTypeName(BeanInfo beanInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "value": {
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                beanInfo.typeName = value;
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            });
+        }
+
+        private void processJacksonJsonSubTypes(BeanInfo beanInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "value": {
+                            Object[] value = (Object[]) result;
+                            if (value.length != 0) {
+                                beanInfo.seeAlso = new Class[value.length];
+                                beanInfo.seeAlsoNames = new String[value.length];
+                                for (int i = 0; i < value.length; i++) {
+                                    Annotation subTypeAnn = (Annotation) value[i];
+                                    processJacksonJsonSubTypesType(beanInfo, i, subTypeAnn);
+                                }
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            });
+        }
+
+        private void processJacksonJsonSubTypesType(BeanInfo beanInfo, int index, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "value": {
+                            Class value = (Class) result;
+                            beanInfo.seeAlso[index] = value;
+                            break;
+                        }
+                        case "name": {
+                            String value = (String) result;
+                            beanInfo.seeAlsoNames[index] = value;
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            });
+        }
+
+        private void processJacksonJsonTypeInfo(BeanInfo beanInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "property": {
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                beanInfo.typeKey = value;
+                                beanInfo.readerFeatures |= JSONReader.Feature.SupportAutoType.mask;
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            });
         }
 
         private void getBeanInfo(BeanInfo beanInfo, Annotation[] annotations) {

@@ -215,9 +215,9 @@ public class ObjectReaderNoneDefaultConstrutor<T>
                     continue;
                 }
 
-                boolean supportAutoType = jsonReader.getContext().isEnabled(JSONReader.Feature.SupportAutoType);
-
                 JSONReader.Context context = jsonReader.getContext();
+                boolean supportAutoType = ((this.features | features | context.getFeatures()) & JSONReader.Feature.SupportAutoType.mask) != 0;
+
                 ObjectReader autoTypeObjectReader = null;
 
                 if (supportAutoType) {

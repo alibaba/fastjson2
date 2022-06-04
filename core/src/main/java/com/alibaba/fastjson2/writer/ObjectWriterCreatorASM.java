@@ -493,11 +493,13 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ISTORE, COMMA); // comma = false
 
         Label writeFields_ = new Label();
-        mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-        mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-        mw.visitVarInsn(Opcodes.ALOAD, FIELD_TYPE);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isWriteTypeInfo", "(Ljava/lang/Object;Ljava/lang/reflect/Type;)Z", false);
-        mw.visitJumpInsn(Opcodes.IFEQ, writeFields_);
+        if ((objectFeatures & JSONWriter.Feature.WriteClassName.mask) == 0) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_TYPE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isWriteTypeInfo", "(Ljava/lang/Object;Ljava/lang/reflect/Type;)Z", false);
+            mw.visitJumpInsn(Opcodes.IFEQ, writeFields_);
+        }
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -524,7 +526,8 @@ public class ObjectWriterCreatorASM
         mw.visitEnd();
     }
 
-    private void genMethodWriteJSONB(Class objectType,
+    private void genMethodWriteJSONB(
+            Class objectType,
             List<FieldWriter> fieldWriters,
             ClassWriter cw,
             String classNameType,
@@ -541,11 +544,13 @@ public class ObjectWriterCreatorASM
         int entryCnt = fieldWriters.size();
 
         Label notWriteType = new Label();
-        mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-        mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-        mw.visitVarInsn(Opcodes.ALOAD, FIELD_TYPE);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isWriteTypeInfo", "(Ljava/lang/Object;Ljava/lang/reflect/Type;)Z", false);
-        mw.visitJumpInsn(Opcodes.IFEQ, notWriteType);
+        if ((objectFeatures & JSONWriter.Feature.WriteClassName.mask) == 0) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_TYPE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isWriteTypeInfo", "(Ljava/lang/Object;Ljava/lang/reflect/Type;)Z", false);
+            mw.visitJumpInsn(Opcodes.IFEQ, notWriteType);
+        }
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
