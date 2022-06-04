@@ -34,21 +34,25 @@ class Model {
 
 # 4. JSONReader.Feature介绍
 
-|  JSONReader.Feature |  介绍 |
-| --- | --- |
-|  FieldBased |  基于字段反序列化，如果不配置，会默认基于public的field和getter方法序列化。配置后，会基于非static的field（包括private）做反序列化。在fieldbase配置下会更安全|
-|  IgnoreNoneSerializable |  反序列化忽略非Serializable类型的字段 |
-|  SupportArrayToBean | 支持数据映射的方式 |
-|  InitStringFieldAsEmpty | 初始化String字段为空字符串"" |
-| SupportAutoType | 支持自动类型，要读取带"@type"类型信息的JSON数据，需要显示打开SupportAutoType |
-| SupportSmartMatch | 默认下是camal case精确匹配，打开这个后，能够智能识别camal/upper/pascal/snake/Kebab五中case |
-| UseNativeObject | 默认是使用JSONObject和JSONArray，配置后会使用LinkedHashMap和ArrayList |
-| SupportClassForName | 支持类型为Class的字段，使用Class.forName。为了安全这个是默认关闭的 |
-| IgnoreSetNullValue | 忽略输入为null的字段 |
-| UseDefaultConstructorAsPossible | 尽可能使用缺省构造函数，在fieldBase打开这个选项没打开的时候，会可能用Unsafe.allocateInstance来实现 | 
-| UseBigDecimalForFloats | 默认配置会使用BigDecimal来parse小数，打开后会使用Float |
-| UseBigDecimalForDoubles | 默认配置会使用BigDecimal来parse小数，打开后会使用Double |
-| ErrorOnEnumNotMatch | 默认Enum的name不匹配时会忽略，打开后不匹配会抛异常 |
+| JSONReader.Feature              | 介绍                                                                                                  |
+|---------------------------------|-----------------------------------------------------------------------------------------------------|
+| FieldBased                      | 基于字段反序列化，如果不配置，会默认基于public的field和getter方法序列化。配置后，会基于非static的field（包括private）做反序列化。在fieldbase配置下会更安全 |
+| IgnoreNoneSerializable          | 反序列化忽略非Serializable类型的字段                                                                            |
+| SupportArrayToBean              | 支持数据映射的方式                                                                                           |
+| InitStringFieldAsEmpty          | 初始化String字段为空字符串""                                                                                  |
+| SupportAutoType                 | 支持自动类型，要读取带"@type"类型信息的JSON数据，需要显示打开SupportAutoType                                                 |
+| SupportSmartMatch               | 默认下是camal case精确匹配，打开这个后，能够智能识别camal/upper/pascal/snake/Kebab五中case                                 |
+| UseNativeObject                 | 默认是使用JSONObject和JSONArray，配置后会使用LinkedHashMap和ArrayList                                             |
+| SupportClassForName             | 支持类型为Class的字段，使用Class.forName。为了安全这个是默认关闭的                                                          |
+| IgnoreSetNullValue              | 忽略输入为null的字段                                                                                        |
+| UseDefaultConstructorAsPossible | 尽可能使用缺省构造函数，在fieldBase打开这个选项没打开的时候，会可能用Unsafe.allocateInstance来实现                                   | 
+| UseBigDecimalForFloats          | 默认配置会使用BigDecimal来parse小数，打开后会使用Float                                                               |
+| UseBigDecimalForDoubles         | 默认配置会使用BigDecimal来parse小数，打开后会使用Double                                                              |
+| ErrorOnEnumNotMatch             | 默认Enum的name不匹配时会忽略，打开后不匹配会抛异常                                                                       |
+| TrimString                      | 对读取到的字符串值做trim处理                                                                                    |
+| ErrorOnNotSupportAutoType       | 遇到AutoType报错（缺省是忽略）                                                                                 |
+| DuplicateKeyValueAsArray | 重复Key的Value不是替换而是组合成数组                                                                              |
+| AllowUnQuotedFieldNames | 支持不带双引号的字段名 |
 
 # 5. JSONWrier.Feature介绍
 
