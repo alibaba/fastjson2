@@ -10,7 +10,7 @@ public class Issue364 {
     @Test
     public void test() {
         TestBean bean = new TestBean();
-        Assertions.assertEquals("{\"bean\":null,\"msg\":\"\"}", JSON.toJSONString(bean, SerializerFeature.WriteNullStringAsEmpty));
+        Assertions.assertEquals("{\"msg\":\"\"}", JSON.toJSONString(bean, SerializerFeature.WriteNullStringAsEmpty));
     }
 
     @Data
