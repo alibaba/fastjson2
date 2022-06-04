@@ -37,6 +37,9 @@ public @interface JSONType {
 
     String[] includes() default {};
 
+    /**
+     * Order in which properties of annotated object are to be serialized in.
+     */
     String[] orders() default {};
 
     Class<?> serializer() default Void.class;
