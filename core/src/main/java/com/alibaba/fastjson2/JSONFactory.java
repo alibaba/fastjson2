@@ -229,18 +229,7 @@ public final class JSONFactory {
     static ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
     static ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
 
-    static JSONPathCompiler defaultJSONPathCompiler;
-    static {
-        switch (JSONFactory.CREATOR) {
-            case "reflect":
-            case "lambda":
-                defaultJSONPathCompiler = JSONPathCompilerReflect.INSTANCE;
-                break;
-            default:
-                defaultJSONPathCompiler = JSONPathCompilerReflectASM.INSTANCE;
-                break;
-        }
-    }
+    static JSONPathCompiler defaultJSONPathCompiler = JSONPathCompilerReflect.INSTANCE;
 
     static final ThreadLocal<ObjectReaderCreator> readerCreatorLocal = new ThreadLocal<>();
     static final ThreadLocal<ObjectReaderProvider> readerProviderLocal = new ThreadLocal<>();

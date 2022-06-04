@@ -428,11 +428,8 @@ public class ObjectReaderProvider {
                 this.creator = ObjectReaderCreator.INSTANCE;
                 break;
             case "lambda":
-                this.creator = ObjectReaderCreatorLambda.INSTANCE;
-                break;
-            case "asm":
             default:
-                this.creator = ObjectReaderCreatorASM.INSTANCE;
+                this.creator = ObjectReaderCreatorLambda.INSTANCE;
                 break;
         }
 
