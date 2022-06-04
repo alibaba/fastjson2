@@ -27,11 +27,13 @@ final class FieldReaderObjectFunc<T, V>
             Object defaultValue,
             JSONSchema schema,
             Method method,
-            BiConsumer<T, V> function
+            BiConsumer<T, V> function,
+            ObjectReader fieldObjectReader
     ) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
         this.method = method;
         this.function = function;
+        this.fieldObjectReader = fieldObjectReader;
     }
 
     @Override
