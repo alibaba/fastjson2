@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipInputStream;
 
@@ -19,6 +20,8 @@ public class LargeFile2MTest {
         ) {
             zipIn.getNextEntry();
             str = IOUtils.toString(zipIn, "UTF-8");
+        } catch (IOException ignored) {
+            // ignored
         }
     }
 
