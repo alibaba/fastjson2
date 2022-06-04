@@ -65,9 +65,9 @@ public class EishayParseString {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("millis : " + millis);
-        // zulu11.52.13 :
-        // zulu17.32.13 : 525 513
-        // zulu8.58.0.13 : 517 552 507
+        // zulu11.52.13 : 535
+        // zulu17.32.13 : 500
+        // zulu8.58.0.13 : 517
     }
 
     public static void fastjson1_perf() {
@@ -77,9 +77,9 @@ public class EishayParseString {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("millis : " + millis);
-        // zulu17.32.13 :
-        // zulu11.52.13 : 928
-        // zulu8.58.0.13 :
+        // zulu17.32.13 : 544
+        // zulu11.52.13 : 678
+        // zulu8.58.0.13 : 647
     }
 
     public static void main(String[] args) throws RunnerException {
