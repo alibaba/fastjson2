@@ -40,6 +40,11 @@ final class FieldReaderObjectFunc<T, V>
     }
 
     @Override
+    public ObjectReader getInitReader() {
+        return fieldObjectReader;
+    }
+
+    @Override
     public void accept(T object, Object value) {
         if (fieldType == Float.class) {
             value = TypeUtils.toFloat(value);

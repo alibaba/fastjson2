@@ -32,6 +32,11 @@ class FieldReaderObjectParam<T>
     }
 
     @Override
+    public ObjectReader getInitReader() {
+        return fieldObjectReader;
+    }
+
+    @Override
     public ObjectReader<Object> getFieldObjectReader(JSONReader.Context context) {
         if (fieldObjectReader == null) {
             fieldObjectReader = context
