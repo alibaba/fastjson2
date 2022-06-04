@@ -70,6 +70,12 @@ class ObjectWriterBaseModule
                     case "com.fasterxml.jackson.annotation.JsonPropertyOrder":
                         processJacksonJsonPropertyOrder(beanInfo, annotation);
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonTypeInfo":
+                        processJacksonJsonTypeInfo(beanInfo, annotation);
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonTypeName":
+                        processJacksonJsonTypeName(beanInfo, annotation);
+                        break;
                     case "kotlin.Metadata":
                         beanInfo.kotlin = true;
                         BeanUtils.getKotlinConstructor(objectClass, beanInfo);
@@ -267,6 +273,53 @@ class ObjectWriterBaseModule
             if (jsonField.jsonDirect()) {
                 fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
             }
+        }
+
+        private void processJacksonJsonTypeName(BeanInfo beanInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "value": {
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                beanInfo.typeName = value;
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            });
+        }
+
+        private void processJacksonJsonTypeInfo(BeanInfo beanInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "property": {
+                            String value = (String) result;
+                            if (!value.isEmpty()) {
+                                beanInfo.typeKey = value;
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteClassName.mask;
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            });
         }
 
         private void processJacksonJsonPropertyOrder(BeanInfo beanInfo, Annotation annotation) {
