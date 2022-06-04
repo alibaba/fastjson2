@@ -117,11 +117,18 @@ public class FastJsonHttpMessageConverter
     protected void writeInternal(Object object, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             HttpHeaders headers = outputMessage.getHeaders();
+            int contentLength;
 
-            int len = JSON.writeTo(baos, object, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
+            if (object instanceof String && JSON.isValidObject((String) object)) {
+                byte[] strBytes = ((String) object).getBytes(config.getCharset());
+                contentLength = strBytes.length;
+                baos.write(strBytes, 0, strBytes.length);
+            } else {
+                contentLength = JSON.writeTo(baos, object, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
+            }
 
             if (headers.getContentLength() < 0 && config.isWriteContentLength()) {
-                headers.setContentLength(len);
+                headers.setContentLength(contentLength);
             }
 
             baos.writeTo(outputMessage.getBody());
