@@ -147,7 +147,8 @@ public class ObjectReaderCreatorLambda
                     fieldInfo.schema,
                     fieldType,
                     fieldClass,
-                    method
+                    method,
+                    fieldInfo.getInitReader()
             );
             FieldReader origin = fieldReaders.putIfAbsent(fieldName, fieldReader);
             if (origin != null && origin.compareTo(fieldReader) > 0) {
@@ -221,7 +222,7 @@ public class ObjectReaderCreatorLambda
                 || isExternalClass(objectClass)) {
             return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, method, initReader);
         }
-        return createFieldReaderLambda(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, method);
+        return createFieldReaderLambda(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, method, initReader);
     }
 
     protected <T> FieldReader createFieldReaderLambda(
@@ -236,7 +237,8 @@ public class ObjectReaderCreatorLambda
             String schema,
             Type fieldType,
             Class fieldClass,
-            Method method
+            Method method,
+            ObjectReader initReader
     ) {
         if (defaultValue != null && defaultValue.getClass() != fieldClass) {
             Function typeConvert = JSONFactory
@@ -255,6 +257,11 @@ public class ObjectReaderCreatorLambda
             if (!object.isEmpty()) {
                 jsonSchema = JSONSchema.of(object, fieldClass);
             }
+        }
+
+        if (initReader != null) {
+            BiConsumer function = (BiConsumer) lambdaFunction(objectClass, fieldClass, method);
+            return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, method, function, initReader);
         }
 
         if (fieldType == boolean.class) {
@@ -298,7 +305,7 @@ public class ObjectReaderCreatorLambda
         }
 
         BiConsumer function = (BiConsumer) lambdaFunction(objectClass, fieldClass, method);
-        return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, method, function);
+        return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, method, function, initReader);
     }
 
     private static Object lambdaFunction(Class objectType, Class fieldClass, Method method) {
