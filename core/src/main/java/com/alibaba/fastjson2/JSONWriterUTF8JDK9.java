@@ -12,6 +12,11 @@ final class JSONWriterUTF8JDK9
     @Override
     public void writeString(String str) {
         if (str == null) {
+            if (isEnabled(Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) {
+                writeString("");
+                return;
+            }
+
             writeNull();
             return;
         }
