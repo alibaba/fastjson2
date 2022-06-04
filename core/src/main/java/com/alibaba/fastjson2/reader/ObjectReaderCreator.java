@@ -968,7 +968,7 @@ public class ObjectReaderCreator {
                     method.getGenericReturnType(),
                     method.getReturnType(),
                     method,
-                    null
+                    fieldInfo.getInitReader()
             );
             FieldReader origin = fieldReaders.putIfAbsent(fieldName,
                     fieldReader
@@ -1723,7 +1723,7 @@ public class ObjectReaderCreator {
             Method method,
             BiConsumer<T, V> function
     ) {
-        return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, 0, null, null, null, method, function);
+        return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, 0, null, null, null, method, function, null);
     }
 
     <T, V> FieldReader createFieldReader(
@@ -1738,7 +1738,8 @@ public class ObjectReaderCreator {
             Object defaultValue,
             JSONSchema schema,
             Method method,
-            BiConsumer<T, V> function
+            BiConsumer<T, V> function,
+            ObjectReader initReader
     ) {
         if (fieldClass == Integer.class) {
             return new FieldReaderInt32Func<>(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
@@ -1806,10 +1807,10 @@ public class ObjectReaderCreator {
         }
 
         if (fieldTypeResolved != null) {
-            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
+            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function, initReader);
         }
 
-        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
+        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function, initReader);
     }
 
     protected ObjectReader createEnumReader(
