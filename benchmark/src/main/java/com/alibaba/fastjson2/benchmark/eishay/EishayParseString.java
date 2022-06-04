@@ -65,8 +65,8 @@ public class EishayParseString {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("millis : " + millis);
-        // zulu11.52.13 : 535
-        // zulu17.32.13 : 500
+        // zulu11.52.13 : 535 490
+        // zulu17.32.13 : 500 485
         // zulu8.58.0.13 : 517
     }
 
