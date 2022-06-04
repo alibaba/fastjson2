@@ -98,7 +98,11 @@ final class ObjectWriterImplDate
             int second = zdt.getSecond();
             int nano = zdt.getNano();
             if (nano == 0) {
-                jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
+                if (hour == 0 && minute == 0 && second == 0 && date.getClass().getName().equals("java.sql.Date")) {
+                    jsonWriter.writeDateYYYMMDD10(year, month, dayOfMonth);
+                } else {
+                    jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
+                }
             } else {
                 jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano / 1000_000, offsetSeconds);
             }
