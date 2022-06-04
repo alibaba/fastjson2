@@ -160,6 +160,15 @@ public interface FieldReader<T>
             }
         }
 
+        ObjectReader thisInitReader = this.getInitReader();
+        ObjectReader otherInitReader = o.getInitReader();
+        if (thisInitReader != null && otherInitReader == null) {
+            return -1;
+        }
+        if (thisInitReader == null && otherInitReader != null) {
+            return 1;
+        }
+
         return cmp;
     }
 

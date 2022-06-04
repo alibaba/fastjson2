@@ -25,6 +25,11 @@ class FieldReaderObjectMethod<T>
     }
 
     @Override
+    public ObjectReader getInitReader() {
+        return fieldObjectReader;
+    }
+
+    @Override
     public void accept(T object, Object value) {
         if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
             return;
@@ -53,6 +58,15 @@ class FieldReaderObjectMethod<T>
     public ObjectReader getFieldObjectReader(JSONReader.Context context) {
         if (fieldObjectReader == null) {
             fieldObjectReader = context
+                    .getObjectReader(fieldType);
+        }
+        return fieldObjectReader;
+    }
+
+    @Override
+    public ObjectReader getObjectReader(JSONReader jsonReader) {
+        if (fieldObjectReader == null) {
+            fieldObjectReader = jsonReader
                     .getObjectReader(fieldType);
         }
         return fieldObjectReader;

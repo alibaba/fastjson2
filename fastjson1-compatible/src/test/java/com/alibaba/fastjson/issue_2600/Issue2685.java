@@ -36,8 +36,8 @@ public class Issue2685 {
         System.out.println(smsMsg);
 
         com.alibaba.fastjson2.JSON.mixIn(SMGPSubmitMessage.class, Mixin.class);
-        smgpSubmitMessage = JSON.parseObject(smsMsg, SMGPSubmitMessage.class);
-        assertEquals("hello", smgpSubmitMessage.getMsgContent());
+        SMGPSubmitMessage smgpSubmitMessage2 = JSON.parseObject(smsMsg, SMGPSubmitMessage.class);
+        assertEquals("hello", smgpSubmitMessage2.getMsgContent());
     }
 
     public interface Mixin {
