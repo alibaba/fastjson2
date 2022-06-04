@@ -11,7 +11,7 @@ public class Issue364 {
     @Test
     public void test() {
         TestBean bean = new TestBean();
-        assertEquals("{\"bean\":null,\"msg\":\"\"}", JSON.toJSONString(bean, JSONWriter.Feature.NullAsDefaultValue));
+        assertEquals("{\"msg\":\"\"}", JSON.toJSONString(bean, JSONWriter.Feature.NullAsDefaultValue));
     }
 
     @Data

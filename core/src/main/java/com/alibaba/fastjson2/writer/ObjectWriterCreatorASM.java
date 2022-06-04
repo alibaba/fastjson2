@@ -74,6 +74,7 @@ public class ObjectWriterCreatorASM
     static final int JSON_WRITER = 1;
     static final String NOT_WRITE_DEFAULT_VALUE = "WRITE_DEFAULT_VALUE";
     static final String WRITE_NULLS = "WRITE_NULLS";
+    static final String CONTEXT_FEATURES = "CONTEXT_FEATURES";
 
     static String[] fieldWriterCache = new String[1024];
 
@@ -1617,8 +1618,26 @@ public class ObjectWriterCreatorASM
 
         // if (!jw.isWriteNulls())
         if ((features & JSONWriter.Feature.WriteNulls.mask) == 0) {
-            mw.visitVarInsn(Opcodes.ILOAD, mwc.var(WRITE_NULLS));
-            mw.visitJumpInsn(Opcodes.IFEQ, notNull_);
+            long nullFeatures = JSONWriter.Feature.WriteNulls.mask;
+            if (fieldClass == AtomicLongArray.class
+                    || fieldClass == AtomicIntegerArray.class
+                    || Collection.class.isAssignableFrom(fieldClass)
+                    || fieldClass.isArray()) {
+                nullFeatures |= JSONWriter.Feature.WriteNullListAsEmpty.mask;
+                nullFeatures |= JSONWriter.Feature.NullAsDefaultValue.mask;
+            } else if (Number.class.isAssignableFrom(fieldClass)) {
+                nullFeatures |= JSONWriter.Feature.WriteNullNumberAsZero.mask;
+                nullFeatures |= JSONWriter.Feature.NullAsDefaultValue.mask;
+            } else if (fieldClass == Boolean.class) {
+                nullFeatures |= JSONWriter.Feature.WriteNullBooleanAsFalse.mask;
+                nullFeatures |= JSONWriter.Feature.NullAsDefaultValue.mask;
+            } else if (fieldClass == String.class) {
+                nullFeatures |= JSONWriter.Feature.WriteNullStringAsEmpty.mask;
+                nullFeatures |= JSONWriter.Feature.NullAsDefaultValue.mask;
+            }
+            mwc.genIsEnabled(nullFeatures, notNull_);
+//            mw.visitVarInsn(Opcodes.ILOAD, mwc.var(WRITE_NULLS));
+//            mw.visitJumpInsn(Opcodes.IFEQ, notNull_);
         }
 
         // writeFieldName(w);
@@ -2965,6 +2984,16 @@ public class ObjectWriterCreatorASM
             return var;
         }
 
+        int var2(Object key) {
+            Integer var = variants.get(key);
+            if (var == null) {
+                var = maxVariant;
+                variants.put(key, var);
+                maxVariant += 2;
+            }
+            return var;
+        }
+
         void genVariantsMethodBefore() {
             Label notDefault_ = new Label(), end_ = new Label();
 
@@ -2976,14 +3005,49 @@ public class ObjectWriterCreatorASM
 
             mw.visitInsn(Opcodes.ICONST_0);
             mw.visitVarInsn(Opcodes.ISTORE, var(WRITE_NULLS));
+            mw.visitInsn(Opcodes.LCONST_0);
+            mw.visitVarInsn(Opcodes.LSTORE, var2(CONTEXT_FEATURES));
             mw.visitJumpInsn(Opcodes.GOTO, end_);
 
             mw.visitLabel(notDefault_);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isWriteNulls", "()Z", false);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "getFeatures", "()J", false);
+            mw.visitVarInsn(Opcodes.LSTORE, var2(CONTEXT_FEATURES));
+
+            long features = JSONWriter.Feature.WriteNulls.mask
+                    | JSONWriter.Feature.NullAsDefaultValue.mask
+                    | JSONWriter.Feature.WriteNullBooleanAsFalse.mask
+                    | JSONWriter.Feature.WriteNullStringAsEmpty.mask
+                    | JSONWriter.Feature.WriteNullNumberAsZero.mask
+                    | JSONWriter.Feature.WriteNullListAsEmpty.mask;
+            genIsEnabled(features);
             mw.visitVarInsn(Opcodes.ISTORE, var(WRITE_NULLS));
 
             mw.visitLabel(end_);
+        }
+
+        void genIsEnabled(long features, Label label) {
+            mw.visitVarInsn(Opcodes.LLOAD, var2(CONTEXT_FEATURES));
+            mw.visitLdcInsn(features);
+            mw.visitInsn(Opcodes.LAND);
+            mw.visitInsn(Opcodes.LCONST_0);
+            mw.visitInsn(Opcodes.LCMP);
+            mw.visitJumpInsn(Opcodes.IFEQ, label);
+        }
+
+        void genIsEnabled(long features) {
+            Label L1 = new Label(), L2 = new Label();
+            mw.visitVarInsn(Opcodes.LLOAD, var2(CONTEXT_FEATURES));
+            mw.visitLdcInsn(features);
+            mw.visitInsn(Opcodes.LAND);
+            mw.visitInsn(Opcodes.LCONST_0);
+            mw.visitInsn(Opcodes.LCMP);
+            mw.visitJumpInsn(Opcodes.IFEQ, L1);
+            mw.visitInsn(Opcodes.ICONST_1);
+            mw.visitJumpInsn(Opcodes.GOTO, L2);
+            mw.visitLabel(L1);
+            mw.visitInsn(Opcodes.ICONST_0);
+            mw.visitLabel(L2);
         }
     }
 }
