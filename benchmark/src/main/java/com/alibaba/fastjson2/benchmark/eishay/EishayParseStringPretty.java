@@ -63,6 +63,7 @@ public class EishayParseStringPretty {
     }
 
     public static void main(String[] args) throws RunnerException {
+//        new EishayParseStringPretty().fastjson2_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayParseStringPretty.class.getName())
                 .mode(Mode.Throughput)
