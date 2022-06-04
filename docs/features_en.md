@@ -52,7 +52,10 @@ class Model {
 | UseBigDecimalForFloats | The default configuration will use BigDecimal to parse decimals, and will use Float when turned on. |
 | UseBigDecimalForDoubles | The default configuration will use BigDecimal to parse decimals, and Double will be used when turned on. |
 | ErrorOnEnumNotMatch | By default, if the name of the Enum does not match, it will be ignored, and an exception will be thrown if it does not match when turned on. |
-
+| TrimString                      |                                                                                     |
+| ErrorOnNotSupportAutoType       |                                                                             |
+| DuplicateKeyValueAsArray |                                                                               |
+| AllowUnQuotedFieldNames |  |
 # 5. JSONWrier.Feature
 
 |  JSONWrier.Feature |  Description |
