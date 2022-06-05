@@ -51,6 +51,34 @@ public class Issue392 {
         assertEquals(1654053162000L, date.getTime());
     }
 
+    @Test
+    public void test2_str() {
+        String date1 = JSONObject.of("date1", "1654053162").toString();
+        Date date = JSON.parseObject(date1, Bean2.class).date1;
+        assertEquals(1654053162000L, date.getTime());
+    }
+
+    @Test
+    public void test2_str1() {
+        String date1 = JSONObject.of("date1", "165405316").toString();
+        Date date = JSON.parseObject(date1, Bean2.class).date1;
+        assertEquals(165405316000L, date.getTime());
+    }
+
+    @Test
+    public void test2_str2() {
+        String date1 = JSONObject.of("date1", "16540531").toString();
+        Date date = JSON.parseObject(date1, Bean2.class).date1;
+        assertEquals(16540531000L, date.getTime());
+    }
+
+    @Test
+    public void test2_str3() {
+        String date1 = JSONObject.of("date1", "1654053").toString();
+        Date date = JSON.parseObject(date1, Bean2.class).date1;
+        assertEquals(1654053000L, date.getTime());
+    }
+
     public static class Bean2 {
         @JSONField(format = "unixtime")
         public Date date1;

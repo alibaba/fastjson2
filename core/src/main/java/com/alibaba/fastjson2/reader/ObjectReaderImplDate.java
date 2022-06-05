@@ -82,7 +82,12 @@ public class ObjectReaderImplDate
             }
         }
 
-        if (format != null) {
+        if ((formatUnixTime || formatUnixTime) && jsonReader.isString()) {
+            millis = jsonReader.readInt64Value();
+            if (formatUnixTime) {
+                millis *= 1000L;
+            }
+        } else if (format != null) {
             DateTimeFormatter formatter = getDateFormatter(jsonReader.getLocale());
 
             ZonedDateTime zdt;
