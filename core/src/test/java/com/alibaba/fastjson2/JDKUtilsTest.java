@@ -27,7 +27,7 @@ public class JDKUtilsTest {
     @Test
     public void test_11() throws Throwable {
         System.out.println("JVM_VERSION : " + JDKUtils.JVM_VERSION);
-        if (JDKUtils.JVM_VERSION == 11 && JDKUtils.LANG_UNNAMED) {
+        if (JDKUtils.JVM_VERSION == 11) {
             Function<byte[], String> stringCreator = JDKUtils.getStringCreatorJDK11();
 
             byte[] bytes = new byte[]{'a', 'b', 'c'};
