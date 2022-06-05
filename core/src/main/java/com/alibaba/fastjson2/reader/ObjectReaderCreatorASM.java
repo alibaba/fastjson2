@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.codec.BeanInfo;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.internal.asm.*;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
@@ -279,7 +280,7 @@ public class ObjectReaderCreatorASM
                     break;
                 }
 
-                if (fieldReader.getInitReader() != null) {
+                if ((fieldReader.getFeatures() & FieldInfo.READ_USING_MASK) != 0) {
                     match = false;
                     break;
                 }
