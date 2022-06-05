@@ -58,12 +58,32 @@ public class EishayParseTreeUTF8Bytes {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("millis : " + millis);
-        // zulu17.32.13 : 991 981
+        // zulu17.32.13 : 991 981 1008
         // zulu11.52.13 : 1154 965 922
         // zulu8.58.0.13 : 1155 1010
     }
 
+    public void fastjson1_perf_test() {
+        for (int i = 0; i < 10; i++) {
+            fastjson1_perf();
+        }
+    }
+
+    public static void fastjson1_perf() {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000 * 1000; ++i) {
+            com.alibaba.fastjson.JSON.parse(utf8Bytes);
+        }
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("millis : " + millis);
+        // zulu17.32.13 : 1379
+        // zulu11.52.13 : 1871
+        // zulu8.58.0.13 : 1586
+    }
+
     public static void main(String[] args) throws RunnerException {
+//        new EishayParseTreeUTF8Bytes().fastjson1_perf_test();
+//        new EishayParseTreeUTF8Bytes().fastjson2_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayParseTreeUTF8Bytes.class.getName())
                 .mode(Mode.Throughput)
