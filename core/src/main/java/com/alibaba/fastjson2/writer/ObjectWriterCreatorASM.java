@@ -141,7 +141,7 @@ public class ObjectWriterCreatorASM
             fieldBased = false;
         }
 
-        if (fieldBased && JDKUtils.JVM_VERSION >= 11 && !JDKUtils.LANG_UNNAMED && Throwable.class.isAssignableFrom(objectClass)) {
+        if (fieldBased && JDKUtils.JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
             return super.createObjectWriter(objectClass, features, modules);
         }
 

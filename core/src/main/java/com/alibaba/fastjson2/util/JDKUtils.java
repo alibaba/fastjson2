@@ -1,18 +1,12 @@
 package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.function.*;
 
 public class JDKUtils {
     public static final int JVM_VERSION;
-
-    // GraalVM not support
-    // Android not support
-    public static final boolean LANG_UNNAMED;
 
     static final Field FIELD_STRING_VALUE;
     static final long FIELD_STRING_VALUE_OFFSET;
@@ -36,8 +30,6 @@ public class JDKUtils {
     public static final Function<byte[], String> UNSAFE_ASCII_CREATOR;
 
     static {
-        String vmVendor = "", vmName = "";
-
         int jvmVersion = -1;
         try {
             String property = System.getProperty("java.specification.version");
@@ -45,9 +37,6 @@ public class JDKUtils {
                 property = property.substring(2);
             }
             jvmVersion = Integer.parseInt(property);
-
-            vmName = System.getProperty("java.vm.name");
-            vmVendor = System.getProperty("java.vm.vendor");
         } catch (Throwable ignored) {
         }
 
@@ -72,10 +61,6 @@ public class JDKUtils {
         CLASS_TRANSIENT = transientClass;
 
         JVM_VERSION = jvmVersion;
-
-        List<String> inputArguments = ManagementFactory.getRuntimeMXBean().getInputArguments();
-        LANG_UNNAMED = !vmVendor.contains("GraalVM") && !vmName.contains("Substrate")
-                && (inputArguments.contains("--add-opens=java.base/java.lang=ALL-UNNAMED") || JVM_VERSION <= 11);
 
         if (JVM_VERSION == 8) {
             Field field = null;
@@ -107,7 +92,7 @@ public class JDKUtils {
         UNSAFE_SUPPORT = unsafeSupport;
 
         Boolean bigEndian = null;
-        if (JDKUtils.JVM_VERSION > 8 && UNSAFE_SUPPORT && LANG_UNNAMED) {
+        if (JDKUtils.JVM_VERSION > 8 && UNSAFE_SUPPORT) {
             Class clazz;
             try {
                 clazz = Class.forName("java.lang.StringUTF16");
