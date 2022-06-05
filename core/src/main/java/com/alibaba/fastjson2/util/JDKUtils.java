@@ -4,7 +4,6 @@ import java.lang.invoke.*;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.function.*;
 
@@ -205,27 +204,6 @@ public class JDKUtils {
                 handle.type()
         );
         return (Function<byte[], String>) callSite.getTarget().invokeExact();
-    }
-
-    public static BiFunction<byte[], Charset, String> getStringCreatorJDK17() throws Throwable {
-        // GraalVM not support
-        // Android not support
-        MethodHandles.Lookup lookup = getLookup();
-
-        MethodHandles.Lookup caller = lookup.in(String.class);
-        MethodHandle handle = caller.findStatic(
-                String.class, "newStringNoRepl1", MethodType.methodType(String.class, byte[].class, Charset.class)
-        );
-
-        CallSite callSite = LambdaMetafactory.metafactory(
-                caller,
-                "apply",
-                MethodType.methodType(BiFunction.class),
-                handle.type().generic(),
-                handle,
-                handle.type()
-        );
-        return (BiFunction<byte[], Charset, String>) callSite.getTarget().invokeExact();
     }
 
     private static MethodHandles.Lookup getLookup() throws Exception {

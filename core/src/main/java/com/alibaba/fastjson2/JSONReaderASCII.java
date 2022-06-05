@@ -692,8 +692,8 @@ final class JSONReaderASCII
             } else {
                 if (this.str != null) {
                     str = this.str.substring(this.offset, offset);
-                } else if (JDKUtils.JVM_VERSION == 11) {
-                    if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {
+                } else if (JDKUtils.JVM_VERSION == 11 && !STRING_CREATOR_ERROR) {
+                    if (STRING_CREATOR_JDK11 == null) {
                         try {
                             STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
                         } catch (Throwable e) {
@@ -707,21 +707,9 @@ final class JSONReaderASCII
                         byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
                         str = STRING_CREATOR_JDK11.apply(bytes);
                     }
-                } else if (JDKUtils.JVM_VERSION == 15 || JDKUtils.JVM_VERSION == 17) {
-                    if (STRING_CREATOR_JDK17 == null && !STRING_CREATOR_ERROR) {
-                        try {
-                            STRING_CREATOR_JDK17 = JDKUtils.getStringCreatorJDK17();
-                        } catch (Throwable e) {
-                            STRING_CREATOR_ERROR = true;
-                        }
-                    }
-
-                    if (STRING_CREATOR_JDK17 == null) {
-                        str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
-                    } else {
-                        byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                        str = STRING_CREATOR_JDK17.apply(bytes, StandardCharsets.US_ASCII);
-                    }
+                } else if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+                    byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
+                    str = JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
                 } else {
                     str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
                 }
