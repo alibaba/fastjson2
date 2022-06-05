@@ -808,7 +808,7 @@ class ObjectWriterBaseModule
             case "java.sql.Time":
                 return JdbcSupport.createTimeWriter(null);
             case "java.sql.Timestamp":
-                return JdbcSupport.createTimestampWriter(null);
+                return JdbcSupport.createTimestampWriter(objectClass, null);
             case "org.joda.time.chrono.GregorianChronology":
                 return JodaSupport.createGregorianChronologyWriter(objectClass);
             case "org.joda.time.chrono.ISOChronology":

@@ -28,11 +28,11 @@ public interface FieldReaderObject<T, V>
             String typeName = fieldType.getTypeName();
             switch (typeName) {
                 case "java.sql.Time":
-                    return JdbcSupport.createTimeReader(format, locale);
+                    return JdbcSupport.createTimeReader((Class) fieldType, format, locale);
                 case "java.sql.Timestamp":
-                    return JdbcSupport.createTimestampReader(format, locale);
+                    return JdbcSupport.createTimestampReader((Class) fieldType, format, locale);
                 case "java.sql.Date":
-                    return JdbcSupport.createDateReader(format, locale);
+                    return JdbcSupport.createDateReader((Class) fieldType, format, locale);
                 case "byte[]":
                 case "[B":
                     return new ObjectReaderImplInt8Array(format);

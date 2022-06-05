@@ -481,7 +481,7 @@ public interface FieldWriter<T>
                 case "java.sql.Date":
                     return new ObjectWriterImplDate(format);
                 case "java.sql.Timestamp":
-                    return JdbcSupport.createTimestampWriter(format);
+                    return JdbcSupport.createTimestampWriter(valueClass, format);
                 case "org.joda.time.LocalDate":
                     return JodaSupport.createLocalDateWriter(valueClass, format);
                 case "org.joda.time.LocalDateTime":

@@ -91,11 +91,11 @@ abstract class FieldReaderImpl<T>
             String typeName = fieldType.getTypeName();
             switch (typeName) {
                 case "java.sql.Time":
-                    return reader = JdbcSupport.createTimeReader(format, locale);
+                    return reader = JdbcSupport.createTimeReader((Class) fieldType, format, locale);
                 case "java.sql.Timestamp":
-                    return reader = JdbcSupport.createTimestampReader(format, locale);
+                    return reader = JdbcSupport.createTimestampReader((Class) fieldType, format, locale);
                 case "java.sql.Date":
-                    return JdbcSupport.createDateReader(format, locale);
+                    return JdbcSupport.createDateReader((Class) fieldType, format, locale);
                 default:
                     break;
             }

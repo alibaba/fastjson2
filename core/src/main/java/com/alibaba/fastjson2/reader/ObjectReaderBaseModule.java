@@ -1748,11 +1748,11 @@ public class ObjectReaderBaseModule
 
         switch (typeName) {
             case "java.sql.Time":
-                return JdbcSupport.createTimeReader(null, null);
+                return JdbcSupport.createTimeReader((Class) type, null, null);
             case "java.sql.Timestamp":
-                return JdbcSupport.createTimestampReader(null, null);
+                return JdbcSupport.createTimestampReader((Class) type, null, null);
             case "java.sql.Date":
-                return JdbcSupport.createDateReader(null, null);
+                return JdbcSupport.createDateReader((Class) type, null, null);
             case "org.joda.time.Chronology":
                 return JodaSupport.createChronologyReader((Class) type);
             case "org.joda.time.LocalDate":
