@@ -65,7 +65,7 @@ public class EishayParseString {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("millis : " + millis);
-        // zulu11.52.13 : 535 490
+        // zulu11.52.13 : 535 490 474
         // zulu17.32.13 : 500 485
         // zulu8.58.0.13 : 517
     }
@@ -77,7 +77,7 @@ public class EishayParseString {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("millis : " + millis);
-        // zulu17.32.13 : 544
+        // zulu17.32.13 : 544 503
         // zulu11.52.13 : 678
         // zulu8.58.0.13 : 647
     }
@@ -87,6 +87,7 @@ public class EishayParseString {
 //        new EishayParseString().fastjson1_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayParseString.class.getName())
+                .exclude(EishayParseStringPretty.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .forks(1)
