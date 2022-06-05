@@ -415,6 +415,9 @@ public abstract class JSONReader
         if (this.ch != ch) {
             return false;
         }
+        if (ch == ',') {
+            this.comma = true;
+        }
         next();
         return true;
     }
@@ -1167,6 +1170,142 @@ public abstract class JSONReader
         return (T) objectReader.readObject(this, 0);
     }
 
+    public void read(List list) {
+        if (!nextIfMatch('[')) {
+            throw new JSONException("illegal input, offset " + offset + ", char " + ch);
+        }
+
+        for (; ; ) {
+            if (nextIfMatch(']')) {
+                break;
+            }
+            Object item = readAny();
+            list.add(item);
+
+            if (nextIfMatch(',')) {
+                continue;
+            }
+        }
+
+        nextIfMatch(',');
+    }
+
+    public void read(Map object, long features) {
+        boolean match = nextIfMatch('{');
+        boolean typeRedirect = false;
+        if (!match) {
+            if (typeRedirect = isTypeRedirect()) {
+                setTypeRedirect(false);
+            } else {
+                if (isString()) {
+                    String str = readString();
+                    if (str.isEmpty()) {
+                        return;
+                    }
+                }
+                throw new JSONException("illegal input， offset " + offset + ", char " + ch);
+            }
+        }
+
+        for_:
+        for (int i = 0; ; ++i) {
+            if (ch == '/') {
+                skipLineComment();
+            }
+
+            if (nextIfMatch('}')) {
+                break;
+            }
+
+            if (i != 0 && !comma) {
+                throw new JSONException("illegal input， offset " + offset + ", char " + ch);
+            }
+
+            String name;
+            if (match || typeRedirect) {
+                name = readFieldName();
+            } else {
+                name = getFieldName();
+                match = true;
+            }
+
+            if (name == null) {
+                name = readFieldNameUnquote();
+                if (ch == ':') {
+                    next();
+                }
+            }
+
+            comma = false;
+            Object value;
+            switch (ch) {
+                case '-':
+                case '+':
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                case '.':
+                    value = readNumber();
+                    break;
+                case '[':
+                    value = readArray();
+                    break;
+                case '{':
+                    value = readObject();
+                    break;
+                case '"':
+                case '\'':
+                    value = readString();
+                    break;
+                case 't':
+                case 'f':
+                    value = readBoolValue();
+                    break;
+                case 'n':
+                    readNull();
+                    value = null;
+                    break;
+                case '/':
+                    next();
+                    if (ch == '/') {
+                        skipLineComment();
+                    } else {
+                        throw new JSONException("FASTJSON" + JSON.VERSION + "input not support " + ch + ", offset " + offset);
+                    }
+                    continue for_;
+                case 'S':
+                    if (nextIfSet()) {
+                        value = read(HashSet.class);
+                    } else {
+                        throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
+                    }
+                    break;
+                default:
+                    throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
+            }
+            Object origin = object.put(name, value);
+            if (origin != null) {
+                long contextFeatures = features | context.getFeatures();
+                if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                    if (origin instanceof Collection) {
+                        ((Collection) origin).add(value);
+                        object.put(name, value);
+                    } else {
+                        JSONArray array = JSONArray.of(origin, value);
+                        object.put(name, array);
+                    }
+                }
+            }
+        }
+    }
+
     public <T> T read(Class<T> type) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
@@ -1251,6 +1390,7 @@ public abstract class JSONReader
         }
 
         if (ch == ',') {
+            this.comma = true;
             next();
         }
 
@@ -1368,6 +1508,7 @@ public abstract class JSONReader
         }
 
         if (ch == ',') {
+            this.comma = true;
             next();
         }
 
@@ -1465,6 +1606,7 @@ public abstract class JSONReader
         }
 
         if (ch == ',') {
+            this.comma = true;
             next();
         }
 

@@ -42,6 +42,9 @@ final class JSONReaderASCII
         if (this.ch != ch) {
             return false;
         }
+        if (ch == ',') {
+            this.comma = true;
+        }
 
         if (offset >= end) {
             this.ch = EOI;
@@ -213,6 +216,7 @@ final class JSONReaderASCII
                 }
 
                 if (c == ',') {
+                    this.comma = true;
                     offset++;
                     c = (char) bytes[offset];
 
@@ -597,6 +601,7 @@ final class JSONReaderASCII
         }
 
         if (b == ',') {
+            this.comma = true;
             this.offset = offset + 1;
             next();
         } else {
@@ -731,6 +736,7 @@ final class JSONReaderASCII
             }
 
             if (b == ',') {
+                this.comma = true;
                 this.offset = offset + 1;
 
                 // inline next

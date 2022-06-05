@@ -75,6 +75,9 @@ final class JSONReaderStr
         if (this.ch != ch) {
             return false;
         }
+        if (ch == ',') {
+            this.comma = true;
+        }
 
         if (offset >= end) {
             this.ch = EOI;
@@ -385,6 +388,7 @@ final class JSONReaderStr
                 }
 
                 if (c == ',') {
+                    this.comma = true;
                     offset++;
                     c = str.charAt(offset);
 
@@ -733,6 +737,7 @@ final class JSONReaderStr
         }
 
         if (ch == ',') {
+            this.comma = true;
             this.ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {
@@ -849,6 +854,7 @@ final class JSONReaderStr
         }
 
         if (ch == ',') {
+            this.comma = true;
             this.ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {
@@ -957,6 +963,7 @@ final class JSONReaderStr
         }
 
         if (ch == ',') {
+            this.comma = true;
             this.ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {
@@ -1070,6 +1077,7 @@ final class JSONReaderStr
         }
 
         if (ch == ',') {
+            this.comma = true;
             this.ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {
@@ -1326,6 +1334,7 @@ final class JSONReaderStr
         }
 
         if (b == ',') {
+            this.comma = true;
             this.offset = offset + 1;
 
             // inline next
@@ -1448,6 +1457,7 @@ final class JSONReaderStr
             }
 
             if (b == ',') {
+                this.comma = true;
                 this.offset = offset + 1;
 
                 // inline next
@@ -1848,6 +1858,7 @@ final class JSONReaderStr
         }
 
         if (ch == ',') {
+            this.comma = true;
             this.ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {
@@ -1888,6 +1899,7 @@ final class JSONReaderStr
             }
         }
         if (ch == ',') {
+            this.comma = true;
             ch = str.charAt(offset++);
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -1997,6 +2009,7 @@ final class JSONReaderStr
             }
         }
         if (ch == ',') {
+            this.comma = true;
             ch = str.charAt(offset++);
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -2043,6 +2056,7 @@ final class JSONReaderStr
             }
         }
         if (ch == ',') {
+            this.comma = true;
             ch = str.charAt(offset++);
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -2080,6 +2094,7 @@ final class JSONReaderStr
                 ch = str.charAt(offset++);
 
                 if (ch == ',') {
+                    this.comma = true;
                     next();
                 }
 
@@ -2106,6 +2121,7 @@ final class JSONReaderStr
                     ch = str.charAt(offset++);
 
                     if (ch == ',') {
+                        this.comma = true;
                         next();
                     }
 
@@ -2243,6 +2259,7 @@ final class JSONReaderStr
         offset += 17;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
         return ldt;
@@ -2378,6 +2395,7 @@ final class JSONReaderStr
         offset += 18;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
         return ldt;
@@ -2514,6 +2532,7 @@ final class JSONReaderStr
         offset += 19;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
         return ldt;
@@ -2576,6 +2595,7 @@ final class JSONReaderStr
         offset += 9;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
 
@@ -2656,6 +2676,7 @@ final class JSONReaderStr
         offset += 9;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
         return ldt;
@@ -2760,6 +2781,7 @@ final class JSONReaderStr
         offset += 10;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
         return ldt;
@@ -2913,6 +2935,7 @@ final class JSONReaderStr
         offset += 11;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
         return ldt;
@@ -2997,6 +3020,7 @@ final class JSONReaderStr
         offset += 12;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
         return ldt;
@@ -3558,6 +3582,7 @@ final class JSONReaderStr
         offset += (len + 1);
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
         return zdt;
@@ -3722,6 +3747,7 @@ final class JSONReaderStr
         offset += 20;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
         return ldt;
@@ -3867,6 +3893,7 @@ final class JSONReaderStr
         offset += (len + 1);
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
         return ldt;
@@ -4053,6 +4080,7 @@ final class JSONReaderStr
         offset += 11;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
 
@@ -4133,6 +4161,7 @@ final class JSONReaderStr
         offset += 12;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
 
@@ -4214,6 +4243,7 @@ final class JSONReaderStr
         offset += 13;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
 
@@ -4320,6 +4350,7 @@ final class JSONReaderStr
         offset += 19;
         next();
         if (ch == ',') {
+            this.comma = true;
             next();
         }
 
@@ -4627,6 +4658,7 @@ final class JSONReaderStr
         }
 
         if (ch == ',') {
+            this.comma = true;
             ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {
