@@ -322,6 +322,10 @@ public class ObjectWriterAdapter<T>
     public void writeWithFilter(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         jsonWriter.startObject();
 
+        if (jsonWriter.isWriteTypeInfo(object, features)) {
+            writeTypeInfo(jsonWriter);
+        }
+
         JSONWriter.Context context = jsonWriter.getContext();
 
         BeforeFilter beforeFilter = context.getBeforeFilter();
