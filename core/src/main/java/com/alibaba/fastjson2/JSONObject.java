@@ -220,6 +220,9 @@ public class JSONObject
 
     public <T> List<T> getList(String key, Class<T> itemClass, JSONReader.Feature... features) {
         JSONArray jsonArray = getJSONArray(key);
+        if (jsonArray == null) {
+            return null;
+        }
         return jsonArray.toList(itemClass, features);
     }
 
