@@ -285,6 +285,36 @@ final class JSONReaderUTF16
         return true;
     }
 
+    public boolean nextIfEmptyString() {
+        final char first = this.ch;
+        if ((first != '"' && first != '\'') || offset >= end || chars[offset] != first) {
+            return false;
+        }
+        this.ch = chars[offset + 1];
+        offset += 1;
+
+        if (ch == ',') {
+            this.comma = true;
+        }
+
+        if (offset >= end) {
+            this.ch = EOI;
+            return true;
+        }
+
+        this.ch = chars[offset];
+        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+            offset++;
+            if (offset >= end) {
+                this.ch = EOI;
+                return true;
+            }
+            this.ch = chars[offset];
+        }
+        offset++;
+        return true;
+    }
+
     public boolean nextIfSet() {
         if (ch == 'S'
                 && offset + 2 < end

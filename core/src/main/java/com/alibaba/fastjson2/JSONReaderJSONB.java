@@ -191,6 +191,14 @@ final class JSONReaderJSONB
         return true;
     }
 
+    public boolean nextIfEmptyString() {
+        if (bytes[offset] != BC_STR_ASCII && offset < end && bytes[offset + 1] == 0) {
+            return false;
+        }
+        offset += 2;
+        return true;
+    }
+
     @Override
     public <T> T read(Type type) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;

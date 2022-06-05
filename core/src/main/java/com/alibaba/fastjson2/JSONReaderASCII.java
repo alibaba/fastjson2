@@ -64,6 +64,36 @@ final class JSONReaderASCII
         return true;
     }
 
+    public boolean nextIfEmptyString() {
+        final char first = this.ch;
+        if ((first != '"' && first != '\'') || offset >= end || bytes[offset] != first) {
+            return false;
+        }
+        this.ch = (char) bytes[offset + 1];
+        offset += 1;
+
+        if (ch == ',') {
+            this.comma = true;
+        }
+
+        if (offset >= end) {
+            this.ch = EOI;
+            return true;
+        }
+
+        this.ch = (char) bytes[offset];
+        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+            offset++;
+            if (offset >= end) {
+                this.ch = EOI;
+                return true;
+            }
+            this.ch = (char) bytes[offset];
+        }
+        offset++;
+        return true;
+    }
+
     @Override
     public long readFieldNameHashCode() {
         if (ch != '"' && ch != '\'') {

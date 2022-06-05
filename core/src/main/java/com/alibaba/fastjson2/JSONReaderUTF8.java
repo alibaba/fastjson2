@@ -5267,6 +5267,74 @@ class JSONReaderUTF8
         return str;
     }
 
+    public boolean nextIfEmptyString() {
+        final char first = this.ch;
+        if ((first != '"' && first != '\'') || offset >= end || this.bytes[offset] != first) {
+            return false;
+        }
+        this.ch = (char) bytes[offset + 1];
+        offset += 1;
+
+        if (ch == ',') {
+            this.comma = true;
+        }
+
+        if (offset >= end) {
+            ch = EOI;
+            return true;
+        }
+
+        int c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            if (offset >= end) {
+                ch = EOI;
+                return true;
+            }
+            c = bytes[offset];
+        }
+
+        if (c >= 0) {
+            offset++;
+            ch = (char) c;
+            return true;
+        }
+
+        c &= 0xFF;
+        switch (c >> 4) {
+            case 12:
+            case 13: {
+                /* 110x xxxx   10xx xxxx*/
+                offset += 2;
+                int char2 = bytes[offset - 1];
+                if ((char2 & 0xC0) != 0x80) {
+                    throw new JSONException(
+                            "malformed input around byte " + offset);
+                }
+                ch = (char) (((c & 0x1F) << 6) | (char2 & 0x3F));
+                break;
+            }
+            case 14: {
+                /* 1110 xxxx  10xx xxxx  10xx xxxx */
+                offset += 3;
+                int char2 = bytes[offset - 2];
+                int char3 = bytes[offset - 1];
+                if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
+                    throw new JSONException("malformed input around byte " + (offset - 1));
+                }
+                ch = (char)
+                        (((c & 0x0F) << 12) |
+                                ((char2 & 0x3F) << 6) |
+                                ((char3 & 0x3F) << 0));
+                break;
+            }
+            default:
+                /* 10xx xxxx,  1111 xxxx */
+                throw new JSONException("malformed input around byte " + offset);
+        }
+        return true;
+    }
+
     @Override
     public boolean isReference() {
         if (ch != '{') {

@@ -196,7 +196,12 @@ public class ObjectReaderNoneDefaultConstrutor<T>
                             : valueMap);
         }
 
-        jsonReader.nextIfMatch('{');
+        boolean objectStart = jsonReader.nextIfObjectStart();
+        if (!objectStart && !jsonReader.isTypeRedirect()) {
+            if (jsonReader.nextIfEmptyString()) {
+                return null;
+            }
+        }
 
         LinkedHashMap<Long, Object> valueMap = null;
         for (int i = 0; ; i++) {
