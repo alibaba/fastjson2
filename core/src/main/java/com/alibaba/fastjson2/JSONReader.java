@@ -985,6 +985,9 @@ public abstract class JSONReader
                 if ("0000-00-00".equals(str)) {
                     return 0;
                 }
+                if (IOUtils.isNumber(str)) {
+                    return Long.parseLong(str);
+                }
                 throw new JSONException("TODO : " + str);
             }
             case 11: {
