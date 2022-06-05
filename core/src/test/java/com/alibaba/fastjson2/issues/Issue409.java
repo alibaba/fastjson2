@@ -7,10 +7,15 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 public class Issue409 {
     @Test
     public void test() {
         String str = "{\n" +
+                "\"total\": 1,\n" +
+                "\"records\": {\n" +
                 "\"user_serial\": 2201266,\n" +
                 "\"user_name\": \"朱忠恕\",\n" +
                 "\"codes\": [\n" +
@@ -19,7 +24,7 @@ public class Issue409 {
                 "\"dept_list\": [\n" +
                 "{\n" +
                 "\"dept_id\": 200882,\n" +
-                "\"pt_node_path_name\": \"/佛山狮山高级中学\",\n" +
+                "\"pt_node_path_name\": \"/测试学校\",\n" +
                 "\"dept_name\": \"办公室\",\n" +
                 "\"is_grade\": 0\n" +
                 "}\n" +
@@ -28,12 +33,16 @@ public class Issue409 {
                 "\"user_deps\": [\n" +
                 "200882\n" +
                 "]\n" +
+                "}\n" +
                 "}";
 
         JSONObject teacherObject = JSON.parseObject(str);
-        List teacherList = teacherObject.getList("records", DeptList.class);
+        List<TeacherJson> teacherList = teacherObject.getList("records", TeacherJson.class);
+        assertNotNull(teacherList);
+        assertEquals(1, teacherList.size());
+        TeacherJson teacherJson = teacherList.get(0);
+        assertEquals("朱忠恕", teacherJson.userName);
     }
-
     public static class TeacherJson {
         private static final long serialVersionUID = 1L;
 
