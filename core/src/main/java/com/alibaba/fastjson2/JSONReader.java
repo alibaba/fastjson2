@@ -1961,16 +1961,17 @@ public abstract class JSONReader
             }
 
             return new JSONReaderStr(context, str, 0, str.length());
-        } else {
-            char[] chars = JDKUtils.getCharArray(str);
-            return new JSONReaderUTF16(
-                    context,
-                    str,
-                    chars,
-                    0,
-                    chars.length
-            );
         }
+
+        final int length = str.length();
+        char[] chars;
+        if (JDKUtils.JVM_VERSION == 8) {
+            chars = JDKUtils.getCharArray(str);
+        } else {
+            chars = str.toCharArray();
+        }
+
+        return new JSONReaderUTF16(context, str, chars, 0, length);
     }
 
     public static JSONReader of(String str) {
@@ -1991,16 +1992,17 @@ public abstract class JSONReader
             }
 
             return new JSONReaderStr(context, str, 0, str.length());
-        } else {
-            char[] chars = JDKUtils.getCharArray(str);
-            return new JSONReaderUTF16(
-                    context,
-                    str,
-                    chars,
-                    0,
-                    chars.length
-            );
         }
+
+        final int length = str.length();
+        char[] chars;
+        if (JDKUtils.JVM_VERSION == 8) {
+            chars = JDKUtils.getCharArray(str);
+        } else {
+            chars = str.toCharArray();
+        }
+
+        return new JSONReaderUTF16(context, str, chars, 0, length);
     }
 
     public static JSONReader of(String str, int offset, int length) {
@@ -2009,7 +2011,6 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        char[] chars = JDKUtils.getCharArray(str);
         if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT && length > 1024 * 1024) {
             try {
                 byte coder = UnsafeUtils.getStringCoder(str);
@@ -2022,15 +2023,16 @@ public abstract class JSONReader
             }
 
             return new JSONReaderStr(context, str, 0, str.length());
-        } else {
-            return new JSONReaderUTF16(
-                    context,
-                    str,
-                    chars,
-                    offset,
-                    length
-            );
         }
+
+        char[] chars;
+        if (JDKUtils.JVM_VERSION == 8) {
+            chars = JDKUtils.getCharArray(str);
+        } else {
+            chars = str.toCharArray();
+        }
+
+        return new JSONReaderUTF16(context, str, chars, offset, length);
     }
 
     void bigInt(char[] chars, int off, int len) {
