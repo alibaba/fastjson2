@@ -44,13 +44,11 @@ public class JdbcSupport {
 
     static class TimeReader
             extends ObjectReaderImplDate {
-        final Class objectClass;
         final Constructor constructor;
         final Method methodValueOf;
 
         public TimeReader(Class objectClass, String format, Locale locale) {
             super(format, locale);
-            this.objectClass = objectClass;
             try {
                 constructor = objectClass.getConstructor(long.class);
                 methodValueOf = objectClass.getMethod("valueOf", String.class);
@@ -224,13 +222,11 @@ public class JdbcSupport {
     static class TimestampWriter
             extends DateTimeCodec
             implements ObjectWriter {
-        private Class objectClass;
         final Method methodGetNano;
         final Method methodToLocalDateTime;
 
         public TimestampWriter(Class objectClass, String format) {
             super(format);
-            this.objectClass = objectClass;
             try {
                 methodGetNano = objectClass.getMethod("getNanos");
                 methodToLocalDateTime = objectClass.getMethod("toLocalDateTime");
@@ -451,13 +447,11 @@ public class JdbcSupport {
 
     static class DateReader
             extends ObjectReaderImplDate {
-        final Class objectClass;
         final Constructor constructor;
         final Method methodValueOf;
 
         public DateReader(Class objectClass, String format, Locale locale) {
             super(format, locale);
-            this.objectClass = objectClass;
             try {
                 constructor = objectClass.getConstructor(long.class);
                 methodValueOf = objectClass.getMethod("valueOf", LocalDate.class);
