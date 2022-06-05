@@ -179,8 +179,7 @@ final class ObjectReader1<T>
             return readJSONBObject(jsonReader, 0);
         }
 
-        if (jsonReader.nextIfNull()) {
-            jsonReader.nextIfMatch(',');
+        if (jsonReader.nextIfNull() || jsonReader.nextIfEmptyString()) {
             return null;
         }
 

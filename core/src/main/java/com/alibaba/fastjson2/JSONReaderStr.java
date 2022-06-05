@@ -97,6 +97,36 @@ final class JSONReaderStr
         return true;
     }
 
+    public boolean nextIfEmptyString() {
+        final char first = this.ch;
+        if ((first != '"' && first != '\'') || offset >= end || str.charAt(offset) != first) {
+            return false;
+        }
+        this.ch = str.charAt(offset + 1);
+        offset += 1;
+
+        if (ch == ',') {
+            this.comma = true;
+        }
+
+        if (offset >= end) {
+            this.ch = EOI;
+            return true;
+        }
+
+        this.ch = str.charAt(offset);
+        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+            offset++;
+            if (offset >= end) {
+                this.ch = EOI;
+                return true;
+            }
+            this.ch = str.charAt(offset);
+        }
+        offset++;
+        return true;
+    }
+
     public boolean nextIfSet() {
         if (ch == 'S'
                 && offset + 2 < end
