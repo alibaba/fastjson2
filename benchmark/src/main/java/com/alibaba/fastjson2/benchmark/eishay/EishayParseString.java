@@ -59,9 +59,10 @@ public class EishayParseString {
     }
 
     public static void fastjson2_perf() {
+        Blackhole bh = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
-            JSON.parseObject(str, MediaContent.class);
+            bh.consume(JSON.parseObject(str, MediaContent.class));
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("millis : " + millis);
@@ -71,9 +72,10 @@ public class EishayParseString {
     }
 
     public static void fastjson1_perf() {
+        Blackhole bh = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
-            com.alibaba.fastjson.JSON.parseObject(str, MediaContent.class);
+            bh.consume(com.alibaba.fastjson.JSON.parseObject(str, MediaContent.class));
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("millis : " + millis);

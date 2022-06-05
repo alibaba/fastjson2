@@ -1483,6 +1483,7 @@ public class ObjectReaderCreator {
         }
 
         if (initReader != null) {
+            features |= FieldInfo.READ_USING_MASK;
             FieldReaderObjectField fieldReader = new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
             fieldReader.fieldObjectReader = initReader;
             return fieldReader;
