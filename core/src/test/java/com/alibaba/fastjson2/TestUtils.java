@@ -14,7 +14,6 @@ public class TestUtils {
                 ObjectReaderCreator.INSTANCE,
                 ObjectReaderCreatorLambda.INSTANCE,
                 ObjectReaderCreatorASM.INSTANCE,
-                ObjectReaderCreatorDynamicCompile.INSTANCE,
         };
     }
 
