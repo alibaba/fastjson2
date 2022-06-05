@@ -1776,7 +1776,8 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] utf8Bytes) {
-        return new JSONReaderUTF8(JSONFactory.createReadContext(), utf8Bytes, 0, utf8Bytes.length);
+        Context context = createReadContext();
+        return new JSONReaderUTF8(context, utf8Bytes, 0, utf8Bytes.length);
     }
 
     public static JSONReader of(JSONReader.Context context, byte[] utf8Bytes) {
