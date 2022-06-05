@@ -38,7 +38,6 @@ public class Issue1879 {
                 ObjectReaderCreator.INSTANCE,
 //                ObjectReaderCreatorLambda.INSTANCE,
 //                ObjectReaderCreatorASM.INSTANCE,
-//                ObjectReaderCreatorDynamicCompile.INSTANCE // TODO: ObjectReaderCreatorDynamicCompile
         };
 
         String json = "{\n" +
