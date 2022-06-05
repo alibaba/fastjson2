@@ -178,6 +178,10 @@ public class JSONObject
             return (JSONArray) value;
         }
 
+        if (value instanceof JSONObject) {
+            return JSONArray.of(value);
+        }
+
         if (value instanceof String) {
             String str = (String) value;
 
