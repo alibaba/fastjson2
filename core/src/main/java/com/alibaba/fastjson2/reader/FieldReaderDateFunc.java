@@ -102,27 +102,33 @@ final class FieldReaderDateFunc<T>
             jsonReader.readNull();
             fieldValue = null;
         } else {
+            long millis;
             if (format != null) {
-                if (formatter == null) {
-                    String format = this.format.replaceAll("aa", "a");
-                    formatter = DateTimeFormatter.ofPattern(format);
-                }
                 String str = jsonReader.readString();
-
-                LocalDateTime ldt;
-                if (format.indexOf("HH") == -1) {
-                    ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                if ((formatUnixtime || formatMillis) && IOUtils.isNumber(str)) {
+                    millis = Long.parseLong(str);
+                    if (formatUnixtime) {
+                        millis *= 1000L;
+                    }
                 } else {
-                    ldt = LocalDateTime.parse(str, formatter);
-                }
+                    if (formatter == null) {
+                        String format = this.format.replaceAll("aa", "a");
+                        formatter = DateTimeFormatter.ofPattern(format);
+                    }
+                    LocalDateTime ldt;
+                    if (format.indexOf("HH") == -1) {
+                        ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                    } else {
+                        ldt = LocalDateTime.parse(str, formatter);
+                    }
 
-                ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
-                long millis = zdt.toInstant().toEpochMilli();
-                fieldValue = new java.util.Date(millis);
+                    ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
+                    millis = zdt.toInstant().toEpochMilli();
+                }
             } else {
-                long millis = jsonReader.readMillisFromString();
-                fieldValue = new Date(millis);
+                millis = jsonReader.readMillisFromString();
             }
+            fieldValue = new Date(millis);
         }
 
         return fieldValue;
