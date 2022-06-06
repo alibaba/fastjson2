@@ -1,15 +1,12 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
@@ -21,10 +18,15 @@ final class FieldReaderDateField<T>
     final Locale locale;
     final boolean useSimpleFormatter;
 
+    boolean formatUnixtime;
+    boolean formatMillis;
+
     FieldReaderDateField(String fieldName, Class fieldType, int ordinal, long features, String format, Locale locale, Date defaultValue, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
         this.locale = locale;
         this.useSimpleFormatter = "yyyyMMddHHmmssSSSZ".equals(format);
+        this.formatUnixtime = "unixtime".equals(format);
+        this.formatMillis = "millis".equals(format);
     }
 
     @Override
@@ -88,10 +90,27 @@ final class FieldReaderDateField<T>
     @Override
     public void accept(T object, Object value) {
         if (value instanceof String) {
-            JSONReader jsonReader = JSONReader.of(
-                    JSON.toJSONString(value));
-            value = getObjectReader(jsonReader)
-                    .readObject(jsonReader);
+            String str = (String) value;
+
+            long millis;
+            if ((format == null || formatUnixtime || formatMillis) && IOUtils.isNumber(str)) {
+                millis = Long.parseLong(str);
+                if (formatUnixtime) {
+                    millis *= 1000L;
+                }
+            } else {
+                DateTimeFormatter formatter = getFormatter(null);
+                LocalDateTime ldt;
+                if (format.indexOf("HH") == -1) {
+                    ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                } else {
+                    ldt = LocalDateTime.parse(str, formatter);
+                }
+
+                ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
+                millis = zdt.toInstant().toEpochMilli();
+            }
+            value = new java.util.Date(millis);
         } else if (value instanceof Integer) {
             long millis = ((Integer) value).intValue();
             if (dateReader.formatUnixTime) {
