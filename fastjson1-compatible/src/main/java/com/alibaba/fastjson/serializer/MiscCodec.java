@@ -26,6 +26,7 @@ public class MiscCodec
         throw new JSONException("TODO");
     }
 
+    @Override
     public long getFeatures() {
         return 0L;
     }
