@@ -5491,6 +5491,7 @@ class JSONReaderUTF8
                 .append(", character ").append(ch)
                 .append(", line ").append(line)
                 .append(", column ").append(column)
+                .append(", fastjson-version ").append(JSON.VERSION)
                 .append(line > 1 ? '\n' : ' ');
 
         String str = new String(bytes, this.start, length < 65535 ? length : 65535);

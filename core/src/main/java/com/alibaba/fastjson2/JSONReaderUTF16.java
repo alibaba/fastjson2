@@ -4612,6 +4612,7 @@ final class JSONReaderUTF16
                 .append(", character ").append(ch)
                 .append(", line ").append(line)
                 .append(", column ").append(column)
+                .append(", fastjson-version ").append(JSON.VERSION)
                 .append(line > 1 ? '\n' : ' ');
         buf.append(chars, this.start, length < 65535 ? length : 65535);
         return buf.toString();
