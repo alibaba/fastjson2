@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Format;
 
 import java.time.LocalTime;
 
