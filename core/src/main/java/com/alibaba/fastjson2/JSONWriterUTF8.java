@@ -816,6 +816,11 @@ class JSONWriterUTF8
 
     @Override
     public void writeFloat(float value) {
+        if (Float.isNaN(value) || Float.isInfinite(value)) {
+            writeNull();
+            return;
+        }
+
         ensureCapacity(off + 15);
         int len = RyuFloat.toString(value, bytes, off);
         off += len;
@@ -823,6 +828,11 @@ class JSONWriterUTF8
 
     @Override
     public void writeDouble(double value) {
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            writeNull();
+            return;
+        }
+
         ensureCapacity(off + 24);
         int len = RyuDouble.toString(value, bytes, off);
         off += len;
