@@ -890,6 +890,9 @@ public abstract class JSONReader
                 return readLocalTime12();
             case 18:
                 return readLocalTime18();
+            case 19:
+                return readLocalDateTime19()
+                        .toLocalTime();
             default:
                 break;
         }
