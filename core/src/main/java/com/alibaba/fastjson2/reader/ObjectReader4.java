@@ -336,6 +336,7 @@ final class ObjectReader4<T>
         return null;
     }
 
+    @Override
     public FieldReader getFieldReaderLCase(long hashCode) {
         if (hashCode == hashCode0LCase) {
             return fieldReader0;

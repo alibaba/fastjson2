@@ -1340,7 +1340,7 @@ public abstract class JSONReader
                 nextIfMatch(':');
             }
 
-            if (i == 0 && (context.features & Feature.ErrorOnNotSupportAutoType.mask) != 0 && name.equals("@type")) {
+            if (i == 0 && (context.features & Feature.ErrorOnNotSupportAutoType.mask) != 0 && "@type".equals(name)) {
                 String typeName = readString();
                 throw new JSONException("autoType not support : " + typeName);
             }

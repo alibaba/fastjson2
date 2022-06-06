@@ -72,6 +72,7 @@ public class SerializeWriter
 
     class ListWrapper<T>
             extends ArrayList<T> {
+        @Override
         public boolean add(T filter) {
             JSONWriter.Context context = raw.getContext();
 
@@ -115,6 +116,7 @@ public class SerializeWriter
         raw.writeName(key);
     }
 
+    @Override
     public String toString() {
         return raw.toString();
     }

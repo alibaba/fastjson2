@@ -191,6 +191,7 @@ final class JSONReaderJSONB
         return true;
     }
 
+    @Override
     public boolean nextIfEmptyString() {
         if (bytes[offset] != BC_STR_ASCII && offset < end && bytes[offset + 1] == 0) {
             return false;
