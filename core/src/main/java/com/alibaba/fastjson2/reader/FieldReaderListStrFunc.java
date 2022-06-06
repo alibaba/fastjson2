@@ -83,7 +83,7 @@ final class FieldReaderListStrFunc<T>
                 try {
                     value = (List) listType.newInstance();
                 } catch (InstantiationException | IllegalAccessException e) {
-                    throw new JSONException("create instance error " + listType, e);
+                    throw new JSONException(jsonReader.info("create instance error " + listType), e);
                 }
             }
 
@@ -108,7 +108,7 @@ final class FieldReaderListStrFunc<T>
 
             value = list;
         } else {
-            throw new JSONException("json format error : " + jsonReader.current());
+            throw new JSONException(jsonReader.info("json format error"));
         }
 
         if (schema != null) {
@@ -145,7 +145,7 @@ final class FieldReaderListStrFunc<T>
                 try {
                     value = (List) listType.newInstance();
                 } catch (InstantiationException | IllegalAccessException e) {
-                    throw new JSONException("create instance error " + listType, e);
+                    throw new JSONException(jsonReader.info("create instance error " + listType), e);
                 }
             }
 
@@ -172,7 +172,7 @@ final class FieldReaderListStrFunc<T>
 
             value = list;
         } else {
-            throw new JSONException("json format error : " + jsonReader.current());
+            throw new JSONException(jsonReader.info("json format error"));
         }
 
         if (schema != null) {
@@ -182,7 +182,7 @@ final class FieldReaderListStrFunc<T>
         try {
             function.accept(object, value);
         } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
     }
 }

@@ -68,7 +68,7 @@ final class ObjectReaderImplEnum2X4
         if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
             long typeNameHash = jsonReader.readTypeHashCode();
             if (typeNameHash != this.typeNameHash) {
-                throw new JSONException("not support enumType : " + jsonReader.getString());
+                throw new JSONException(jsonReader.info("not support enumType : " + jsonReader.getString()));
             }
         }
 

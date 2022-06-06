@@ -135,7 +135,7 @@ public class JdbcSupport {
                 try {
                     return methodValueOf.invoke(null, str);
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new JSONException("invoke java.sql.Time.valueOf error", e);
+                    throw new JSONException(jsonReader.info("invoke java.sql.Time.valueOf error"), e);
                 }
             }
 
@@ -504,7 +504,7 @@ public class JdbcSupport {
                     try {
                         return methodValueOf.invoke(null, localDateTime.toLocalDate());
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new JSONException("invoke method java.sql.Date.valueOf error", e);
+                        throw new JSONException(jsonReader.info("invoke method java.sql.Date.valueOf error"), e);
                     }
                 }
 

@@ -17,6 +17,7 @@ final class JSONReaderStr
         extends JSONReader {
     protected final String str;
     protected final int length;
+    protected final int start;
     protected final int end;
 
     protected int nameBegin;
@@ -35,6 +36,7 @@ final class JSONReaderStr
         this.str = str;
         this.offset = offset;
         this.length = length;
+        this.start = offset;
         this.end = offset + length;
 
         // inline next();
@@ -4708,5 +4710,30 @@ final class JSONReaderStr
         }
 
         return reference;
+    }
+
+    @Override
+    public String info(String message) {
+        int line = 1, column = 1;
+        for (int i = 0; i < offset && i < end; i++, column++) {
+            if (str.charAt(i) == '\n') {
+                column = 1;
+                line++;
+            }
+        }
+
+        StringBuilder buf = new StringBuilder();
+
+        if (message != null && !message.isEmpty()) {
+            buf.append(message).append(", ");
+        }
+
+        buf.append("offset ").append(offset)
+                .append(", character ").append(ch)
+                .append(", line ").append(line)
+                .append(", column ").append(column)
+                .append(line > 1 ? '\n' : ' ');
+        buf.append(str, this.start, length < 65535 ? length : 65535);
+        return buf.toString();
     }
 }

@@ -2135,7 +2135,7 @@ public class ObjectReaderBaseModule
                 return array;
             }
 
-            throw new JSONException("TODO");
+            throw new JSONException(jsonReader.info("TODO"));
         }
 
         @Override
@@ -2192,7 +2192,7 @@ public class ObjectReaderBaseModule
                 return Arrays.copyOf(values, size);
             }
 
-            throw new JSONException("TODO");
+            throw new JSONException(jsonReader.info("TODO"));
         }
 
         @Override
@@ -2231,7 +2231,7 @@ public class ObjectReaderBaseModule
                         autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
                         if (autoTypeObjectReader == null) {
-                            throw new JSONException("auotype not support : " + typeName);
+                            throw new JSONException(jsonReader.info("auotype not support : " + typeName));
                         }
                     }
 
@@ -2274,7 +2274,7 @@ public class ObjectReaderBaseModule
                     value = null;
                     break;
                 default:
-                    throw new JSONException("TODO : " + jsonReader.current());
+                    throw new JSONException(jsonReader.info());
             }
 
             return value;
@@ -2303,7 +2303,7 @@ public class ObjectReaderBaseModule
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             int entryCnt = jsonReader.startArray();
             if (entryCnt != 2) {
-                throw new JSONException("entryCnt must be 2, but " + entryCnt);
+                throw new JSONException(jsonReader.info("entryCnt must be 2, but " + entryCnt));
             }
             Object key;
             if (keyType == null) {
@@ -2363,7 +2363,7 @@ public class ObjectReaderBaseModule
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             int entryCnt = jsonReader.startArray();
             if (entryCnt != 1) {
-                throw new JSONException("input not singleton");
+                throw new JSONException(jsonReader.info("input not singleton"));
             }
             Object value = jsonReader.read(Object.class);
             return Collections.singleton(value);
@@ -2377,7 +2377,7 @@ public class ObjectReaderBaseModule
             if (jsonReader.nextIfMatch(']')) {
                 jsonReader.nextIfMatch(',');
             } else {
-                throw new JSONException("input not singleton");
+                throw new JSONException(jsonReader.info("input not singleton"));
             }
             return Collections.singleton(value);
         }
@@ -2446,12 +2446,12 @@ public class ObjectReaderBaseModule
                 if (str.isEmpty()) {
                     return null;
                 }
-                throw new JSONException("format error");
+                throw new JSONException(jsonReader.info());
             }
 
             List<Object> list = new ArrayList<>();
             if (ch != '[') {
-                throw new JSONException("format error : " + ch);
+                throw new JSONException(jsonReader.info());
             }
             jsonReader.next();
 
@@ -2467,7 +2467,7 @@ public class ObjectReaderBaseModule
                     if (itemType == String.class) {
                         item = jsonReader.readString();
                     } else {
-                        throw new JSONException("TODO : " + itemType);
+                        throw new JSONException(jsonReader.info("TODO : " + itemType));
                     }
                 }
 

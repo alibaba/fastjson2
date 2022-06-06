@@ -46,6 +46,6 @@ public class ObjectReaderMisc
             return new InetSocketAddress(inetAddress, port);
         }
 
-        throw new JSONException("not support : " + objectClass.getName());
+        throw new JSONException(jsonReader.info("not support : " + objectClass.getName()));
     }
 }

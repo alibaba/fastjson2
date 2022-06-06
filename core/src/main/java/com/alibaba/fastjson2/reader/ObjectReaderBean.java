@@ -63,7 +63,7 @@ public abstract class ObjectReaderBean<T>
             }
 
             if (autoTypeObjectReader == null) {
-                throw new JSONException("auotype not support : " + jsonReader.getString());
+                throw new JSONException(jsonReader.info("auotype not support"));
             }
 
             if (typeHash == this.typeNameHash) {
@@ -108,7 +108,7 @@ public abstract class ObjectReaderBean<T>
             }
 
             if (ch != '"' && ch != '\'' && ch != '}') {
-                throw new JSONException("illegal input " + ch + ", offset " + jsonReader.getOffset());
+                throw new JSONException(jsonReader.info());
             }
         }
 
@@ -138,7 +138,7 @@ public abstract class ObjectReaderBean<T>
                     );
 
                     if (reader == null) {
-                        throw new JSONException("No suitable ObjectReader found for" + typeName);
+                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for" + typeName));
                     }
                 }
 

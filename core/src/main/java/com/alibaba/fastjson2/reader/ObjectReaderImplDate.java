@@ -78,7 +78,7 @@ public class ObjectReaderImplDate
             try {
                 return new SimpleDateFormat(format).parse(str);
             } catch (ParseException e) {
-                throw new JSONException("parse error : " + str, e);
+                throw new JSONException(jsonReader.info("parse error : " + str), e);
             }
         }
 

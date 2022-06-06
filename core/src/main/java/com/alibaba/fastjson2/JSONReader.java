@@ -1220,7 +1220,7 @@ public abstract class JSONReader
             }
 
             if (i != 0 && !comma) {
-                throw new JSONException("illegal input， offset " + offset + ", char " + ch);
+                throw new JSONException(info());
             }
 
             String name;
@@ -1680,7 +1680,7 @@ public abstract class JSONReader
                 try {
                     return new BigDecimal(stringValue);
                 } catch (NumberFormatException ex) {
-                    throw new JSONException("read decimal error, value " + stringValue, ex);
+                    throw new JSONException(info("read decimal error, value " + stringValue), ex);
                 }
             }
             default:
@@ -2902,5 +2902,16 @@ public abstract class JSONReader
             zoneId = context.getZoneId();
         }
         return zoneId;
+    }
+
+    public String info() {
+        return info(null);
+    }
+
+    public String info(String message) {
+        if (message == null || message.isEmpty()) {
+            return "offset " + offset;
+        }
+        return message + ", offset " + offset;
     }
 }

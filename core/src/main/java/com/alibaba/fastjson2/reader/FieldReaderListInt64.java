@@ -66,7 +66,7 @@ public final class FieldReaderListInt64
             try {
                 list = (Collection) listType.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                throw new JSONException("create instance error " + listType, e);
+                throw new JSONException(jsonReader.info("create instance error " + listType), e);
             }
         } else {
             list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
@@ -108,7 +108,7 @@ public final class FieldReaderListInt64
         }
 
         if (jsonReader.current() != '[') {
-            throw new JSONException("format error : " + jsonReader.current());
+            throw new JSONException(jsonReader.info("format error"));
         }
         jsonReader.next();
 

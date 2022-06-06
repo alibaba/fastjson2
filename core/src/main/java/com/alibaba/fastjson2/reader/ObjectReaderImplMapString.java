@@ -31,7 +31,7 @@ final class ObjectReaderImplMapString
                         return arrayItem;
                     }
                 }
-                throw new JSONException("expect '{', but '['");
+                throw new JSONException(jsonReader.info("expect '{', but '['"));
             }
         }
 

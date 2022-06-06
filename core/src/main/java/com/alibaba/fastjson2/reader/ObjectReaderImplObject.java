@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
@@ -70,7 +69,7 @@ public final class ObjectReaderImplObject
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
                     if (autoTypeObjectReader == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
-                        throw new JSONException("autoType not support : " + typeName);
+                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                     }
                 }
 
@@ -154,11 +153,11 @@ public final class ObjectReaderImplObject
                         if (jsonReader.nextIfSet()) {
                             value = jsonReader.read(HashSet.class);
                         } else {
-                            throw new JSONException("FASTJSON-" + JSON.VERSION + "error, offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
+                            throw new JSONException(jsonReader.info());
                         }
                         break;
                     default:
-                        throw new JSONException("FASTJSON-" + JSON.VERSION + "error, offset " + jsonReader.getOffset() + ", char " + jsonReader.current());
+                        throw new JSONException(jsonReader.info());
                 }
 
                 Object origin = object.put(name, value);
@@ -213,7 +212,7 @@ public final class ObjectReaderImplObject
                 value = jsonReader.readNullOrNewDate();
                 break;
             default:
-                throw new JSONException("illegal input : " + jsonReader.current() + ", offset " + jsonReader.getOffset());
+                throw new JSONException(jsonReader.info());
         }
 
         return value;

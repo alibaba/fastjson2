@@ -92,7 +92,7 @@ public class ObjectReader2<T>
         if (jsonReader.isArray()) {
             int entryCnt = jsonReader.startArray();
             if (entryCnt != 2) {
-                throw new JSONException("not support input entryCount " + entryCnt);
+                throw new JSONException(jsonReader.info("not support input entryCount " + entryCnt));
             }
 
             T object = defaultCreator.get();
@@ -110,7 +110,7 @@ public class ObjectReader2<T>
         }
 
         if (!jsonReader.nextIfMatch(BC_OBJECT)) {
-            throw new JSONException("expect object, but " + JSONB.typeName(jsonReader.getType()));
+            throw new JSONException(jsonReader.info("expect object, but " + JSONB.typeName(jsonReader.getType())));
         }
 
         T object;
@@ -120,7 +120,7 @@ public class ObjectReader2<T>
             try {
                 object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {
-                throw new JSONException("create instance error", e);
+                throw new JSONException(jsonReader.info("create instance error"), e);
             }
         } else {
             object = null;
@@ -199,7 +199,7 @@ public class ObjectReader2<T>
             first.readFieldValue(jsonReader, object);
             second.readFieldValue(jsonReader, object);
             if (jsonReader.current() != ']') {
-                throw new JSONException("array to bean end error, " + jsonReader.current());
+                throw new JSONException(jsonReader.info("array to bean end error"));
             }
             jsonReader.next();
         } else {
@@ -264,7 +264,7 @@ public class ObjectReader2<T>
             try {
                 object = (T) buildFunction.apply(object);
             } catch (IllegalStateException e) {
-                throw new JSONException("build object error", e);
+                throw new JSONException(jsonReader.info("build object error"), e);
             }
         }
 

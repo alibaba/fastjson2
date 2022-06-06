@@ -81,7 +81,7 @@ public final class ObjectReaderImplEnum
         if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
             long typeNameHash = jsonReader.readTypeHashCode();
             if (typeNameHash != this.typeNameHash) {
-                throw new JSONException("not support enumType : " + jsonReader.getString());
+                throw new JSONException(jsonReader.info("not support enumType : " + jsonReader.getString()));
             }
         }
 
@@ -109,7 +109,7 @@ public final class ObjectReaderImplEnum
             try {
                 return createMethod.invoke(null, paramValue);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new JSONException("create enum error, enumClass " + enumClass.getName() + ", paramValue " + paramValue, e);
+                throw new JSONException(jsonReader.info("create enum error, enumClass " + enumClass.getName() + ", paramValue " + paramValue), e);
             }
         }
 
@@ -137,7 +137,7 @@ public final class ObjectReaderImplEnum
                         }
                     }
                 } catch (Exception error) {
-                    throw new JSONException("parse enum error, class " + enumClass.getName() + ", value " + intValue, error);
+                    throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", value " + intValue), error);
                 }
             }
         } else {
@@ -155,7 +155,7 @@ public final class ObjectReaderImplEnum
 
             if (fieldValue == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnEnumNotMatch)) {
                 String strVal = jsonReader.getString();
-                throw new JSONException("parse enum error, class " + enumClass.getName() + ", value " + strVal);
+                throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", value " + strVal));
             }
         }
         return fieldValue;

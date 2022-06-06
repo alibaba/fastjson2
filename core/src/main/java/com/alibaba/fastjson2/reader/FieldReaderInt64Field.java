@@ -24,7 +24,7 @@ final class FieldReaderInt64Field<T>
         try {
             field.set(object, fieldValue);
         } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
     }
 

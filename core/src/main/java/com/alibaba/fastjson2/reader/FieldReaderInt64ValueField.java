@@ -23,7 +23,7 @@ final class FieldReaderInt64ValueField<T>
         try {
             field.setLong(object, fieldLong);
         } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
     }
 }

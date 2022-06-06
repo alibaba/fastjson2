@@ -215,7 +215,7 @@ class ObjectReaderImplMapTyped
     public Object readObject(JSONReader jsonReader, long features) {
         boolean match = jsonReader.nextIfMatch('{');
         if (!match) {
-            throw new JSONException("expect '{', but '['");
+            throw new JSONException(jsonReader.info("expect '{', but '['"));
         }
 
         JSONReader.Context context = jsonReader.getContext();

@@ -68,13 +68,13 @@ public class ObjectReaderImplValue<I, T>
             try {
                 object = function.apply(value);
             } catch (Exception ex) {
-                throw new JSONException("create object error", ex);
+                throw new JSONException(jsonReader.info("create object error"), ex);
             }
         } else if (constructor != null) {
             try {
                 object = constructor.newInstance(value);
             } catch (Exception ex) {
-                throw new JSONException("create object error", ex);
+                throw new JSONException(jsonReader.info("create object error"), ex);
             }
         } else if (factoryMethod != null) {
             try {
@@ -84,10 +84,10 @@ public class ObjectReaderImplValue<I, T>
                     object = (T) factoryMethod.invoke(null, value);
                 }
             } catch (Exception ex) {
-                throw new JSONException("create object error", ex);
+                throw new JSONException(jsonReader.info("create object error"), ex);
             }
         } else {
-            throw new JSONException("create object error");
+            throw new JSONException(jsonReader.info("create object error"));
         }
 
         return object;

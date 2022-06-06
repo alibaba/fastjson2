@@ -36,7 +36,7 @@ final class FieldReaderAtomicLongArrayReadOnly<T>
         try {
             atomic = (AtomicLongArray) method.invoke(object);
         } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
         if (jsonReader.nextIfMatch('[')) {
             for (int i = 0; ; ++i) {

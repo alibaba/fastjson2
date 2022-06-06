@@ -128,7 +128,7 @@ public final class ObjectReaderImplListStr
             try {
                 list = (Collection) listType.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                throw new JSONException("create instance error " + listType, e);
+                throw new JSONException(jsonReader.info("create instance error " + listType), e);
             }
         } else {
             list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
@@ -159,7 +159,7 @@ public final class ObjectReaderImplListStr
         boolean set = jsonReader.nextIfSet();
 
         if (jsonReader.current() != '[') {
-            throw new JSONException("offset " + jsonReader.getOffset() + ", char : " + jsonReader.current());
+            throw new JSONException(jsonReader.info());
         }
         jsonReader.next();
 

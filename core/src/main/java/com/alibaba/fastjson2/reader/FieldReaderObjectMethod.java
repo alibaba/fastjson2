@@ -109,7 +109,7 @@ class FieldReaderObjectMethod<T>
                 value = objectReader.readObject(jsonReader, features);
             }
         } catch (JSONException ex) {
-            throw new JSONException("read field error : " + fieldName, ex);
+            throw new JSONException(jsonReader.info("read field error : " + fieldName), ex);
         }
 
         accept(object, value);

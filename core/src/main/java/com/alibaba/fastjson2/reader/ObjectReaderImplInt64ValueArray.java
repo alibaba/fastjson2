@@ -57,7 +57,7 @@ final class ObjectReaderImplInt64ValueArray
             return Arrays.copyOf(values, size);
         }
 
-        throw new JSONException("TODO");
+        throw new JSONException(jsonReader.info("TODO"));
     }
 
     @Override
@@ -65,7 +65,7 @@ final class ObjectReaderImplInt64ValueArray
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();
             if (typeHash != HASH_TYPE) {
-                throw new JSONException("not support " + jsonReader.getString());
+                throw new JSONException(jsonReader.info("not support " + jsonReader.getString()));
             }
         }
 

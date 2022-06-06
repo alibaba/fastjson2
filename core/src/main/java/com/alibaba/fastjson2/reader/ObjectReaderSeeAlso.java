@@ -93,7 +93,7 @@ final class ObjectReaderSeeAlso<T>
             }
 
             String strVal = jsonReader.getString();
-            throw new JSONException("not support input " + strVal);
+            throw new JSONException(jsonReader.info("not support input " + strVal));
         }
 
         return super.readObject(jsonReader, features);

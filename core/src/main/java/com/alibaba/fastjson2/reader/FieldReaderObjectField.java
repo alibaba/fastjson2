@@ -104,7 +104,7 @@ class FieldReaderObjectField<T>
         } catch (JSONSchemaValidException ex) {
             throw ex;
         } catch (Exception | IllegalAccessError ex) {
-            throw new JSONException("read field '" + field.getDeclaringClass().getName() + "." + field.getName() + "' error, offset " + offset, ex);
+            throw new JSONException(jsonReader.info("read field '" + field.getDeclaringClass().getName() + "." + field.getName()), ex);
         }
     }
 

@@ -43,7 +43,7 @@ final class ObjectReaderImplAtomicLongArray
             return array;
         }
 
-        throw new JSONException("TODO");
+        throw new JSONException(jsonReader.info("TODO"));
     }
 
     @Override

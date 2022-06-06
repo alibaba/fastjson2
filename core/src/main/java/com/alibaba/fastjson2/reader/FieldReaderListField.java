@@ -202,9 +202,9 @@ class FieldReaderListField<T>
                 return;
             }
 
-            throw new JSONException("listField not support input : " + str);
+            throw new JSONException(jsonReader.info("listField not support input : " + str));
         }
 
-        throw new JSONException("listField not support input : " + jsonReader.current());
+        throw new JSONException(jsonReader.info("listField not support"));
     }
 }
