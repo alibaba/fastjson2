@@ -31,7 +31,14 @@ final class ObjectWriterImplInt64
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt64(
-                ((Number) object).longValue());
+        long longValue = ((Number) object).longValue();
+        jsonWriter.writeInt64(longValue);
+
+        if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
+            if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
+                    && fieldType != Short.class && fieldType != short.class) {
+                jsonWriter.writeRaw('L');
+            }
+        }
     }
 }
