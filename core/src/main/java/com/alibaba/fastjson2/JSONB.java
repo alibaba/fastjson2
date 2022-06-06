@@ -734,7 +734,7 @@ public interface JSONB {
             type = BC_STR_UTF16BE;
         } else if (charset == StandardCharsets.UTF_16LE) {
             type = BC_STR_UTF16LE;
-        } else if (charset != null && charset.name().equals("GB18030")) { // GraalVM support
+        } else if (charset != null && "GB18030".equals(charset.name())) { // GraalVM support
             type = BC_STR_GB18030;
         } else {
             return toBytes(str);

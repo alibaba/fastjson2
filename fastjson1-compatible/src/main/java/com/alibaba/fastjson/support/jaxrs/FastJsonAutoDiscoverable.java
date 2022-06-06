@@ -29,6 +29,7 @@ public class FastJsonAutoDiscoverable
         }
     }
 
+    @Override
     public void configure(final FeatureContext context) {
         final Configuration config = context.getConfiguration();
 
