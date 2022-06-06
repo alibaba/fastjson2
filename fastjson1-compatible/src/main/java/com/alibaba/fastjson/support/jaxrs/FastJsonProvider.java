@@ -307,6 +307,7 @@ public class FastJsonProvider
      * Method that JAX-RS container calls to try to check whether given value
      * (of specified type) can be serialized by this provider.
      */
+    @Override
     public boolean isWriteable(
             Class<?> type,
             Type genericType,
@@ -327,6 +328,7 @@ public class FastJsonProvider
      * Method that JAX-RS container calls to try to figure out serialized length
      * of given value. always return -1 to denote "not known".
      */
+    @Override
     public long getSize(Object t, //
                         Class<?> type, //
                         Type genericType, //
@@ -338,6 +340,7 @@ public class FastJsonProvider
     /**
      * Method that JAX-RS container calls to serialize given value.
      */
+    @Override
     public void writeTo(Object obj, //
                         Class<?> type, //
                         Type genericType, //
@@ -408,6 +411,7 @@ public class FastJsonProvider
      * Method that JAX-RS container calls to try to check whether values of
      * given type (and media type) can be deserialized by this provider.
      */
+    @Override
     public boolean isReadable(
             Class<?> type,
             Type genericType,
@@ -427,6 +431,7 @@ public class FastJsonProvider
     /**
      * Method that JAX-RS container calls to deserialize given value.
      */
+    @Override
     public Object readFrom(Class<Object> type, //
                            Type genericType, //
                            Annotation[] annotations, //

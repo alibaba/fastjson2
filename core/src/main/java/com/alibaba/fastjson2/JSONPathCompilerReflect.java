@@ -11,6 +11,7 @@ class JSONPathCompilerReflect
         implements JSONFactory.JSONPathCompiler {
     static final JSONPathCompilerReflect INSTANCE = new JSONPathCompilerReflect();
 
+    @Override
     public JSONPath compile(
             Class objectClass, JSONPath path
     ) {

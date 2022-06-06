@@ -517,6 +517,7 @@ class JSONWriterUTF8
         off += bytes.length;
     }
 
+    @Override
     public void writeRaw(char ch) {
         if (ch < 0 || ch > 128) {
             throw new JSONException("not support " + ch);

@@ -285,6 +285,7 @@ final class JSONReaderUTF16
         return true;
     }
 
+    @Override
     public boolean nextIfEmptyString() {
         final char first = this.ch;
         if ((first != '"' && first != '\'') || offset >= end || chars[offset] != first) {
@@ -315,6 +316,7 @@ final class JSONReaderUTF16
         return true;
     }
 
+    @Override
     public boolean nextIfSet() {
         if (ch == 'S'
                 && offset + 2 < end
@@ -2192,6 +2194,7 @@ final class JSONReaderUTF16
         return true;
     }
 
+    @Override
     public Date readNullOrNewDate() {
         Date date = null;
         if (offset + 2 < end
