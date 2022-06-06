@@ -24,5 +24,9 @@ final class ObjectWriterImplDouble
             return;
         }
         jsonWriter.writeDouble(((Double) object).doubleValue());
+        if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
+                && fieldType != Double.class && fieldType != double.class) {
+            jsonWriter.writeRaw('D');
+        }
     }
 }

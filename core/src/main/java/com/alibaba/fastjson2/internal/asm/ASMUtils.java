@@ -1,6 +1,16 @@
 package com.alibaba.fastjson2.internal.asm;
 
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.function.*;
+import com.alibaba.fastjson2.reader.FieldReader;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.UnsafeUtils;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +20,10 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
+import java.util.function.ObjDoubleConsumer;
+import java.util.function.ObjIntConsumer;
+import java.util.function.ObjLongConsumer;
 
 public class ASMUtils {
     static Map<Class, String> descMapping = new HashMap<>();
@@ -26,6 +40,7 @@ public class ASMUtils {
         descMapping.put(long.class, "J");
         descMapping.put(double.class, "D");
         descMapping.put(java.util.List.class, "Ljava/util/List;");
+        typeMapping.put(java.util.Collection.class, "Ljava/util/Collection;");
 
         typeMapping.put(int.class, "I");
         typeMapping.put(void.class, "V");
@@ -36,7 +51,34 @@ public class ASMUtils {
         typeMapping.put(float.class, "F");
         typeMapping.put(long.class, "J");
         typeMapping.put(double.class, "D");
-        typeMapping.put(java.util.List.class, "java/util/List");
+
+        Class[] classes = new Class[] {
+                java.util.List.class,
+                java.util.Collection.class,
+                ObjectReader.class,
+                ObjectReaderAdapter.class,
+                FieldReader.class,
+                JSONReader.class,
+                ObjBoolConsumer.class,
+                ObjCharConsumer.class,
+                ObjByteConsumer.class,
+                ObjShortConsumer.class,
+                ObjIntConsumer.class,
+                ObjLongConsumer.class,
+                ObjFloatConsumer.class,
+                ObjDoubleConsumer.class,
+                BiConsumer.class,
+                UnsafeUtils.class,
+                ObjectWriter.class,
+                ObjectWriterAdapter.class,
+                com.alibaba.fastjson2.writer.FieldWriter.class,
+                JSONWriter.class,
+                JSONWriter.Context.class,
+                JSONB.class
+        };
+        for (Class objectType : classes) {
+            typeMapping.put(objectType, objectType.getName().replace('.', '/'));
+        }
     }
 
     public static String type(Class<?> clazz) {
@@ -53,9 +95,8 @@ public class ASMUtils {
             return typeMapping.get(clazz);
         }
 
-        String clsName = clazz.getName();
         // 直接基于字符串替换，不使用正则替换
-        return clsName.replace('.', '/');
+        return clazz.getName().replace('.', '/');
     }
 
     static final AtomicReference<char[]> descCacheRef = new AtomicReference<>();

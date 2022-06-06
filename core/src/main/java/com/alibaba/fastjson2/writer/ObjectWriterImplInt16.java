@@ -15,7 +15,8 @@ final class ObjectWriterImplInt16
             return;
         }
 
-        jsonWriter.writeInt16(((Short) object).shortValue());
+        short shortValue = ((Short) object).shortValue();
+        jsonWriter.writeInt16(shortValue);
     }
 
     @Override
@@ -24,6 +25,11 @@ final class ObjectWriterImplInt16
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32(((Short) object).shortValue());
+        short shortValue = ((Short) object).shortValue();
+        jsonWriter.writeInt32(shortValue);
+        if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
+                && fieldType != Short.class && fieldType != short.class) {
+            jsonWriter.writeRaw('S');
+        }
     }
 }

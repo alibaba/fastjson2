@@ -414,6 +414,29 @@ public final class MethodWriter {
         }
     }
 
+    public void visitLdcInsn(Class value) {
+        Type type = Type.getType(ASMUtils.desc(value));
+        lastBytecodeOffset = code.length;
+        // Add the instruction to the bytecode of the method.
+        Symbol constantSymbol;
+        int typeSort = type.getSort();
+        if (typeSort == Type.OBJECT) {
+            constantSymbol = symbolTable.addConstantClass(type.getInternalName());
+        } else { // type is a primitive or array type.
+            constantSymbol = symbolTable.addConstantClass(type.getDescriptor());
+        }
+        int constantIndex = constantSymbol.index;
+        if (constantIndex >= 256) {
+            code.put12(Constants.LDC_W, constantIndex);
+        } else {
+            code.put11(Opcodes.LDC, constantIndex);
+        }
+        // If needed, update the maximum stack size and number of locals, and stack map frames.
+        if (currentBasicBlock != null) {
+            currentBasicBlock.frame.execute(Opcodes.LDC, 0, constantSymbol, symbolTable);
+        }
+    }
+
     public void visitLdcInsn(final int value) {
         final int CONSTANT_INTEGER_TAG = 3;
 

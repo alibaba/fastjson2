@@ -24,5 +24,9 @@ final class ObjectWriterImplFloat
             return;
         }
         jsonWriter.writeFloat(((Float) object).floatValue());
+        if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
+                && fieldType != Float.class && fieldType != float.class) {
+            jsonWriter.writeRaw('F');
+        }
     }
 }

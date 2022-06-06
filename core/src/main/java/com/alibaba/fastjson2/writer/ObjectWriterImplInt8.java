@@ -25,5 +25,9 @@ final class ObjectWriterImplInt8
             return;
         }
         jsonWriter.writeInt32(((Number) object).intValue());
+        if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
+                && fieldType != Byte.class && fieldType != byte.class) {
+            jsonWriter.writeRaw('B');
+        }
     }
 }
