@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Method;
 import java.time.*;
@@ -17,7 +18,8 @@ final class FieldReaderDateFunc<T>
     DateTimeFormatter formatter;
 
     ObjectReader dateReader;
-    boolean unixtime;
+    boolean formatUnixtime;
+    boolean formatMillis;
 
     public FieldReaderDateFunc(
             String fieldName,
@@ -33,7 +35,8 @@ final class FieldReaderDateFunc<T>
         super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema);
         this.method = method;
         this.function = function;
-        this.unixtime = "unixtime".equals(format);
+        this.formatUnixtime = "unixtime".equals(format);
+        this.formatMillis = "millis".equals(format);
     }
 
     @Override
@@ -46,7 +49,13 @@ final class FieldReaderDateFunc<T>
         if (value instanceof String) {
             String str = (String) value;
 
-            if (format != null) {
+            long millis;
+            if ((format == null || formatUnixtime || formatMillis) && IOUtils.isNumber(str)) {
+                millis = Long.parseLong(str);
+                if (formatUnixtime) {
+                    millis *= 1000L;
+                }
+            } else {
                 DateTimeFormatter formatter = getFormatter(null);
                 LocalDateTime ldt;
                 if (format.indexOf("HH") == -1) {
@@ -56,9 +65,9 @@ final class FieldReaderDateFunc<T>
                 }
 
                 ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
-                long millis = zdt.toInstant().toEpochMilli();
-                value = new java.util.Date(millis);
+                millis = zdt.toInstant().toEpochMilli();
             }
+            value = new java.util.Date(millis);
         }
 
         function.accept(object, (Date) value);
@@ -85,7 +94,7 @@ final class FieldReaderDateFunc<T>
         Date fieldValue;
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();
-            if (unixtime) {
+            if (formatUnixtime) {
                 millis *= 1000L;
             }
             fieldValue = new Date(millis);
