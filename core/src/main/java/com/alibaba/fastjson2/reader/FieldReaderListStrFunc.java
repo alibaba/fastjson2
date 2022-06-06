@@ -56,6 +56,7 @@ final class FieldReaderListStrFunc<T>
         function.accept(object, (List) value);
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         List value;
         if (jsonReader.isJSONB()) {

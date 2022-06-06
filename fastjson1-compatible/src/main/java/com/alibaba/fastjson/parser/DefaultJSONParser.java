@@ -54,6 +54,7 @@ public class DefaultJSONParser
         return reader.read(type);
     }
 
+    @Override
     public void close() {
         this.reader.close();
     }

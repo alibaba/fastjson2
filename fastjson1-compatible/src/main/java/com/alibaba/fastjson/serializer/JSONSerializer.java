@@ -116,6 +116,7 @@ public class JSONSerializer {
         objectWriter.write(raw, 0);
     }
 
+    @Override
     public String toString() {
         return this.raw.toString();
     }
