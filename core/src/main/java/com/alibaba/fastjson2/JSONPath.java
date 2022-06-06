@@ -1181,13 +1181,13 @@ public abstract class JSONPath {
             case 'S': {
                 jsonReader.readFieldNameHashCodeUnquote();
                 String fieldName = jsonReader.getFieldName();
-                if (!fieldName.equalsIgnoreCase("starts")) {
+                if (!"starts".equalsIgnoreCase(fieldName)) {
                     throw new JSONException("not support operator : " + fieldName);
                 }
 
                 jsonReader.readFieldNameHashCodeUnquote();
                 fieldName = jsonReader.getFieldName();
-                if (!fieldName.equalsIgnoreCase("with")) {
+                if (!"with".equalsIgnoreCase(fieldName)) {
                     throw new JSONException("not support operator : " + fieldName);
                 }
                 operator = Operator.STARTS_WITH;

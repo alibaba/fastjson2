@@ -288,6 +288,7 @@ public class ObjectReader2<T>
         return null;
     }
 
+    @Override
     public FieldReader getFieldReaderLCase(long hashCode) {
         if (hashCode == firstHashCodeLCase) {
             return first;

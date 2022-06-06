@@ -47,6 +47,7 @@ class JSONPathCompilerReflectASM
                 || externalClass;
     }
 
+    @Override
     protected JSONPath compileSingleNamePath(Class objectClass, JSONPath.SingleNamePath path) {
         if (support(objectClass)) {
             return super.compileSingleNamePath(objectClass, path);

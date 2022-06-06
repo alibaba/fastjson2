@@ -64,6 +64,7 @@ final class JSONReaderASCII
         return true;
     }
 
+    @Override
     public boolean nextIfEmptyString() {
         final char first = this.ch;
         if ((first != '"' && first != '\'') || offset >= end || bytes[offset] != first) {
