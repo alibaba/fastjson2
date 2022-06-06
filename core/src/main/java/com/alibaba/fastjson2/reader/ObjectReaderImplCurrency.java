@@ -25,7 +25,7 @@ final class ObjectReaderImplCurrency
             jsonReader.next();
             long typeHash = jsonReader.readTypeHashCode();
             if (typeHash != TYPE_HASH && typeHash != TYPE_HASH_FULL) {
-                throw new JSONException("currency not support input autoTypeClass " + jsonReader.getString());
+                throw new JSONException(jsonReader.info("currency not support input autoTypeClass " + jsonReader.getString()));
             }
         }
 

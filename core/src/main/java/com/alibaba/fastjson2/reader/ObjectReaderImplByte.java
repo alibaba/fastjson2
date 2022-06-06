@@ -22,7 +22,7 @@ public final class ObjectReaderImplByte
             long typeHash = jsonReader.readTypeHashCode();
             if (typeHash != HASH_TYPE) {
                 String typeName = jsonReader.getString();
-                throw new JSONException(typeName);
+                throw new JSONException(jsonReader.info(typeName));
             }
         }
 

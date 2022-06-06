@@ -21,6 +21,7 @@ final class JSONReaderUTF16
     private final String str;
     private final char[] chars;
     private final int length;
+    private final int start;
     private final int end;
 
     private int nameBegin;
@@ -41,6 +42,7 @@ final class JSONReaderUTF16
             byte c1 = bytes[i + 1];
             chars[j] = (char) ((c1 & 0xff) | ((c0 & 0xff) << 8));
         }
+        this.start = offset;
         this.end = this.length = j;
 
         // inline next();
@@ -223,6 +225,7 @@ final class JSONReaderUTF16
         this.chars = chars;
         this.offset = offset;
         this.length = length;
+        this.start = offset;
         this.end = offset + length;
 
         // inline next();
@@ -1588,7 +1591,7 @@ final class JSONReaderUTF16
                 _for:
                 for (int i = 0; ; ++i) {
                     if (offset >= end) {
-                        throw new JSONException("invalid escape character EOI");
+                        throw new JSONException(info("invalid escape character EOI"));
                     }
                     char c = chars[offset];
                     if (c == '\\') {
@@ -4587,5 +4590,30 @@ final class JSONReaderUTF16
         }
 
         return str;
+    }
+
+    @Override
+    public String info(String message) {
+        int line = 1, column = 1;
+        for (int i = 0; i < offset & i < end; i++, column++) {
+            if (chars[i] == '\n') {
+                column = 1;
+                line++;
+            }
+        }
+
+        StringBuilder buf = new StringBuilder();
+
+        if (message != null && !message.isEmpty()) {
+            buf.append(message).append(", ");
+        }
+
+        buf.append("offset ").append(offset)
+                .append(", character ").append(ch)
+                .append(", line ").append(line)
+                .append(", column ").append(column)
+                .append(line > 1 ? '\n' : ' ');
+        buf.append(chars, this.start, length < 65535 ? length : 65535);
+        return buf.toString();
     }
 }

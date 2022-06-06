@@ -54,7 +54,7 @@ class ObjectReaderImplInt8ValueArray
             return jsonReader.readBinary();
         }
 
-        throw new JSONException("TODO");
+        throw new JSONException(jsonReader.info("TODO"));
     }
 
     @Override

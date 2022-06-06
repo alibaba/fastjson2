@@ -125,7 +125,7 @@ public class ObjectReaderAdapter<T>
             autoTypeObjectReader = context.getObjectReaderAutoType(typeName, expectClass, this.features | features | context.getFeatures());
 
             if (autoTypeObjectReader == null) {
-                throw new JSONException("auotype not support : " + typeName);
+                throw new JSONException(jsonReader.info("auotype not support : " + typeName));
             }
         }
 
@@ -147,7 +147,7 @@ public class ObjectReaderAdapter<T>
         }
 
         if (!jsonReader.nextIfMatch(']')) {
-            throw new JSONException("array to bean end error, " + jsonReader.current());
+            throw new JSONException(jsonReader.info("array to bean end error"));
         }
 
         jsonReader.nextIfMatch(',');
@@ -284,7 +284,7 @@ public class ObjectReaderAdapter<T>
             autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
             if (autoTypeObjectReader == null) {
-                throw new JSONException("auotype not support : " + typeName);
+                throw new JSONException(jsonReader.info("auotype not support : " + typeName));
             }
         }
 
@@ -306,7 +306,7 @@ public class ObjectReaderAdapter<T>
             if (jsonReader.isSupportBeanArray()) {
                 return readArrayMappingJSONBObject(jsonReader);
             } else {
-                throw new JSONException("expect object, but " + JSONB.typeName(jsonReader.getType()));
+                throw new JSONException(jsonReader.info("expect object, but " + JSONB.typeName(jsonReader.getType())));
             }
         }
 
@@ -328,7 +328,7 @@ public class ObjectReaderAdapter<T>
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
                     if (autoTypeObjectReader == null) {
-                        throw new JSONException("auotype not support : " + typeName);
+                        throw new JSONException(jsonReader.info("auotype not support : " + typeName));
                     }
                 }
 

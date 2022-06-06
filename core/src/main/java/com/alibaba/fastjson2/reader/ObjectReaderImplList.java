@@ -357,7 +357,7 @@ public final class ObjectReaderImplList
             try {
                 list = (Collection) listType.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                throw new JSONException("create instance error " + listType, e);
+                throw new JSONException(jsonReader.info("create instance error " + listType), e);
             }
         } else {
             list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
@@ -433,11 +433,11 @@ public final class ObjectReaderImplList
                 list.add(converted);
                 return list;
             }
-            throw new JSONException("illegal input, offset " + jsonReader.getOffset() + ", " + str);
+            throw new JSONException(jsonReader.info());
         }
 
         if (!jsonReader.nextIfMatch('[')) {
-            throw new JSONException("illegal input, offset " + jsonReader.getOffset() + ", char " + ch);
+            throw new JSONException(jsonReader.info());
         }
 
         for (; ; ) {
@@ -452,7 +452,7 @@ public final class ObjectReaderImplList
                 if (itemType == String.class) {
                     item = jsonReader.readString();
                 } else {
-                    throw new JSONException("TODO : " + itemType);
+                    throw new JSONException(jsonReader.info("TODO : " + itemType));
                 }
             }
 

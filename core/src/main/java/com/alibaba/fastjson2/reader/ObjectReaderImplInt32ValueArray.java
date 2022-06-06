@@ -53,7 +53,7 @@ final class ObjectReaderImplInt32ValueArray
             return Arrays.copyOf(values, size);
         }
 
-        throw new JSONException("TODO");
+        throw new JSONException(jsonReader.info("TODO"));
     }
 
     @Override

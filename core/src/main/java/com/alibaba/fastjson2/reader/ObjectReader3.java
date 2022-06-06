@@ -120,7 +120,7 @@ class ObjectReader3<T>
         }
 
         if (!jsonReader.nextIfMatch(BC_OBJECT)) {
-            throw new JSONException("expect object, but " + JSONB.typeName(jsonReader.getType()));
+            throw new JSONException(jsonReader.info("expect object, but " + JSONB.typeName(jsonReader.getType())));
         }
 
         T object;
@@ -130,7 +130,7 @@ class ObjectReader3<T>
             try {
                 object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {
-                throw new JSONException("create instance error", e);
+                throw new JSONException(jsonReader.info("create instance error"), e);
             }
         } else {
             object = null;
@@ -218,7 +218,7 @@ class ObjectReader3<T>
             fieldReader1.readFieldValue(jsonReader, object);
             fieldReader2.readFieldValue(jsonReader, object);
             if (!jsonReader.nextIfMatch(']')) {
-                throw new JSONException("array to bean end error, " + jsonReader.current());
+                throw new JSONException(jsonReader.info("array to bean end error"));
             }
 
             jsonReader.nextIfMatch(',');

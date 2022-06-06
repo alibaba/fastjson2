@@ -21,7 +21,7 @@ final class ObjectReaderImplClass
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long valueHashCode = jsonReader.readTypeHashCode();
             if (valueHashCode != TYPE_HASH) {
-                throw new JSONException("not support autoType : " + jsonReader.getString());
+                throw new JSONException(jsonReader.info("not support autoType : " + jsonReader.getString()));
             }
         }
         return readObject(jsonReader, features);
@@ -33,7 +33,7 @@ final class ObjectReaderImplClass
 
         JSONReader.Context context = jsonReader.getContext();
         if (!context.isEnabled(JSONReader.Feature.SupportClassForName)) {
-            throw new JSONException("not support ClassForName : " + className + ", you can config 'JSONReader.Feature.SupportClassForName'");
+            throw new JSONException(jsonReader.info("not support ClassForName : " + className + ", you can config 'JSONReader.Feature.SupportClassForName'"));
         }
 
         Class mappingClass = TypeUtils.getMapping(className);
@@ -44,7 +44,7 @@ final class ObjectReaderImplClass
         ObjectReaderProvider provider = context.getProvider();
         Class<?> resolvedClass = provider.checkAutoType(className, null, JSONReader.Feature.SupportAutoType.mask);
         if (resolvedClass == null) {
-            throw new JSONException("class not found " + className);
+            throw new JSONException(jsonReader.info("class not found " + className));
         }
         return resolvedClass;
     }

@@ -152,7 +152,7 @@ public interface FieldReaderList<T, V>
             }
         }
 
-        throw new JSONException("TODO : " + this.getClass());
+        throw new JSONException(jsonReader.info("TODO : " + this.getClass()));
     }
 
     @Override
@@ -163,7 +163,7 @@ public interface FieldReaderList<T, V>
 
             boolean isSupportAutoType = jsonReader.isSupportAutoType(features);
             if (!isSupportAutoType) {
-                throw new JSONException("autoType not support input " + jsonReader.getString());
+                throw new JSONException(jsonReader.info("autoType not support input " + jsonReader.getString()));
             }
 
             ObjectReader autoTypeObjectReader = jsonReader.getContext().getObjectReaderAutoType(typeHash);
@@ -179,7 +179,7 @@ public interface FieldReaderList<T, V>
             }
 
             if (autoTypeObjectReader == null) {
-                throw new JSONException("auotype not support : " + jsonReader.getString());
+                throw new JSONException(jsonReader.info("auotype not support : " + jsonReader.getString()));
             }
 
             return autoTypeObjectReader;

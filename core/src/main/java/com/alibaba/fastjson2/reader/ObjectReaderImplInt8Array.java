@@ -82,12 +82,12 @@ class ObjectReaderImplInt8Array
                     }
                     return byteOut.toByteArray();
                 } catch (IOException ex) {
-                    throw new JSONException("unzip bytes error.", ex);
+                    throw new JSONException(jsonReader.info("unzip bytes error."), ex);
                 }
             }
         }
 
-        throw new JSONException("TODO");
+        throw new JSONException(jsonReader.info("TODO"));
     }
 
     @Override

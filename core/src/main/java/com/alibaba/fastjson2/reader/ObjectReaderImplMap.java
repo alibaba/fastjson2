@@ -253,7 +253,7 @@ public final class ObjectReaderImplMap
                         map = (Map) instanceType.newInstance();
                     } catch (InstantiationException | IllegalAccessException e) {
                         instanceError = true;
-                        error = new JSONException("create map error " + instanceType);
+                        error = new JSONException(jsonReader.info("create map error " + instanceType));
                     }
                 }
 
@@ -263,7 +263,7 @@ public final class ObjectReaderImplMap
                         error = null;
                     } catch (InstantiationException | IllegalAccessException e) {
                         if (error == null) {
-                            error = new JSONException("create map error " + instanceType);
+                            error = new JSONException(jsonReader.info("create map error " + instanceType));
                         }
                     }
                 }

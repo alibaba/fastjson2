@@ -77,7 +77,7 @@ final class ObjectReader1<T>
         if (jsonReader.isArray()) {
             int entryCnt = jsonReader.startArray();
             if (entryCnt != 1) {
-                throw new JSONException("not support input entryCount " + entryCnt);
+                throw new JSONException(jsonReader.info("not support input entryCount " + entryCnt));
             }
 
             Object object = defaultCreator.get();
@@ -93,7 +93,7 @@ final class ObjectReader1<T>
             if (jsonReader.isTypeRedirect()) {
                 jsonReader.setTypeRedirect(false);
             } else {
-                throw new JSONException("expect object, but " + JSONB.typeName(jsonReader.getType()));
+                throw new JSONException(jsonReader.info("expect object, but " + JSONB.typeName(jsonReader.getType())));
             }
         }
 
@@ -104,7 +104,7 @@ final class ObjectReader1<T>
             try {
                 object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {
-                throw new JSONException("create instance error", e);
+                throw new JSONException(jsonReader.info("create instance error"), e);
             }
         } else {
             object = null;
@@ -130,7 +130,7 @@ final class ObjectReader1<T>
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
                     if (autoTypeObjectReader == null) {
-                        throw new JSONException("auotype not support : " + typeName);
+                        throw new JSONException(jsonReader.info("auotype not support : " + typeName));
                     }
                 }
 
@@ -190,7 +190,7 @@ final class ObjectReader1<T>
 
             fieldReader.readFieldValue(jsonReader, object);
             if (!jsonReader.nextIfMatch(']')) {
-                throw new JSONException("array to bean end error, " + jsonReader.current());
+                throw new JSONException(jsonReader.info("array to bean end error, " + jsonReader.current()));
             }
 
             jsonReader.nextIfMatch(',');

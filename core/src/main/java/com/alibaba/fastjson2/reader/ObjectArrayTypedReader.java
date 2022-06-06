@@ -76,7 +76,7 @@ final class ObjectArrayTypedReader
             }
         }
 
-        throw new JSONException("TODO");
+        throw new JSONException(jsonReader.info("TODO"));
     }
 
     @Override
@@ -96,13 +96,13 @@ final class ObjectArrayTypedReader
                     }
 
                     if (autoTypeObjectReader == null) {
-                        throw new JSONException("auotype not support : " + jsonReader.getString());
+                        throw new JSONException(jsonReader.info("auotype not support : " + jsonReader.getString()));
                     }
 
                     return autoTypeObjectReader.readObject(jsonReader, features);
                 }
 
-                throw new JSONException("not support autotype : " + jsonReader.getString());
+                throw new JSONException(jsonReader.info("not support autotype : " + jsonReader.getString()));
             }
         }
 

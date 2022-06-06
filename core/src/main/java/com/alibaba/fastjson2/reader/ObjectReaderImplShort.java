@@ -23,7 +23,7 @@ public final class ObjectReaderImplShort
             long typeHash = jsonReader.readTypeHashCode();
             if (typeHash != HASH_TYPE) {
                 String typeName = jsonReader.getString();
-                throw new JSONException(typeName);
+                throw new JSONException(jsonReader.info(typeName));
             }
         }
 

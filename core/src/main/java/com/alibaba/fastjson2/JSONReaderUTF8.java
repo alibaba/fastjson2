@@ -23,6 +23,7 @@ class JSONReaderUTF8
         extends JSONReader {
     protected final byte[] bytes;
     protected final int length;
+    protected final int start;
     protected final int end;
 
     protected int nameBegin;
@@ -38,6 +39,7 @@ class JSONReaderUTF8
         this.bytes = bytes;
         this.offset = offset;
         this.length = length;
+        this.start = offset;
         this.end = offset + length;
         next();
 
@@ -5467,5 +5469,32 @@ class JSONReaderUTF8
         }
 
         return reference;
+    }
+
+    @Override
+    public String info(String message) {
+        int line = 1, column = 1;
+        for (int i = 0; i < offset && i < end; i++, column++) {
+            if (bytes[i] == '\n') {
+                column = 1;
+                line++;
+            }
+        }
+
+        StringBuilder buf = new StringBuilder();
+
+        if (message != null && !message.isEmpty()) {
+            buf.append(message).append(", ");
+        }
+
+        buf.append("offset ").append(offset)
+                .append(", character ").append(ch)
+                .append(", line ").append(line)
+                .append(", column ").append(column)
+                .append(line > 1 ? '\n' : ' ');
+
+        String str = new String(bytes, this.start, length < 65535 ? length : 65535);
+        buf.append(str);
+        return buf.toString();
     }
 }

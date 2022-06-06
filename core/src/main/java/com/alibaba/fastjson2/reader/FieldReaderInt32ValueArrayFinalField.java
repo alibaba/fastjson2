@@ -27,7 +27,7 @@ final class FieldReaderInt32ValueArrayFinalField<T>
         try {
             array = (int[]) field.get(object);
         } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
 
         if (jsonReader.nextIfMatch('[')) {

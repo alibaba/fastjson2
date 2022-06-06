@@ -46,7 +46,7 @@ class FieldReaderAnySetter<T>
         try {
             method.invoke(object, name, value);
         } catch (Exception e) {
-            throw new JSONException("any set error", e);
+            throw new JSONException(jsonReader.info("any set error"), e);
         }
     }
 

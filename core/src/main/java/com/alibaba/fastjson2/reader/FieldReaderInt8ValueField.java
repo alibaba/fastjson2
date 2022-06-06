@@ -24,7 +24,7 @@ final class FieldReaderInt8ValueField<T>
         try {
             field.setByte(object, (byte) fieldInt);
         } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
     }
 

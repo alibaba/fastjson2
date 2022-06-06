@@ -246,7 +246,7 @@ public interface FieldReader<T>
     }
 
     default Object readFieldValue(JSONReader jsonReader) {
-        throw new JSONException("TODO : " + this.getClass());
+        throw new JSONException(jsonReader.info("TODO : " + this.getClass()));
     }
 
     default void addResolveTask(JSONReader jsonReader, Object object, String reference) {
@@ -264,7 +264,7 @@ public interface FieldReader<T>
 
             boolean isSupportAutoType = jsonReader.isSupportAutoType(features);
             if (!isSupportAutoType) {
-                throw new JSONException("autoType not support input " + jsonReader.getString());
+                throw new JSONException(jsonReader.info("autoType not support input " + jsonReader.getString()));
             }
 
             ObjectReader autoTypeObjectReader = jsonReader.getContext().getObjectReaderAutoType(typeHash);

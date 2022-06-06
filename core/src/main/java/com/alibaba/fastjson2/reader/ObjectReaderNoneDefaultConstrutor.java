@@ -82,7 +82,7 @@ public class ObjectReaderNoneDefaultConstrutor<T>
                     valueMap.put(fieldReader.getFieldNameHash(), fieldValue);
                 }
             } else {
-                throw new JSONException("expect object, but " + JSONB.typeName(jsonReader.getType()));
+                throw new JSONException(jsonReader.info("expect object, but " + JSONB.typeName(jsonReader.getType())));
             }
         } else {
             jsonReader.nextIfObjectStart();
@@ -105,7 +105,7 @@ public class ObjectReaderNoneDefaultConstrutor<T>
                         autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
 
                         if (autoTypeObjectReader == null) {
-                            throw new JSONException("auotype not support : " + typeName);
+                            throw new JSONException(jsonReader.info("auotype not support : " + typeName));
                         }
                     }
 
@@ -186,7 +186,7 @@ public class ObjectReaderNoneDefaultConstrutor<T>
             }
 
             if (!jsonReader.nextIfMatch(']')) {
-                throw new JSONException("array not end, " + jsonReader.current());
+                throw new JSONException(jsonReader.info("array not end, " + jsonReader.current()));
             }
 
             jsonReader.nextIfMatch(',');

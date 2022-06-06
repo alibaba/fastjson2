@@ -90,7 +90,7 @@ public final class ObjectArrayReader
                         value = jsonReader.readArray();
                         break;
                     default:
-                        throw new JSONException("not support : " + ch);
+                        throw new JSONException(jsonReader.info());
                 }
                 values[size++] = value;
             }
@@ -99,7 +99,7 @@ public final class ObjectArrayReader
             return Arrays.copyOf(values, size);
         }
 
-        throw new JSONException("TODO");
+        throw new JSONException(jsonReader.info("TODO"));
     }
 
     @Override

@@ -54,7 +54,7 @@ public class ObjectReaderException
                     reader = context.getObjectReaderAutoType(typeName, objectClass, features);
 
                     if (reader == null) {
-                        throw new JSONException("No suitable ObjectReader found for" + typeName);
+                        throw new JSONException(jsonReader.info("No suitable ObjectReader found for" + typeName));
                     }
                 }
 
@@ -93,7 +93,7 @@ public class ObjectReaderException
         Throwable object = createObject(message, cause);
 
         if (object == null) {
-            throw new JSONException("not support : " + objectClass.getName());
+            throw new JSONException(jsonReader.info(jsonReader.info("not support : " + objectClass.getName())));
         }
 
         if (stackTrace != null) {
