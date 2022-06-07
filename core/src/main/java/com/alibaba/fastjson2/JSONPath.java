@@ -3156,6 +3156,34 @@ public abstract class JSONPath {
                 }
 
                 segment.eval(context);
+                if (context.value == null && nextSegment != null) {
+                    if (value == null) {
+                        return;
+                    }
+
+                    Object parentObject;
+                    if (i == 0) {
+                        parentObject = root;
+                    } else {
+                        parentObject = context.parent.value;
+                    }
+
+                    Object emptyValue;
+                    if (nextSegment instanceof IndexSegment) {
+                        emptyValue = new JSONArray();
+                    } else if (nextSegment instanceof NameSegment) {
+                        emptyValue = new JSONObject();
+                    } else {
+                        return;
+                    }
+                    context.value = emptyValue;
+
+                    if (parentObject instanceof Map && segment instanceof NameSegment) {
+                        ((Map) parentObject).put(((NameSegment) segment).name, emptyValue);
+                    } else if (parentObject instanceof List && segment instanceof IndexSegment) {
+                        ((List) parentObject).set(((IndexSegment) segment).index, emptyValue);
+                    }
+                }
             }
             context = new Context(this, context, segments.get(0), null, 0L);
             context.root = root;
