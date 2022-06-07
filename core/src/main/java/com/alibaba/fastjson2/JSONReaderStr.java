@@ -699,6 +699,8 @@ final class JSONReaderStr
         if (ch == '-') {
             negative = true;
             ch = str.charAt(offset++);
+        } else if (ch == '+') {
+            ch = str.charAt(offset++);
         }
 
         boolean overflow = false;
@@ -817,6 +819,8 @@ final class JSONReaderStr
         if (ch == '-') {
             negative = true;
             ch = str.charAt(offset++);
+        } else if (ch == '+') {
+            ch = str.charAt(offset++);
         }
 
         boolean overflow = false;
@@ -923,6 +927,8 @@ final class JSONReaderStr
 
         if (ch == '-') {
             negative = true;
+            ch = str.charAt(offset++);
+        } else if (ch == '+') {
             ch = str.charAt(offset++);
         }
 
@@ -1042,6 +1048,8 @@ final class JSONReaderStr
 
         if (ch == '-') {
             negative = true;
+            ch = str.charAt(offset++);
+        } else if (ch == '+') {
             ch = str.charAt(offset++);
         }
 
@@ -1701,6 +1709,9 @@ final class JSONReaderStr
             negative = true;
             ch = str.charAt(offset++);
         } else {
+            if (ch == '+') {
+                ch = str.charAt(offset++);
+            }
             limit = -2147483647; // -Integer.MAX_VALUE;
             multmin = -214748364; // limit / 10;
         }
