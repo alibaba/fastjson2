@@ -422,10 +422,17 @@ public final class ObjectReaderImplList
         char ch = jsonReader.current();
         if (ch == '"') {
             String str = jsonReader.readString();
+            if (itemClass == String.class) {
+                jsonReader.nextIfMatch(',');
+                list.add(str);
+                return list;
+            }
+
             if (str.isEmpty()) {
                 jsonReader.nextIfMatch(',');
                 return null;
             }
+
             Function typeConvert = context.getProvider().getTypeConvert(String.class, itemType);
             if (typeConvert != null) {
                 Object converted = typeConvert.apply(str);
