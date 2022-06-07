@@ -1550,6 +1550,20 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(endDetect_);
         }
 
+        if (Object[].class.isAssignableFrom(fieldClass)) {
+            Label notWriteEmptyArrayEnd_ = new Label();
+            mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, notWriteEmptyArrayEnd_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitTypeInsn(Opcodes.CHECKCAST, "[Ljava/lang/Object;");
+            mw.visitInsn(Opcodes.ARRAYLENGTH);
+            mw.visitJumpInsn(Opcodes.IFNE, notWriteEmptyArrayEnd_);
+
+            mw.visitJumpInsn(Opcodes.GOTO, notNull_);
+
+            mw.visitLabel(notWriteEmptyArrayEnd_);
+        }
+
         // writeFieldName(w);
         gwFieldName(mwc, i);
 
@@ -1732,6 +1746,19 @@ public class ObjectWriterCreatorASM
             mw.visitJumpInsn(Opcodes.GOTO, notNull_);
 
             mw.visitLabel(endDetect_);
+        }
+
+        {
+            Label notWriteEmptyArrayEnd_ = new Label();
+            mwc.genIsEnabled(JSONWriter.Feature.NotWriteEmptyArray.mask, notWriteEmptyArrayEnd_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, LIST);
+            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/Collection", "isEmpty", "()Z", true);
+            mw.visitJumpInsn(Opcodes.IFEQ, notWriteEmptyArrayEnd_);
+
+            mw.visitJumpInsn(Opcodes.GOTO, notNull_);
+
+            mw.visitLabel(notWriteEmptyArrayEnd_);
         }
 
         // listStr

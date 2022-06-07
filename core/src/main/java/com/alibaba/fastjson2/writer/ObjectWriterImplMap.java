@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.*;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -326,7 +327,8 @@ final class ObjectWriterImplMap
         jsonWriter.startObject();
         Map map = (Map) object;
 
-        if (jsonWriter.isEnabled(JSONWriter.Feature.MapSortField)) {
+        features |= jsonWriter.getFeatures();
+        if ((features & JSONWriter.Feature.MapSortField.mask) != 0) {
             if (!(map instanceof SortedMap) && map.getClass() != LinkedHashMap.class) {
                 map = new TreeMap<>(map);
             }
@@ -339,12 +341,19 @@ final class ObjectWriterImplMap
             String strKey = key == null ? "null" : key.toString();
 
             if (value == null) {
-                if ((jsonWriter.getFeatures(features) & JSONWriter.Feature.WriteNulls.mask) != 0) {
+                if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
                     jsonWriter.writeName(strKey);
                     jsonWriter.writeColon();
                     jsonWriter.writeNull();
                 }
                 continue;
+            } else if ((features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0) {
+                if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
+                    continue;
+                }
+                if (value.getClass().isArray() && Array.getLength(value) == 0) {
+                    continue;
+                }
             }
 
             jsonWriter.writeName(strKey);

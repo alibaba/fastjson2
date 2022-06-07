@@ -1629,7 +1629,12 @@ public abstract class JSONWriter
         /**
          * @since 1.1
          */
-        WriteNullBooleanAsFalse(1 << 24);
+        WriteNullBooleanAsFalse(1 << 24),
+
+        /**
+         * @since 2.0.7
+         */
+        NotWriteEmptyArray(1 << 25);
 
         public final long mask;
 
