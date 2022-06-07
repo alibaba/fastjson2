@@ -1411,7 +1411,12 @@ public abstract class JSONReader
             readNull();
             return null;
         }
-        return readBoolValue();
+
+        boolean boolValue = readBoolValue();
+        if (!boolValue && wasNull) {
+            return null;
+        }
+        return boolValue;
     }
 
     public boolean readBoolValue() {
@@ -1478,6 +1483,12 @@ public abstract class JSONReader
             if ("false".equalsIgnoreCase(str)) {
                 return false;
             }
+
+            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+                wasNull = true;
+                return false;
+            }
+
             throw new JSONException("can not convert to boolean : " + str);
         } else {
             throw new JSONException("syntax error : " + ch);
