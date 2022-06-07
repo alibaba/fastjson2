@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 
 import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -51,7 +53,12 @@ final class ObjectWriterImplLocalTime
             return;
         }
 
-        String str = formatter.format(time);
+        String str;
+        if (formatHasDay || ctx.isDateFormatHasDay()) {
+            str = formatter.format(LocalDateTime.of(LocalDate.of(1970, 1, 1), time));
+        } else {
+            str = formatter.format(time);
+        }
         jsonWriter.writeString(str);
     }
 }

@@ -1372,6 +1372,8 @@ public abstract class JSONWriter
         boolean dateFormatMillis;
         boolean dateFormatISO8601;
         boolean dateFormatUnixTime;
+        boolean formatHasDay;
+        boolean formatHasHour;
         long features;
         ZoneId zoneId;
 
@@ -1489,6 +1491,14 @@ public abstract class JSONWriter
             return dateFormatISO8601;
         }
 
+        public boolean isDateFormatHasDay() {
+            return formatHasDay;
+        }
+
+        public boolean isDateFormatHasHour() {
+            return formatHasHour;
+        }
+
         public DateTimeFormatter getDateFormatter() {
             if (dateFormatter == null && dateFormat != null && !dateFormatMillis && !dateFormatISO8601 && !dateFormatUnixTime) {
                 dateFormatter = DateTimeFormatter.ofPattern(dateFormat);
@@ -1516,6 +1526,8 @@ public abstract class JSONWriter
                         break;
                     default:
                         dateFormatMillis = false;
+                        formatHasHour = dateFormat.indexOf("d") != -1;
+                        formatHasDay = dateFormat.indexOf("H") != -1;
                         break;
                 }
             }
