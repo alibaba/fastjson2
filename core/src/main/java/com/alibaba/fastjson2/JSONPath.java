@@ -27,6 +27,9 @@ import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 
 public abstract class JSONPath {
+    static final long HASH_LAX = Fnv.hashCode64("lax");
+    static final long HASH_STRICT = Fnv.hashCode64("strict");
+
     JSONReader.Context readerContext;
     JSONWriter.Context writerContext;
     final String path;
@@ -384,12 +387,13 @@ public abstract class JSONPath {
         JSONReader jsonReader = JSONReader.of(path);
         List<Segment> segments = new ArrayList<>();
 
-        while (jsonReader.current() != JSONReader.EOI) {
-            if (jsonReader.current() == '$') {
+        loop_:
+        while (jsonReader.ch != JSONReader.EOI) {
+            if (jsonReader.ch == '$') {
                 jsonReader.next();
-                if (jsonReader.current() == '.') {
+                if (jsonReader.ch == '.') {
                     jsonReader.next();
-                    if (jsonReader.current() == '*') {
+                    if (jsonReader.ch == '*') {
                         jsonReader.next();
                         segments.add(AllSegment.INSTANCE);
                     } else if (jsonReader.current() == '.') {
@@ -442,11 +446,16 @@ public abstract class JSONPath {
                         }
                         segments.add(segment);
                     }
+                } else if (jsonReader.ch == '?') {
+                    jsonReader.next();
+                    Segment segment = parseFilter(jsonReader);
+                    segments.add(segment);
+                    break;
                 }
                 continue;
             }
 
-            if (jsonReader.current() == '.') {
+            if (jsonReader.ch == '.') {
                 jsonReader.next();
                 if (jsonReader.current() == '*') {
                     jsonReader.next();
@@ -647,6 +656,11 @@ public abstract class JSONPath {
             char ch = jsonReader.ch;
             if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_') {
                 long hashCode = jsonReader.readFieldNameHashCodeUnquote();
+
+                if ((hashCode == HASH_LAX || hashCode == HASH_STRICT) && jsonReader.ch == '$') {
+                    continue loop_;
+                }
+
                 String name = jsonReader.getFieldName();
                 Segment segment;
                 if (jsonReader.ch == '(') {
@@ -740,13 +754,13 @@ public abstract class JSONPath {
                 if (segment != null) {
                     if (parentheses) {
                         if (!jsonReader.nextIfMatch(')')) {
-                            throw new JSONException("syntax error, " + jsonReader.ch);
+                            throw new JSONException(jsonReader.info("jsonpath syntax error"));
                         }
                     }
                     return segment;
                 }
 
-                throw new JSONException("syntax error, " + jsonReader.ch);
+                throw new JSONException(jsonReader.info("jsonpath syntax error"));
             }
 
             jsonReader.next();
@@ -804,7 +818,7 @@ public abstract class JSONPath {
 
                     Segment segment = new NameRLikeSegment(fieldName, hashCode, pattern, operator == Operator.NOT_RLIKE);
                     if (!jsonReader.nextIfMatch(')')) {
-                        throw new JSONException("syntax error, " + jsonReader.ch);
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
                     }
 
                     return segment;
@@ -812,7 +826,7 @@ public abstract class JSONPath {
                 case IN:
                 case NOT_IN: {
                     if (jsonReader.ch != '(') {
-                        throw new JSONException("syntax error, " + jsonReader.ch);
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
                     }
                     jsonReader.next();
 
@@ -836,14 +850,14 @@ public abstract class JSONPath {
                         }
                         segment = new NameIntInSegment(fieldName, hashCode, function, values, operator == Operator.NOT_IN);
                     } else {
-                        throw new JSONException("syntax error, " + jsonReader.ch);
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
                     }
 
                     if (!jsonReader.nextIfMatch(')')) {
-                        throw new JSONException("syntax error, " + jsonReader.ch);
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
                     }
                     if (!jsonReader.nextIfMatch(')')) {
-                        throw new JSONException("syntax error, " + jsonReader.ch);
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
                     }
 
                     return segment;
@@ -860,12 +874,12 @@ public abstract class JSONPath {
                         Number end = jsonReader.readNumber();
                         segment = new NameIntBetweenSegment(fieldName, hashCode, begin.longValue(), end.longValue(), operator == Operator.NOT_BETWEEN);
                     } else {
-                        throw new JSONException("syntax error, " + jsonReader.ch);
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
                     }
 
                     if (parentheses) {
                         if (!jsonReader.nextIfMatch(')')) {
-                            throw new JSONException("syntax error, " + jsonReader.ch);
+                            throw new JSONException(jsonReader.info("jsonpath syntax error"));
                         }
                     }
 
@@ -895,7 +909,7 @@ public abstract class JSONPath {
                     } else if (number instanceof BigDecimal) {
                         segment = new NameDecimalOpSegment(fieldName, hashCode, operator, (BigDecimal) number);
                     } else {
-                        throw new JSONException("TODO : " + number);
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
                     }
                     break;
                 }
@@ -987,7 +1001,7 @@ public abstract class JSONPath {
                     break;
                 }
                 default:
-                    throw new JSONException("TODO : " + jsonReader.ch);
+                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
             }
 
             if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
@@ -996,13 +1010,13 @@ public abstract class JSONPath {
 
             if (parentheses) {
                 if (!jsonReader.nextIfMatch(')')) {
-                    throw new JSONException("TODO : " + jsonReader.ch);
+                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
                 }
             }
 
             return segment;
         } else {
-            throw new JSONException("TODO : " + jsonReader.ch);
+            throw new JSONException(jsonReader.info("jsonpath syntax error"));
         }
     }
 
@@ -1012,14 +1026,14 @@ public abstract class JSONPath {
             case '&':
                 jsonReader.next();
                 if (!jsonReader.nextIfMatch('&')) {
-                    throw new JSONException("syntx error, " + jsonReader.ch);
+                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
                 }
                 and = true;
                 break;
             case '|':
                 jsonReader.next();
                 if (!jsonReader.nextIfMatch('|')) {
-                    throw new JSONException("syntx error, " + jsonReader.ch);
+                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
                 }
                 and = false;
                 break;

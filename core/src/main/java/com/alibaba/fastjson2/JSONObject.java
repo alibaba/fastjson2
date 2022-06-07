@@ -1677,6 +1677,10 @@ public class JSONObject
         return new JSONObject(this);
     }
 
+    public Object eval(JSONPath path) {
+        return path.eval(this);
+    }
+
     /**
      *
      * <pre>
