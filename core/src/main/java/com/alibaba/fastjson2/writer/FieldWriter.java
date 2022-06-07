@@ -470,6 +470,14 @@ public interface FieldWriter<T>
                 }
             }
 
+            if (LocalTime.class.isAssignableFrom(valueClass)) {
+                if (format == null || format.isEmpty()) {
+                    return ObjectWriterImplLocalTime.INSTANCE;
+                } else {
+                    return new ObjectWriterImplLocalTime(format, locale);
+                }
+            }
+
             if (Optional.class == valueClass) {
                 return ObjectWriterImplOptional.of(format, locale);
             }

@@ -1,13 +1,21 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.codec.DateTimeCodec;
 
 import java.lang.reflect.Type;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 final class ObjectWriterImplLocalTime
-        extends ObjectWriterBaseModule.PrimitiveImpl {
-    static final ObjectWriterImplLocalTime INSTANCE = new ObjectWriterImplLocalTime();
+        extends DateTimeCodec
+        implements ObjectWriter {
+    static final ObjectWriterImplLocalTime INSTANCE = new ObjectWriterImplLocalTime(null, null);
+
+    public ObjectWriterImplLocalTime(String format, Locale locale) {
+        super(format, locale);
+    }
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -25,8 +33,12 @@ final class ObjectWriterImplLocalTime
 
         LocalTime time = (LocalTime) object;
 
-        String dateFormat = ctx.getDateFormat();
-        if (dateFormat == null) {
+        DateTimeFormatter formatter = this.getDateFormatter();
+        if (formatter == null) {
+            formatter = ctx.getDateFormatter();
+        }
+
+        if (formatter == null) {
             int hour = time.getHour();
             int minute = time.getMinute();
             int second = time.getSecond();
@@ -36,9 +48,10 @@ final class ObjectWriterImplLocalTime
             } else {
                 jsonWriter.writeLocalTime(time);
             }
-        } else {
-            String str = ctx.getDateFormatter().format(time);
-            jsonWriter.writeString(str);
+            return;
         }
+
+        String str = formatter.format(time);
+        jsonWriter.writeString(str);
     }
 }
