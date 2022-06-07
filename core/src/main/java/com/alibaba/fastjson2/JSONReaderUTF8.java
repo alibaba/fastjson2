@@ -1024,6 +1024,8 @@ class JSONReaderUTF8
         if (ch == '-') {
             negative = true;
             ch = (char) bytes[offset++];
+        } else if (ch == '+') {
+            ch = (char) bytes[offset++];
         }
 
         boolean overflow = false;
@@ -1142,6 +1144,8 @@ class JSONReaderUTF8
         if (ch == '-') {
             negative = true;
             ch = (char) bytes[offset++];
+        } else if (ch == '+') {
+            ch = (char) bytes[offset++];
         }
 
         boolean overflow = false;
@@ -1248,6 +1252,8 @@ class JSONReaderUTF8
 
         if (ch == '-') {
             negative = true;
+            ch = (char) bytes[offset++];
+        } else if (ch == '+') {
             ch = (char) bytes[offset++];
         }
 
@@ -1377,6 +1383,8 @@ class JSONReaderUTF8
                 nextIfMatch(',');
                 return null;
             }
+        } else if (ch == '+') {
+            ch = (char) bytes[offset++];
         }
 
         boolean overflow = false;
@@ -2530,6 +2538,9 @@ class JSONReaderUTF8
             negative = true;
             ch = (char) bytes[offset++];
         } else {
+            if (ch == '+') {
+                ch = (char) bytes[offset++];
+            }
             limit = -2147483647; // -Integer.MAX_VALUE;
             multmin = -214748364; // limit / 10;
         }
