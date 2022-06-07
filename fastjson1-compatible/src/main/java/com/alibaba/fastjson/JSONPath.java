@@ -54,4 +54,11 @@ public class JSONPath {
     public boolean set(Object rootObject, Object value, boolean p) {
         throw new JSONException("TODO"); // TODO : JSONPath.set
     }
+
+    public static Object read(String json, String path) {
+        return com.alibaba.fastjson2.JSONPath.of(path)
+                .eval(
+                        JSON.parse(json)
+                );
+    }
 }
