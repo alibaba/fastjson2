@@ -1697,6 +1697,17 @@ public abstract class JSONReader
                     throw new JSONException(info("read decimal error, value " + stringValue), ex);
                 }
             }
+            case JSON_TYPE_OBJECT: {
+                JSONObject object = (JSONObject) complex;
+                BigDecimal decimal = object.getBigDecimal("value");
+                if (decimal == null) {
+                    decimal = object.getBigDecimal("$numberDecimal");
+                }
+                if (decimal != null) {
+                    return decimal;
+                }
+                throw new JSONException("TODO : " + valueType);
+            }
             default:
                 throw new JSONException("TODO : " + valueType);
         }

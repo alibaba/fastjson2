@@ -267,6 +267,10 @@ public class TypeConverts {
                 return new BigDecimal((BigInteger) o);
             }
 
+            if (o instanceof String) {
+                return new BigDecimal((String) o);
+            }
+
             throw new JSONException("can not cast to BigDecimal " + o.getClass());
         }
     }
