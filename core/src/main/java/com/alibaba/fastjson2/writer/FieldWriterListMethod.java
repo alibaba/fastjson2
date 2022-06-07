@@ -53,8 +53,8 @@ final class FieldWriterListMethod<T>
             throw error;
         }
 
+        long features = this.features | jsonWriter.getFeatures();
         if (value == null) {
-            long features = this.features | jsonWriter.getFeatures();
             if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullListAsEmpty.mask)) != 0) {
                 writeFieldName(jsonWriter);
                 jsonWriter.writeArrayNull();
@@ -62,6 +62,10 @@ final class FieldWriterListMethod<T>
             } else {
                 return false;
             }
+        }
+
+        if ((features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0 && value.isEmpty()) {
+            return false;
         }
 
         writeList(jsonWriter, true, value);
