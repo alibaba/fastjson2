@@ -56,9 +56,6 @@ public class JSONPath {
     }
 
     public static Object read(String json, String path) {
-        return com.alibaba.fastjson2.JSONPath.of(path)
-                .eval(
-                        JSON.parse(json)
-                );
+        return com.alibaba.fastjson2.JSONPath.extract(json, path);
     }
 }
