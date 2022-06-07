@@ -1753,7 +1753,7 @@ public class ObjectReaderCreatorASM
                     mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
                     mw.visitVarInsn(Opcodes.ASTORE, LIST);
                 } else {
-                    Label match_ = new Label(), skipValue_ = new Label();
+                    Label match_ = new Label(), skipValue_ = new Label(), loadNull_ = new Label();
 
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                     mw.visitIntInsn(Opcodes.BIPUSH, '[');
@@ -1777,12 +1777,30 @@ public class ObjectReaderCreatorASM
                         mw.visitInsn(Opcodes.POP);
 
                         mw.visitJumpInsn(Opcodes.GOTO, loadList_);
+                    } else if (itemType instanceof Class) {
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfEmptyString", "()Z", false);
+                        mw.visitJumpInsn(Opcodes.IFNE, loadNull_);
+
+                        // nextIfEmptyString
+                        mw.visitTypeInsn(Opcodes.NEW, LIST_TYPE);
+                        mw.visitInsn(Opcodes.DUP);
+                        mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
+                        mw.visitVarInsn(Opcodes.ASTORE, LIST);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitVarInsn(Opcodes.ALOAD, LIST);
+                        mw.visitLdcInsn((Class) itemType);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readArray", "(Ljava/util/List;Ljava/lang/reflect/Type;)V", false);
+
+                        mw.visitJumpInsn(Opcodes.GOTO, loadList_);
                     }
 
                     mw.visitLabel(skipValue_);
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                     mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "skipValue", "()V", false);
 
+                    mw.visitLabel(loadNull_);
                     mw.visitInsn(Opcodes.ACONST_NULL);
                     mw.visitVarInsn(Opcodes.ASTORE, LIST);
                     mw.visitJumpInsn(Opcodes.GOTO, loadList_);

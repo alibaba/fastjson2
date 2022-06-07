@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -1529,6 +1530,58 @@ public abstract class JSONReader
         }
 
         return list;
+    }
+
+    public void readArray(List list, Type itemType) {
+        if (nextIfMatch('[')) {
+            for (;;) {
+                if (nextIfMatch(']')) {
+                    break;
+                }
+                Object item = read(itemType);
+                list.add(item);
+
+                if (ch == '}') {
+                    throw new JSONException(info());
+                }
+            }
+
+            if (ch == ',') {
+                this.comma = true;
+                next();
+            }
+            return;
+        }
+
+        if (isString()) {
+            String str = readString();
+            if (itemType == String.class) {
+                list.add(str);
+            } else {
+                Function typeConvert = context.getProvider().getTypeConvert(String.class, itemType);
+                if (typeConvert == null) {
+                    throw new JSONException(info("not support input " + str));
+                }
+                if (str.indexOf(',') != -1) {
+                    String[] items = str.split(",");
+                    for (String strItem : items) {
+                        Object item = typeConvert.apply(strItem);
+                        list.add(item);
+                    }
+                } else {
+                    Object item = typeConvert.apply(str);
+                    list.add(item);
+                }
+            }
+        } else {
+            Object item = read(itemType);
+            list.add(item);
+        }
+
+        if (ch == ',') {
+            this.comma = true;
+            next();
+        }
     }
 
     public List readArray() {
