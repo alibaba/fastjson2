@@ -2252,16 +2252,7 @@ public abstract class JSONPath {
         public void set(Object rootObject, Object value) {
             if (rootObject instanceof Map) {
                 Map map = (Map) rootObject;
-                Object origin = map.put(name, value);
-                if (origin != null) {
-                    if (origin instanceof Collection) {
-                        ((Collection) origin).add(value);
-                        map.put(name, value);
-                    } else {
-                        JSONArray array = JSONArray.of(origin, value);
-                        map.put(name, array);
-                    }
-                }
+                map.put(name, value);
                 return;
             }
             ObjectReaderProvider provider = getReaderContext().getProvider();
