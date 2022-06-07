@@ -85,7 +85,13 @@ final class ObjectWriterImplLocalDate
             return;
         }
 
-        String str = formatter.format(date);
+        String str;
+        if (formatHasHour || ctx.isDateFormatHasHour()) {
+            str = formatter.format(LocalDateTime.of(date, LocalTime.MIN));
+        } else {
+            str = formatter.format(date);
+        }
+
         jsonWriter.writeString(str);
     }
 }
