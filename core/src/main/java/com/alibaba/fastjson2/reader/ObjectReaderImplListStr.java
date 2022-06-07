@@ -157,22 +157,26 @@ public final class ObjectReaderImplListStr
         }
 
         boolean set = jsonReader.nextIfSet();
-
-        if (jsonReader.current() != '[') {
-            throw new JSONException(jsonReader.info());
-        }
-        jsonReader.next();
-
         Collection list = set
                 ? new HashSet()
                 : (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
-        for (; ; ) {
-            if (jsonReader.nextIfMatch(']')) {
-                break;
-            }
 
-            list.add(
-                    jsonReader.readString());
+        char ch = jsonReader.current();
+        if (ch == '[') {
+            jsonReader.next();
+            for (; ; ) {
+                if (jsonReader.nextIfMatch(']')) {
+                    break;
+                }
+
+                list.add(
+                        jsonReader.readString());
+            }
+        } else if (ch == '"' || ch == '\'') {
+            String str = jsonReader.readString();
+            list.add(str);
+        } else {
+            throw new JSONException(jsonReader.info());
         }
 
         jsonReader.nextIfMatch(',');

@@ -1753,12 +1753,33 @@ public class ObjectReaderCreatorASM
                     mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
                     mw.visitVarInsn(Opcodes.ASTORE, LIST);
                 } else {
-                    Label match_ = new Label();
+                    Label match_ = new Label(), skipValue_ = new Label();
 
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                     mw.visitIntInsn(Opcodes.BIPUSH, '[');
                     mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
                     mw.visitJumpInsn(Opcodes.IFNE, match_);
+
+                    if (itemClass == String.class) {
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isString", "()Z", false);
+                        mw.visitJumpInsn(Opcodes.IFEQ, skipValue_);
+
+                        mw.visitTypeInsn(Opcodes.NEW, LIST_TYPE);
+                        mw.visitInsn(Opcodes.DUP);
+                        mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
+                        mw.visitVarInsn(Opcodes.ASTORE, LIST);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, LIST);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readString", "()Ljava/lang/String;", false);
+                        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);
+                        mw.visitInsn(Opcodes.POP);
+
+                        mw.visitJumpInsn(Opcodes.GOTO, loadList_);
+                    }
+
+                    mw.visitLabel(skipValue_);
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                     mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "skipValue", "()V", false);
 
