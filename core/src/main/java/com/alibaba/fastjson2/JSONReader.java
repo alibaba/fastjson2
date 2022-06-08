@@ -43,6 +43,12 @@ public abstract class JSONReader
     static final byte JSON_TYPE_ARRAY = 7;
     static final byte JSON_TYPE_BIG_DEC = 8;
 
+    static final byte JSON_TYPE_INT8 = 9;
+    static final byte JSON_TYPE_INT16 = 10;
+    static final byte JSON_TYPE_INT64 = 11;
+    static final byte JSON_TYPE_FLOAT = 12;
+    static final byte JSON_TYPE_DOUBLE = 13;
+
     static final char EOI = 0x1A;
     static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
 
@@ -1772,19 +1778,25 @@ public abstract class JSONReader
         }
 
         switch (valueType) {
-            case JSON_TYPE_INT: {
+            case JSON_TYPE_INT:
+            case JSON_TYPE_INT64: {
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                    int intVlaue;
                     if (negative) {
                         if (mag3 < 0) {
                             return -(mag3 & 0xFFFFFFFFL);
                         }
-                        return -mag3;
+                        intVlaue = -mag3;
                     } else {
                         if (mag3 < 0) {
                             return mag3 & 0xFFFFFFFFL;
                         }
-                        return mag3;
+                        intVlaue = mag3;
                     }
+                    if (valueType == JSON_TYPE_INT64) {
+                        return Long.valueOf(intVlaue);
+                    }
+                    return Integer.valueOf(intVlaue);
                 }
                 int[] mag;
                 if (mag0 == 0) {
@@ -1805,6 +1817,20 @@ public abstract class JSONReader
                 }
 
                 return getBigInt(negative, mag);
+            }
+            case JSON_TYPE_INT16: {
+                if (mag1 == 0 && mag2 == 0 && mag3 >= 0) {
+                    int intValue = negative ? -mag3 : mag3;
+                    return Short.valueOf((short) intValue);
+                }
+                throw new JSONException(info("shortValue overflow"));
+            }
+            case JSON_TYPE_INT8: {
+                if (mag1 == 0 && mag2 == 0 && mag3 >= 0) {
+                    int intValue = negative ? -mag3 : mag3;
+                    return Byte.valueOf((byte) intValue);
+                }
+                throw new JSONException(info("shortValue overflow"));
             }
             case JSON_TYPE_DEC: {
                 int[] mag = mag0 == 0
@@ -1838,6 +1864,35 @@ public abstract class JSONReader
                 } else {
                     return new BigInteger(stringValue);
                 }
+            }
+            case JSON_TYPE_FLOAT:
+            case JSON_TYPE_DOUBLE: {
+                int[] mag = mag0 == 0
+                        ? mag1 == 0
+                        ? mag2 == 0
+                        ? new int[]{mag3}
+                        : new int[]{mag2, mag3}
+                        : new int[]{mag1, mag2, mag3}
+                        : new int[]{mag0, mag1, mag2, mag3};
+                BigInteger bigInt = getBigInt(negative, mag);
+                BigDecimal decimal = new BigDecimal(bigInt, scale);
+
+                if (valueType == JSON_TYPE_FLOAT) {
+                    if (exponent != 0) {
+                        float floatValueValue = Float.parseFloat(
+                                decimal + "E" + exponent);
+                        return Float.valueOf(floatValueValue);
+                    }
+
+                    return decimal.floatValue();
+                }
+
+                if (exponent != 0) {
+                    double doubleValue = Double.parseDouble(
+                            decimal + "E" + exponent);
+                    return Double.valueOf(doubleValue);
+                }
+                return decimal.doubleValue();
             }
             case JSON_TYPE_BOOL:
                 return boolValue ? 1 : 0;
