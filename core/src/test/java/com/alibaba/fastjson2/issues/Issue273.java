@@ -18,6 +18,7 @@ public class Issue273 {
         map0.put(1, 111L);
         map0.put(2, 222L);
         String json = JSON.toJSONString(map0);
+        assertEquals("{1:111,2:222}", json);
 
         Type type1 = new TypeReference<HashMap<Integer, Long>>() {
         }.getType();

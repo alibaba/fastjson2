@@ -418,7 +418,26 @@ public class JSON {
     }
 
     public static String toJSONString(Object object) {
-        return toJSONString(object, new SerializeFilter[0], new SerializerFeature[0]);
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+
+        try (JSONWriter writer = JSONWriter.of(context)) {
+            writer.setRootObject(object);
+
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                Class<?> valueClass = object.getClass();
+                ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+
+            return writer.toString();
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("toJSONString error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("toJSONString error", ex);
+        }
     }
 
     public static String toJSONString(Object object, SerializeFilter... filters) {
@@ -426,11 +445,49 @@ public class JSON {
     }
 
     public static String toJSONString(Object object, SerializerFeature... features) {
-        return toJSONString(object, new SerializeFilter[0], features);
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        config(context, features);
+
+        try (JSONWriter writer = JSONWriter.of(context)) {
+            writer.setRootObject(object);
+
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                Class<?> valueClass = object.getClass();
+                ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+
+            return writer.toString();
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("toJSONString error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("toJSONString error", ex);
+        }
     }
 
     public static byte[] toJSONBytes(Object object) {
-        return toJSONBytes(object, new SerializeFilter[0], new SerializerFeature[0]);
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+            writer.setRootObject(object);
+
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                Class<?> valueClass = object.getClass();
+                ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+
+            return writer.getBytes();
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("toJSONBytes error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("toJSONBytes error", ex);
+        }
     }
 
     public static byte[] toJSONBytes(Object object, SerializeFilter... filters) {
@@ -500,6 +557,9 @@ public class JSON {
                     break;
                 case PrettyFormat:
                     ctx.config(JSONWriter.Feature.PrettyFormat);
+                    break;
+                case WriteNonStringKeyAsString:
+                    ctx.config(JSONWriter.Feature.WriteNonStringKeyAsString);
                     break;
                 default:
                     break;

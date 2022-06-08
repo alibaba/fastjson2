@@ -3,6 +3,7 @@ package com.alibaba.fastjson.issue_1400;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -23,8 +24,8 @@ public class Issue1480 {
         map.put(36796, 9);
 
         String json = JSON.toJSONString(map);
-        System.out.println(json);
-        assertEquals("{\"1\":10,\"2\":4,\"3\":5,\"4\":5,\"37306\":98,\"36796\":9}", json);
+        assertEquals("{1:10,2:4,3:5,4:5,37306:98,36796:9}", json);
+        assertEquals("{\"1\":10,\"2\":4,\"3\":5,\"4\":5,\"37306\":98,\"36796\":9}", JSON.toJSONString(map, SerializerFeature.WriteNonStringKeyAsString));
 
         Map<Integer, Integer> map1 = JSON.parseObject(json, new TypeReference<HashMap<Integer, Integer>>() {
         }.getType());
