@@ -956,6 +956,25 @@ final class JSONReaderUTF16
         }
 
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+            switch (ch) {
+                case 'B':
+                    valueType = JSON_TYPE_INT8;
+                    break;
+                case 'S':
+                    valueType = JSON_TYPE_INT16;
+                    break;
+                case 'L':
+                    valueType = JSON_TYPE_INT64;
+                    break;
+                case 'F':
+                    valueType = JSON_TYPE_FLOAT;
+                    break;
+                case 'D':
+                    valueType = JSON_TYPE_DOUBLE;
+                    break;
+                default:
+                    break;
+            }
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -1073,6 +1092,25 @@ final class JSONReaderUTF16
         }
 
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+            switch (ch) {
+                case 'B':
+                    valueType = JSON_TYPE_INT8;
+                    break;
+                case 'S':
+                    valueType = JSON_TYPE_INT16;
+                    break;
+                case 'L':
+                    valueType = JSON_TYPE_INT64;
+                    break;
+                case 'F':
+                    valueType = JSON_TYPE_FLOAT;
+                    break;
+                case 'D':
+                    valueType = JSON_TYPE_DOUBLE;
+                    break;
+                default:
+                    break;
+            }
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -1182,6 +1220,25 @@ final class JSONReaderUTF16
         }
 
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+            switch (ch) {
+                case 'B':
+                    valueType = JSON_TYPE_INT8;
+                    break;
+                case 'S':
+                    valueType = JSON_TYPE_INT16;
+                    break;
+                case 'L':
+                    valueType = JSON_TYPE_INT64;
+                    break;
+                case 'F':
+                    valueType = JSON_TYPE_FLOAT;
+                    break;
+                case 'D':
+                    valueType = JSON_TYPE_DOUBLE;
+                    break;
+                default:
+                    break;
+            }
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -1295,6 +1352,25 @@ final class JSONReaderUTF16
         }
 
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+            switch (ch) {
+                case 'B':
+                    valueType = JSON_TYPE_INT8;
+                    break;
+                case 'S':
+                    valueType = JSON_TYPE_INT16;
+                    break;
+                case 'L':
+                    valueType = JSON_TYPE_INT64;
+                    break;
+                case 'F':
+                    valueType = JSON_TYPE_FLOAT;
+                    break;
+                case 'D':
+                    valueType = JSON_TYPE_DOUBLE;
+                    break;
+                default:
+                    break;
+            }
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -2136,6 +2212,25 @@ final class JSONReaderUTF16
         }
 
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+            switch (ch) {
+                case 'B':
+                    valueType = JSON_TYPE_INT8;
+                    break;
+                case 'S':
+                    valueType = JSON_TYPE_INT16;
+                    break;
+                case 'L':
+                    valueType = JSON_TYPE_INT64;
+                    break;
+                case 'F':
+                    valueType = JSON_TYPE_FLOAT;
+                    break;
+                case 'D':
+                    valueType = JSON_TYPE_DOUBLE;
+                    break;
+                default:
+                    break;
+            }
             if (offset >= end) {
                 ch = EOI;
             } else {

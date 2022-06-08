@@ -19,30 +19,30 @@ public class BasicTypeNameTest {
         JSONArray array = JSON.parseArray(json);
         assertEquals(6, array.size());
         assertEquals(1, array.get(0));
-        assertEquals(2, array.get(1));
-        assertEquals(3, array.get(2));
-        assertEquals(4, array.get(3));
-        assertEquals(5, array.get(4));
-        assertEquals(6, array.get(5));
+        assertEquals(2L, array.get(1));
+        assertEquals(3F, array.get(2));
+        assertEquals(4D, array.get(3));
+        assertEquals((byte) 5, array.get(4));
+        assertEquals((short) 6, array.get(5));
 
         JSONArray array2 = JSON.parseArray(json.getBytes(StandardCharsets.UTF_8));
         assertEquals(6, array2.size());
         assertEquals(1, array2.get(0));
-        assertEquals(2, array2.get(1));
-        assertEquals(3, array2.get(2));
-        assertEquals(4, array2.get(3));
-        assertEquals(5, array2.get(4));
-        assertEquals(6, array2.get(5));
+        assertEquals(2L, array2.get(1));
+        assertEquals(3F, array2.get(2));
+        assertEquals(4D, array2.get(3));
+        assertEquals((byte) 5, array2.get(4));
+        assertEquals((short) 6, array2.get(5));
 
         JSONReader jsonReaderStr = TestUtils.createJSONReaderStr(json);
         List array3 = jsonReaderStr.readArray();
         assertEquals(6, array3.size());
         assertEquals(1, array3.get(0));
-        assertEquals(2, array3.get(1));
-        assertEquals(3, array3.get(2));
-        assertEquals(4, array3.get(3));
-        assertEquals(5, array3.get(4));
-        assertEquals(6, array3.get(5));
+        assertEquals(2L, array3.get(1));
+        assertEquals(3F, array3.get(2));
+        assertEquals(4D, array3.get(3));
+        assertEquals((byte) 5, array3.get(4));
+        assertEquals((short) 6, array3.get(5));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class BasicTypeNameTest {
                 JSONReader[] jsonReaders = TestUtils.createJSONReaders(string);
                 for (JSONReader jsonReader : jsonReaders) {
                     Object o = jsonReader.readAny();
-                    assertEquals(i + 1, o);
+                    assertEquals(i + 1, ((Number) o).intValue());
                 }
             }
             {
