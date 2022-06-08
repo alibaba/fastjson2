@@ -25,10 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Supplier;
 
@@ -60,11 +57,72 @@ public class JSON {
     }
 
     public static JSONObject parseObject(String str) {
-        return parseObject(str, JSONObject.class);
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
+        JSONReader reader = JSONReader.of(str);
+        JSONReader.Context context = reader.getContext();
+        context.setArraySupplier(arraySupplier);
+        context.setObjectSupplier(defaultSupplier);
+
+        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
+            context.setUtilDateFormat(defaultDateFormat);
+        }
+
+        try {
+            Map<String, Object> map = new HashMap<>();
+            reader.read(map, 0);
+            JSONObject jsonObject = new JSONObject(map);
+            reader.handleResolveTasks(jsonObject);
+            return jsonObject;
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
     }
 
     public static JSONObject parseObject(String text, Feature... features) {
-        return parseObject(text, JSONObject.class, features);
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        JSONReader reader = JSONReader.of(text);
+        JSONReader.Context context = reader.getContext();
+        context.setArraySupplier(arraySupplier);
+        context.setObjectSupplier(defaultSupplier);
+
+        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
+            context.setUtilDateFormat(defaultDateFormat);
+        }
+
+        boolean ordered = false;
+        for (Feature feature : features) {
+            if (feature == Feature.OrderedField) {
+                ordered = true;
+                break;
+            }
+        }
+
+        config(context, features);
+        try {
+            Map<String, Object> map = ordered ? new LinkedHashMap() : new HashMap<>();
+            reader.read(map, 0);
+            JSONObject jsonObject = new JSONObject(map);
+            reader.handleResolveTasks(jsonObject);
+            return jsonObject;
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
     }
 
     public static <T> T parseObject(char[] str, Class type, Feature... features) {
@@ -102,6 +160,48 @@ public class JSON {
                 reader.handleResolveTasks(object);
             }
             return object;
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
+    /**
+     * @since 2.0.7
+     */
+    public static <T> JSONObject parseObject(byte[] jsonBytes, Feature... features) {
+        if (jsonBytes == null || jsonBytes.length == 0) {
+            return null;
+        }
+
+        JSONReader reader = JSONReader.of(jsonBytes);
+        JSONReader.Context context = reader.getContext();
+        context.setArraySupplier(arraySupplier);
+        context.setObjectSupplier(defaultSupplier);
+
+        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
+            context.setUtilDateFormat(defaultDateFormat);
+        }
+
+        boolean ordered = false;
+        for (Feature feature : features) {
+            if (feature == Feature.OrderedField) {
+                ordered = true;
+                break;
+            }
+        }
+
+        config(context, features);
+        try {
+            Map<String, Object> map = ordered ? new LinkedHashMap<>() : new HashMap<>();
+            reader.read(map, 0);
+            JSONObject jsonObject = new JSONObject(map);
+            reader.handleResolveTasks(jsonObject);
+            return jsonObject;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
             if (cause == null) {

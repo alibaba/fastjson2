@@ -62,4 +62,40 @@ public class RemotingCommandTest {
             deserialize_perf(); // 296
         }
     }
+
+    public void parseTree_perf() {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000 * 1000; ++i) {
+            JSON.parseObject(bytes);
+        }
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("parseTreeBytes millis : " + millis);
+    }
+
+    @Test
+    public void parseTree_perf_test() {
+        JSON.parseObject(bytes);
+
+        for (int i = 0; i < 10; i++) {
+            parseTree_perf(); // 520
+        }
+    }
+
+    public void parseStringTree_perf() {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000 * 1000; ++i) {
+            JSON.parseObject(str);
+        }
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("serialize millis : " + millis);
+    }
+
+    @Test
+    public void parseStringTree_perf_test() {
+        JSON.parseObject(str);
+
+        for (int i = 0; i < 10; i++) {
+            parseStringTree_perf(); // 394
+        }
+    }
 }

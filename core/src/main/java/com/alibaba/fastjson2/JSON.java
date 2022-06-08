@@ -141,6 +141,9 @@ public interface JSON {
             }
             JSONObject object = new JSONObject();
             reader.read(object, 0L);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
             return object;
         }
     }
