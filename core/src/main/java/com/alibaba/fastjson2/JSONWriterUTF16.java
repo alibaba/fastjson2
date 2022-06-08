@@ -275,6 +275,61 @@ class JSONWriterUTF16
                     chars[off++] = '\\';
                     chars[off++] = 't';
                     break;
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    chars[off++] = '\\';
+                    chars[off++] = 'u';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = (char) ('0' + (int) ch);
+                    break;
+                case 11:
+                case 14:
+                case 15:
+                    chars[off++] = '\\';
+                    chars[off++] = 'u';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = (char) ('a' + (ch - 10));
+                    break;
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                case 21:
+                case 22:
+                case 23:
+                case 24:
+                case 25:
+                    chars[off++] = '\\';
+                    chars[off++] = 'u';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = '1';
+                    chars[off++] = (char) ('0' + (ch - 16));
+                    break;
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                    chars[off++] = '\\';
+                    chars[off++] = 'u';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = '1';
+                    chars[off++] = (char) ('a' + (ch - 26));
+                    break;
                 default:
                     chars[off++] = ch;
                     break;

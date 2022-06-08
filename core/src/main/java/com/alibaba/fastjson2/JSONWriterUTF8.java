@@ -331,29 +331,94 @@ class JSONWriterUTF8
         for (; i < chars.length; ++i) { // ascii none special fast write
             char ch = chars[i];
             if ((ch >= 0x0000) && (ch <= 0x007F)) {
-                if (ch == quote) {
-                    bytes[off++] = (byte) '\\';
-                    bytes[off++] = (byte) quote;
-                } else if (ch == '\\') {
-                    bytes[off++] = (byte) '\\';
-                    bytes[off++] = (byte) '\\';
-                } else if (ch == '\n') {
-                    bytes[off++] = (byte) '\\';
-                    bytes[off++] = (byte) 'n';
-                } else if (ch == '\r') {
-                    bytes[off++] = (byte) '\\';
-                    bytes[off++] = (byte) 'r';
-                } else if (ch == '\f') {
-                    bytes[off++] = (byte) '\\';
-                    bytes[off++] = (byte) 'f';
-                } else if (ch == '\b') {
-                    bytes[off++] = (byte) '\\';
-                    bytes[off++] = (byte) 'b';
-                } else if (ch == '\t') {
-                    bytes[off++] = (byte) '\\';
-                    bytes[off++] = (byte) 't';
-                } else {
-                    bytes[off++] = (byte) ch;
+                switch (ch) {
+                    case '\\':
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) '\\';
+                        break;
+                    case '\n':
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) 'n';
+                        break;
+                    case '\r':
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) 'r';
+                        break;
+                    case '\f':
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) 'f';
+                        break;
+                    case '\b':
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) 'b';
+                        break;
+                    case '\t':
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) 't';
+                        break;
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                        bytes[off++] = '\\';
+                        bytes[off++] = 'u';
+                        bytes[off++] = '0';
+                        bytes[off++] = '0';
+                        bytes[off++] = '0';
+                        bytes[off++] = (byte) ('0' + (int) ch);
+                        break;
+                    case 11:
+                    case 14:
+                    case 15:
+                        bytes[off++] = '\\';
+                        bytes[off++] = 'u';
+                        bytes[off++] = '0';
+                        bytes[off++] = '0';
+                        bytes[off++] = '0';
+                        bytes[off++] = (byte) ('a' + (ch - 10));
+                        break;
+                    case 16:
+                    case 17:
+                    case 18:
+                    case 19:
+                    case 20:
+                    case 21:
+                    case 22:
+                    case 23:
+                    case 24:
+                    case 25:
+                        bytes[off++] = '\\';
+                        bytes[off++] = 'u';
+                        bytes[off++] = '0';
+                        bytes[off++] = '0';
+                        bytes[off++] = '1';
+                        bytes[off++] = (byte) ('0' + (ch - 16));
+                        break;
+                    case 26:
+                    case 27:
+                    case 28:
+                    case 29:
+                    case 30:
+                    case 31:
+                        bytes[off++] = '\\';
+                        bytes[off++] = 'u';
+                        bytes[off++] = '0';
+                        bytes[off++] = '0';
+                        bytes[off++] = '1';
+                        bytes[off++] = (byte) ('a' + (ch - 26));
+                        break;
+                    default:
+                        if (ch == quote) {
+                            bytes[off++] = (byte) '\\';
+                            bytes[off++] = (byte) quote;
+                        } else {
+                            bytes[off++] = (byte) ch;
+                        }
+                        break;
                 }
             } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
                 final int uc;
