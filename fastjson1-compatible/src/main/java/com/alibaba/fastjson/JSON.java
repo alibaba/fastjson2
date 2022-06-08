@@ -33,11 +33,12 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Supplier;
 
 public class JSON {
+    private static TimeZone DEFAULT_TIME_ZONE = TimeZone.getDefault();
     public static final String VERSION = com.alibaba.fastjson2.JSON.VERSION;
     static final Cache CACHE = new Cache();
     static final AtomicReferenceFieldUpdater<Cache, char[]> CHARS_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(Cache.class, char[].class, "chars");
-    public static TimeZone defaultTimeZone = TimeZone.getDefault();
+    public static TimeZone defaultTimeZone = DEFAULT_TIME_ZONE;
     public static Locale defaultLocale = Locale.getDefault();
     public static String DEFAULT_TYPE_KEY = "@type";
     public static String DEFFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
@@ -411,10 +412,29 @@ public class JSON {
     }
 
     public static String toJSONString(Object object, boolean prettyFormat) {
-        SerializerFeature[] features = prettyFormat
-                ? new SerializerFeature[]{SerializerFeature.PrettyFormat}
-                : new SerializerFeature[0];
-        return toJSONString(object, new SerializeFilter[0], features);
+        JSONWriter.Context context = JSONFactory.createWriteContext(JSONWriter.Feature.ReferenceDetection);
+        if (prettyFormat) {
+            context.config(JSONWriter.Feature.PrettyFormat);
+        }
+        context.setDateFormat("millis");
+        try (JSONWriter writer = JSONWriter.of(context)) {
+            writer.setRootObject(object);
+
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                Class<?> valueClass = object.getClass();
+                ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+
+            return writer.toString();
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("toJSONString error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("toJSONString error", ex);
+        }
     }
 
     public static String toJSONString(Object object) {
@@ -497,15 +517,45 @@ public class JSON {
     }
 
     public static byte[] toJSONBytes(Object object, SerializerFeature... features) {
-        return toJSONBytes(object, new SerializeFilter[0], features);
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        config(context, features);
+
+        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+            writer.setRootObject(object);
+
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                Class<?> valueClass = object.getClass();
+                ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+
+            return writer.getBytes();
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("toJSONBytes error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("toJSONBytes error", ex);
+        }
     }
 
     public static void config(JSONWriter.Context ctx, SerializerFeature[] features) {
         ctx.setDateFormat("millis");
-        if (defaultTimeZone != null) {
+        if (defaultTimeZone != null && defaultTimeZone != DEFAULT_TIME_ZONE) {
             ctx.setZoneId(defaultTimeZone.toZoneId());
         }
-        ctx.config(JSONWriter.Feature.ReferenceDetection);
+
+        boolean disableCircularReferenceDetect = false;
+        for (SerializerFeature feature : features) {
+            if (feature == SerializerFeature.DisableCircularReferenceDetect) {
+                disableCircularReferenceDetect = true;
+                break;
+            }
+        }
+        if (!disableCircularReferenceDetect) {
+            ctx.config(JSONWriter.Feature.ReferenceDetection);
+        }
 
         for (SerializerFeature feature : features) {
             switch (feature) {
