@@ -15,13 +15,42 @@ final class FieldReaderDateMethod<T>
     DateTimeFormatter formatter;
     ObjectReaderImplDate dateReader;
 
-    boolean formatUnixtime;
-    boolean formatMillis;
+    final boolean formatISO8601;
+    final boolean formatUnixTime;
+    final boolean formatMillis;
+    final boolean formatHasDay;
+    final boolean formatHasHour;
 
     FieldReaderDateMethod(String fieldName, Class fieldClass, int ordinal, long features, String format, Locale locale, JSONSchema schema, Method method) {
         super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, null, schema, method);
-        this.formatUnixtime = "unixtime".equals(format);
-        this.formatMillis = "millis".equals(format);
+
+        boolean formatUnixTime = false, formatISO8601 = false, formatMillis = false, hasDay = false, hasHour = false;
+        if (format != null) {
+            switch (format) {
+                case "unixtime":
+                    formatUnixTime = true;
+                    break;
+                case "iso8601":
+                    formatISO8601 = true;
+                    break;
+                case "millis":
+                    formatMillis = true;
+                    break;
+                default:
+                    hasDay = format.indexOf('d') != -1;
+                    hasHour = format.indexOf('H') != -1
+                            || format.indexOf('h') != -1
+                            || format.indexOf('K') != -1
+                            || format.indexOf('k') != -1;
+                    break;
+            }
+        }
+        this.formatUnixTime = formatUnixTime;
+        this.formatMillis = formatMillis;
+        this.formatISO8601 = formatISO8601;
+
+        this.formatHasDay = hasDay;
+        this.formatHasHour = hasHour;
     }
 
     @Override
@@ -41,15 +70,15 @@ final class FieldReaderDateMethod<T>
                 String str = (String) value;
 
                 long millis;
-                if ((format == null || formatUnixtime || formatMillis) && IOUtils.isNumber(str)) {
+                if ((format == null || formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
                     millis = Long.parseLong(str);
-                    if (formatUnixtime) {
+                    if (formatUnixTime) {
                         millis *= 1000L;
                     }
                 } else {
                     DateTimeFormatter formatter = getFormatter(null);
                     LocalDateTime ldt;
-                    if (format.indexOf("HH") == -1) {
+                    if (!formatHasHour) {
                         ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
                     } else {
                         ldt = LocalDateTime.parse(str, formatter);
@@ -70,9 +99,9 @@ final class FieldReaderDateMethod<T>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         java.util.Date fieldValue;
-        if (jsonReader.isInt() && (format == null || formatUnixtime || formatMillis)) {
+        if (jsonReader.isInt() && (format == null || formatUnixTime || formatMillis)) {
             long millis = jsonReader.readInt64Value();
-            if (formatUnixtime) {
+            if (formatUnixTime) {
                 millis *= 1000L;
             }
             fieldValue = new java.util.Date(millis);
@@ -83,9 +112,9 @@ final class FieldReaderDateMethod<T>
             if (format != null) {
                 String str = jsonReader.readString();
                 long millis;
-                if ((formatUnixtime || formatMillis) && IOUtils.isNumber(str)) {
+                if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
                     millis = Long.parseLong(str);
-                    if (formatUnixtime) {
+                    if (formatUnixTime) {
                         millis *= 1000L;
                     }
                 } else {
@@ -93,7 +122,7 @@ final class FieldReaderDateMethod<T>
                     DateTimeFormatter formatter = getFormatter(locale);
 
                     LocalDateTime ldt;
-                    if (format.indexOf("HH") == -1) {
+                    if (!formatHasHour) {
                         ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
                     } else {
                         ldt = LocalDateTime.parse(str, formatter);

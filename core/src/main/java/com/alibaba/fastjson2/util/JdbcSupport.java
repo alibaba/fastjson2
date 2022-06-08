@@ -104,12 +104,12 @@ public class JdbcSupport {
                     String str = jsonReader.readString();
 
                     LocalDateTime ldt;
-                    if (format.indexOf("HH") == -1) {
+                    if (!formatHasHour) {
                         ldt = LocalDateTime.of(
                                 LocalDate.parse(str, formatter),
                                 LocalTime.MIN
                         );
-                    } else if (format.indexOf("DD") == -1) {
+                    } else if (!formatHasDay) {
                         ldt = LocalDateTime.of(
                                 LocalDate.of(1970, 1, 1),
                                 LocalTime.parse(str, formatter)
@@ -429,7 +429,7 @@ public class JdbcSupport {
             DateTimeFormatter dateFormatter = getDateFormatter();
 
             Instant instant;
-            if (format.indexOf("HH") == -1) {
+            if (!formatHasHour) {
                 LocalDate localDate = LocalDate.parse(str, dateFormatter);
                 LocalDateTime ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                 instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
@@ -521,7 +521,7 @@ public class JdbcSupport {
             DateTimeFormatter dateFormatter = getDateFormatter();
 
             Instant instant;
-            if (format != null && format.indexOf("HH") == -1) {
+            if (format != null && !formatHasHour) {
                 LocalDate localDate = LocalDate.parse(str, dateFormatter);
                 LocalDateTime ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                 instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();

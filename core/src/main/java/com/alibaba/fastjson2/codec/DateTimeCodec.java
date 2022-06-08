@@ -45,8 +45,11 @@ public abstract class DateTimeCodec {
                     formatMillis = true;
                     break;
                 default:
-                    hasDay = format.indexOf("d") != -1;
-                    hasHour = format.indexOf("H") != -1;
+                    hasDay = format.indexOf('d') != -1;
+                    hasHour = format.indexOf('H') != -1
+                            || format.indexOf('h') != -1
+                            || format.indexOf('K') != -1
+                            || format.indexOf('k') != -1;
                     break;
             }
         }
