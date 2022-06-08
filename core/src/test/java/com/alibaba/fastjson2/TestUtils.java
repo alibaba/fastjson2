@@ -33,6 +33,15 @@ public class TestUtils {
         };
     }
 
+    public static JSONWriter[] createJSONWriters() {
+        return new JSONWriter[] {
+                new JSONWriterUTF8(JSONFactory.createWriteContext()),
+                new JSONWriterUTF8JDK9(JSONFactory.createWriteContext()),
+                new JSONWriterUTF16(JSONFactory.createWriteContext()),
+                new JSONWriterUTF16JDK8(JSONFactory.createWriteContext())
+        };
+    }
+
     public static ObjectReaderCreator READER_CREATOR = ObjectReaderCreatorASM.INSTANCE;
     public static ObjectWriterCreator WRITER_CREATOR = ObjectWriterCreatorASM.INSTANCE;
 
