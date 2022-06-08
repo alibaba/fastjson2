@@ -418,8 +418,8 @@ public class JSON {
     }
 
     public static String toJSONString(Object object) {
-        JSONWriter.Context context = JSONFactory.createWriteContext();
-
+        JSONWriter.Context context = JSONFactory.createWriteContext(JSONWriter.Feature.ReferenceDetection);
+        context.setDateFormat("millis");
         try (JSONWriter writer = JSONWriter.of(context)) {
             writer.setRootObject(object);
 
@@ -446,6 +446,7 @@ public class JSON {
 
     public static String toJSONString(Object object, SerializerFeature... features) {
         JSONWriter.Context context = JSONFactory.createWriteContext();
+        context.setDateFormat("millis");
         config(context, features);
 
         try (JSONWriter writer = JSONWriter.of(context)) {
@@ -469,7 +470,8 @@ public class JSON {
     }
 
     public static byte[] toJSONBytes(Object object) {
-        JSONWriter.Context context = JSONFactory.createWriteContext();
+        JSONWriter.Context context = JSONFactory.createWriteContext(JSONWriter.Feature.ReferenceDetection);
+        context.setDateFormat("millis");
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
             writer.setRootObject(object);
 

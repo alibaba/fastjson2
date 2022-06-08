@@ -12,11 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class DateFieldTest {
     @Test
     public void test_codec() {
+        long millis = 1654686106601L;
         V0 v = new V0();
-        v.setValue(new Date());
+        v.setValue(new Date(millis));
 
         String text = JSON.toJSONString(v);
-        assertEquals("{\"value\":" + v.getValue().getTime() + "}", text);
+        assertEquals("{\"value\":1654686106601}", text);
 
         V0 v1 = JSON.parseObject(text, V0.class);
 
