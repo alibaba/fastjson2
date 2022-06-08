@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue436 {
@@ -16,16 +17,18 @@ public class Issue436 {
             Date startTime = new Date(now.getTime() + 10 * 1000);
             Date endTime = new Date(startTime.getTime() + 1000 * 60 * 1000);
             Bean bean = new Bean();
-            bean.setAvailable_begin_time(startTime);
-            bean.setAvailable_end_time(endTime);
-            String jsonStr = JSON.toJSONString(bean);
-            assertTrue(jsonStr.contains("+") && jsonStr.contains("T"));
+            bean.setAvailableBeginTime(startTime);
+            bean.setAvailableEndTime(endTime);
+            String jsonStr1 = JSON.toJSONString(bean);
+            assertTrue(jsonStr1.contains("+"));
+            String jsonStr2 = JSON.toJSONString(bean, "yyyy-MM-dd HH:mm:ss");
+            assertFalse(jsonStr2.contains("+"));
         }
     }
 
     @Data
     public static class Bean {
-        public Date available_begin_time;
-        public Date available_end_time;
+        public Date availableBeginTime;
+        public Date availableEndTime;
     }
 }
