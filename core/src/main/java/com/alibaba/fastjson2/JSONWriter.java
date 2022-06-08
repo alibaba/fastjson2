@@ -1526,8 +1526,8 @@ public abstract class JSONWriter
                         break;
                     default:
                         dateFormatMillis = false;
-                        formatHasHour = dateFormat.indexOf("d") != -1;
-                        formatHasDay = dateFormat.indexOf("H") != -1;
+                        formatHasDay = dateFormat.indexOf("d") != -1;
+                        formatHasHour = dateFormat.indexOf("H") != -1;
                         break;
                 }
             }
