@@ -22,8 +22,13 @@ class KotlinTest0 {
     @Test
     fun test1() {
         assertEquals(
-            "{\"1\":\"one\",\"2\":\"two\"}", JSON.toJSONString(
+            "{1:\"one\",2:\"two\"}", JSON.toJSONString(
                 mapOf(1 to "one", 2 to "two")
+            )
+        )
+        assertEquals(
+            "{\"1\":\"one\",\"2\":\"two\"}", JSON.toJSONString(
+                mapOf(1 to "one", 2 to "two"), JSONWriter.Feature.WriteNonStringKeyAsString
             )
         )
     }

@@ -587,6 +587,36 @@ public abstract class JSONWriter
         writeString(name);
     }
 
+    public void writeName(long name) {
+        if (startObject) {
+            startObject = false;
+        } else {
+            writeComma();
+        }
+
+        writeInt64(name);
+    }
+
+    public void writeName(int name) {
+        if (startObject) {
+            startObject = false;
+        } else {
+            writeComma();
+        }
+
+        writeInt32(name);
+    }
+
+    public void writeNameAny(Object name) {
+        if (startObject) {
+            startObject = false;
+        } else {
+            writeComma();
+        }
+
+        writeAny(name);
+    }
+
     public abstract void startObject();
 
     public abstract void endObject();
@@ -1634,7 +1664,8 @@ public abstract class JSONWriter
         /**
          * @since 2.0.7
          */
-        NotWriteEmptyArray(1 << 25);
+        NotWriteEmptyArray(1 << 25),
+        WriteNonStringKeyAsString(1 << 26);
 
         public final long mask;
 

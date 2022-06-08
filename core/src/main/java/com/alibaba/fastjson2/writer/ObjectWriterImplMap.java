@@ -338,11 +338,26 @@ final class ObjectWriterImplMap
             Map.Entry entry = it.next();
             Object value = entry.getValue();
             Object key = entry.getKey();
-            String strKey = key == null ? "null" : key.toString();
 
             if (value == null) {
                 if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
-                    jsonWriter.writeName(strKey);
+                    if (key == null) {
+                        jsonWriter.writeName("null");
+                    } else if (key instanceof String) {
+                        jsonWriter.writeName((String) key);
+                    } else {
+                        if ((features & JSONWriter.Feature.WriteNonStringKeyAsString.mask) != 0) {
+                            jsonWriter.writeName(key.toString());
+                        } else {
+                            if (key instanceof Integer) {
+                                jsonWriter.writeName(((Integer) key).intValue());
+                            } else if (key instanceof Long) {
+                                jsonWriter.writeName(((Long) key).longValue());
+                            } else {
+                                jsonWriter.writeNameAny(key);
+                            }
+                        }
+                    }
                     jsonWriter.writeColon();
                     jsonWriter.writeNull();
                 }
@@ -356,7 +371,24 @@ final class ObjectWriterImplMap
                 }
             }
 
-            jsonWriter.writeName(strKey);
+            String strKey = null;
+            if (key == null) {
+                jsonWriter.writeName("null");
+            } else if (key instanceof String) {
+                jsonWriter.writeName(strKey = (String) key);
+            } else {
+                if ((features & JSONWriter.Feature.WriteNonStringKeyAsString.mask) != 0) {
+                    jsonWriter.writeName(strKey = key.toString());
+                } else {
+                    if (key instanceof Integer) {
+                        jsonWriter.writeName(((Integer) key).intValue());
+                    } else if (key instanceof Long) {
+                        jsonWriter.writeName(((Long) key).longValue());
+                    } else {
+                        jsonWriter.writeNameAny(key);
+                    }
+                }
+            }
             jsonWriter.writeColon();
 
             Class<?> valueType = value.getClass();
@@ -376,7 +408,7 @@ final class ObjectWriterImplMap
                 valueWriter = jsonWriter.getObjectWriter(valueType);
             }
 
-            if (refDetect && !ObjectWriterProvider.isPrimitiveOrEnum(value.getClass())) {
+            if (refDetect && strKey != null && !ObjectWriterProvider.isPrimitiveOrEnum(value.getClass())) {
                 if (value == object) {
                     jsonWriter.writeReference("..");
                     continue;
