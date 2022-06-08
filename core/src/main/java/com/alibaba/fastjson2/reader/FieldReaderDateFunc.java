@@ -18,8 +18,11 @@ final class FieldReaderDateFunc<T>
     DateTimeFormatter formatter;
 
     ObjectReader dateReader;
-    boolean formatUnixtime;
-    boolean formatMillis;
+    final boolean formatISO8601;
+    final boolean formatUnixTime;
+    final boolean formatMillis;
+    final boolean formatHasDay;
+    final boolean formatHasHour;
 
     public FieldReaderDateFunc(
             String fieldName,
@@ -35,8 +38,34 @@ final class FieldReaderDateFunc<T>
         super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema);
         this.method = method;
         this.function = function;
-        this.formatUnixtime = "unixtime".equals(format);
-        this.formatMillis = "millis".equals(format);
+
+        boolean formatUnixTime = false, formatISO8601 = false, formatMillis = false, hasDay = false, hasHour = false;
+        if (format != null) {
+            switch (format) {
+                case "unixtime":
+                    formatUnixTime = true;
+                    break;
+                case "iso8601":
+                    formatISO8601 = true;
+                    break;
+                case "millis":
+                    formatMillis = true;
+                    break;
+                default:
+                    hasDay = format.indexOf('d') != -1;
+                    hasHour = format.indexOf('H') != -1
+                            || format.indexOf('h') != -1
+                            || format.indexOf('K') != -1
+                            || format.indexOf('k') != -1;
+                    break;
+            }
+        }
+        this.formatUnixTime = formatUnixTime;
+        this.formatMillis = formatMillis;
+        this.formatISO8601 = formatISO8601;
+
+        this.formatHasDay = hasDay;
+        this.formatHasHour = hasHour;
     }
 
     @Override
@@ -50,15 +79,15 @@ final class FieldReaderDateFunc<T>
             String str = (String) value;
 
             long millis;
-            if ((format == null || formatUnixtime || formatMillis) && IOUtils.isNumber(str)) {
+            if ((format == null || formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
                 millis = Long.parseLong(str);
-                if (formatUnixtime) {
+                if (formatUnixTime) {
                     millis *= 1000L;
                 }
             } else {
                 DateTimeFormatter formatter = getFormatter(null);
                 LocalDateTime ldt;
-                if (format.indexOf("HH") == -1) {
+                if (!formatHasHour) {
                     ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
                 } else {
                     ldt = LocalDateTime.parse(str, formatter);
@@ -94,7 +123,7 @@ final class FieldReaderDateFunc<T>
         Date fieldValue;
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();
-            if (formatUnixtime) {
+            if (formatUnixTime) {
                 millis *= 1000L;
             }
             fieldValue = new Date(millis);
@@ -105,9 +134,9 @@ final class FieldReaderDateFunc<T>
             long millis;
             if (format != null) {
                 String str = jsonReader.readString();
-                if ((formatUnixtime || formatMillis) && IOUtils.isNumber(str)) {
+                if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
                     millis = Long.parseLong(str);
-                    if (formatUnixtime) {
+                    if (formatUnixTime) {
                         millis *= 1000L;
                     }
                 } else {
@@ -116,7 +145,7 @@ final class FieldReaderDateFunc<T>
                         formatter = DateTimeFormatter.ofPattern(format);
                     }
                     LocalDateTime ldt;
-                    if (format.indexOf("HH") == -1) {
+                    if (!formatHasHour) {
                         ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
                     } else {
                         ldt = LocalDateTime.parse(str, formatter);

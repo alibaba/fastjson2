@@ -49,7 +49,7 @@ class ObjectReaderImplZonedDateTime
             if (formatter != null) {
                 String str = jsonReader.readString();
                 LocalDateTime ldt;
-                if (format.indexOf("HH") == -1) {
+                if (!formatHasHour) {
                     ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
                 } else {
                     ldt = LocalDateTime.parse(str, formatter);
