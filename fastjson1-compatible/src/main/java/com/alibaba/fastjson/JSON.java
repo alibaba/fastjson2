@@ -747,7 +747,17 @@ public class JSON {
     }
 
     public static String toJSONString(Object object, SerializeConfig config, SerializerFeature... features) {
-        return toJSONString(object, DEFAULT_GENERATE_FEATURE, features);
+        try (JSONWriter writer = JSONWriter.of()) {
+            JSONWriter.Context context = writer.getContext();
+            if (config.propertyNamingStrategy != null
+                    && config.propertyNamingStrategy != PropertyNamingStrategy.NeverUseThisValueExceptDefaultValue) {
+                NameFilter nameFilter = NameFilter.of(config.propertyNamingStrategy);
+                configFilter(context, nameFilter);
+            }
+            config(context, features);
+            writer.writeAny(object);
+            return writer.toString();
+        }
     }
 
     public static String toJSONString(
@@ -757,10 +767,28 @@ public class JSON {
             SerializerFeature... features) {
         try (JSONWriter writer = JSONWriter.of()) {
             JSONWriter.Context context = writer.getContext();
+
+            if (config.propertyNamingStrategy != null
+                    && config.propertyNamingStrategy != PropertyNamingStrategy.NeverUseThisValueExceptDefaultValue) {
+                NameFilter nameFilter = NameFilter.of(config.propertyNamingStrategy);
+                if (filter instanceof NameFilter) {
+                    filter = NameFilter.compose(nameFilter, (NameFilter) filter);
+                } else {
+                    configFilter(context, nameFilter);
+                }
+            }
+
             configFilter(context, filter);
             config(context, features);
 
-            writer.writeAny(object);
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.setRootObject(object);
+                Class<?> valueClass = object.getClass();
+                ObjectWriter<?> objectWriter = context.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
             return writer.toString();
         }
     }

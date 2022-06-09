@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 
 public class SerializeConfig {
     public static SerializeConfig global = new SerializeConfig();
+
     public PropertyNamingStrategy propertyNamingStrategy;
 
     public static SerializeConfig getGlobalInstance() {

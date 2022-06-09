@@ -1445,6 +1445,10 @@ public abstract class JSONWriter
             return (this.features & feature.mask) != 0;
         }
 
+        public boolean isEnabled(long feature) {
+            return (this.features & feature) != 0;
+        }
+
         public void config(Feature... features) {
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;

@@ -23,4 +23,13 @@ public interface NameFilter
     static NameFilter of(PropertyNamingStrategy namingStrategy) {
         return (object, name, value) -> BeanUtils.fieldName(name, namingStrategy.name());
     }
+
+    static NameFilter compose(NameFilter before, NameFilter after) {
+        return (object, name, value) ->
+                after.process(
+                        object,
+                        before.process(object, name, value),
+                        value
+                );
+    }
 }
