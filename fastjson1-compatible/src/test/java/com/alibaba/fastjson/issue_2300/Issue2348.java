@@ -2,7 +2,7 @@ package com.alibaba.fastjson.issue_2300;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONType;
-import com.alibaba.fastjson2.annotation.NamingStrategy;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -129,7 +129,7 @@ public class Issue2348 {
         }
     }
 
-    @JSONType(naming = NamingStrategy.UpperCase)
+    @JSONType(naming = PropertyNamingStrategy.UpperCase)
     public static class PersonnelModel
             implements Serializable {
         private String xm;

@@ -738,8 +738,13 @@ public abstract class BeanUtils {
                 }
                 return new String(chars);
             }
+            case "PascalCase":
+                return pascal(methodName, methodNameLength, prefixLength);
             case "SnakeCase": {
                 return snakeCase(methodName, prefixLength);
+            }
+            case "UpperCaseWithUnderScores": {
+                return underScores(methodName, prefixLength, true);
             }
             case "UpperCase": {
                 char[] chars = new char[methodNameLength - prefixLength];
@@ -801,17 +806,13 @@ public abstract class BeanUtils {
                 return new String(chars);
             }
             case "PascalCase": {
-                char[] chars = new char[methodNameLength - prefixLength];
-                methodName.getChars(prefixLength, methodNameLength, chars, 0);
-                char c0 = chars[0];
-                boolean c1UCase = chars.length > 1 && chars[1] >= 'a' && chars[1] <= 'z';
-                if (c0 >= 'a' && c0 <= 'z' && !c1UCase) {
-                    chars[0] = (char) (c0 - 32);
-                }
-                return new String(chars);
+                return pascal(methodName, methodNameLength, prefixLength);
             }
             case "SnakeCase": {
                 return snakeCase(methodName, prefixLength);
+            }
+            case "UpperCaseWithUnderScores": {
+                return underScores(methodName, prefixLength, true);
             }
             case "UpperCase": {
                 return methodName.substring(prefixLength).toUpperCase();
@@ -846,6 +847,22 @@ public abstract class BeanUtils {
         }
     }
 
+    private static String pascal(String methodName, int methodNameLength, int prefixLength) {
+        char[] chars = new char[methodNameLength - prefixLength];
+        methodName.getChars(prefixLength, methodNameLength, chars, 0);
+        char c0 = chars[0];
+        if (c0 >= 'a' && c0 <= 'z' && chars.length > 1) {
+            boolean c1UCase = chars[1] >= 'a' && chars[1] <= 'z';
+            chars[0] = (char) (c0 - 32);
+        } else if (c0 == '_' && chars.length > 2) {
+            char c1 = chars[1];
+            if (c1 >= 'a' && c1 <= 'z' && chars[2] >= 'a' && chars[2] <= 'z') {
+                chars[1] = (char) (c1 - 32);
+            }
+        }
+        return new String(chars);
+    }
+
     public static String fieldName(String methodName, String namingStrategy) {
         if (namingStrategy == null) {
             namingStrategy = "CamelCase";
@@ -875,15 +892,40 @@ public abstract class BeanUtils {
                     char[] chars = methodName.toCharArray();
                     chars[0] = (char) (c0 - 32);
                     return new String(chars);
+                } else if (c0 == '_'
+                        && methodName.length() > 1
+                        && (c1 = methodName.charAt(1)) >= 'a'
+                        && c1 <= 'z') {
+                    char[] chars = methodName.toCharArray();
+                    chars[1] = (char) (c1 - 32);
+                    return new String(chars);
                 }
                 return methodName;
             }
             case "SnakeCase": {
                 return snakeCase(methodName, 0);
             }
-            case "UpperCase": {
-                return methodName.toUpperCase();
+            case "UpperCaseWithUnderScores": {
+                return underScores(methodName, 0, true);
             }
+            case "LowerCaseWithUnderScores": {
+                return underScores(methodName, 0, false);
+            }
+            case "LowerCaseWithDashes": {
+                return dashes(methodName, 0, false);
+            }
+            case "LowerCaseWithDots":
+                return dots(methodName, 0, false);
+            case "UpperCase":
+                return methodName.toUpperCase();
+            case "UpperCamelCaseWithSpaces":
+                return upperCamelWith(methodName, 0, ' ');
+            case "UpperCamelCaseWithUnderScores":
+                return upperCamelWith(methodName, 0, '_');
+            case "UpperCamelCaseWithDashes":
+                return upperCamelWith(methodName, 0, '-');
+            case "UpperCamelCaseWithDots":
+                return upperCamelWith(methodName, 0, '.');
             case "KebabCase": {
                 StringBuilder buf = new StringBuilder();
                 for (int i = 0; i < methodName.length(); ++i) {
@@ -924,6 +966,181 @@ public abstract class BeanUtils {
                     buf[off++] = chUcase;
                 } else {
                     buf[off++] = ch;
+                }
+            }
+            return new String(buf, 0, off);
+        } finally {
+            TypeUtils.CHARS_UPDATER.set(TypeUtils.CACHE, buf);
+        }
+    }
+
+    static String upperCamelWith(String methodName, int prefixLength, char separator) {
+        final int methodNameLength = methodName.length();
+
+        char[] buf = TypeUtils.CHARS_UPDATER.getAndSet(TypeUtils.CACHE, null);
+        if (buf == null) {
+            buf = new char[128];
+        }
+        try {
+            int off = 0;
+            for (int i = prefixLength; i < methodNameLength; ++i) {
+                char ch = methodName.charAt(i);
+                char c1;
+                if (i == prefixLength) {
+                    if (ch >= 'a' && ch <= 'z'
+                            && i + 1 < methodNameLength
+                            && (c1 = methodName.charAt(i + 1)) >= 'a'
+                            && c1 <= 'z') {
+                        buf[off++] = (char) (ch - 32);
+                    } else if (ch == '_' && i + 1 < methodNameLength
+                            && (c1 = methodName.charAt(i + 1)) >= 'a'
+                            && c1 <= 'z') {
+                        buf[off++] = ch;
+                        buf[off++] = (char) (c1 - 32);
+                        ++i;
+                    } else {
+                        buf[off++] = ch;
+                    }
+                } else if (ch >= 'A' && ch <= 'Z'
+                        && i + 1 < methodNameLength
+                        && ((c1 = methodName.charAt(i + 1)) < 'A' || c1 > 'Z')) {
+                    if (i > prefixLength) {
+                        buf[off++] = separator;
+                    }
+                    buf[off++] = ch;
+                } else if (ch >= 'A' && ch <= 'Z'
+                        && i > prefixLength
+                        && i + 1 < methodNameLength
+                        && (c1 = methodName.charAt(i + 1)) >= 'A'
+                        && c1 <= 'Z'
+                        && (c1 = methodName.charAt(i - 1)) >= 'a'
+                        && c1 <= 'z') {
+                    if (i > prefixLength) {
+                        buf[off++] = separator;
+                    }
+                    buf[off++] = ch;
+                } else {
+                    buf[off++] = ch;
+                }
+            }
+            return new String(buf, 0, off);
+        } finally {
+            TypeUtils.CHARS_UPDATER.set(TypeUtils.CACHE, buf);
+        }
+    }
+
+    static String underScores(String methodName, int prefixLength, boolean upper) {
+        final int methodNameLength = methodName.length();
+
+        char[] buf = TypeUtils.CHARS_UPDATER.getAndSet(TypeUtils.CACHE, null);
+        if (buf == null) {
+            buf = new char[128];
+        }
+        try {
+            int off = 0;
+            for (int i = prefixLength; i < methodNameLength; ++i) {
+                char ch = methodName.charAt(i);
+                if (upper) {
+                    if (ch >= 'A' && ch <= 'Z') {
+                        if (i > prefixLength) {
+                            buf[off++] = '_';
+                        }
+                        buf[off++] = ch;
+                    } else {
+                        if (ch >= 'a' && ch <= 'z') {
+                            ch -= 32;
+                        }
+                        buf[off++] = ch;
+                    }
+                } else {
+                    if (ch >= 'A' && ch <= 'Z') {
+                        if (i > prefixLength) {
+                            buf[off++] = '_';
+                        }
+                        buf[off++] = (char) (ch + 32);
+                    } else {
+                        buf[off++] = ch;
+                    }
+                }
+            }
+            return new String(buf, 0, off);
+        } finally {
+            TypeUtils.CHARS_UPDATER.set(TypeUtils.CACHE, buf);
+        }
+    }
+
+    static String dashes(String methodName, int prefixLength, boolean upper) {
+        final int methodNameLength = methodName.length();
+
+        char[] buf = TypeUtils.CHARS_UPDATER.getAndSet(TypeUtils.CACHE, null);
+        if (buf == null) {
+            buf = new char[128];
+        }
+        try {
+            int off = 0;
+            for (int i = prefixLength; i < methodNameLength; ++i) {
+                char ch = methodName.charAt(i);
+                if (upper) {
+                    if (ch >= 'A' && ch <= 'Z') {
+                        if (i > prefixLength) {
+                            buf[off++] = '-';
+                        }
+                        buf[off++] = ch;
+                    } else {
+                        if (ch >= 'a' && ch <= 'z') {
+                            ch -= 32;
+                        }
+                        buf[off++] = ch;
+                    }
+                } else {
+                    if (ch >= 'A' && ch <= 'Z') {
+                        if (i > prefixLength) {
+                            buf[off++] = '-';
+                        }
+                        buf[off++] = (char) (ch + 32);
+                    } else {
+                        buf[off++] = ch;
+                    }
+                }
+            }
+            return new String(buf, 0, off);
+        } finally {
+            TypeUtils.CHARS_UPDATER.set(TypeUtils.CACHE, buf);
+        }
+    }
+
+    static String dots(String methodName, int prefixLength, boolean upper) {
+        final int methodNameLength = methodName.length();
+
+        char[] buf = TypeUtils.CHARS_UPDATER.getAndSet(TypeUtils.CACHE, null);
+        if (buf == null) {
+            buf = new char[128];
+        }
+        try {
+            int off = 0;
+            for (int i = prefixLength; i < methodNameLength; ++i) {
+                char ch = methodName.charAt(i);
+                if (upper) {
+                    if (ch >= 'A' && ch <= 'Z') {
+                        if (i > prefixLength) {
+                            buf[off++] = '.';
+                        }
+                        buf[off++] = ch;
+                    } else {
+                        if (ch >= 'a' && ch <= 'z') {
+                            ch -= 32;
+                        }
+                        buf[off++] = ch;
+                    }
+                } else {
+                    if (ch >= 'A' && ch <= 'Z') {
+                        if (i > prefixLength) {
+                            buf[off++] = '.';
+                        }
+                        buf[off++] = (char) (ch + 32);
+                    } else {
+                        buf[off++] = ch;
+                    }
                 }
             }
             return new String(buf, 0, off);

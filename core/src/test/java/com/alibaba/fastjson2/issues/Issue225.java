@@ -3,7 +3,7 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.annotation.NamingStrategy;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,7 +26,7 @@ public class Issue225 {
         assertEquals(101, jsonObject.get("item_id"));
 
         jsonObject.nameFilter(
-                (object, name, value) -> NamingStrategy.snakeToCamel(name)
+                (object, name, value) -> PropertyNamingStrategy.snakeToCamel(name)
         );
         assertEquals(1, jsonObject.size());
         assertEquals(101, jsonObject.get("itemId"));
@@ -43,7 +43,7 @@ public class Issue225 {
                 );
 
         jsonObject.nameFilter(
-                (object, name, value) -> NamingStrategy.snakeToCamel(name)
+                (object, name, value) -> PropertyNamingStrategy.snakeToCamel(name)
         );
 
         assertEquals(
@@ -60,7 +60,7 @@ public class Issue225 {
         JSONObject jsonObject = JSON.parseObject("{\"items\":[{\"item_id\":101}]}");
 
         jsonObject.nameFilter(
-                (object, name, value) -> NamingStrategy.snakeToCamel(name)
+                (object, name, value) -> PropertyNamingStrategy.snakeToCamel(name)
         );
 
         assertEquals(
@@ -108,7 +108,7 @@ public class Issue225 {
         );
 
         jsonObject.nameFilter(
-                (object, name, value) -> NamingStrategy.snakeToCamel(name)
+                (object, name, value) -> PropertyNamingStrategy.snakeToCamel(name)
         );
 
         assertEquals(

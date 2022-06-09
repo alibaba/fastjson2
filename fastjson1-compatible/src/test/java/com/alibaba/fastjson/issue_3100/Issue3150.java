@@ -19,9 +19,10 @@ public class Issue3150 {
         items.add(new Item("item1", category));
         items.add(new Item("item2", category));
 
+        String str = JSON.toJSONString(items, refAfterFilterTest);
         assertEquals(
-                "[{\"category\":{\"name\":\"category\"},\"name\":\"item1\",\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"}},{\"category\":{\"$ref\":\"$[0].category\"},\"name\":\"item2\",\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"}}]",
-                JSON.toJSONString(items, refAfterFilterTest)
+                "[{\"category\":{\"name\":\"category\"},\"name\":\"item1\",\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"}},{\"category\":{\"$ref\":\"[0].category\"},\"name\":\"item2\",\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"}}]",
+                str
         );
     }
 

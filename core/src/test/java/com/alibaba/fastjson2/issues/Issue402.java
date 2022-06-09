@@ -3,7 +3,7 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.annotation.JSONType;
-import com.alibaba.fastjson2.annotation.NamingStrategy;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -28,7 +28,7 @@ public class Issue402 {
         assertEquals("测试公司", test.getDeptName());
     }
 
-    @JSONType(naming = NamingStrategy.SnakeCase)
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
     public static class DeptTreeJsonMixIn {
 
     }

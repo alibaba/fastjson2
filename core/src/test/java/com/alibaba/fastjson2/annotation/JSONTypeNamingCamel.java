@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,13 +23,13 @@ public class JSONTypeNamingCamel {
         assertEquals("{\"id\":101,\"name\":\"DataWorks\"}", JSON.toJSONString(bean));
     }
 
-    @JSONType(naming = NamingStrategy.CamelCase)
+    @JSONType(naming = PropertyNamingStrategy.CamelCase)
     public static class Bean {
         public int id;
         public String name;
     }
 
-    @JSONType(naming = NamingStrategy.CamelCase)
+    @JSONType(naming = PropertyNamingStrategy.CamelCase)
     public static class Bean1 {
         private int id;
         private String name;
