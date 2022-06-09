@@ -12,10 +12,19 @@ import java.lang.reflect.Type;
 public class SerializeConfig {
     public static SerializeConfig global = new SerializeConfig();
 
+    public final boolean fieldBased;
     public PropertyNamingStrategy propertyNamingStrategy;
 
     public static SerializeConfig getGlobalInstance() {
         return global;
+    }
+
+    public SerializeConfig() {
+        this.fieldBased = false;
+    }
+
+    public SerializeConfig(boolean fieldBased) {
+        this.fieldBased = fieldBased;
     }
 
     public boolean put(Type type, ObjectSerializer value) {

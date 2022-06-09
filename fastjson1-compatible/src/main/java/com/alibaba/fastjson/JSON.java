@@ -754,6 +754,11 @@ public class JSON {
                 NameFilter nameFilter = NameFilter.of(config.propertyNamingStrategy);
                 configFilter(context, nameFilter);
             }
+
+            if (config.fieldBased) {
+                context.config(JSONWriter.Feature.FieldBased);
+            }
+
             config(context, features);
             writer.writeAny(object);
             return writer.toString();
@@ -776,6 +781,10 @@ public class JSON {
                 } else {
                     configFilter(context, nameFilter);
                 }
+            }
+
+            if (config.fieldBased) {
+                context.config(JSONWriter.Feature.FieldBased);
             }
 
             configFilter(context, filter);

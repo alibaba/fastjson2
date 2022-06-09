@@ -1356,7 +1356,7 @@ public abstract class JSONWriter
         }
 
         Class<?> valueClass = value.getClass();
-        ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass);
+        ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
         if (isJSONB()) {
             objectWriter.writeJSONB(this, value, null, null, 0);
         } else {
