@@ -212,7 +212,12 @@ final class ObjectWriterImplMap
             }
 
             if (entryKey instanceof String || (contextFeatures & JSONWriter.Feature.WriteClassName.mask) == 0) {
-                String key = (String) entryKey;
+                String key;
+                if (entryKey instanceof String) {
+                    key = (String) entryKey;
+                } else {
+                    key = entryKey.toString();
+                }
 
                 if (symbolTable != null) {
                     jsonWriter.writeSymbol(key);
