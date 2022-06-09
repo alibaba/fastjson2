@@ -1,6 +1,7 @@
 package com.alibaba.fastjson;
 
 /**
+ * An enumeration that defines a few standard naming conventions for JSON field names.
  * @since 1.2.15
  */
 public enum PropertyNamingStrategy {
