@@ -52,6 +52,22 @@ public class Issue446 {
         assertEquals("{\"Age B1\":12,\"Name V1\":\"z\"}", res);
     }
 
+    @Test
+    public void test5() {
+        Student test = new Student("z", 12, null);
+        NameFilter nameFilter = NameFilter.compose(
+                NameFilter.of(PropertyNamingStrategy.SnakeCase),
+                (o12, s, o1) -> {
+                    String res = s.substring(0, 1).toUpperCase();
+                    if (s.length() > 1) {
+                        res += s.substring(1);
+                    }
+                    return res;
+                });
+        String res = JSON.toJSONString(test, nameFilter, JSONWriter.Feature.WriteNullStringAsEmpty);
+        assertEquals("{\"Age_b1\":12,\"Name_v1\":\"z\"}", res);
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
