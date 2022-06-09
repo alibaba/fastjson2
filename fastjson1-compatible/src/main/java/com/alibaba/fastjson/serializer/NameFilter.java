@@ -15,6 +15,12 @@
  */
 package com.alibaba.fastjson.serializer;
 
+import com.alibaba.fastjson.PropertyNamingStrategy;
+import com.alibaba.fastjson2.util.BeanUtils;
+
 public interface NameFilter
         extends SerializeFilter, com.alibaba.fastjson2.filter.NameFilter {
+    static NameFilter of(PropertyNamingStrategy namingStrategy) {
+        return (object, name, value) -> BeanUtils.fieldName(name, namingStrategy.name());
+    }
 }

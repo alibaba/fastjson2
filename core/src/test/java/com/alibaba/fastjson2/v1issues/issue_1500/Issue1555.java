@@ -1,9 +1,9 @@
 package com.alibaba.fastjson2.v1issues.issue_1500;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
-import com.alibaba.fastjson2.annotation.NamingStrategy;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +41,7 @@ public class Issue1555 {
         assertEquals("test", model2.userName);
     }
 
-    @JSONType(naming = NamingStrategy.SnakeCase)
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
     public static class Model {
         private int userId;
         @JSONField(name = "userName")
@@ -64,7 +64,7 @@ public class Issue1555 {
         }
     }
 
-    @JSONType(naming = NamingStrategy.SnakeCase)
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
     public static class ModelTwo {
         /**
          * 此字段准备序列化为字符串类型

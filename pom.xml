@@ -618,6 +618,7 @@
                                 com/alibaba/fastjson/issue_1700/Issue*.java,
                                 com/alibaba/fastjson/issue_1900/Issue*.java,
                                 com/alibaba/fastjson/issue_2300/Issue*.java,
+                                com/alibaba/fastjson2/naming/*.java,
                                 com/alibaba/json/bvt/**/*.java,
                             </excludes>
                         </configuration>

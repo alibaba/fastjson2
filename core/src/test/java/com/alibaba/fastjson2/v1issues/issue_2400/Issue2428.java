@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.v1issues.issue_2400;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.annotation.JSONType;
-import com.alibaba.fastjson2.annotation.NamingStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,14 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @NoArgsConstructor
 @Data
-@JSONType(naming = NamingStrategy.SnakeCase)
+@JSONType(naming = PropertyNamingStrategy.SnakeCase)
 public class Issue2428 {
     private String myName;
     private NestedBean nestedBean;
 
     @AllArgsConstructor
     @Data
-    @JSONType(naming = NamingStrategy.SnakeCase)
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
     public static class NestedBean {
         private String myId;
     }

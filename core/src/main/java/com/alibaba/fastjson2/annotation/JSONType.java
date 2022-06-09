@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.filter.Filter;
 
 import java.lang.annotation.ElementType;
@@ -29,7 +30,7 @@ public @interface JSONType {
      */
     JSONWriter.Feature[] serializeFeatures() default {};
 
-    NamingStrategy naming() default NamingStrategy.CamelCase;
+    PropertyNamingStrategy naming() default PropertyNamingStrategy.NeverUseThisValueExceptDefaultValue;
 
     boolean writeEnumAsJavaBean() default false;
 

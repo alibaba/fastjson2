@@ -468,21 +468,25 @@ public class JSON {
 
     public static void configFilter(JSONWriter.Context context, SerializeFilter... filters) {
         for (SerializeFilter filter : filters) {
-            if (filter instanceof NameFilter) {
-                context.setNameFilter((NameFilter) filter);
-            } else if (filter instanceof ValueFilter) {
-                context.setValueFilter((ValueFilter) filter);
-            } else if (filter instanceof PropertyPreFilter) {
-                context.setPropertyPreFilter((PropertyPreFilter) filter);
-            } else if (filter instanceof PropertyFilter) {
-                context.setPropertyFilter((PropertyFilter) filter);
-            } else if (filter instanceof BeforeFilter) {
-                context.setBeforeFilter((BeforeFilter) filter);
-            } else if (filter instanceof AfterFilter) {
-                context.setAfterFilter((AfterFilter) filter);
-            } else if (filter instanceof LabelFilter) {
-                context.setLabelFilter((LabelFilter) filter);
-            }
+            configFilter(context, filter);
+        }
+    }
+
+    private static void configFilter(JSONWriter.Context context, SerializeFilter filter) {
+        if (filter instanceof NameFilter) {
+            context.setNameFilter((NameFilter) filter);
+        } else if (filter instanceof ValueFilter) {
+            context.setValueFilter((ValueFilter) filter);
+        } else if (filter instanceof PropertyPreFilter) {
+            context.setPropertyPreFilter((PropertyPreFilter) filter);
+        } else if (filter instanceof PropertyFilter) {
+            context.setPropertyFilter((PropertyFilter) filter);
+        } else if (filter instanceof BeforeFilter) {
+            context.setBeforeFilter((BeforeFilter) filter);
+        } else if (filter instanceof AfterFilter) {
+            context.setAfterFilter((AfterFilter) filter);
+        } else if (filter instanceof LabelFilter) {
+            context.setLabelFilter((LabelFilter) filter);
         }
     }
 
@@ -560,8 +564,31 @@ public class JSON {
         }
     }
 
-    public static String toJSONString(Object object, SerializeFilter... filters) {
-        return toJSONString(object, filters, new SerializerFeature[0]);
+    public static String toJSONString(Object object, SerializeFilter filter0, SerializeFilter filter1, SerializeFilter... filters) {
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        configFilter(context, filter0);
+        configFilter(context, filter1);
+        configFilter(context, filters);
+
+        try (JSONWriter writer = JSONWriter.of(context)) {
+            writer.setRootObject(object);
+            configFilter(context, filters);
+
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                Class<?> valueClass = object.getClass();
+                ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+
+            return writer.toString();
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("toJSONString error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("toJSONString error", ex);
+        }
     }
 
     public static String toJSONString(Object object, SerializerFeature... features) {
@@ -723,11 +750,40 @@ public class JSON {
         return toJSONString(object, DEFAULT_GENERATE_FEATURE, features);
     }
 
+    public static String toJSONString(
+            Object object,
+            SerializeConfig config,
+            SerializeFilter filter,
+            SerializerFeature... features) {
+        try (JSONWriter writer = JSONWriter.of()) {
+            JSONWriter.Context context = writer.getContext();
+            configFilter(context, filter);
+            config(context, features);
+
+            writer.writeAny(object);
+            return writer.toString();
+        }
+    }
+
+    public static String toJSONString(
+            Object object,
+            SerializeFilter filter,
+            SerializerFeature... features) {
+        try (JSONWriter writer = JSONWriter.of()) {
+            JSONWriter.Context context = writer.getContext();
+            configFilter(context, filter);
+            config(context, features);
+
+            writer.writeAny(object);
+            return writer.toString();
+        }
+    }
+
     public static String toJSONString(Object object, int defaultFeatures, SerializerFeature... features) {
         try (JSONWriter writer = JSONWriter.of()) {
-            JSONWriter.Context ctx = writer.getContext();
+            JSONWriter.Context context = writer.getContext();
 
-            config(ctx, features);
+            config(context, features);
 
             writer.writeAny(object);
             return writer.toString();

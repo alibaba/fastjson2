@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,13 +23,13 @@ public class JSONTypeNamingUpper {
         assertEquals("{\"ID\":101,\"NAME\":\"DataWorks\"}", JSON.toJSONString(bean));
     }
 
-    @JSONType(naming = NamingStrategy.UpperCase)
+    @JSONType(naming = PropertyNamingStrategy.UpperCase)
     public static class Bean {
         public int id;
         public String name;
     }
 
-    @JSONType(naming = NamingStrategy.UpperCase)
+    @JSONType(naming = PropertyNamingStrategy.UpperCase)
     public static class Bean1 {
         private int id;
         private String name;

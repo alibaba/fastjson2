@@ -64,7 +64,7 @@ public @interface JSONType {
 
     boolean serializeEnumAsJavaBean() default false;
 
-    PropertyNamingStrategy naming() default PropertyNamingStrategy.CamelCase;
+    PropertyNamingStrategy naming() default PropertyNamingStrategy.NeverUseThisValueExceptDefaultValue;
 
     /**
      * @since 1.2.49

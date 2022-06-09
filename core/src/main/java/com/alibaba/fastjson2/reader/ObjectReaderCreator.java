@@ -827,6 +827,7 @@ public class ObjectReaderCreator {
     protected void createFieldReader(
             Class objectClass,
             Type objectType,
+            String namingStrategy,
             FieldInfo fieldInfo,
             Field field,
             Map<String, FieldReader> fieldReaders,
@@ -846,6 +847,7 @@ public class ObjectReaderCreator {
         String fieldName;
         if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
             fieldName = field.getName();
+            fieldName = BeanUtils.fieldName(fieldName, namingStrategy);
         } else {
             fieldName = fieldInfo.fieldName;
         }
@@ -1060,12 +1062,12 @@ public class ObjectReaderCreator {
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
                 fieldInfo.features |= JSONReader.Feature.FieldBased.mask;
-                createFieldReader(objectClass, objectType, fieldInfo, field, fieldReaders, Collections.emptyList());
+                createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, Collections.emptyList());
             });
         } else {
             BeanUtils.fields(objectClass, field -> {
                 fieldInfo.init();
-                createFieldReader(objectClass, objectType, fieldInfo, field, fieldReaders, modules);
+                createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, modules);
             });
 
             BeanUtils.setters(objectClass, method -> {

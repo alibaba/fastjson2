@@ -2,8 +2,8 @@ package com.alibaba.fastjson2.v1issues.issue_1500;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.annotation.JSONType;
-import com.alibaba.fastjson2.annotation.NamingStrategy;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -57,7 +57,7 @@ public class Issue1565 {
         private Integer netValueDate;
     }
 
-    @JSONType(naming = NamingStrategy.SnakeCase)
+    @JSONType(naming = PropertyNamingStrategy.SnakeCase)
     public static class LargeBean
             implements Serializable {
         /**
