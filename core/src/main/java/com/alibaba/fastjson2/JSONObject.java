@@ -1147,6 +1147,22 @@ public class JSONObject
      *
      * <pre>{@code
      * JSONObject obj = ...
+     * Map<String, User> users = obj.to(new TypeReference<HashMap<String, User>>(){});
+     * }</pre>
+     *
+     * @param typeReference specify the {@link TypeReference} to be converted
+     * @param features features to be enabled in parsing
+     * @since 2.0.7
+     */
+    public <T> T to(TypeReference typeReference, JSONReader.Feature... features) {
+        return to(typeReference.getType(), features);
+    }
+
+    /**
+     * Convert this {@link JSONObject} to the specified Object
+     *
+     * <pre>{@code
+     * JSONObject obj = ...
      * User user = obj.to(User.class);
      * }</pre>
      *
@@ -1196,6 +1212,18 @@ public class JSONObject
     @Deprecated
     public <T> T toJavaObject(Type type, JSONReader.Feature... features) {
         return to(type, features);
+    }
+
+    /**
+     * Convert this {@link JSONObject} to the specified Object
+     *
+     * @param typeReference specify the {@link TypeReference} to be converted
+     * @param features features to be enabled in parsing
+     * @deprecated since 2.0.4, please use {@link #to(Type, JSONReader.Feature...)}
+     */
+    @Deprecated
+    public <T> T toJavaObject(TypeReference typeReference, JSONReader.Feature... features) {
+        return to(typeReference, features);
     }
 
     /**
