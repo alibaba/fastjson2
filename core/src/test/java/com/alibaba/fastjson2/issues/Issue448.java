@@ -50,7 +50,7 @@ public class Issue9 {
         return staff;
     }
 
-   public static class BasicStaff implements Serializable {
+   public class BasicStaff implements Serializable {
        private List<BasicStaff> boyList;
 
        @JSONField(format = "yyyyMMdd")
