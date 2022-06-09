@@ -156,7 +156,8 @@ public class ObjectWriterCreatorASM
                     return;
                 }
 
-                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, Collections.emptyList(), beanInfo, fieldInfo, field);
+                fieldInfo.init();
+                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
                     fieldWriterMap.put(fieldWriter.getFieldName(), fieldWriter);
                 }
