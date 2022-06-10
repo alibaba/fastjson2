@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -2175,6 +2176,16 @@ public interface JSON {
      * @return Java Object
      */
     static Object toJSON(Object object) {
+        return toJSON(object, new JSONWriter.Feature[0]);
+    }
+
+    /**
+     * Convert Java object order to {@link JSONArray} or {@link JSONObject}
+     *
+     * @param object Java Object to be converted
+     * @return Java Object
+     */
+    static Object toJSON(Object object, JSONWriter.Feature... features) {
         if (object == null) {
             return null;
         }
@@ -2182,7 +2193,22 @@ public interface JSON {
             return object;
         }
 
-        String str = toJSONString(object);
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext(features);
+        Class<?> valueClass = object.getClass();
+        ObjectWriter<?> objectWriter = writeContext.getObjectWriter(valueClass, valueClass);
+        if (objectWriter instanceof ObjectWriterAdapter && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)) {
+            ObjectWriterAdapter objectWriterAdapter = (ObjectWriterAdapter) objectWriter;
+            return objectWriterAdapter.toJSONObject(object);
+        }
+
+        String str;
+        try (JSONWriter writer = JSONWriter.of(writeContext)) {
+            objectWriter.write(writer, object, null, null, 0);
+            str = writer.toString();
+        } catch (NullPointerException | NumberFormatException ex) {
+            throw new JSONException("toJSONString error", ex);
+        }
+
         return parse(str);
     }
 

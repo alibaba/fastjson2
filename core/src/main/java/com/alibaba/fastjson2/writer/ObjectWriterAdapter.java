@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.FieldInfo;
@@ -435,6 +436,25 @@ public class ObjectWriterAdapter<T>
 
         for (FieldWriter fieldWriter : fieldWriters) {
             Object fieldValue = fieldWriter.getFieldValue(object);
+
+            long fieldFeatures = fieldWriter.getFeatures();
+            if ((fieldFeatures & FieldInfo.UNWRAPPED_MASK) != 0) {
+                if (fieldValue instanceof Map) {
+                    jsonObject.putAll((Map) fieldValue);
+                    continue;
+                }
+
+                ObjectWriter fieldObjectWriter = fieldWriter.getInitWriter();
+                if (fieldObjectWriter == null) {
+                    fieldObjectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(fieldWriter.getFieldClass());
+                }
+                List<FieldWriter> unwrappedFieldWriters = fieldObjectWriter.getFieldWriters();
+                for (FieldWriter unwrappedFieldWriter : unwrappedFieldWriters) {
+                    Object unwrappedFieldValue = unwrappedFieldWriter.getFieldValue(fieldValue);
+                    jsonObject.put(unwrappedFieldWriter.getFieldName(), unwrappedFieldValue);
+                }
+                continue;
+            }
             jsonObject.put(fieldWriter.getFieldName(), fieldValue);
         }
 
