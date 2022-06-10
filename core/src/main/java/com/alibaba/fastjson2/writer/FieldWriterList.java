@@ -82,12 +82,17 @@ abstract class FieldWriterList<T>
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
+        long features = this.features | jsonWriter.getFeatures();
+        boolean refDetect = (features & JSONWriter.Feature.ReferenceDetection.mask) != 0;
+        boolean beanToArray = (features & JSONWriter.Feature.BeanToArray.mask) != 0;
+
+        if ((features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0 && list.isEmpty() && writeFieldName) {
+            return;
+        }
+
         if (writeFieldName) {
             writeFieldName(jsonWriter);
         }
-
-        boolean refDetect = jsonWriter.isRefDetect();
-        boolean beanToArray = jsonWriter.isBeanToArray(features);
 
         if (jsonWriter.isJSONB()) {
             int size = list.size();

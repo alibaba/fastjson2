@@ -171,6 +171,12 @@ final class FieldReaderListStrFunc<T>
             jsonReader.nextIfMatch(',');
 
             value = list;
+        } else if (jsonReader.isString()) {
+            List list = createList();
+            list.add(jsonReader.readString());
+            accept(object, list);
+            jsonReader.nextIfMatch(',');
+            value = list;
         } else {
             throw new JSONException(jsonReader.info("json format error"));
         }

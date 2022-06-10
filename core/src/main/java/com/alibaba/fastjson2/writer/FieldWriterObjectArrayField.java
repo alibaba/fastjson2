@@ -97,11 +97,16 @@ final class FieldWriterObjectArrayField<T>
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
+        long features = jsonWriter.getFeatures();
+        boolean refDetect = (features & JSONWriter.Feature.ReferenceDetection.mask) != 0;
+
         if (writeFieldName) {
+            if (array.length == 0 && (features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0) {
+                return;
+            }
+
             writeFieldName(jsonWriter);
         }
-
-        boolean refDetect = jsonWriter.isRefDetect();
 
         if (refDetect) {
             String path = jsonWriter.setPath(name, array);
