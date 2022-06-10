@@ -38,6 +38,7 @@ Bean bean = (Bean) JSON.parseObject(jsonString, Object.class, JSONReader.Feature
 ```
 
 ## 5. 使用AutoTypeFilter在不打开AutoTypeSupport时实现自动类型
+当打开AutoTypeSupport，虽然内置了一个比较广泛的黑名单，但仍然是不够安全的。下面有一种办法是控制当前调用的AutoType支持范围，避免全局打开，这个更安全。
 ```java
 public class FastJsonRedisSerializer<T> implements RedisSerializer<T> {
     static final Filter autoTypeFilter = JSONReader.autoTypeFilter(
