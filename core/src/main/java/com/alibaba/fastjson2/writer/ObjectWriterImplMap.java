@@ -323,7 +323,7 @@ final class ObjectWriterImplMap
         }
 
         if (hasFilter(jsonWriter)) {
-            writeWithFilter(jsonWriter, object);
+            writeWithFilter(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
 
@@ -458,11 +458,12 @@ final class ObjectWriterImplMap
         ValueFilter valueFilter = context.getValueFilter();
         PropertyFilter propertyFilter = context.getPropertyFilter();
         AfterFilter afterFilter = context.getAfterFilter();
+        boolean writeNulls = context.isEnabled(JSONWriter.Feature.WriteNulls.mask);
 
         for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = it.next();
             Object value = entry.getValue();
-            if (value == null) {
+            if (value == null && !writeNulls) {
                 continue;
             }
 
@@ -484,9 +485,6 @@ final class ObjectWriterImplMap
                 }
             }
 
-            jsonWriter.writeName(key);
-            jsonWriter.writeColon();
-
             if (valueFilter != null) {
                 value = valueFilter.apply(object, key, value);
             }
@@ -494,6 +492,9 @@ final class ObjectWriterImplMap
             if (value == null) {
                 continue;
             }
+
+            jsonWriter.writeName(key);
+            jsonWriter.writeColon();
 
             Class<?> valueType = value.getClass();
             ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueType);

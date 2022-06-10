@@ -8,4 +8,13 @@ public interface ValueFilter
     default Object apply(Object object, String name, Object value) {
         return process(object, name, value);
     }
+
+    static ValueFilter compose(ValueFilter before, ValueFilter after) {
+        return (object, name, value) ->
+                after.process(
+                        object,
+                        name,
+                        before.process(object, name, value)
+                );
+    }
 }
