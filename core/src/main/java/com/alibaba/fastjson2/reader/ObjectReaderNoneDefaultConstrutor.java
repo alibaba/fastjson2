@@ -202,6 +202,8 @@ public class ObjectReaderNoneDefaultConstrutor<T>
                 return null;
             }
         }
+        JSONReader.Context context = jsonReader.getContext();
+        long featuresAll = this.features | features | context.getFeatures();
 
         LinkedHashMap<Long, Object> valueMap = null;
         for (int i = 0; ; i++) {
@@ -220,10 +222,9 @@ public class ObjectReaderNoneDefaultConstrutor<T>
                     continue;
                 }
 
-                JSONReader.Context context = jsonReader.getContext();
-                boolean supportAutoType = ((this.features | features | context.getFeatures()) & JSONReader.Feature.SupportAutoType.mask) != 0;
+                boolean supportAutoType = (featuresAll & JSONReader.Feature.SupportAutoType.mask) != 0;
 
-                ObjectReader autoTypeObjectReader = null;
+                ObjectReader autoTypeObjectReader;
 
                 if (supportAutoType) {
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
@@ -239,7 +240,7 @@ public class ObjectReaderNoneDefaultConstrutor<T>
 
                 if (autoTypeObjectReader == null) {
                     String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass, this.features | features | context.getFeatures());
+                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass, features);
                 }
 
                 if (autoTypeObjectReader != null) {
@@ -251,6 +252,14 @@ public class ObjectReaderNoneDefaultConstrutor<T>
             }
 
             FieldReader fieldReader = getFieldReader(hashCode);
+
+            if (fieldReader == null && (featuresAll & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
+                long hashCodeLCase = jsonReader.getNameHashCodeLCase();
+                if (hashCodeLCase != hashCode) {
+                    fieldReader = getFieldReaderLCase(hashCodeLCase);
+                }
+            }
+
             if (fieldReader == null) {
                 jsonReader.skipValue();
                 continue;

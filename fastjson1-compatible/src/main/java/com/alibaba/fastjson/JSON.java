@@ -895,6 +895,10 @@ public class JSON {
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
 
         try (JSONReader reader = JSONReader.of(text)) {
+            JSONReader.Context context = reader.getContext();
+            context.setObjectSupplier(defaultSupplier);
+            context.setArraySupplier(arraySupplier);
+            context.config(JSONReader.Feature.SupportSmartMatch);
             return reader.read(paramType);
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -912,7 +916,11 @@ public class JSON {
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
 
         try (JSONReader reader = JSONReader.of(text)) {
-            config(reader.getContext(), features);
+            JSONReader.Context context = reader.getContext();
+            context.setObjectSupplier(defaultSupplier);
+            context.setArraySupplier(arraySupplier);
+
+            config(context, features);
 
             return reader.read(paramType);
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -955,7 +963,27 @@ public class JSON {
     }
 
     public static List<Object> parseArray(String text, Type[] types) {
-        return com.alibaba.fastjson2.JSON.parseArray(text, types);
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+        List array = new JSONArray(types.length);
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            JSONReader.Context context = reader.getContext();
+            context.setObjectSupplier(defaultSupplier);
+            context.setArraySupplier(arraySupplier);
+            context.config(JSONReader.Feature.SupportSmartMatch);
+
+            reader.startArray();
+            for (Type itemType : types) {
+                array.add(
+                        reader.read(itemType)
+                );
+            }
+            reader.endArray();
+            reader.handleResolveTasks(array);
+            return array;
+        }
     }
 
     static class Cache {
