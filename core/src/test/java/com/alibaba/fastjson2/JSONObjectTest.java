@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -959,6 +960,10 @@ public class JSONObjectTest {
         assertEquals(date, JSONObject.of("id", zdt).getDate("id"));
         assertEquals(date, JSONObject.of("id", zdt.toString()).getDate("id"));
         assertEquals(date, JSONObject.of("id", '"' + zdt.toString() + '"').getDate("id"));
+
+        LocalDate ldt = LocalDate.now();
+        Date date1 = JSONObject.of("date", ldt).getDate("date");
+        assertEquals(ldt.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(), date1.getTime());
     }
 
     @Test
