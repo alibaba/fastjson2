@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
+import java.time.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -966,6 +966,10 @@ public class JSONArrayTest {
         assertSame(date, JSONArray.of(date).getDate(0));
         assertEquals(date, JSONArray.of(millis).getDate(0));
         assertEquals(date, JSONArray.of(Instant.ofEpochMilli(millis)).getDate(0));
+
+        LocalDate ldt = LocalDate.now();
+        Date date1 = JSONObject.of("date", ldt).getDate("date");
+        assertEquals(ldt.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(), date1.getTime());
     }
 
     @Test
