@@ -30,18 +30,6 @@ public class TypeUtils {
     static final AtomicReferenceFieldUpdater<Cache, char[]> CHARS_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(Cache.class, char[].class, "chars");
 
-    private static final Set<String> isProxyClassNames = new HashSet<String>(6) {
-        {
-            add("net.sf.cglib.proxy.Factory");
-            add("org.springframework.cglib.proxy.Factory");
-            add("javassist.util.proxy.ProxyObject");
-            add("org.apache.ibatis.javassist.util.proxy.ProxyObject");
-            add("org.hibernate.proxy.HibernateProxy");
-            add("org.springframework.context.annotation.ConfigurationClassEnhancer$EnhancedConfiguration");
-            add("org.mockito.cglib.proxy.Factory");
-        }
-    };
-
     public static Class<?> getMapping(Type type) {
         if (type == null) {
             return null;
@@ -1118,8 +1106,16 @@ public class TypeUtils {
     public static boolean isProxy(Class<?> clazz) {
         for (Class<?> item : clazz.getInterfaces()) {
             String interfaceName = item.getName();
-            if (isProxyClassNames.contains(interfaceName)) {
-                return true;
+            switch (interfaceName) {
+                case "org.springframework.cglib.proxy.Factory":
+                case "javassist.util.proxy.ProxyObject":
+                case "org.apache.ibatis.javassist.util.proxy.ProxyObject":
+                case "org.hibernate.proxy.HibernateProxy":
+                case "org.springframework.context.annotation.ConfigurationClassEnhancer$EnhancedConfiguration":
+                case "org.mockito.cglib.proxy.Factory":
+                    return true;
+                default:
+                    break;
             }
         }
         return false;

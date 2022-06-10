@@ -345,21 +345,6 @@ public class TypeUtils {
     }
 
     public static boolean isProxy(Class<?> clazz) {
-        for (Class<?> item : clazz.getInterfaces()) {
-            String interfaceName = item.getName();
-            if ("net.sf.cglib.proxy.Factory".equals(interfaceName) //
-                    || "org.springframework.cglib.proxy.Factory".equals(interfaceName)) {
-                return true;
-            }
-            if ("javassist.util.proxy.ProxyObject".equals(interfaceName) //
-                    || "org.apache.ibatis.javassist.util.proxy.ProxyObject".equals(interfaceName)
-            ) {
-                return true;
-            }
-            if ("org.hibernate.proxy.HibernateProxy".equals(interfaceName)) {
-                return true;
-            }
-        }
-        return false;
+        return com.alibaba.fastjson2.util.TypeUtils.isProxy(clazz);
     }
 }
