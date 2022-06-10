@@ -31,7 +31,42 @@ Bean bean = (Bean) JSON.parseObject(jsonString, Object.class, JSONReader.Feature
 ```
 
 ## 4. 配置safeMode
+配置SafeMode是完全禁用autotype功能，如果程序中显示指定也不行
 ### 4.1 JVM启动参数配置
 ```
 -Dfastjson2.parser.safeMode=true
+```
+
+## 5. 使用AutoTypeFilter在不打开AutoTypeSupport时实现自动类型
+```java
+public class FastJsonRedisSerializer<T> implements RedisSerializer<T> {
+    static final Filter autoTypeFilter = JSONReader.autoTypeFilter(
+            // 按需加上需要支持自动类型的类名前缀，范围越小越安全
+            "org.springframework.security.core.authority.SimpleGrantedAuthority"
+    );
+
+    private Class<T> clazz;
+
+    public FastJsonRedisSerializer(Class<T> clazz) {
+        super();
+        this.clazz = clazz;
+    }
+
+    @Override
+    public byte[] serialize(T t) {
+        if (t == null) {
+            return new byte[0];
+        }
+        return JSON.toJSONBytes(t, JSONWriter.Feature.WriteClassName);
+    }
+
+    @Override
+    public T deserialize(byte[] bytes) {
+        if (bytes == null || bytes.length <= 0) {
+            return null;
+        }
+
+        return JSON.parseObject(bytes, clazz, autoTypeFilter);
+    }
+}
 ```
