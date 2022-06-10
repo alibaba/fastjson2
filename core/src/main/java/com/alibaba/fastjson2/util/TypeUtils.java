@@ -9,8 +9,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -78,6 +77,20 @@ public class TypeUtils {
 
         if (obj instanceof ZonedDateTime) {
             ZonedDateTime zdt = (ZonedDateTime) obj;
+            return new Date(
+                    zdt.toInstant().toEpochMilli());
+        }
+
+        if (obj instanceof LocalDate) {
+            LocalDate localDate = (LocalDate) obj;
+            ZonedDateTime zdt = localDate.atStartOfDay(ZoneId.systemDefault());
+            return new Date(
+                    zdt.toInstant().toEpochMilli());
+        }
+
+        if (obj instanceof LocalDateTime) {
+            LocalDateTime ldt = (LocalDateTime) obj;
+            ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
             return new Date(
                     zdt.toInstant().toEpochMilli());
         }
