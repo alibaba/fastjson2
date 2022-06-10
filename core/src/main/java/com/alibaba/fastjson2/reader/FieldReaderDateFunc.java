@@ -1,10 +1,13 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -18,6 +21,7 @@ final class FieldReaderDateFunc<T>
     DateTimeFormatter formatter;
 
     ObjectReader dateReader;
+    final boolean useSimpleFormatter;
     final boolean formatISO8601;
     final boolean formatUnixTime;
     final boolean formatMillis;
@@ -38,6 +42,7 @@ final class FieldReaderDateFunc<T>
         super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema);
         this.method = method;
         this.function = function;
+        this.useSimpleFormatter = "yyyyMMddHHmmssSSSZ".equals(format);
 
         boolean formatUnixTime = false, formatISO8601 = false, formatMillis = false, hasDay = false, hasHour = false;
         if (format != null) {
@@ -130,6 +135,13 @@ final class FieldReaderDateFunc<T>
         } else if (jsonReader.isNull()) {
             jsonReader.readNull();
             fieldValue = null;
+        } else if (useSimpleFormatter) {
+            String str = jsonReader.readString();
+            try {
+                fieldValue = new SimpleDateFormat(format).parse(str);
+            } catch (ParseException e) {
+                throw new JSONException(jsonReader.info("parse error : " + str), e);
+            }
         } else {
             long millis;
             if (format != null) {
@@ -140,10 +152,7 @@ final class FieldReaderDateFunc<T>
                         millis *= 1000L;
                     }
                 } else {
-                    if (formatter == null) {
-                        String format = this.format.replaceAll("aa", "a");
-                        formatter = DateTimeFormatter.ofPattern(format);
-                    }
+                    DateTimeFormatter formatter = getFormatter(jsonReader.getLocale());
                     LocalDateTime ldt;
                     if (!formatHasHour) {
                         ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);

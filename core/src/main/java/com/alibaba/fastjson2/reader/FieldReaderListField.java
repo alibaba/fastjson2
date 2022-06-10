@@ -205,6 +205,17 @@ class FieldReaderListField<T>
             throw new JSONException(jsonReader.info("listField not support input : " + str));
         }
 
-        throw new JSONException(jsonReader.info("listField not support"));
+        ObjectReader itemObjectReader = getItemObjectReader(jsonReader);
+        Object itemObject = itemObjectReader.readObject(jsonReader, features);
+
+        Collection list = (Collection) this.fieldObjectReader.createInstance(context.getFeatures() | features);
+        list.add(itemObject);
+        if (builder != null) {
+            list = (Collection) builder.apply(list);
+        }
+
+        accept(object, list);
+
+        jsonReader.nextIfMatch(',');
     }
 }

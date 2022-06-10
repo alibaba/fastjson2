@@ -61,6 +61,10 @@ final class FieldWriterListFunc<T>
             return true;
         }
 
+        if ((features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0 && list.isEmpty()) {
+            return false;
+        }
+
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
