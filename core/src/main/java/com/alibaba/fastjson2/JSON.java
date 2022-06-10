@@ -105,7 +105,7 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
+     * Parse UTF8 encoded JSON byte array into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
      *
      * @param bytes     the UTF8 Bytes to be parsed
      * @param features features to be enabled in parsing
@@ -129,7 +129,6 @@ public interface JSON {
      * @param text the JSON {@link String} to be parsed
      * @return JSONObject
      */
-    @SuppressWarnings("unchecked")
     static JSONObject parseObject(String text) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -155,7 +154,6 @@ public interface JSON {
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
-    @SuppressWarnings("unchecked")
     static JSONObject parseObject(String text, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -184,7 +182,6 @@ public interface JSON {
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
-    @SuppressWarnings("unchecked")
     static JSONObject parseObject(String text, int offset, int length, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -211,7 +208,6 @@ public interface JSON {
      * @param context specify the context use by JSONReader
      * @return JSONObject
      */
-    @SuppressWarnings("unchecked")
     static JSONObject parseObject(String text, JSONReader.Context context) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -237,7 +233,6 @@ public interface JSON {
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
-    @SuppressWarnings("unchecked")
     static JSONObject parseObject(Reader input, JSONReader.Feature... features) {
         if (input == null) {
             return null;
@@ -265,7 +260,6 @@ public interface JSON {
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
-    @SuppressWarnings("unchecked")
     static JSONObject parseObject(InputStream input, JSONReader.Feature... features) {
         if (input == null) {
             return null;
@@ -292,7 +286,6 @@ public interface JSON {
      * @param bytes UTF8 encoded JSON byte array to parse
      * @return JSONObject
      */
-    @SuppressWarnings("unchecked")
     static JSONObject parseObject(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return null;
@@ -362,7 +355,6 @@ public interface JSON {
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
-    @SuppressWarnings("unchecked")
     static JSONObject parseObject(byte[] bytes, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
             return null;
@@ -391,7 +383,6 @@ public interface JSON {
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
-    @SuppressWarnings("unchecked")
     static JSONObject parseObject(byte[] bytes, int offset, int length, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
             return null;
@@ -421,7 +412,6 @@ public interface JSON {
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
-    @SuppressWarnings("unchecked")
     static JSONObject parseObject(byte[] bytes, int offset, int length, Charset charset, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
             return null;
@@ -1419,7 +1409,6 @@ public interface JSON {
      *
      * @param text the JSON {@link String} to be parsed
      */
-    @SuppressWarnings("unchecked")
     static JSONArray parseArray(String text) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -1443,7 +1432,6 @@ public interface JSON {
      *
      * @param bytes the JSON {@link String} to be parsed
      */
-    @SuppressWarnings("unchecked")
     static JSONArray parseArray(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return null;
@@ -1468,7 +1456,6 @@ public interface JSON {
      * @param text     the JSON {@link String} to be parsed
      * @param features features to be enabled in parsing
      */
-    @SuppressWarnings("unchecked")
     static JSONArray parseArray(String text, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -1489,12 +1476,11 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray}
+     * Parse JSON {@link InputStream} into {@link JSONArray}
      *
      * @param url      the JSON {@link URL} to be parsed
      * @param features features to be enabled in parsing
      */
-    @SuppressWarnings("unchecked")
     static JSONArray parseArray(URL url, JSONReader.Feature... features) {
         if (url == null) {
             return null;
@@ -1508,7 +1494,7 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray}
+     * Parse JSON {@link InputStream} into {@link JSONArray}
      *
      * @param in       the JSON {@link InputStream} to be parsed
      * @param features features to be enabled in parsing
@@ -1535,6 +1521,7 @@ public interface JSON {
      * @param type     specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
+    @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(String text, Type type, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -1557,6 +1544,7 @@ public interface JSON {
      * @param type     specify the {@link Class} to be converted
      * @param features features to be enabled in parsing
      */
+    @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(String text, Class<T> type, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -1609,6 +1597,7 @@ public interface JSON {
      * @param type     specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
+    @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(byte[] bytes, Type type, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
             return null;
@@ -1631,6 +1620,7 @@ public interface JSON {
      * @param type     specify the {@link Class} to be converted
      * @param features features to be enabled in parsing
      */
+    @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(byte[] bytes, Class<T> type, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
             return null;
@@ -1656,6 +1646,7 @@ public interface JSON {
      * @param type     specify the {@link Class} to be converted
      * @param features features to be enabled in parsing
      */
+    @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(byte[] bytes, int offset, int length, Charset charset, Class<T> type, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
             return null;
@@ -2241,7 +2232,7 @@ public interface JSON {
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader)
      * @since 2.0.2
      */
-    static ObjectReader register(Type type, ObjectReader<?> objectReader) {
+    static ObjectReader<?> register(Type type, ObjectReader<?> objectReader) {
         return JSONFactory.getDefaultObjectReaderProvider().register(type, objectReader);
     }
 
@@ -2249,10 +2240,10 @@ public interface JSON {
      * Register if absent an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
      *
      * @see JSONFactory#getDefaultObjectReaderProvider()
-     * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader)
+     * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#registerIfAbsent(Type, ObjectReader)
      * @since 2.0.6
      */
-    static ObjectReader registerIfAbsent(Type type, ObjectReader<?> objectReader) {
+    static ObjectReader<?> registerIfAbsent(Type type, ObjectReader<?> objectReader) {
         return JSONFactory.getDefaultObjectReaderProvider().registerIfAbsent(type, objectReader);
     }
 
@@ -2283,7 +2274,7 @@ public interface JSON {
      * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
      * @since 2.0.2
      */
-    static ObjectWriter register(Type type, ObjectWriter<?> objectWriter) {
+    static ObjectWriter<?> register(Type type, ObjectWriter<?> objectWriter) {
         return JSONFactory.getDefaultObjectWriterProvider().register(type, objectWriter);
     }
 
@@ -2291,19 +2282,32 @@ public interface JSON {
      * Register if absent an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
      *
      * @see JSONFactory#getDefaultObjectWriterProvider()
-     * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
+     * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#registerIfAbsent(Type, ObjectWriter)
      * @since 2.0.6
      */
-    static ObjectWriter registerIfAbsent(Type type, ObjectWriter<?> objectWriter) {
+    static ObjectWriter<?> registerIfAbsent(Type type, ObjectWriter<?> objectWriter) {
         return JSONFactory.getDefaultObjectWriterProvider().registerIfAbsent(type, objectWriter);
     }
 
+    /**
+     * Enable the specified features in default reader
+     *
+     * @param features the specified features to be used
+     * @since 2.0.6
+     */
     static void config(JSONReader.Feature... features) {
         for (JSONReader.Feature feature : features) {
             JSONFactory.defaultReaderFeatures |= feature.mask;
         }
     }
 
+    /**
+     * Enable or disable the specified features in default reader
+     *
+     * @param feature the specified feature to be used
+     * @param state enable this feature if and only if {@code state} is {@code true}, disable otherwise
+     * @since 2.0.6
+     */
     static void config(JSONReader.Feature feature, boolean state) {
         if (state) {
             JSONFactory.defaultReaderFeatures |= feature.mask;
@@ -2312,16 +2316,34 @@ public interface JSON {
         }
     }
 
+    /**
+     * Check if the default reader enables the specified feature
+     *
+     * @param feature the specified feature
+     */
     static boolean isEnabled(JSONReader.Feature feature) {
         return (JSONFactory.defaultReaderFeatures & feature.mask) != 0;
     }
 
+    /**
+     * Enable the specified features in default writer
+     *
+     * @param features the specified features to be used
+     * @since 2.0.6
+     */
     static void config(JSONWriter.Feature... features) {
         for (JSONWriter.Feature feature : features) {
             JSONFactory.defaultWriterFeatures |= feature.mask;
         }
     }
 
+    /**
+     * Enable or disable the specified features in default writer
+     *
+     * @param feature the specified feature to be used
+     * @param state enable this feature if and only if {@code state} is {@code true}, disable otherwise
+     * @since 2.0.6
+     */
     static void config(JSONWriter.Feature feature, boolean state) {
         if (state) {
             JSONFactory.defaultWriterFeatures |= feature.mask;
@@ -2330,6 +2352,11 @@ public interface JSON {
         }
     }
 
+    /**
+     * Check if the default writer enables the specified feature
+     *
+     * @param feature the specified feature
+     */
     static boolean isEnabled(JSONWriter.Feature feature) {
         return (JSONFactory.defaultWriterFeatures & feature.mask) != 0;
     }
