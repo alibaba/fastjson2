@@ -883,6 +883,9 @@ public abstract class BeanUtils {
                 return methodName;
             }
             case "PascalCase": {
+                if (methodName.isEmpty()) {
+                    return methodName;
+                }
                 char c0 = methodName.charAt(0);
                 char c1;
                 if (c0 >= 'a' && c0 <= 'z'
