@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
@@ -220,10 +221,17 @@ class ObjectReaderImplMapTyped
 
         JSONReader.Context context = jsonReader.getContext();
         long contextFeatures = context.getFeatures() | features;
-        Map object
-                = instanceType == HashMap.class
-                ? new HashMap<>()
-                : (Map) createInstance(contextFeatures);
+        Map object;
+        if (instanceType == HashMap.class) {
+            Supplier<Map> objectSupplier = context.getObjectSupplier();
+            if (mapType == Map.class && objectSupplier != null) {
+                object = objectSupplier.get();
+            } else {
+                object = new HashMap<>();
+            }
+        } else {
+            object = (Map) createInstance(contextFeatures);
+        }
 
         for (; ; ) {
             if (jsonReader.nextIfMatch('}')) {
