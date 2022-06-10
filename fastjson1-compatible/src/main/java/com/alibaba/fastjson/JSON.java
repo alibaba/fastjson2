@@ -653,6 +653,7 @@ public class JSON {
 
     public static String toJSONString(Object object, SerializeFilter filter0, SerializeFilter filter1, SerializeFilter... filters) {
         JSONWriter.Context context = JSONFactory.createWriteContext();
+        context.setDateFormat("millis");
         configFilter(context, filter0);
         configFilter(context, filter1);
         configFilter(context, filters);
