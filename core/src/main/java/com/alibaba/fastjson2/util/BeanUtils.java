@@ -580,12 +580,22 @@ public abstract class BeanUtils {
     }
 
     public static void getters(Class objectClass, Consumer<Method> methodConsumer) {
+        if (objectClass == null) {
+            return;
+        }
+
         if (Proxy.isProxyClass(objectClass)) {
             Class[] interfaces = objectClass.getInterfaces();
             if (interfaces.length == 1) {
                 getters(interfaces[0], methodConsumer);
                 return;
             }
+        }
+
+        if (TypeUtils.isProxy(objectClass)) {
+            Class superclass = objectClass.getSuperclass();
+            getters(superclass, methodConsumer);
+            return;
         }
 
         boolean record = isRecord(objectClass);

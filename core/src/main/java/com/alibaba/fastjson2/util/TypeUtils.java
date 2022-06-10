@@ -30,6 +30,18 @@ public class TypeUtils {
     static final AtomicReferenceFieldUpdater<Cache, char[]> CHARS_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(Cache.class, char[].class, "chars");
 
+    private static final Set<String> isProxyClassNames = new HashSet<String>(6) {
+        {
+            add("net.sf.cglib.proxy.Factory");
+            add("org.springframework.cglib.proxy.Factory");
+            add("javassist.util.proxy.ProxyObject");
+            add("org.apache.ibatis.javassist.util.proxy.ProxyObject");
+            add("org.hibernate.proxy.HibernateProxy");
+            add("org.springframework.context.annotation.ConfigurationClassEnhancer$EnhancedConfiguration");
+            add("org.mockito.cglib.proxy.Factory");
+        }
+    };
+
     public static Class<?> getMapping(Type type) {
         if (type == null) {
             return null;
@@ -1101,5 +1113,15 @@ public class TypeUtils {
         }
 
         return Object.class;
+    }
+
+    public static boolean isProxy(Class<?> clazz) {
+        for (Class<?> item : clazz.getInterfaces()) {
+            String interfaceName = item.getName();
+            if (isProxyClassNames.contains(interfaceName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
