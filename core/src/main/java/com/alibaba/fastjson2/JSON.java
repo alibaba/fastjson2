@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -1285,24 +1284,9 @@ public interface JSON {
     @SuppressWarnings("unchecked")
     static <T> void parseObject(InputStream input, Charset charset, char delimiter, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
         int identityHashCode = System.identityHashCode(Thread.currentThread());
-        final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> byteUpdater;
-
-        switch (identityHashCode & 3) {
-            case 0:
-                byteUpdater = JSONFactory.BYTES0_UPDATER;
-                break;
-            case 1:
-                byteUpdater = JSONFactory.BYTES1_UPDATER;
-                break;
-            case 2:
-                byteUpdater = JSONFactory.BYTES2_UPDATER;
-                break;
-            default:
-                byteUpdater = JSONFactory.BYTES3_UPDATER;
-                break;
-        }
-
-        byte[] bytes = byteUpdater.getAndSet(JSONFactory.CACHE, null);
+        byte[] bytes = JSONFactory.CACHE_BYTES.getAndSet(
+                identityHashCode & 3, null
+        );
         if (bytes == null) {
             bytes = new byte[8192];
         }
@@ -1362,7 +1346,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> void parseObject(Reader input, char delimiter, Type type, Consumer<T> consumer) {
-        char[] chars = JSONFactory.CHARS_UPDATER.getAndSet(JSONFactory.CACHE, null);
+        char[] chars = JSONFactory.CACHE_CHARS.getAndSet(0, null);
         if (chars == null) {
             chars = new char[8192];
         }
