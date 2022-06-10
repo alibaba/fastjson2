@@ -125,25 +125,13 @@ public class JSON {
         }
     }
 
-    public static <T> T parseObject(char[] str, Class type, Feature... features) {
-        return parseObject(new String(str), type, features);
-    }
-
-    public static <T> T parseObject(String str, TypeReference typeReference, Feature... features) {
-        return parseObject(str, typeReference.getType(), features);
-    }
-
-    public static <T> T parseObject(String text, Class<T> clazz) {
-        return parseObject(text, clazz, new Feature[0]);
-    }
-
-    public static <T> T parseObject(String str, Type type, Feature... features) {
-        if (str == null || str.isEmpty()) {
+    public static <T> T parseObject(char[] str, Class<T> objectClass, Feature... features) {
+        if (str == null || str.length == 0) {
             return null;
         }
 
-        JSONReader reader = JSONReader.of(str);
-        JSONReader.Context context = reader.getContext();
+        JSONReader jsonReader = JSONReader.of(str);
+        JSONReader.Context context = jsonReader.getContext();
         context.setArraySupplier(arraySupplier);
         context.setObjectSupplier(defaultSupplier);
 
@@ -155,9 +143,79 @@ public class JSON {
         config(context, features);
 
         try {
-            T object = reader.read(type);
+            ObjectReader<T> objectReader = jsonReader.getObjectReader(objectClass);
+            T object = objectReader.readObject(jsonReader, 0);
             if (object != null) {
-                reader.handleResolveTasks(object);
+                jsonReader.handleResolveTasks(object);
+            }
+            return object;
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
+    public static <T> T parseObject(String str, TypeReference typeReference, Feature... features) {
+        return parseObject(str, typeReference.getType(), features);
+    }
+
+    public static <T> T parseObject(String str, Class<T> objectClass) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
+        JSONReader jsonReader = JSONReader.of(str);
+        JSONReader.Context context = jsonReader.getContext();
+        context.setArraySupplier(arraySupplier);
+        context.setObjectSupplier(defaultSupplier);
+        context.config(JSONReader.Feature.SupportSmartMatch);
+
+        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
+            context.setUtilDateFormat(defaultDateFormat);
+        }
+
+        try {
+            ObjectReader<T> objectReader = jsonReader.getObjectReader(objectClass);
+            T object = objectReader.readObject(jsonReader, 0);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return object;
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
+    public static <T> T parseObject(String str, Type objectType, Feature... features) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
+        JSONReader jsonReader = JSONReader.of(str);
+        JSONReader.Context context = jsonReader.getContext();
+        context.setArraySupplier(arraySupplier);
+        context.setObjectSupplier(defaultSupplier);
+
+        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
+            context.setUtilDateFormat(defaultDateFormat);
+        }
+
+        config(context, features);
+
+        try {
+            ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
+            T object = objectReader.readObject(jsonReader, 0);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
             }
             return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
@@ -216,8 +274,8 @@ public class JSON {
             return null;
         }
 
-        JSONReader reader = JSONReader.of(jsonBytes);
-        JSONReader.Context context = reader.getContext();
+        JSONReader jsonReader = JSONReader.of(jsonBytes);
+        JSONReader.Context context = jsonReader.getContext();
         context.setObjectSupplier(defaultSupplier);
         context.setArraySupplier(arraySupplier);
 
@@ -228,7 +286,12 @@ public class JSON {
 
         config(context, features);
         try {
-            return reader.read(type);
+            ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
+            T object = objectReader.readObject(jsonReader, 0);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
             if (cause == null) {
@@ -243,8 +306,8 @@ public class JSON {
             return null;
         }
 
-        JSONReader reader = JSONReader.of(jsonBytes);
-        JSONReader.Context context = reader.getContext();
+        JSONReader jsonReader = JSONReader.of(jsonBytes);
+        JSONReader.Context context = jsonReader.getContext();
         context.setObjectSupplier(defaultSupplier);
         context.setArraySupplier(arraySupplier);
 
@@ -259,7 +322,12 @@ public class JSON {
 
         config(context, features);
         try {
-            return reader.read(type);
+            ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
+            T object = objectReader.readObject(jsonReader, 0);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return object;
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
             if (cause == null) {
@@ -274,15 +342,15 @@ public class JSON {
             return null;
         }
 
-        try (JSONReader reader = JSONReader.of(str)) {
-            JSONReader.Context context = reader.getContext();
+        try (JSONReader jsonReader = JSONReader.of(str)) {
+            JSONReader.Context context = jsonReader.getContext();
             context.setObjectSupplier(defaultSupplier);
             context.setArraySupplier(arraySupplier);
             config(context, features);
-            if (reader.isObject() && !reader.isSupportAutoType(0)) {
-                return reader.read(JSONObject.class);
+            if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
+                return jsonReader.read(JSONObject.class);
             }
-            return reader.readAny();
+            return jsonReader.readAny();
         } catch (Exception ex) {
             throw new JSONException(ex.getMessage(), ex);
         }
@@ -365,8 +433,8 @@ public class JSON {
 
             int position = charBuf.position();
 
-            JSONReader reader = JSONReader.of(chars, 0, position);
-            JSONReader.Context context = reader.getContext();
+            JSONReader jsonReader = JSONReader.of(chars, 0, position);
+            JSONReader.Context context = jsonReader.getContext();
 
             for (Feature feature : Feature.values()) {
                 if ((features & feature.mask) != 0) {
@@ -387,7 +455,11 @@ public class JSON {
                 }
             }
 
-            return reader.read(Object.class);
+            Object object = jsonReader.read(Object.class);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return object;
         } finally {
             if (chars.length <= 1024 * 64) {
                 CHARS_UPDATER.set(CACHE, chars);
@@ -396,12 +468,13 @@ public class JSON {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T parseObject(byte[] input, //
-                                    int off, //
-                                    int len, //
-                                    CharsetDecoder charsetDecoder, //
-                                    Type clazz, //
-                                    Feature... features) {
+    public static <T> T parseObject(
+            byte[] input,
+            int off,
+            int len,
+            CharsetDecoder charsetDecoder,
+            Type clazz,
+            Feature... features) {
         charsetDecoder.reset();
 
         int scaleLength = (int) (len * (double) charsetDecoder.maxCharsPerByte());
@@ -418,9 +491,19 @@ public class JSON {
 
             int position = charByte.position();
 
-            JSONReader reader = JSONReader.of(chars, 0, position);
-            config(reader.getContext(), features);
-            return reader.read(clazz);
+            JSONReader jsonReader = JSONReader.of(chars, 0, position);
+
+            JSONReader.Context context = jsonReader.getContext();
+            context.setObjectSupplier(defaultSupplier);
+            context.setArraySupplier(arraySupplier);
+            context.config(JSONReader.Feature.SupportSmartMatch);
+
+            config(context, features);
+            T object = jsonReader.read(clazz);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return object;
         } finally {
             if (chars.length <= 1024 * 64) {
                 CHARS_UPDATER.set(CACHE, chars);
@@ -435,9 +518,13 @@ public class JSON {
             Charset charset,
             Type clazz,
             Feature... features) {
-        try (JSONReader reader = JSONReader.of(input, off, len, charset)) {
-            config(reader.getContext(), features);
-            return reader.read(clazz);
+        try (JSONReader jsonReader = JSONReader.of(input, off, len, charset)) {
+            config(jsonReader.getContext(), features);
+            T object = jsonReader.read(clazz);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return object;
         }
     }
 
@@ -472,7 +559,7 @@ public class JSON {
         }
     }
 
-    private static void configFilter(JSONWriter.Context context, SerializeFilter filter) {
+    static void configFilter(JSONWriter.Context context, SerializeFilter filter) {
         if (filter instanceof NameFilter) {
             context.setNameFilter((NameFilter) filter);
         } else if (filter instanceof ValueFilter) {
@@ -685,64 +772,68 @@ public class JSON {
         }
 
         for (SerializerFeature feature : features) {
-            switch (feature) {
-                case UseISO8601DateFormat:
-                    ctx.setDateFormat("iso8601");
-                    break;
-                case WriteMapNullValue:
-                    ctx.config(JSONWriter.Feature.WriteNulls);
-                    break;
-                case WriteNullListAsEmpty:
-                    ctx.config(JSONWriter.Feature.WriteNullListAsEmpty);
-                    break;
-                case WriteNullStringAsEmpty:
-                    ctx.config(JSONWriter.Feature.WriteNullStringAsEmpty);
-                    break;
-                case WriteNullNumberAsZero:
-                    ctx.config(JSONWriter.Feature.WriteNullNumberAsZero);
-                    break;
-                case WriteNullBooleanAsFalse:
-                    ctx.config(JSONWriter.Feature.WriteNullBooleanAsFalse);
-                    break;
-                case BrowserCompatible:
-                    ctx.config(JSONWriter.Feature.BrowserCompatible);
-                    break;
-                case WriteClassName:
-                    ctx.config(JSONWriter.Feature.WriteClassName);
-                    break;
-                case WriteNonStringValueAsString:
-                    ctx.config(JSONWriter.Feature.WriteNonStringValueAsString);
-                    break;
-                case WriteEnumUsingToString:
-                    ctx.config(JSONWriter.Feature.WriteEnumUsingToString);
-                    break;
-                case NotWriteRootClassName:
-                    ctx.config(JSONWriter.Feature.NotWriteRootClassName);
-                    break;
-                case IgnoreErrorGetter:
-                    ctx.config(JSONWriter.Feature.IgnoreErrorGetter);
-                    break;
-                case WriteDateUseDateFormat:
-                    ctx.setDateFormat(JSON.DEFFAULT_DATE_FORMAT);
-                    break;
-                case BeanToArray:
-                    ctx.config(JSONWriter.Feature.BeanToArray);
-                    break;
-                case UseSingleQuotes:
-                    ctx.config(JSONWriter.Feature.UseSingleQuotes);
-                    break;
-                case MapSortField:
-                    ctx.config(JSONWriter.Feature.MapSortField);
-                    break;
-                case PrettyFormat:
-                    ctx.config(JSONWriter.Feature.PrettyFormat);
-                    break;
-                case WriteNonStringKeyAsString:
-                    ctx.config(JSONWriter.Feature.WriteNonStringKeyAsString);
-                    break;
-                default:
-                    break;
-            }
+            config(ctx, feature);
+        }
+    }
+
+    static void config(JSONWriter.Context context, SerializerFeature feature) {
+        switch (feature) {
+            case UseISO8601DateFormat:
+                context.setDateFormat("iso8601");
+                break;
+            case WriteMapNullValue:
+                context.config(JSONWriter.Feature.WriteNulls);
+                break;
+            case WriteNullListAsEmpty:
+                context.config(JSONWriter.Feature.WriteNullListAsEmpty);
+                break;
+            case WriteNullStringAsEmpty:
+                context.config(JSONWriter.Feature.WriteNullStringAsEmpty);
+                break;
+            case WriteNullNumberAsZero:
+                context.config(JSONWriter.Feature.WriteNullNumberAsZero);
+                break;
+            case WriteNullBooleanAsFalse:
+                context.config(JSONWriter.Feature.WriteNullBooleanAsFalse);
+                break;
+            case BrowserCompatible:
+                context.config(JSONWriter.Feature.BrowserCompatible);
+                break;
+            case WriteClassName:
+                context.config(JSONWriter.Feature.WriteClassName);
+                break;
+            case WriteNonStringValueAsString:
+                context.config(JSONWriter.Feature.WriteNonStringValueAsString);
+                break;
+            case WriteEnumUsingToString:
+                context.config(JSONWriter.Feature.WriteEnumUsingToString);
+                break;
+            case NotWriteRootClassName:
+                context.config(JSONWriter.Feature.NotWriteRootClassName);
+                break;
+            case IgnoreErrorGetter:
+                context.config(JSONWriter.Feature.IgnoreErrorGetter);
+                break;
+            case WriteDateUseDateFormat:
+                context.setDateFormat(JSON.DEFFAULT_DATE_FORMAT);
+                break;
+            case BeanToArray:
+                context.config(JSONWriter.Feature.BeanToArray);
+                break;
+            case UseSingleQuotes:
+                context.config(JSONWriter.Feature.UseSingleQuotes);
+                break;
+            case MapSortField:
+                context.config(JSONWriter.Feature.MapSortField);
+                break;
+            case PrettyFormat:
+                context.config(JSONWriter.Feature.PrettyFormat);
+                break;
+            case WriteNonStringKeyAsString:
+                context.config(JSONWriter.Feature.WriteNonStringKeyAsString);
+                break;
+            default:
+                break;
         }
     }
 
@@ -806,67 +897,100 @@ public class JSON {
             Object object,
             SerializeFilter filter,
             SerializerFeature... features) {
-        try (JSONWriter writer = JSONWriter.of()) {
-            JSONWriter.Context context = writer.getContext();
+        try (JSONWriter jsonWriter = JSONWriter.of()) {
+            JSONWriter.Context context = jsonWriter.getContext();
             configFilter(context, filter);
             config(context, features);
 
-            writer.writeAny(object);
-            return writer.toString();
+            if (object == null) {
+                jsonWriter.writeNull();
+            } else {
+                ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
+                objectWriter.write(jsonWriter, object, null, null, 0);
+            }
+            return jsonWriter.toString();
         }
     }
 
     public static String toJSONString(Object object, int defaultFeatures, SerializerFeature... features) {
-        try (JSONWriter writer = JSONWriter.of()) {
-            JSONWriter.Context context = writer.getContext();
+        try (JSONWriter jsonWriter = JSONWriter.of()) {
+            JSONWriter.Context context = jsonWriter.getContext();
+
+            if (defaultFeatures != 0) {
+                for (SerializerFeature feature : SerializerFeature.values()) {
+                    if ((defaultFeatures & feature.mask) != 0) {
+                        config(context, feature);
+                    }
+                }
+            }
 
             config(context, features);
 
-            writer.writeAny(object);
-            return writer.toString();
+            if (object == null) {
+                jsonWriter.writeNull();
+            } else {
+                ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
+                objectWriter.write(jsonWriter, object, null, null, 0);
+            }
+            return jsonWriter.toString();
         }
     }
 
     public static String toJSONStringWithDateFormat(Object object, String dateFormat,
                                                     SerializerFeature... features) {
         //return toJSONString(object, SerializeConfig.globalInstance, null, dateFormat, DEFAULT_GENERATE_FEATURE, features);
-        try (JSONWriter writer = JSONWriter.of()) {
+        try (JSONWriter jsonWriter = JSONWriter.of()) {
             for (SerializerFeature feature : features) {
                 if (feature == SerializerFeature.WriteMapNullValue) {
-                    writer.config(JSONWriter.Feature.WriteNulls);
+                    jsonWriter.config(JSONWriter.Feature.WriteNulls);
                 }
             }
 
-            writer.getContext().setDateFormat(dateFormat);
-            writer.writeAny(object);
-            return writer.toString();
+            JSONWriter.Context context = jsonWriter.getContext();
+            context.setDateFormat(dateFormat);
+
+            if (object == null) {
+                jsonWriter.writeNull();
+            } else {
+                ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
+                objectWriter.write(jsonWriter, object, null, null, 0);
+            }
+            return jsonWriter.toString();
         }
     }
 
-    public static final int writeJSONString(OutputStream os, //
-                                            Object object, //
-                                            SerializerFeature... features) throws IOException {
+    public static final int writeJSONString(
+            OutputStream os,
+            Object object,
+            SerializerFeature... features) throws IOException {
         return writeJSONString(os, object, new SerializeFilter[0], features);
     }
 
-    public static final int writeJSONString(OutputStream os, //
-                                            Object object, //
-                                            SerializeFilter[] filters) throws IOException {
+    public static final int writeJSONString(
+            OutputStream os,
+            Object object,
+            SerializeFilter[] filters) throws IOException {
         return writeJSONString(os, object, filters, new SerializerFeature[0]);
     }
 
-    public static final int writeJSONString(OutputStream os, //
-                                            Object object, //
-                                            SerializeFilter[] filters, //
-                                            SerializerFeature... features) throws IOException {
-        try (JSONWriter writer = JSONWriter.ofUTF8()) {
-            JSONWriter.Context context = writer.getContext();
-            writer.setRootObject(object);
+    public static final int writeJSONString(
+            OutputStream os,
+            Object object,
+            SerializeFilter[] filters,
+            SerializerFeature... features) throws IOException {
+        try (JSONWriter jsonWriter = JSONWriter.ofUTF8()) {
+            JSONWriter.Context context = jsonWriter.getContext();
+            jsonWriter.setRootObject(object);
             config(context, features);
             configFilter(context, filters);
 
-            writer.writeAny(object);
-            byte[] bytes = writer.getBytes();
+            if (object == null) {
+                jsonWriter.writeNull();
+            } else {
+                ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
+                objectWriter.write(jsonWriter, object, null, null, 0);
+            }
+            byte[] bytes = jsonWriter.getBytes();
             os.write(bytes);
             return bytes.length;
         } catch (com.alibaba.fastjson2.JSONException ex) {
@@ -878,18 +1002,28 @@ public class JSON {
     }
 
     public static JSONArray parseArray(String str, Feature... features) {
-        try (JSONReader reader = JSONReader.of(str)) {
-            JSONReader.Context context = reader.getContext();
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
+        try (JSONReader jsonReader = JSONReader.of(str)) {
+            JSONReader.Context context = jsonReader.getContext();
             context.setObjectSupplier(defaultSupplier);
             context.setArraySupplier(arraySupplier);
             config(context, features);
-            ObjectReader<JSONArray> objectReader = reader.getObjectReader(JSONArray.class);
-            return objectReader.readObject(reader, 0);
+
+            if (jsonReader.nextIfNull()) {
+                return null;
+            }
+
+            JSONArray jsonArray = new JSONArray();
+            jsonReader.read(jsonArray);
+            return jsonArray;
         }
     }
 
     public static <T> List<T> parseArray(String text, Class<T> type) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
@@ -910,7 +1044,7 @@ public class JSON {
     }
 
     public static <T> List<T> parseArray(String text, Class<T> type, Feature... features) {
-        if (text == null || text.length() == 0) {
+        if (text == null || text.isEmpty()) {
             return null;
         }
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
