@@ -2151,7 +2151,7 @@ public abstract class JSONReader
     public static JSONReader of(InputStream is, Charset charset) {
         Context ctx = JSONFactory.createReadContext();
 
-        byte[] bytes = BYTES0_UPDATER.getAndSet(CACHE, null);
+        byte[] bytes = CACHE_BYTES.getAndSet(0, null);
         if (bytes == null) {
             bytes = new byte[8192];
         }
@@ -2195,7 +2195,7 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(java.io.Reader is) {
-        char[] chars = CHARS_UPDATER.getAndSet(CACHE, null);
+        char[] chars = CACHE_CHARS.getAndSet(0, null);
 
         if (chars == null) {
             chars = new char[8192];

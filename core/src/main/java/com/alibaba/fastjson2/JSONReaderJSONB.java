@@ -22,8 +22,7 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.SymbolTable;
 import static com.alibaba.fastjson2.JSONB.typeName;
-import static com.alibaba.fastjson2.JSONFactory.CACHE;
-import static com.alibaba.fastjson2.JSONFactory.VALUE_BYTES_UPDATER;
+import static com.alibaba.fastjson2.JSONFactory.CACHE_BYTES;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 final class JSONReaderJSONB
@@ -40,6 +39,7 @@ final class JSONReaderJSONB
     private int strBegin;
 
     private byte[] valueBytes;
+    private final int cachedIndex = 4;
 
     private SymbolTable symbolTable;
     private long[] symbols = new long[16];
@@ -358,7 +358,7 @@ final class JSONReaderJSONB
 
                 if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
                     if (valueBytes == null) {
-                        valueBytes = VALUE_BYTES_UPDATER.getAndSet(CACHE, null);
+                        valueBytes = CACHE_BYTES.getAndSet(cachedIndex, null);
                     }
 
                     int minCapacity = strlen << 1;
@@ -1546,7 +1546,7 @@ final class JSONReaderJSONB
 
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
                 if (valueBytes == null) {
-                    valueBytes = VALUE_BYTES_UPDATER.getAndSet(CACHE, null);
+                    valueBytes = CACHE_BYTES.getAndSet(cachedIndex, null);
                 }
 
                 int minCapacity = strlen << 1;
@@ -1706,7 +1706,7 @@ final class JSONReaderJSONB
 
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
                 if (valueBytes == null) {
-                    valueBytes = VALUE_BYTES_UPDATER.getAndSet(CACHE, null);
+                    valueBytes = CACHE_BYTES.getAndSet(cachedIndex, null);
                 }
 
                 int minCapacity = strlen << 1;
@@ -4232,7 +4232,7 @@ final class JSONReaderJSONB
     @Override
     public void close() {
         if (valueBytes != null) {
-            VALUE_BYTES_UPDATER.set(CACHE, valueBytes);
+            CACHE_BYTES.set(cachedIndex, valueBytes);
         }
     }
 }

@@ -16,11 +16,15 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 class JSONWriterUTF16
         extends JSONWriter {
     protected char[] chars;
+    private final int cachedIndex;
 
     JSONWriterUTF16(Context ctx) {
         super(ctx, StandardCharsets.UTF_16);
 
-        chars = JSONFactory.CHARS_UPDATER.getAndSet(JSONFactory.CACHE, null);
+        int identityHashCode = System.identityHashCode(Thread.currentThread());
+        chars = JSONFactory.CACHE_CHARS.getAndSet(
+                cachedIndex = identityHashCode & 1, null
+        );
         if (chars == null) {
             chars = new char[1024];
         }
@@ -40,7 +44,7 @@ class JSONWriterUTF16
         if (chars.length > CACHE_THREAD) {
             return;
         }
-        JSONFactory.CHARS_UPDATER.set(JSONFactory.CACHE, chars);
+        JSONFactory.CACHE_CHARS.set(cachedIndex, chars);
     }
 
     @Override
