@@ -865,6 +865,11 @@ final class JSONReaderJSONB
     }
 
     @Override
+    public Date readNullOrNewDate() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
     public boolean nextIfNull() {
         if (bytes[offset] == BC_NULL) {
             offset++;

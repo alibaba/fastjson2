@@ -864,6 +864,8 @@ public class JSONTest {
 
         JSONArray array = new JSONArray();
         assertSame(array, JSON.toJSON(array));
+
+        assertEquals(1, JSON.toJSON(1));
     }
 
     @Test

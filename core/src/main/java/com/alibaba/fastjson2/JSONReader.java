@@ -95,10 +95,7 @@ public abstract class JSONReader
 
     public abstract boolean isNull();
 
-    public Date readNullOrNewDate() {
-        readNull();
-        return null;
-    }
+    public abstract Date readNullOrNewDate();
 
     public abstract boolean nextIfNull();
 
