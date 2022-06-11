@@ -39,7 +39,7 @@ final class JSONReaderJSONB
     private int strBegin;
 
     private byte[] valueBytes;
-    private final int cachedIndex = 4;
+    private final int cachedIndex = JSONFactory.cacheIndex();
 
     private SymbolTable symbolTable;
     private long[] symbols = new long[16];

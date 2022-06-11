@@ -21,10 +21,8 @@ class JSONWriterUTF16
     JSONWriterUTF16(Context ctx) {
         super(ctx, StandardCharsets.UTF_16);
 
-        int identityHashCode = System.identityHashCode(Thread.currentThread());
-        chars = JSONFactory.CACHE_CHARS.getAndSet(
-                cachedIndex = identityHashCode & 1, null
-        );
+        cachedIndex = JSONFactory.cacheIndex();
+        chars = JSONFactory.CACHE_CHARS.getAndSet(cachedIndex, null);
         if (chars == null) {
             chars = new char[1024];
         }

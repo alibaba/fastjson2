@@ -1284,8 +1284,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> void parseObject(InputStream input, Charset charset, char delimiter, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
-        int identityHashCode = System.identityHashCode(Thread.currentThread());
-        int cachedIndex = identityHashCode & 3;
+        int cachedIndex = JSONFactory.cacheIndex();
         byte[] bytes = JSONFactory.CACHE_BYTES.getAndSet(
                 cachedIndex, null
         );
@@ -1362,8 +1361,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> void parseObject(Reader input, char delimiter, Type type, Consumer<T> consumer) {
-        int identityHashCode = System.identityHashCode(Thread.currentThread());
-        int cachedIndex = identityHashCode & 1;
+        final int cachedIndex = JSONFactory.cacheIndex();
         char[] chars = JSONFactory.CACHE_CHARS.getAndSet(
                 cachedIndex, null
         );
