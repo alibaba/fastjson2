@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.Arrays;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.CACHE_THREAD;
@@ -23,7 +22,7 @@ final class JSONWriterJSONB
     static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
     static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
-    final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> byteUpdater;
+    private final int cachedIndex;
 
     private byte[] bytes;
     private JSONB.SymbolTable symbolTable;
@@ -35,21 +34,9 @@ final class JSONWriterJSONB
         super(ctx, StandardCharsets.UTF_8);
 
         int identityHashCode = System.identityHashCode(Thread.currentThread());
-        switch (identityHashCode & 3) {
-            case 0:
-                byteUpdater = JSONFactory.BYTES0_UPDATER;
-                break;
-            case 1:
-                byteUpdater = JSONFactory.BYTES1_UPDATER;
-                break;
-            case 2:
-                byteUpdater = JSONFactory.BYTES2_UPDATER;
-                break;
-            default:
-                byteUpdater = JSONFactory.BYTES3_UPDATER;
-                break;
-        }
-        bytes = byteUpdater.getAndSet(JSONFactory.CACHE, null);
+        bytes = JSONFactory.CACHE_BYTES.getAndSet(
+                cachedIndex = identityHashCode & 3, null
+        );
 
         if (bytes == null) {
             bytes = new byte[1024];
@@ -63,7 +50,7 @@ final class JSONWriterJSONB
         if (bytes.length > CACHE_THREAD) {
             return;
         }
-        byteUpdater.set(JSONFactory.CACHE, bytes);
+        JSONFactory.CACHE_BYTES.set(cachedIndex, bytes);
     }
 
     @Override

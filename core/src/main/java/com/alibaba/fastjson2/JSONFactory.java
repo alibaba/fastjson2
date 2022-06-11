@@ -11,10 +11,13 @@ import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.concurrent.atomic.AtomicReferenceArray;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class JSONFactory {
@@ -31,6 +34,15 @@ public final class JSONFactory {
 
     static long defaultReaderFeatures;
     static long defaultWriterFeatures;
+
+    static final class Utils {
+        // GraalVM not support
+        // Android not support
+        static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
+        static Function<byte[], String> STRING_CREATOR_JDK11;
+        static BiFunction<byte[], Charset, String> STRING_CREATOR_JDK17;
+        static volatile boolean STRING_CREATOR_ERROR;
+    }
 
     static final BigDecimal LOW = BigDecimal.valueOf(-9007199254740991L);
     static final BigDecimal HIGH = BigDecimal.valueOf(9007199254740991L);
@@ -68,18 +80,15 @@ public final class JSONFactory {
     static {
         Properties properties = new Properties();
 
-        InputStream inputStream = AccessController.doPrivileged(new PrivilegedAction<InputStream>() {
-            @Override
-            public InputStream run() {
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        InputStream inputStream = AccessController.doPrivileged((PrivilegedAction<InputStream>) () -> {
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
-                final String resourceFile = "fastjson2.properties";
+            final String resourceFile = "fastjson2.properties";
 
-                if (cl != null) {
-                    return cl.getResourceAsStream(resourceFile);
-                } else {
-                    return ClassLoader.getSystemResourceAsStream(resourceFile);
-                }
+            if (cl != null) {
+                return cl.getResourceAsStream(resourceFile);
+            } else {
+                return ClassLoader.getSystemResourceAsStream(resourceFile);
             }
         });
         if (inputStream != null) {
@@ -100,28 +109,9 @@ public final class JSONFactory {
         CREATOR = property == null ? "asm" : property;
     }
 
-    static final class Cache {
-        volatile char[] chars;
-
-        volatile byte[] bytes0;
-        volatile byte[] bytes1;
-        volatile byte[] bytes2;
-        volatile byte[] bytes3;
-
-        volatile byte[] valueBytes;
-    }
-
-    static final Cache CACHE = new Cache();
-
     static final int CACHE_THREAD = 1024 * 1024;
-
-    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, char[]> CHARS_UPDATER = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, char[].class, "chars");
-    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> BYTES0_UPDATER = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, byte[].class, "bytes0");
-    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> BYTES1_UPDATER = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, byte[].class, "bytes1");
-    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> BYTES2_UPDATER = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, byte[].class, "bytes2");
-    static final AtomicReferenceFieldUpdater<JSONFactory.Cache, byte[]> BYTES3_UPDATER = AtomicReferenceFieldUpdater.newUpdater(JSONFactory.Cache.class, byte[].class, "bytes3");
-
-    static final AtomicReferenceFieldUpdater<Cache, byte[]> VALUE_BYTES_UPDATER = AtomicReferenceFieldUpdater.newUpdater(Cache.class, byte[].class, "valueBytes");
+    static final AtomicReferenceArray<byte[]> CACHE_BYTES = new AtomicReferenceArray<>(5);
+    static final AtomicReferenceArray<char[]> CACHE_CHARS = new AtomicReferenceArray<>(2);
 
     static final class SymbolTableImpl
             implements JSONB.SymbolTable {
@@ -229,7 +219,18 @@ public final class JSONFactory {
     static ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
     static ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
 
-    static JSONPathCompiler defaultJSONPathCompiler = JSONPathCompilerReflect.INSTANCE;
+    static JSONPathCompiler defaultJSONPathCompiler;
+    static {
+        switch (JSONFactory.CREATOR) {
+            case "reflect":
+            case "lambda":
+                defaultJSONPathCompiler = JSONPathCompilerReflect.INSTANCE;
+                break;
+            default:
+                defaultJSONPathCompiler = JSONPathCompilerReflectASM.INSTANCE;
+                break;
+        }
+    }
 
     static final ThreadLocal<ObjectReaderCreator> readerCreatorLocal = new ThreadLocal<>();
     static final ThreadLocal<ObjectReaderProvider> readerProviderLocal = new ThreadLocal<>();
