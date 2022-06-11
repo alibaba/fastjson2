@@ -8,7 +8,6 @@ import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.ReferenceKey;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -2237,76 +2236,24 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(InputStream is, Charset charset) {
-        Context ctx = JSONFactory.createReadContext();
-
-        byte[] bytes = CACHE_BYTES.getAndSet(0, null);
-        if (bytes == null) {
-            bytes = new byte[8192];
-        }
-        int off = 0;
-        try {
-            for (; ; ) {
-                int n = is.read(bytes, off, bytes.length - off);
-                if (n == -1) {
-                    break;
-                }
-                off += n;
-
-                if (off == bytes.length) {
-                    bytes = Arrays.copyOf(bytes, bytes.length + 8192);
-                }
-            }
-        } catch (IOException ioe) {
-            throw new JSONException("read error", ioe);
-        }
+        Context context = JSONFactory.createReadContext();
 
         if (charset == StandardCharsets.UTF_8 || charset == null) {
-            return new JSONReaderUTF8(ctx, bytes, 0, off);
+            return new JSONReaderUTF8(context, is);
         }
 
         if (charset == StandardCharsets.UTF_16) {
-            if (off % 2 == 1) {
-                throw new JSONException("illegal input utf16 bytes, length " + off);
-            }
-
-            char[] chars = new char[off / 2];
-            for (int i = 0, j = 0; i < off; i += 2, ++j) {
-                byte c0 = bytes[i];
-                byte c1 = bytes[i + 1];
-                chars[j] = (char) ((c1 & 0xff) | ((c0 & 0xff) << 8));
-            }
-
-            return new JSONReaderUTF16(ctx, null, chars, 0, chars.length);
+            return new JSONReaderUTF16(context, is);
         }
 
         throw new JSONException("not support input charset : " + charset);
     }
 
     public static JSONReader of(java.io.Reader is) {
-        char[] chars = CACHE_CHARS.getAndSet(0, null);
-
-        if (chars == null) {
-            chars = new char[8192];
-        }
-        int off = 0;
-        try {
-            for (; ; ) {
-                int n = is.read(chars, off, chars.length - off);
-                if (n == -1) {
-                    break;
-                }
-                off += n;
-
-                if (off == chars.length) {
-                    chars = Arrays.copyOf(chars, chars.length + 8192);
-                }
-            }
-        } catch (IOException ioe) {
-            throw new JSONException("read error", ioe);
-        }
-
         return new JSONReaderUTF16(
-                JSONFactory.createReadContext(), null, chars, 0, off);
+                JSONFactory.createReadContext(),
+                is
+        );
     }
 
     public static JSONReader of(Context context, String str) {

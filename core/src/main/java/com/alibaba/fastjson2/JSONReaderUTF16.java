@@ -3,15 +3,23 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
+import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 final class JSONReaderUTF16
@@ -27,6 +35,9 @@ final class JSONReaderUTF16
     private int nameLength;
 
     private int referenceBegin;
+
+    private Closeable input;
+    private int cacheIndex = -1;
 
     JSONReaderUTF16(Context ctx, byte[] bytes, int offset, int length) {
         super(ctx);
@@ -216,6 +227,73 @@ final class JSONReaderUTF16
         return reference;
     }
 
+    JSONReaderUTF16(Context ctx, Reader input) {
+        super(ctx);
+        this.input = input;
+
+        cacheIndex = JSONFactory.cacheIndex();
+        char[] chars = CACHE_CHARS.getAndSet(cacheIndex, null);
+
+        if (chars == null) {
+            chars = new char[8192];
+        }
+        int off = 0;
+        try {
+            for (; ; ) {
+                int n = input.read(chars, off, chars.length - off);
+                if (n == -1) {
+                    break;
+                }
+                off += n;
+
+                if (off == chars.length) {
+                    chars = Arrays.copyOf(chars, chars.length + 8192);
+                }
+            }
+        } catch (IOException ioe) {
+            throw new JSONException("read error", ioe);
+        }
+
+        this.str = null;
+        this.chars = chars;
+        this.offset = 0;
+        this.length = off;
+        this.start = 0;
+        this.end = length;
+
+        // inline next();
+        {
+            if (this.offset >= end) {
+                ch = EOI;
+                return;
+            }
+
+            ch = chars[this.offset];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                this.offset++;
+                if (this.offset >= length) {
+                    ch = EOI;
+                    return;
+                }
+                ch = chars[this.offset];
+            }
+            this.offset++;
+        }
+
+        if (ch == '\uFFFE' || ch == '\uFEFF') {
+            next();
+        }
+
+        while (ch == '/') {
+            next();
+            if (ch == '/') {
+                skipLineComment();
+            } else {
+                throw new JSONException("input not support " + ch + ", offset " + offset);
+            }
+        }
+    }
+
     JSONReaderUTF16(Context ctx, String str, char[] chars, int offset, int length) {
         super(ctx);
 
@@ -225,6 +303,89 @@ final class JSONReaderUTF16
         this.length = length;
         this.start = offset;
         this.end = offset + length;
+
+        // inline next();
+        {
+            if (this.offset >= end) {
+                ch = EOI;
+                return;
+            }
+
+            ch = chars[this.offset];
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                this.offset++;
+                if (this.offset >= length) {
+                    ch = EOI;
+                    return;
+                }
+                ch = chars[this.offset];
+            }
+            this.offset++;
+        }
+
+        if (ch == '\uFFFE' || ch == '\uFEFF') {
+            next();
+        }
+
+        while (ch == '/') {
+            next();
+            if (ch == '/') {
+                skipLineComment();
+            } else {
+                throw new JSONException("input not support " + ch + ", offset " + offset);
+            }
+        }
+    }
+
+    JSONReaderUTF16(Context ctx, InputStream input) {
+        super(ctx);
+        this.input = input;
+        final int cacheIndex = JSONFactory.cacheIndex();
+
+        byte[] bytes = CACHE_BYTES.getAndSet(cacheIndex, null);
+        if (bytes == null) {
+            bytes = new byte[8192];
+        }
+
+        char[] chars;
+        try {
+            int off = 0;
+            for (; ; ) {
+                int n = input.read(bytes, off, bytes.length - off);
+                if (n == -1) {
+                    break;
+                }
+                off += n;
+
+                if (off == bytes.length) {
+                    bytes = Arrays.copyOf(bytes, bytes.length + 8192);
+                }
+            }
+
+            if (off % 2 == 1) {
+                throw new JSONException("illegal input utf16 bytes, length " + off);
+            }
+
+            chars = new char[off / 2];
+            for (int i = 0, j = 0; i < off; i += 2, ++j) {
+                byte c0 = bytes[i];
+                byte c1 = bytes[i + 1];
+                chars[j] = (char) ((c1 & 0xff) | ((c0 & 0xff) << 8));
+            }
+        } catch (IOException ioe) {
+            throw new JSONException("read error", ioe);
+        } finally {
+            if (bytes.length < CACHE_THREAD) {
+                CACHE_BYTES.set(cacheIndex, bytes);
+            }
+        }
+
+        this.str = null;
+        this.chars = chars;
+        this.offset = 0;
+        this.length = chars.length;
+        this.start = 0;
+        this.end = length;
 
         // inline next();
         {
@@ -1741,7 +1902,22 @@ final class JSONReaderUTF16
                     offset++;
                 }
 
-                str = new String(chars);
+                if (JDKUtils.JVM_VERSION == 8) {
+                    if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                        try {
+                            STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                        } catch (Throwable e) {
+                            STRING_CREATOR_ERROR = true;
+                        }
+                    }
+                    if (STRING_CREATOR_JDK8 != null) {
+                        str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                    } else {
+                        str = new String(chars);
+                    }
+                } else {
+                    str = new String(chars);
+                }
             } else {
                 if (this.str != null && JDKUtils.JVM_VERSION > 8) {
                     str = this.str.substring(this.offset, offset);
@@ -4705,5 +4881,19 @@ final class JSONReaderUTF16
                 .append(line > 1 ? '\n' : ' ');
         buf.append(chars, this.start, length < 65535 ? length : 65535);
         return buf.toString();
+    }
+
+    public void close() {
+        if (cacheIndex != -1 && chars.length <= CACHE_THREAD) {
+            CACHE_CHARS.set(cacheIndex, chars);
+        }
+
+        if (input != null) {
+            try {
+                input.close();
+            } catch (IOException ignored) {
+                // ignored
+            }
+        }
     }
 }
