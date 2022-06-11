@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -16,6 +18,8 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import static com.alibaba.fastjson2.JSONFactory.CACHE_BYTES;
+import static com.alibaba.fastjson2.JSONFactory.CACHE_THREAD;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
@@ -33,12 +37,60 @@ class JSONReaderUTF8
     protected boolean nameAscii;
     protected int referenceBegin;
 
+    protected InputStream in;
+
+    protected int cacheIndex = -1;
+
+    JSONReaderUTF8(Context ctx, InputStream is) {
+        super(ctx);
+
+        cacheIndex = JSONFactory.cacheIndex();
+        byte[] bytes = CACHE_BYTES.getAndSet(cacheIndex, null);
+        if (bytes == null) {
+            bytes = new byte[8192];
+        }
+        int off = 0;
+        try {
+            for (; ; ) {
+                int n = is.read(bytes, off, bytes.length - off);
+                if (n == -1) {
+                    break;
+                }
+                off += n;
+
+                if (off == bytes.length) {
+                    bytes = Arrays.copyOf(bytes, bytes.length + 8192);
+                }
+            }
+        } catch (IOException ioe) {
+            throw new JSONException("read error", ioe);
+        }
+
+        this.bytes = bytes;
+        this.offset = 0;
+        this.length = off;
+        this.in = is;
+        this.start = 0;
+        this.end = length;
+        next();
+
+        while (ch == '/') {
+            next();
+            if (ch == '/') {
+                skipLineComment();
+            } else {
+                throw new JSONException("input not support " + ch + ", offset " + offset);
+            }
+        }
+    }
+
     JSONReaderUTF8(Context ctx, byte[] bytes, int offset, int length) {
         super(ctx);
 
         this.bytes = bytes;
         this.offset = offset;
         this.length = length;
+        this.in = in;
         this.start = offset;
         this.end = offset + length;
         next();
@@ -5603,5 +5655,18 @@ class JSONReaderUTF8
         String str = new String(bytes, this.start, length < 65535 ? length : 65535);
         buf.append(str);
         return buf.toString();
+    }
+
+    public void close() {
+        if (cacheIndex != -1 && bytes.length < CACHE_THREAD) {
+            CACHE_BYTES.set(cacheIndex, bytes);
+        }
+        if (in != null) {
+            try {
+                in.close();
+            } catch (IOException ignroed) {
+                // ignored
+            }
+        }
     }
 }

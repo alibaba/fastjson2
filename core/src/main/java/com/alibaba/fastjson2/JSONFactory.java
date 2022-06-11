@@ -110,8 +110,12 @@ public final class JSONFactory {
     }
 
     static final int CACHE_THREAD = 1024 * 1024;
-    static final AtomicReferenceArray<byte[]> CACHE_BYTES = new AtomicReferenceArray<>(5);
-    static final AtomicReferenceArray<char[]> CACHE_CHARS = new AtomicReferenceArray<>(2);
+    static final AtomicReferenceArray<byte[]> CACHE_BYTES = new AtomicReferenceArray<>(4);
+    static final AtomicReferenceArray<char[]> CACHE_CHARS = new AtomicReferenceArray<>(4);
+
+    static int cacheIndex() {
+        return System.identityHashCode(Thread.currentThread()) & 3; //
+    }
 
     static final class SymbolTableImpl
             implements JSONB.SymbolTable {
