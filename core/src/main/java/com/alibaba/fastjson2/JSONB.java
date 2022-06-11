@@ -15,7 +15,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 /**
  * x91          # binary len_int32 bytes
@@ -679,7 +678,7 @@ public interface JSONB {
         }
 
         if (JDKUtils.JVM_VERSION == 8) {
-            char[] chars = JDKUtils.getCharArray(str);
+            char[] chars = str.toCharArray();
             int strlen = chars.length;
             if (strlen <= STR_ASCII_FIX_LEN) {
                 boolean ascii = true;
@@ -696,18 +695,6 @@ public interface JSONB {
                     for (int i = 0; i < strlen; ++i) {
                         bytes[i + 1] = (byte) chars[i];
                     }
-                    return bytes;
-                }
-            }
-        } else if (JDKUtils.UNSAFE_SUPPORT) {
-            int coder = UnsafeUtils.getStringCoder(str);
-            if (coder == 0) {
-                byte[] value = UnsafeUtils.getStringValue(str);
-                int strlen = value.length;
-                if (strlen <= STR_ASCII_FIX_LEN) {
-                    byte[] bytes = new byte[value.length + 1];
-                    bytes[0] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                    System.arraycopy(value, 0, bytes, 1, value.length);
                     return bytes;
                 }
             }

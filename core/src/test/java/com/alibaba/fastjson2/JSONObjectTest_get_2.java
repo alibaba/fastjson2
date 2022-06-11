@@ -3,9 +3,6 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONObjectTest_get_2 {
@@ -14,21 +11,6 @@ public class JSONObjectTest_get_2 {
         JSONObject obj = JSON.parseObject("{\"value\":{}}");
         JSONObject value = (JSONObject) obj.getObject("value", Object.class);
         assertEquals(0, value.size());
-    }
-
-    @Test
-    public void test_get_obj() {
-        // GraalVM not support
-        // Android not support
-        JSONObject obj = new JSONObject();
-        {
-            Map<String, Object> value = new LinkedHashMap<>();
-            value.put("@type", "com.alibaba.fastjson2.JSONObjectTest_get_2$VO");
-            value.put("id", 1001);
-            obj.put("value", value);
-        }
-        VO value = (VO) obj.getObject("value", Object.class, JSONReader.Feature.SupportAutoType);
-        assertEquals(1001, value.getId());
     }
 
     public interface VO {

@@ -7,7 +7,6 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JSONObjectTest2 {
@@ -97,17 +96,6 @@ public class JSONObjectTest2 {
             }.getType());
             assertNotNull(bean.date);
         }
-    }
-
-    @Test
-    public void testInterface() {
-        // GraalVM not support
-        // Android not support
-        BeanInterface bean =
-                JSONObject
-                        .of("id", 123)
-                        .toJavaObject(BeanInterface.class);
-        assertEquals(123, bean.getId());
     }
 
     public interface BeanInterface {

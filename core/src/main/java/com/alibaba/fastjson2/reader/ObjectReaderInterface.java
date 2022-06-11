@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 
-import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -30,15 +29,13 @@ public final class ObjectReaderInterface<T>
         }
 
         JSONObject object = jsonReader.read(JSONObject.class);
-        // GraalVM not support
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public T createInstance(long features) {
         JSONObject object = new JSONObject();
-        // GraalVM not support
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -49,7 +46,6 @@ public final class ObjectReaderInterface<T>
         } else {
             object = new JSONObject(map);
         }
-        // GraalVM not support
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        throw new UnsupportedOperationException();
     }
 }
