@@ -86,7 +86,7 @@ public class EishayParseUTF8Bytes {
 //        new EishayParseUTF8Bytes().fastjson2_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayParseUTF8Bytes.class.getName())
-//                .exclude(EishayParseUTF8BytesPretty.class.getName())
+                .exclude(EishayParseUTF8BytesPretty.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .forks(1)

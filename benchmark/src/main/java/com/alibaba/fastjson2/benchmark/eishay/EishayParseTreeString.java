@@ -87,6 +87,7 @@ public class EishayParseTreeString {
 //        new EishayParseTreeString().fastjson2_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayParseTreeString.class.getName())
+                .exclude(EishayParseTreeStringPretty.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .forks(1)

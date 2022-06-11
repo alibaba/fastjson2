@@ -17,6 +17,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.util.concurrent.TimeUnit;
 
 public class EishayWriteBinary {
@@ -41,6 +42,15 @@ public class EishayWriteBinary {
     @Benchmark
     public void fastjson2JSONB(Blackhole bh) {
         bh.consume(JSONB.toBytes(mc));
+    }
+
+    @Benchmark
+    public void javaSerialize(Blackhole bh) throws Exception {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+        objectOutputStream.writeObject(mc);
+        objectOutputStream.flush();
+        bh.consume(byteArrayOutputStream.toByteArray());
     }
 
     @Benchmark
