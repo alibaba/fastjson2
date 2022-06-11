@@ -15,7 +15,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 /**
  * x91          # binary len_int32 bytes
