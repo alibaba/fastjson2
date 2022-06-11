@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +31,7 @@ public class Issue413 {
 
     @Test
     public void testLambda() {
-        ObjectReader<Bean> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean.class);
         String date1 = JSONObject.of("date1", "1654134285").toString();
         Bean bean = objectReader.readObject(JSONReader.of(date1));
         assertEquals(1654134285000L, bean.getDate1().getTime());

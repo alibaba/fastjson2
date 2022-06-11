@@ -3,7 +3,7 @@ package com.alibaba.fastjson2.features;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ public class ListRefTest {
         bean.items.add(null);
         bean.items.add(item);
 
-        ObjectWriter objectWriter = ObjectWriterCreatorLambda.INSTANCE.createObjectWriter(Bean.class);
+        ObjectWriter objectWriter = ObjectWriterCreator.INSTANCE.createObjectWriter(Bean.class);
         JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.ReferenceDetection);
         jsonWriter.setRootObject(bean);
 
