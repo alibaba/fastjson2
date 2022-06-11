@@ -11,13 +11,10 @@ import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceArray;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class JSONFactory {
@@ -34,15 +31,6 @@ public final class JSONFactory {
 
     static long defaultReaderFeatures;
     static long defaultWriterFeatures;
-
-    static final class Utils {
-        // GraalVM not support
-        // Android not support
-        static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
-        static Function<byte[], String> STRING_CREATOR_JDK11;
-        static BiFunction<byte[], Charset, String> STRING_CREATOR_JDK17;
-        static volatile boolean STRING_CREATOR_ERROR;
-    }
 
     static final BigDecimal LOW = BigDecimal.valueOf(-9007199254740991L);
     static final BigDecimal HIGH = BigDecimal.valueOf(9007199254740991L);
@@ -219,18 +207,7 @@ public final class JSONFactory {
     static ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
     static ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
 
-    static JSONPathCompiler defaultJSONPathCompiler;
-    static {
-        switch (JSONFactory.CREATOR) {
-            case "reflect":
-            case "lambda":
-                defaultJSONPathCompiler = JSONPathCompilerReflect.INSTANCE;
-                break;
-            default:
-                defaultJSONPathCompiler = JSONPathCompilerReflectASM.INSTANCE;
-                break;
-        }
-    }
+    static JSONPathCompiler defaultJSONPathCompiler = JSONPathCompilerReflect.INSTANCE;
 
     static final ThreadLocal<ObjectReaderCreator> readerCreatorLocal = new ThreadLocal<>();
     static final ThreadLocal<ObjectReaderProvider> readerProviderLocal = new ThreadLocal<>();
