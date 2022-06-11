@@ -237,7 +237,7 @@ public class JSONObject
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             jsonReader
                     .getContext()
-                    .setUtilDateFormat(defaultDateFormat);
+                    .setDateFormat(defaultDateFormat);
         }
 
         return (T) objectReader.readObject(jsonReader);
@@ -279,7 +279,7 @@ public class JSONObject
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             jsonReader
                     .getContext()
-                    .setUtilDateFormat(defaultDateFormat);
+                    .setDateFormat(defaultDateFormat);
         }
 
         return (T) objectReader.readObject(jsonReader);
@@ -391,7 +391,7 @@ public class JSONObject
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             jsonReader
                     .getContext()
-                    .setUtilDateFormat(defaultDateFormat);
+                    .setDateFormat(defaultDateFormat);
         }
 
         return (T) objectReader.readObject(jsonReader);

@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.codec.BeanInfo;
-import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
@@ -23,7 +22,6 @@ import java.math.BigInteger;
 import java.net.*;
 import java.text.SimpleDateFormat;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
@@ -1345,15 +1343,15 @@ public class ObjectReaderBaseModule
         }
 
         if (type == LocalDate.class) {
-            return LocalDateImpl.INSTANCE;
+            return ObjectReaderImplLocalDate.INSTANCE;
         }
 
         if (type == LocalTime.class) {
-            return LocalTimeImpl.INSTANCE;
+            return ObjectReaderImplLocalTime.INSTANCE;
         }
 
         if (type == LocalDateTime.class) {
-            return LocalDateTimeImpl.INSTANCE;
+            return ObjectReaderImplLocalDateTime.INSTANCE;
         }
 
         if (type == ZonedDateTime.class) {
@@ -1994,36 +1992,6 @@ public class ObjectReaderBaseModule
         }
     }
 
-    static class LocalDateImpl
-            extends PrimitiveImpl {
-        static final LocalDateImpl INSTANCE = new LocalDateImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return jsonReader.readLocalDate();
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            return jsonReader.readLocalDate();
-        }
-    }
-
-    static class LocalTimeImpl
-            extends PrimitiveImpl {
-        static final LocalTimeImpl INSTANCE = new LocalTimeImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return jsonReader.readLocalTime();
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            return jsonReader.readLocalTime();
-        }
-    }
-
     static class LocaleImpl
             extends PrimitiveImpl {
         static final LocaleImpl INSTANCE = new LocaleImpl();
@@ -2058,49 +2026,6 @@ public class ObjectReaderBaseModule
                 return new Locale(items[0], items[1]);
             }
             return new Locale(items[0], items[1], items[2]);
-        }
-    }
-
-    static class LocalDateTimeImpl
-            extends DateTimeCodec
-            implements ObjectReader {
-        static final LocalDateTimeImpl INSTANCE = new LocalDateTimeImpl(null);
-        static final LocalDateTimeImpl INSTANCE_UNIXTIME = new LocalDateTimeImpl("unixtime");
-
-        public LocalDateTimeImpl(String format) {
-            super(format);
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return jsonReader.readLocalDateTime();
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.isInt()) {
-                DateTimeFormatter formatter = getDateFormatter();
-                if (formatter != null) {
-                    String str = jsonReader.readString();
-                    return LocalDateTime.parse(str, formatter);
-                }
-
-                long millis = jsonReader.readInt64Value();
-
-                if (formatUnixTime) {
-                    millis *= 1000;
-                }
-
-                Instant instant = Instant.ofEpochMilli(millis);
-                ZoneId zoneId = jsonReader.getContext().getZoneId();
-                return LocalDateTime.ofInstant(instant, zoneId);
-            }
-
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            return jsonReader.readLocalDateTime();
         }
     }
 

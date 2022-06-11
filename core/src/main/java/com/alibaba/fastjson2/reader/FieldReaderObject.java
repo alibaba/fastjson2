@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.util.JdbcSupport;
 
 import java.lang.reflect.Type;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
@@ -47,15 +48,18 @@ public interface FieldReaderObject<T, V>
 
                     if (fieldClass == LocalDateTime.class) {
                         if (format == null) {
-                            return ObjectReaderBaseModule.LocalDateTimeImpl.INSTANCE;
+                            return ObjectReaderImplLocalDateTime.INSTANCE;
                         }
 
-                        switch (format) {
-                            case "unixtime":
-                                return ObjectReaderBaseModule.LocalDateTimeImpl.INSTANCE_UNIXTIME;
-                            default:
-                                return new ObjectReaderBaseModule.LocalDateTimeImpl(format);
+                        return new ObjectReaderImplLocalDateTime(format, locale);
+                    }
+
+                    if (fieldClass == LocalDate.class) {
+                        if (format == null) {
+                            return ObjectReaderImplLocalDate.INSTANCE;
                         }
+
+                        return new ObjectReaderImplLocalDate(format, locale);
                     }
 
                     if (fieldClass == Instant.class) {
