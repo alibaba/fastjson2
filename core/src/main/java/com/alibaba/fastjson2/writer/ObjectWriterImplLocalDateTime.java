@@ -6,15 +6,15 @@ import com.alibaba.fastjson2.codec.DateTimeCodec;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 final class ObjectWriterImplLocalDateTime
         extends DateTimeCodec
         implements ObjectWriter {
-    static final ObjectWriterImplLocalDateTime INSTANCE = new ObjectWriterImplLocalDateTime(null);
-    static final ObjectWriterImplLocalDateTime INSTANCE_UNIXTIME = new ObjectWriterImplLocalDateTime("unixtime");
+    static final ObjectWriterImplLocalDateTime INSTANCE = new ObjectWriterImplLocalDateTime(null, null);
 
-    public ObjectWriterImplLocalDateTime(String format) {
-        super(format);
+    public ObjectWriterImplLocalDateTime(String format, Locale locale) {
+        super(format, locale);
     }
 
     @Override

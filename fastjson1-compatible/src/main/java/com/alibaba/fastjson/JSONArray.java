@@ -784,7 +784,7 @@ public class JSONArray
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             jsonReader
                     .getContext()
-                    .setUtilDateFormat(defaultDateFormat);
+                    .setDateFormat(defaultDateFormat);
         }
 
         return (T) objectReader.readObject(jsonReader);

@@ -25,16 +25,17 @@ abstract class FieldWriterDate<T>
             = AtomicReferenceFieldUpdater.newUpdater(FieldWriterDate.class, char[].class, "cacheFormat19UTF16");
 
     protected DateTimeFormatter formatter;
-    boolean formatMillis;
-    boolean formatISO8601;
-    boolean formatUnixTime;
+    final boolean formatMillis;
+    final boolean formatISO8601;
+    final boolean formatyyyyMMddhhmmss19;
+    final boolean formatUnixTime;
 
     protected ObjectWriter dateWriter;
 
     protected FieldWriterDate(String fieldName, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
         super(fieldName, ordinal, features, format, label, fieldType, fieldClass);
 
-        boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false;
+        boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false, formatyyyyMMddhhmmss19 = false;
         if (format != null) {
             switch (format) {
                 case "millis":
@@ -45,6 +46,10 @@ abstract class FieldWriterDate<T>
                     break;
                 case "unixtime":
                     formatUnixTime = true;
+                    break;
+                case "yyyy-MM-ddTHH:mm:ss":
+                    formatyyyyMMddhhmmss19 = true;
+                    break;
                 default:
                     break;
             }
@@ -53,6 +58,7 @@ abstract class FieldWriterDate<T>
         this.formatMillis = formatMillis;
         this.formatISO8601 = formatISO8601;
         this.formatUnixTime = formatUnixTime;
+        this.formatyyyyMMddhhmmss19 = formatyyyyMMddhhmmss19;
     }
 
     @Override
@@ -292,7 +298,7 @@ abstract class FieldWriterDate<T>
                     .ofInstant(
                             Instant.ofEpochMilli(timeMillis), zoneId);
 
-            if (isDateFormatISO8601() || ctx.isDateFormatISO8601()) {
+            if (formatISO8601 || ctx.isDateFormatISO8601()) {
                 int year = zdt.getYear();
                 int month = zdt.getMonthValue();
                 int dayOfMonth = zdt.getDayOfMonth();
@@ -302,6 +308,17 @@ abstract class FieldWriterDate<T>
                 int millis = zdt.getNano() / 1000_000;
                 int offsetSeconds = zdt.getOffset().getTotalSeconds();
                 jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds);
+                return;
+            }
+
+            if (formatyyyyMMddhhmmss19 || ctx.isFormatyyyyMMddhhmmss19()) {
+                int year = zdt.getYear();
+                int month = zdt.getMonthValue();
+                int dayOfMonth = zdt.getDayOfMonth();
+                int hour = zdt.getHour();
+                int minute = zdt.getMinute();
+                int second = zdt.getSecond();
+                jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
                 return;
             }
 

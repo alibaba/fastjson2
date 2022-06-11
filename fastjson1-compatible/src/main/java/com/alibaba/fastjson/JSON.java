@@ -68,7 +68,7 @@ public class JSON {
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setUtilDateFormat(defaultDateFormat);
+            context.setDateFormat(defaultDateFormat);
         }
 
         try {
@@ -98,7 +98,7 @@ public class JSON {
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setUtilDateFormat(defaultDateFormat);
+            context.setDateFormat(defaultDateFormat);
         }
 
         boolean ordered = false;
@@ -137,7 +137,7 @@ public class JSON {
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setUtilDateFormat(defaultDateFormat);
+            context.setDateFormat(defaultDateFormat);
         }
 
         config(context, features);
@@ -175,7 +175,7 @@ public class JSON {
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setUtilDateFormat(defaultDateFormat);
+            context.setDateFormat(defaultDateFormat);
         }
 
         try {
@@ -206,7 +206,7 @@ public class JSON {
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setUtilDateFormat(defaultDateFormat);
+            context.setDateFormat(defaultDateFormat);
         }
 
         config(context, features);
@@ -242,7 +242,7 @@ public class JSON {
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setUtilDateFormat(defaultDateFormat);
+            context.setDateFormat(defaultDateFormat);
         }
 
         boolean ordered = false;
@@ -281,7 +281,7 @@ public class JSON {
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setUtilDateFormat(defaultDateFormat);
+            context.setDateFormat(defaultDateFormat);
         }
 
         config(context, features);
@@ -313,7 +313,7 @@ public class JSON {
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setUtilDateFormat(defaultDateFormat);
+            context.setDateFormat(defaultDateFormat);
         }
 
         if (filter instanceof Filter) {

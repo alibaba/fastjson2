@@ -7,25 +7,18 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-class ObjectReaderImplZonedDateTime
-        extends DateTimeCodec implements ObjectReader {
-    static final ObjectReaderImplZonedDateTime INSTANCE = new ObjectReaderImplZonedDateTime(null, null);
+class ObjectReaderImplLocalDateTime
+        extends DateTimeCodec
+        implements ObjectReader {
+    static final ObjectReaderImplLocalDateTime INSTANCE = new ObjectReaderImplLocalDateTime(null, null);
 
-    public static ObjectReaderImplZonedDateTime of(String format, Locale locale) {
-        if (format == null) {
-            return INSTANCE;
-        }
-
-        return new ObjectReaderImplZonedDateTime(format, locale);
-    }
-
-    public ObjectReaderImplZonedDateTime(String format, Locale locale) {
+    public ObjectReaderImplLocalDateTime(String format, Locale locale) {
         super(format, locale);
     }
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
-        return jsonReader.readZonedDateTime();
+        return jsonReader.readLocalDateTime();
     }
 
     @Override
@@ -33,13 +26,21 @@ class ObjectReaderImplZonedDateTime
         JSONReader.Context context = jsonReader.getContext();
 
         if (jsonReader.isInt()) {
+            DateTimeFormatter formatter = getDateFormatter();
+            if (formatter != null) {
+                String str = jsonReader.readString();
+                return LocalDateTime.parse(str, formatter);
+            }
+
             long millis = jsonReader.readInt64Value();
+
             if (formatUnixTime) {
                 millis *= 1000;
             }
 
             Instant instant = Instant.ofEpochMilli(millis);
-            return ZonedDateTime.ofInstant(instant, context.getZoneId());
+            ZoneId zoneId = context.getZoneId();
+            return LocalDateTime.ofInstant(instant, zoneId);
         }
 
         if (jsonReader.readIfNull()) {
@@ -47,37 +48,32 @@ class ObjectReaderImplZonedDateTime
         }
 
         if (format == null || yyyyMMddhhmmss19 || formatISO8601) {
-            return jsonReader.readZonedDateTime();
+            return jsonReader.readLocalDateTime();
         }
 
         String str = jsonReader.readString();
-
         if (formatMillis || formatUnixTime) {
             long millis = Long.parseLong(str);
             if (formatUnixTime) {
                 millis *= 1000L;
             }
             Instant instant = Instant.ofEpochMilli(millis);
-            return ZonedDateTime.ofInstant(instant, context.getZoneId());
+            return LocalDateTime.ofInstant(instant, context.getZoneId());
         }
 
-        DateTimeFormatter formatter = getDateFormatter(jsonReader.getLocale());
+        DateTimeFormatter formatter = getDateFormatter(context.getLocale());
         if (!formatHasHour) {
-            return ZonedDateTime.of(
+            return LocalDateTime.of(
                     LocalDate.parse(str, formatter),
-                    LocalTime.MIN,
-                    context.getZoneId()
+                    LocalTime.MIN
             );
         }
-
         if (!formatHasDay) {
-            return ZonedDateTime.of(
+            return LocalDateTime.of(
                     LocalDate.of(1970, 1, 1),
-                    LocalTime.parse(str, formatter),
-                    context.getZoneId()
+                    LocalTime.parse(str, formatter)
             );
         }
-        LocalDateTime localDateTime = LocalDateTime.parse(str, formatter);
-        return ZonedDateTime.of(localDateTime, context.getZoneId());
+        return LocalDateTime.parse(str, formatter);
     }
 }

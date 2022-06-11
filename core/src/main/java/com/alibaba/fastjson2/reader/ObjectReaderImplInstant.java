@@ -59,27 +59,53 @@ public final class ObjectReaderImplInstant
 
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
-        if (jsonReader.isString()) {
-            if (format != null) {
-                DateTimeFormatter formatter = getDateFormatter(jsonReader.getLocale());
-                if (formatter != null) {
-                    String str = jsonReader.readString();
+        JSONReader.Context context = jsonReader.getContext();
 
-                    LocalDateTime ldt;
-                    if (!formatHasHour) {
-                        ldt = LocalDateTime.of(
-                                LocalDate.parse(str, formatter),
-                                LocalTime.MIN
-                        );
-                    } else {
-                        ldt = LocalDateTime.parse(str, formatter);
-                    }
-                    ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
-                    return zdt.toInstant();
-                }
+        if (jsonReader.isInt() && context.getDateFormat() == null) {
+            long millis = jsonReader.readInt64Value();
+            if (formatUnixTime) {
+                millis *= 1000;
             }
+
+            return Instant.ofEpochMilli(millis);
         }
 
-        return jsonReader.readInstant();
+        if (jsonReader.readIfNull()) {
+            return null;
+        }
+
+        if (format == null || yyyyMMddhhmmss19 || formatISO8601 || jsonReader.isObject()) {
+            return jsonReader.readInstant();
+        }
+
+        String str = jsonReader.readString();
+
+        if (formatMillis || formatUnixTime) {
+            long millis = Long.parseLong(str);
+            if (formatUnixTime) {
+                millis *= 1000L;
+            }
+            return Instant.ofEpochMilli(millis);
+        }
+
+        DateTimeFormatter formatter = getDateFormatter(jsonReader.getLocale());
+        if (!formatHasHour) {
+            return ZonedDateTime.of(
+                    LocalDate.parse(str, formatter),
+                    LocalTime.MIN,
+                    context.getZoneId()
+            ).toInstant();
+        }
+
+        if (!formatHasDay) {
+            return ZonedDateTime.of(
+                    LocalDate.of(1970, 1, 1),
+                    LocalTime.parse(str, formatter),
+                    context.getZoneId()
+            ).toInstant();
+        }
+        LocalDateTime localDateTime = LocalDateTime.parse(str, formatter);
+        return ZonedDateTime.of(localDateTime, context.getZoneId())
+                .toInstant();
     }
 }

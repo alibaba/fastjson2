@@ -516,7 +516,7 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(text)) {
             JSONReader.Context context = reader.context;
-            context.setUtilDateFormat(format);
+            context.setDateFormat(format);
             context.config(filters, features);
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
@@ -707,7 +707,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(text)) {
             JSONReader.Context context = reader.context;
             if (format != null && !format.isEmpty()) {
-                context.setUtilDateFormat(format);
+                context.setDateFormat(format);
             }
             context.config(features);
 
@@ -790,7 +790,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(text)) {
             JSONReader.Context context = reader.context;
             if (format != null && !format.isEmpty()) {
-                context.setUtilDateFormat(format);
+                context.setDateFormat(format);
             }
             context.config(features);
 
@@ -933,7 +933,7 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(utf8Bytes)) {
             JSONReader.Context context = reader.context;
-            context.setUtilDateFormat(format);
+            context.setDateFormat(format);
             context.config(filters, features);
 
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
@@ -1037,7 +1037,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(bytes)) {
             JSONReader.Context context = reader.context;
             if (format != null && !format.isEmpty()) {
-                context.setUtilDateFormat(format);
+                context.setDateFormat(format);
             }
             context.config(features);
 
@@ -1168,7 +1168,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8)) {
             JSONReader.Context context = reader.context;
             if (format != null && !format.isEmpty()) {
-                context.setUtilDateFormat(format);
+                context.setDateFormat(format);
             }
             context.config(features);
 

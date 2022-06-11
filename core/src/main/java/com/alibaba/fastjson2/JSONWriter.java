@@ -1399,9 +1399,11 @@ public abstract class JSONWriter
         final ObjectWriterProvider provider;
         DateTimeFormatter dateFormatter;
         String dateFormat;
+        Locale locale;
         boolean dateFormatMillis;
         boolean dateFormatISO8601;
         boolean dateFormatUnixTime;
+        boolean formatyyyyMMddhhmmss19;
         boolean formatHasDay;
         boolean formatHasHour;
         long features;
@@ -1533,9 +1535,15 @@ public abstract class JSONWriter
             return formatHasHour;
         }
 
+        public boolean isFormatyyyyMMddhhmmss19() {
+            return formatyyyyMMddhhmmss19;
+        }
+
         public DateTimeFormatter getDateFormatter() {
             if (dateFormatter == null && dateFormat != null && !dateFormatMillis && !dateFormatISO8601 && !dateFormatUnixTime) {
-                dateFormatter = DateTimeFormatter.ofPattern(dateFormat);
+                dateFormatter = locale == null
+                        ? DateTimeFormatter.ofPattern(dateFormat)
+                        : DateTimeFormatter.ofPattern(dateFormat, locale);
             }
             return dateFormatter;
         }
@@ -1546,6 +1554,7 @@ public abstract class JSONWriter
             }
 
             if (dateFormat != null && !dateFormat.isEmpty()) {
+                boolean dateFormatMillis = false, dateFormatISO8601 = false, dateFormatUnixTime = false, formatHasDay = false, formatHasHour = false, formatyyyyMMddhhmmss19 = false;
                 switch (dateFormat) {
                     case "millis":
                         dateFormatMillis = true;
@@ -1558,12 +1567,28 @@ public abstract class JSONWriter
                         dateFormatMillis = false;
                         dateFormatUnixTime = true;
                         break;
+                    case "yyyy-MM-ddTHH:mm:ss":
+                        dateFormat = "yyyy-MM-dd'T'HH:mm:ss";
+                        formatHasDay = true;
+                        formatHasHour = true;
+                        break;
+                    case "yyyy-MM-dd HH:mm:ss":
+                        formatyyyyMMddhhmmss19 = true;
+                        formatHasDay = true;
+                        formatHasHour = true;
+                        break;
                     default:
                         dateFormatMillis = false;
                         formatHasDay = dateFormat.indexOf("d") != -1;
                         formatHasHour = dateFormat.indexOf("H") != -1;
                         break;
                 }
+                this.dateFormatMillis = dateFormatMillis;
+                this.dateFormatISO8601 = dateFormatISO8601;
+                this.dateFormatUnixTime = dateFormatUnixTime;
+                this.formatHasDay = formatHasDay;
+                this.formatHasHour = formatHasHour;
+                this.formatyyyyMMddhhmmss19 = formatyyyyMMddhhmmss19;
             }
 
             this.dateFormat = dateFormat;

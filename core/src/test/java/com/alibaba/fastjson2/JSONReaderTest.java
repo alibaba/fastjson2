@@ -380,8 +380,8 @@ public class JSONReaderTest {
 
         assertEquals(0, context.getFeatures());
 
-        context.setDateFormat(null);
-        assertNull(context.getDateFormat());
+        context.setDateFormatter(null);
+        assertNull(context.getDateFormatter());
 
         context.setObjectSupplier(null);
         assertNull(context.getObjectSupplier());
