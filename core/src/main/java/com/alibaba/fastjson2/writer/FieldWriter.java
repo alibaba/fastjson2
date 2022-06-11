@@ -440,12 +440,7 @@ public interface FieldWriter<T>
                 if (format == null || format.isEmpty()) {
                     return ObjectWriterImplZonedDateTime.INSTANCE;
                 } else {
-                    switch (format) {
-                        case "unixtime":
-                            return ObjectWriterImplZonedDateTime.INSTANCE_UNIXTIME;
-                        default:
-                            return new ObjectWriterImplZonedDateTime(format);
-                    }
+                    return new ObjectWriterImplZonedDateTime(format, locale);
                 }
             }
 
@@ -453,12 +448,7 @@ public interface FieldWriter<T>
                 if (format == null || format.isEmpty()) {
                     return ObjectWriterImplLocalDateTime.INSTANCE;
                 } else {
-                    switch (format) {
-                        case "unixtime":
-                            return ObjectWriterImplLocalDateTime.INSTANCE_UNIXTIME;
-                        default:
-                            return new ObjectWriterImplLocalDateTime(format);
-                    }
+                    return new ObjectWriterImplLocalDateTime(format, locale);
                 }
             }
 
@@ -475,6 +465,14 @@ public interface FieldWriter<T>
                     return ObjectWriterImplLocalTime.INSTANCE;
                 } else {
                     return new ObjectWriterImplLocalTime(format, locale);
+                }
+            }
+
+            if (Instant.class == valueClass) {
+                if (format == null || format.isEmpty()) {
+                    return ObjectWriterImplInstant.INSTANCE;
+                } else {
+                    return new ObjectWriterImplInstant(format, locale);
                 }
             }
 
