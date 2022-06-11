@@ -15,8 +15,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.SymbolTable;
@@ -1441,12 +1439,6 @@ final class JSONReaderJSONB
     public String getFieldName() {
         return getString();
     }
-
-    // GraalVM not support
-    // Android not support
-    private static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
-    private static Function<byte[], String> STRING_CREATOR_JDK11;
-    private static volatile boolean STRING_CREATOR_ERROR;
 
     @Override
     public String readString() {
