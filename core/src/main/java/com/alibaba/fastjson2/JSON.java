@@ -1284,27 +1284,31 @@ public interface JSON {
     @SuppressWarnings("unchecked")
     static <T> void parseObject(InputStream input, Charset charset, char delimiter, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
         int identityHashCode = System.identityHashCode(Thread.currentThread());
+        int cachedIndex = identityHashCode & 3;
         byte[] bytes = JSONFactory.CACHE_BYTES.getAndSet(
-                identityHashCode & 3, null
+                cachedIndex, null
         );
         if (bytes == null) {
             bytes = new byte[8192];
         }
 
-        int limit = 0, start = 0, end;
+        int offset = 0, start = 0, end;
         ObjectReader<? extends T> objectReader = null;
 
         try {
             while (true) {
-                int n = input.read(bytes, limit, bytes.length - limit);
+                int n = input.read(bytes, offset, bytes.length - offset);
                 if (n == -1) {
                     break;
                 }
 
-                for (int i = 0; i < n; ++i) {
-                    int j = limit + i;
-                    if (bytes[j] == delimiter) {
-                        end = j;
+                int k = offset;
+                offset += n;
+                boolean dispose = false;
+
+                for (; k < offset; ++k) {
+                    if (bytes[k] == delimiter) {
+                        end = k;
 
                         JSONReader jsonReader = JSONReader.of(bytes, start, end - start, charset);
                         jsonReader.context.config(features);
@@ -1321,16 +1325,27 @@ public interface JSON {
                                 object
                         );
                         start = end + 1;
+                        dispose = true;
                     }
                 }
-                limit += n;
 
-                if (limit == bytes.length) {
-                    bytes = Arrays.copyOf(bytes, bytes.length + 8192);
+                if (offset == bytes.length) {
+                    if (dispose) {
+                        int len = bytes.length - start;
+                        System.arraycopy(bytes, start, bytes, 0, len);
+                        start = 0;
+                        offset = len;
+                    } else {
+                        bytes = Arrays.copyOf(bytes, bytes.length + 8192);
+                    }
                 }
             }
         } catch (IOException e) {
             throw new JSONException("Interruption in reading", e);
+        } finally {
+            if (bytes.length < JSONFactory.CACHE_THREAD) {
+                JSONFactory.CACHE_BYTES.set(cachedIndex, bytes);
+            }
         }
     }
 
@@ -1346,25 +1361,32 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> void parseObject(Reader input, char delimiter, Type type, Consumer<T> consumer) {
-        char[] chars = JSONFactory.CACHE_CHARS.getAndSet(0, null);
+        int identityHashCode = System.identityHashCode(Thread.currentThread());
+        int cachedIndex = identityHashCode & 1;
+        char[] chars = JSONFactory.CACHE_CHARS.getAndSet(
+                cachedIndex, null
+        );
         if (chars == null) {
             chars = new char[8192];
         }
 
-        int limit = 0, start = 0, end;
+        int offset = 0, start = 0, end;
         ObjectReader<? extends T> objectReader = null;
 
         try {
             while (true) {
-                int n = input.read(chars, limit, chars.length - limit);
+                int n = input.read(chars, offset, chars.length - offset);
                 if (n == -1) {
                     break;
                 }
 
-                for (int i = 0; i < n; ++i) {
-                    int j = limit + i;
-                    if (chars[j] == delimiter) {
-                        end = j;
+                int k = offset;
+                offset += n;
+                boolean dispose = false;
+
+                for (; k < offset; ++k) {
+                    if (chars[k] == delimiter) {
+                        end = k;
 
                         JSONReader jsonReader = JSONReader.of(chars, start, end - start);
                         if (objectReader == null) {
@@ -1375,16 +1397,27 @@ public interface JSON {
                                 objectReader.readObject(jsonReader)
                         );
                         start = end + 1;
+                        dispose = true;
                     }
                 }
-                limit += n;
 
-                if (limit == chars.length) {
-                    chars = Arrays.copyOf(chars, chars.length + 8192);
+                if (offset == chars.length) {
+                    if (dispose) {
+                        int len = chars.length - start;
+                        System.arraycopy(chars, start, chars, 0, len);
+                        start = 0;
+                        offset = len;
+                    } else {
+                        chars = Arrays.copyOf(chars, chars.length + 8192);
+                    }
                 }
             }
         } catch (IOException e) {
             throw new JSONException("Interruption in reading", e);
+        } finally {
+            if (chars.length < JSONFactory.CACHE_THREAD) {
+                JSONFactory.CACHE_CHARS.set(cachedIndex, chars);
+            }
         }
     }
 
@@ -2304,6 +2337,7 @@ public interface JSON {
      * Check if the default reader enables the specified feature
      *
      * @param feature the specified feature
+     * @since 2.0.6
      */
     static boolean isEnabled(JSONReader.Feature feature) {
         return (JSONFactory.defaultReaderFeatures & feature.mask) != 0;
@@ -2340,6 +2374,7 @@ public interface JSON {
      * Check if the default writer enables the specified feature
      *
      * @param feature the specified feature
+     * @since 2.0.6
      */
     static boolean isEnabled(JSONWriter.Feature feature) {
         return (JSONFactory.defaultWriterFeatures & feature.mask) != 0;
