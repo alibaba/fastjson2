@@ -82,6 +82,56 @@ public abstract class ObjectReaderBean<T>
     protected void initDefaultValue(T object) {
     }
 
+    public void readObject(JSONReader jsonReader, Object object, long features) {
+        if (jsonReader.isJSONB()) {
+//            return readJSONBObject(jsonReader, features);
+        }
+
+        if (jsonReader.nextIfNull()) {
+            jsonReader.nextIfMatch(',');
+            return;
+        }
+
+        if (jsonReader.isArray() && jsonReader.isSupportBeanArray(getFeatures() | features)) {
+//            return readArrayMappingObject(jsonReader);
+        }
+
+        boolean objectStart = jsonReader.nextIfMatch('{');
+        if (!objectStart) {
+            throw new JSONException(jsonReader.info());
+        }
+
+        while (true) {
+            if (jsonReader.nextIfMatch('}')) {
+                break;
+            }
+
+            long hash = jsonReader.readFieldNameHashCode();
+            FieldReader fieldReader = getFieldReader(hash);
+            if (fieldReader == null && jsonReader.isSupportSmartMatch(features | getFeatures())) {
+                long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
+                fieldReader = getFieldReaderLCase(nameHashCodeLCase);
+            }
+
+            if (fieldReader == null) {
+                if (this instanceof ObjectReaderBean) {
+                    processExtra(jsonReader, object);
+                } else {
+                    jsonReader.skipValue();
+                }
+                continue;
+            }
+
+            fieldReader.readFieldValue(jsonReader, object);
+        }
+
+        jsonReader.nextIfMatch(',');
+
+        if (schema != null) {
+            schema.assertValidate(object);
+        }
+    }
+
     @Override
     public T readObject(JSONReader jsonReader, long features) {
         if (jsonReader.isJSONB()) {
