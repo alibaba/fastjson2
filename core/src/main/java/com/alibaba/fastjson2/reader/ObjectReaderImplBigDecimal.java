@@ -26,6 +26,7 @@ final class ObjectReaderImplBigDecimal
         return jsonReader.readBigDecimal();
     }
 
+    @Override
     public Object createInstance(Map map, long features) {
         Object value = map.get("value");
         if (value == null) {

@@ -5657,6 +5657,7 @@ class JSONReaderUTF8
         return buf.toString();
     }
 
+    @Override
     public void close() {
         if (cacheIndex != -1 && bytes.length < CACHE_THREAD) {
             CACHE_BYTES.set(cacheIndex, bytes);
