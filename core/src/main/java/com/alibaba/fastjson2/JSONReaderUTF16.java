@@ -4883,6 +4883,7 @@ final class JSONReaderUTF16
         return buf.toString();
     }
 
+    @Override
     public void close() {
         if (cacheIndex != -1 && chars.length <= CACHE_THREAD) {
             CACHE_CHARS.set(cacheIndex, chars);
