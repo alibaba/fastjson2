@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -79,5 +81,24 @@ public class JSONReaderTest1 {
         for (JSONReader jsonReader : jsonReaders) {
             assertEquals(BigInteger.ZERO, jsonReader.read(BigInteger1.class).getId());
         }
+    }
+
+    @Test
+    public void testReadObject() {
+        String str = "{\"v0000\":101}";
+        Int1 vo = new Int1();
+        JSONReader jsonReader = JSONReader.of(str);
+        jsonReader.readObject(vo);
+        assertEquals(101, vo.getV0000());
+    }
+
+    @Test
+    public void testReadObject1() {
+        String str = "{\"v0000\":101}";
+
+        Map map = new TreeMap();
+        JSONReader jsonReader = JSONReader.of(str);
+        jsonReader.readObject(map);
+        assertEquals(101, map.get("v0000"));
     }
 }

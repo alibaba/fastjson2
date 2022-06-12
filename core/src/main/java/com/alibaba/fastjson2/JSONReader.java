@@ -1287,6 +1287,31 @@ public abstract class JSONReader
         nextIfMatch(',');
     }
 
+    public void readObject(Object object, Feature... features) {
+        long featuresLong = 0;
+        for (Feature feature : features) {
+            featuresLong |= feature.mask;
+        }
+        readObject(object, featuresLong);
+    }
+
+    public void readObject(Object object, long features) {
+        if (object == null) {
+            throw new JSONException("object is null");
+        }
+        Class objectClass = object.getClass();
+        boolean fieldBased = ((context.features | features) & Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = context.provider.getObjectReader(objectClass, fieldBased);
+        if (objectReader instanceof ObjectReaderBean) {
+            ObjectReaderBean objectReaderBean = (ObjectReaderBean) objectReader;
+            objectReaderBean.readObject(this, object, features);
+        } else if (object instanceof Map) {
+            read((Map) object, features);
+        } else {
+            throw new JSONException("read object not support");
+        }
+    }
+
     public void read(Map object, long features) {
         boolean match = nextIfMatch('{');
         boolean typeRedirect = false;
