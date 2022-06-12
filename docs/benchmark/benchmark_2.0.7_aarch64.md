@@ -1,19 +1,24 @@
-# 0. 测试环境
+# 1. 测试环境
 * MacOS Monterey Version 12.4(21F79)
 * Chip Apple M1 Max
 * Memory 64 GB
 
-## 0.0 JDK
+## 1.1 JDK
 * JDK 8 zulu8.60.0.21-ca-jdk8.0.322-macosx_aarch64
 * JDK 11 zulu11.52.13-ca-jdk11.0.13-macosx_aarch64
 * JDK 17 zulu17.32.13-ca-jdk17.0.2-macosx_aarch64
+* JMH 1.35
 
-## 0.1 JSON库的版本
+## 1.2 JSON库的版本
 * Jackson 2.13.3
 * FASTJSON 1.2.83
-* FASTJSON 2.0.7
+* [FASTJSON 2.0.7](https://github.com/alibaba/fastjson2/releases/tag/2.0.7)
+* Hessian 4.0.66
 
-# 1. Parse String to Tree
+## 1.3 测试代码
+* https://github.com/alibaba/fastjson2/tree/2.0.7/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay
+
+# 2. Parse String to Tree
 这个场景是将字符串解析为JSONObject或者HashMap，不涉及绑定JavaBean对象。
 ## JDK 8
 JDK 8环境下FASTJSON2比FASTJSON1快96.46%，比Jackson快74.59%。
@@ -42,7 +47,7 @@ EishayParseTreeString.fastjson2  thrpt    5  1289.000 ± 11.511  ops/ms
 EishayParseTreeString.jackson    thrpt    5   803.867 ±  4.779  ops/ms
 ```
 
-# Pars String to Java Bean
+# 3. Pars String to Java Bean
 这个场景是将一个没有格式化的JSON字符串反序列化为JavaBean对象，是最常用的场景，这个是fastjson1的强项。
 ## JDK 8
 JDK 8环境下FASTJSON2比FASTJSON1快18.5%，比Jackson快134.6%。
@@ -73,9 +78,9 @@ EishayParseString.fastjson2  thrpt    5  2089.508 ± 4.307  ops/ms
 EishayParseString.jackson    thrpt    5   765.751 ± 6.288  ops/ms
 ```
 
-# Parse UTF8 Bytes to Java Bean
+# 4. Parse UTF8 Bytes to Java Bean
 将UTF8编码的Bytes反序列化为JavaBean，这个场景在网络传输和缓存场景常用
-## JDK8 
+## JDK8
 JDK 8环境下FASTJSON 2比FASTJSON 1快20.96%，比Jackson快65.03%。
 ```java
 Benchmark                        Mode  Cnt     Score    Error   Units
@@ -102,7 +107,7 @@ EishayParseUTF8Bytes.fastjson2  thrpt    5  1850.714 ± 10.967  ops/ms
 EishayParseUTF8Bytes.jackson    thrpt    5   934.355 ± 10.108  ops/ms
 ```
 
-# Parse UTF8 Bytes to JSONObject
+# 5. Parse UTF8 Bytes to JSONObject
 将带有空格缩进的格式化的UTF8编码的Bytes反序列化为JSONObject/HashMap，不涉及绑定JavaBean对象。
 
 ## JDK 8
@@ -132,7 +137,7 @@ EishayParseTreeUTF8Bytes.fastjson2  thrpt    5  1029.244 ±  3.325  ops/ms
 EishayParseTreeUTF8Bytes.jackson    thrpt    5   966.648 ± 18.829  ops/ms
 ```
 
-# Parse Pretty UTF8 Bytes to Java Bean
+# 6. Parse Pretty UTF8 Bytes to Java Bean
 将带有空格缩进的格式化的UTF8编码的Bytes反序列化为JavaBean对象。
 ## JDK 8
 JDK 8环境下FASTJSON 2比FASTJSON 1快61.62%，比Jackson快43.83%。
@@ -161,7 +166,7 @@ EishayParseTreeStringPretty.fastjson2  thrpt    5  1132.815 ± 111.454  ops/ms
 EishayParseTreeStringPretty.jackson    thrpt    5   731.110 ±   4.889  ops/ms
 ```
 
-# Write JavaBean to String
+# 7. Write JavaBean to String
 这个场景是将JavaBean对象序列化为字符串
 ## JDK 8
 JDK 11环境下FASTJSON 2比FASTJSON 1快153.68%，比Jackson快68.52%。
@@ -190,7 +195,7 @@ EishayWriteString.fastjson2  thrpt    5  2801.838 ± 25.323  ops/ms
 EishayWriteString.jackson    thrpt    5  1738.689 ± 10.372  ops/ms
 ```
 
-# Write JavaBean to UTF8 Bytes
+# 8. Write JavaBean to UTF8 Bytes
 这个场景是将JavaBean对象序列化为UTF8编码的Bytes
 ## JDK 8
 JDK 8环境下FASTJSON 2比FASTJSON 1快78.42%，比Jackson快81.13%。
@@ -219,9 +224,10 @@ EishayWriteUTF8Bytes.fastjson2  thrpt    5  2926.923 ±  5.526  ops/ms
 EishayWriteUTF8Bytes.jackson    thrpt    5  1590.268 ± 12.166  ops/ms
 ```
 
-# Write JavaBean to Binary
-这个是序列化的场景，将JavaBean序列化
+# 9. Write JavaBean to Binary
+这个是序列化的场景，将JavaBean序列化为二进制格式，用于缓存和网络传输。这个场景可以看出JSONB的极速性能。
 ## JDK 8
+FASTJSON2 JSONB比快425.14%，比java内置序列化快672.31%
 ```java
 Benchmark                              Mode  Cnt     Score    Error   Units
 EishayWriteBinary.fastjson2JSONB      thrpt    5  3355.913 ± 22.156  ops/ms
@@ -248,8 +254,10 @@ EishayWriteBinary.hessian             thrpt    5   711.496 ±  4.984  ops/ms
 EishayWriteBinary.javaSerialize       thrpt    5   453.639 ±  4.727  ops/ms
 ```
 
-# Read Binary to JavaBean
+# 10. Read Binary to JavaBean
+这个是序列化的场景，将二进制的byte数组反序列化为JavaBean，用于缓存和网络传输。这个场景可以看出JSONB的极速性能。
 ## JDK 8
+FASTJSON2 JSONB比快731.28%，比java内置序列化快5139.68%
 ```java
 Benchmark                              Mode  Cnt     Score    Error   Units
 EishayParseBinary.fastjson2JSONB      thrpt    5  3130.576 ± 23.829  ops/ms
@@ -267,6 +275,7 @@ EishayParseBinary.hessian             thrpt    5   361.239 ±  2.726  ops/ms
 EishayParseBinary.javaSerialize       thrpt    5    61.553 ±  0.097  ops/ms
 ```
 
+## JDK 17
 ```java
 Benchmark                              Mode  Cnt     Score    Error   Units
 EishayParseBinary.fastjson2JSONB      thrpt    5  2525.308 ± 19.115  ops/ms
