@@ -44,6 +44,7 @@ final class FieldReaderInt32Func<T, V>
         function.accept(object, (V) fieldValue);
     }
 
+    @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readInt32();
     }

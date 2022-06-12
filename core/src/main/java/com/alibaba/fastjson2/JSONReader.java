@@ -1601,7 +1601,7 @@ public abstract class JSONReader
                 return false;
             }
 
-            if (str.isEmpty() || str.equalsIgnoreCase("null")) {
+            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
                 wasNull = true;
                 return false;
             }
