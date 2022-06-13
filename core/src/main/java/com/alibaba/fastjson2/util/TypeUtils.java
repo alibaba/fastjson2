@@ -111,6 +111,10 @@ public class TypeUtils {
             return jsonReader.read(Date.class);
         }
 
+        if (obj instanceof Long) {
+            return new Date(((Long) obj).longValue());
+        }
+
         throw new JSONException("can not cast to Date from " + obj.getClass());
     }
 
