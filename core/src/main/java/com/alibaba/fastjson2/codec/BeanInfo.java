@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.filter.Filter;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Locale;
 
 public class BeanInfo {
     public String typeKey;
@@ -35,4 +36,6 @@ public class BeanInfo {
     public Class deserializer;
     public Class<? extends Filter>[] serializeFilters;
     public String schema;
+    public String format;
+    public Locale locale;
 }

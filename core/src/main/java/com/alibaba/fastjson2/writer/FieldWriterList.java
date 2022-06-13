@@ -35,7 +35,7 @@ abstract class FieldWriterList<T>
 
         if (format != null) {
             if (itemClass == Date.class) {
-                itemObjectWriter = new ObjectWriterImplDate(format);
+                itemObjectWriter = new ObjectWriterImplDate(format, null);
             }
         }
     }

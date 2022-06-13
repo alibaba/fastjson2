@@ -50,4 +50,14 @@ public @interface JSONType {
     Class<? extends Filter>[] serializeFilters() default {};
 
     String schema() default "";
+
+    /**
+     * @since 2.0.8
+     */
+    String format() default "";
+
+    /**
+     * @since 2.0.8
+     */
+    String locale() default "";
 }

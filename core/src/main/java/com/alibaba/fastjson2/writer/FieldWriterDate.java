@@ -91,7 +91,7 @@ abstract class FieldWriterDate<T>
                 if (format == null) {
                     return dateWriter = ObjectWriterImplDate.INSTANCE;
                 }
-                return dateWriter = new ObjectWriterImplDate(format);
+                return dateWriter = new ObjectWriterImplDate(format, null);
             }
 
             return dateWriter;
