@@ -22,8 +22,8 @@ public class Issue445 {
         bean.tomorrow = new java.sql.Date(1654737514867L);
         String str = JSON.toJSONString(bean, JSONWriter.Feature.FieldBased);
         String str1 = JSON.toJSONString(bean);
-        assertEquals("{\"current\":\"2022-06-09T09:19:13.000000017\",\"history\":\"2022-06-09 09\",\"tomorrow\":\"2022-06-09 09:18\",\"yesterday\":\"1990-12-11\"}", str);
-        assertEquals("{\"current\":\"2022-06-09T09:19:13.000000017\",\"history\":\"2022-06-09 09\",\"tomorrow\":\"2022-06-09 09:18\",\"yesterday\":\"1990-12-11\"}", str1);
+        assertEquals("{\"current\":\"2022-06-09 09:19:13.000000017\",\"history\":\"2022-06-09 09\",\"tomorrow\":\"2022-06-09 09:18\",\"yesterday\":\"1990-12-11\"}", str);
+        assertEquals("{\"current\":\"2022-06-09 09:19:13.000000017\",\"history\":\"2022-06-09 09\",\"tomorrow\":\"2022-06-09 09:18\",\"yesterday\":\"1990-12-11\"}", str1);
     }
 
     @Test
@@ -35,8 +35,8 @@ public class Issue445 {
         bean.tomorrow = new java.sql.Date(1654737514867L);
         String str = JSON.toJSONString(bean, JSONWriter.Feature.FieldBased);
         String str1 = JSON.toJSONString(bean);
-        assertEquals("{\"current\":\"2022-06-09T09:19:13.000000017\",\"history\":\"2022-06-09 09\",\"tomorrow\":\"2022-06-09 09:18\",\"yesterday\":\"1990-12-11\"}", str);
-        assertEquals("{\"current\":\"2022-06-09T09:19:13.000000017\",\"history\":\"2022-06-09 09\",\"tomorrow\":\"2022-06-09 09:18\",\"yesterday\":\"1990-12-11\"}", str1);
+        assertEquals("{\"current\":\"2022-06-09 09:19:13.000000017\",\"history\":\"2022-06-09 09\",\"tomorrow\":\"2022-06-09 09:18\",\"yesterday\":\"1990-12-11\"}", str);
+        assertEquals("{\"current\":\"2022-06-09 09:19:13.000000017\",\"history\":\"2022-06-09 09\",\"tomorrow\":\"2022-06-09 09:18\",\"yesterday\":\"1990-12-11\"}", str1);
     }
 
     @Data

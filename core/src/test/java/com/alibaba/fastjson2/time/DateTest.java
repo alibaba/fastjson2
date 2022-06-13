@@ -83,7 +83,7 @@ public class DateTest {
 
         jw.writeAny(
                 LocalDateTime.of(1970, 1, 1, 0, 0, 0));
-        assertEquals("\"1970-01-01T00:00:00\"", jw.toString());
+        assertEquals("\"1970-01-01 00:00:00\"", jw.toString());
     }
 
     @Test

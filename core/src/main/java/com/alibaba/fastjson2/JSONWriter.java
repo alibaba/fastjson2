@@ -993,7 +993,7 @@ public abstract class JSONWriter
             IOUtils.getChars(month, yearSize + 4, chars);
             chars[yearSize + 4] = '-';
             IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-            chars[yearSize + 7] = 'T';
+            chars[yearSize + 7] = ' ';
             IOUtils.getChars(hour, yearSize + 10, chars);
             chars[yearSize + 10] = ':';
             IOUtils.getChars(minute, yearSize + 13, chars);
@@ -1015,7 +1015,7 @@ public abstract class JSONWriter
             IOUtils.getChars(month, yearSize + 4, chars);
             chars[yearSize + 4] = '-';
             IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-            chars[yearSize + 7] = 'T';
+            chars[yearSize + 7] = ' ';
             IOUtils.getChars(hour, yearSize + 10, chars);
             chars[yearSize + 10] = ':';
             IOUtils.getChars(minute, yearSize + 13, chars);

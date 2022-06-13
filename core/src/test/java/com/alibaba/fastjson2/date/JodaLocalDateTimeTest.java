@@ -25,7 +25,11 @@ public class JodaLocalDateTimeTest {
     public void test1() {
         String str = "{\"birthday\":\"2022-05-03T15:26:05\"}";
         Student1 student = JSON.parseObject(str, Student1.class);
-        assertEquals(str, JSON.toJSONString(student));
+        assertEquals("{\"birthday\":\"2022-05-03 15:26:05\"}", JSON.toJSONString(student));
+
+        String str2 = "{\"birthday\":\"2022-05-03 15:26:05\"}";
+        Student1 student2 = JSON.parseObject(str, Student1.class);
+        assertEquals("{\"birthday\":\"2022-05-03 15:26:05\"}", JSON.toJSONString(student2));
     }
 
     @Test

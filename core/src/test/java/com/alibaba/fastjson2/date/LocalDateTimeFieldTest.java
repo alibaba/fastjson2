@@ -96,7 +96,7 @@ public class LocalDateTimeFieldTest {
         bean.value = ldt(1654686106602L);
 
         String str = JSON.toJSONString(bean, "iso8601");
-        assertEquals("{\"value\":\"2022-06-08T19:01:46.602\"}", str);
+        assertEquals("{\"value\":\"2022-06-08T19:01:46.602+08:00\"}", str);
 
         Bean bean1 = JSON.parseObject(str, Bean.class, "iso8601");
         assertEquals(1654686106602L, millis(bean1.value));
@@ -245,7 +245,7 @@ public class LocalDateTimeFieldTest {
         bean.value = ldt(1654686106602L);
 
         String str = JSON.toJSONString(bean);
-        assertEquals("{\"value\":\"2022-06-08T19:01:46.602\"}", str);
+        assertEquals("{\"value\":\"2022-06-08T19:01:46.602+08:00\"}", str);
 
         Bean24 bean1 = JSON.parseObject(str, Bean24.class);
         assertEquals(1654686106602L, millis(bean1.value));

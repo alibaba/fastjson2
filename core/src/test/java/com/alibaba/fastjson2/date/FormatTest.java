@@ -26,7 +26,7 @@ public class FormatTest {
         JSON.mixIn(LocalDateTime.class, null);
         JSON.mixIn(Bean.class, null);
 
-        assertEquals("{\"date\":\"2017-12-13\",\"dateTime\":\"2017-01-02T12:13:14\"}", JSON.toJSONString(bean));
+        assertEquals("{\"date\":\"2017-12-13\",\"dateTime\":\"2017-01-02 12:13:14\"}", JSON.toJSONString(bean));
 
         JSON.mixIn(LocalDateTime.class, null);
         JSON.mixIn(Bean.class, null);
