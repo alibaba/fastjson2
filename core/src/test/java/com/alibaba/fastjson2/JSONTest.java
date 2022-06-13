@@ -4,19 +4,22 @@ import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.PascalNameFilter;
 import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
+import com.alibaba.fastjson2.modules.ObjectReaderModule;
+import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.ObjectReaderImplList;
 import com.alibaba.fastjson2.reader.ObjectReaderImplListStr;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.alibaba.fastjson2_vo.Date1;
 import com.alibaba.fastjson2_vo.IntField1;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Type;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
@@ -510,6 +513,77 @@ public class JSONTest {
     @Test
     public void test_null() {
         assertNull(JSON.parse("null"));
+        assertNull(JSON.parse(""));
+        assertNull(JSON.parse(null, 0, 0));
+        assertNull(JSON.parse("", 0, 0));
+        assertNull(JSON.parse("abc", 0, 0));
+
+        assertNull(JSON.parseObject("null"));
+        assertNull(JSON.parseObject(""));
+
+        assertNull(JSON.parseObject("null", JSONReader.Feature.SupportSmartMatch));
+        assertNull(JSON.parseObject("", JSONReader.Feature.SupportSmartMatch));
+
+        assertNull(JSON.parseObject("null", JSONFactory.createReadContext()));
+        assertNull(JSON.parseObject("", JSONFactory.createReadContext()));
+        assertEquals("{}", JSON.parseObject("{}", JSONFactory.createReadContext()).toString());
+
+        assertNull(JSON.parseObject((String) null, 0, 0));
+        assertNull(JSON.parseObject("", 0, 0));
+        assertNull(JSON.parseObject("abc", 0, 0));
+        assertNull(JSON.parseObject("null", 0, 4));
+
+        assertNull(JSON.parseObject((byte[]) null));
+        assertNull(JSON.parseObject(new byte[0]));
+        assertNull(JSON.parseObject("null".getBytes(StandardCharsets.UTF_8)));
+
+        assertNull(JSON.parseObject((byte[]) null, 0, 0));
+        assertNull(JSON.parseObject(new byte[0], 0, 0));
+        assertNull(JSON.parseObject("abc".getBytes(StandardCharsets.UTF_8), 0, 0));
+        assertNull(JSON.parseObject("null".getBytes(StandardCharsets.UTF_8), 0, 4));
+
+        assertNull(JSON.parseObject((byte[]) null, 0, 0, StandardCharsets.US_ASCII));
+        assertNull(JSON.parseObject(new byte[0], 0, 0, StandardCharsets.US_ASCII));
+        assertNull(JSON.parseObject("abc".getBytes(StandardCharsets.UTF_8), 0, 0, StandardCharsets.US_ASCII));
+        assertNull(JSON.parseObject("null".getBytes(StandardCharsets.UTF_8), 0, 4, StandardCharsets.US_ASCII));
+
+        assertNull(JSON.parseObject((String) null, Object.class, (Filter) null));
+        assertNull(JSON.parseObject("", Object.class, (Filter) null));
+        assertNull(JSON.parseObject("null", Object.class, (Filter) null));
+
+        assertNull(JSON.parseObject((String) null, Object.class));
+        assertNull(JSON.parseObject("", Object.class));
+        assertNull(JSON.parseObject("null", Object.class));
+
+        assertNull(JSON.parseObject((String) null, (Type) Object.class));
+        assertNull(JSON.parseObject("", (Type) Object.class));
+        assertNull(JSON.parseObject("null", (Type) Object.class));
+
+        assertNull(JSON.parseObject((String) null, 0, 0, Object.class));
+        assertNull(JSON.parseObject("", 0, 0, Object.class));
+        assertNull(JSON.parseObject("null", 0, 0, Object.class));
+
+        assertNull(JSON.parseObject((String) null, Object.class, "", new Filter[0]));
+        assertNull(JSON.parseObject("", Object.class, "", new Filter[0]));
+        assertNull(JSON.parseObject("null", Object.class, "", new Filter[0]));
+
+        assertNull(JSON.parseObject((byte[]) null, Object.class, "", new Filter[0]));
+        assertNull(JSON.parseObject("".getBytes(StandardCharsets.UTF_8), Object.class, "", new Filter[0]));
+        assertNull(JSON.parseObject("null".getBytes(StandardCharsets.UTF_8), Object.class, "", new Filter[0]));
+
+        assertNull(JSON.parseObject((String) null, new TypeReference<List<Map>>(){}, (Filter) null));
+        assertNull(JSON.parseObject("", new TypeReference<List<Map>>(){}, (Filter) null));
+        assertNull(JSON.parseObject("null", new TypeReference<List<Map>>(){}, (Filter) null));
+
+        assertNull(JSON.parseArray((byte[]) null, (Type) Object.class));
+        assertNull(JSON.parseArray(new byte[0], (Type) Object.class));
+        assertNull(JSON.parseArray("null".getBytes(StandardCharsets.UTF_8), (Type) Object.class));
+
+        assertNull(JSON.parseArray("null", new Type[0]));
+
+        assertNull(JSON.parseObject((byte[]) null, Object.class, (Filter) null));
+        assertNull(JSON.parseObject(new byte[0], Object.class, (Filter) null));
+        assertNull(JSON.parseObject("null".getBytes(StandardCharsets.UTF_8), Object.class, (Filter) null));
     }
 
     @Test
@@ -807,6 +881,8 @@ public class JSONTest {
             JSON.writeTo(out, null, "", (Filter[]) null);
             assertEquals("null", new String(out.toByteArray()));
         }
+
+        assertNull(JSON.parseObject((URL) null));
     }
 
     @Test
@@ -872,5 +948,42 @@ public class JSONTest {
     public void testValid() {
         assertTrue(JSON.isValidArray("[]".getBytes(StandardCharsets.UTF_8)));
         assertFalse(JSON.isValidArray("{}".getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    public void testRegisterReaderModule() {
+        ObjectReaderModule module = new ObjectReaderModule() {
+            @Override
+            public void init(ObjectReaderProvider provider) {
+                ObjectReaderModule.super.init(provider);
+            }
+        };
+        JSON.register(module);
+        JSONFactory.getDefaultObjectReaderProvider().unregister(module);
+    }
+
+    @Test
+    public void testRegisterWriterModule() {
+        ObjectWriterModule module = new ObjectWriterModule() {
+            @Override
+            public void init(ObjectWriterProvider provider) {
+                ObjectWriterModule.super.init(provider);
+            }
+        };
+        JSON.register(module);
+        JSONFactory.getDefaultObjectWriterProvider().unregister(module);
+    }
+
+    @Test
+    public void testParseInputStream() throws Exception {
+        Charset utf8 = StandardCharsets.UTF_8;
+
+        assertNull(JSON.parseObject((InputStream) null, utf8));
+        String str = "{}";
+
+        byte[] bytes = str.getBytes(utf8);
+        ByteArrayInputStream is = new ByteArrayInputStream(bytes);
+        JSONObject object = JSON.parseObject(is, utf8);
+        assertEquals(0, object.size());
     }
 }

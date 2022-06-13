@@ -1630,6 +1630,10 @@ public abstract class JSONReader
     }
 
     public List readArray(Type itemType) {
+        if (nextIfNull()) {
+            return null;
+        }
+
         List list = new ArrayList();
         if (!nextIfMatch('[')) {
             throw new JSONException("syntax error : " + ch);
