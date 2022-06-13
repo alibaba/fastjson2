@@ -171,6 +171,19 @@ class ObjectWriterBaseModule
                 if (serializeFilters.length != 0) {
                     beanInfo.serializeFilters = serializeFilters;
                 }
+
+                String format = jsonType.format();
+                if (!format.isEmpty()) {
+                    beanInfo.format = format;
+                }
+
+                String locale = jsonType.locale();
+                if (!locale.isEmpty()) {
+                    String[] parts = locale.split("_");
+                    if (parts.length == 2) {
+                        beanInfo.locale = new Locale(parts[0], parts[1]);
+                    }
+                }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
                 BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> processJSONType1x(beanInfo, annotation, method));
@@ -1110,39 +1123,81 @@ class ObjectWriterBaseModule
                 return externalObjectWriter;
             }
 
+            BeanInfo beanInfo = new BeanInfo();
+            Class mixIn = provider.getMixIn(clazz);
+            if (mixIn != null) {
+                getAnnotationProcessor().getBeanInfo(beanInfo, mixIn);
+            }
+
             if (Date.class.isAssignableFrom(clazz)) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplDate(beanInfo.format, beanInfo.locale);
+                }
+
                 return ObjectWriterImplDate.INSTANCE;
             }
 
             if (Calendar.class.isAssignableFrom(clazz)) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplCalendar(beanInfo.format, beanInfo.locale);
+                }
+
                 return ObjectWriterImplCalendar.INSTANCE;
             }
 
             if (ZonedDateTime.class == clazz) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplZonedDateTime(beanInfo.format, beanInfo.locale);
+                }
+
                 return ObjectWriterImplZonedDateTime.INSTANCE;
             }
 
             if (OffsetDateTime.class == clazz) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplOffsetDateTime(beanInfo.format, beanInfo.locale);
+                }
+
                 return ObjectWriterImplOffsetDateTime.INSTANCE;
             }
 
             if (LocalDateTime.class == clazz) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplLocalDateTime(beanInfo.format, beanInfo.locale);
+                }
+
                 return ObjectWriterImplLocalDateTime.INSTANCE;
             }
 
             if (LocalDate.class == clazz) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplLocalDate(beanInfo.format, beanInfo.locale);
+                }
+
                 return ObjectWriterImplLocalDate.INSTANCE;
             }
 
             if (LocalTime.class == clazz) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplLocalTime(beanInfo.format, beanInfo.locale);
+                }
+
                 return ObjectWriterImplLocalTime.INSTANCE;
             }
 
             if (OffsetTime.class == clazz) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplOffsetTime(beanInfo.format, beanInfo.locale);
+                }
+
                 return ObjectWriterImplOffsetTime.INSTANCE;
             }
 
             if (Instant.class == clazz) {
+                if (beanInfo.format != null || beanInfo.locale != null) {
+                    return new ObjectWriterImplInstant(beanInfo.format, beanInfo.locale);
+                }
+
                 return ObjectWriterImplInstant.INSTANCE;
             }
 

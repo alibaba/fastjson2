@@ -9,14 +9,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.Locale;
 
 final class ObjectWriterImplCalendar
         extends DateTimeCodec implements ObjectWriter {
-    static final ObjectWriterImplCalendar INSTANCE = new ObjectWriterImplCalendar(null);
-    static final ObjectWriterImplCalendar INSTANCE_UNIXTIME = new ObjectWriterImplCalendar("unixtime");
+    static final ObjectWriterImplCalendar INSTANCE = new ObjectWriterImplCalendar(null, null);
 
-    public ObjectWriterImplCalendar(String format) {
-        super(format);
+    public ObjectWriterImplCalendar(String format, Locale locale) {
+        super(format, locale);
     }
 
     @Override

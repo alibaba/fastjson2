@@ -10,17 +10,18 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Locale;
 
 final class ObjectWriterImplDate
         extends DateTimeCodec
         implements ObjectWriter {
-    static final ObjectWriterImplDate INSTANCE = new ObjectWriterImplDate(null);
+    static final ObjectWriterImplDate INSTANCE = new ObjectWriterImplDate(null, null);
 
     static final char[] PREFIX_CHARS = "new Date(".toCharArray();
     static final byte[] PREFIX_BYTES = "new Date(".getBytes(StandardCharsets.UTF_8);
 
-    public ObjectWriterImplDate(String format) {
-        super(format);
+    public ObjectWriterImplDate(String format, Locale locale) {
+        super(format, locale);
     }
 
     @Override

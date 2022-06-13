@@ -428,12 +428,7 @@ public interface FieldWriter<T>
                 if (format == null || format.isEmpty()) {
                     return ObjectWriterImplCalendar.INSTANCE;
                 }
-                switch (format) {
-                    case "unixtime":
-                        return ObjectWriterImplCalendar.INSTANCE_UNIXTIME;
-                    default:
-                        return new ObjectWriterImplCalendar(format);
-                }
+                return new ObjectWriterImplCalendar(format, locale);
             }
 
             if (ZonedDateTime.class.isAssignableFrom(valueClass)) {
@@ -485,7 +480,7 @@ public interface FieldWriter<T>
                 case "java.sql.Time":
                     return JdbcSupport.createTimeWriter(format);
                 case "java.sql.Date":
-                    return new ObjectWriterImplDate(format);
+                    return new ObjectWriterImplDate(format, locale);
                 case "java.sql.Timestamp":
                     return JdbcSupport.createTimestampWriter(valueClass, format);
                 case "org.joda.time.LocalDate":
