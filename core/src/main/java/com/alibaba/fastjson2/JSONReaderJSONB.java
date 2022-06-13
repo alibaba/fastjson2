@@ -3160,6 +3160,10 @@ final class JSONReaderJSONB
         throw new UnsupportedOperationException();
     }
 
+    protected LocalDateTime readLocalDateTime16() {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public LocalTime readLocalTime() {
         int type = bytes[offset];
@@ -3938,6 +3942,11 @@ final class JSONReaderJSONB
         offset += 19;
 
         return LocalTime.of(hour, minute, seccond, millis);
+    }
+
+    @Override
+    protected LocalDateTime readLocalDateTime18() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
