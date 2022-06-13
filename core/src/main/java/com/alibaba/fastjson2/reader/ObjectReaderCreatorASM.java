@@ -40,7 +40,6 @@ public class ObjectReaderCreatorASM
     static final String TYPE_FIELD_READE = ASMUtils.type(FieldReader.class);
 
     static final String DESC_JSON_READER = ASMUtils.desc(JSONReader.class);
-    static final String DESC_JSON_READER_CONTEXT = ASMUtils.desc(JSONReader.Context.class);
     static final String DESC_FIELD_READER = ASMUtils.desc(FieldReader.class);
     static final String DESC_OBJECT_READER = ASMUtils.desc(ObjectReader.class);
     static final String DESC_SUPPLIER = ASMUtils.desc(Supplier.class);
