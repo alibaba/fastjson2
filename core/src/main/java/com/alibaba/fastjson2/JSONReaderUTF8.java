@@ -4735,7 +4735,7 @@ class JSONReaderUTF8
         byte c14 = bytes[offset + 14];
         byte c15 = bytes[offset + 15];
 
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1;
+        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0 = '0', s1 = '0';
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':') {
             y0 = (char) c0;
             y1 = (char) c1;
@@ -4753,6 +4753,24 @@ class JSONReaderUTF8
 
             i0 = (char) c14;
             i1 = (char) c15;
+        } else if (c8 == 'T' && c15 == 'Z') {
+            y0 = (char) c0;
+            y1 = (char) c1;
+            y2 = (char) c2;
+            y3 = (char) c3;
+
+            m0 = (char) c4;
+            m1 = (char) c5;
+
+            d0 = (char) c6;
+            d1 = (char) c7;
+            h0 = (char) c9;
+            h1 = (char) c10;
+            i0 = (char) c11;
+            i1 = (char) c12;
+
+            s0 = (char) c13;
+            s1 = (char) c14;
         } else if (c4 == -27 && c5 == -71 && c6 == -76 // 年
                 && c8 == -26 && c9 == -100 && c10 == -120 // 月
                 && c13 == -26 && c14 == -105 && c15 == -91 // 日
@@ -4844,14 +4862,14 @@ class JSONReaderUTF8
             return null;
         }
 
-        int second = 0;
-//            if (c17 >= '0' && c17 <= '9'
-//                    && c18 >= '0' && c18 <= '9'
-//            ) {
-//                second = (c17 - '0') * 10 + (c18 - '0');
-//            } else {
-//                return null;
-//            }
+        int second;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            second = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            return null;
+        }
 
         LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second);
 

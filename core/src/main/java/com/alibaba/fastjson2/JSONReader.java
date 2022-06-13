@@ -833,6 +833,9 @@ public abstract class JSONReader
                     return readLocalDateTime18();
                 case 19:
                     return readLocalDateTime19();
+                case 20:
+                    return readZonedDateTimeX(len)
+                            .toLocalDateTime();
                 case 21:
                 case 22:
                 case 23:
@@ -1187,17 +1190,13 @@ public abstract class JSONReader
         throw new JSONException(info("format " + format + " not support, input " + str));
     }
 
-    protected LocalDateTime readLocalDateTime16() {
-        throw new UnsupportedOperationException();
-    }
+    protected abstract LocalDateTime readLocalDateTime16();
 
     protected LocalDateTime readLocalDateTime17() {
         throw new UnsupportedOperationException();
     }
 
-    protected LocalDateTime readLocalDateTime18() {
-        throw new UnsupportedOperationException();
-    }
+    protected abstract LocalDateTime readLocalDateTime18();
 
     protected abstract LocalDateTime readLocalDateTime19();
 
