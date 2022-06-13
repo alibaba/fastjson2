@@ -75,7 +75,7 @@ public interface JSON {
      * @return Object
      */
     static Object parse(String text, int offset, int length, JSONReader.Feature... features) {
-        if (text == null || text.isEmpty()) {
+        if (text == null || text.isEmpty() || length == 0) {
             return null;
         }
 
@@ -183,7 +183,7 @@ public interface JSON {
      * @return JSONObject
      */
     static JSONObject parseObject(String text, int offset, int length, JSONReader.Feature... features) {
-        if (text == null || text.isEmpty()) {
+        if (text == null || text.isEmpty() || length == 0) {
             return null;
         }
 
@@ -384,7 +384,7 @@ public interface JSON {
      * @return JSONObject
      */
     static JSONObject parseObject(byte[] bytes, int offset, int length, JSONReader.Feature... features) {
-        if (bytes == null || bytes.length == 0) {
+        if (bytes == null || bytes.length == 0 || length == 0) {
             return null;
         }
 
@@ -413,7 +413,7 @@ public interface JSON {
      * @return JSONObject
      */
     static JSONObject parseObject(byte[] bytes, int offset, int length, Charset charset, JSONReader.Feature... features) {
-        if (bytes == null || bytes.length == 0) {
+        if (bytes == null || bytes.length == 0 || length == 0) {
             return null;
         }
 
@@ -478,6 +478,10 @@ public interface JSON {
         }
 
         try (JSONReader reader = JSONReader.of(text)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+
             JSONReader.Context context = reader.context;
             reader.context.config(filter, features);
 
@@ -514,6 +518,10 @@ public interface JSON {
         }
 
         try (JSONReader reader = JSONReader.of(text)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+
             JSONReader.Context context = reader.context;
             context.setDateFormat(format);
             context.config(filters, features);
@@ -645,7 +653,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, int offset, int length, Class<T> clazz, JSONReader.Feature... features) {
-        if (text == null || text.isEmpty()) {
+        if (text == null || text.isEmpty() || length == 0) {
             return null;
         }
 
@@ -861,7 +869,7 @@ public interface JSON {
             Class<T> clazz,
             Filter filter,
             JSONReader.Feature... features) {
-        if (utf8Bytes == null) {
+        if (utf8Bytes == null || utf8Bytes.length == 0) {
             return null;
         }
 
@@ -926,7 +934,7 @@ public interface JSON {
             String format,
             Filter[] filters,
             JSONReader.Feature... features) {
-        if (utf8Bytes == null) {
+        if (utf8Bytes == null || utf8Bytes.length == 0) {
             return null;
         }
 
@@ -1587,9 +1595,14 @@ public interface JSON {
         if (text == null || text.isEmpty()) {
             return null;
         }
+
         List<T> array = new ArrayList<>(types.length);
 
         try (JSONReader reader = JSONReader.of(text)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+
             reader.context.config(features);
 
             reader.startArray();
