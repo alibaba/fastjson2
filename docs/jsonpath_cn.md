@@ -1,6 +1,6 @@
 # FASTJSON2 JSONPath支持介绍
 
-在FASTJSON2中，JSONPath是一等公民，支持通过JSONPath在不完整解析JSON Document的清下，根据JSONPath读取内容；也支持用JSONPath对JavaBean求值，可以在Java框架中当做对象查询语言（OQL）来使用。
+在FASTJSON2中，JSONPath是一等公民，支持通过JSONPath在不完整解析JSON Document的情况下，根据JSONPath读取内容；也支持用JSONPath对JavaBean求值，可以在Java框架中当做对象查询语言（OQL）来使用。
 
 
 ## 1. 支持语法
