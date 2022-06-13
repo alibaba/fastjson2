@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1892 {
     @Test
     public void test_for_issue() throws Exception {
-        assertEquals("\"2018-10-10T00:00:00\"",
+        assertEquals("\"2018-10-10T00:00:00+08:00\"",
                 JSON.toJSONString(
                         LocalDateTime.of(2018, 10, 10, 0, 0), SerializerFeature.UseISO8601DateFormat
                 )
@@ -23,6 +23,6 @@ public class Issue1892 {
         String json = JSON.toJSONString(
                 LocalDateTime.of(2018, 10, 10, 0, 0, 40, 788000000), SerializerFeature.UseISO8601DateFormat
         );
-        assertEquals("\"2018-10-10T00:00:40.788\"", json);
+        assertEquals("\"2018-10-10T00:00:40.788+08:00\"", json);
     }
 }
