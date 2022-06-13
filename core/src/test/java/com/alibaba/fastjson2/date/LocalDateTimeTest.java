@@ -26,14 +26,14 @@ public class LocalDateTimeTest {
     public void test1() {
         String str = "{\"birthday\":\"2022-05-03T15:26:05\"}";
         Student1 student = JSON.parseObject(str, Student1.class);
-        assertEquals(str, JSON.toJSONString(student));
+        assertEquals("{\"birthday\":\"2022-05-03T15:26:05+08:00\"}", JSON.toJSONString(student));
     }
 
     @Test
     public void test1_date() {
         String str = "{\"birthday\":\"2022-05-03\"}";
         Student1 student = JSON.parseObject(str, Student1.class);
-        assertEquals("{\"birthday\":\"2022-05-03T00:00:00\"}", JSON.toJSONString(student));
+        assertEquals("{\"birthday\":\"2022-05-03T00:00:00+08:00\"}", JSON.toJSONString(student));
     }
 
     @Test

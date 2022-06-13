@@ -3141,7 +3141,15 @@ final class JSONReaderJSONB
                 case 27:
                 case 28:
                 case 29:
-                    return readLocalDateTimeX(len);
+                    LocalDateTime ldt = readLocalDateTimeX(len);
+                    if (ldt != null) {
+                        return ldt;
+                    }
+                    ZonedDateTime zdt = readZonedDateTimeX(len);
+                    if (zdt != null) {
+                        return zdt.toLocalDateTime();
+                    }
+                    break;
                 default:
                     break;
             }

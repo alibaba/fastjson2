@@ -27,7 +27,7 @@ public class OptionalLocalDateTimeTest {
     public void test1() {
         String str = "{\"birthday\":\"2022-05-03T15:26:05\"}";
         Student1 student = JSON.parseObject(str, Student1.class);
-        assertEquals(str, JSON.toJSONString(student));
+        assertEquals("{\"birthday\":\"2022-05-03T15:26:05+08:00\"}", JSON.toJSONString(student));
     }
 
     @Test

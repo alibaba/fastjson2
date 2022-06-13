@@ -49,6 +49,19 @@ final class ObjectWriterImplLocalDateTime
             return;
         }
 
+        if (formatISO8601 || ctx.isDateFormatISO8601()) {
+            int year = dateTime.getYear();
+            int month = dateTime.getMonthValue();
+            int dayOfMonth = dateTime.getDayOfMonth();
+            int hour = dateTime.getHour();
+            int minute = dateTime.getMinute();
+            int second = dateTime.getSecond();
+            int nano = dateTime.getNano() / 1000_000;
+            int offsetSeconds = ctx.getZoneId().getRules().getOffset(dateTime).getTotalSeconds();
+            jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds);
+            return;
+        }
+
         DateTimeFormatter formatter = this.getDateFormatter();
         if (formatter == null) {
             formatter = ctx.getDateFormatter();

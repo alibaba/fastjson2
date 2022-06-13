@@ -24,14 +24,14 @@ public class Issue1493 {
         String t1 = JSON.toJSONString(time1);
 
         String json = JSON.toJSONString(test);
-        assertEquals("{\"time1\":" + t1 + ",\"time2\":\"2017-09-22T15:08:56\"}", json);
+        assertEquals("{\"time1\":" + t1 + ",\"time2\":\"2017-09-22 15:08:56\"}", json);
 
         //String default_format = JSON.DEFFAULT_LOCAL_DATE_TIME_FORMAT;
         //JSON.DEFFAULT_LOCAL_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
         //String stime1 = DateTimeFormatter.ofPattern(JSON.DEFFAULT_LOCAL_DATE_TIME_FORMAT, Locale.CHINA).format(time1);
 
         json = JSON.toJSONString(test);
-        assertEquals("{\"time1\":" + JSON.toJSONString(time1) + ",\"time2\":\"2017-09-22T15:08:56\"}", json);
+        assertEquals("{\"time1\":" + JSON.toJSONString(time1) + ",\"time2\":\"2017-09-22 15:08:56\"}", json);
 
         String pattern = "yyyy-MM-dd'T'HH:mm:ss";
         String stime1 = DateTimeFormatter.ofPattern(pattern, Locale.CHINA).format(time1);
