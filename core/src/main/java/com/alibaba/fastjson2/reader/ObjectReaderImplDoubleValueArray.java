@@ -44,6 +44,15 @@ class ObjectReaderImplDoubleValueArray
             return Arrays.copyOf(values, size);
         }
 
+        if (jsonReader.isString()) {
+            String str = jsonReader.readString();
+            if (str.isEmpty()) {
+                return null;
+            }
+
+            throw new JSONException(jsonReader.info("not support input " + str));
+        }
+
         throw new JSONException(jsonReader.info("TODO"));
     }
 
