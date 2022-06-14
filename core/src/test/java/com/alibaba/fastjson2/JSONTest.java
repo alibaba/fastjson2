@@ -986,4 +986,12 @@ public class JSONTest {
         JSONObject object = JSON.parseObject(is, utf8);
         assertEquals(0, object.size());
     }
+
+    @Test
+    public void testConfig() {
+        assertThrows(JSONException.class, () -> JSON.config(JSONReader.Feature.SupportAutoType));
+        assertThrows(JSONException.class, () -> JSON.config(JSONReader.Feature.SupportAutoType, true));
+        JSON.config(JSONReader.Feature.SupportAutoType, false);
+        assertFalse(JSON.isEnabled(JSONReader.Feature.SupportAutoType));
+    }
 }
