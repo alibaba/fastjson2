@@ -1337,4 +1337,25 @@ class JSONWriterUTF16
             val >>>= 4;
         } while (charPos > offset);
     }
+
+    public byte[] getBytes() {
+        boolean ascii = true;
+        for (int i = 0; i < off; i++) {
+            if (chars[i] >= 0x80) {
+                ascii = false;
+                break;
+            }
+        }
+
+        if (ascii) {
+            byte[] bytes = new byte[off];
+            for (int i = 0; i < off; i++) {
+                bytes[i] = (byte) chars[i];
+            }
+            return bytes;
+        }
+        byte[] utf8 = new byte[off * 3];
+        int utf8Length = encodeUTF8(chars, 0, off, utf8, 0);
+        return Arrays.copyOf(utf8, utf8Length);
+    }
 }
