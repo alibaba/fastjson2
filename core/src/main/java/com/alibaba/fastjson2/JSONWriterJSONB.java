@@ -1758,6 +1758,59 @@ final class JSONWriterJSONB
         writeInt32(nano);
     }
 
+    public void writeDateTimeISO8601(
+            int year,
+            int month,
+            int dayOfMonth,
+            int hour,
+            int minute,
+            int second,
+            int millis,
+            int offsetSeconds
+    ) {
+        throw new JSONException("unsupported operation");
+    }
+
+    @Override
+    public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
+        throw new JSONException("unsupported operation");
+    }
+
+    @Override
+    public void writeTimeHHMMSS8(int hour, int minute, int second) {
+        throw new JSONException("unsupported operation");
+    }
+
+    @Override
+    public void writeBase64(byte[] bytes) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void writeRaw(char ch) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void writeNameRaw(byte[] bytes) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void writeNameRaw(char[] chars) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void writeNameRaw(char[] bytes, int offset, int len) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void writeColon() {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public byte[] getBytes() {
         return Arrays.copyOf(bytes, off);
