@@ -2,6 +2,10 @@ package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Random;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONWriterTest {
@@ -217,5 +221,52 @@ public class JSONWriterTest {
         JSONWriter jsonWriter = JSONWriter.ofUTF8();
         jsonWriter.writeDouble(new double[]{0D, 1D});
         assertEquals("[0.0,1.0]", jsonWriter.toString());
+    }
+
+    @Test
+    public void test_utf8_writeDoubleArray1() {
+        JSONWriter jsonWriter = JSONWriter.ofUTF8(JSONFactory.createWriteContext());
+        jsonWriter.writeDoubleArray(0D, 1D);
+        assertEquals("[0.0,1.0]", jsonWriter.toString());
+    }
+
+    @Test
+    public void test_utf8_ref() {
+        ArrayList list = new ArrayList();
+        list.add(list);
+        JSONObject object = JSONObject.of("values", list);
+        JSONWriter jsonWriter = JSONWriter.ofUTF8(JSONWriter.Feature.ReferenceDetection);
+        jsonWriter.writeAny(object);
+        assertEquals("{\"values\":[{\"$ref\":\"values\"}]}", jsonWriter.toString());
+    }
+
+    @Test
+    public void test_ref() {
+        ArrayList list = new ArrayList();
+        list.add(list);
+        JSONObject object = JSONObject.of("values", list);
+        JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.ReferenceDetection);
+        jsonWriter.writeAny(object);
+        assertEquals("{\"values\":[{\"$ref\":\"values\"}]}", jsonWriter.toString());
+    }
+
+    @Test
+    public void test_base64() {
+        byte[] bytes = new byte[1024];
+        new Random().nextBytes(bytes);
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.writeBase64(bytes);
+            String str = jsonWriter.toString();
+            String base64 = Base64.getEncoder().encodeToString(bytes);
+            assertEquals(base64, str.substring(1, str.length() - 1));
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.writeBase64(bytes);
+            String str = jsonWriter.toString();
+            String base64 = Base64.getEncoder().encodeToString(bytes);
+            assertEquals(base64, str.substring(1, str.length() - 1));
+        }
     }
 }

@@ -6,6 +6,8 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 final class JSONWriterPretty
@@ -69,8 +71,41 @@ final class JSONWriterPretty
     }
 
     @Override
+    public void writeLocalDate(LocalDate date) {
+        jsonWriter.writeLocalDate(date);
+    }
+
+    @Override
+    public void writeLocalDateTime(LocalDateTime dateTime) {
+        jsonWriter.writeLocalDateTime(dateTime);
+    }
+
+    @Override
     public void writeDateTime19(int year, int month, int dayOfMonth, int hour, int minute, int second) {
         jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
+    }
+
+    @Override
+    public void writeDateTimeISO8601(
+            int year,
+            int month,
+            int dayOfMonth,
+            int hour,
+            int minute,
+            int second,
+            int millis,
+            int offsetSeconds) {
+        jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds);
+    }
+
+    @Override
+    public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
+        jsonWriter.writeDateYYYMMDD10(year, month, dayOfMonth);
+    }
+
+    @Override
+    public void writeTimeHHMMSS8(int hour, int minute, int second) {
+        jsonWriter.writeTimeHHMMSS8(hour, minute, second);
     }
 
     @Override
@@ -192,6 +227,16 @@ final class JSONWriterPretty
     }
 
     @Override
+    public void writeColon() {
+        jsonWriter.writeColon();
+    }
+
+    @Override
+    public void writeInt16(short[] value) {
+        jsonWriter.writeInt16(value);
+    }
+
+    @Override
     public byte[] getBytes() {
         return jsonWriter.getBytes();
     }
@@ -209,6 +254,16 @@ final class JSONWriterPretty
     @Override
     public int flushTo(OutputStream to, Charset charset) throws IOException {
         return jsonWriter.flushTo(to, charset);
+    }
+
+    @Override
+    public void writeBase64(byte[] bytes) {
+        jsonWriter.writeBase64(bytes);
+    }
+
+    @Override
+    public void writeRaw(char ch) {
+        jsonWriter.writeRaw(ch);
     }
 
     @Override

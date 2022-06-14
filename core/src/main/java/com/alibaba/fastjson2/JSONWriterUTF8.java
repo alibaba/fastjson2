@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -121,8 +122,40 @@ class JSONWriterUTF8
 
     @Override
     protected void write0(char c) {
-        ensureCapacity(off + 1);
+        if (off == bytes.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
         bytes[off++] = (byte) c;
+    }
+
+    @Override
+    public void writeColon() {
+        if (off == bytes.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+        bytes[off++] = ':';
     }
 
     @Override
@@ -925,6 +958,25 @@ class JSONWriterUTF8
         bytes[off++] = '"';
     }
 
+    public void writeLocalDate(LocalDate date) {
+        int year = date.getYear();
+        int month = date.getMonthValue();
+        int dayOfMonth = date.getDayOfMonth();
+
+        int yearSize = IOUtils.stringSize(year);
+        int len = 8 + yearSize;
+        byte[] chars = new byte[len];
+        chars[0] = '"';
+        Arrays.fill(chars, 1, len - 1, (byte) '0');
+        IOUtils.getChars(year, yearSize + 1, chars);
+        chars[yearSize + 1] = '-';
+        IOUtils.getChars(month, yearSize + 4, chars);
+        chars[yearSize + 4] = '-';
+        IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
+        chars[len - 1] = '"';
+        writeRaw(chars);
+    }
+
     @Override
     public void writeLocalDateTime(LocalDateTime dateTime) {
         int year = dateTime.getYear();
@@ -1328,6 +1380,14 @@ class JSONWriterUTF8
             str.getBytes(0, strlen, bytes, off);
             off += strlen;
         }
+    }
+
+    public void writeNameRaw(char[] chars) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeNameRaw(char[] bytes, int offset, int len) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

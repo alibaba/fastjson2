@@ -169,16 +169,6 @@ public abstract class JSONWriter
         return (context.features & Feature.WriteNulls.mask) != 0;
     }
 
-    public boolean isWriteNullsAny() {
-        long mask = Feature.WriteNulls.mask
-                | Feature.NullAsDefaultValue.mask
-                | Feature.WriteNullBooleanAsFalse.mask
-                | Feature.WriteNullStringAsEmpty.mask
-                | Feature.WriteNullNumberAsZero.mask
-                | Feature.WriteNullListAsEmpty.mask;
-        return (context.features & mask) != 0;
-    }
-
     public boolean isNotWriteDefaultValue() {
         return (context.features & Feature.NotWriteDefaultValue.mask) != 0;
     }
@@ -533,9 +523,7 @@ public abstract class JSONWriter
         endArray();
     }
 
-    public void writeBase64(byte[] bytes) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void writeBase64(byte[] bytes);
 
     protected abstract void write0(char ch);
 
@@ -557,25 +545,17 @@ public abstract class JSONWriter
         throw new UnsupportedOperationException();
     }
 
-    public void writeRaw(char ch) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void writeRaw(char ch);
 
-    public void writeNameRaw(byte[] bytes) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void writeNameRaw(byte[] bytes);
 
     public void writeNameRaw(byte[] name, long nameHash) {
         throw new UnsupportedOperationException();
     }
 
-    public void writeNameRaw(char[] chars) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void writeNameRaw(char[] chars);
 
-    public void writeNameRaw(char[] bytes, int offset, int len) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void writeNameRaw(char[] bytes, int offset, int len);
 
     public void writeName(String name) {
         if (startObject) {
@@ -635,9 +615,7 @@ public abstract class JSONWriter
 
     public abstract void writeComma();
 
-    public void writeColon() {
-        write0(':');
-    }
+    public abstract void writeColon();
 
     public void writeInt16(short[] value) {
         if (value == null) {
@@ -909,127 +887,9 @@ public abstract class JSONWriter
         write0('"');
     }
 
-    public void writeLocalDate(LocalDate date) {
-        int year = date.getYear();
-        int month = date.getMonthValue();
-        int dayOfMonth = date.getDayOfMonth();
+    public abstract void writeLocalDate(LocalDate date);
 
-        int yearSize = IOUtils.stringSize(year);
-        int len = 8 + yearSize;
-        if (isUTF8()) {
-            byte[] chars = new byte[len];
-            chars[0] = '"';
-            Arrays.fill(chars, 1, len - 1, (byte) '0');
-            IOUtils.getChars(year, yearSize + 1, chars);
-            chars[yearSize + 1] = '-';
-            IOUtils.getChars(month, yearSize + 4, chars);
-            chars[yearSize + 4] = '-';
-            IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-            chars[len - 1] = '"';
-            writeRaw(chars);
-        } else {
-            char[] chars = new char[len];
-            chars[0] = '"';
-            Arrays.fill(chars, 1, len - 1, '0');
-            IOUtils.getChars(year, yearSize + 1, chars);
-            chars[yearSize + 1] = '-';
-            IOUtils.getChars(month, yearSize + 4, chars);
-            chars[yearSize + 4] = '-';
-            IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-            chars[len - 1] = '"';
-            writeRaw(chars);
-        }
-    }
-
-    public void writeLocalDateTime(LocalDateTime dateTime) {
-        int year = dateTime.getYear();
-        int month = dateTime.getMonthValue();
-        int dayOfMonth = dateTime.getDayOfMonth();
-        int hour = dateTime.getHour();
-        int minute = dateTime.getMinute();
-        int second = dateTime.getSecond();
-        int nano = dateTime.getNano();
-
-        int yearSize = IOUtils.stringSize(year);
-        int len = 17 + yearSize;
-        int small;
-        if (nano % 1000_000_000 == 0) {
-            small = 0;
-        } else if (nano % 1000_000_00 == 0) {
-            len += 2;
-            small = nano / 1000_000_00;
-        } else if (nano % 1000_000_0 == 0) {
-            len += 3;
-            small = nano / 1000_000_0;
-        } else if (nano % 1000_000 == 0) {
-            len += 4;
-            small = nano / 1000_000;
-        } else if (nano % 1000_00 == 0) {
-            len += 5;
-            small = nano / 1000_00;
-        } else if (nano % 1000_0 == 0) {
-            len += 6;
-            small = nano / 1000_0;
-        } else if (nano % 1000 == 0) {
-            len += 7;
-            small = nano / 1000;
-        } else if (nano % 100 == 0) {
-            len += 8;
-            small = nano / 100;
-        } else if (nano % 10 == 0) {
-            len += 9;
-            small = nano / 10;
-        } else {
-            len += 10;
-            small = nano;
-        }
-
-        if (isUTF8()) {
-            byte[] chars = new byte[len];
-            chars[0] = '"';
-            Arrays.fill(chars, 1, len - 1, (byte) '0');
-            IOUtils.getChars(year, yearSize + 1, chars);
-            chars[yearSize + 1] = '-';
-            IOUtils.getChars(month, yearSize + 4, chars);
-            chars[yearSize + 4] = '-';
-            IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-            chars[yearSize + 7] = ' ';
-            IOUtils.getChars(hour, yearSize + 10, chars);
-            chars[yearSize + 10] = ':';
-            IOUtils.getChars(minute, yearSize + 13, chars);
-            chars[yearSize + 13] = ':';
-            IOUtils.getChars(second, yearSize + 16, chars);
-            if (small != 0) {
-                chars[yearSize + 16] = '.';
-                IOUtils.getChars(small, len - 1, chars);
-            }
-            chars[len - 1] = '"';
-
-            writeRaw(chars);
-        } else {
-            char[] chars = new char[len];
-            chars[0] = '"';
-            Arrays.fill(chars, 1, len - 1, '0');
-            IOUtils.getChars(year, yearSize + 1, chars);
-            chars[yearSize + 1] = '-';
-            IOUtils.getChars(month, yearSize + 4, chars);
-            chars[yearSize + 4] = '-';
-            IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-            chars[yearSize + 7] = ' ';
-            IOUtils.getChars(hour, yearSize + 10, chars);
-            chars[yearSize + 10] = ':';
-            IOUtils.getChars(minute, yearSize + 13, chars);
-            chars[yearSize + 13] = ':';
-            IOUtils.getChars(second, yearSize + 16, chars);
-            if (small != 0) {
-                chars[yearSize + 16] = '.';
-                IOUtils.getChars(small, len - 1, chars);
-            }
-            chars[len - 1] = '"';
-
-            writeRaw(chars);
-        }
-    }
+    public abstract void writeLocalDateTime(LocalDateTime dateTime);
 
     public void writeLocalTime(LocalTime time) {
         int hour = time.getHour();
@@ -1195,7 +1055,7 @@ public abstract class JSONWriter
             int minute,
             int second);
 
-    public void writeDateTimeISO8601(
+    public abstract void writeDateTimeISO8601(
             int year,
             int month,
             int dayOfMonth,
@@ -1204,117 +1064,11 @@ public abstract class JSONWriter
             int second,
             int millis,
             int offsetSeconds
-    ) {
-        int millislen;
-        if (millis == 0) {
-            millislen = 0;
-        } else if (millis < 10) {
-            millislen = 4;
-        } else {
-            if (millis % 100 == 0) {
-                millislen = 2;
-            } else if (millis % 10 == 0) {
-                millislen = 3;
-            } else {
-                millislen = 4;
-            }
-        }
-        int zonelen = offsetSeconds == 0 ? 1 : 6;
-        int offset = offsetSeconds / 3600;
-        int len = 21 + millislen + zonelen;
-        char[] chars = new char[len];
+    );
 
-        chars[0] = '"';
-        chars[1] = (char) (year / 1000 + '0');
-        chars[2] = (char) ((year / 100) % 10 + '0');
-        chars[3] = (char) ((year / 10) % 10 + '0');
-        chars[4] = (char) (year % 10 + '0');
-        chars[5] = '-';
-        chars[6] = (char) (month / 10 + '0');
-        chars[7] = (char) (month % 10 + '0');
-        chars[8] = '-';
-        chars[9] = (char) (dayOfMonth / 10 + '0');
-        chars[10] = (char) (dayOfMonth % 10 + '0');
-        chars[11] = 'T';
-        chars[12] = (char) (hour / 10 + '0');
-        chars[13] = (char) (hour % 10 + '0');
-        chars[14] = ':';
-        chars[15] = (char) (minute / 10 + '0');
-        chars[16] = (char) (minute % 10 + '0');
-        chars[17] = ':';
-        chars[18] = (char) (second / 10 + '0');
-        chars[19] = (char) (second % 10 + '0');
-        if (millislen > 0) {
-            chars[20] = '.';
-            Arrays.fill(chars, 21, 20 + millislen, '0');
-            if (millis < 10) {
-                IOUtils.getChars(millis, 20 + millislen, chars);
-            } else {
-                if (millis % 100 == 0) {
-                    IOUtils.getChars(millis / 100, 20 + millislen, chars);
-                } else if (millis % 10 == 0) {
-                    IOUtils.getChars(millis / 10, 20 + millislen, chars);
-                } else {
-                    IOUtils.getChars(millis, 20 + millislen, chars);
-                }
-            }
-        }
-        if (offsetSeconds == 0) {
-            chars[20 + millislen] = 'Z';
-        } else {
-            int offsetAbs = Math.abs(offset);
+    public abstract void writeDateYYYMMDD10(int year, int month, int dayOfMonth);
 
-            if (offset >= 0) {
-                chars[20 + millislen] = '+';
-            } else {
-                chars[20 + millislen] = '-';
-            }
-            chars[20 + millislen + 1] = '0';
-            IOUtils.getChars(offsetAbs, 20 + millislen + 3, chars);
-            chars[20 + millislen + 3] = ':';
-            chars[20 + millislen + 4] = '0';
-            int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
-            if (offsetMinutes < 0) {
-                offsetMinutes = -offsetMinutes;
-            }
-            IOUtils.getChars(offsetMinutes, 20 + millislen + zonelen, chars);
-        }
-        chars[chars.length - 1] = '"';
-
-        writeRaw(chars);
-    }
-
-    public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
-        char[] chars = new char[10];
-
-        chars[0] = (char) (year / 1000 + '0');
-        chars[1] = (char) ((year / 100) % 10 + '0');
-        chars[2] = (char) ((year / 10) % 10 + '0');
-        chars[3] = (char) (year % 10 + '0');
-        chars[4] = '-';
-        chars[5] = (char) (month / 10 + '0');
-        chars[6] = (char) (month % 10 + '0');
-        chars[7] = '-';
-        chars[8] = (char) (dayOfMonth / 10 + '0');
-        chars[9] = (char) (dayOfMonth % 10 + '0');
-
-        writeString(chars);
-    }
-
-    public void writeTimeHHMMSS8(int hour, int minute, int second) {
-        char[] chars = new char[8];
-
-        chars[0] = (char) (hour / 10 + '0');
-        chars[1] = (char) (hour % 10 + '0');
-        chars[2] = ':';
-        chars[3] = (char) (minute / 10 + '0');
-        chars[4] = (char) (minute % 10 + '0');
-        chars[5] = ':';
-        chars[6] = (char) (second / 10 + '0');
-        chars[7] = (char) (second % 10 + '0');
-
-        writeString(chars);
-    }
+    public abstract void writeTimeHHMMSS8(int hour, int minute, int second);
 
     public void write(List array) {
         write0('[');
@@ -1383,9 +1137,7 @@ public abstract class JSONWriter
         }
     }
 
-    public int flushTo(OutputStream to) throws IOException {
-        throw new UnsupportedOperationException();
-    }
+    public abstract int flushTo(OutputStream to) throws IOException;
 
     public int flushTo(OutputStream out, Charset charset) throws IOException {
         throw new UnsupportedOperationException();
