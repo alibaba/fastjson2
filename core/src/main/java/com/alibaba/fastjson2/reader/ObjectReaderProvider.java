@@ -130,6 +130,8 @@ public class ObjectReaderProvider {
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
 
+    final LRUAutoTypeCache autoTypeList = new LRUAutoTypeCache(1024);
+
     private ConcurrentMap<Type, Map<Type, Function>> typeConverts = new ConcurrentHashMap<>();
 
     final ObjectReaderCreator creator;
@@ -504,6 +506,16 @@ public class ObjectReaderProvider {
         return objectReader;
     }
 
+    void afterAutoType(String typeName, Class type) {
+        if (autoTypeHandler != null) {
+            autoTypeHandler.accept(type);
+        }
+
+        synchronized (autoTypeList) {
+            autoTypeList.putIfAbsent(typeName, new Date());
+        }
+    }
+
     public Class<?> checkAutoType(String typeName, Class<?> expectClass, long features) {
         if (typeName == null || typeName.isEmpty()) {
             return null;
@@ -512,6 +524,7 @@ public class ObjectReaderProvider {
         if (autoTypeBeforeHandler != null) {
             Class<?> resolvedClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
             if (resolvedClass != null) {
+                afterAutoType(typeName, resolvedClass);
                 return resolvedClass;
             }
         }
@@ -531,9 +544,7 @@ public class ObjectReaderProvider {
         }
 
         if (expectClass != null && expectClass.getName().equals(typeName)) {
-            if (autoTypeHandler != null) {
-                autoTypeHandler.accept(expectClass);
-            }
+            afterAutoType(typeName, expectClass);
             return expectClass;
         }
 
@@ -555,9 +566,7 @@ public class ObjectReaderProvider {
                 if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
                     clazz = loadClass(typeName);
                     if (clazz != null) {
-                        if (autoTypeHandler != null) {
-                            autoTypeHandler.accept(expectClass);
-                        }
+                        afterAutoType(typeName, clazz);
                         return clazz;
                     }
                 }
@@ -589,6 +598,7 @@ public class ObjectReaderProvider {
                         throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
                     }
 
+                    afterAutoType(typeName, clazz);
                     return clazz;
                 }
             }
@@ -609,9 +619,7 @@ public class ObjectReaderProvider {
                 throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
             }
 
-            if (autoTypeHandler != null) {
-                autoTypeHandler.accept(expectClass);
-            }
+            afterAutoType(typeName, clazz);
             return clazz;
         }
 
@@ -624,9 +632,7 @@ public class ObjectReaderProvider {
 
             if (expectClass != null) {
                 if (expectClass.isAssignableFrom(clazz)) {
-                    if (autoTypeHandler != null) {
-                        autoTypeHandler.accept(expectClass);
-                    }
+                    afterAutoType(typeName, clazz);
                     return clazz;
                 } else {
                     throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
@@ -634,9 +640,7 @@ public class ObjectReaderProvider {
             }
         }
 
-        if (autoTypeHandler != null) {
-            autoTypeHandler.accept(expectClass);
-        }
+        afterAutoType(typeName, clazz);
         return clazz;
     }
 
@@ -755,7 +759,25 @@ public class ObjectReaderProvider {
         return autoTypeBeforeHandler;
     }
 
+    public Map<String, Date> getAutoTypeList() {
+        return autoTypeList;
+    }
+
     public void setAutoTypeBeforeHandler(AutoTypeBeforeHandler autoTypeBeforeHandler) {
         this.autoTypeBeforeHandler = autoTypeBeforeHandler;
+    }
+
+    static class LRUAutoTypeCache
+            extends LinkedHashMap<String, Date> {
+        private final int maxSize;
+
+        public LRUAutoTypeCache(int maxSize) {
+            super(16, 0.75f, false);
+            this.maxSize = maxSize;
+        }
+
+        protected boolean removeEldestEntry(Map.Entry<String, Date> eldest) {
+            return this.size() > this.maxSize;
+        }
     }
 }
