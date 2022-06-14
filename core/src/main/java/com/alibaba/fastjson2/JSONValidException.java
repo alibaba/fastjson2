@@ -5,10 +5,4 @@ public class JSONValidException
     public JSONValidException(String message) {
         super(message);
     }
-
-    @Override
-    public synchronized Throwable fillInStackTrace() {
-        // fast valid
-        return null;
-    }
 }

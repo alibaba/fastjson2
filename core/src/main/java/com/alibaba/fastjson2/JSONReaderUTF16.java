@@ -986,9 +986,10 @@ final class JSONReaderUTF16
 
     @Override
     public boolean skipName() {
-        if (ch != '"') {
-            throw new JSONException("not support unquoted name");
+        if (ch != '"' && ch != '\'') {
+            throw new JSONException(info("not support unquoted name"));
         }
+        char quote = ch;
 
         int offset = this.offset;
         for (; ; ) {
@@ -1011,7 +1012,7 @@ final class JSONReaderUTF16
                 continue;
             }
 
-            if (c == '"') {
+            if (c == quote) {
                 offset++;
                 c = chars[offset];
 
@@ -1571,6 +1572,10 @@ final class JSONReaderUTF16
         _for:
         for (; ; ) {
             if (ch == '\\') {
+                if (offset >= end) {
+                    throw new JSONException(info("illegal string, end"));
+                }
+
                 ch = chars[offset++];
                 if (ch == '\\' || ch == '"') {
                     ch = chars[offset++];
@@ -2018,7 +2023,7 @@ final class JSONReaderUTF16
                         break;
                     }
                     if (i != 0 && !comma) {
-                        throw new JSONValidException("offset " + this.offset);
+                        throw new JSONValidException(info("illegal value"));
                     }
                     comma = false;
                     skipValue();
