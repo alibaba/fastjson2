@@ -58,6 +58,10 @@ class ObjectReaderImplInt8Array
 
         if (jsonReader.isString()) {
             String strVal = jsonReader.readString();
+            if (strVal.isEmpty()) {
+                return null;
+            }
+
             if ("base64".equals(format)) {
                 return Base64.getDecoder().decode(strVal);
             }

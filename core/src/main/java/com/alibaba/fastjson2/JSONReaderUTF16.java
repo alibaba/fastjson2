@@ -2009,7 +2009,12 @@ final class JSONReaderUTF16
             throw new UnsupportedOperationException();
         }
 
-        throw new UnsupportedOperationException();
+        String str = readString();
+        if (str.isEmpty()) {
+            return null;
+        }
+
+        throw new JSONException(info("not support input " + str));
     }
 
     @Override
