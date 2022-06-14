@@ -2,6 +2,8 @@ package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Random;
@@ -267,6 +269,22 @@ public class JSONWriterTest {
             String str = jsonWriter.toString();
             String base64 = Base64.getEncoder().encodeToString(bytes);
             assertEquals(base64, str.substring(1, str.length() - 1));
+        }
+    }
+
+    @Test
+    public void testUTF16GetBytes() {
+        Charset charset = StandardCharsets.UTF_8;
+
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.writeString("abc");
+            assertEquals("\"abc\"", new String(jsonWriter.getBytes(), charset));
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.writeString("中文");
+            assertEquals("\"中文\"", new String(jsonWriter.getBytes(), charset));
         }
     }
 }
