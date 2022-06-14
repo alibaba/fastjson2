@@ -298,7 +298,7 @@ abstract class FieldWriterDate<T>
                     .ofInstant(
                             Instant.ofEpochMilli(timeMillis), zoneId);
 
-            if (formatISO8601 || ctx.isDateFormatISO8601()) {
+            if (formatISO8601 || (ctx.isDateFormatISO8601() && this.format == null)) {
                 int year = zdt.getYear();
                 int month = zdt.getMonthValue();
                 int dayOfMonth = zdt.getDayOfMonth();
@@ -311,7 +311,7 @@ abstract class FieldWriterDate<T>
                 return;
             }
 
-            if (formatyyyyMMddhhmmss19 || ctx.isFormatyyyyMMddhhmmss19()) {
+            if (formatyyyyMMddhhmmss19 || (ctx.isFormatyyyyMMddhhmmss19() && this.format == null)) {
                 int year = zdt.getYear();
                 int month = zdt.getMonthValue();
                 int dayOfMonth = zdt.getDayOfMonth();
