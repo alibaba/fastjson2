@@ -51,7 +51,7 @@ public class Issue380 {
         bean.date = new Date(zdt.toInstant().toEpochMilli());
 
         assertEquals("{\"date\":\"2017-06-28\"}", JSON.toJSONString(bean));
-        assertEquals("{\"date\":\"2017-06-28 11:12:13\"}", JSON.toJSONString(bean, "yyyy-MM-dd HH:mm:ss"));
+        assertEquals("{\"date\":\"2017-06-28\"}", JSON.toJSONString(bean, "yyyy-MM-dd HH:mm:ss"));
     }
 
     public static class Bean2 {
