@@ -102,6 +102,9 @@ public class JdbcSupport {
                 ZonedDateTime zdt;
                 if (formatter != null) {
                     String str = jsonReader.readString();
+                    if (str.isEmpty()) {
+                        return null;
+                    }
 
                     LocalDateTime ldt;
                     if (!formatHasHour) {
@@ -425,6 +428,9 @@ public class JdbcSupport {
             }
 
             String str = jsonReader.readString();
+            if (str.isEmpty()) {
+                return null;
+            }
 
             DateTimeFormatter dateFormatter = getDateFormatter();
 
@@ -517,6 +523,9 @@ public class JdbcSupport {
             }
 
             String str = jsonReader.readString();
+            if (str.isEmpty()) {
+                return null;
+            }
 
             DateTimeFormatter dateFormatter = getDateFormatter();
 
