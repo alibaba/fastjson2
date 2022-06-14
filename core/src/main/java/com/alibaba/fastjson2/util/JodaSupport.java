@@ -119,6 +119,10 @@ public class JodaSupport {
 
             if (jsonReader.isString()) {
                 Instant jdkInstant = jsonReader.readInstant();
+                if (jdkInstant == null) {
+                    return null;
+                }
+
                 long millis = jdkInstant.toEpochMilli();
                 return createInstanceFromMillis(millis);
             }
@@ -362,6 +366,10 @@ public class JodaSupport {
             }
 
             LocalDate localDate = jsonReader.readLocalDate();
+            if (localDate == null) {
+                return null;
+            }
+
             try {
                 return constructor4.newInstance(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), null);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -573,6 +581,10 @@ public class JodaSupport {
         public Object readObject(JSONReader jsonReader, long features) {
             if (jsonReader.isString() || jsonReader.isInt()) {
                 LocalDateTime ldt = jsonReader.readLocalDateTime();
+                if (ldt == null) {
+                    return null;
+                }
+
                 try {
                     return constructor7.newInstance(ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth(), ldt.getHour(), ldt.getMinute(), ldt.getSecond(), ldt.getNano() / 1000_000);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {

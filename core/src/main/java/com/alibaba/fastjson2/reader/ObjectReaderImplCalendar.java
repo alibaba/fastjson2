@@ -66,6 +66,10 @@ final class ObjectReaderImplCalendar
                 DateTimeFormatter formatter = getDateFormatter();
                 if (formatter != null) {
                     String str = jsonReader.readString();
+                    if (str.isEmpty()) {
+                        return null;
+                    }
+
                     LocalDateTime ldt = LocalDateTime.parse(str, formatter);
                     ZonedDateTime zdt = ZonedDateTime.of(ldt, jsonReader.getContext().getZoneId());
 

@@ -93,6 +93,9 @@ public class ObjectReaderImplDate
             ZonedDateTime zdt;
             if (formatter != null) {
                 String str = jsonReader.readString();
+                if (str.isEmpty()) {
+                    return null;
+                }
 
                 LocalDateTime ldt;
                 if (!formatHasHour) {

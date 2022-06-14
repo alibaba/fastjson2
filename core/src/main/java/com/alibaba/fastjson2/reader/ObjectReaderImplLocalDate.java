@@ -36,6 +36,10 @@ class ObjectReaderImplLocalDate
         }
 
         String str = jsonReader.readString();
+        if (str.isEmpty()) {
+            return null;
+        }
+
         if (formatMillis || formatUnixTime) {
             long millis = Long.parseLong(str);
             if (formatUnixTime) {

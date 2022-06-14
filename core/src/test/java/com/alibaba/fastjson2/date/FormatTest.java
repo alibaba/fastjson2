@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class FormatTest {
     @Test
@@ -38,6 +39,8 @@ public class FormatTest {
         assertEquals("\"2017-12-13 00:00:00\"", JSON.toJSONString(date));
         JSON.mixIn(LocalDate.class, null);
         assertEquals("\"2017-12-13\"", JSON.toJSONString(date));
+
+        assertNull(JSON.parseObject("{\"date\":\"\"}", Bean.class).date);
     }
 
     @Test
