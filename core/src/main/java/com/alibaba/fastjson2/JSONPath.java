@@ -3284,6 +3284,10 @@ public abstract class JSONPath {
 
                 context = new Context(this, context, segment, nextSegment, 0);
                 segment.accept(jsonReader, context);
+
+                if (context.eval && context.value == null) {
+                    break;
+                }
             }
 
             return context.value;
@@ -3381,7 +3385,9 @@ public abstract class JSONPath {
                     jsonReader.skipValue();
                 }
                 context.value = array;
+                return;
             }
+            throw new JSONException("TODO");
         }
 
         @Override
@@ -3391,6 +3397,7 @@ public abstract class JSONPath {
                     : context.parent.value;
             if (object instanceof Map) {
                 context.value = new JSONArray(((Map<?, ?>) object).keySet());
+                context.eval = true;
                 return;
             }
 
@@ -3405,16 +3412,7 @@ public abstract class JSONPath {
 
         @Override
         public void accept(JSONReader jsonReader, Context context) {
-            if (jsonReader.isObject()) {
-                jsonReader.next();
-                JSONArray array = new JSONArray();
-                while (!jsonReader.nextIfObjectEnd()) {
-                    String fieldName = jsonReader.readFieldName();
-                    array.add(fieldName);
-                    jsonReader.skipValue();
-                }
-                context.value = array;
-            }
+            eval(context);
         }
 
         @Override
@@ -3422,8 +3420,16 @@ public abstract class JSONPath {
             Object object = context.parent == null
                     ? context.root
                     : context.parent.value;
+
+            if (object == null) {
+                context.value = null;
+                context.eval = true;
+                return;
+            }
+
             if (object instanceof Map) {
                 context.value = new JSONArray(((Map<?, ?>) object).values());
+                context.eval = true;
                 return;
             }
 
@@ -5898,6 +5904,12 @@ public abstract class JSONPath {
             Object object = context.parent == null
                     ? context.root
                     : context.parent.value;
+
+            if (object == null) {
+                context.value = null;
+                context.eval = true;
+                return;
+            }
 
             if (object instanceof Map) {
                 Map map = (Map) object;
