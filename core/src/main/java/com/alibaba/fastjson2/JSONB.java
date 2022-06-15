@@ -851,12 +851,13 @@ public interface JSONB {
                 new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features),
                 null
         )) {
+            JSONWriter.Context context = writer.context;
+
             if (object == null) {
                 writer.writeNull();
             } else {
                 writer.rootObject = object;
 
-                JSONWriter.Context context = writer.context;
                 if ((context.features & JSONWriter.Feature.ReferenceDetection.mask) != 0) {
                     writer.refs = new IdentityHashMap(8);
                     writer.refs.put(object, writer.path = JSONWriter.Path.ROOT);
