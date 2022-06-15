@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.spring;
+package com.alibaba.fastjson2.spring.mock;
 
 import com.alibaba.fastjson2.support.spring.http.converter.FastJsonHttpMessageConverter;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,7 +84,7 @@ public class FastJsonHttpMessageConverterMockTest {
         }
     }
 
-    @ComponentScan(basePackages = "com.alibaba.fastjson2.spring")
+    @ComponentScan(basePackages = "com.alibaba.fastjson2.spring.mock")
     @Configuration
     @Order(Ordered.LOWEST_PRECEDENCE + 1)
     @EnableWebMvc
