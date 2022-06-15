@@ -47,7 +47,6 @@
         <dependency>
             <groupId>com.github.erosb</groupId>
             <artifactId>everit-json-schema</artifactId>
-            <version>1.14.1</version>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
@@ -56,8 +55,6 @@
         <dependency>
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
-            <!-- <version>1.0.49</version> -->
-            <version>1.0.69</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -71,8 +68,6 @@
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
         </dependency>
-
-
     </dependencies>
 
     <build>
