@@ -383,7 +383,7 @@ public class ObjectWriterAdapter<T>
                 continue;
             }
 
-            boolean nameChanged = filteredName != fieldName;
+            boolean nameChanged = filteredName != null && filteredName != fieldName;
 
             Object filteredValue;
             if (valueFilter != null
