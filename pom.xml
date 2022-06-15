@@ -153,6 +153,11 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
+                <groupId>com.github.erosb</groupId>
+                <artifactId>everit-json-schema</artifactId>
+                <version>1.14.1</version>
+            </dependency>
+            <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>2.9.0</version>
@@ -168,11 +173,6 @@
                 <type>pom</type>
                 <version>3.20.1</version>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.github.erosb</groupId>
-                <artifactId>everit-json-schema</artifactId>
-                <version>1.14.1</version>
             </dependency>
             <dependency>
                 <groupId>com.googlecode.json-simple</groupId>
