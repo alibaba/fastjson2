@@ -98,7 +98,8 @@ public class Issue471 {
         }
     }
 
-    static class CustomizePropertyFilter implements PropertyFilter {
+    static class CustomizePropertyFilter
+            implements PropertyFilter {
         @Override
         public boolean apply(Object object, String name, Object value) {
             return true;
