@@ -169,10 +169,6 @@ public abstract class JSONWriter
         return (context.features & Feature.WriteNulls.mask) != 0;
     }
 
-    public boolean isNotWriteDefaultValue() {
-        return (context.features & Feature.NotWriteDefaultValue.mask) != 0;
-    }
-
     public boolean isRefDetect() {
         return (context.features & Feature.ReferenceDetection.mask) != 0;
     }
@@ -197,10 +193,6 @@ public abstract class JSONWriter
 
     public boolean isBeanToArray() {
         return (context.features & Feature.BeanToArray.mask) != 0;
-    }
-
-    public boolean isBeanToArray(long features) {
-        return ((context.features | features) & Feature.BeanToArray.mask) != 0;
     }
 
     public boolean isEnabled(Feature feature) {
