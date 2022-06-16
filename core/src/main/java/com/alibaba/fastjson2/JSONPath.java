@@ -2936,7 +2936,21 @@ public abstract class JSONPath {
             context0.root = root;
             first.eval(context0);
             if (context0.value == null) {
-                return;
+                Object emptyValue;
+                if (second instanceof IndexSegment) {
+                    emptyValue = new JSONArray();
+                } else if (second instanceof NameSegment) {
+                    emptyValue = new JSONObject();
+                } else {
+                    return;
+                }
+
+                context0.value = emptyValue;
+                if (root instanceof Map && first instanceof NameSegment) {
+                    ((Map) root).put(((NameSegment) first).name, emptyValue);
+                } else if (root instanceof List && first instanceof IndexSegment) {
+                    ((List) root).set(((IndexSegment) first).index, emptyValue);
+                }
             }
 
             Context context1 = new Context(this, context0, second, null, 0);
