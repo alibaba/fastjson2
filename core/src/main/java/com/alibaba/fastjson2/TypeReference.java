@@ -50,7 +50,7 @@ public abstract class TypeReference<T> {
      * @throws NullPointerException If the {@link Type} is null
      */
     @SuppressWarnings("unchecked")
-    public TypeReference(Type type) {
+    private TypeReference(Type type, boolean raw) {
         if (type == null) {
             throw new NullPointerException();
         }
@@ -71,7 +71,7 @@ public abstract class TypeReference<T> {
      * @since 2.0.2
      */
     @SuppressWarnings("unchecked")
-    public TypeReference(Type[] actualTypeArguments) {
+    public TypeReference(Type... actualTypeArguments) {
         if (actualTypeArguments == null
                 || actualTypeArguments.length == 0) {
             throw new NullPointerException();
@@ -219,7 +219,7 @@ public abstract class TypeReference<T> {
      * @param type specify the {@link Type} to be converted
      */
     public static TypeReference<?> get(Type type) {
-        return new TypeReference<Object>(type) {
+        return new TypeReference<Object>(type, true) {
             // nothing
         };
     }

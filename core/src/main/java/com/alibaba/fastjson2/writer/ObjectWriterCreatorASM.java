@@ -409,9 +409,10 @@ public class ObjectWriterCreatorASM
 
         Label json_ = new Label(), jsonb_ = new Label(), notSuper_ = new Label();
 
-        mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isIgnoreErrorGetter", "()Z", false);
-        mw.visitJumpInsn(Opcodes.IFEQ, notSuper_);
+        MethodWriterContext mwc = new MethodWriterContext(objectType, objectFeatures, classNameType, mw, 8, false);
+        mwc.genVariantsMethodBefore();
+
+        mwc.genIsEnabled(JSONWriter.Feature.IgnoreErrorGetter.mask, notSuper_);
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -428,9 +429,7 @@ public class ObjectWriterCreatorASM
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isJSONB", "()Z", false);
         mw.visitJumpInsn(Opcodes.IFEQ, json_);
 
-        mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isBeanToArray", "()Z", false);
-        mw.visitJumpInsn(Opcodes.IFEQ, jsonb_);
+        mwc.genIsEnabled(JSONWriter.Feature.BeanToArray.mask, jsonb_);
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -455,9 +454,7 @@ public class ObjectWriterCreatorASM
 
         Label checkFilter_ = new Label();
 
-        mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isBeanToArray", "()Z", false);
-        mw.visitJumpInsn(Opcodes.IFEQ, checkFilter_);
+        mwc.genIsEnabled(JSONWriter.Feature.BeanToArray.mask, checkFilter_);
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -487,6 +484,27 @@ public class ObjectWriterCreatorASM
 
         mw.visitLabel(object_);
 
+        Label return_ = new Label();
+        if (!java.io.Serializable.class.isAssignableFrom(objectType)) {
+            Label endIgnoreNoneSerializable_ = new Label();
+            mwc.genIsEnabled(JSONWriter.Feature.IgnoreNoneSerializable.mask, endIgnoreNoneSerializable_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeNull", "()V", false);
+            mw.visitJumpInsn(Opcodes.GOTO, return_);
+
+            mw.visitLabel(endIgnoreNoneSerializable_);
+
+            Label endErrorOnNoneSerializable_ = new Label();
+
+            mwc.genIsEnabled(JSONWriter.Feature.ErrorOnNoneSerializable.mask, endErrorOnNoneSerializable_);
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mwc.classNameType, "errorOnNoneSerializable", "()V", false);
+            mw.visitJumpInsn(Opcodes.GOTO, return_);
+
+            mw.visitLabel(endErrorOnNoneSerializable_);
+        }
+
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "startObject", "()V", false);
 
@@ -511,9 +529,6 @@ public class ObjectWriterCreatorASM
 
         mw.visitLabel(writeFields_);
 
-        MethodWriterContext mwc = new MethodWriterContext(objectType, objectFeatures, classNameType, mw, 8, false);
-        mwc.genVariantsMethodBefore();
-
         for (int i = 0; i < fieldWriters.size(); i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
             gwFieldValue(mwc, fieldWriter, OBJECT, i);
@@ -522,6 +537,7 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, 1);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "endObject", "()V", false);
 
+        mw.visitLabel(return_);
         mw.visitInsn(Opcodes.RETURN);
         mw.visitMaxs(mwc.maxVariant + 1, mwc.maxVariant + 1);
         mw.visitEnd();
@@ -542,6 +558,29 @@ public class ObjectWriterCreatorASM
         final int FIELD_FEATURES = 5;
 
         MethodWriterContext mwc = new MethodWriterContext(objectType, objectFeatures, classNameType, mw, 7, true);
+        mwc.genVariantsMethodBefore();
+
+        Label return_ = new Label();
+        if (!java.io.Serializable.class.isAssignableFrom(objectType)) {
+            Label endIgnoreNoneSerializable_ = new Label();
+            mwc.genIsEnabled(JSONWriter.Feature.IgnoreNoneSerializable.mask, endIgnoreNoneSerializable_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeNull", "()V", false);
+            mw.visitJumpInsn(Opcodes.GOTO, return_);
+
+            mw.visitLabel(endIgnoreNoneSerializable_);
+
+            Label endErrorOnNoneSerializable_ = new Label();
+
+            mwc.genIsEnabled(JSONWriter.Feature.ErrorOnNoneSerializable.mask, endErrorOnNoneSerializable_);
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mwc.classNameType, "errorOnNoneSerializable", "()V", false);
+            mw.visitJumpInsn(Opcodes.GOTO, return_);
+
+            mw.visitLabel(endErrorOnNoneSerializable_);
+        }
+
         int entryCnt = fieldWriters.size();
 
         Label notWriteType = new Label();
@@ -562,8 +601,6 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "startObject", "()V", false);
 
-        mwc.genVariantsMethodBefore();
-
         for (int i = 0; i < fieldWriters.size(); i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
             gwFieldValueJSONB(mwc, fieldWriter, OBJECT, i);
@@ -572,6 +609,7 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "endObject", "()V", false);
 
+        mw.visitLabel(return_);
         mw.visitInsn(Opcodes.RETURN);
         mw.visitMaxs(mwc.maxVariant + 1, mwc.maxVariant + 1);
         mw.visitEnd();
@@ -700,9 +738,7 @@ public class ObjectWriterCreatorASM
         if (refDetection) {
             Label endDetect_ = new Label(), refSetPath_ = new Label();
 
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isRefDetect", "()Z", false);
-            mw.visitJumpInsn(Opcodes.IFEQ, endDetect_);
+            mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, endDetect_);
 
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
@@ -815,9 +851,8 @@ public class ObjectWriterCreatorASM
 
         {
             Label endDetect_ = new Label(), refSetPath_ = new Label();
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isRefDetect", "()Z", false);
-            mw.visitJumpInsn(Opcodes.IFEQ, endDetect_);
+
+            mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, endDetect_);
 
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
             mw.visitVarInsn(Opcodes.ALOAD, LIST);
@@ -1713,9 +1748,8 @@ public class ObjectWriterCreatorASM
 
         {
             Label endDetect_ = new Label(), refSetPath_ = new Label();
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isRefDetect", "()Z", false);
-            mw.visitJumpInsn(Opcodes.IFEQ, endDetect_);
+
+            mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, endDetect_);
 
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
             mw.visitVarInsn(Opcodes.ALOAD, LIST);
@@ -3024,7 +3058,10 @@ public class ObjectWriterCreatorASM
             Label notDefault_ = new Label(), end_ = new Label();
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isNotWriteDefaultValue", "()Z", false);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "getFeatures", "()J", false);
+            mw.visitVarInsn(Opcodes.LSTORE, var2(CONTEXT_FEATURES));
+
+            genIsEnabled(JSONWriter.Feature.NotWriteDefaultValue.mask);
             mw.visitInsn(Opcodes.DUP);
             mw.visitVarInsn(Opcodes.ISTORE, var(NOT_WRITE_DEFAULT_VALUE));
             mw.visitJumpInsn(Opcodes.IFEQ, notDefault_);
@@ -3036,9 +3073,6 @@ public class ObjectWriterCreatorASM
             mw.visitJumpInsn(Opcodes.GOTO, end_);
 
             mw.visitLabel(notDefault_);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "getFeatures", "()J", false);
-            mw.visitVarInsn(Opcodes.LSTORE, var2(CONTEXT_FEATURES));
 
             long features = JSONWriter.Feature.WriteNulls.mask
                     | JSONWriter.Feature.NullAsDefaultValue.mask
@@ -3052,13 +3086,13 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(end_);
         }
 
-        void genIsEnabled(long features, Label label) {
+        void genIsEnabled(long features, Label elseLabel) {
             mw.visitVarInsn(Opcodes.LLOAD, var2(CONTEXT_FEATURES));
             mw.visitLdcInsn(features);
             mw.visitInsn(Opcodes.LAND);
             mw.visitInsn(Opcodes.LCONST_0);
             mw.visitInsn(Opcodes.LCMP);
-            mw.visitJumpInsn(Opcodes.IFEQ, label);
+            mw.visitJumpInsn(Opcodes.IFEQ, elseLabel);
         }
 
         void genIsEnabled(long features) {
