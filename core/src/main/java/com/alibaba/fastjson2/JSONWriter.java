@@ -1446,7 +1446,8 @@ public abstract class JSONWriter
          * @since 2.0.7
          */
         NotWriteEmptyArray(1 << 25),
-        WriteNonStringKeyAsString(1 << 26);
+        WriteNonStringKeyAsString(1 << 26),
+        ErrorOnNoneSerializable(1 << 27);
 
         public final long mask;
 
