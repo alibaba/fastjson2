@@ -19,12 +19,14 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Supplier;
@@ -200,6 +202,50 @@ public class JSON {
         }
 
         JSONReader jsonReader = JSONReader.of(str);
+        JSONReader.Context context = jsonReader.getContext();
+        context.setArraySupplier(arraySupplier);
+        context.setObjectSupplier(defaultSupplier);
+
+        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
+            context.setDateFormat(defaultDateFormat);
+        }
+
+        config(context, features);
+
+        try {
+            ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
+            T object = objectReader.readObject(jsonReader, 0);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return object;
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
+    public static <T> T parseObject(
+            InputStream is,
+            Type objectType,
+            Feature... features) throws IOException {
+        return parseObject(is, StandardCharsets.UTF_8, objectType, features);
+    }
+
+    public static <T> T parseObject(
+            InputStream is,
+            Charset charset,
+            Type objectType,
+            Feature... features) throws IOException {
+        if (is == null) {
+            return null;
+        }
+
+        JSONReader jsonReader = JSONReader.of(is, charset);
         JSONReader.Context context = jsonReader.getContext();
         context.setArraySupplier(arraySupplier);
         context.setObjectSupplier(defaultSupplier);
