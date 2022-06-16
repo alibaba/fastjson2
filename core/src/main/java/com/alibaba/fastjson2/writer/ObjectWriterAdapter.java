@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.Fnv;
@@ -43,6 +40,7 @@ public class ObjectWriterAdapter<T>
     final short[] mapping;
 
     final boolean hasValueField;
+    final boolean serializable;
 
     public ObjectWriterAdapter(Class<T> objectType, List<FieldWriter> fieldWriters) {
         this(objectType, null, null, 0, fieldWriters);
@@ -69,6 +67,7 @@ public class ObjectWriterAdapter<T>
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
         this.features = features;
         this.fieldWriters = fieldWriters;
+        this.serializable = java.io.Serializable.class.isAssignableFrom(objectType);
 
         this.fieldWriterArray = new FieldWriter[fieldWriters.size()];
         fieldWriters.toArray(fieldWriterArray);
@@ -106,6 +105,7 @@ public class ObjectWriterAdapter<T>
         this.features = features;
         this.hasValueField = fieldWriterArray.length == 1
                 && (fieldWriterArray[0].getFeatures() & FieldInfo.VALUE_MASK) != 0;
+        this.serializable = objectType == null || java.io.Serializable.class.isAssignableFrom(objectType);
 
         String typeName = null;
         if (objectType != null) {
@@ -174,6 +174,12 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        long featuresAll = features | this.features | jsonWriter.getFeatures();
+        if (!serializable && (featuresAll & JSONWriter.Feature.ErrorOnNoneSerializable.mask) != 0) {
+            errorOnNoneSerializable();
+            return;
+        }
+
         int size = fieldWriterArray.length;
         if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
             writeClassInfo(jsonWriter);
@@ -224,9 +230,14 @@ public class ObjectWriterAdapter<T>
             }
         }
 
-        if (jsonWriter
-                .isBeanToArray(features | this.features)) {
-            writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
+        long featuresAll = features | this.features | jsonWriter.getFeatures();
+        if ((featuresAll & JSONWriter.Feature.BeanToArray.mask) != 0) {
+            writeArrayMapping(jsonWriter, object, fieldName, fieldType, features | this.features);
+            return;
+        }
+
+        if (!serializable && (featuresAll & JSONWriter.Feature.ErrorOnNoneSerializable.mask) != 0) {
+            errorOnNoneSerializable();
             return;
         }
 
@@ -237,7 +248,7 @@ public class ObjectWriterAdapter<T>
 
         jsonWriter.startObject();
 
-        if (((this.features | features) & JSONWriter.Feature.WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
+        if (((features | this.features) & JSONWriter.Feature.WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
             writeTypeInfo(jsonWriter);
         }
 
@@ -464,5 +475,9 @@ public class ObjectWriterAdapter<T>
     @Override
     public String toString() {
         return objectType.getName();
+    }
+
+    protected void errorOnNoneSerializable() {
+        throw new JSONException("not support none serializable class " + objectType.getName());
     }
 }
