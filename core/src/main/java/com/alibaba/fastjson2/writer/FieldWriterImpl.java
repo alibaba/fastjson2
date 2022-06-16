@@ -124,16 +124,6 @@ abstract class FieldWriterImpl<T>
     @Override
     public final void writeFieldName(JSONWriter jsonWriter) {
         if (jsonWriter.isJSONB()) {
-//                JSONB.SymbolTable symbolTable = jsonWriter.getSymbolTable();
-//                if (symbolTable != null) {
-//                    int ordinal = symbolTable.getOrdinalByHashCode(hashCode);
-//                    if (ordinal >= 0) {
-//                        jsonWriter.writeRaw(JSONB.Constants.TYPE_STR_ASCII);
-//                        jsonWriter.writeInt32(-ordinal);
-//                        return;
-//                    }
-//                }
-
             if (nameJSONB == null) {
                 nameJSONB = JSONB.toBytes(name);
             }
