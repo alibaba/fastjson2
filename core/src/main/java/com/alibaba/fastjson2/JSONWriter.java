@@ -163,7 +163,8 @@ public abstract class JSONWriter
                 || context.beforeFilter != null
                 || context.afterFilter != null
                 || context.labelFilter != null
-                || context.contextValueFilter != null;
+                || context.contextValueFilter != null
+                || context.contextNameFilter != null;
     }
 
     public boolean isWriteNulls() {
@@ -1162,6 +1163,7 @@ public abstract class JSONWriter
         AfterFilter afterFilter;
         LabelFilter labelFilter;
         ContextValueFilter contextValueFilter;
+        ContextNameFilter contextNameFilter;
 
         public Context(ObjectWriterProvider provider) {
             if (provider == null) {
@@ -1243,6 +1245,10 @@ public abstract class JSONWriter
 
                 if (filter instanceof ContextValueFilter) {
                     this.contextValueFilter = (ContextValueFilter) filter;
+                }
+
+                if (filter instanceof ContextNameFilter) {
+                    this.contextNameFilter = (ContextNameFilter) filter;
                 }
             }
         }
@@ -1386,6 +1392,14 @@ public abstract class JSONWriter
 
         public void setContextValueFilter(ContextValueFilter contextValueFilter) {
             this.contextValueFilter = contextValueFilter;
+        }
+
+        public ContextNameFilter getContextNameFilter() {
+            return contextNameFilter;
+        }
+
+        public void setContextNameFilter(ContextNameFilter contextNameFilter) {
+            this.contextNameFilter = contextNameFilter;
         }
 
         public PropertyFilter getPropertyFilter() {
