@@ -50,6 +50,7 @@ public class GeoJsonPointReader
                 if (!match) {
                     throw new JSONException("coordinates not support input " + jsonReader.current());
                 }
+                jsonReader.nextIfMatch(',');
             } else {
                 jsonReader.skipValue();
             }
