@@ -1110,6 +1110,7 @@ class JSONWriterUTF16
         chars[off++] = '"';
     }
 
+    @Override
     public void writeLocalDate(LocalDate date) {
         int year = date.getYear();
         int month = date.getMonthValue();
@@ -1129,6 +1130,7 @@ class JSONWriterUTF16
         writeRaw(chars);
     }
 
+    @Override
     public void writeLocalDateTime(LocalDateTime dateTime) {
         int year = dateTime.getYear();
         int month = dateTime.getMonthValue();
@@ -1195,6 +1197,7 @@ class JSONWriterUTF16
         writeRaw(chars);
     }
 
+    @Override
     public void writeDateTimeISO8601(
             int year,
             int month,
@@ -1284,6 +1287,7 @@ class JSONWriterUTF16
         writeRaw(chars);
     }
 
+    @Override
     public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
         char[] chars = new char[10];
 
@@ -1301,6 +1305,7 @@ class JSONWriterUTF16
         writeString(chars);
     }
 
+    @Override
     public void writeTimeHHMMSS8(int hour, int minute, int second) {
         char[] chars = new char[8];
 
@@ -1316,6 +1321,7 @@ class JSONWriterUTF16
         writeString(chars);
     }
 
+    @Override
     public void writeNameRaw(byte[] bytes) {
         throw new UnsupportedOperationException();
     }
@@ -1338,6 +1344,7 @@ class JSONWriterUTF16
         } while (charPos > offset);
     }
 
+    @Override
     public byte[] getBytes() {
         boolean ascii = true;
         for (int i = 0; i < off; i++) {

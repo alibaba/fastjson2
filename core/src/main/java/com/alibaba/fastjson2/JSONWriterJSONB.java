@@ -1758,6 +1758,7 @@ final class JSONWriterJSONB
         writeInt32(nano);
     }
 
+    @Override
     public void writeDateTimeISO8601(
             int year,
             int month,
