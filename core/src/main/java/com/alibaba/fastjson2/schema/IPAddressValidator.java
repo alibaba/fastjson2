@@ -1,14 +1,36 @@
-package com.alibaba.fastjson2.util;
+package com.alibaba.fastjson2.schema;
 
 import java.nio.ByteBuffer;
 
-public class InetAddresses {
-    public static boolean isInetAddress(String ipString) {
-        return ipStringToBytes(ipString) != null;
+final class IPAddressValidator
+        implements FormatValidator {
+    static final IPAddressValidator IPV6 = new IPAddressValidator(false);
+    static final IPAddressValidator IPV4 = new IPAddressValidator(true);
+
+    final boolean v4;
+
+    public IPAddressValidator(boolean v4) {
+        this.v4 = v4;
     }
 
-    private static byte[] ipStringToBytes(String ipStringParam) {
-        String ipString = ipStringParam;
+    @Override
+    public boolean isValid(String address) {
+        if (address == null) {
+            return false;
+        }
+        if (!isInetAddress(address)) {
+            return false;
+        }
+
+        if (v4) {
+            return address.indexOf('.') != -1;
+        } else {
+            return address.indexOf(':') != -1;
+        }
+    }
+
+    static boolean isInetAddress(String ip) {
+        String ipString = ip;
         // Make a first pass to categorize the characters in this string.
         boolean hasColon = false;
         boolean hasDot = false;
@@ -19,14 +41,14 @@ public class InetAddresses {
                 hasDot = true;
             } else if (c == ':') {
                 if (hasDot) {
-                    return null; // Colons must not appear after dots.
+                    return false; // Colons must not appear after dots.
                 }
                 hasColon = true;
             } else if (c == '%') {
                 percentIndex = i;
                 break; // everything after a '%' is ignored (it's a Scope ID): http://superuser.com/a/99753
             } else if (Character.digit(c, 16) == -1) {
-                return null; // Everything else must be a decimal or hex digit.
+                return false; // Everything else must be a decimal or hex digit.
             }
         }
 
@@ -35,23 +57,23 @@ public class InetAddresses {
             if (hasDot) {
                 ipString = convertDottedQuadToHex(ipString);
                 if (ipString == null) {
-                    return null;
+                    return false;
                 }
             }
             if (percentIndex != -1) {
                 ipString = ipString.substring(0, percentIndex);
             }
-            return textToNumericFormatV6(ipString);
+            return numericFormatV6(ipString);
         } else if (hasDot) {
             if (percentIndex != -1) {
-                return null; // Scope IDs are not supported for IPV4
+                return false; // Scope IDs are not supported for IPV4
             }
-            return textToNumericFormatV4(ipString);
+            return textToNumericFormatV4(ipString) != null;
         }
-        return null;
+        return false;
     }
 
-    private static String convertDottedQuadToHex(String ipString) {
+    static String convertDottedQuadToHex(String ipString) {
         int lastColon = ipString.lastIndexOf(':');
         String initialPart = ipString.substring(0, lastColon + 1);
         String dottedQuad = ipString.substring(lastColon + 1);
@@ -95,7 +117,7 @@ public class InetAddresses {
         return bytes;
     }
 
-    private static byte[] textToNumericFormatV6(String ipString) {
+    private static boolean numericFormatV6(String ipString) {
         final int IPV6_PART_COUNT = 8;
 
         // An address can have [2..8] colons.
@@ -107,7 +129,7 @@ public class InetAddresses {
         }
 
         if (delimiterCount < 2 || delimiterCount > IPV6_PART_COUNT) {
-            return null;
+            return false;
         }
 
         int partsSkipped = IPV6_PART_COUNT - (delimiterCount + 1); // estimate; may be modified later
@@ -117,7 +139,7 @@ public class InetAddresses {
         for (int i = 0; i < ipString.length() - 1; i++) {
             if (ipString.charAt(i) == ':' && ipString.charAt(i + 1) == ':') {
                 if (hasSkip) {
-                    return null; // Can't have more than one ::
+                    return false; // Can't have more than one ::
                 }
                 hasSkip = true;
                 partsSkipped++; // :: means we skipped an extra part in between the two delimiters.
@@ -130,17 +152,17 @@ public class InetAddresses {
             }
         }
         if (ipString.charAt(0) == ':' && ipString.charAt(1) != ':') {
-            return null; // ^: requires ^::
+            return false; // ^: requires ^::
         }
         if (ipString.charAt(ipString.length() - 1) == ':'
                 && ipString.charAt(ipString.length() - 2) != ':') {
-            return null; // :$ requires ::$
+            return false; // :$ requires ::$
         }
         if (hasSkip && partsSkipped <= 0) {
-            return null; // :: must expand to at least one '0'
+            return false; // :: must expand to at least one '0'
         }
         if (!hasSkip && delimiterCount + 1 != IPV6_PART_COUNT) {
-            return null; // Incorrect number of parts
+            return false; // Incorrect number of parts
         }
 
         ByteBuffer rawBytes = ByteBuffer.allocate(2 * IPV6_PART_COUNT);
@@ -168,9 +190,9 @@ public class InetAddresses {
                 start = end + 1;
             }
         } catch (NumberFormatException ex) {
-            return null;
+            return false;
         }
-        return rawBytes.array();
+        return true;
     }
 
     private static byte parseOctet(String ipString, int start, int end) {

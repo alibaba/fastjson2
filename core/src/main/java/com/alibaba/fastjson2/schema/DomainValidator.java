@@ -1,10 +1,12 @@
-package com.alibaba.fastjson2.util;
+package com.alibaba.fastjson2.schema;
+
+import com.alibaba.fastjson2.util.RegexValidator;
 
 import java.net.IDN;
 import java.util.Arrays;
 import java.util.Locale;
 
-public class DomainValidator {
+class DomainValidator {
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     // Regular expression strings for hostnames (derived from RFC2396 and RFC 1123)
