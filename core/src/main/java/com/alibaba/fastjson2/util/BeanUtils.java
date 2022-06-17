@@ -543,42 +543,6 @@ public abstract class BeanUtils {
         return member;
     }
 
-    public static boolean hasStaticCreatorOrBuilder(Class clazz) {
-        if (clazz == null) {
-            return false;
-        }
-
-        Method[] methods = methodCache.get(clazz);
-        if (methods == null) {
-            methods = clazz.getMethods();
-            methodCache.putIfAbsent(clazz, methods);
-        }
-
-        for (Method method : methods) {
-            if (!Modifier.isStatic(method.getModifiers())) {
-                continue;
-            }
-
-            if (method.getReturnType() == Void.class) {
-                continue;
-            }
-
-            Annotation[] annotations = method.getAnnotations();
-            for (Annotation annotation : annotations) {
-                Class<? extends Annotation> annotationType = annotation.annotationType();
-                switch (annotationType.getName()) {
-                    case "com.alibaba.fastjson.annotation.JSONCreator":
-                    case "com.alibaba.fastjson2.annotation.JSONCreator":
-                        return true;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        return false;
-    }
-
     public static void getters(Class objectClass, Consumer<Method> methodConsumer) {
         if (objectClass == null) {
             return;
@@ -915,18 +879,18 @@ public abstract class BeanUtils {
                 }
                 return methodName;
             }
-            case "SnakeCase": {
+            case "SnakeCase":
                 return snakeCase(methodName, 0);
-            }
-            case "UpperCaseWithUnderScores": {
+            case "UpperCaseWithUnderScores":
                 return underScores(methodName, 0, true);
-            }
-            case "LowerCaseWithUnderScores": {
+            case "LowerCaseWithUnderScores":
                 return underScores(methodName, 0, false);
-            }
-            case "LowerCaseWithDashes": {
+            case "UpperCaseWithDashes":
+                return dashes(methodName, 0, true);
+            case "LowerCaseWithDashes":
                 return dashes(methodName, 0, false);
-            }
+            case "UpperCaseWithDots":
+                return dots(methodName, 0, true);
             case "LowerCaseWithDots":
                 return dots(methodName, 0, false);
             case "UpperCase":
