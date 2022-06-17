@@ -785,6 +785,7 @@ public class ObjectReaderProvider {
             this.maxSize = maxSize;
         }
 
+        @Override
         protected boolean removeEldestEntry(Map.Entry<String, Date> eldest) {
             return this.size() > this.maxSize;
         }
