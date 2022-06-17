@@ -3160,6 +3160,7 @@ final class JSONReaderJSONB
         throw new UnsupportedOperationException();
     }
 
+    @Override
     protected LocalDateTime readLocalDateTime16() {
         throw new UnsupportedOperationException();
     }

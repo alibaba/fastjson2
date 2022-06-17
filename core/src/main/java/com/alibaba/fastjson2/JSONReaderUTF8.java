@@ -5553,6 +5553,7 @@ class JSONReaderUTF8
         return true;
     }
 
+    @Override
     public boolean nextIfMatchIdent(char c0, char c1, char c2) {
         if (ch != c0) {
             return false;
@@ -5589,6 +5590,7 @@ class JSONReaderUTF8
         return true;
     }
 
+    @Override
     public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
         if (ch != c0) {
             return false;

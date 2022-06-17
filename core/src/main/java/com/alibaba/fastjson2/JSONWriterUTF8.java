@@ -958,6 +958,7 @@ class JSONWriterUTF8
         bytes[off++] = '"';
     }
 
+    @Override
     public void writeLocalDate(LocalDate date) {
         int year = date.getYear();
         int month = date.getMonthValue();
@@ -1382,10 +1383,12 @@ class JSONWriterUTF8
         }
     }
 
+    @Override
     public void writeNameRaw(char[] chars) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void writeNameRaw(char[] bytes, int offset, int len) {
         throw new UnsupportedOperationException();
     }
