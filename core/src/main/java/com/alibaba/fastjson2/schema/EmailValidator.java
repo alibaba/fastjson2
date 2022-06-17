@@ -29,7 +29,6 @@ final class EmailValidator
     /** IPv4 RegexValidator */
     private static final RegexValidator ipv4Validator = new RegexValidator(IPV4_REGEX);
 
-
     static final EmailValidator INSTANCE = new EmailValidator();
 
     @Override
