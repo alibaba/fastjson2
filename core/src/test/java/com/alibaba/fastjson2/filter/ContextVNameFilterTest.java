@@ -1,14 +1,16 @@
 package com.alibaba.fastjson2.filter;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.util.BeanUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ContextValueFilterTest {
+public class ContextVNameFilterTest {
     @Test
     public void test() throws Exception {
         Bean bean = new Bean();
@@ -16,12 +18,12 @@ public class ContextValueFilterTest {
 
         AtomicReference<BeanContext> contextReference = new AtomicReference<>();
 
-        ContextValueFilter filter = (BeanContext context, Object object, String name, Object value) -> {
+        ContextNameFilter filter = (BeanContext context, Object object, String name, Object value) -> {
             contextReference.set(context);
-            return ((Integer) value).intValue() + 1;
+            return BeanUtils.fieldName(name, PropertyNamingStrategy.KebabCase.name());
         };
 
-        assertEquals("{\"userId\":11}", JSON.toJSONString(bean, filter));
+        assertEquals("{\"user-id\":10}", JSON.toJSONString(bean, filter));
 
         BeanContext context = contextReference.get();
         assertEquals(Bean.class, context.getBeanClass());
