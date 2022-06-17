@@ -608,18 +608,34 @@ public class JSON {
     static void configFilter(JSONWriter.Context context, SerializeFilter filter) {
         if (filter instanceof NameFilter) {
             context.setNameFilter((NameFilter) filter);
-        } else if (filter instanceof ValueFilter) {
+        }
+
+        if (filter instanceof ValueFilter) {
             context.setValueFilter((ValueFilter) filter);
-        } else if (filter instanceof PropertyPreFilter) {
+        }
+
+        if (filter instanceof PropertyPreFilter) {
             context.setPropertyPreFilter((PropertyPreFilter) filter);
-        } else if (filter instanceof PropertyFilter) {
+        }
+
+        if (filter instanceof PropertyFilter) {
             context.setPropertyFilter((PropertyFilter) filter);
-        } else if (filter instanceof BeforeFilter) {
+        }
+
+        if (filter instanceof BeforeFilter) {
             context.setBeforeFilter((BeforeFilter) filter);
-        } else if (filter instanceof AfterFilter) {
+        }
+
+        if (filter instanceof AfterFilter) {
             context.setAfterFilter((AfterFilter) filter);
-        } else if (filter instanceof LabelFilter) {
+        }
+
+        if (filter instanceof LabelFilter) {
             context.setLabelFilter((LabelFilter) filter);
+        }
+
+        if (filter instanceof ContextValueFilter) {
+            context.setContextValueFilter((ContextValueFilter) filter);
         }
     }
 

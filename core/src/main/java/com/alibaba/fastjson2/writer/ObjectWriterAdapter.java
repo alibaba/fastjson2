@@ -348,6 +348,7 @@ public class ObjectWriterAdapter<T>
         PropertyPreFilter propertyPreFilter = context.getPropertyPreFilter();
         NameFilter nameFilter = context.getNameFilter();
         ValueFilter valueFilter = context.getValueFilter();
+        ContextValueFilter contextValueFilter = context.getContextValueFilter();
         PropertyFilter propertyFilter = context.getPropertyFilter();
         LabelFilter labelFilter = context.getLabelFilter();
 
@@ -372,7 +373,7 @@ public class ObjectWriterAdapter<T>
             }
 
             // fast return
-            if (nameFilter == null && propertyFilter == null && valueFilter == null) {
+            if (nameFilter == null && propertyFilter == null && valueFilter == null && contextValueFilter == null) {
                 fieldWriter.write(jsonWriter, object);
                 continue;
             }
@@ -396,9 +397,26 @@ public class ObjectWriterAdapter<T>
 
             boolean nameChanged = filteredName != null && filteredName != fieldName;
 
-            Object filteredValue;
-            if (valueFilter != null
-                    && (filteredValue = valueFilter.apply(object, fieldWriterFieldName, fieldValue)) != fieldValue) {
+            Object filteredValue = fieldValue;
+            if (valueFilter != null) {
+                filteredValue = valueFilter.apply(object, fieldWriterFieldName, fieldValue);
+            }
+            if (contextValueFilter != null) {
+                BeanContext beanContext = new BeanContext(
+                        objectType,
+                        fieldWriter.getMethod(),
+                        fieldWriter.getField(),
+                        fieldWriter.getFieldName(),
+                        fieldWriter.getLabel(),
+                        fieldWriter.getFieldClass(),
+                        fieldWriter.getFieldType(),
+                        fieldWriter.getFeatures(),
+                        fieldWriter.getFormat()
+                );
+                filteredValue = contextValueFilter.process(beanContext, object, filteredName, filteredValue);
+            }
+
+            if (filteredValue != fieldValue) {
                 if (nameChanged) {
                     jsonWriter.writeName(filteredName);
                     jsonWriter.writeColon();

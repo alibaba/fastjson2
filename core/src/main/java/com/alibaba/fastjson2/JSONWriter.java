@@ -162,7 +162,8 @@ public abstract class JSONWriter
                 || context.valueFilter != null
                 || context.beforeFilter != null
                 || context.afterFilter != null
-                || context.labelFilter != null;
+                || context.labelFilter != null
+                || context.contextValueFilter != null;
     }
 
     public boolean isWriteNulls() {
@@ -1160,6 +1161,7 @@ public abstract class JSONWriter
         BeforeFilter beforeFilter;
         AfterFilter afterFilter;
         LabelFilter labelFilter;
+        ContextValueFilter contextValueFilter;
 
         public Context(ObjectWriterProvider provider) {
             if (provider == null) {
@@ -1213,18 +1215,34 @@ public abstract class JSONWriter
             for (Filter filter : filters) {
                 if (filter instanceof NameFilter) {
                     this.nameFilter = (NameFilter) filter;
-                } else if (filter instanceof ValueFilter) {
+                }
+
+                if (filter instanceof ValueFilter) {
                     this.valueFilter = (ValueFilter) filter;
-                } else if (filter instanceof PropertyFilter) {
+                }
+
+                if (filter instanceof PropertyFilter) {
                     this.propertyFilter = (PropertyFilter) filter;
-                } else if (filter instanceof PropertyPreFilter) {
+                }
+
+                if (filter instanceof PropertyPreFilter) {
                     this.propertyPreFilter = (PropertyPreFilter) filter;
-                } else if (filter instanceof BeforeFilter) {
+                }
+
+                if (filter instanceof BeforeFilter) {
                     this.beforeFilter = (BeforeFilter) filter;
-                } else if (filter instanceof AfterFilter) {
+                }
+
+                if (filter instanceof AfterFilter) {
                     this.afterFilter = (AfterFilter) filter;
-                } else if (filter instanceof LabelFilter) {
+                }
+
+                if (filter instanceof LabelFilter) {
                     this.labelFilter = (LabelFilter) filter;
+                }
+
+                if (filter instanceof ContextValueFilter) {
+                    this.contextValueFilter = (ContextValueFilter) filter;
                 }
             }
         }
@@ -1360,6 +1378,14 @@ public abstract class JSONWriter
 
         public void setValueFilter(ValueFilter valueFilter) {
             this.valueFilter = valueFilter;
+        }
+
+        public ContextValueFilter getContextValueFilter() {
+            return contextValueFilter;
+        }
+
+        public void setContextValueFilter(ContextValueFilter contextValueFilter) {
+            this.contextValueFilter = contextValueFilter;
         }
 
         public PropertyFilter getPropertyFilter() {
