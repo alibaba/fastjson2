@@ -2662,6 +2662,7 @@ public abstract class JSONPath {
                 return null;
             }
 
+            boolean eval = false;
             Context context = null;
             for (int i = 0; i < size; i++) {
                 Segment segment = segments.get(i);
@@ -2673,10 +2674,17 @@ public abstract class JSONPath {
                 }
 
                 context = new Context(this, context, segment, nextSegment, 0);
-                segment.accept(jsonReader, context);
+                if (eval) {
+                    segment.eval(context);
+                } else {
+                    segment.accept(jsonReader, context);
+                }
 
-                if (context.eval && context.value == null) {
-                    break;
+                if (context.eval) {
+                    eval = true;
+                    if (context.value == null) {
+                        break;
+                    }
                 }
             }
 
@@ -2690,6 +2698,7 @@ public abstract class JSONPath {
                 return null;
             }
 
+            boolean eval = false;
             Context context = null;
             for (int i = 0; i < size; i++) {
                 Segment segment = segments.get(i);
@@ -2701,7 +2710,18 @@ public abstract class JSONPath {
                 }
 
                 context = new Context(this, context, segment, nextSegment, 0);
-                segment.accept(jsonReader, context);
+                if (eval) {
+                    segment.eval(context);
+                } else {
+                    segment.accept(jsonReader, context);
+                }
+
+                if (context.eval) {
+                    eval = true;
+                    if (context.value == null) {
+                        break;
+                    }
+                }
             }
 
             return JSON.toJSONString(context.value);
@@ -5329,6 +5349,21 @@ public abstract class JSONPath {
             if (object instanceof Collection) {
                 // skip
                 context.value = object;
+                context.eval = true;
+                return;
+            }
+
+            if (object instanceof Sequence) {
+                Sequence sequence = (Sequence) object;
+                JSONArray values = new JSONArray(sequence.values.size());
+                for (Object value : sequence.values) {
+                    if (value instanceof Collection) {
+                        values.addAll((Collection<?>) value);
+                    } else {
+                        values.add(value);
+                    }
+                }
+                context.value = values;
                 context.eval = true;
                 return;
             }
