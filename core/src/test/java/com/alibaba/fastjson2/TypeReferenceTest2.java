@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.util.BeanUtils;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -105,5 +106,24 @@ public class TypeReferenceTest2 {
 
     public static class Bean<T> {
         public T value;
+    }
+
+    @Test
+    public void to() {
+        Response<Item> response = new TypeReference<Response<Item>>() {}
+                .to(JSONObject.of("value", JSONObject.of("id", 123)));
+        assertEquals(123, response.value.id);
+
+        List<Item> items = new TypeReference<List<Item>>() {}.to(JSONArray.of(JSONObject.of("id", 123)));
+        assertEquals(1, items.size());
+        assertEquals(123, items.get(0).id);
+    }
+
+    public static class Response<T> {
+        public T value;
+    }
+
+    public static class Item {
+        public int id;
     }
 }
