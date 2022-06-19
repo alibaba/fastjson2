@@ -5033,6 +5033,9 @@ final class JSONReaderStr
 
     @Override
     public String readReference() {
+        if (referenceBegin == end) {
+            return null;
+        }
         this.offset = referenceBegin;
         this.ch = str.charAt(this.offset++);
 

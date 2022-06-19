@@ -20,6 +20,7 @@ public class Issue416 {
         localTest1.setLocalDate(localDateTime.toLocalDate());
         localTest1.setLocalTime(localDateTime.toLocalTime());
         localTest1.setLocalDateTime(localDateTime);
+
         LocalTest localTest2 = JSON.parseObject(JSON.toJSONString(localTest1), LocalTest.class);
 
         assertEquals(localTest1.getLocalDate(), localTest2.getLocalDate());
