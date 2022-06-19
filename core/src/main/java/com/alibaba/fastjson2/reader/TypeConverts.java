@@ -190,6 +190,25 @@ public class TypeConverts {
                 return ((Number) o).doubleValue();
             }
 
+            if (o instanceof String) {
+                String str = (String) o;
+                if (str.isEmpty()) {
+                    return defaultValue;
+                }
+
+                return Double.parseDouble(str);
+            }
+
+            if (o instanceof List) {
+                List list = (List) o;
+                JSONArray array = new JSONArray(list.size());
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
+                    array.add(apply(item));
+                }
+                return array;
+            }
+
             throw new JSONException("can not cast to Float " + o.getClass());
         }
     }
