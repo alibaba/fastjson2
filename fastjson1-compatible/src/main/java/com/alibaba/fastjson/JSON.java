@@ -201,10 +201,19 @@ public class JSON {
             return null;
         }
 
+        boolean useNativeJavaObject = false;
+        for (Feature feature : features) {
+            if (feature == Feature.UseNativeJavaObject) {
+                useNativeJavaObject = true;
+            }
+        }
+
         JSONReader jsonReader = JSONReader.of(str);
         JSONReader.Context context = jsonReader.getContext();
-        context.setArraySupplier(arraySupplier);
-        context.setObjectSupplier(defaultSupplier);
+        if (!useNativeJavaObject) {
+            context.setArraySupplier(arraySupplier);
+            context.setObjectSupplier(defaultSupplier);
+        }
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
@@ -431,6 +440,9 @@ public class JSON {
                     break;
                 case OrderedField:
                     context.setObjectSupplier(orderedSupplier);
+                    break;
+                case UseNativeJavaObject:
+                    context.config(JSONReader.Feature.UseNativeObject);
                     break;
                 default:
                     break;

@@ -1789,7 +1789,11 @@ public abstract class JSONReader
             if (context.arraySupplier != null) {
                 list = context.arraySupplier.get();
             } else {
-                list = i == 2 ? new JSONArray(2) : new JSONArray(1);
+                if (context.isEnabled(Feature.UseNativeObject)) {
+                    list = i == 2 ? new ArrayList(2) : new ArrayList(1);
+                } else {
+                    list = i == 2 ? new JSONArray(2) : new JSONArray(1);
+                }
             }
 
             if (i == 1) {

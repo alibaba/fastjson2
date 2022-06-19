@@ -151,7 +151,8 @@ public enum Feature {
     /**
      * @since 2.0.6
      */
-    ErrorOnNotSupportAutoType;
+    ErrorOnNotSupportAutoType,
+    UseNativeJavaObject;
 
     public final int mask;
 
