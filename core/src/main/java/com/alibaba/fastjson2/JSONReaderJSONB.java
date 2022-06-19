@@ -174,6 +174,11 @@ final class JSONReaderJSONB
     }
 
     @Override
+    public boolean nextIfMatch(char ch) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
     public boolean nextIfObjectStart() {
         if (bytes[offset] != BC_OBJECT) {
             return false;
@@ -4249,6 +4254,26 @@ final class JSONReaderJSONB
 
     @Override
     public String readPattern() {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean nextIfMatchIdent(char c0, char c1, char c2) {
+        throw new UnsupportedOperationException();
+    }
+
+    public long readFieldNameHashCodeUnquote() {
+        return readFieldNameHashCode();
+    }
+
+    public boolean nextIfSet() {
+        return false;
+    }
+
+    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3) {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
         throw new UnsupportedOperationException();
     }
 

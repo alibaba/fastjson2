@@ -268,7 +268,11 @@ final class JSONReaderASCII
                 if (c == ',') {
                     this.comma = true;
                     offset++;
-                    c = (char) bytes[offset];
+                    if (offset == end) {
+                        c = EOI;
+                    } else {
+                        c = (char) bytes[offset];
+                    }
 
                     while (c <= ' ' && ((1L << c) & SPACE) != 0) {
                         offset++;
