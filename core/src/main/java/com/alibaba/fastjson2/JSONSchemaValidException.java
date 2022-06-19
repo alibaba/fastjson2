@@ -5,8 +5,4 @@ public class JSONSchemaValidException
     public JSONSchemaValidException(String message) {
         super(message);
     }
-
-    public JSONSchemaValidException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

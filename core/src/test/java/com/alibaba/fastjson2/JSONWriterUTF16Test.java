@@ -56,4 +56,11 @@ public class JSONWriterUTF16Test {
         jsonWriter.writeString("abcdefghijk1234567890\\\"abcdefghijk1234567890");
         assertEquals("\"abcdefghijk1234567890\\\\\\\"abcdefghijk1234567890\"", jsonWriter.toString());
     }
+
+    @Test
+    public void writeDouble() {
+        JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        jsonWriter.writeDoubleArray(1, 2);
+        assertEquals("[1.0,2.0]", jsonWriter.toString());
+    }
 }

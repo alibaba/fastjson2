@@ -65,7 +65,7 @@ public abstract class JSONWriter
     }
 
     public JSONB.SymbolTable getSymbolTable() {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     public void config(Feature... features) {
@@ -523,20 +523,18 @@ public abstract class JSONWriter
 
     public abstract void writeRaw(String str);
 
-    public void writeRaw(byte[] bytes) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void writeRaw(byte[] bytes);
 
     public void writeRaw(byte b) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public void writeNameRaw(byte[] bytes, int offset, int len) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public void writeRaw(char[] chars) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public abstract void writeRaw(char ch);
@@ -544,7 +542,7 @@ public abstract class JSONWriter
     public abstract void writeNameRaw(byte[] bytes);
 
     public void writeNameRaw(byte[] name, long nameHash) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public abstract void writeNameRaw(char[] chars);
@@ -598,11 +596,11 @@ public abstract class JSONWriter
     public abstract void startArray();
 
     public void startArray(int size) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public void startArray(Object array, int size) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public abstract void endArray();
@@ -833,11 +831,11 @@ public abstract class JSONWriter
     public abstract void writeUUID(UUID value);
 
     public void writeTypeName(String typeName) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public boolean writeTypeName(byte[] typeName, long typeNameHash) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public abstract void writeString(String str);
@@ -1118,9 +1116,7 @@ public abstract class JSONWriter
     public void close() {
     }
 
-    public byte[] getBytes() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract byte[] getBytes();
 
     public void flushTo(java.io.Writer to) {
         try {
@@ -1133,10 +1129,7 @@ public abstract class JSONWriter
 
     public abstract int flushTo(OutputStream to) throws IOException;
 
-    public int flushTo(OutputStream out, Charset charset) throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
+    public abstract int flushTo(OutputStream out, Charset charset) throws IOException;
     static int MAX_ARRAY_SIZE = 1024 * 1024 * 64; // 64M
 
     public static class Context {
