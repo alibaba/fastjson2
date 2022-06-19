@@ -1808,8 +1808,29 @@ public class JSONObject
     /**
      * See {@link JSON#parseObject} for details
      */
-    public static <T> T parseObject(String text, Class<T> clazz) {
-        return JSON.parseObject(text, clazz);
+    public static <T> T parseObject(String text, Class<T> objectClass) {
+        return JSON.parseObject(text, objectClass);
+    }
+
+    /**
+     * See {@link JSON#parseObject} for details
+     */
+    public static <T> T parseObject(String text, Class<T> objectClass, JSONReader.Feature... features) {
+        return JSON.parseObject(text, objectClass, features);
+    }
+
+    /**
+     * See {@link JSON#parseObject} for details
+     */
+    public static <T> T parseObject(String text, Type objectType, JSONReader.Feature... features) {
+        return JSON.parseObject(text, objectType, features);
+    }
+
+    /**
+     * See {@link JSON#parseObject} for details
+     */
+    public static <T> T parseObject(String text, TypeReference typeReference, JSONReader.Feature... features) {
+        return JSON.parseObject(text, typeReference, features);
     }
 
     /**
