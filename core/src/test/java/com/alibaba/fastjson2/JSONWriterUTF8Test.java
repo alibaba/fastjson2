@@ -119,4 +119,184 @@ public class JSONWriterUTF8Test {
         jsonWriter.writeLocalDate(localDate);
         assertEquals("\"2018-06-23\"", jsonWriter.toString());
     }
+
+    @Test
+    public void writeColon() {
+        final int COUNT = 100_000;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        for (int i = 0; i < COUNT; i++) {
+            jsonWriter.writeColon();
+        }
+        String string = jsonWriter.toString();
+        assertEquals(COUNT, string.length());
+        for (int i = 0; i < string.length(); i++) {
+            assertEquals(':', string.charAt(i));
+        }
+    }
+
+    @Test
+    public void write0() {
+        final int COUNT = 100_000;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        for (int i = 0; i < COUNT; i++) {
+            jsonWriter.write0(':');
+        }
+        String string = jsonWriter.toString();
+        assertEquals(COUNT, string.length());
+        for (int i = 0; i < string.length(); i++) {
+            assertEquals(':', string.charAt(i));
+        }
+    }
+
+    @Test
+    public void startObject() {
+        final int COUNT = 100_000;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        for (int i = 0; i < COUNT; i++) {
+            jsonWriter.startObject();
+        }
+        String string = jsonWriter.toString();
+        assertEquals(COUNT, string.length());
+        for (int i = 0; i < string.length(); i++) {
+            assertEquals('{', string.charAt(i));
+        }
+    }
+
+    @Test
+    public void endObject() {
+        final int COUNT = 100_000;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        for (int i = 0; i < COUNT; i++) {
+            jsonWriter.endObject();
+        }
+        String string = jsonWriter.toString();
+        assertEquals(COUNT, string.length());
+        for (int i = 0; i < string.length(); i++) {
+            assertEquals('}', string.charAt(i));
+        }
+    }
+
+    @Test
+    public void startArray() {
+        final int COUNT = 100_000;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        for (int i = 0; i < COUNT; i++) {
+            jsonWriter.startArray();
+        }
+        String string = jsonWriter.toString();
+        assertEquals(COUNT, string.length());
+        for (int i = 0; i < string.length(); i++) {
+            assertEquals('[', string.charAt(i));
+        }
+    }
+
+    @Test
+    public void endArray() {
+        final int COUNT = 100_000;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        for (int i = 0; i < COUNT; i++) {
+            jsonWriter.endArray();
+        }
+        String string = jsonWriter.toString();
+        assertEquals(COUNT, string.length());
+        for (int i = 0; i < string.length(); i++) {
+            assertEquals(']', string.charAt(i));
+        }
+    }
+
+    @Test
+    public void writeRawLarge() {
+        final int COUNT = 100_000;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        for (int i = 0; i < COUNT; i++) {
+            jsonWriter.writeRaw(",");
+        }
+        String string = jsonWriter.toString();
+        assertEquals(COUNT, string.length());
+        for (int i = 0; i < string.length(); i++) {
+            assertEquals(',', string.charAt(i));
+        }
+    }
+
+    @Test
+    public void writeRawLarge1() {
+        final int COUNT = 100_000;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        for (int i = 0; i < COUNT; i++) {
+            jsonWriter.writeRaw(new byte[]{','});
+        }
+        String string = jsonWriter.toString();
+        assertEquals(COUNT, string.length());
+        for (int i = 0; i < string.length(); i++) {
+            assertEquals(',', string.charAt(i));
+        }
+    }
+
+    @Test
+    public void writeRawLarge2() {
+        final int COUNT = 100_000;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        for (int i = 0; i < COUNT; i++) {
+            jsonWriter.writeRaw(',');
+        }
+        String string = jsonWriter.toString();
+        assertEquals(COUNT, string.length());
+        for (int i = 0; i < string.length(); i++) {
+            assertEquals(',', string.charAt(i));
+        }
+    }
+
+    @Test
+    public void writeNameRawLarge() {
+        final int COUNT = 100_000;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        for (int i = 0; i < COUNT; i++) {
+            jsonWriter.writeNameRaw(new byte[0]);
+        }
+        String string = jsonWriter.toString();
+        assertEquals(COUNT, string.length());
+        for (int i = 0; i < string.length(); i++) {
+            assertEquals(',', string.charAt(i));
+        }
+    }
+
+    @Test
+    public void writeNameRawLarge1() {
+        final int COUNT = 100_000;
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        for (int i = 0; i < COUNT; i++) {
+            jsonWriter.writeNameRaw(new byte[0], 0, 0);
+        }
+        String string = jsonWriter.toString();
+        assertEquals(COUNT, string.length());
+        for (int i = 0; i < string.length(); i++) {
+            assertEquals(',', string.charAt(i));
+        }
+    }
+
+    @Test
+    public void writeInt64() {
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext(JSONWriter.Feature.BrowserCompatible));
+        jsonWriter.startArray();
+        jsonWriter.writeInt64(9007199254740992L);
+        jsonWriter.writeComma();
+        jsonWriter.writeInt64(-9007199254740992L);
+        jsonWriter.endArray();
+        assertEquals("[\"9007199254740992\",\"-9007199254740992\"]", jsonWriter.toString());
+    }
+
+    @Test
+    public void writeInt64_1() {
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        jsonWriter.startArray();
+        jsonWriter.writeInt64(Long.MIN_VALUE);
+        jsonWriter.writeComma();
+        jsonWriter.writeInt64(Long.MIN_VALUE);
+        jsonWriter.writeComma();
+        jsonWriter.writeInt64(9007199254740992L);
+        jsonWriter.writeComma();
+        jsonWriter.writeInt64(-9007199254740992L);
+        jsonWriter.endArray();
+        assertEquals("[-9223372036854775808,-9223372036854775808,9007199254740992,-9007199254740992]", jsonWriter.toString());
+    }
 }
