@@ -341,9 +341,7 @@ public abstract class JSONReader
         return 0;
     }
 
-    public boolean isReference() {
-        return false;
-    }
+    public abstract boolean isReference();
 
     public abstract String readReference();
 
@@ -477,10 +475,6 @@ public abstract class JSONReader
     }
 
     public abstract int readInt32Value();
-
-    public boolean nextIfMatch(byte[] bytes) {
-        throw new JSONException("UnsupportedOperation");
-    }
 
     public boolean nextIfMatch(byte type) {
         throw new JSONException("UnsupportedOperation");

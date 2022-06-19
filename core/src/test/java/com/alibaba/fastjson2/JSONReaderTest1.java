@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2_vo.*;
 import org.junit.jupiter.api.Test;
@@ -1447,7 +1449,6 @@ public class JSONReaderTest1 {
             assertNull(jsonReader.checkAutoType(Object.class, 0L, 0));
             assertFalse(jsonReader.isReference());
             assertNull(jsonReader.readReference());
-            assertThrows(JSONException.class, () -> jsonReader.nextIfMatch(new byte[0]));
             assertThrows(JSONException.class, () -> jsonReader.nextIfMatch((byte) 0));
         }
     }
@@ -1474,5 +1475,21 @@ public class JSONReaderTest1 {
         byte[] bytes = JSONB.toBytes("");
         JSONReader jsonReader = JSONReader.ofJSONB(JSONFactory.createReadContext(), bytes);
         assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
+    }
+
+    @Test
+    public void testResolveTaskToString() {
+        JSONReader.ResolveTask resolveTask = new JSONReader.ResolveTask((FieldReader) null, new Object(), "", JSONPath.of("$"));
+        assertEquals("$", resolveTask.toString());
+    }
+
+    @Test
+    public void config() {
+        JSONReader jsonReader = JSONReader.of("");
+        JSONReader.AutoTypeBeforeHandler filter = JSONReader.autoTypeFilter("com.abc");
+        jsonReader.getContext().config(new Filter[] {
+                filter
+        });
+        assertSame(filter, jsonReader.getContext().getContextAutoTypeBeforeHandler());
     }
 }
