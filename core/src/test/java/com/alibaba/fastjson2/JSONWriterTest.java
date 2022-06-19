@@ -2,6 +2,9 @@ package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -286,5 +289,134 @@ public class JSONWriterTest {
             jsonWriter.writeString("中文");
             assertEquals("\"中文\"", new String(jsonWriter.getBytes(), charset));
         }
+    }
+
+    @Test
+    public void unSupportedUTF16() {
+        JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        assertNull(jsonWriter.getSymbolTable());
+
+        assertThrows(JSONException.class, () -> jsonWriter.writeRaw((byte) 0));
+        assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new byte[0], 0, 0));
+        assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new byte[0], 0L));
+        assertThrows(JSONException.class, () -> jsonWriter.startArray(0));
+        assertThrows(JSONException.class, () -> jsonWriter.startArray(null, 0));
+        assertThrows(JSONException.class, () -> jsonWriter.flushTo((OutputStream) null));
+        assertThrows(JSONException.class, () -> jsonWriter.flushTo(null, null));
+        assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new byte[0]));
+        assertThrows(JSONException.class, () -> jsonWriter.writeRaw(new byte[0]));
+    }
+
+    @Test
+    public void unSupportedUTF8() {
+        JSONWriter jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        assertThrows(JSONException.class, () -> jsonWriter.writeRaw(new char[0]));
+        assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new char[0]));
+        assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new char[0], 0, 0));
+        assertThrows(JSONException.class, () -> jsonWriter.writeTypeName(""));
+        assertThrows(JSONException.class, () -> jsonWriter.writeTypeName(new byte[0], 0));
+    }
+
+    @Test
+    public void writeMillis() throws Exception {
+        JSONWriter jsonWriter = JSONWriter.ofUTF8();
+        jsonWriter.writeMillis(1);
+        assertEquals("1", jsonWriter.toString());
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        jsonWriter.flushTo(out);
+        assertEquals("1", new String(out.toByteArray()));
+    }
+
+    @Test
+    public void writeMillis1() throws Exception {
+        JSONWriter jsonWriter = JSONWriter.ofUTF8();
+        jsonWriter.writeMillis(101);
+        assertEquals("101", jsonWriter.toString());
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        jsonWriter.flushTo(out, StandardCharsets.UTF_8);
+        assertEquals("101", new String(out.toByteArray()));
+    }
+
+    @Test
+    public void writeInt64() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        jsonWriter.writeInt64(null);
+        assertEquals("null", jsonWriter.toString());
+
+        StringWriter writer = new StringWriter();
+        jsonWriter.flushTo(writer);
+        assertEquals("null", writer.toString());
+    }
+
+    @Test
+    public void writeInstant() {
+        JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.PrettyFormat);
+        jsonWriter.writeInstant(null);
+        assertEquals("null", jsonWriter.toString());
+
+        StringWriter writer = new StringWriter();
+        jsonWriter.flushTo(writer);
+        assertEquals("null", writer.toString());
+    }
+
+    @Test
+    public void writeSymbol() {
+        JSONWriter jsonWriter = JSONWriter.ofUTF8();
+        jsonWriter.writeSymbol("id");
+        assertEquals("\"id\"", jsonWriter.toString());
+
+        StringWriter writer = new StringWriter();
+        jsonWriter.flushTo(writer);
+        assertEquals("\"id\"", writer.toString());
+    }
+
+    @Test
+    public void propertyPreFilter() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        JSONWriter.Context context = jsonWriter.getContext();
+
+        context.setPropertyPreFilter(null);
+        assertNull(context.getPropertyPreFilter());
+
+        context.setNameFilter(null);
+        assertNull(context.getNameFilter());
+
+        context.setValueFilter(null);
+        assertNull(context.getValueFilter());
+
+        context.setPropertyFilter(null);
+        assertNull(context.getPropertyFilter());
+
+        context.setContextValueFilter(null);
+        assertNull(context.getContextValueFilter());
+
+        context.setContextNameFilter(null);
+        assertNull(context.getContextNameFilter());
+
+        context.setAfterFilter(null);
+        assertNull(context.getAfterFilter());
+
+        context.setBeforeFilter(null);
+        assertNull(context.getBeforeFilter());
+
+        context.setLabelFilter(null);
+        assertNull(context.getLabelFilter());
+    }
+
+    @Test
+    public void path() {
+        assertEquals(JSONWriter.Path.ROOT_0, JSONWriter.Path.ROOT_0);
+        assertEquals(JSONWriter.Path.ROOT_0.hashCode(), JSONWriter.Path.ROOT_0.hashCode());
+        assertNotEquals(JSONWriter.Path.ROOT_0, JSONWriter.Path.ROOT);
+        assertNotEquals(JSONWriter.Path.ROOT_0, JSONWriter.Path.ROOT_1);
+    }
+
+    @Test
+    public void getBytes() {
+        JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        jsonWriter.writeString('a');
+        assertArrayEquals(new byte[] {'"', 'a', '"'}, jsonWriter.getBytes());
     }
 }

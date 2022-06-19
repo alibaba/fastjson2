@@ -2,6 +2,8 @@ package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -90,5 +92,31 @@ public class JSONWriterUTF8Test {
         JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
         jsonWriter.writeString(new String(chars));
         assertEquals(chars.length + 2, jsonWriter.toString().length());
+    }
+
+    @Test
+    public void writeRaw() {
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        jsonWriter.writeRaw('A');
+        assertEquals("A", jsonWriter.toString());
+    }
+
+    @Test
+    public void writeRaw1() {
+        String str = "\"abc\":";
+        byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
+
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        jsonWriter.startObject();
+        jsonWriter.writeNameRaw(utf8, 0, utf8.length);
+        assertEquals("{\"abc\":", jsonWriter.toString());
+    }
+
+    @Test
+    public void writeLocalDate() {
+        LocalDate localDate = LocalDate.of(2018, 6, 23);
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        jsonWriter.writeLocalDate(localDate);
+        assertEquals("\"2018-06-23\"", jsonWriter.toString());
     }
 }
