@@ -106,6 +106,8 @@ final class JSONReaderJSONB
                 }
             }
             charset = StandardCharsets.US_ASCII;
+        } else if (strtype == BC_STR_UTF8) {
+            charset = StandardCharsets.UTF_8;
         } else if (strtype == BC_STR_UTF16) {
             charset = StandardCharsets.UTF_16;
         } else if (strtype == BC_STR_UTF16LE) {
@@ -113,7 +115,7 @@ final class JSONReaderJSONB
         } else if (strtype == BC_STR_UTF16BE) {
             charset = StandardCharsets.UTF_16BE;
         } else {
-            throw new JSONException("TODO : " + strtype);
+            throw new JSONException("TODO : " + JSONB.typeName(strtype));
         }
 
         return new String(bytes, strBegin, strlen, charset);
@@ -2592,7 +2594,7 @@ final class JSONReaderJSONB
 
     @Override
     protected void readNumber0() {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
@@ -3450,17 +3452,6 @@ final class JSONReaderJSONB
     }
 
     @Override
-    public boolean nextIfMatch(byte[] bytes) {
-        for (int i = 0; i < bytes.length; i++) {
-            if (this.bytes[offset + i] != bytes[i]) {
-                return false;
-            }
-        }
-        offset += bytes.length;
-        return true;
-    }
-
-    @Override
     public boolean nextIfMatch(byte type) {
         if (bytes[offset] == type) {
             offset++;
@@ -3982,7 +3973,7 @@ final class JSONReaderJSONB
 
     @Override
     protected LocalDateTime readLocalDateTime18() {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
@@ -4284,11 +4275,11 @@ final class JSONReaderJSONB
 
     @Override
     public String readPattern() {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public boolean nextIfMatchIdent(char c0, char c1, char c2) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public long readFieldNameHashCodeUnquote() {
@@ -4300,11 +4291,11 @@ final class JSONReaderJSONB
     }
 
     public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override

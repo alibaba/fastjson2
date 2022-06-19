@@ -4088,7 +4088,85 @@ class JSONReaderUTF8
 
     @Override
     protected LocalDateTime readLocalDate11() {
-        throw new JSONException("NotSupportedOperation");
+        if (ch != '"' && ch != '\'') {
+            throw new JSONException("localDate only support string input");
+        }
+
+        byte c0 = bytes[offset + 0];
+        byte c1 = bytes[offset + 1];
+        byte c2 = bytes[offset + 2];
+        byte c3 = bytes[offset + 3];
+        byte c4 = bytes[offset + 4];
+        byte c5 = bytes[offset + 5];
+        byte c6 = bytes[offset + 6];
+        byte c7 = bytes[offset + 7];
+        byte c8 = bytes[offset + 8];
+        byte c9 = bytes[offset + 9];
+        byte c10 = bytes[offset + 10];
+
+        byte y0, y1, y2, y3, m0, m1, d0, d1;
+        if (c4 == '-' && c7 == '-' && c10 == 'Z') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+        } else {
+            return null;
+        }
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            return null;
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '1'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            return null;
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            return null;
+        }
+
+        if (year == 0 && month == 0 && dom == 0) {
+            return null;
+        }
+
+        LocalDateTime ldt;
+        try {
+            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+        } catch (DateTimeException e) {
+            throw new JSONException(info(), e);
+        }
+
+        offset += 11;
+        next();
+        if (ch == ',') {
+            this.comma = true;
+            next();
+        }
+        return ldt;
     }
 
     @Override
