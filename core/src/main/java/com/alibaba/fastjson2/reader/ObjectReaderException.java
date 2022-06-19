@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 
-public class ObjectReaderException
-        extends ObjectReaderBean {
+public class ObjectReaderException<T>
+        extends ObjectReaderBean<T> {
     static final long HASH_TYPE = Fnv.hashCode64("@type");
     static final long HASH_MESSAGE = Fnv.hashCode64("message");
     static final long HASH_DETAIL_MESSAGE = Fnv.hashCode64("detailMessage");
@@ -21,13 +21,13 @@ public class ObjectReaderException
 
     private FieldReader fieldReaderStackTrace;
 
-    protected ObjectReaderException(Class objectClass) {
+    protected ObjectReaderException(Class<T> objectClass) {
         super(objectClass, objectClass.getName(), null);
         fieldReaderStackTrace = ObjectReaders.fieldReader("stackTrace", StackTraceElement[].class, Throwable::setStackTrace);
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public T readObject(JSONReader jsonReader, long features) {
         jsonReader.nextIfObjectStart();
 
         String message = null;
@@ -62,7 +62,7 @@ public class ObjectReaderException
                     continue;
                 }
 
-                return reader.readObject(jsonReader);
+                return (T) reader.readObject(jsonReader);
             } else if (hash == HASH_MESSAGE || hash == HASH_DETAIL_MESSAGE) {
                 message = jsonReader.readString();
             } else if (hash == HASH_CAUSE) {
@@ -104,11 +104,11 @@ public class ObjectReaderException
             jsonReader.addResolveTask(fieldReaderStackTrace, object, JSONPath.of(stackTraceReference));
         }
 
-        return object;
+        return (T) object;
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public T readJSONBObject(JSONReader jsonReader, long features) {
         if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY && jsonReader.isSupportAutoType(features)) {
             jsonReader.next();
             long typeHash = jsonReader.readTypeHashCode();
@@ -124,7 +124,7 @@ public class ObjectReaderException
                     throw new JSONException("auoType not support : " + typeName + ", offset " + jsonReader.getOffset());
                 }
             }
-            return autoTypeObjectReader.readJSONBObject(jsonReader, 0);
+            return (T) autoTypeObjectReader.readJSONBObject(jsonReader, 0);
         }
 
         return readObject(jsonReader, features);
