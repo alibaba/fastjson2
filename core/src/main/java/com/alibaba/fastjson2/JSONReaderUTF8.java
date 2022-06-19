@@ -5591,6 +5591,46 @@ class JSONReaderUTF8
     }
 
     @Override
+    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3) {
+        if (ch != c0) {
+            return false;
+        }
+
+        int offset3 = offset + 3;
+        if (offset3 > end
+                || bytes[offset] != c1
+                || bytes[offset + 1] != c2
+                || bytes[offset + 2] != c3) {
+            return false;
+        }
+
+        if (offset3 == end) {
+            offset = offset3;
+            this.ch = EOI;
+            return true;
+        }
+
+        int offset = offset3;
+        char ch = (char) bytes[offset];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            offset++;
+            if (offset == end) {
+                ch = EOI;
+                break;
+            }
+            ch = (char) bytes[offset];
+        }
+        if (offset == offset3 && ch != '(' && ch != ',' && ch != ']') {
+            return false;
+        }
+
+        this.offset = offset + 1;
+        this.ch = ch;
+        return true;
+    }
+
+    @Override
     public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
         if (ch != c0) {
             return false;
@@ -5623,7 +5663,7 @@ class JSONReaderUTF8
             }
             ch = (char) bytes[offset];
         }
-        if (offset == offset5) {
+        if (offset == offset5 && ch != '(') {
             return false;
         }
 
