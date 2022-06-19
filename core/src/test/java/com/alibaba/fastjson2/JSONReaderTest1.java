@@ -122,17 +122,55 @@ public class JSONReaderTest1 {
 
     @Test
     public void testNextIfMatch3_1() {
-        for (JSONReader jsonReader : TestUtils.createJSONReaders("lax")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("lax")) {
             assertTrue(jsonReader.nextIfMatchIdent('l', 'a', 'x'));
         }
-        for (JSONReader jsonReader : TestUtils.createJSONReaders("lax ")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("lax ")) {
             assertTrue(jsonReader.nextIfMatchIdent('l', 'a', 'x'));
         }
-        for (JSONReader jsonReader : TestUtils.createJSONReaders("laxy")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("lax (")) {
+            assertTrue(jsonReader.nextIfMatchIdent('l', 'a', 'x'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("laxy")) {
             assertFalse(jsonReader.nextIfMatchIdent('l', 'a', 'x'));
         }
-        for (JSONReader jsonReader : TestUtils.createJSONReaders("la")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("la")) {
             assertFalse(jsonReader.nextIfMatchIdent('l', 'a', 'x'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("abc")) {
+            assertFalse(jsonReader.nextIfMatchIdent('l', 'a', 'x'));
+        }
+    }
+
+    @Test
+    public void testNextIfMatch4() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("last")) {
+            assertTrue(jsonReader.nextIfMatchIdent('l', 'a', 's', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("last ")) {
+            assertTrue(jsonReader.nextIfMatchIdent('l', 'a', 's', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("last,")) {
+            assertTrue(jsonReader.nextIfMatchIdent('l', 'a', 's', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("last]")) {
+            assertTrue(jsonReader.nextIfMatchIdent('l', 'a', 's', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("lastest")) {
+            assertFalse(jsonReader.nextIfMatchIdent('l', 'a', 's', 't'));
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("l")) {
+            assertFalse(jsonReader.nextIfMatchIdent('l', 'a', 's', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("la")) {
+            assertFalse(jsonReader.nextIfMatchIdent('l', 'a', 's', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("las")) {
+            assertFalse(jsonReader.nextIfMatchIdent('l', 'a', 's', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("abcd")) {
+            assertFalse(jsonReader.nextIfMatchIdent('l', 'a', 's', 't'));
         }
     }
 
@@ -145,6 +183,37 @@ public class JSONReaderTest1 {
             assertEquals('.', jsonReader.current());
             jsonReader.next();
             assertEquals("id", jsonReader.readFieldNameUnquote());
+        }
+    }
+
+    @Test
+    public void testNextIfMatch6_1() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("strict")) {
+            assertTrue(jsonReader.nextIfMatchIdent('s', 't', 'r', 'i', 'c', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("strict ")) {
+            assertTrue(jsonReader.nextIfMatchIdent('s', 't', 'r', 'i', 'c', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("abc")) {
+            assertFalse(jsonReader.nextIfMatchIdent('s', 't', 'r', 'i', 'c', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("stricA")) {
+            assertFalse(jsonReader.nextIfMatchIdent('s', 't', 'r', 'i', 'c', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("striAt")) {
+            assertFalse(jsonReader.nextIfMatchIdent('s', 't', 'r', 'i', 'c', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("strAct")) {
+            assertFalse(jsonReader.nextIfMatchIdent('s', 't', 'r', 'i', 'c', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("stRict")) {
+            assertFalse(jsonReader.nextIfMatchIdent('s', 't', 'r', 'i', 'c', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("sTrict")) {
+            assertFalse(jsonReader.nextIfMatchIdent('s', 't', 'r', 'i', 'c', 't'));
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("Strict")) {
+            assertFalse(jsonReader.nextIfMatchIdent('s', 't', 'r', 'i', 'c', 't'));
         }
     }
 
@@ -316,6 +385,12 @@ public class JSONReaderTest1 {
 
     @Test
     public void testReadUUID() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("null")) {
+            assertNull(jsonReader.readUUID());
+            assertEquals(JSONReader.EOI, jsonReader.ch);
+            assertFalse(jsonReader.comma);
+        }
+
         UUID uuid = UUID.fromString("8c2fef2f-1c68-4075-8bf2-3fe66fd02297");
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"8c2fef2f-1c68-4075-8bf2-3fe66fd02297\"")) {
             assertEquals(uuid, jsonReader.readUUID());
@@ -670,6 +745,25 @@ public class JSONReaderTest1 {
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'20180401'")) {
+            assertEquals(localTime,
+                    jsonReader
+                            .readLocalDate8()
+                            .toLocalDate()
+            );
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'20183301'")) {
+            assertNull(jsonReader.readLocalDate8());
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'20180241'")) {
+            assertNull(jsonReader.readLocalDate8());
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'20180231'")) {
+            assertThrows(JSONException.class, () -> jsonReader.readLocalDate8());
+        }
     }
 
     @Test
@@ -684,6 +778,10 @@ public class JSONReaderTest1 {
             assertEquals(localTime, jsonReader.readLocalDate9().toLocalDate());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'2018-2-31'")) {
+            assertThrows(JSONException.class, () -> jsonReader.readLocalDate9());
         }
     }
 
@@ -737,6 +835,10 @@ public class JSONReaderTest1 {
             assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'2018-02-31'")) {
+            assertThrows(JSONException.class, () -> jsonReader.readLocalDate10());
         }
     }
 
@@ -819,20 +921,20 @@ public class JSONReaderTest1 {
 
     @Test
     public void test_readPattern() {
-        for (JSONReader jsonReader : TestUtils.createJSONReaders2("1 /abc/")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("1 /abc/")) {
             jsonReader.next();
             assertEquals("abc", jsonReader.readPattern());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertFalse(jsonReader.comma);
         }
-        for (JSONReader jsonReader : TestUtils.createJSONReaders2("1 /abc/ , ")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("1 /abc/ , ")) {
             jsonReader.next();
             assertEquals("abc", jsonReader.readPattern());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
-        for (JSONReader jsonReader : TestUtils.createJSONReaders2("1 /abc/ , 1")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("1 /abc/ , 1")) {
             jsonReader.next();
             assertEquals("abc", jsonReader.readPattern());
             assertEquals('1', jsonReader.ch);
@@ -899,6 +1001,436 @@ public class JSONReaderTest1 {
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("{\"$ref\" : \"")) {
             assertTrue(jsonReader.isReference());
+        }
+    }
+
+    @Test
+    public void test_nextIfMatch() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(",")) {
+            assertTrue(jsonReader.nextIfMatch(','));
+        }
+    }
+
+    @Test
+    public void test_nextIfSet() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("Set")) {
+            assertTrue(jsonReader.nextIfSet());
+            assertTrue(jsonReader.isEnd());
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("Set[")) {
+            assertTrue(jsonReader.nextIfSet());
+            assertEquals('[', jsonReader.ch);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("Set  [")) {
+            assertTrue(jsonReader.nextIfSet());
+            assertEquals('[', jsonReader.ch);
+        }
+    }
+
+    @Test
+    public void test_isBinary() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("1")) {
+            assertFalse(jsonReader.isBinary());
+        }
+    }
+
+    @Test
+    public void test_readFieldNameUnquoted() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("id")) {
+            assertEquals(Fnv.hashCode64("id"), jsonReader.readFieldNameHashCodeUnquote());
+            assertEquals("id", jsonReader.getFieldName());
+        }
+    }
+
+    @Test
+    public void test_getNameHashCodeLCase() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"A中国\":")) {
+            assertEquals(Fnv.hashCode64("A中国"), jsonReader.readFieldNameHashCode());
+            assertEquals(Fnv.hashCode64("a中国"), jsonReader.getNameHashCodeLCase());
+            assertEquals("A中国", jsonReader.getFieldName());
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\u0000\\u0001\\u0002\":")) {
+            assertEquals(Fnv.hashCode64("\0\1\2"), jsonReader.readFieldNameHashCode());
+            assertEquals(Fnv.hashCode64("\0\1\2"), jsonReader.getNameHashCodeLCase());
+            assertEquals("\0\1\2", jsonReader.getFieldName());
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\x00\\x01\\x02\" : 1")) {
+            assertEquals(Fnv.hashCode64("\0\1\2"), jsonReader.readFieldNameHashCode());
+            assertEquals(Fnv.hashCode64("\0\1\2"), jsonReader.getNameHashCodeLCase());
+            assertEquals("\0\1\2", jsonReader.getFieldName());
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\\\\\\"\":")) {
+            assertEquals(Fnv.hashCode64("\\\""), jsonReader.readFieldNameHashCode());
+            assertEquals(Fnv.hashCode64("\\\""), jsonReader.getNameHashCodeLCase());
+            assertEquals("\\\"", jsonReader.getFieldName());
+        }
+    }
+
+    @Test
+    public void test_readFieldName() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"A中国\":")) {
+            assertEquals("A中国", jsonReader.readFieldName());
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\u0000\\u0001\\u0002\":")) {
+            assertEquals("\0\1\2", jsonReader.readFieldName());
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\x00\\x01\\x02\" : 1")) {
+            assertEquals("\0\1\2", jsonReader.readFieldName());
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\\\\\\"\":")) {
+            assertEquals("\\\"", jsonReader.readFieldName());
+        }
+    }
+
+    @Test
+    public void test_readValueHashCode() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"A中国\"")) {
+            assertEquals(Fnv.hashCode64("A中国"), jsonReader.readValueHashCode());
+            assertEquals("A中国", jsonReader.getString());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\\u0000\\u0001\\u0002\",")) {
+            assertEquals(Fnv.hashCode64("\0\1\2"), jsonReader.readValueHashCode());
+            assertEquals("\0\1\2", jsonReader.getString());
+            assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\\x00\\x01\\x02\" , \"abc\"")) {
+            assertEquals(Fnv.hashCode64("\0\1\2"), jsonReader.readValueHashCode());
+            assertEquals("\0\1\2", jsonReader.getString());
+            assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\\\\\\\"\"}")) {
+            assertEquals(Fnv.hashCode64("\\\""), jsonReader.readValueHashCode());
+            assertEquals("\\\"", jsonReader.getString());
+            assertFalse(jsonReader.comma);
+        }
+    }
+
+    @Test
+    public void test_readInt32() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("123")) {
+            assertEquals(123, jsonReader.readInt32());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("+123")) {
+            assertEquals(123, jsonReader.readInt32());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("-123")) {
+            assertEquals(-123, jsonReader.readInt32());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"123\"")) {
+            assertEquals(123, jsonReader.readInt32());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'123'")) {
+            assertEquals(123, jsonReader.readInt32());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("123, ")) {
+            assertEquals(123, jsonReader.readInt32());
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("123 , 1")) {
+            assertEquals(123, jsonReader.readInt32());
+            assertEquals('1', jsonReader.ch);
+            assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\"")) {
+            assertNull(jsonReader.readInt32());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'',")) {
+            assertNull(jsonReader.readInt32());
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+    }
+
+    @Test
+    public void test_readInt32Value() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("123")) {
+            assertEquals(123, jsonReader.readInt32Value());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("+123")) {
+            assertEquals(123, jsonReader.readInt32Value());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("-123")) {
+            assertEquals(-123, jsonReader.readInt32Value());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"123\"")) {
+            assertEquals(123, jsonReader.readInt32Value());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.wasNull);
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'123'")) {
+            assertEquals(123, jsonReader.readInt32Value());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.wasNull);
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("123, ")) {
+            assertEquals(123, jsonReader.readInt32Value());
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("123 , 1")) {
+            assertEquals(123, jsonReader.readInt32Value());
+            assertEquals('1', jsonReader.ch);
+            assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\"")) {
+            assertEquals(0, jsonReader.readInt32Value());
+            assertTrue(jsonReader.wasNull);
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'',")) {
+            assertEquals(0, jsonReader.readInt32Value());
+            assertTrue(jsonReader.wasNull);
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+    }
+
+    @Test
+    public void test_readInt64Value() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("123")) {
+            assertEquals(123, jsonReader.readInt64Value());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("+123")) {
+            assertEquals(123, jsonReader.readInt64Value());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("-123")) {
+            assertEquals(-123, jsonReader.readInt64Value());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"123\"")) {
+            assertEquals(123, jsonReader.readInt64Value());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.wasNull);
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'123'")) {
+            assertEquals(123, jsonReader.readInt64Value());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.wasNull);
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("123, ")) {
+            assertEquals(123, jsonReader.readInt64Value());
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("123 , 1")) {
+            assertEquals(123, jsonReader.readInt64Value());
+            assertEquals('1', jsonReader.ch);
+            assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\"")) {
+            assertEquals(0, jsonReader.readInt64Value());
+            assertTrue(jsonReader.wasNull);
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'',")) {
+            assertEquals(0, jsonReader.readInt64Value());
+            assertTrue(jsonReader.wasNull);
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+    }
+
+    @Test
+    public void test_readInt64() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("123")) {
+            assertEquals(123L, jsonReader.readInt64());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("+123")) {
+            assertEquals(123L, jsonReader.readInt64());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("-123")) {
+            assertEquals(-123L, jsonReader.readInt64());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"123\"")) {
+            assertEquals(123L, jsonReader.readInt64());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'123'")) {
+            assertEquals(123L, jsonReader.readInt64());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("123, ")) {
+            assertEquals(123L, jsonReader.readInt64());
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("123 , 1")) {
+            assertEquals(123L, jsonReader.readInt64());
+            assertEquals('1', jsonReader.ch);
+            assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\"")) {
+            assertNull(jsonReader.readInt64());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'',")) {
+            assertNull(jsonReader.readInt64());
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+    }
+
+    @Test
+    public void test_readString() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"A中国\"")) {
+            assertEquals("A中国", jsonReader.readString());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("'A中国',")) {
+            assertEquals("A中国", jsonReader.readString());
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\u0000\\u0001\\u0002\":")) {
+            assertEquals("\0\1\2", jsonReader.readString());
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\x00\\x01\\x02\" , 1")) {
+            assertEquals("\0\1\2", jsonReader.readString());
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\\\\\\"\",")) {
+            assertEquals("\\\"", jsonReader.readString());
+        }
+    }
+
+    @Test
+    public void test_readBinary() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("'',")) {
+            assertNull(jsonReader.readBinary());
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("'abc',")) {
+            assertThrows(JSONException.class, () -> jsonReader.readBinary());
+        }
+    }
+
+    @Test
+    public void test_readIfNull() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("null")) {
+            assertTrue(jsonReader.readIfNull());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("null  ")) {
+            assertTrue(jsonReader.readIfNull());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("null,")) {
+            assertTrue(jsonReader.readIfNull());
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("null  ,  1")) {
+            assertTrue(jsonReader.readIfNull());
+            assertFalse(jsonReader.isEnd());
+            assertEquals('1', jsonReader.ch);
+            assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("nul_")) {
+            assertFalse(jsonReader.readIfNull());
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("nu_l")) {
+            assertFalse(jsonReader.readIfNull());
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("n_ll")) {
+            assertFalse(jsonReader.readIfNull());
+        }
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("_ull")) {
+            assertFalse(jsonReader.readIfNull());
+        }
+    }
+
+    @Test
+    public void test_readNullOrNewDate() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("null")) {
+            assertNull(jsonReader.readNullOrNewDate());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("null  ")) {
+            assertNull(jsonReader.readNullOrNewDate());
+            assertTrue(jsonReader.isEnd());
+            assertFalse(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("null,")) {
+            assertNull(jsonReader.readNullOrNewDate());
+            assertTrue(jsonReader.isEnd());
+            assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("null  ,  1")) {
+            assertNull(jsonReader.readNullOrNewDate());
+            assertFalse(jsonReader.isEnd());
+            assertEquals('1', jsonReader.ch);
+            assertTrue(jsonReader.comma);
         }
     }
 }

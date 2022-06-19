@@ -9,10 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
@@ -173,7 +170,7 @@ class JSONReaderUTF8
     @Override
     public boolean nextIfSet() {
         if (ch == 'S'
-                && offset + 2 < end
+                && offset + 1 < end
                 && bytes[offset] == 'e'
                 && bytes[offset + 1] == 't') {
             offset += 2;
@@ -557,7 +554,11 @@ class JSONReaderUTF8
                 if (c == ',') {
                     this.comma = true;
                     offset++;
-                    c = bytes[offset];
+                    if (offset == end) {
+                        c = EOI;
+                    } else {
+                        c = bytes[offset];
+                    }
 
                     while (c <= ' ' && ((1L << c) & SPACE) != 0) {
                         offset++;
@@ -914,7 +915,11 @@ class JSONReaderUTF8
                 }
 
                 offset++;
-                c = bytes[offset];
+                if (offset == end) {
+                    c = EOI;
+                } else {
+                    c = bytes[offset];
+                }
 
                 while (c <= ' ' && ((1L << c) & SPACE) != 0) {
                     offset++;
@@ -1063,7 +1068,8 @@ class JSONReaderUTF8
         }
 
         if (quote != 0) {
-            ch = (char) bytes[offset++];
+            wasNull = firstOffset + 1 == offset;
+            ch = offset == end ? EOI : (char) bytes[offset++];
         }
 
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
@@ -1103,17 +1109,13 @@ class JSONReaderUTF8
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = (char) bytes[this.offset++];
+            this.ch = offset == end ? EOI : (char) bytes[this.offset++];
             // next inline
-            if (this.offset >= end) {
-                this.ch = EOI;
-            } else {
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    if (offset >= end) {
-                        ch = EOI;
-                    } else {
-                        ch = (char) bytes[offset++];
-                    }
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[offset++];
                 }
             }
         }
@@ -1139,8 +1141,8 @@ class JSONReaderUTF8
                     ch = EOI;
                 } else {
                     ch = (char) bytes[offset++];
+                    nextIfMatch(',');
                 }
-                nextIfMatch(',');
                 return null;
             }
         }
@@ -1330,7 +1332,8 @@ class JSONReaderUTF8
         }
 
         if (quote != 0) {
-            this.ch = (char) bytes[offset++];
+            wasNull = firstOffset + 1 == offset;
+            this.ch = offset == end ? EOI : (char) bytes[offset++];
         }
 
         if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
@@ -1370,17 +1373,13 @@ class JSONReaderUTF8
 
         if (this.ch == ',') {
             this.comma = true;
-            this.ch = (char) bytes[this.offset++];
+            this.ch = offset == end ? EOI : (char) bytes[this.offset++];
             // next inline
-            if (this.offset >= end) {
-                this.ch = EOI;
-            } else {
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    if (offset >= end) {
-                        this.ch = EOI;
-                    } else {
-                        this.ch = (char) bytes[offset++];
-                    }
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    this.ch = EOI;
+                } else {
+                    this.ch = (char) bytes[offset++];
                 }
             }
         }
@@ -3052,7 +3051,7 @@ class JSONReaderUTF8
         }
         if (ch == ',') {
             this.comma = true;
-            ch = (char) bytes[offset++];
+            ch = offset == end ? EOI : (char) bytes[offset++];
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 if (offset >= end) {
@@ -3163,7 +3162,7 @@ class JSONReaderUTF8
         }
         if (ch == ',') {
             this.comma = true;
-            ch = (char) bytes[offset++];
+            ch = offset == end ? EOI : (char) bytes[offset++];
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 if (offset >= end) {
@@ -3851,7 +3850,7 @@ class JSONReaderUTF8
         }
 
         int month;
-        if (m0 >= '0' && m0 <= '9'
+        if (m0 >= '0' && m0 <= '1'
                 && m1 >= '0' && m1 <= '9'
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
@@ -3860,7 +3859,7 @@ class JSONReaderUTF8
         }
 
         int dom;
-        if (d0 >= '0' && d0 <= '9'
+        if (d0 >= '0' && d0 <= '3'
                 && d1 >= '0' && d1 <= '9'
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
@@ -3868,7 +3867,12 @@ class JSONReaderUTF8
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+        LocalDateTime ldt;
+        try {
+            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+        } catch (DateTimeException e) {
+            throw new JSONException(info(), e);
+        }
 
         offset += 9;
         next();
@@ -3951,7 +3955,12 @@ class JSONReaderUTF8
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+        LocalDateTime ldt;
+        try {
+            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+        } catch (DateTimeException e) {
+            throw new JSONException(info(), e);
+        }
 
         offset += 10;
         next();
@@ -4061,7 +4070,12 @@ class JSONReaderUTF8
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+        LocalDateTime ldt;
+        try {
+            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+        } catch (DateTimeException e) {
+            throw new JSONException(info(), e);
+        }
 
         offset += 11;
         next();

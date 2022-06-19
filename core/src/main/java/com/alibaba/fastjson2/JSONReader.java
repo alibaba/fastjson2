@@ -416,20 +416,9 @@ public abstract class JSONReader
         next();
     }
 
-    public boolean nextIfMatch(char ch) {
-        if (this.ch != ch) {
-            return false;
-        }
-        if (ch == ',') {
-            this.comma = true;
-        }
-        next();
-        return true;
-    }
+    public abstract boolean nextIfMatch(char ch);
 
-    public boolean nextIfSet() {
-        return false;
-    }
+    public abstract boolean nextIfSet();
 
     public abstract String readPattern();
 
@@ -461,28 +450,32 @@ public abstract class JSONReader
         return typeRedirect;
     }
 
-    public long readFieldNameHashCodeUnquote() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract long readFieldNameHashCodeUnquote();
 
     public String readFieldNameUnquote() {
         readFieldNameHashCodeUnquote();
         return getFieldName();
     }
 
-    public boolean skipName() {
-        readFieldNameHashCode();
-        return true;
-    }
+    public abstract boolean skipName();
 
     public abstract void skipValue();
 
     public boolean isBinary() {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     public byte[] readBinary() {
-        throw new UnsupportedOperationException();
+        if (ch != '"' && ch != '\'') {
+            throw new UnsupportedOperationException();
+        }
+
+        String str = readString();
+        if (str.isEmpty()) {
+            return null;
+        }
+
+        throw new JSONException(info("not support input " + str));
     }
 
     public abstract int readInt32Value();
@@ -495,28 +488,11 @@ public abstract class JSONReader
         throw new UnsupportedOperationException();
     }
 
-    public boolean nextIfMatchIdent(char c0, char c1, char c2) {
-        if (ch != c0) {
-            return false;
-        }
+    public abstract boolean nextIfMatchIdent(char c0, char c1, char c2);
 
-        throw new UnsupportedOperationException();
-    }
+    public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3);
 
-    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3) {
-        if (ch != c0) {
-            return false;
-        }
-
-        throw new UnsupportedOperationException();
-    }
-
-    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
-        if (ch != c0) {
-            return false;
-        }
-        throw new UnsupportedOperationException();
-    }
+    public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5);
 
     public Integer readInt32() {
         readNumber0();
