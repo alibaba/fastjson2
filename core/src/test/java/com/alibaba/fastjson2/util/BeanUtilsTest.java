@@ -73,4 +73,10 @@ public class BeanUtilsTest {
             // ignored
         }
     }
+
+    @Test
+    public void object1() {
+        JSONObject1O object1O = new JSONObject1O();
+        assertTrue(object1O.isEmpty());
+    }
 }

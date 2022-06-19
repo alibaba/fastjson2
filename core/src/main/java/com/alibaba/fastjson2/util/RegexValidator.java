@@ -31,17 +31,6 @@ public class RegexValidator {
     }
 
     /**
-     * Construct a <i>case sensitive</i> validator that matches any one
-     * of the set of regular expressions.
-     *
-     * @param regexs The set of regular expressions this validator will
-     * validate against
-     */
-    public RegexValidator(String[] regexs) {
-        this(regexs, true);
-    }
-
-    /**
      * Construct a validator that matches any one of the set of regular
      * expressions with the specified case sensitivity.
      *

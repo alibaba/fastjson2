@@ -684,10 +684,6 @@ public abstract class BeanUtils {
         return superclass == RECORD_CLASS;
     }
 
-    public static String setterName(String methodName) {
-        return setterName(methodName, null);
-    }
-
     public static String setterName(String methodName, String namingStrategy) {
         if (namingStrategy == null) {
             namingStrategy = "CamelCase";

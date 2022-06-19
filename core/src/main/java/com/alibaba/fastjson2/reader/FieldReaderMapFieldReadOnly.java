@@ -50,7 +50,7 @@ class FieldReaderMapFieldReadOnly<T>
             throw new JSONException("set " + fieldName + " error", e);
         }
 
-        if (map == Collections.EMPTY_MAP) {
+        if (map == Collections.EMPTY_MAP || map == null) {
             return;
         }
 

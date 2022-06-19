@@ -1171,11 +1171,11 @@ public class ObjectReaderBaseModule
         }
 
         if (type == char.class || type == Character.class) {
-            return CharacterImpl.INSTANCE;
+            return ObjectReaderImplCharacter.INSTANCE;
         }
 
         if (type == boolean.class || type == Boolean.class) {
-            return BooleanImpl.INSTANCE;
+            return ObjectReaderImplBoolean.INSTANCE;
         }
 
         if (type == byte.class || type == Byte.class) {
@@ -1187,19 +1187,19 @@ public class ObjectReaderBaseModule
         }
 
         if (type == int.class || type == Integer.class) {
-            return IntegerImpl.INSTANCE;
+            return ObjectReaderImplInteger.INSTANCE;
         }
 
         if (type == long.class || type == Long.class) {
-            return LongImpl.INSTANCE;
+            return ObjectReaderImplInt64.INSTANCE;
         }
 
         if (type == float.class || type == Float.class) {
-            return FloatImpl.INSTANCE;
+            return ObjectReaderImplFloat.INSTANCE;
         }
 
         if (type == double.class || type == Double.class) {
-            return DoubleImpl.INSTANCE;
+            return ObjectReaderImplDouble.INSTANCE;
         }
 
         if (type == BigInteger.class) {
@@ -1211,7 +1211,7 @@ public class ObjectReaderBaseModule
         }
 
         if (type == Number.class) {
-            return NumberImpl.INSTANCE;
+            return ObjectReaderImplNumber.INSTANCE;
         }
 
         if (type == BitSet.class) {
@@ -1223,11 +1223,11 @@ public class ObjectReaderBaseModule
         }
 
         if (type == OptionalLong.class) {
-            return OptionalLongImpl.INSTANCE;
+            return ObjectReaderImplOptionalLong.INSTANCE;
         }
 
         if (type == OptionalDouble.class) {
-            return OptionalDoubleImpl.INSTANCE;
+            return ObjectReaderImplOptionalDouble.INSTANCE;
         }
 
         if (type == Optional.class) {
@@ -1235,7 +1235,7 @@ public class ObjectReaderBaseModule
         }
 
         if (type == UUID.class) {
-            return UUIDImpl.INSTANCE;
+            return ObjectReaderImplUUID.INSTANCE;
         }
 
         if (type == URI.class) {
@@ -1363,7 +1363,7 @@ public class ObjectReaderBaseModule
         }
 
         if (type == Locale.class) {
-            return LocaleImpl.INSTANCE;
+            return ObjectReaderImplLocale.INSTANCE;
         }
 
         if (type == Currency.class) {
@@ -1393,7 +1393,7 @@ public class ObjectReaderBaseModule
         }
 
         if (type == boolean[].class) {
-            return BoolValueArrayImpl.INSTANCE;
+            return ObjectReaderImplBoolValueArray.INSTANCE;
         }
 
         if (type == byte[].class) {
@@ -1449,7 +1449,7 @@ public class ObjectReaderBaseModule
         }
 
         if (type == AtomicIntegerArray.class) {
-            return AtomicIntegerArrayImpl.INSTANCE;
+            return ObjectReaderImplAtomicIntegerArray.INSTANCE;
         }
 
         if (type == AtomicLongArray.class) {
@@ -1520,7 +1520,7 @@ public class ObjectReaderBaseModule
             return ObjectReaderImplList.of(type, null, 0);
         }
 
-        if (type == SingletonSetImpl.TYPE) {
+        if (type == ObjectReaderImplSingletonSet.TYPE) {
 //            return SingletonSetImpl.INSTANCE;
             return ObjectReaderImplList.of(type, null, 0);
         }
@@ -1535,7 +1535,7 @@ public class ObjectReaderBaseModule
         }
 
         if (type == Map.Entry.class) {
-            return new MapEntryImpl(null, null);
+            return new ObjectReaderImplMapEntry(null, null);
         }
 
         if (type instanceof Class) {
@@ -1619,7 +1619,7 @@ public class ObjectReaderBaseModule
                 }
 
                 if (rawType == Map.Entry.class) {
-                    return new MapEntryImpl(actualTypeArguments[0], actualTypeArguments[1]);
+                    return new ObjectReaderImplMapEntry(actualTypeArguments[0], actualTypeArguments[1]);
                 }
 
                 switch (rawType.getTypeName()) {
@@ -1730,7 +1730,7 @@ public class ObjectReaderBaseModule
         }
 
         if (type instanceof GenericArrayType) {
-            return new GenericArrayImpl(((GenericArrayType) type).getGenericComponentType());
+            return new ObjectReaderImplGenericArray(((GenericArrayType) type).getGenericComponentType());
         }
 
         if (type instanceof WildcardType) {
@@ -1806,7 +1806,7 @@ public class ObjectReaderBaseModule
             implements ObjectReader<T> {
         @Override
         public T createInstance(long features) {
-            throw new UnsupportedOperationException();
+            throw new JSONException("UnsupportedOperation");
         }
 
         @Override
@@ -1818,337 +1818,14 @@ public class ObjectReaderBaseModule
         public abstract T readJSONBObject(JSONReader jsonReader, long features);
     }
 
-    static class CharacterImpl
-            extends PrimitiveImpl {
-        static final CharacterImpl INSTANCE = new CharacterImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            String str = jsonReader.readString();
-            if (str == null) {
-                return null;
-            }
-            return str.charAt(0);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            String str = jsonReader.readString();
-            if (str == null) {
-                return null;
-            }
-            return str.charAt(0);
-        }
-    }
-
-    static class BooleanImpl
-            extends PrimitiveImpl {
-        static final BooleanImpl INSTANCE = new BooleanImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return jsonReader.readBool();
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            return jsonReader.readBool();
-        }
-    }
-
-    static class IntegerImpl
-            extends PrimitiveImpl {
-        static final IntegerImpl INSTANCE = new IntegerImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return jsonReader.readInt32();
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            return jsonReader.readInt32();
-        }
-    }
-
-    static class OptionalLongImpl
-            extends PrimitiveImpl {
-        static final OptionalLongImpl INSTANCE = new OptionalLongImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            Long integer = jsonReader.readInt64();
-            if (integer == null) {
-                return OptionalLong.empty();
-            }
-            return OptionalLong.of(integer.longValue());
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            Long integer = jsonReader.readInt64();
-            if (integer == null) {
-                return OptionalLong.empty();
-            }
-            return OptionalLong.of(integer.longValue());
-        }
-    }
-
-    static class OptionalDoubleImpl
-            extends PrimitiveImpl {
-        static final OptionalDoubleImpl INSTANCE = new OptionalDoubleImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            Double value = jsonReader.readDouble();
-            if (value == null) {
-                return OptionalDouble.empty();
-            }
-            return OptionalDouble.of(value.doubleValue());
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            Double value = jsonReader.readDouble();
-            if (value == null) {
-                return OptionalDouble.empty();
-            }
-            return OptionalDouble.of(value.doubleValue());
-        }
-    }
-
-    static class LongImpl
-            extends PrimitiveImpl<Long> {
-        static final LongImpl INSTANCE = new LongImpl();
-
-        @Override
-        public Long readJSONBObject(JSONReader jsonReader, long features) {
-            return jsonReader.readInt64();
-        }
-
-        @Override
-        public Long readObject(JSONReader jsonReader, long features) {
-            return jsonReader.readInt64();
-        }
-    }
-
-    static class FloatImpl
-            extends PrimitiveImpl {
-        static final FloatImpl INSTANCE = new FloatImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return jsonReader.readFloat();
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            return jsonReader.readFloat();
-        }
-    }
-
-    static class DoubleImpl
-            extends PrimitiveImpl {
-        static final DoubleImpl INSTANCE = new DoubleImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return jsonReader.readDouble();
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            return jsonReader.readDouble();
-        }
-    }
-
-    static class NumberImpl
-            extends PrimitiveImpl {
-        static final NumberImpl INSTANCE = new NumberImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return jsonReader.readNumber();
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            return jsonReader.readNumber();
-        }
-    }
-
-    static class UUIDImpl
-            extends PrimitiveImpl {
-        static final UUIDImpl INSTANCE = new UUIDImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return jsonReader.readUUID();
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            return jsonReader.readUUID();
-        }
-    }
-
-    static class LocaleImpl
-            extends PrimitiveImpl {
-        static final LocaleImpl INSTANCE = new LocaleImpl();
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            String strVal = jsonReader.readString();
-            if (strVal == null || strVal.isEmpty()) {
-                return null;
-            }
-            String[] items = strVal.split("_");
-            if (items.length == 1) {
-                return new Locale(items[0]);
-            }
-            if (items.length == 2) {
-                return new Locale(items[0], items[1]);
-            }
-            return new Locale(items[0], items[1], items[2]);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            String strVal = jsonReader.readString();
-            if (strVal == null || strVal.isEmpty()) {
-                return null;
-            }
-            String[] items = strVal.split("_");
-            if (items.length == 1) {
-                return new Locale(items[0]);
-            }
-            if (items.length == 2) {
-                return new Locale(items[0], items[1]);
-            }
-            return new Locale(items[0], items[1], items[2]);
-        }
-    }
-
-    static class AtomicIntegerArrayImpl
-            extends PrimitiveImpl {
-        static final AtomicIntegerArrayImpl INSTANCE = new AtomicIntegerArrayImpl();
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (jsonReader.nextIfMatch('[')) {
-                List<Integer> values = new ArrayList<>();
-                for (; ; ) {
-                    if (jsonReader.nextIfMatch(']')) {
-                        break;
-                    }
-                    values.add(jsonReader.readInt32());
-                }
-                jsonReader.nextIfMatch(',');
-
-                AtomicIntegerArray array = new AtomicIntegerArray(values.size());
-                for (int i = 0; i < values.size(); i++) {
-                    Integer value = values.get(i);
-                    if (value == null) {
-                        continue;
-                    }
-                    array.set(i, value);
-                }
-                return array;
-            }
-
-            throw new JSONException(jsonReader.info("TODO"));
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt == -1) {
-                return null;
-            }
-            AtomicIntegerArray array = new AtomicIntegerArray(entryCnt);
-            for (int i = 0; i < entryCnt; i++) {
-                Integer value = jsonReader.readInt32();
-                if (value == null) {
-                    continue;
-                }
-                array.set(i, value);
-            }
-            return array;
-        }
-    }
-
-    static class BoolValueArrayImpl
-            extends PrimitiveImpl {
-        static final BoolValueArrayImpl INSTANCE = new BoolValueArrayImpl();
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            if (jsonReader.nextIfMatch('[')) {
-                boolean[] values = new boolean[16];
-                int size = 0;
-                for (; ; ) {
-                    if (jsonReader.nextIfMatch(']')) {
-                        break;
-                    }
-
-                    int minCapacity = size + 1;
-                    if (minCapacity - values.length > 0) {
-                        int oldCapacity = values.length;
-                        int newCapacity = oldCapacity + (oldCapacity >> 1);
-                        if (newCapacity - minCapacity < 0) {
-                            newCapacity = minCapacity;
-                        }
-
-                        values = Arrays.copyOf(values, newCapacity);
-                    }
-
-                    values[size++] = jsonReader.readBoolValue();
-                }
-                jsonReader.nextIfMatch(',');
-
-                return Arrays.copyOf(values, size);
-            }
-
-            if (jsonReader.isString()) {
-                String str = jsonReader.readString();
-                if (str.isEmpty()) {
-                    return null;
-                }
-
-                throw new JSONException(jsonReader.info("not support input " + str));
-            }
-
-            throw new JSONException(jsonReader.info("TODO"));
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt == -1) {
-                return null;
-            }
-            boolean[] array = new boolean[entryCnt];
-            for (int i = 0; i < entryCnt; i++) {
-                array[i] = jsonReader.readBoolValue();
-            }
-            return array;
-        }
-    }
-
     static class InterfaceImpl
             extends PrimitiveImpl {
         final Type interfaceType;
+        final Class interfaceClass;
 
         public InterfaceImpl(Type interfaceType) {
             this.interfaceType = interfaceType;
+            this.interfaceClass = TypeUtils.getClass(interfaceType);
         }
 
         @Override
@@ -2162,10 +1839,10 @@ public class ObjectReaderBaseModule
                     ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
                     if (autoTypeObjectReader == null) {
                         String typeName = jsonReader.getString();
-                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
+                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, interfaceClass);
 
                         if (autoTypeObjectReader == null) {
-                            throw new JSONException(jsonReader.info("auotype not support : " + typeName));
+                            throw new JSONException(jsonReader.info("auoType not support : " + typeName));
                         }
                     }
 
@@ -2217,210 +1894,6 @@ public class ObjectReaderBaseModule
         @Override
         public Object readJSONBObject(JSONReader jsonReader, long features) {
             return jsonReader.readAny();
-        }
-    }
-
-    static class MapEntryImpl
-            extends PrimitiveImpl {
-        final Type keyType;
-        final Type valueType;
-
-        volatile ObjectReader keyReader;
-        volatile ObjectReader valueReader;
-
-        public MapEntryImpl(Type keyType, Type valueType) {
-            this.keyType = keyType;
-            this.valueType = valueType;
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt != 2) {
-                throw new JSONException(jsonReader.info("entryCnt must be 2, but " + entryCnt));
-            }
-            Object key;
-            if (keyType == null) {
-                key = jsonReader.readAny();
-            } else {
-                if (keyReader == null) {
-                    keyReader = jsonReader.getObjectReader(keyType);
-                }
-                key = keyReader.readObject(jsonReader, features);
-            }
-
-            Object value;
-            if (valueType == null) {
-                value = jsonReader.readAny();
-            } else {
-                if (valueReader == null) {
-                    valueReader = jsonReader.getObjectReader(valueType);
-                }
-                value = valueReader.readObject(jsonReader, features);
-            }
-
-            return new AbstractMap.SimpleEntry(key, value);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            jsonReader.nextIfMatch('{');
-            Object key = jsonReader.readAny();
-            jsonReader.nextIfMatch(':');
-
-            Object value;
-            if (valueType == null) {
-                value = jsonReader.readAny();
-            } else {
-                if (valueReader == null) {
-                    valueReader = jsonReader.getObjectReader(valueType);
-                }
-                value = valueReader.readObject(jsonReader, features);
-            }
-
-            jsonReader.nextIfMatch('}');
-            jsonReader.nextIfMatch(',');
-            return new AbstractMap.SimpleEntry(key, value);
-        }
-    }
-
-    static class SingletonSetImpl
-            extends PrimitiveImpl {
-        static final Class TYPE = Collections.singleton(1).getClass();
-
-        @Override
-        public Class getObjectClass() {
-            return TYPE;
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt != 1) {
-                throw new JSONException(jsonReader.info("input not singleton"));
-            }
-            Object value = jsonReader.read(Object.class);
-            return Collections.singleton(value);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            jsonReader.nextIfMatch('[');
-            Object value = jsonReader.readAny();
-
-            if (jsonReader.nextIfMatch(']')) {
-                jsonReader.nextIfMatch(',');
-            } else {
-                throw new JSONException(jsonReader.info("input not singleton"));
-            }
-            return Collections.singleton(value);
-        }
-    }
-
-    static class GenericArrayImpl
-            implements ObjectReader {
-        final Type itemType;
-        final Class<?> componentClass;
-        ObjectReader itemObjectReader;
-
-        public GenericArrayImpl(Type itemType) {
-            this.itemType = itemType;
-            this.componentClass = TypeUtils.getMapping(itemType);
-        }
-
-        @Override
-        public Object createInstance(long features) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public FieldReader getFieldReader(long hashCode) {
-            return null;
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            int entryCnt = jsonReader.startArray();
-
-            if (entryCnt > 0 && itemObjectReader == null) {
-                itemObjectReader = jsonReader
-                        .getContext()
-                        .getObjectReader(itemType);
-            }
-
-            Object array = Array.newInstance(componentClass, entryCnt);
-
-            for (int i = 0; i < entryCnt; ++i) {
-                Object item = itemObjectReader.readJSONBObject(jsonReader, 0);
-                Array.set(array, i, item);
-            }
-
-            return array;
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, long features) {
-            if (itemObjectReader == null) {
-                itemObjectReader = jsonReader
-                        .getContext()
-                        .getObjectReader(itemType);
-            }
-
-            if (jsonReader.isJSONB()) {
-                return readJSONBObject(jsonReader, 0);
-            }
-
-            if (jsonReader.readIfNull()) {
-                return null;
-            }
-
-            char ch = jsonReader.current();
-            if (ch == '"') {
-                String str = jsonReader.readString();
-                if (str.isEmpty()) {
-                    return null;
-                }
-                throw new JSONException(jsonReader.info());
-            }
-
-            List<Object> list = new ArrayList<>();
-            if (ch != '[') {
-                throw new JSONException(jsonReader.info());
-            }
-            jsonReader.next();
-
-            for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
-                    break;
-                }
-
-                Object item;
-                if (itemObjectReader != null) {
-                    item = itemObjectReader.readObject(jsonReader, 0);
-                } else {
-                    if (itemType == String.class) {
-                        item = jsonReader.readString();
-                    } else {
-                        throw new JSONException(jsonReader.info("TODO : " + itemType));
-                    }
-                }
-
-                list.add(item);
-
-                if (jsonReader.nextIfMatch(',')) {
-                    continue;
-                }
-            }
-
-            jsonReader.nextIfMatch(',');
-
-            Object array = Array.newInstance(componentClass, list.size());
-
-            for (int i = 0; i < list.size(); ++i) {
-                Array.set(array, i, list.get(i));
-            }
-
-            return array;
         }
     }
 }
