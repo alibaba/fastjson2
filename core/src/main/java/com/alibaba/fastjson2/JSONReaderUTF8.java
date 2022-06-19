@@ -4087,6 +4087,11 @@ class JSONReaderUTF8
     }
 
     @Override
+    protected LocalDateTime readLocalDate11() {
+        throw new JSONException("NotSupportedOperation");
+    }
+
+    @Override
     protected LocalDateTime readLocalDateTime17() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
@@ -5766,6 +5771,9 @@ class JSONReaderUTF8
 
     @Override
     public String readReference() {
+        if (referenceBegin == end) {
+            return null;
+        }
         this.offset = referenceBegin;
         this.ch = (char) bytes[offset++];
         String reference = readString();

@@ -4,15 +4,14 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2_vo.*;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -1350,6 +1349,10 @@ public class JSONReaderTest1 {
         for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\\\\\\"\",")) {
             assertEquals("\\\"", jsonReader.readString());
         }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\0\\1\\2\\3\\4\\5\\6\\7\\v\",")) {
+            assertEquals("\0\1\2\3\4\5\6\7\u000B", jsonReader.readString());
+        }
     }
 
     @Test
@@ -1432,5 +1435,44 @@ public class JSONReaderTest1 {
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
+    }
+
+    @Test
+    public void test1() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("")) {
+            assertEquals(-128, jsonReader.getType());
+            assertFalse(jsonReader.isEnabled(JSONReader.Feature.IgnoreNoneSerializable));
+            assertFalse(jsonReader.isSupportSmartMatch());
+            assertNotNull(jsonReader.getZoneId());
+            assertNull(jsonReader.checkAutoType(Object.class, 0L, 0));
+            assertFalse(jsonReader.isReference());
+            assertNull(jsonReader.readReference());
+            assertThrows(JSONException.class, () -> jsonReader.nextIfMatch(new byte[0]));
+            assertThrows(JSONException.class, () -> jsonReader.nextIfMatch((byte) 0));
+        }
+    }
+
+    @Test
+    public void testReadArray() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders("[101,102,103]")) {
+            List list = new ArrayList<>();
+            jsonReader.readArray(list, Long.class);
+            assertEquals(3, list.size());
+            assertEquals(101L, list.get(0));
+            assertEquals(102L, list.get(1));
+            assertEquals(103L, list.get(2));
+        }
+    }
+
+    @Test
+    public void testOf() {
+        assertThrows(JSONException.class, () -> JSONReader.of((InputStream) null, StandardCharsets.ISO_8859_1));
+    }
+
+    @Test
+    public void testJSONB() {
+        byte[] bytes = JSONB.toBytes("");
+        JSONReader jsonReader = JSONReader.ofJSONB(JSONFactory.createReadContext(), bytes);
+        assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
     }
 }

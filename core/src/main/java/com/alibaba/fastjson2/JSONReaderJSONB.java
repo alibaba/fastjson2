@@ -3167,7 +3167,37 @@ final class JSONReaderJSONB
 
     @Override
     protected LocalDateTime readLocalDateTime16() {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    protected LocalDateTime readLocalDateTime17() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    protected LocalTime readLocalTime10() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    protected LocalTime readLocalTime11() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    protected LocalDateTime readLocalDate11() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    protected ZonedDateTime readZonedDateTimeX(int len) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    public void skipLineComment() {
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
