@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.function.impl.ToDouble;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
@@ -2921,7 +2922,7 @@ public abstract class JSONPath {
     }
 
     static FunctionSegment FUNCTION_TYPE = new FunctionSegment(JSONPath::type);
-    static FunctionSegment FUNCTION_DOUBLE = new FunctionSegment(new TypeConverts.ToDouble(null));
+    static FunctionSegment FUNCTION_DOUBLE = new FunctionSegment(new ToDouble(null));
     static FunctionSegment FUNCTION_FLOOR = new FunctionSegment(JSONPath::floor);
     static FunctionSegment FUNCTION_CEIL = new FunctionSegment(JSONPath::ceil);
     static FunctionSegment FUNCTION_ABS = new FunctionSegment(JSONPath::abs);

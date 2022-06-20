@@ -16,4 +16,9 @@ public class JSONFactoryTest {
         JSONFactory.setContextJSONPathCompiler(null);
         assertSame(JSONFactory.defaultJSONPathCompiler, JSONFactory.getDefaultJSONPathCompiler());
     }
+
+    @Test
+    public void test() {
+        new JSONFactory.Utils();
+    }
 }
