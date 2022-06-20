@@ -1296,6 +1296,7 @@ public class JSONObjectTest {
     public void testCompatible() {
         assertEquals(0, JSONObject.parseObject("{}").size());
         assertEquals(101, JSONObject.parseObject("{\"id\":101}", Bean.class).id);
+        assertEquals(101, JSONObject.parseObject("{\"ID\":101}", Bean.class, JSONReader.Feature.SupportSmartMatch).id);
         assertEquals(0, JSONArray.parseArray("[]").size());
     }
 }

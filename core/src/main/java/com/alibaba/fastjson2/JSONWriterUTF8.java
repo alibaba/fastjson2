@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -958,6 +959,7 @@ class JSONWriterUTF8
         bytes[off++] = '"';
     }
 
+    @Override
     public void writeLocalDate(LocalDate date) {
         int year = date.getYear();
         int month = date.getMonthValue();
@@ -1382,12 +1384,14 @@ class JSONWriterUTF8
         }
     }
 
+    @Override
     public void writeNameRaw(char[] chars) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
+    @Override
     public void writeNameRaw(char[] bytes, int offset, int len) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
@@ -1403,5 +1407,16 @@ class JSONWriterUTF8
             buf[--charPos] = (byte) DIGITS[((int) val) & mask];
             val >>>= 4;
         } while (charPos > offset);
+    }
+
+    public int flushTo(OutputStream out, Charset charset) throws IOException {
+        if (charset != null && charset != StandardCharsets.UTF_8) {
+            throw new JSONException("UnsupportedOperation");
+        }
+
+        int len = off;
+        out.write(bytes, 0, off);
+        off = 0;
+        return len;
     }
 }

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -853,55 +854,6 @@ class JSONWriterUTF16
         off += size;
     }
 
-    static void getChars(long i, int index, char[] chars) {
-        long q;
-        int r;
-        int charPos = index;
-        char sign = 0;
-
-        if (i < 0) {
-            sign = '-';
-            i = -i;
-        }
-
-        // Get 2 digits/iteration using longs until quotient fits into an int
-        while (i > Integer.MAX_VALUE) {
-            q = i / 100;
-            // really: r = i - (q * 100);
-            r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
-            i = q;
-            chars[--charPos] = (char) DigitOnes[r];
-            chars[--charPos] = (char) DigitTens[r];
-        }
-
-        // Get 2 digits/iteration using ints
-        int q2;
-        int i2 = (int) i;
-        while (i2 >= 65536) {
-            q2 = i2 / 100;
-            // really: r = i2 - (q * 100);
-            r = i2 - ((q2 << 6) + (q2 << 5) + (q2 << 2));
-            i2 = q2;
-            chars[--charPos] = (char) DigitOnes[r];
-            chars[--charPos] = (char) DigitTens[r];
-        }
-
-        // Fall thru to fast mode for smaller numbers
-        // assert(i2 <= 65536, i2);
-        for (; ; ) {
-            q2 = (i2 * 52429) >>> (16 + 3);
-            r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
-            chars[--charPos] = (char) digits[r];
-            i2 = q2;
-            if (i2 == 0) {
-                break;
-            }
-        }
-        if (sign != 0) {
-            chars[--charPos] = sign;
-        }
-    }
-
     @Override
     public void writeFloat(float value) {
         if (Float.isNaN(value) || Float.isInfinite(value)) {
@@ -1110,6 +1062,7 @@ class JSONWriterUTF16
         chars[off++] = '"';
     }
 
+    @Override
     public void writeLocalDate(LocalDate date) {
         int year = date.getYear();
         int month = date.getMonthValue();
@@ -1129,6 +1082,7 @@ class JSONWriterUTF16
         writeRaw(chars);
     }
 
+    @Override
     public void writeLocalDateTime(LocalDateTime dateTime) {
         int year = dateTime.getYear();
         int month = dateTime.getMonthValue();
@@ -1195,6 +1149,7 @@ class JSONWriterUTF16
         writeRaw(chars);
     }
 
+    @Override
     public void writeDateTimeISO8601(
             int year,
             int month,
@@ -1284,6 +1239,7 @@ class JSONWriterUTF16
         writeRaw(chars);
     }
 
+    @Override
     public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
         char[] chars = new char[10];
 
@@ -1301,6 +1257,7 @@ class JSONWriterUTF16
         writeString(chars);
     }
 
+    @Override
     public void writeTimeHHMMSS8(int hour, int minute, int second) {
         char[] chars = new char[8];
 
@@ -1316,13 +1273,19 @@ class JSONWriterUTF16
         writeString(chars);
     }
 
+    @Override
     public void writeNameRaw(byte[] bytes) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
     public int flushTo(OutputStream to) throws IOException {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    public int flushTo(OutputStream to, Charset charset) throws IOException {
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
@@ -1338,6 +1301,7 @@ class JSONWriterUTF16
         } while (charPos > offset);
     }
 
+    @Override
     public byte[] getBytes() {
         boolean ascii = true;
         for (int i = 0; i < off; i++) {
@@ -1357,5 +1321,9 @@ class JSONWriterUTF16
         byte[] utf8 = new byte[off * 3];
         int utf8Length = encodeUTF8(chars, 0, off, utf8, 0);
         return Arrays.copyOf(utf8, utf8Length);
+    }
+
+    public void writeRaw(byte[] bytes) {
+        throw new JSONException("UnsupportedOperation");
     }
 }

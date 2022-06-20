@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class JSONPath_18 {
     String str = "{ \"inputs\": {\n" +
@@ -47,5 +48,11 @@ public class JSONPath_18 {
                         .eval(JSON.parseObject(str))
                         .toString()
         );
+    }
+
+    @Test
+    public void test2() {
+        Object object = new Object();
+        assertSame(object, JSONPath.of("$").eval(object));
     }
 }

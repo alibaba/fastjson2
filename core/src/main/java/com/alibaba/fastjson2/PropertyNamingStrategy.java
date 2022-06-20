@@ -68,6 +68,26 @@ public enum PropertyNamingStrategy {
      */
     UpperCaseWithUnderScores,
     /**
+     * Using this naming policy with FASTJSON will modify the Java Field name from its camel cased form to an upper case field name where each word is separated by a dash (-).
+     * Here are a few examples of the form "Java Field Name" ---&gt; "JSON Field Name":
+     * someFieldName ---&gt; SOME-FIELD-NAME
+     * _someFieldName ---&gt; _SOME-FIELD-NAME
+     * aStringField ---&gt; A-STRING-FIELD
+     * aURL ---&gt; A-U-R-L
+     * @since 2.0.8
+     */
+    UpperCaseWithDashes,
+    /**
+     * Using this naming policy with FASTJSON will modify the Java Field name from its camel cased form to an upper case field name where each word is separated by a dot (.).
+     * Here are a few examples of the form "Java Field Name" ---&gt; "JSON Field Name":
+     * someFieldName ---&gt; SOME.FIELD.NAME
+     * _someFieldName ---&gt; _SOME.FIELD.NAME
+     * aStringField ---&gt; A.STRING.FIELD
+     * aURL ---&gt; A.U.R.L
+     * @since 2.0.8
+     */
+    UpperCaseWithDots,
+    /**
      * Using this naming policy with FASTJSON will modify the Java Field name from its camel cased form to a lower case field name where each word is separated by an underscore (_).
      * Here are a few examples of the form "Java Field Name" ---&gt; "JSON Field Name":
      * someFieldName ---&gt; some_field_name

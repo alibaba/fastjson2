@@ -444,6 +444,10 @@ public interface JSONB {
             SymbolTable symbolTable,
             Filter[] filters,
             JSONReader.Feature... features) {
+        if (jsonbBytes == null || jsonbBytes.length == 0) {
+            return null;
+        }
+
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context context = new JSONReader.Context(provider);
         context.config(filters, features);

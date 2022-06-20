@@ -1780,10 +1780,57 @@ public class JSONObject
     }
 
     /**
+     * Pack three key-value pairs as {@link JSONObject}
+     *
+     * <pre>
+     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3");
+     * </pre>
+     *
+     * @param k1 first key
+     * @param v1 first value
+     * @param k2 second key
+     * @param v2 second value
+     * @param k3 third key
+     * @param v3 third value
+     * @param k4 third key
+     * @param v4 third value
+     * @since 2.0.8
+     */
+    public static JSONObject of(String k1, Object v1, String k2, Object v2, String k3, Object v3, String k4, Object v4) {
+        JSONObject object = new JSONObject(5);
+        object.put(k1, v1);
+        object.put(k2, v2);
+        object.put(k3, v3);
+        object.put(k4, v4);
+        return object;
+    }
+
+    /**
      * See {@link JSON#parseObject} for details
      */
-    public static <T> T parseObject(String text, Class<T> clazz) {
-        return JSON.parseObject(text, clazz);
+    public static <T> T parseObject(String text, Class<T> objectClass) {
+        return JSON.parseObject(text, objectClass);
+    }
+
+    /**
+     * See {@link JSON#parseObject} for details
+     */
+    public static <T> T parseObject(String text, Class<T> objectClass, JSONReader.Feature... features) {
+        return JSON.parseObject(text, objectClass, features);
+    }
+
+    /**
+     * See {@link JSON#parseObject} for details
+     */
+    public static <T> T parseObject(String text, Type objectType, JSONReader.Feature... features) {
+        return JSON.parseObject(text, objectType, features);
+    }
+
+    /**
+     * See {@link JSON#parseObject} for details
+     */
+    public static <T> T parseObject(String text, TypeReference typeReference, JSONReader.Feature... features) {
+        return JSON.parseObject(text, typeReference, features);
     }
 
     /**

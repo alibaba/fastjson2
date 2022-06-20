@@ -19,12 +19,14 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Supplier;
@@ -199,7 +201,60 @@ public class JSON {
             return null;
         }
 
+        boolean useNativeJavaObject = false;
+        for (Feature feature : features) {
+            if (feature == Feature.UseNativeJavaObject) {
+                useNativeJavaObject = true;
+            }
+        }
+
         JSONReader jsonReader = JSONReader.of(str);
+        JSONReader.Context context = jsonReader.getContext();
+        if (!useNativeJavaObject) {
+            context.setArraySupplier(arraySupplier);
+            context.setObjectSupplier(defaultSupplier);
+        }
+
+        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
+            context.setDateFormat(defaultDateFormat);
+        }
+
+        config(context, features);
+
+        try {
+            ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
+            T object = objectReader.readObject(jsonReader, 0);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return object;
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
+    public static <T> T parseObject(
+            InputStream is,
+            Type objectType,
+            Feature... features) throws IOException {
+        return parseObject(is, StandardCharsets.UTF_8, objectType, features);
+    }
+
+    public static <T> T parseObject(
+            InputStream is,
+            Charset charset,
+            Type objectType,
+            Feature... features) throws IOException {
+        if (is == null) {
+            return null;
+        }
+
+        JSONReader jsonReader = JSONReader.of(is, charset);
         JSONReader.Context context = jsonReader.getContext();
         context.setArraySupplier(arraySupplier);
         context.setObjectSupplier(defaultSupplier);
@@ -386,6 +441,9 @@ public class JSON {
                 case OrderedField:
                     context.setObjectSupplier(orderedSupplier);
                     break;
+                case UseNativeJavaObject:
+                    context.config(JSONReader.Feature.UseNativeObject);
+                    break;
                 default:
                     break;
             }
@@ -562,18 +620,34 @@ public class JSON {
     static void configFilter(JSONWriter.Context context, SerializeFilter filter) {
         if (filter instanceof NameFilter) {
             context.setNameFilter((NameFilter) filter);
-        } else if (filter instanceof ValueFilter) {
+        }
+
+        if (filter instanceof ValueFilter) {
             context.setValueFilter((ValueFilter) filter);
-        } else if (filter instanceof PropertyPreFilter) {
+        }
+
+        if (filter instanceof PropertyPreFilter) {
             context.setPropertyPreFilter((PropertyPreFilter) filter);
-        } else if (filter instanceof PropertyFilter) {
+        }
+
+        if (filter instanceof PropertyFilter) {
             context.setPropertyFilter((PropertyFilter) filter);
-        } else if (filter instanceof BeforeFilter) {
+        }
+
+        if (filter instanceof BeforeFilter) {
             context.setBeforeFilter((BeforeFilter) filter);
-        } else if (filter instanceof AfterFilter) {
+        }
+
+        if (filter instanceof AfterFilter) {
             context.setAfterFilter((AfterFilter) filter);
-        } else if (filter instanceof LabelFilter) {
+        }
+
+        if (filter instanceof LabelFilter) {
             context.setLabelFilter((LabelFilter) filter);
+        }
+
+        if (filter instanceof ContextValueFilter) {
+            context.setContextValueFilter((ContextValueFilter) filter);
         }
     }
 

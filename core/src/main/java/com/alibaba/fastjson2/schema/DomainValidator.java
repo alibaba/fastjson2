@@ -1,34 +1,18 @@
-package com.alibaba.fastjson2.util;
+package com.alibaba.fastjson2.schema;
+
+import com.alibaba.fastjson2.util.RegexValidator;
 
 import java.net.IDN;
 import java.util.Arrays;
 import java.util.Locale;
 
-public class DomainValidator {
-    private static final String[] EMPTY_STRING_ARRAY = new String[0];
-
-    // Regular expression strings for hostnames (derived from RFC2396 and RFC 1123)
-
-    // RFC2396: domainlabel   = alphanum | alphanum *( alphanum | "-" ) alphanum
-    // Max 63 characters
-    private static final String DOMAIN_LABEL_REGEX = "\\p{Alnum}(?>[\\p{Alnum}-]{0,61}\\p{Alnum})?";
-
-    // RFC2396 toplabel = alpha | alpha *( alphanum | "-" ) alphanum
-    // Max 63 characters
-    private static final String TOP_LABEL_REGEX = "\\p{Alpha}(?>[\\p{Alnum}-]{0,61}\\p{Alnum})?";
-
-    // RFC2396 hostname = *( domainlabel "." ) toplabel [ "." ]
-    // Note that the regex currently requires both a domain label and a top level label, whereas
-    // the RFC does not. This is because the regex is used to detect if a TLD is present.
-    // If the match fails, input is checked against DOMAIN_LABEL_REGEX (hostnameRegex)
-    // RFC1123 sec 2.1 allows hostnames to start with a digit
-    private static final String DOMAIN_NAME_REGEX =
-            "^(?:" + DOMAIN_LABEL_REGEX + "\\.)+" + "(" + TOP_LABEL_REGEX + ")\\.?$";
-
+class DomainValidator {
     /**
      * RegexValidator for matching domains.
      */
-    private static final RegexValidator domainRegex = new RegexValidator(DOMAIN_NAME_REGEX);
+    private static final RegexValidator domainRegex = new RegexValidator(
+            "^(?:\\p{Alnum}(?>[\\p{Alnum}-]{0,61}\\p{Alnum})?\\.)+(\\p{Alpha}(?>[\\p{Alnum}-]{0,61}\\p{Alnum})?)\\.?$"
+    );
 
     /**
      * Returns true if the specified <code>String</code> parses
@@ -92,8 +76,7 @@ public class DomainValidator {
      */
     public static boolean isValidGenericTld(String gTld) {
         final String key = chompLeadingDot(unicodeToASCII(gTld).toLowerCase(Locale.ENGLISH));
-        return (arrayContains(GENERIC_TLDS, key) || arrayContains(GENERIC_TLDS_PLUS, key))
-                && !arrayContains(GENERIC_TLDS_MINUS, key);
+        return (arrayContains(GENERIC_TLDS, key));
     }
 
     /**
@@ -105,8 +88,7 @@ public class DomainValidator {
      */
     static boolean isValidCountryCodeTld(String ccTld) {
         final String key = chompLeadingDot(unicodeToASCII(ccTld).toLowerCase(Locale.ENGLISH));
-        return (arrayContains(COUNTRY_CODE_TLDS, key) || arrayContains(COUNTRY_CODE_TLDS_PLUS, key))
-                && !arrayContains(COUNTRY_CODE_TLDS_MINUS, key);
+        return (arrayContains(COUNTRY_CODE_TLDS, key));
     }
 
     private static String chompLeadingDot(String str) {
@@ -1245,40 +1227,6 @@ public class DomainValidator {
             "zw",                 // Zimbabwe
     };
 
-    // WARNING: this array MUST be sorted, otherwise it cannot be searched reliably using binary search
-    private static final String[] LOCAL_TLDS = new String[] {
-            "localdomain",         // Also widely used as localhost.localdomain
-            "localhost",           // RFC2606 defined
-    };
-
-    // Additional arrays to supplement or override the built in ones.
-    // The PLUS arrays are valid keys, the MINUS arrays are invalid keys
-
-    /*
-     * These arrays are mutable, but they don't need to be volatile.
-     * They can only be updated by the updateTLDOverride method, and any readers must get an instance
-     * using the getInstance methods which are all (now) synchronised.
-     */
-    // WARNING: this array MUST be sorted, otherwise it cannot be searched reliably using binary search
-    private static volatile String[] COUNTRY_CODE_TLDS_PLUS = EMPTY_STRING_ARRAY;
-
-    // WARNING: this array MUST be sorted, otherwise it cannot be searched reliably using binary search
-    private static volatile String[] GENERIC_TLDS_PLUS = EMPTY_STRING_ARRAY;
-
-    // WARNING: this array MUST be sorted, otherwise it cannot be searched reliably using binary search
-    private static volatile String[] COUNTRY_CODE_TLDS_MINUS = EMPTY_STRING_ARRAY;
-
-    // WARNING: this array MUST be sorted, otherwise it cannot be searched reliably using binary search
-    private static volatile String[] GENERIC_TLDS_MINUS = EMPTY_STRING_ARRAY;
-
-    private static class IDNBUGHOLDER {
-        private static boolean keepsTrailingDot() {
-            final String input = "a."; // must be a valid name
-            return input.equals(IDN.toASCII(input));
-        }
-        private static final boolean IDN_TOASCII_PRESERVES_TRAILING_DOTS = keepsTrailingDot();
-    }
-
     /**
      * Converts potentially Unicode input to punycode.
      * If conversion fails, returns the original input.
@@ -1291,29 +1239,7 @@ public class DomainValidator {
         if (isOnlyASCII(input)) { // skip possibly expensive processing
             return input;
         }
-        try {
-            final String ascii = IDN.toASCII(input);
-            if (IDNBUGHOLDER.IDN_TOASCII_PRESERVES_TRAILING_DOTS) {
-                return ascii;
-            }
-            final int length = input.length();
-            if (length == 0) {
-                return input;
-            }
-
-            char lastChar = input.charAt(length - 1);
-            switch (lastChar) {
-                case '\u002E': // "." full stop
-                case '\u3002': // ideographic full stop
-                case '\uFF0E': // fullwidth full stop
-                case '\uFF61': // halfwidth ideographic full stop
-                    return ascii + "."; // restore the missing stop
-                default:
-                    return ascii;
-            }
-        } catch (IllegalArgumentException e) { // input is not valid
-            return input;
-        }
+        return IDN.toASCII(input);
     }
 
     /*

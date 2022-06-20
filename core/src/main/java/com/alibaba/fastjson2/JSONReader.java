@@ -341,13 +341,9 @@ public abstract class JSONReader
         return 0;
     }
 
-    public boolean isReference() {
-        return false;
-    }
+    public abstract boolean isReference();
 
-    public String readReference() {
-        throw new JSONException("TODO");
-    }
+    public abstract String readReference();
 
     public void addResolveTask(FieldReader fieldReader, Object object, JSONPath path) {
         if (resolveTasks == null) {
@@ -416,20 +412,9 @@ public abstract class JSONReader
         next();
     }
 
-    public boolean nextIfMatch(char ch) {
-        if (this.ch != ch) {
-            return false;
-        }
-        if (ch == ',') {
-            this.comma = true;
-        }
-        next();
-        return true;
-    }
+    public abstract boolean nextIfMatch(char ch);
 
-    public boolean nextIfSet() {
-        return false;
-    }
+    public abstract boolean nextIfSet();
 
     public abstract String readPattern();
 
@@ -461,54 +446,47 @@ public abstract class JSONReader
         return typeRedirect;
     }
 
-    public long readFieldNameHashCodeUnquote() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract long readFieldNameHashCodeUnquote();
 
     public String readFieldNameUnquote() {
         readFieldNameHashCodeUnquote();
         return getFieldName();
     }
 
-    public boolean skipName() {
-        readFieldNameHashCode();
-        return true;
-    }
+    public abstract boolean skipName();
 
     public abstract void skipValue();
 
     public boolean isBinary() {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     public byte[] readBinary() {
-        throw new UnsupportedOperationException();
+        if (ch != '"' && ch != '\'') {
+            throw new UnsupportedOperationException();
+        }
+
+        String str = readString();
+        if (str.isEmpty()) {
+            return null;
+        }
+
+        throw new JSONException(info("not support input " + str));
     }
 
     public abstract int readInt32Value();
 
-    public boolean nextIfMatch(byte[] bytes) {
-        throw new UnsupportedOperationException();
-    }
-
     public boolean nextIfMatch(byte type) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
-    public Integer readInt32() {
-        readNumber0();
+    public abstract boolean nextIfMatchIdent(char c0, char c1, char c2);
 
-        if (valueType == JSON_TYPE_INT) {
-            return negative ? -mag3 : mag3;
-        }
+    public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3);
 
-        if (valueType == JSON_TYPE_NULL) {
-            return null;
-        }
+    public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5);
 
-        Number number = getNumber();
-        return number == null ? 0 : number.intValue();
-    }
+    public abstract Integer readInt32();
 
     public int getInt32Value() {
         switch (valueType) {
@@ -1192,9 +1170,7 @@ public abstract class JSONReader
 
     protected abstract LocalDateTime readLocalDateTime16();
 
-    protected LocalDateTime readLocalDateTime17() {
-        throw new UnsupportedOperationException();
-    }
+    protected abstract LocalDateTime readLocalDateTime17();
 
     protected abstract LocalDateTime readLocalDateTime18();
 
@@ -1204,13 +1180,9 @@ public abstract class JSONReader
 
     protected abstract LocalTime readLocalTime8();
 
-    protected LocalTime readLocalTime10() {
-        throw new UnsupportedOperationException();
-    }
+    protected abstract LocalTime readLocalTime10();
 
-    protected LocalTime readLocalTime11() {
-        throw new UnsupportedOperationException();
-    }
+    protected abstract LocalTime readLocalTime11();
 
     protected abstract LocalTime readLocalTime12();
 
@@ -1222,13 +1194,9 @@ public abstract class JSONReader
 
     protected abstract LocalDateTime readLocalDate10();
 
-    protected LocalDateTime readLocalDate11() {
-        throw new UnsupportedOperationException();
-    }
+    protected abstract LocalDateTime readLocalDate11();
 
-    protected ZonedDateTime readZonedDateTimeX(int len) {
-        throw new UnsupportedOperationException();
-    }
+    protected abstract ZonedDateTime readZonedDateTimeX(int len);
 
     public void readNumber(ValueConsumer consumer, boolean quoted) {
         readNumber0();
@@ -1513,7 +1481,7 @@ public abstract class JSONReader
                     }
                     continue for_;
                 default:
-                    throw new JSONException("illegal input offset " + offset + ", char " + ch);
+                    throw new JSONException(info("illegal input " + ch));
             }
             object.put(name, val);
         }
@@ -1526,9 +1494,7 @@ public abstract class JSONReader
         return object;
     }
 
-    public void skipLineComment() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void skipLineComment();
 
     public Boolean readBool() {
         if (isNull()) {
@@ -1790,7 +1756,11 @@ public abstract class JSONReader
             if (context.arraySupplier != null) {
                 list = context.arraySupplier.get();
             } else {
-                list = i == 2 ? new JSONArray(2) : new JSONArray(1);
+                if (context.isEnabled(Feature.UseNativeObject)) {
+                    list = i == 2 ? new ArrayList(2) : new ArrayList(1);
+                } else {
+                    list = i == 2 ? new JSONArray(2) : new JSONArray(1);
+                }
             }
 
             if (i == 1) {
@@ -2258,7 +2228,7 @@ public abstract class JSONReader
             return new JSONReaderASCII(ctx, null, bytes, offset, length);
         }
 
-        throw new JSONException("TODO");
+        throw new JSONException("not support charset " + charset);
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length) {
@@ -2280,7 +2250,7 @@ public abstract class JSONReader
             return new JSONReaderUTF16(context, is);
         }
 
-        throw new JSONException("not support input charset : " + charset);
+        throw new JSONException("not support charset " + charset);
     }
 
     public static JSONReader of(java.io.Reader is) {
@@ -3047,114 +3017,6 @@ public abstract class JSONReader
         }
 
         return LocalDateTime.of(year, month, dom, hour, minute, second, nanos);
-    }
-
-    static ZonedDateTime getZonedDateTime(
-            char y0,
-            char y1,
-            char y2,
-            char y3,
-            char m0,
-            char m1,
-            char d0,
-            char d1,
-            char h0,
-            char h1,
-            char i0,
-            char i1,
-            char s0,
-            char s1,
-            char S0,
-            char S1,
-            char S2,
-            char S3,
-            char S4,
-            char S5,
-            char S6,
-            char S7,
-            char S8,
-            ZoneId zoneId) {
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int nanos;
-        if (S0 >= '0' && S0 <= '9'
-                && S1 >= '0' && S1 <= '9'
-                && S2 >= '0' && S2 <= '9'
-                && S3 >= '0' && S3 <= '9'
-                && S4 >= '0' && S4 <= '9'
-                && S5 >= '0' && S5 <= '9'
-                && S6 >= '0' && S6 <= '9'
-                && S7 >= '0' && S7 <= '9'
-                && S8 >= '0' && S8 <= '9'
-        ) {
-            nanos = (S0 - '0') * 1000_000_00
-                    + (S1 - '0') * 1000_000_0
-                    + (S2 - '0') * 1000_000
-                    + (S3 - '0') * 1000_00
-                    + (S4 - '0') * 1000_0
-                    + (S5 - '0') * 1000
-                    + (S6 - '0') * 100
-                    + (S7 - '0') * 10
-                    + (S8 - '0');
-        } else {
-            return null;
-        }
-
-        return ZonedDateTime.of(year, month, dom, hour, minute, second, nanos, zoneId);
     }
 
     protected ZoneId getZoneId(LocalDateTime ldt, String zoneIdStr) {

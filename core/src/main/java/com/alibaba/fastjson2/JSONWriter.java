@@ -65,7 +65,7 @@ public abstract class JSONWriter
     }
 
     public JSONB.SymbolTable getSymbolTable() {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     public void config(Feature... features) {
@@ -162,7 +162,9 @@ public abstract class JSONWriter
                 || context.valueFilter != null
                 || context.beforeFilter != null
                 || context.afterFilter != null
-                || context.labelFilter != null;
+                || context.labelFilter != null
+                || context.contextValueFilter != null
+                || context.contextNameFilter != null;
     }
 
     public boolean isWriteNulls() {
@@ -521,20 +523,18 @@ public abstract class JSONWriter
 
     public abstract void writeRaw(String str);
 
-    public void writeRaw(byte[] bytes) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void writeRaw(byte[] bytes);
 
     public void writeRaw(byte b) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public void writeNameRaw(byte[] bytes, int offset, int len) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public void writeRaw(char[] chars) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public abstract void writeRaw(char ch);
@@ -542,7 +542,7 @@ public abstract class JSONWriter
     public abstract void writeNameRaw(byte[] bytes);
 
     public void writeNameRaw(byte[] name, long nameHash) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public abstract void writeNameRaw(char[] chars);
@@ -596,11 +596,11 @@ public abstract class JSONWriter
     public abstract void startArray();
 
     public void startArray(int size) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public void startArray(Object array, int size) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public abstract void endArray();
@@ -831,11 +831,11 @@ public abstract class JSONWriter
     public abstract void writeUUID(UUID value);
 
     public void writeTypeName(String typeName) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public boolean writeTypeName(byte[] typeName, long typeNameHash) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     public abstract void writeString(String str);
@@ -1116,9 +1116,7 @@ public abstract class JSONWriter
     public void close() {
     }
 
-    public byte[] getBytes() {
-        throw new UnsupportedOperationException();
-    }
+    public abstract byte[] getBytes();
 
     public void flushTo(java.io.Writer to) {
         try {
@@ -1131,10 +1129,7 @@ public abstract class JSONWriter
 
     public abstract int flushTo(OutputStream to) throws IOException;
 
-    public int flushTo(OutputStream out, Charset charset) throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
+    public abstract int flushTo(OutputStream out, Charset charset) throws IOException;
     static int MAX_ARRAY_SIZE = 1024 * 1024 * 64; // 64M
 
     public static class Context {
@@ -1160,6 +1155,8 @@ public abstract class JSONWriter
         BeforeFilter beforeFilter;
         AfterFilter afterFilter;
         LabelFilter labelFilter;
+        ContextValueFilter contextValueFilter;
+        ContextNameFilter contextNameFilter;
 
         public Context(ObjectWriterProvider provider) {
             if (provider == null) {
@@ -1213,18 +1210,38 @@ public abstract class JSONWriter
             for (Filter filter : filters) {
                 if (filter instanceof NameFilter) {
                     this.nameFilter = (NameFilter) filter;
-                } else if (filter instanceof ValueFilter) {
+                }
+
+                if (filter instanceof ValueFilter) {
                     this.valueFilter = (ValueFilter) filter;
-                } else if (filter instanceof PropertyFilter) {
+                }
+
+                if (filter instanceof PropertyFilter) {
                     this.propertyFilter = (PropertyFilter) filter;
-                } else if (filter instanceof PropertyPreFilter) {
+                }
+
+                if (filter instanceof PropertyPreFilter) {
                     this.propertyPreFilter = (PropertyPreFilter) filter;
-                } else if (filter instanceof BeforeFilter) {
+                }
+
+                if (filter instanceof BeforeFilter) {
                     this.beforeFilter = (BeforeFilter) filter;
-                } else if (filter instanceof AfterFilter) {
+                }
+
+                if (filter instanceof AfterFilter) {
                     this.afterFilter = (AfterFilter) filter;
-                } else if (filter instanceof LabelFilter) {
+                }
+
+                if (filter instanceof LabelFilter) {
                     this.labelFilter = (LabelFilter) filter;
+                }
+
+                if (filter instanceof ContextValueFilter) {
+                    this.contextValueFilter = (ContextValueFilter) filter;
+                }
+
+                if (filter instanceof ContextNameFilter) {
+                    this.contextNameFilter = (ContextNameFilter) filter;
                 }
             }
         }
@@ -1360,6 +1377,22 @@ public abstract class JSONWriter
 
         public void setValueFilter(ValueFilter valueFilter) {
             this.valueFilter = valueFilter;
+        }
+
+        public ContextValueFilter getContextValueFilter() {
+            return contextValueFilter;
+        }
+
+        public void setContextValueFilter(ContextValueFilter contextValueFilter) {
+            this.contextValueFilter = contextValueFilter;
+        }
+
+        public ContextNameFilter getContextNameFilter() {
+            return contextNameFilter;
+        }
+
+        public void setContextNameFilter(ContextNameFilter contextNameFilter) {
+            this.contextNameFilter = contextNameFilter;
         }
 
         public PropertyFilter getPropertyFilter() {

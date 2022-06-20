@@ -325,10 +325,6 @@ public final class JSONFactory {
         jsonPathCompilerLocal.set(compiler);
     }
 
-    public static JSONPathCompiler getContextJSONPathCompiler() {
-        return jsonPathCompilerLocal.get();
-    }
-
     public static void setContextWriterCreator(ObjectWriterCreator creator) {
         writerCreatorLocal.set(creator);
     }

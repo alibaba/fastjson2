@@ -209,7 +209,7 @@ public class JSONSchemaResourceTest {
         try {
             result = schema.validate(data);
         } catch (Exception ex) {
-            throw new JSONSchemaValidException("schema " + i + ", test " + j + " valid error, " + description, ex);
+            throw new JSONSchemaValidException("schema " + i + ", test " + j + " valid error, " + description);
         }
 
         if (result.isSuccess() != valid) {

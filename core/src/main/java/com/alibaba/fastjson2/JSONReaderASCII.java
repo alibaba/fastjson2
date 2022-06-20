@@ -70,11 +70,30 @@ final class JSONReaderASCII
         if ((first != '"' && first != '\'') || offset >= end || bytes[offset] != first) {
             return false;
         }
-        this.ch = (char) bytes[offset + 1];
-        offset += 1;
+
+        offset++;
+        this.ch = offset == end ? EOI : (char) bytes[offset];
+
+        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+            offset++;
+            if (offset >= end) {
+                this.ch = EOI;
+                return true;
+            }
+            this.ch = (char) bytes[offset];
+        }
 
         if (ch == ',') {
             this.comma = true;
+            ch = (char) bytes[offset++];
+
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[offset++];
+                }
+            }
         }
 
         if (offset >= end) {
@@ -249,7 +268,11 @@ final class JSONReaderASCII
                 if (c == ',') {
                     this.comma = true;
                     offset++;
-                    c = (char) bytes[offset];
+                    if (offset == end) {
+                        c = EOI;
+                    } else {
+                        c = (char) bytes[offset];
+                    }
 
                     while (c <= ' ' && ((1L << c) & SPACE) != 0) {
                         offset++;

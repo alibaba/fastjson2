@@ -50,10 +50,10 @@ final class StringSchema
                     formatValidator = EmailValidator.INSTANCE;
                     break;
                 case "ipv4":
-                    formatValidator = IPV4AddressValidator.INSTANCE;
+                    formatValidator = IPAddressValidator.IPV4;
                     break;
                 case "ipv6":
-                    formatValidator = IPV6AddressValidator.INSTANCE;
+                    formatValidator = IPAddressValidator.IPV6;
                     break;
                 case "uri":
                     formatValidator = URIValidator.INSTANCE;

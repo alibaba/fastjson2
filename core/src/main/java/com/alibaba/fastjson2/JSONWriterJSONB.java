@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.Arrays;
@@ -136,7 +137,7 @@ final class JSONWriterJSONB
 
     @Override
     public void startArray() {
-        throw new UnsupportedOperationException();
+        throw new JSONException("unsupported operation");
     }
 
     @Override
@@ -245,12 +246,12 @@ final class JSONWriterJSONB
 
     @Override
     public void writeComma() {
-        throw new UnsupportedOperationException();
+        throw new JSONException("unsupported operation");
     }
 
     @Override
     protected void write0(char ch) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("unsupported operation");
     }
 
     @Override
@@ -1339,7 +1340,7 @@ final class JSONWriterJSONB
 
     @Override
     public void writeRaw(String str) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("unsupported operation");
     }
 
     @Override
@@ -1758,6 +1759,7 @@ final class JSONWriterJSONB
         writeInt32(nano);
     }
 
+    @Override
     public void writeDateTimeISO8601(
             int year,
             int month,
@@ -1783,32 +1785,32 @@ final class JSONWriterJSONB
 
     @Override
     public void writeBase64(byte[] bytes) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
     public void writeRaw(char ch) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
     public void writeNameRaw(byte[] bytes) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
     public void writeNameRaw(char[] chars) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
     public void writeNameRaw(char[] bytes, int offset, int len) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
     public void writeColon() {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
@@ -1822,6 +1824,11 @@ final class JSONWriterJSONB
         to.write(bytes, 0, off);
         off = 0;
         return len;
+    }
+
+    @Override
+    public int flushTo(OutputStream out, Charset charset) throws IOException {
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
