@@ -1323,6 +1323,7 @@ class JSONWriterUTF16
         return Arrays.copyOf(utf8, utf8Length);
     }
 
+    @Override
     public void writeRaw(byte[] bytes) {
         throw new JSONException("UnsupportedOperation");
     }

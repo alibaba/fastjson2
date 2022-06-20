@@ -1409,6 +1409,7 @@ class JSONWriterUTF8
         } while (charPos > offset);
     }
 
+    @Override
     public int flushTo(OutputStream out, Charset charset) throws IOException {
         if (charset != null && charset != StandardCharsets.UTF_8) {
             throw new JSONException("UnsupportedOperation");
