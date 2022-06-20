@@ -7,6 +7,11 @@ class ObjectReaderImplCharacter
     static final ObjectReaderImplCharacter INSTANCE = new ObjectReaderImplCharacter();
 
     @Override
+    public Class getObjectClass() {
+        return Character.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         String str = jsonReader.readString();
         if (str == null) {

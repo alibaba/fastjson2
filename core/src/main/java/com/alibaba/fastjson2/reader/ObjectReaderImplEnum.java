@@ -64,10 +64,6 @@ public final class ObjectReaderImplEnum
         return enums[enumIndex];
     }
 
-    public Enum<?> valueOf(int ordinal) {
-        return ordinalEnums[ordinal];
-    }
-
     public Enum getEnumByOrdinal(int ordinal) {
         if (ordinal < 0 || ordinal >= ordinalEnums.length) {
             throw new JSONException("No enum ordinal " + enumClass.getCanonicalName() + "." + ordinal);
@@ -78,9 +74,13 @@ public final class ObjectReaderImplEnum
     @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         byte type = jsonReader.getType();
-        if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
-            long typeNameHash = jsonReader.readTypeHashCode();
-            if (typeNameHash != this.typeNameHash) {
+        if (jsonReader.getType() == BC_TYPED_ANY) {
+            ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(enumClass, 0L, features);
+            if (autoTypeObjectReader != null) {
+                if (autoTypeObjectReader != this) {
+                    return autoTypeObjectReader.readJSONBObject(jsonReader, features);
+                }
+            } else {
                 throw new JSONException(jsonReader.info("not support enumType : " + jsonReader.getString()));
             }
         }

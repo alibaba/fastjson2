@@ -13,6 +13,10 @@ class ObjectReaderImplDoubleValueArray
     static final ObjectReaderImplDoubleValueArray INSTANCE = new ObjectReaderImplDoubleValueArray();
 
     @Override
+    public Class getObjectClass() {
+        return double[].class;
+    }
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.readIfNull()) {
             return null;

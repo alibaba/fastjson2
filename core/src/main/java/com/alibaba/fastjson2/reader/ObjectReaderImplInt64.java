@@ -7,6 +7,11 @@ class ObjectReaderImplInt64
     static final ObjectReaderImplInt64 INSTANCE = new ObjectReaderImplInt64();
 
     @Override
+    public Class getObjectClass() {
+        return Long.class;
+    }
+
+    @Override
     public Long readJSONBObject(JSONReader jsonReader, long features) {
         return jsonReader.readInt64();
     }

@@ -7,6 +7,11 @@ class ObjectReaderImplBoolean
     static final ObjectReaderImplBoolean INSTANCE = new ObjectReaderImplBoolean();
 
     @Override
+    public Class getObjectClass() {
+        return Boolean.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         return jsonReader.readBool();
     }

@@ -398,10 +398,6 @@ public class ObjectReaderProvider {
         return cache.remove(type, reader);
     }
 
-    public boolean unregisterModule(ObjectReaderModule module) {
-        return modules.remove(module);
-    }
-
     public boolean register(ObjectReaderModule module) {
         for (int i = modules.size() - 1; i >= 0; i--) {
             if (modules.get(i) == module) {
@@ -515,7 +511,7 @@ public class ObjectReaderProvider {
         return objectReader;
     }
 
-    void afterAutoType(String typeName, Class type) {
+    final void afterAutoType(String typeName, Class type) {
         if (autoTypeHandler != null) {
             autoTypeHandler.accept(type);
         }
@@ -575,6 +571,10 @@ public class ObjectReaderProvider {
                 if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
                     clazz = loadClass(typeName);
                     if (clazz != null) {
+                        if (expectClass != null && !expectClass.isAssignableFrom(clazz)) {
+                            throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
+                        }
+
                         afterAutoType(typeName, clazz);
                         return clazz;
                     }
@@ -603,7 +603,7 @@ public class ObjectReaderProvider {
                 if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
                     clazz = loadClass(typeName);
 
-                    if (clazz != null && expectClass != null && expectClass.isAssignableFrom(clazz)) {
+                    if (clazz != null && expectClass != null && !expectClass.isAssignableFrom(clazz)) {
                         throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
                     }
 

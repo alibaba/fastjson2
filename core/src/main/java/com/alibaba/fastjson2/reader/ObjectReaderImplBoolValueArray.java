@@ -10,6 +10,11 @@ class ObjectReaderImplBoolValueArray
     static final ObjectReaderImplBoolValueArray INSTANCE = new ObjectReaderImplBoolValueArray();
 
     @Override
+    public Class getObjectClass() {
+        return boolean[].class;
+    }
+
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.readIfNull()) {
             return null;

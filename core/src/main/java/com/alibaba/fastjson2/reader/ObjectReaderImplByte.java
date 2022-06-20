@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
@@ -18,14 +16,6 @@ public final class ObjectReaderImplByte
 
     @Override
     public Byte readJSONBObject(JSONReader jsonReader, long features) {
-        if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
-            long typeHash = jsonReader.readTypeHashCode();
-            if (typeHash != HASH_TYPE) {
-                String typeName = jsonReader.getString();
-                throw new JSONException(jsonReader.info(typeName));
-            }
-        }
-
         Integer i = jsonReader.readInt32();
         if (i == null) {
             return null;
