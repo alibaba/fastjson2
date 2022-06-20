@@ -12,6 +12,11 @@ class ObjectReaderImplAtomicIntegerArray
     static final ObjectReaderImplAtomicIntegerArray INSTANCE = new ObjectReaderImplAtomicIntegerArray();
 
     @Override
+    public Class getObjectClass() {
+        return AtomicIntegerArray.class;
+    }
+
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.readIfNull()) {
             return null;

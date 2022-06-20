@@ -31,6 +31,11 @@ final class ObjectArrayTypedReader
     }
 
     @Override
+    public Class getObjectClass() {
+        return objectClass;
+    }
+
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.isJSONB()) {
             return readJSONBObject(jsonReader, 0);

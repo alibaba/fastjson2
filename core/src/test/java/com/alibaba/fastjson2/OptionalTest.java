@@ -4,10 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.OptionalLong;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -624,5 +621,16 @@ public class OptionalTest {
 
     public static class Bean_Long {
         public Optional<Long> value;
+    }
+
+    @Test
+    public void getObjectClass() {
+        assertEquals(
+                Optional.class,
+                JSONFactory
+                        .getDefaultObjectReaderProvider()
+                        .getObjectReader(Optional.class)
+                        .getObjectClass()
+        );
     }
 }

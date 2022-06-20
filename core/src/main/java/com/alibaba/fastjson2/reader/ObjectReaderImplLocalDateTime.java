@@ -17,6 +17,11 @@ class ObjectReaderImplLocalDateTime
     }
 
     @Override
+    public Class getObjectClass() {
+        return LocalDateTime.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         return jsonReader.readLocalDateTime();
     }

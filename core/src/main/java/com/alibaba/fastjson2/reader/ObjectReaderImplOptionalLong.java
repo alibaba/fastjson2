@@ -9,6 +9,11 @@ class ObjectReaderImplOptionalLong
     static final ObjectReaderImplOptionalLong INSTANCE = new ObjectReaderImplOptionalLong();
 
     @Override
+    public Class getObjectClass() {
+        return OptionalLong.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         Long integer = jsonReader.readInt64();
         if (integer == null) {

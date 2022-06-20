@@ -13,6 +13,11 @@ class ObjectReaderImplInt16ValueArray
     static final ObjectReaderImplInt16ValueArray INSTANCE = new ObjectReaderImplInt16ValueArray();
 
     @Override
+    public Class getObjectClass() {
+        return short[].class;
+    }
+
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.readIfNull()) {
             return null;

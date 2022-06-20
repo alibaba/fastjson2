@@ -9,6 +9,11 @@ class ObjectReaderImplLocale
     static final ObjectReaderImplLocale INSTANCE = new ObjectReaderImplLocale();
 
     @Override
+    public Class getObjectClass() {
+        return Locale.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         String strVal = jsonReader.readString();
         if (strVal == null || strVal.isEmpty()) {

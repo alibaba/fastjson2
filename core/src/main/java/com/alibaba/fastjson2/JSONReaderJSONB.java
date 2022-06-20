@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderImplByte;
-import com.alibaba.fastjson2.reader.ObjectReaderImplShort;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
@@ -2738,14 +2736,7 @@ final class JSONReaderJSONB
                 return new BigDecimal(str);
             }
             case BC_TYPED_ANY: {
-                long typeHash = readTypeHashCode();
-                if (typeHash == ObjectReaderImplByte.HASH_TYPE) {
-                    return (byte) readInt32Value();
-                }
-                if (typeHash == ObjectReaderImplShort.HASH_TYPE) {
-                    return (short) readInt32Value();
-                }
-                String typeName = getString();
+                String typeName = readString();
                 throw new JSONException("not support input type : " + typeName);
             }
             default:

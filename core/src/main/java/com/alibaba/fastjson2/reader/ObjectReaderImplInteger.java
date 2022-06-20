@@ -7,6 +7,11 @@ class ObjectReaderImplInteger
     static final ObjectReaderImplInteger INSTANCE = new ObjectReaderImplInteger();
 
     @Override
+    public Class getObjectClass() {
+        return Integer.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         return jsonReader.readInt32();
     }

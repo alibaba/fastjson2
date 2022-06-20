@@ -213,4 +213,30 @@ public class MapTest {
         assertEquals(list.size(), list2.size());
         assertEquals(list.get(0).getClass(), list2.get(0).getClass());
     }
+
+    @Test
+    public void getObjectClass() {
+        assertEquals(
+                Map.class,
+                JSONFactory
+                        .getDefaultObjectReaderProvider()
+                        .getObjectReader(Map.class)
+                        .getObjectClass()
+        );
+        assertEquals(
+                Map.class,
+                JSONFactory
+                        .getDefaultObjectReaderProvider()
+                        .getObjectReader(
+                                new TypeReference<Map<String, String>>(){}.getType()
+                        )
+                        .getObjectClass()
+        );
+        assertNull(
+                JSONFactory
+                        .getDefaultObjectReaderProvider()
+                        .getObjectReader(Map.class)
+                        .getBuildFunction()
+        );
+    }
 }

@@ -1238,21 +1238,23 @@ public class ObjectReaderBaseModule
         }
 
         if (type == URI.class) {
-            return new ObjectReaderImplFromString<URI>(e -> URI.create(e));
+            return new ObjectReaderImplFromString<URI>(URI.class, e -> URI.create(e));
         }
 
         if (type == File.class) {
-            return new ObjectReaderImplFromString<File>(e -> new File(e));
+            return new ObjectReaderImplFromString<File>(File.class, e -> new File(e));
         }
 
         if (type == URL.class) {
-            return new ObjectReaderImplFromString<URL>(e -> {
-                try {
-                    return new URL(e);
-                } catch (MalformedURLException ex) {
-                    throw new JSONException("read URL error", ex);
-                }
-            });
+            return new ObjectReaderImplFromString<URL>(
+                    URL.class,
+                    e -> {
+                        try {
+                            return new URL(e);
+                        } catch (MalformedURLException ex) {
+                            throw new JSONException("read URL error", ex);
+                        }
+                    });
         }
 
         if (type == Class.class) {
@@ -1372,11 +1374,11 @@ public class ObjectReaderBaseModule
         if (type == ZoneId.class) {
 //            return ZoneIdImpl.INSTANCE;
             // ZoneId.of(strVal)
-            return new ObjectReaderImplFromString<ZoneId>(e -> ZoneId.of(e));
+            return new ObjectReaderImplFromString<ZoneId>(ZoneId.class, e -> ZoneId.of(e));
         }
 
         if (type == TimeZone.class) {
-            return new ObjectReaderImplFromString<TimeZone>(e -> TimeZone.getTimeZone(e));
+            return new ObjectReaderImplFromString<TimeZone>(TimeZone.class, e -> TimeZone.getTimeZone(e));
         }
 
         if (type == char[].class) {
@@ -1729,7 +1731,7 @@ public class ObjectReaderBaseModule
         }
 
         if (type instanceof GenericArrayType) {
-            return new ObjectReaderImplGenericArray(((GenericArrayType) type).getGenericComponentType());
+            return new ObjectReaderImplGenericArray((GenericArrayType) type);
         }
 
         if (type instanceof WildcardType) {

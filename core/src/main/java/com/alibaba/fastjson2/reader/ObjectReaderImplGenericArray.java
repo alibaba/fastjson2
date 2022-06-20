@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +16,8 @@ class ObjectReaderImplGenericArray
     final Class<?> componentClass;
     ObjectReader itemObjectReader;
 
-    public ObjectReaderImplGenericArray(Type itemType) {
-        this.itemType = itemType;
+    public ObjectReaderImplGenericArray(GenericArrayType genericType) {
+        this.itemType = genericType.getGenericComponentType();
         this.componentClass = TypeUtils.getMapping(itemType);
     }
 

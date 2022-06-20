@@ -101,11 +101,6 @@ class ObjectReaderImplMapTyped
     }
 
     @Override
-    public FieldReader getFieldReader(long hashCode) {
-        return null;
-    }
-
-    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         ObjectReader objectReader = null;
         Function builder = this.builder;

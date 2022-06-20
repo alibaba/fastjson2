@@ -19,6 +19,11 @@ class ObjectReaderImplInt8ValueArray
     }
 
     @Override
+    public Class getObjectClass() {
+        return byte[].class;
+    }
+
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.readIfNull()) {
             return null;
