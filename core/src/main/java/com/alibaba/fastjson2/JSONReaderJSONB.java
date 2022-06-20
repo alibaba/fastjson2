@@ -4278,22 +4278,27 @@ final class JSONReaderJSONB
         throw new JSONException("UnsupportedOperation");
     }
 
+    @Override
     public boolean nextIfMatchIdent(char c0, char c1, char c2) {
         throw new JSONException("UnsupportedOperation");
     }
 
+    @Override
     public long readFieldNameHashCodeUnquote() {
         return readFieldNameHashCode();
     }
 
+    @Override
     public boolean nextIfSet() {
         return false;
     }
 
+    @Override
     public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3) {
         throw new JSONException("UnsupportedOperation");
     }
 
+    @Override
     public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
         throw new JSONException("UnsupportedOperation");
     }
