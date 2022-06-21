@@ -30,19 +30,6 @@ import java.util.*;
  * @author wenshao[szujobs@hotmail.com]
  */
 public class TypeUtils {
-    public static int intValue(BigDecimal decimal) {
-        if (decimal == null) {
-            return 0;
-        }
-
-        int scale = decimal.scale();
-        if (scale >= -100 && scale <= 100) {
-            return decimal.intValue();
-        }
-
-        return decimal.intValueExact();
-    }
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> T cast(Object obj, Class<T> clazz, ParserConfig config) {
         return com.alibaba.fastjson2.util.TypeUtils.cast(obj, clazz);
@@ -280,28 +267,6 @@ public class TypeUtils {
         } catch (Exception e) {
             throw new JSONException(e.getMessage(), e);
         }
-    }
-
-    public static Field getField(Class<?> clazz, String fieldName, Field[] declaredFields) {
-        for (Field field : declaredFields) {
-            String itemName = field.getName();
-            if (fieldName.equals(itemName)) {
-                return field;
-            }
-
-            char c0, c1;
-            if (fieldName.length() > 2
-                    && (c0 = fieldName.charAt(0)) >= 'a' && c0 <= 'z'
-                    && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z'
-                    && fieldName.equalsIgnoreCase(itemName)) {
-                return field;
-            }
-        }
-        Class<?> superClass = clazz.getSuperclass();
-        if (superClass != null && superClass != Object.class) {
-            return getField(superClass, fieldName, superClass.getDeclaredFields());
-        }
-        return null;
     }
 
     public static Type checkPrimitiveArray(GenericArrayType genericArrayType) {
