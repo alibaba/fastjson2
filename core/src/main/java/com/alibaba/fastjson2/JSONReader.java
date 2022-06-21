@@ -1831,7 +1831,9 @@ public abstract class JSONReader
                         : new int[]{mag1, mag2, mag3}
                         : new int[]{mag0, mag1, mag2, mag3};
                 BigInteger bigInt = getBigInt(negative, mag);
-                return new BigDecimal(bigInt, scale);
+                int adjustedScale = scale - exponent;
+                BigDecimal decimal = new BigDecimal(bigInt, adjustedScale);
+                return decimal;
             }
             case JSON_TYPE_BIG_DEC: {
                 return new BigDecimal(stringValue);

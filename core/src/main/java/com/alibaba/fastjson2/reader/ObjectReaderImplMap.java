@@ -150,10 +150,6 @@ public final class ObjectReaderImplMap
         return mapType;
     }
 
-    public Function getBuilder() {
-        return builder;
-    }
-
     @Override
     public Function getBuildFunction() {
         return builder;

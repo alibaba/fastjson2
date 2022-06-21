@@ -13,6 +13,11 @@ class ObjectReaderImplInt16Array
     static final ObjectReaderImplInt16Array INSTANCE = new ObjectReaderImplInt16Array();
 
     @Override
+    public Class getObjectClass() {
+        return Short[].class;
+    }
+
+    @Override
     public Object createInstance(Collection collection) {
         Short[] array = new Short[collection.size()];
         int i = 0;

@@ -127,7 +127,7 @@ public class JDKUtils {
     }
 
     public static boolean isSQLDataSourceOrRowSet(Class type) {
-        return (CLASS_SQL_DATASOURCE != null && CLASS_SQL_ROW_SET.isAssignableFrom(type))
+        return (CLASS_SQL_DATASOURCE != null && CLASS_SQL_DATASOURCE.isAssignableFrom(type))
                 || (CLASS_SQL_ROW_SET != null && CLASS_SQL_ROW_SET.isAssignableFrom(type));
     }
 

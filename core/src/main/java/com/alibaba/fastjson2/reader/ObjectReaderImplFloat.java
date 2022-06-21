@@ -7,6 +7,11 @@ class ObjectReaderImplFloat
     static final ObjectReaderImplFloat INSTANCE = new ObjectReaderImplFloat();
 
     @Override
+    public Class getObjectClass() {
+        return Float.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         return jsonReader.readFloat();
     }

@@ -24,6 +24,11 @@ class ObjectReaderImplZonedDateTime
     }
 
     @Override
+    public Class getObjectClass() {
+        return ZonedDateTime.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         return jsonReader.readZonedDateTime();
     }

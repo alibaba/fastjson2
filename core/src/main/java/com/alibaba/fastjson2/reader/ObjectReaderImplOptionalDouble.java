@@ -9,6 +9,11 @@ class ObjectReaderImplOptionalDouble
     static final ObjectReaderImplOptionalDouble INSTANCE = new ObjectReaderImplOptionalDouble();
 
     @Override
+    public Class getObjectClass() {
+        return OptionalDouble.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         Double value = jsonReader.readDouble();
         if (value == null) {

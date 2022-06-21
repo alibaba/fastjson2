@@ -7,6 +7,11 @@ class ObjectReaderImplDouble
     static final ObjectReaderImplDouble INSTANCE = new ObjectReaderImplDouble();
 
     @Override
+    public Class getObjectClass() {
+        return Double.class;
+    }
+
+    @Override
     public Object readJSONBObject(JSONReader jsonReader, long features) {
         return jsonReader.readDouble();
     }

@@ -13,6 +13,11 @@ final class ObjectReaderImplFloatArray
     static final ObjectReaderImplFloatArray INSTANCE = new ObjectReaderImplFloatArray();
 
     @Override
+    public Class getObjectClass() {
+        return Float[].class;
+    }
+
+    @Override
     public Object readObject(JSONReader jsonReader, long features) {
         if (jsonReader.readIfNull()) {
             return null;

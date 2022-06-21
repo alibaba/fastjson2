@@ -7,9 +7,16 @@ import java.util.function.Function;
 public final class ObjectReaderImplFromString<T>
         extends ObjectReaderBaseModule.PrimitiveImpl<T> {
     final Function<String, T> creator;
+    final Class objectClass;
 
-    public ObjectReaderImplFromString(Function<String, T> creator) {
+    public ObjectReaderImplFromString(Class<T> objectClass, Function<String, T> creator) {
+        this.objectClass = objectClass;
         this.creator = creator;
+    }
+
+    @Override
+    public Class getObjectClass() {
+        return objectClass;
     }
 
     @Override

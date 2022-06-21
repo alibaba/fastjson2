@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -531,6 +532,8 @@ public class JSONObjectTest {
 
         BeanInterface beanInterface = (BeanInterface) Proxy.newProxyInstance(JSONObject.class.getClassLoader(), new Class[]{BeanInterface.class}, object);
         assertEquals(123, beanInterface.getId());
+        assertEquals(object.hashCode(), beanInterface.hashCode());
+        assertEquals(object.toString(), beanInterface.toString());
     }
 
     @Test
@@ -550,5 +553,24 @@ public class JSONObjectTest {
 
     public interface BeanInterface {
         int getId();
+    }
+
+    @Test
+    public void test2() {
+        JSONObject jsonObject = new JSONObject(2);
+        assertTrue(jsonObject.isEmpty());
+        assertTrue(jsonObject.values().isEmpty());
+        assertFalse(jsonObject.containsKey("id"));
+        assertFalse(jsonObject.containsValue("id"));
+        assertNull(jsonObject.remove("id"));
+        jsonObject.clear();
+        jsonObject.putAll(Collections.emptyMap());
+        assertNull(jsonObject.getBytes("id"));
+
+        jsonObject.put("bytes", new byte[0]);
+        assertEquals(0, jsonObject.getBytes("bytes").length);
+
+        jsonObject.put("bytes", Base64.getEncoder().encodeToString("abc中华人民共和国".getBytes()));
+        assertEquals("abc中华人民共和国", new String(jsonObject.getBytes("bytes")));
     }
 }
