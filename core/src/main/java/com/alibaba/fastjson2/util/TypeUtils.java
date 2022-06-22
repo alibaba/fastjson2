@@ -15,6 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 
@@ -177,6 +180,18 @@ public class TypeUtils {
 
         if (targetClass == String.class) {
             return (T) JSON.toJSONString(obj);
+        }
+
+        if (targetClass == AtomicInteger.class) {
+            return (T) new AtomicInteger(toIntValue(obj));
+        }
+
+        if (targetClass == AtomicLong.class) {
+            return (T) new AtomicLong(toLongValue(obj));
+        }
+
+        if (targetClass == AtomicBoolean.class) {
+            return (T) new AtomicBoolean((Boolean) obj);
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
