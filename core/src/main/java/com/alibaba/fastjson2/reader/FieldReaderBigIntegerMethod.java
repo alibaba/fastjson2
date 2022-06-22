@@ -33,9 +33,14 @@ final class FieldReaderBigIntegerMethod<T>
 
     @Override
     public void accept(T object, Object value) {
+        BigInteger bigInteger = TypeUtils.toBigInteger(value);
+
+        if (schema != null) {
+            schema.assertValidate(bigInteger);
+        }
+
         try {
-            method.invoke(object,
-                    TypeUtils.toBigInteger(value));
+            method.invoke(object, bigInteger);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

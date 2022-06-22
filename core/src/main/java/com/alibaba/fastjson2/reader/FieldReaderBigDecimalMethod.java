@@ -33,9 +33,14 @@ final class FieldReaderBigDecimalMethod<T>
 
     @Override
     public void accept(T object, Object value) {
+        BigDecimal decimalValue = TypeUtils.toBigDecimal(value);
+
+        if (schema != null) {
+            schema.assertValidate(decimalValue);
+        }
+
         try {
-            method.invoke(object,
-                    TypeUtils.toBigDecimal(value));
+            method.invoke(object, decimalValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
@@ -43,6 +48,10 @@ final class FieldReaderBigDecimalMethod<T>
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             method.invoke(object, BigDecimal.valueOf(value));
         } catch (Exception e) {
@@ -52,6 +61,10 @@ final class FieldReaderBigDecimalMethod<T>
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             method.invoke(object, BigDecimal.valueOf(value));
         } catch (Exception e) {

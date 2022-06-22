@@ -31,6 +31,10 @@ final class FieldReaderBigIntegerField<T>
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.set(object, BigInteger.valueOf(value));
         } catch (Exception e) {
@@ -40,6 +44,10 @@ final class FieldReaderBigIntegerField<T>
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.set(object, BigInteger.valueOf(value));
         } catch (Exception e) {
@@ -49,9 +57,14 @@ final class FieldReaderBigIntegerField<T>
 
     @Override
     public void accept(T object, Object value) {
+        BigInteger bigInteger = TypeUtils.toBigInteger(value);
+
+        if (schema != null) {
+            schema.assertValidate(bigInteger);
+        }
+
         try {
-            field.set(object,
-                    TypeUtils.toBigInteger(value));
+            field.set(object, bigInteger);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
