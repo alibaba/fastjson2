@@ -35,6 +35,9 @@ final class FieldReaderAtomicBooleanFieldReadOnly<T>
 
         try {
             AtomicBoolean atomic = (AtomicBoolean) field.get(object);
+            if (value instanceof AtomicBoolean) {
+                value = ((AtomicBoolean) value).get();
+            }
             atomic.set((Boolean) value);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);

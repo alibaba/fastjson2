@@ -2,8 +2,10 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLongArray;
 
@@ -14,6 +16,15 @@ final class ObjectReaderImplAtomicLongArray
     @Override
     public Class getObjectClass() {
         return AtomicLongArray.class;
+    }
+
+    public Object createInstance(Collection collection) {
+        AtomicLongArray array = new AtomicLongArray(collection.size());
+        int index = 0;
+        for (Object item : collection) {
+            array.set(index++, TypeUtils.toLongValue(item));
+        }
+        return array;
     }
 
     @Override
