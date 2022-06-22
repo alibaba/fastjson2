@@ -13,8 +13,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 final class FieldReaderListStrFunc<T>
-        extends FieldReaderImpl<T>
-        implements FieldListStrReader<T> {
+        extends FieldReaderImpl<T> {
     final Method method;
     final BiConsumer<T, List> function;
     final long fieldClassHash;
@@ -190,5 +189,9 @@ final class FieldReaderListStrFunc<T>
         } catch (Exception e) {
             throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
+    }
+
+    public List<String> createList() {
+        return new ArrayList<>();
     }
 }

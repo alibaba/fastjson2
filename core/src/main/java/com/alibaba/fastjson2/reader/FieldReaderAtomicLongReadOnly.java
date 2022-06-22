@@ -35,7 +35,8 @@ final class FieldReaderAtomicLongReadOnly<T>
 
         try {
             AtomicLong atomic = (AtomicLong) method.invoke(object);
-            atomic.set((Long) value);
+            long longValue = ((Number) value).longValue();
+            atomic.set(longValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
