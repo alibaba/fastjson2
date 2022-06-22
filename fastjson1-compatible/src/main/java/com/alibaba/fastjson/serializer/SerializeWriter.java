@@ -11,10 +11,6 @@ public class SerializeWriter
         implements Cloneable {
     final JSONWriter raw;
 
-    public JSONWriter getRaw() {
-        return raw;
-    }
-
     final ListWrapper<PropertyFilter> propertyFilters;
     final ListWrapper<ValueFilter> valueFilters;
     final ListWrapper<NameFilter> nameFilters;
@@ -42,12 +38,8 @@ public class SerializeWriter
         this.raw.writeString(text);
     }
 
-    public void writeNull(SerializerFeature feature) {
-        this.raw.writeNull();
-    }
-
     public void write(String text) {
-        this.raw.writeString(text);
+        this.raw.writeRaw(text);
     }
 
     public List<PropertyFilter> getPropertyFilters() {
