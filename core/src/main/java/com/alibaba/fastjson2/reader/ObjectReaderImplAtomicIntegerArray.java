@@ -2,8 +2,10 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
@@ -14,6 +16,15 @@ class ObjectReaderImplAtomicIntegerArray
     @Override
     public Class getObjectClass() {
         return AtomicIntegerArray.class;
+    }
+
+    public Object createInstance(Collection collection) {
+        AtomicIntegerArray array = new AtomicIntegerArray(collection.size());
+        int index = 0;
+        for (Object item : collection) {
+            array.set(index++, TypeUtils.toIntValue(item));
+        }
+        return array;
     }
 
     @Override
