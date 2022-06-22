@@ -37,12 +37,13 @@ final class FieldReaderBigIntegerFunc<T, V>
 
     @Override
     public void accept(T object, Object value) {
+        BigInteger bigInteger = TypeUtils.toBigInteger(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(bigInteger);
         }
 
-        function.accept(object,
-                (V) TypeUtils.toBigInteger(value));
+        function.accept(object, (V) bigInteger);
     }
 
     @Override
