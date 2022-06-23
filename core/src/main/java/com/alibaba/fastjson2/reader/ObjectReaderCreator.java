@@ -1385,10 +1385,10 @@ public class ObjectReaderCreator {
                         return new FieldReaderListStrMethod(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, jsonSchema, method);
                     }
 
-                    return new FieldReaderListMethod(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, jsonSchema, itemType, method);
+                    return new FieldReaderListMethod(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, itemType, method);
                 }
             }
-            return new FieldReaderListMethod(fieldName, fieldType, fieldClass, ordinal, features, format, jsonSchema, method);
+            return new FieldReaderListMethod(fieldName, fieldType, fieldClass, ordinal, features, format, jsonSchema, null, method);
         }
 
         if (fieldClass == Date.class) {

@@ -15,19 +15,15 @@ final class FieldReaderListMethod<T>
     final Class itemClass;
     final long itemClassHash;
 
-    FieldReaderListMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Method method) {
+    FieldReaderListMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Type itemType, Method method) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, method);
-        if (fieldType instanceof ParameterizedType) {
-            itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
-        } else {
-            itemType = Object.class;
+        if (itemType == null) {
+            if (fieldType instanceof ParameterizedType) {
+                itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
+            } else {
+                itemType = Object.class;
+            }
         }
-        this.itemClass = TypeUtils.getClass(itemType);
-        this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
-    }
-
-    FieldReaderListMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, JSONSchema schema, Type itemType, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, null, null, null, null, method);
         this.itemType = itemType;
         this.itemClass = TypeUtils.getClass(itemType);
         this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
