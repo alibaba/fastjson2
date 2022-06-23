@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FieldReaderBigDecimalFuncTest {
     @Test
@@ -19,6 +18,7 @@ public class FieldReaderBigDecimalFuncTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals(new BigDecimal("123"), bean.value);
+        assertNotNull(fieldReader.getMethod());
 
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
 

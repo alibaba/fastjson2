@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.util.Locale;
@@ -25,7 +26,8 @@ final class FieldReaderBoolFunc<T, V>
 
     @Override
     public void accept(T object, Object value) {
-        function.accept(object, (V) value);
+        Boolean booleanValue = TypeUtils.toBoolean(value);
+        function.accept(object, (V) booleanValue);
     }
 
     @Override

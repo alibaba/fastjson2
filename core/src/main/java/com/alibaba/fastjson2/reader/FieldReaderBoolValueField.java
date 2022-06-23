@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 
@@ -25,6 +26,11 @@ final class FieldReaderBoolValueField<T>
         } catch (Exception e) {
             throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
+    }
+
+    @Override
+    public void accept(T object, int value) {
+        accept(object, TypeUtils.toBooleanValue(value));
     }
 
     @Override

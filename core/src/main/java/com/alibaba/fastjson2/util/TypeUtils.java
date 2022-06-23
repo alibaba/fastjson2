@@ -717,6 +717,66 @@ public class TypeUtils {
         throw new JSONException("can not cast to decimal");
     }
 
+    public static boolean toBooleanValue(Object value) {
+        if (value == null) {
+            return false;
+        }
+
+        if (value instanceof Boolean) {
+            return ((Boolean) value).booleanValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.isEmpty() || str.equals("null")) {
+                return false;
+            }
+            return Boolean.parseBoolean(str);
+        }
+
+        if (value instanceof Number) {
+            int intValue = ((Number) value).intValue();
+            if (intValue == 1) {
+                return true;
+            }
+            if (intValue == 0) {
+                return false;
+            }
+        }
+
+        throw new JSONException("can not cast to boolean");
+    }
+
+    public static Boolean toBoolean(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Boolean) {
+            return ((Boolean) value).booleanValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.isEmpty() || str.equals("null")) {
+                return null;
+            }
+            return Boolean.parseBoolean(str);
+        }
+
+        if (value instanceof Number) {
+            int intValue = ((Number) value).intValue();
+            if (intValue == 1) {
+                return true;
+            }
+            if (intValue == 0) {
+                return false;
+            }
+        }
+
+        throw new JSONException("can not cast to boolean");
+    }
+
     public static float toFloatValue(Object value) {
         if (value == null) {
             return 0F;
