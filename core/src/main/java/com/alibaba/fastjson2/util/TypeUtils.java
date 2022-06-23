@@ -589,6 +589,14 @@ public class TypeUtils {
             return Integer.parseInt(str);
         }
 
+        if (value instanceof Map && ((Map<?, ?>) value).isEmpty()) {
+            return null;
+        }
+
+        if (value instanceof Boolean) {
+            return ((Boolean) value).booleanValue() ? 1 : 0;
+        }
+
         throw new JSONException("can not cast to integer");
     }
 

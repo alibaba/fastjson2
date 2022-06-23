@@ -29,13 +29,25 @@ final class FieldReaderInt32ValueField<T>
     }
 
     @Override
+    public void accept(T object, float value) {
+        accept(object, Integer.valueOf((int) value));
+    }
+
+    @Override
+    public void accept(T object, double value) {
+        accept(object, Integer.valueOf((int) value));
+    }
+
+    @Override
     public void accept(T object, Object value) {
+        int intValue = TypeUtils.toIntValue(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(intValue);
         }
 
         try {
-            field.set(object, TypeUtils.toIntValue(value));
+            field.setInt(object, intValue);
         } catch (Exception e) {
             throw new JSONException("set " + getFieldName() + " error", e);
         }

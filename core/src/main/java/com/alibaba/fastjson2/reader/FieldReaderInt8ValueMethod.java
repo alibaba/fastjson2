@@ -32,17 +32,14 @@ final class FieldReaderInt8ValueMethod<T>
 
     @Override
     public void accept(T object, Object value) {
-        if (value == null) {
-            value = 0;
-        }
+        byte byteValue = TypeUtils.toByteValue(value);
 
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(byteValue);
         }
 
         try {
-            method.invoke(object,
-                    TypeUtils.toByteValue(value));
+            method.invoke(object, byteValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

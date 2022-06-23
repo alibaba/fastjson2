@@ -26,11 +26,13 @@ final class FieldReaderInt32Func<T, V>
 
     @Override
     public void accept(T object, Object value) {
+        Integer intValue = TypeUtils.toInteger(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(intValue);
         }
 
-        function.accept(object, (V) TypeUtils.toInteger(value));
+        function.accept(object, (V) intValue);
     }
 
     @Override

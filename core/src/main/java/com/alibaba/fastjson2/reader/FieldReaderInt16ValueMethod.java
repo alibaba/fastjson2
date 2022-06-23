@@ -32,26 +32,14 @@ final class FieldReaderInt16ValueMethod<T>
 
     @Override
     public void accept(T object, Object value) {
-        if (value == null) {
-            value = 0;
-        }
+        short shortValue = TypeUtils.toShortValue(value);
 
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(shortValue);
         }
 
         try {
-            method.invoke(object,
-                    TypeUtils.toShortValue(value));
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
-    }
-
-    @Override
-    public void accept(T object, long value) {
-        try {
-            method.invoke(object, (short) value);
+            method.invoke(object, shortValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

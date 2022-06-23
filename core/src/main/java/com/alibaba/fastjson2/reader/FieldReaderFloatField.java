@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 
@@ -30,5 +31,20 @@ final class FieldReaderFloatField<T>
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readFloat();
+    }
+
+    @Override
+    public void accept(T object, Object value) {
+        Float floatValue = TypeUtils.toFloat(value);
+
+        if (schema != null) {
+            schema.assertValidate(floatValue);
+        }
+
+        try {
+            field.set(object, floatValue);
+        } catch (Exception e) {
+            throw new JSONException("set " + fieldName + " error", e);
+        }
     }
 }
