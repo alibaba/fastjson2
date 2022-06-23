@@ -34,12 +34,14 @@ final class FieldReaderDoubleValueFunc<T>
 
     @Override
     public void accept(T object, Object value) {
+        double doubleValue = TypeUtils.toDoubleValue(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(doubleValue);
         }
 
         function.accept(object,
-                TypeUtils.toDoubleValue(value));
+                doubleValue);
     }
 
     @Override

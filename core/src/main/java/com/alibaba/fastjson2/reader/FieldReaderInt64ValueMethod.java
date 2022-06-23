@@ -32,30 +32,14 @@ final class FieldReaderInt64ValueMethod<T>
 
     @Override
     public void accept(T object, Object value) {
-        if (value == null) {
-            value = 0L;
-        }
+        long longValue = TypeUtils.toLongValue(value);
 
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(longValue);
         }
 
         try {
-            method.invoke(object,
-                    TypeUtils.toLongValue(value));
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
-    }
-
-    @Override
-    public void accept(T object, int value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        try {
-            method.invoke(object, (long) value);
+            method.invoke(object, longValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

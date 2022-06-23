@@ -34,12 +34,13 @@ final class FieldReaderInt8ValueFunc<T>
 
     @Override
     public void accept(T object, Object value) {
+        byte byteValue = TypeUtils.toByteValue(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(byteValue);
         }
 
-        function.accept(object,
-                TypeUtils.toByteValue(value));
+        function.accept(object, byteValue);
     }
 
     @Override

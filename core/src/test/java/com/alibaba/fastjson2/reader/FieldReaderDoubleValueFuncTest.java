@@ -3,27 +3,26 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONSchemaValidException;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigInteger;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-public class FieldReaderBigIntegerFuncTest {
+public class FieldReaderDoubleValueFuncTest {
     @Test
     public void test() {
         Bean bean = new Bean();
-        ObjectReader<Bean> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = TestUtils.READER_CREATOR_LAMBDA.createObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
-        assertEquals(new BigInteger("123"), bean.value);
+        assertEquals(123D, bean.value);
+        assertNotNull(fieldReader.getMethod());
 
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
 
         assertEquals(
-                new BigInteger("101"),
+                101D,
                 objectReader.readObject(
                         JSONReader.of("{\"value\":101}"),
                         0
@@ -32,13 +31,13 @@ public class FieldReaderBigIntegerFuncTest {
     }
 
     public static class Bean {
-        private BigInteger value;
+        private double value;
 
-        public BigInteger getValue() {
+        public double getValue() {
             return value;
         }
 
-        public void setValue(BigInteger value) {
+        public void setValue(double value) {
             this.value = value;
         }
     }
@@ -51,9 +50,11 @@ public class FieldReaderBigIntegerFuncTest {
         assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123));
         assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123L));
+        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123F));
+        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123D));
 
         assertEquals(
-                new BigInteger("201"),
+                201D,
                 objectReader.readObject(
                         JSONReader.of("{\"value\":201}"),
                         0
@@ -63,13 +64,13 @@ public class FieldReaderBigIntegerFuncTest {
 
     public static class Bean1 {
         @JSONField(schema = "{'minimum':128}")
-        private BigInteger value;
+        private double value;
 
-        public BigInteger getValue() {
+        public double getValue() {
             return value;
         }
 
-        public void setValue(BigInteger value) {
+        public void setValue(double value) {
             this.value = value;
         }
     }
@@ -82,10 +83,12 @@ public class FieldReaderBigIntegerFuncTest {
         assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, 123));
         assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, 123L));
+        assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, 123F));
+        assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, 123D));
     }
 
     public static class Bean2 {
-        public void setValue(BigInteger value) {
+        public void setValue(double value) {
             throw new UnsupportedOperationException();
         }
     }

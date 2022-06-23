@@ -36,12 +36,13 @@ final class FieldReaderInt64Func<T, V>
 
     @Override
     public void accept(T object, Object value) {
+        Long longValue = TypeUtils.toLong(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(longValue);
         }
 
-        function.accept(object,
-                (V) TypeUtils.toLong(value));
+        function.accept(object, (V) longValue);
     }
 
     @Override

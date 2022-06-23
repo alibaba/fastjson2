@@ -3,27 +3,26 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONSchemaValidException;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigInteger;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-public class FieldReaderBigIntegerFuncTest {
+public class FieldReaderInt64FuncTest {
     @Test
     public void test() {
         Bean bean = new Bean();
-        ObjectReader<Bean> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = TestUtils.READER_CREATOR_LAMBDA.createObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
-        assertEquals(new BigInteger("123"), bean.value);
+        assertEquals(123L, bean.value);
+        assertNotNull(fieldReader.getMethod());
 
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
 
         assertEquals(
-                new BigInteger("101"),
+                101L,
                 objectReader.readObject(
                         JSONReader.of("{\"value\":101}"),
                         0
@@ -32,13 +31,13 @@ public class FieldReaderBigIntegerFuncTest {
     }
 
     public static class Bean {
-        private BigInteger value;
+        private Long value;
 
-        public BigInteger getValue() {
+        public Long getValue() {
             return value;
         }
 
-        public void setValue(BigInteger value) {
+        public void setValue(Long value) {
             this.value = value;
         }
     }
@@ -51,9 +50,11 @@ public class FieldReaderBigIntegerFuncTest {
         assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123));
         assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123L));
+        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123F));
+        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123D));
 
         assertEquals(
-                new BigInteger("201"),
+                201L,
                 objectReader.readObject(
                         JSONReader.of("{\"value\":201}"),
                         0
@@ -63,13 +64,13 @@ public class FieldReaderBigIntegerFuncTest {
 
     public static class Bean1 {
         @JSONField(schema = "{'minimum':128}")
-        private BigInteger value;
+        private Long value;
 
-        public BigInteger getValue() {
+        public Long getValue() {
             return value;
         }
 
-        public void setValue(BigInteger value) {
+        public void setValue(Long value) {
             this.value = value;
         }
     }
@@ -82,11 +83,41 @@ public class FieldReaderBigIntegerFuncTest {
         assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, 123));
         assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, 123L));
+        assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, 123F));
+        assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, 123D));
     }
 
     public static class Bean2 {
-        public void setValue(BigInteger value) {
+        public void setValue(Long value) {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    @Test
+    public void test3() {
+        ObjectReader<Bean3> objectReader = TestUtils.READER_CREATOR_LAMBDA.createObjectReader(Bean3.class);
+        assertEquals(
+                123L,
+                objectReader.readObject(
+                        JSONReader.of("{\"id\":101, \"value\":123}")
+                ).value
+        );
+    }
+
+    public static class Bean3 {
+        private Long value;
+        public final int id;
+
+        public Bean3(@JSONField(name = "id") int id) {
+            this.id = id;
+        }
+
+        public Long getValue() {
+            return value;
+        }
+
+        public void setValue(Long value) {
+            this.value = value;
         }
     }
 }

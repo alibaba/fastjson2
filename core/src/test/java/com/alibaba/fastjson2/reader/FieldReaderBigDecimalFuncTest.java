@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
@@ -14,12 +15,20 @@ public class FieldReaderBigDecimalFuncTest {
     @Test
     public void test() {
         Bean bean = new Bean();
-        ObjectReader objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals(new BigDecimal("123"), bean.value);
 
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
+
+        assertEquals(
+                new BigDecimal("101"),
+                objectReader.readObject(
+                        JSONReader.of("{\"value\":101}"),
+                        0
+                ).value
+        );
     }
 
     public static class Bean {
@@ -37,11 +46,19 @@ public class FieldReaderBigDecimalFuncTest {
     @Test
     public void test1() {
         Bean1 bean = new Bean1();
-        ObjectReader objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean1.class);
+        ObjectReader<Bean1> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean1.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123));
         assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123L));
+
+        assertEquals(
+                new BigDecimal("201"),
+                objectReader.readObject(
+                        JSONReader.of("{\"value\":201}"),
+                        0
+                ).value
+        );
     }
 
     public static class Bean1 {
