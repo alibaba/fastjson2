@@ -25,6 +25,9 @@ public class FieldReaderInt8FuncTest {
         fieldReader.accept(bean, 102);
         assertEquals((byte) 102, bean.value);
 
+        fieldReader.accept(bean, (byte) 103);
+        assertEquals((byte) 103, bean.value);
+
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
 
         assertEquals(
@@ -98,6 +101,34 @@ public class FieldReaderInt8FuncTest {
     public static class Bean2 {
         public void setValue(Byte value) {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    @Test
+    public void test3() {
+        ObjectReader<Bean3> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean3.class);
+        assertEquals(
+                (byte) 85,
+                objectReader.readObject(
+                        JSONReader.of("{\"id\":101, \"value\":85}")
+                ).value
+        );
+    }
+
+    public static class Bean3 {
+        private Byte value;
+        public final int id;
+
+        public Bean3(@JSONField(name = "id") int id) {
+            this.id = id;
+        }
+
+        public Byte getValue() {
+            return value;
+        }
+
+        public void setValue(Byte value) {
+            this.value = value;
         }
     }
 }

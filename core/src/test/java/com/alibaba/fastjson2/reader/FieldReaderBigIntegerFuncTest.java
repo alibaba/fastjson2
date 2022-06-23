@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FieldReaderBigIntegerFuncTest {
     @Test
@@ -19,6 +18,7 @@ public class FieldReaderBigIntegerFuncTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals(new BigInteger("123"), bean.value);
+        assertNotNull(fieldReader.getMethod());
 
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
 

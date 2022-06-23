@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.function.ObjCharConsumer;
 import com.alibaba.fastjson2.schema.JSONSchema;
@@ -25,6 +26,18 @@ final class FieldReaderCharValueFunc<T>
     @Override
     public void accept(T object, char value) {
         function.accept(object, value);
+    }
+
+    public void accept(T object, Object value) {
+        char charValue;
+        if (value instanceof String) {
+            charValue = ((String) value).charAt(0);
+        } else if (value instanceof Character) {
+            charValue = (Character) value;
+        } else {
+            throw new JSONException("cast to char error");
+        }
+        accept(object, charValue);
     }
 
     @Override

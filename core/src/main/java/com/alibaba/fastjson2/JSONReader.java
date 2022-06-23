@@ -462,16 +462,35 @@ public abstract class JSONReader
     }
 
     public byte[] readBinary() {
-        if (ch != '"' && ch != '\'') {
-            throw new UnsupportedOperationException();
+        if (isString()) {
+            String str = readString();
+            if (str.isEmpty()) {
+                return null;
+            }
+
+            throw new JSONException(info("not support input " + str));
         }
 
-        String str = readString();
-        if (str.isEmpty()) {
-            return null;
+        if (nextIfMatch('[')) {
+            int index = 0;
+            byte[] bytes = new byte[64];
+            while (true) {
+                if (ch == ']') {
+                    next();
+                    break;
+                }
+                if (index == bytes.length) {
+                    int oldCapacity = bytes.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    bytes = Arrays.copyOf(bytes, newCapacity);
+                }
+                bytes[index++] = (byte) readInt32Value();
+            }
+            nextIfMatch(',');
+            return Arrays.copyOf(bytes, index);
         }
 
-        throw new JSONException(info("not support input " + str));
+        throw new JSONException(info("not support read binary"));
     }
 
     public abstract int readInt32Value();
