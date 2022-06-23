@@ -1521,7 +1521,7 @@ public class ObjectReaderBaseModule
             return ObjectReaderImplList.of(type, null, 0);
         }
 
-        if (type == ObjectReaderImplSingletonSet.TYPE) {
+        if (type == TypeUtils.CLASS_SINGLE_SET) {
 //            return SingletonSetImpl.INSTANCE;
             return ObjectReaderImplList.of(type, null, 0);
         }

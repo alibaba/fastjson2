@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 
 public class TypeUtils {
+    public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
+
     static class Cache {
         volatile char[] chars;
     }
