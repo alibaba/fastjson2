@@ -204,27 +204,31 @@ abstract class FieldReaderImplDate<T>
         } else {
             if (format != null) {
                 String str = jsonReader.readString();
-                long millis;
-                if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
-                    millis = Long.parseLong(str);
-                    if (formatUnixTime) {
-                        millis *= 1000L;
-                    }
+                if (str.isEmpty() || str.equals("null")) {
+                    fieldValue = null;
                 } else {
-                    Locale locale = jsonReader.getContext().getLocale();
-                    DateTimeFormatter formatter = getFormatter(locale);
-
-                    LocalDateTime ldt;
-                    if (!formatHasHour) {
-                        ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                    long millis;
+                    if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
+                        millis = Long.parseLong(str);
+                        if (formatUnixTime) {
+                            millis *= 1000L;
+                        }
                     } else {
-                        ldt = LocalDateTime.parse(str, formatter);
-                    }
+                        Locale locale = jsonReader.getContext().getLocale();
+                        DateTimeFormatter formatter = getFormatter(locale);
 
-                    ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
-                    millis = zdt.toInstant().toEpochMilli();
+                        LocalDateTime ldt;
+                        if (!formatHasHour) {
+                            ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                        } else {
+                            ldt = LocalDateTime.parse(str, formatter);
+                        }
+
+                        ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
+                        millis = zdt.toInstant().toEpochMilli();
+                    }
+                    fieldValue = new java.util.Date(millis);
                 }
-                fieldValue = new java.util.Date(millis);
             } else {
                 long millis = jsonReader.readMillisFromString();
                 fieldValue = new java.util.Date(millis);

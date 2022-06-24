@@ -87,12 +87,12 @@ public class FieldReaderInt64MethodTest {
         Bean2 bean = new Bean2();
         ObjectReader<Bean2> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean2.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
-        assertThrows(JSONException.class, () -> fieldReader.accept(bean, "123"));
-        assertThrows(JSONException.class, () -> fieldReader.accept(bean, 123));
-        assertThrows(JSONException.class, () -> fieldReader.accept(bean, (short) 123));
-        assertThrows(JSONException.class, () -> fieldReader.accept(bean, 123L));
-        assertThrows(JSONException.class, () -> fieldReader.accept(bean, 123F));
-        assertThrows(JSONException.class, () -> fieldReader.accept(bean, 123D));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, "123"));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, 123));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, (short) 123));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, 123L));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, 123F));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, 123D));
     }
 
     public static class Bean2 {
