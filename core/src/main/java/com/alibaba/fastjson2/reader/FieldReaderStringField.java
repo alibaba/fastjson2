@@ -12,7 +12,7 @@ final class FieldReaderStringField<T>
 
     FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, String defaultValue, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
-        trim = "trim".equals(format);
+        trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
     }
 
     @Override
@@ -44,16 +44,23 @@ final class FieldReaderStringField<T>
 
     @Override
     public void accept(T object, Object value) {
+        String fieldValue;
         if (value != null && !(value instanceof String)) {
-            value = value.toString();
+            fieldValue = value.toString();
+        } else {
+            fieldValue = (String) value;
+        }
+
+        if (trim && fieldValue != null) {
+            fieldValue = fieldValue.trim();
         }
 
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(fieldValue);
         }
 
         try {
-            field.set(object, value);
+            field.set(object, fieldValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

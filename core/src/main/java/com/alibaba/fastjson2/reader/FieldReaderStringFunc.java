@@ -32,7 +32,7 @@ final class FieldReaderStringFunc<T, V>
         this.function = function;
 
         this.format = format;
-        trim = "trim".equals(format);
+        trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
     }
 
     @Override
@@ -41,8 +41,24 @@ final class FieldReaderStringFunc<T, V>
     }
 
     @Override
+    public void accept(T object, int value) {
+        accept(object, Integer.toString(value));
+    }
+
+    @Override
+    public void accept(T object, long value) {
+        accept(object, Long.toString(value));
+    }
+
+    @Override
     public void accept(T object, Object value) {
-        String fieldValue = (String) value;
+        String fieldValue;
+        if (value instanceof String || value == null) {
+            fieldValue = (String) value;
+        } else {
+            fieldValue = value.toString();
+        }
+
         if (trim && fieldValue != null) {
             fieldValue = fieldValue.trim();
         }
