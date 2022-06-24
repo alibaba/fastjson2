@@ -12,7 +12,7 @@ public class FieldReaderBooleanValueFuncTest {
     @Test
     public void test() {
         Bean bean = new Bean();
-        ObjectReader<Bean> objectReader = TestUtils.READER_CREATOR_LAMBDA.createObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = TestUtils.createObjectReaderLambda(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "true");
         assertEquals(true, bean.value);
@@ -53,7 +53,7 @@ public class FieldReaderBooleanValueFuncTest {
     @Test
     public void test2() {
         Bean2 bean = new Bean2();
-        ObjectReader objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean2.class);
+        ObjectReader objectReader = TestUtils.createObjectReaderLambda(Bean2.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, 123));
@@ -71,7 +71,7 @@ public class FieldReaderBooleanValueFuncTest {
 
     @Test
     public void test3() {
-        ObjectReader<Bean3> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean3.class);
+        ObjectReader<Bean3> objectReader = TestUtils.createObjectReaderLambda(Bean3.class);
         assertEquals(
                 true,
                 objectReader.readObject(

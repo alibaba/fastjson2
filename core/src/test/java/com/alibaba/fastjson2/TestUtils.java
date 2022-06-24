@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson.util.IOUtils;
 import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
@@ -45,7 +46,13 @@ public class TestUtils {
     public static ObjectReaderCreator READER_CREATOR = ObjectReaderCreatorASM.INSTANCE;
     public static ObjectWriterCreator WRITER_CREATOR = ObjectWriterCreatorASM.INSTANCE;
 
-    public static ObjectReaderCreator READER_CREATOR_LAMBDA = ObjectReaderCreatorLambda.INSTANCE;
+    public static <T> ObjectReader<T> createObjectReaderLambda(Class<T> objectClass) {
+        return ObjectReaderCreatorLambda.INSTANCE.createObjectReader(objectClass);
+    }
+
+    public static <T> ObjectWriter<T> createObjectWriterLambda(Class<T> objectClass) {
+        return ObjectWriterCreatorLambda.INSTANCE.createObjectWriter(objectClass);
+    }
 
     public static ObjectReaderCreator readerCreator(ClassLoader classLoader) {
         return new ObjectReaderCreatorASM(classLoader);

@@ -14,7 +14,7 @@ public class FieldReaderListFuncTest {
     @Test
     public void test() {
         Bean bean = new Bean();
-        ObjectReader<Bean> objectReader = TestUtils.READER_CREATOR_LAMBDA.createObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = TestUtils.createObjectReaderLambda(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("values");
         assertNotNull(fieldReader.getMethod());
         assertEquals(Long.class, fieldReader.getItemType());
@@ -51,7 +51,7 @@ public class FieldReaderListFuncTest {
     @Test
     public void test1() {
         Bean1 bean = new Bean1(123);
-        ObjectReader<Bean1> objectReader = TestUtils.READER_CREATOR_LAMBDA.createObjectReader(Bean1.class);
+        ObjectReader<Bean1> objectReader = TestUtils.createObjectReaderLambda(Bean1.class);
         FieldReader fieldReader = objectReader.getFieldReader("values");
         assertNotNull(fieldReader.getMethod());
         assertEquals(Long.class, fieldReader.getItemType());
@@ -77,7 +77,7 @@ public class FieldReaderListFuncTest {
     public void test1_jsonb() {
         JSONObject object = JSONObject.of("id", 123, "values", Arrays.asList(101L, 102L));
         byte[] jsonbBytes = JSONB.toBytes(object);
-        ObjectReader<Bean1> objectReader = TestUtils.READER_CREATOR_LAMBDA.createObjectReader(Bean1.class);
+        ObjectReader<Bean1> objectReader = TestUtils.createObjectReaderLambda(Bean1.class);
         Bean1 bean1 = objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes), 0);
         assertEquals(101L, bean1.values.get(0));
         assertEquals(102L, bean1.values.get(1));
