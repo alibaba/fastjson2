@@ -175,9 +175,16 @@ public class ObjectWriterAdapter<T>
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         long featuresAll = features | this.features | jsonWriter.getFeatures();
-        if (!serializable && (featuresAll & JSONWriter.Feature.ErrorOnNoneSerializable.mask) != 0) {
-            errorOnNoneSerializable();
-            return;
+        if (!serializable) {
+            if ((featuresAll & JSONWriter.Feature.ErrorOnNoneSerializable.mask) != 0) {
+                errorOnNoneSerializable();
+                return;
+            }
+
+            if ((featuresAll & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
+                jsonWriter.writeNull();
+                return;
+            }
         }
 
         int size = fieldWriterArray.length;
@@ -236,9 +243,16 @@ public class ObjectWriterAdapter<T>
             return;
         }
 
-        if (!serializable && (featuresAll & JSONWriter.Feature.ErrorOnNoneSerializable.mask) != 0) {
-            errorOnNoneSerializable();
-            return;
+        if (!serializable) {
+            if ((featuresAll & JSONWriter.Feature.ErrorOnNoneSerializable.mask) != 0) {
+                errorOnNoneSerializable();
+                return;
+            }
+
+            if ((featuresAll & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
+                jsonWriter.writeNull();
+                return;
+            }
         }
 
         if (hasFilter(jsonWriter)) {
