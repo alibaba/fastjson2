@@ -9,7 +9,7 @@ import java.util.List;
 
 public class JSONSerializer {
     public final SerializeWriter out;
-    private final JSONWriter raw;
+    final JSONWriter raw;
 
     public JSONSerializer() {
         this(new SerializeWriter());

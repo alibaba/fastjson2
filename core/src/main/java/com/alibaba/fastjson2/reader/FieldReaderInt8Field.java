@@ -29,40 +29,39 @@ final class FieldReaderInt8Field<T>
     }
 
     @Override
-    public void accept(T object, int value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
+    public void accept(T object, short value) {
+        accept(object, Byte.valueOf((byte) value));
+    }
 
-        try {
-            field.set(object, (byte) value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+    @Override
+    public void accept(T object, float value) {
+        accept(object, Byte.valueOf((byte) value));
+    }
+
+    @Override
+    public void accept(T object, double value) {
+        accept(object, Byte.valueOf((byte) value));
+    }
+
+    @Override
+    public void accept(T object, int value) {
+        accept(object, Byte.valueOf((byte) value));
     }
 
     @Override
     public void accept(T object, long value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        try {
-            field.set(object, (byte) value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        accept(object, Byte.valueOf((byte) value));
     }
 
     @Override
     public void accept(T object, Object value) {
+        Byte byteValue = TypeUtils.toByte(value);
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(byteValue);
         }
 
         try {
-            field.set(object,
-                    TypeUtils.toByte(value));
+            field.set(object, byteValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

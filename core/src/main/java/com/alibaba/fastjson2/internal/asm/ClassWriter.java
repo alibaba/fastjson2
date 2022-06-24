@@ -249,15 +249,4 @@ public class ClassWriter {
             return class1.getName().replace('.', '/');
         }
     }
-
-    /**
-     * Returns the {@link ClassLoader} to be used by the default implementation of {@link
-     * #getCommonSuperClass(String, String)}, that of this {@link ClassWriter}'s runtime type by
-     * default.
-     *
-     * @return ClassLoader
-     */
-    protected ClassLoader getClassLoader() {
-        return getClass().getClassLoader();
-    }
 }

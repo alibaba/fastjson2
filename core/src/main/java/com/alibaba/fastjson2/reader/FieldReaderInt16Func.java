@@ -36,12 +36,13 @@ final class FieldReaderInt16Func<T, V>
 
     @Override
     public void accept(T object, Object value) {
+        Short shortValue = TypeUtils.toShort(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(shortValue);
         }
 
-        function.accept(object,
-                (V) TypeUtils.toShort(value));
+        function.accept(object, (V) shortValue);
     }
 
     @Override
@@ -54,5 +55,10 @@ final class FieldReaderInt16Func<T, V>
         }
 
         function.accept(object, (V) fieldValue);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return (short) jsonReader.readInt32Value();
     }
 }

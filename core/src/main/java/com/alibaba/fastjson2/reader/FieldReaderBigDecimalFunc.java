@@ -36,12 +36,13 @@ final class FieldReaderBigDecimalFunc<T, V>
 
     @Override
     public void accept(T object, Object value) {
+        BigDecimal decimalValue = TypeUtils.toBigDecimal(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(decimalValue);
         }
 
-        function.accept(object,
-                (V) TypeUtils.toBigDecimal(value));
+        function.accept(object, (V) decimalValue);
     }
 
     @Override

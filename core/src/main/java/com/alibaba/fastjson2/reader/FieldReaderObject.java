@@ -4,10 +4,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.JdbcSupport;
 
 import java.lang.reflect.Type;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -60,6 +57,14 @@ public interface FieldReaderObject<T, V>
                         }
 
                         return new ObjectReaderImplLocalDate(format, locale);
+                    }
+
+                    if (fieldClass == LocalTime.class) {
+                        if (format == null) {
+                            return ObjectReaderImplLocalTime.INSTANCE;
+                        }
+
+                        return new ObjectReaderImplLocalTime(format, locale);
                     }
 
                     if (fieldClass == Instant.class) {

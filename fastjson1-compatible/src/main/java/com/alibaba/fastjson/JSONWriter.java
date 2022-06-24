@@ -7,7 +7,7 @@ import java.io.Writer;
 
 public class JSONWriter {
     private final Writer out;
-    private final com.alibaba.fastjson2.JSONWriter raw;
+    final com.alibaba.fastjson2.JSONWriter raw;
 
     public JSONWriter(Writer out) {
         this.out = out;
@@ -26,10 +26,16 @@ public class JSONWriter {
                 ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.WriteNulls, state);
                 break;
             case WriteNullListAsEmpty:
+                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.WriteNullListAsEmpty, state);
+                break;
             case WriteNullStringAsEmpty:
+                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.WriteNullStringAsEmpty, state);
+                break;
             case WriteNullNumberAsZero:
+                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.WriteNullNumberAsZero, state);
+                break;
             case WriteNullBooleanAsFalse:
-                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue, state);
+                ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.WriteNullBooleanAsFalse, state);
                 break;
             case BrowserCompatible:
                 ctx.config(com.alibaba.fastjson2.JSONWriter.Feature.BrowserCompatible, state);

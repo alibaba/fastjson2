@@ -15,10 +15,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 
 public class TypeUtils {
+    public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
+
     static class Cache {
         volatile char[] chars;
     }
@@ -177,6 +182,18 @@ public class TypeUtils {
 
         if (targetClass == String.class) {
             return (T) JSON.toJSONString(obj);
+        }
+
+        if (targetClass == AtomicInteger.class) {
+            return (T) new AtomicInteger(toIntValue(obj));
+        }
+
+        if (targetClass == AtomicLong.class) {
+            return (T) new AtomicLong(toLongValue(obj));
+        }
+
+        if (targetClass == AtomicBoolean.class) {
+            return (T) new AtomicBoolean((Boolean) obj);
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
@@ -574,6 +591,14 @@ public class TypeUtils {
             return Integer.parseInt(str);
         }
 
+        if (value instanceof Map && ((Map<?, ?>) value).isEmpty()) {
+            return null;
+        }
+
+        if (value instanceof Boolean) {
+            return ((Boolean) value).booleanValue() ? 1 : 0;
+        }
+
         throw new JSONException("can not cast to integer");
     }
 
@@ -692,6 +717,66 @@ public class TypeUtils {
         }
 
         throw new JSONException("can not cast to decimal");
+    }
+
+    public static boolean toBooleanValue(Object value) {
+        if (value == null) {
+            return false;
+        }
+
+        if (value instanceof Boolean) {
+            return ((Boolean) value).booleanValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.isEmpty() || str.equals("null")) {
+                return false;
+            }
+            return Boolean.parseBoolean(str);
+        }
+
+        if (value instanceof Number) {
+            int intValue = ((Number) value).intValue();
+            if (intValue == 1) {
+                return true;
+            }
+            if (intValue == 0) {
+                return false;
+            }
+        }
+
+        throw new JSONException("can not cast to boolean");
+    }
+
+    public static Boolean toBoolean(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Boolean) {
+            return ((Boolean) value).booleanValue();
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+            if (str.isEmpty() || str.equals("null")) {
+                return null;
+            }
+            return Boolean.parseBoolean(str);
+        }
+
+        if (value instanceof Number) {
+            int intValue = ((Number) value).intValue();
+            if (intValue == 1) {
+                return true;
+            }
+            if (intValue == 0) {
+                return false;
+            }
+        }
+
+        throw new JSONException("can not cast to boolean");
     }
 
     public static float toFloatValue(Object value) {

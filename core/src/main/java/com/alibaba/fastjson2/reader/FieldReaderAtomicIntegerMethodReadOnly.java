@@ -35,7 +35,8 @@ class FieldReaderAtomicIntegerMethodReadOnly<T>
 
         try {
             AtomicInteger atomic = (AtomicInteger) method.invoke(object);
-            atomic.set((Integer) value);
+            int intValue = ((Number) value).intValue();
+            atomic.set(intValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
@@ -45,6 +46,16 @@ class FieldReaderAtomicIntegerMethodReadOnly<T>
     public void readFieldValue(JSONReader jsonReader, T object) {
         Integer value = jsonReader.readInt32();
         accept(object, value);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        int intValue = jsonReader.readInt32Value();
+        if (jsonReader.wasNull()) {
+            return null;
+        }
+
+        return new AtomicInteger(intValue);
     }
 
     @Override

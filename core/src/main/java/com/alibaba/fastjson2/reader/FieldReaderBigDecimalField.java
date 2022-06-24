@@ -57,13 +57,14 @@ final class FieldReaderBigDecimalField<T>
 
     @Override
     public void accept(T object, Object value) {
+        BigDecimal decimalValue = TypeUtils.toBigDecimal(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(decimalValue);
         }
 
         try {
-            field.set(object,
-                    TypeUtils.toBigDecimal(value));
+            field.set(object, decimalValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

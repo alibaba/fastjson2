@@ -26,12 +26,13 @@ final class FieldReaderInt8Func<T, V>
 
     @Override
     public void accept(T object, Object value) {
+        Byte byteValue = TypeUtils.toByte(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(byteValue);
         }
 
-        function.accept(object,
-                (V) TypeUtils.toByte(value));
+        function.accept(object, (V) byteValue);
     }
 
     @Override
@@ -44,5 +45,10 @@ final class FieldReaderInt8Func<T, V>
         }
 
         function.accept(object, (V) fieldValue);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readInt32();
     }
 }

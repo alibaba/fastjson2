@@ -14,7 +14,7 @@ final class FieldReaderStringMethod<T>
 
     FieldReaderStringMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, String defaultValue, JSONSchema schema, Method setter) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter);
-        trim = "trim".equals(format);
+        trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
     }
 
     @Override
@@ -42,5 +42,29 @@ final class FieldReaderStringMethod<T>
             fieldValue = fieldValue.trim();
         }
         return fieldValue;
+    }
+
+    @Override
+    public void accept(T object, Object value) {
+        String fieldValue;
+        if (value instanceof String || value == null) {
+            fieldValue = (String) value;
+        } else {
+            fieldValue = value.toString();
+        }
+
+        if (trim && fieldValue != null) {
+            fieldValue = fieldValue.trim();
+        }
+
+        if (schema != null) {
+            schema.assertValidate(fieldValue);
+        }
+
+        try {
+            method.invoke(object, fieldValue);
+        } catch (Exception e) {
+            throw new JSONException("set " + fieldName + " error", e);
+        }
     }
 }

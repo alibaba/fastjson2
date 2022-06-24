@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.function.ObjFloatConsumer;
 import com.alibaba.fastjson2.schema.JSONSchema;
@@ -35,16 +34,13 @@ final class FieldReaderFloatValueFunc<T>
 
     @Override
     public void accept(T object, Object value) {
+        float floatValue = TypeUtils.toFloatValue(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(floatValue);
         }
 
-        try {
-            method.invoke(object,
-                    TypeUtils.toFloatValue(value));
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        function.accept(object, floatValue);
     }
 
     @Override

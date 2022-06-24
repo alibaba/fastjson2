@@ -43,12 +43,13 @@ final class FieldReaderInt32ValueFunc<T>
 
     @Override
     public void accept(T object, Object value) {
+        int intValue = TypeUtils.toIntValue(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(intValue);
         }
 
-        function.accept(object,
-                TypeUtils.toIntValue(value));
+        function.accept(object, intValue);
     }
 
     @Override
