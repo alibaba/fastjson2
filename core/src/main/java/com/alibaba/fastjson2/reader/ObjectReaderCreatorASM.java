@@ -183,10 +183,6 @@ public class ObjectReaderCreatorASM
         }
     }
 
-    public static <T> ObjectReader<T> of(Class<T> objectType) {
-        return INSTANCE.createObjectReader(objectType);
-    }
-
     public ObjectReaderCreatorASM() {
         this.classLoader = new DynamicClassLoader();
     }

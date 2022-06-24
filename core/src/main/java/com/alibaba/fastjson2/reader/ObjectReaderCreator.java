@@ -1111,26 +1111,6 @@ public class ObjectReaderCreator {
         };
     }
 
-    public <T> Supplier<T> createInstanceSupplier(Constructor<T> constructor) {
-        return () -> {
-            try {
-                return constructor.newInstance();
-            } catch (Throwable e) {
-                throw new JSONException("create instance error", e);
-            }
-        };
-    }
-
-    public <T> Supplier<T> createInstanceSupplier(Method staticFactoryMethod) {
-        return () -> {
-            try {
-                return (T) staticFactoryMethod.invoke(null);
-            } catch (Throwable e) {
-                throw new JSONException("create instance error", e);
-            }
-        };
-    }
-
     public <T, R> Function<T, R> createBuildFunction(Method builderMethod) {
         builderMethod.setAccessible(true);
 
