@@ -14,7 +14,7 @@ public class FieldReaderDateFuncTest {
     @Test
     public void test() {
         Bean bean = new Bean();
-        ObjectReader<Bean> objectReader = TestUtils.READER_CREATOR_LAMBDA.createObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = TestUtils.createObjectReaderLambda(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
 
         assertNotNull(fieldReader.getMethod());
@@ -65,7 +65,7 @@ public class FieldReaderDateFuncTest {
     @Test
     public void test2() {
         Bean2 bean = new Bean2();
-        ObjectReader objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean2.class);
+        ObjectReader objectReader = TestUtils.createObjectReaderLambda(Bean2.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(ClassCastException.class, () -> fieldReader.accept(bean, 123));
@@ -84,7 +84,7 @@ public class FieldReaderDateFuncTest {
 
     @Test
     public void test3() {
-        ObjectReader<Bean3> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean3.class);
+        ObjectReader<Bean3> objectReader = TestUtils.createObjectReaderLambda(Bean3.class);
         assertEquals(
                 1499055194000L,
                 objectReader.readObject(
@@ -123,7 +123,7 @@ public class FieldReaderDateFuncTest {
 
     @Test
     public void test4() {
-        ObjectReader<Bean4> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean4.class);
+        ObjectReader<Bean4> objectReader = TestUtils.createObjectReaderLambda(Bean4.class);
         assertEquals(
                 1499055194000L,
                 objectReader.readObject(
@@ -152,7 +152,7 @@ public class FieldReaderDateFuncTest {
 
     @Test
     public void testMillis() {
-        ObjectReader<BeanMillis> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(BeanMillis.class);
+        ObjectReader<BeanMillis> objectReader = TestUtils.createObjectReaderLambda(BeanMillis.class);
         assertEquals(
                 1499055194000L,
                 objectReader.readObject(
@@ -181,7 +181,7 @@ public class FieldReaderDateFuncTest {
 
     @Test
     public void test5() {
-        ObjectReader<Bean5> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean5.class);
+        ObjectReader<Bean5> objectReader = TestUtils.createObjectReaderLambda(Bean5.class);
         assertEquals(
                 1499055194000L,
                 objectReader.readObject(
@@ -216,7 +216,7 @@ public class FieldReaderDateFuncTest {
 
     @Test
     public void testISO8601() {
-        ObjectReader<BeanISO8601> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(BeanISO8601.class);
+        ObjectReader<BeanISO8601> objectReader = TestUtils.createObjectReaderLambda(BeanISO8601.class);
         assertEquals(
                 1499055194000L,
                 objectReader.readObject(

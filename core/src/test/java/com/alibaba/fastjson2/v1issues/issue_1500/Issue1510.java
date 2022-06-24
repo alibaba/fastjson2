@@ -2,9 +2,9 @@ package com.alibaba.fastjson2.v1issues.issue_1500;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -21,7 +21,7 @@ public class Issue1510 {
 
     @Test
     public void test_for_issue_lambda() throws Exception {
-        ObjectReader<Model> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Model.class);
+        ObjectReader<Model> objectReader = TestUtils.createObjectReaderLambda(Model.class);
         Model model = objectReader.readObject(JSONReader.of("{\"startTime\":\"2017-11-04\",\"endTime\":\"2017-11-14\"}"));
         String text = JSON.toJSONString(model);
         assertEquals("{\"endTime\":\"2017-11-14\",\"startTime\":\"2017-11-04\"}", text);
