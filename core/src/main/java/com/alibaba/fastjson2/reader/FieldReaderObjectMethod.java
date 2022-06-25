@@ -39,6 +39,18 @@ class FieldReaderObjectMethod<T>
             schema.assertValidate(value);
         }
 
+        if (fieldClass == char.class) {
+            char charValue;
+            if (value instanceof String) {
+                charValue = ((String) value).charAt(0);
+            } else if (value instanceof Character) {
+                charValue = (Character) value;
+            } else {
+                throw new JSONException("cast to char error");
+            }
+            value = charValue;
+        }
+
         try {
             method.invoke(object, value);
         } catch (Exception e) {

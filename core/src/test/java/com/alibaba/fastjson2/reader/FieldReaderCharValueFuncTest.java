@@ -49,7 +49,7 @@ public class FieldReaderCharValueFuncTest {
         Bean2 bean = new Bean2();
         ObjectReader objectReader = TestUtils.createObjectReaderLambda(Bean2.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
-        assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, "123"));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(Exception.class, () -> fieldReader.accept(bean, 123));
         assertThrows(Exception.class, () -> fieldReader.accept(bean, (short) 123));
         assertThrows(Exception.class, () -> fieldReader.accept(bean, 123L));
@@ -66,6 +66,17 @@ public class FieldReaderCharValueFuncTest {
     @Test
     public void test3() {
         ObjectReader<Bean3> objectReader = TestUtils.createObjectReaderLambda(Bean3.class);
+        assertEquals(
+                'A',
+                objectReader.readObject(
+                        JSONReader.of("{\"id\":101, \"value\":\"A\"}")
+                ).value
+        );
+    }
+
+    @Test
+    public void test3_reflect() {
+        ObjectReader<Bean3> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean3.class);
         assertEquals(
                 'A',
                 objectReader.readObject(
