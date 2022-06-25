@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.JDKUtils;
-
 import java.util.Arrays;
 
 final class JSONWriterUTF16JDK8
@@ -22,7 +20,7 @@ final class JSONWriterUTF16JDK8
             return;
         }
 
-        char[] value = JDKUtils.getCharArray(str);
+        char[] value = str.toCharArray();
 
         final int strlen = value.length;
 
