@@ -10,10 +10,11 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONObjectTest_get_2 {
-    // GraalVM not support
-    // Android not support
     @Test
     public void test_get() throws Exception {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
         JSONObject obj = JSON.parseObject("{\"value\":{}}");
         JSONObject value = (JSONObject) obj.getObject("value", Object.class);
         assertEquals(0, value.size());
@@ -21,6 +22,10 @@ public class JSONObjectTest_get_2 {
 
     @Test
     public void test_get_obj() throws Exception {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
+
         JSONObject obj = new JSONObject();
         {
             Map<String, Object> value = new LinkedHashMap<>();

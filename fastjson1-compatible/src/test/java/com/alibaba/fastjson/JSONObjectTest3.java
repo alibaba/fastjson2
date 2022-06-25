@@ -7,10 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JSONObjectTest3 {
-    // GraalVM not support
-    // Android not support
     @Test
     public void test_0() {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
+
         String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
         assertEquals("123", bean.getValue());
@@ -26,6 +28,10 @@ public class JSONObjectTest3 {
 
     @Test
     public void test_error_0() {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
+
         String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
@@ -40,6 +46,10 @@ public class JSONObjectTest3 {
 
     @Test
     public void test_error_1() {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
+
         String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
@@ -54,6 +64,10 @@ public class JSONObjectTest3 {
 
     @Test
     public void test_error_2() {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
+
         String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
@@ -68,6 +82,10 @@ public class JSONObjectTest3 {
 
     @Test
     public void test_error_3() {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
+
         String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
@@ -82,6 +100,10 @@ public class JSONObjectTest3 {
 
     @Test
     public void test_error_4() {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
+
         String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
@@ -96,6 +118,10 @@ public class JSONObjectTest3 {
 
     @Test
     public void test_error_5() {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
+
         String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
@@ -110,6 +136,10 @@ public class JSONObjectTest3 {
 
     @Test
     public void test_error_6() {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
+
         String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
@@ -124,6 +154,10 @@ public class JSONObjectTest3 {
 
     @Test
     public void test_error_7() {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
+
         String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
@@ -138,6 +172,10 @@ public class JSONObjectTest3 {
 
     @Test
     public void test_error_8() {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
+
         String text = "{'value':'123','big':false}";
         Bean bean = JSON.parseObject(text, Bean.class);
 
