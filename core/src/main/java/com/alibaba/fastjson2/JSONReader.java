@@ -1385,8 +1385,7 @@ public abstract class JSONReader
                     value = readBoolValue();
                     break;
                 case 'n':
-                    readNull();
-                    value = null;
+                    value = readNullOrNewDate();
                     break;
                 case '/':
                     next();
