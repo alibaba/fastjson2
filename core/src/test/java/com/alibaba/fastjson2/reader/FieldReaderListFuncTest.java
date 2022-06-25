@@ -25,7 +25,32 @@ public class FieldReaderListFuncTest {
         );
         assertEquals(123L, bean.values.get(0));
 
-        assertThrows(ClassCastException.class, () -> fieldReader.accept(bean, new Object()));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, new Object()));
+
+        assertEquals(
+                101L,
+                objectReader.readObject(
+                        JSONReader.of("{\"values\":[101]}"),
+                        0
+                ).values.get(0)
+        );
+    }
+
+    @Test
+    public void test_reflect() {
+        Bean bean = new Bean();
+        ObjectReader<Bean> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean.class);
+        FieldReader fieldReader = objectReader.getFieldReader("values");
+        assertNotNull(fieldReader.getMethod());
+        assertEquals(Long.class, fieldReader.getItemType());
+
+        fieldReader.accept(
+                bean,
+                Arrays.asList(Long.valueOf(123L))
+        );
+        assertEquals(123L, bean.values.get(0));
+
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, new Object()));
 
         assertEquals(
                 101L,
@@ -62,7 +87,7 @@ public class FieldReaderListFuncTest {
         );
         assertEquals(123L, bean.values.get(0));
 
-        assertThrows(ClassCastException.class, () -> fieldReader.accept(bean, new Object()));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, new Object()));
 
         assertEquals(
                 102L,

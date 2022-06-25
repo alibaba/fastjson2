@@ -10,6 +10,9 @@ import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 import java.nio.charset.StandardCharsets;
 
 public class TestUtils {
+    public static final boolean GRAALVM = false;
+    public static final boolean ANDROID = false;
+
     public static ObjectReaderCreator[] readerCreators() {
         return new ObjectReaderCreator[]{
                 ObjectReaderCreator.INSTANCE,

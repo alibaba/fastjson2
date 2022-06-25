@@ -9,8 +9,6 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONObjectTest3 {
-    // GraalVM not support
-    // Android not support
     @Test
     public void test0() {
         assertEquals(

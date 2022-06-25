@@ -8,10 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class InterfaceTest {
-    // GraalVM not support
-    // Android not support
     @Test
     public void test() {
+        if (TestUtils.GRAALVM || TestUtils.ANDROID) {
+            return;
+        }
+
         String str = "{\"item\":{\"id\":123}}";
 
         Bean bean = JSON.parseObject(str, Bean.class);
