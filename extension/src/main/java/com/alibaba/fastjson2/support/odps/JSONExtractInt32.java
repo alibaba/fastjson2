@@ -19,7 +19,7 @@ public class JSONExtractInt32
 
     public IntWritable eval(Text input) {
         JSONReader parser = JSONReader.of(input.getBytes(), 0, input.getLength(), StandardCharsets.UTF_8);
-        int value = path.extractInt32(parser);
+        int value = path.extractInt32Value(parser);
         if (parser.wasNull()) {
             return null;
         }
