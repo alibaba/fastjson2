@@ -9,6 +9,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 final class ObjectWriterImplMap
@@ -32,6 +33,9 @@ final class ObjectWriterImplMap
     final Field jsonObject1InnerMap;
     long jsonObject1InnerMapOffset = -1;
 
+    final char[] typeInfoUTF16;
+    final byte[] typeInfoUTF8;
+
     public ObjectWriterImplMap(Class objectClass, long features) {
         this(null, null, objectClass, objectClass, features);
     }
@@ -50,6 +54,10 @@ final class ObjectWriterImplMap
         }
 
         String typeName = TypeUtils.getTypeName(objectClass);
+        String typeInfoStr = "\"@type\":\"" + objectClass.getName() + "\"";
+        this.typeInfoUTF16 = typeInfoStr.toCharArray();
+        this.typeInfoUTF8 = typeInfoStr.getBytes(StandardCharsets.UTF_8);
+
         jsonObject1 = "JO1".equals(typeName);
         this.jsonbTypeInfo = JSONB.toBytes(typeName);
         this.typeNameHash = Fnv.hashCode64(typeName);
@@ -315,6 +323,15 @@ final class ObjectWriterImplMap
         jsonWriter.endObject();
     }
 
+    public boolean writeTypeInfo(JSONWriter jsonWriter) {
+        if (jsonWriter.isUTF8()) {
+            jsonWriter.writeNameRaw(typeInfoUTF8);
+        } else {
+            jsonWriter.writeNameRaw(typeInfoUTF16);
+        }
+        return true;
+    }
+
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (jsonWriter.isJSONB()) {
@@ -330,6 +347,13 @@ final class ObjectWriterImplMap
         boolean refDetect = jsonWriter.isRefDetect();
 
         jsonWriter.startObject();
+
+        if ((fieldType == this.objectType && jsonWriter.isWriteMapTypeInfo(object, objectClass, features))
+                || jsonWriter.isWriteTypeInfo(object, fieldType, features)
+        ) {
+            writeTypeInfo(jsonWriter);
+        }
+
         Map map = (Map) object;
 
         features |= jsonWriter.getFeatures();
@@ -388,7 +412,8 @@ final class ObjectWriterImplMap
                     if (key instanceof Integer) {
                         jsonWriter.writeName(((Integer) key).intValue());
                     } else if (key instanceof Long) {
-                        jsonWriter.writeName(((Long) key).longValue());
+                        long longKey = (Long) key;
+                        jsonWriter.writeName(longKey);
                     } else {
                         jsonWriter.writeNameAny(key);
                     }

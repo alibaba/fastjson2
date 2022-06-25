@@ -97,6 +97,7 @@ public final class ObjectReaderImplObject
 
             if (typeName != null) {
                 object.put("@type", typeName);
+                hash = 0;
             }
 
             for (int i = 0; ; ++i) {
@@ -104,9 +105,12 @@ public final class ObjectReaderImplObject
                     break;
                 }
 
-                String name;
+                Object name;
                 if (i == 0 && typeName == null && hash != 0) {
                     name = jsonReader.getFieldName();
+                } else if (jsonReader.isNumber()) {
+                    name = jsonReader.readNumber();
+                    jsonReader.nextIfMatch(':');
                 } else {
                     name = jsonReader.readFieldName();
                 }

@@ -2,12 +2,14 @@ package com.alibaba.fastjson.issue_3200;
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
+import com.alibaba.fastjson.parser.Feature
 import com.alibaba.fastjson.parser.ParserConfig
 import com.alibaba.fastjson.serializer.SerializerFeature
+import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertSame
 import org.junit.jupiter.api.Test
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.properties.Delegates
-import org.junit.jupiter.api.Assertions
 
 /**
  * kotlin集合测试
@@ -38,8 +40,8 @@ class TestIssue3223 {
         n.longValue = 1
         n.json = JSON.parseObject(JSON.toJSONString(mapOf("a" to "b")))
         val raw = JSON.toJSONString(n, SerializerFeature.WriteClassName)
-        val d = JSON.parseObject(raw, NullableKotlin::class.java)
-        Assertions.assertTrue(n == d)
+        val d = JSON.parseObject(raw, NullableKotlin::class.java, Feature.SupportAutoType)
+        assertEquals(n, d)
 
     }
 }
