@@ -21,6 +21,6 @@ public class Issue3347 {
         String mapJSONString = JSON.toJSONString(map);
         Map mapValues = JSONObject.parseObject(mapJSONString, Map.class);
         Object mapKey = mapValues.keySet().iterator().next();
-        assertTrue(mapKey instanceof String);
+        assertTrue(mapKey instanceof Integer);
     }
 }

@@ -1337,7 +1337,7 @@ public abstract class JSONReader
                 throw new JSONException(info());
             }
 
-            String name;
+            Object name;
             if (match || typeRedirect) {
                 name = readFieldName();
             } else {
@@ -1346,7 +1346,14 @@ public abstract class JSONReader
             }
 
             if (name == null) {
-                name = readFieldNameUnquote();
+                if (isNumber()) {
+                    name = readNumber();
+                    if ((context.features & Feature.NonStringKeyAsString.mask) != 0) {
+                        name = name.toString();
+                    }
+                } else {
+                    name = readFieldNameUnquote();
+                }
                 if (ch == ':') {
                     next();
                 }
@@ -2904,7 +2911,8 @@ public abstract class JSONReader
         TrimString(1 << 13),
         ErrorOnNotSupportAutoType(1 << 14),
         DuplicateKeyValueAsArray(1 << 15),
-        AllowUnQuotedFieldNames(1 << 16);
+        AllowUnQuotedFieldNames(1 << 16),
+        NonStringKeyAsString(1 << 17);
 
         public final long mask;
 

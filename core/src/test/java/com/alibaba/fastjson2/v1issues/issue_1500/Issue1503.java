@@ -17,7 +17,7 @@ public class Issue1503 {
         map.put(null, new Bean());
         Map<Long, Bean> rmap = (Map<Long, Bean>) JSON.parse(JSON.toJSONString(map, JSONWriter.Feature.WriteClassName));
         String json = JSON.toJSONString(rmap);
-        assertEquals("{\"null\":{\"@type\":\"com.alibaba.fastjson2.v1issues.issue_1500.Issue1503$Bean\"}}", json);
+        assertEquals("{\"@type\":\"java.util.HashMap\",\"null\":{\"@type\":\"com.alibaba.fastjson2.v1issues.issue_1500.Issue1503$Bean\"}}", json);
     }
 
     public static class Bean {

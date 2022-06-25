@@ -97,9 +97,10 @@ public class JSONObject
                 || key instanceof Boolean
                 || key instanceof UUID
         ) {
-            return super.get(
-                    key.toString()
-            );
+            Object value = super.get(key.toString());
+            if (value != null) {
+                return value;
+            }
         }
 
         return super.get(key);
