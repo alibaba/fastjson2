@@ -17,7 +17,6 @@ public class Issue502 {
 
     @Data
     public static class ThirdCommonResult {
-
         private String msg;
 
         private String flag;
