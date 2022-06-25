@@ -760,13 +760,11 @@ public class EishayTest {
 
     @Test
     public void test_read_gen_lambda() throws Exception {
-        ObjectReaderCreator creator = ObjectReaderCreatorLambda.INSTANCE;
-
         for (int i = 0; i < 5; ++i) {
             long start = System.currentTimeMillis();
 
             for (int j = 0; j < 1000 * 10; ++j) {
-                creator.createObjectReader(MediaContent.class);
+                TestUtils.createObjectReaderLambda(MediaContent.class);
 //                creator.createObjectReader(Media.class);
 //                creator.createObjectReader(Image.class);
             }

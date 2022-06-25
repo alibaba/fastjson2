@@ -106,8 +106,15 @@ public class IgnoreNoneSerializableTest {
                 "\t\"b\":{}\n" +
                 "}", JSONB.toJSONString(JSONB.toBytes(bean, JSONWriter.Feature.FieldBased)));
 
-        assertEquals("null", JSONB.toJSONString(
-                JSONB.toBytes(bean, JSONWriter.Feature.IgnoreNoneSerializable, JSONWriter.Feature.FieldBased))
+        assertEquals(
+                "null",
+                JSONB.toJSONString(
+                        JSONB.toBytes(
+                                bean,
+                                JSONWriter.Feature.IgnoreNoneSerializable,
+                                JSONWriter.Feature.FieldBased
+                        )
+                )
         );
     }
 

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +43,7 @@ public class FieldReaderBooleanFieldTest {
     @Test
     public void test1() {
         Bean1 bean = new Bean1();
-        ObjectReader<Bean1> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean1.class);
+        ObjectReader<Bean1> objectReader = TestUtils.createObjectReaderLambda(Bean1.class);
 //        FieldReader fieldReader = objectReader.getFieldReader("value");
 //        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, "false"));
 //        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 0));

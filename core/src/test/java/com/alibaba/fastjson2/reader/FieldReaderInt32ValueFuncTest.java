@@ -13,7 +13,7 @@ public class FieldReaderInt32ValueFuncTest {
     @Test
     public void test() {
         Bean bean = new Bean();
-        ObjectReader<Bean> objectReader = TestUtils.READER_CREATOR_LAMBDA.createObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = TestUtils.createObjectReaderLambda(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals(123, bean.value);
@@ -45,7 +45,7 @@ public class FieldReaderInt32ValueFuncTest {
     @Test
     public void test1() {
         Bean1 bean = new Bean1();
-        ObjectReader<Bean1> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean1.class);
+        ObjectReader<Bean1> objectReader = TestUtils.createObjectReaderLambda(Bean1.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123));
@@ -78,7 +78,7 @@ public class FieldReaderInt32ValueFuncTest {
     @Test
     public void test2() {
         Bean2 bean = new Bean2();
-        ObjectReader objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Bean2.class);
+        ObjectReader objectReader = TestUtils.createObjectReaderLambda(Bean2.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(UnsupportedOperationException.class, () -> fieldReader.accept(bean, 123));
@@ -95,7 +95,7 @@ public class FieldReaderInt32ValueFuncTest {
 
     @Test
     public void test3() {
-        ObjectReader<Bean3> objectReader = TestUtils.READER_CREATOR_LAMBDA.createObjectReader(Bean3.class);
+        ObjectReader<Bean3> objectReader = TestUtils.createObjectReaderLambda(Bean3.class);
         assertEquals(
                 123,
                 objectReader.readObject(
