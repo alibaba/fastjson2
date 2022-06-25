@@ -62,6 +62,26 @@ public class FieldReaderInt64FuncTest {
         );
     }
 
+    @Test
+    public void test1_reflect() {
+        Bean1 bean = new Bean1();
+        ObjectReader<Bean1> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean1.class);
+        FieldReader fieldReader = objectReader.getFieldReader("value");
+        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, "123"));
+        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123));
+        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123L));
+        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123F));
+        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123D));
+
+        assertEquals(
+                201L,
+                objectReader.readObject(
+                        JSONReader.of("{\"value\":201}"),
+                        0
+                ).value
+        );
+    }
+
     public static class Bean1 {
         @JSONField(schema = "{'minimum':128}")
         private Long value;
