@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.autoType;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
@@ -15,8 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class AutoTypeTest43_dynamic {
     @Test
     public void test_0() throws Exception {
-        // GraalVM not support
-        // Android not support
+        if (TestUtils.GRAALVM || TestUtils.ANDROID) {
+            return;
+        }
+
         JSONObject object = new JSONObject();
 
         Model proxy = (Model) Proxy.newProxyInstance(Model.class.getClassLoader(), new Class<?>[]{Model.class, Map.class}, object);
