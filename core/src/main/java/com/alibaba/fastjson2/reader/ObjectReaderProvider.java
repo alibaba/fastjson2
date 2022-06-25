@@ -424,24 +424,13 @@ public class ObjectReaderProvider {
     }
 
     public ObjectReaderProvider() {
-        ObjectReaderCreator creator = null;
+        ObjectReaderCreator creator;
         switch (JSONFactory.CREATOR) {
             case "reflect":
                 creator = ObjectReaderCreator.INSTANCE;
                 break;
-            case "lambda":
-                creator = ObjectReaderCreatorLambda.INSTANCE;
-                break;
-            case "asm":
             default:
-                try {
-                    creator = ObjectReaderCreatorASM.INSTANCE;
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-                if (creator == null) {
-                    creator = ObjectReaderCreatorLambda.INSTANCE;
-                }
+                creator = ObjectReaderCreatorLambda.INSTANCE;
                 break;
         }
         this.creator = creator;

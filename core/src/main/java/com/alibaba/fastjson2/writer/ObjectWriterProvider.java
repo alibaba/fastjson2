@@ -26,24 +26,13 @@ public class ObjectWriterProvider {
     public ObjectWriterProvider() {
         init();
 
-        ObjectWriterCreator creator = null;
+        ObjectWriterCreator creator;
         switch (JSONFactory.CREATOR) {
             case "reflect":
                 creator = ObjectWriterCreator.INSTANCE;
                 break;
-            case "lambda":
-                creator = ObjectWriterCreatorLambda.INSTANCE;
-                break;
-            case "asm":
             default:
-                try {
-                    creator = ObjectWriterCreatorASM.INSTANCE;
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-                if (creator == null) {
-                    creator = ObjectWriterCreatorLambda.INSTANCE;
-                }
+                creator = ObjectWriterCreatorLambda.INSTANCE;
                 break;
         }
         this.creator = creator;

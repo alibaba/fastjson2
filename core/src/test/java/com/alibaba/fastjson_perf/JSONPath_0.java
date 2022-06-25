@@ -14,6 +14,12 @@ public class JSONPath_0 {
     private String str;
     private byte[] utf8Bytes;
 
+    @Test
+    public void test_dollar() throws Exception {
+        JSONPath path = JSONPath.of("$");
+        System.out.println(path);
+    }
+
     public JSONPath_0() throws Exception {
         InputStream is = Int100Test.class.getClassLoader().getResourceAsStream("data/path_01.json");
         str = IOUtils.toString(is, "UTF-8");

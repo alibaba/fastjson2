@@ -4,20 +4,18 @@ import com.alibaba.fastjson.util.IOUtils;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 
 import java.nio.charset.StandardCharsets;
 
 public class TestUtils {
-    public static final boolean GRAALVM = false;
+    public static final boolean GRAALVM = true;
     public static final boolean ANDROID = false;
 
     public static ObjectReaderCreator[] readerCreators() {
         return new ObjectReaderCreator[]{
                 ObjectReaderCreator.INSTANCE,
                 ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE,
         };
     }
 
@@ -25,7 +23,6 @@ public class TestUtils {
         return new ObjectWriterCreator[]{
                 ObjectWriterCreator.INSTANCE,
                 ObjectWriterCreatorLambda.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE,
         };
     }
 
@@ -33,7 +30,6 @@ public class TestUtils {
         return new ObjectReaderCreator[]{
                 ObjectReaderCreator.INSTANCE,
                 ObjectReaderCreatorLambda.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE,
         };
     }
 
@@ -46,8 +42,8 @@ public class TestUtils {
         };
     }
 
-    public static ObjectReaderCreator READER_CREATOR = ObjectReaderCreatorASM.INSTANCE;
-    public static ObjectWriterCreator WRITER_CREATOR = ObjectWriterCreatorASM.INSTANCE;
+    public static ObjectReaderCreator READER_CREATOR = ObjectReaderCreatorLambda.INSTANCE;
+    public static ObjectWriterCreator WRITER_CREATOR = ObjectWriterCreatorLambda.INSTANCE;
 
     public static <T> ObjectReader<T> createObjectReaderLambda(Class<T> objectClass) {
         return ObjectReaderCreatorLambda.INSTANCE.createObjectReader(objectClass);
@@ -58,11 +54,11 @@ public class TestUtils {
     }
 
     public static ObjectReaderCreator readerCreator(ClassLoader classLoader) {
-        return new ObjectReaderCreatorASM(classLoader);
+        return READER_CREATOR;
     }
 
     public static ObjectWriterCreator writerCreator(ClassLoader classLoader) {
-        return new ObjectWriterCreatorASM(classLoader);
+        return WRITER_CREATOR;
     }
 
     public static <T> ObjectReader<T> of(Class<T> objectType) {
