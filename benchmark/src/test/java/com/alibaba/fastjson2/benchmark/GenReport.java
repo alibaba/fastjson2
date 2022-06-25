@@ -35,7 +35,7 @@ public class GenReport {
                 LibResult fastjson2 = benchmarkResult.libraryResults.get("fastjson2");
                 LibResult jackson = benchmarkResult.libraryResults.get("jackson");
                 if (fastjson1 != null && fastjson2 != null && jackson != null) {
-                    benchmarkResult.libraryResults.clear();;
+                    benchmarkResult.libraryResults.clear();
                     benchmarkResult.libraryResults.put("fastjson2", fastjson2);
                     benchmarkResult.libraryResults.put("fastjson1", fastjson1);
                     benchmarkResult.libraryResults.put("jackson", jackson);
@@ -111,7 +111,8 @@ public class GenReport {
         }
     }
 
-    static class DocReader implements Closeable {
+    static class DocReader
+            implements Closeable {
         BufferedReader reader;
 
         public DocReader(File file) throws IOException {
