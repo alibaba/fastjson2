@@ -28,55 +28,58 @@ public final class ObjectReaderImplObject
         if (jsonReader.isObject()) {
             jsonReader.nextIfObjectStart();
 
-            long hash = jsonReader.readFieldNameHashCode();
+            long hash = 0;
+            if (jsonReader.isString()) {
+                hash = jsonReader.readFieldNameHashCode();
 
-            if (hash == HASH_TYPE) {
-                boolean supportAutoType = context.isEnabled(JSONReader.Feature.SupportAutoType);
+                if (hash == HASH_TYPE) {
+                    boolean supportAutoType = context.isEnabled(JSONReader.Feature.SupportAutoType);
 
-                ObjectReader autoTypeObjectReader;
+                    ObjectReader autoTypeObjectReader;
 
-                if (supportAutoType) {
-                    long typeHash = jsonReader.readTypeHashCode();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+                    if (supportAutoType) {
+                        long typeHash = jsonReader.readTypeHashCode();
+                        autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
 
-                    if (autoTypeObjectReader != null) {
-                        Class objectClass = autoTypeObjectReader.getObjectClass();
-                        if (objectClass != null) {
-                            ClassLoader objectClassLoader = objectClass.getClassLoader();
-                            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                            if (objectClassLoader != contextClassLoader) {
-                                Class contextClass = null;
+                        if (autoTypeObjectReader != null) {
+                            Class objectClass = autoTypeObjectReader.getObjectClass();
+                            if (objectClass != null) {
+                                ClassLoader objectClassLoader = objectClass.getClassLoader();
+                                ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+                                if (objectClassLoader != contextClassLoader) {
+                                    Class contextClass = null;
 
-                                typeName = jsonReader.getString();
-                                try {
-                                    contextClass = contextClassLoader.loadClass(typeName);
-                                } catch (ClassNotFoundException ignored) {
-                                }
+                                    typeName = jsonReader.getString();
+                                    try {
+                                        contextClass = contextClassLoader.loadClass(typeName);
+                                    } catch (ClassNotFoundException ignored) {
+                                    }
 
-                                if (!objectClass.equals(contextClass)) {
-                                    autoTypeObjectReader = context.getObjectReader(contextClass);
+                                    if (!objectClass.equals(contextClass)) {
+                                        autoTypeObjectReader = context.getObjectReader(contextClass);
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    if (autoTypeObjectReader == null) {
-                        typeName = jsonReader.getString();
+                        if (autoTypeObjectReader == null) {
+                            typeName = jsonReader.getString();
+                            autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
+                        }
+                    } else {
+                        typeName = jsonReader.readString();
                         autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
+
+                        if (autoTypeObjectReader == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
+                            throw new JSONException(jsonReader.info("autoType not support : " + typeName));
+                        }
                     }
-                } else {
-                    typeName = jsonReader.readString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
-                    if (autoTypeObjectReader == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
-                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
+                    if (autoTypeObjectReader != null) {
+                        jsonReader.setTypeRedirect(true);
+
+                        return autoTypeObjectReader.readObject(jsonReader, features);
                     }
-                }
-
-                if (autoTypeObjectReader != null) {
-                    jsonReader.setTypeRedirect(true);
-
-                    return autoTypeObjectReader.readObject(jsonReader, features);
                 }
             }
 
@@ -94,6 +97,7 @@ public final class ObjectReaderImplObject
 
             if (typeName != null) {
                 object.put("@type", typeName);
+                hash = 0;
             }
 
             for (int i = 0; ; ++i) {
@@ -101,9 +105,12 @@ public final class ObjectReaderImplObject
                     break;
                 }
 
-                String name;
-                if (i == 0 && typeName == null) {
+                Object name;
+                if (i == 0 && typeName == null && hash != 0) {
                     name = jsonReader.getFieldName();
+                } else if (jsonReader.isNumber()) {
+                    name = jsonReader.readNumber();
+                    jsonReader.nextIfMatch(':');
                 } else {
                     name = jsonReader.readFieldName();
                 }

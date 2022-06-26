@@ -196,6 +196,48 @@ public class JSON {
         }
     }
 
+    public static <T> T parseObject(String str, Class<T> objectType, Feature... features) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
+        boolean useNativeJavaObject = false;
+        for (Feature feature : features) {
+            if (feature == Feature.UseNativeJavaObject) {
+                useNativeJavaObject = true;
+            }
+        }
+
+        JSONReader jsonReader = JSONReader.of(str);
+        JSONReader.Context context = jsonReader.getContext();
+        if (!useNativeJavaObject) {
+            context.setArraySupplier(arraySupplier);
+            context.setObjectSupplier(defaultSupplier);
+        }
+
+        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
+            context.setDateFormat(defaultDateFormat);
+        }
+
+        config(context, features);
+
+        try {
+            ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
+            T object = objectReader.readObject(jsonReader, 0);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return object;
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
     public static <T> T parseObject(String str, Type objectType, Feature... features) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -443,6 +485,9 @@ public class JSON {
                     break;
                 case UseNativeJavaObject:
                     context.config(JSONReader.Feature.UseNativeObject);
+                    break;
+                case NonStringKeyAsString:
+                    context.config(JSONReader.Feature.NonStringKeyAsString);
                     break;
                 default:
                     break;

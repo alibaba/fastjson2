@@ -228,7 +228,7 @@ class ObjectReaderImplMapTyped
             object = (Map) createInstance(contextFeatures);
         }
 
-        for (; ; ) {
+        for (int i = 0; ; ++i) {
             if (jsonReader.nextIfMatch('}')) {
                 break;
             }
@@ -238,6 +238,11 @@ class ObjectReaderImplMapTyped
                 name = jsonReader.readFieldName();
             } else {
                 name = jsonReader.read(keyType);
+                if (i == 0
+                        && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                        && name.equals(getTypeKey())) {
+                    continue;
+                }
                 jsonReader.nextIfMatch(':');
             }
             if (valueObjectReader == null) {

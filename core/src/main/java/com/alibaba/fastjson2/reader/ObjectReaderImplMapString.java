@@ -40,17 +40,23 @@ final class ObjectReaderImplMapString
                 = instanceType == HashMap.class
                 ? new HashMap<>()
                 : (Map) createInstance(context.getFeatures() | features);
+        long contextFeatures = features | context.getFeatures();
 
-        for (; ; ) {
+        for (int i = 0; ; ++i) {
             if (jsonReader.nextIfMatch('}')) {
                 break;
             }
 
             String name = jsonReader.readFieldName();
             String value = jsonReader.readString();
+            if (i == 0
+                    && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                    && name.equals(getTypeKey())) {
+                continue;
+            }
+
             Object origin = object.put(name, value);
             if (origin != null) {
-                long contextFeatures = features | context.getFeatures();
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);
