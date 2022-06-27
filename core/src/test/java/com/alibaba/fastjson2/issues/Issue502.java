@@ -10,9 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue502 {
     @Test
     public void test() {
-        String result = "{\"taskId\":\"xxx\"}";
-        ThirdCommonResult thirdCommonResult = JSONObject.parseObject(result, ThirdCommonResult.class);
-        assertEquals("xxx", thirdCommonResult.getTaskId());
+        String s = "{  \"msg\":\"success\",\"flag\":\"ok\",\"taskId\":\"13fee3000dddc\"," +
+                "\"data\":[{\"rq\":\"2022-06-28 12:03:52\",\"lng\":\"172.342\"," +
+                "\"lat\":\"31.4532\",\"name\":\"ceshi\"}]}";
+        ThirdCommonResult thirdCommonResult = JSONObject.parseObject(s, ThirdCommonResult.class);
+        assertEquals("13fee3000dddc", thirdCommonResult.getTaskId());
     }
 
     @Data
