@@ -15,6 +15,7 @@ import static com.alibaba.fastjson2.reader.ObjectReaders.fieldReader;
 
 public class AwtRederModule
         implements ObjectReaderModule {
+    // Android not support
     static final long HASH_X = Fnv.hashCode64("x");
     static final long HASH_Y = Fnv.hashCode64("y");
     static final long HASH_NAME = Fnv.hashCode64("name");
