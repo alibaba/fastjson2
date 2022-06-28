@@ -218,6 +218,15 @@ public final class ObjectReaderImplObject
             case 'n':
                 value = jsonReader.readNullOrNewDate();
                 break;
+            case 'S':
+                if (jsonReader.nextIfSet()) {
+                    HashSet<Object> set = new HashSet<>();
+                    jsonReader.read(set);
+                    value = set;
+                } else {
+                    throw new JSONException(jsonReader.info());
+                }
+                break;
             default:
                 throw new JSONException(jsonReader.info());
         }
