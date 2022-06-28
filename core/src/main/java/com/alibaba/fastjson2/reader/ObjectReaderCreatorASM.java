@@ -1751,6 +1751,10 @@ public class ObjectReaderCreatorASM
                     Label match_ = new Label(), skipValue_ = new Label(), loadNull_ = new Label();
 
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfNull", "()Z", false);
+                    mw.visitJumpInsn(Opcodes.IFNE, loadNull_);
+
+                    mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                     mw.visitIntInsn(Opcodes.BIPUSH, '[');
                     mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
                     mw.visitJumpInsn(Opcodes.IFNE, match_);
