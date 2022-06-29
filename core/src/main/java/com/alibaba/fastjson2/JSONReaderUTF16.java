@@ -773,8 +773,7 @@ final class JSONReaderUTF16
                     ch = EOI;
                     break;
                 } else {
-                    offset++;
-                    ch = chars[offset];
+                    ch = chars[offset++];
                 }
             }
         }
@@ -1078,6 +1077,10 @@ final class JSONReaderUTF16
         }
 
         if (ch != '"' && ch != '\'') {
+            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
+                return readFieldNameUnquote();
+            }
+
             return null;
         }
 
