@@ -1281,6 +1281,26 @@ public abstract class JSONReader
         nextIfMatch(',');
     }
 
+    public void read(Collection list) {
+        if (!nextIfMatch('[')) {
+            throw new JSONException("illegal input, offset " + offset + ", char " + ch);
+        }
+
+        for (; ; ) {
+            if (nextIfMatch(']')) {
+                break;
+            }
+            Object item = readAny();
+            list.add(item);
+
+            if (nextIfMatch(',')) {
+                continue;
+            }
+        }
+
+        nextIfMatch(',');
+    }
+
     public void readObject(Object object, Feature... features) {
         long featuresLong = 0;
         for (Feature feature : features) {
@@ -1352,7 +1372,11 @@ public abstract class JSONReader
                         name = name.toString();
                     }
                 } else {
-                    name = readFieldNameUnquote();
+                    if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
+                        name = readFieldNameUnquote();
+                    } else {
+                        throw new JSONException(info("not allow unquoted fieldName"));
+                    }
                 }
                 if (ch == ':') {
                     next();

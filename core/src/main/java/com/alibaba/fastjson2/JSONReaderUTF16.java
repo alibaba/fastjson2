@@ -773,8 +773,7 @@ final class JSONReaderUTF16
                     ch = EOI;
                     break;
                 } else {
-                    offset++;
-                    ch = chars[offset];
+                    ch = chars[offset++];
                 }
             }
         }

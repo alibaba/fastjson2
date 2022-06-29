@@ -357,8 +357,7 @@ class JSONReaderUTF8
                     ch = EOI;
                     break;
                 } else {
-                    offset++;
-                    ch = (char) bytes[offset];
+                    ch = (char) bytes[offset++];
                 }
             }
         }

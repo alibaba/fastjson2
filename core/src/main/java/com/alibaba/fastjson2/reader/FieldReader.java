@@ -197,7 +197,7 @@ public interface FieldReader<T>
     }
 
     default ObjectReader getItemObjectReader(JSONReader.Context ctx) {
-        throw new UnsupportedOperationException();
+        return ctx.getObjectReader(Object.class);
     }
 
     default ObjectReader getItemObjectReader(JSONReader jsonReader) {
