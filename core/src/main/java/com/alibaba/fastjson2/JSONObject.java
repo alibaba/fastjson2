@@ -127,7 +127,7 @@ public class JSONObject
                 || key instanceof Boolean
                 || key instanceof UUID
         ) {
-            return super.containsKey(key.toString());
+            return super.containsKey(key) || super.containsKey(key.toString());
         }
 
         return super.containsKey(key);
