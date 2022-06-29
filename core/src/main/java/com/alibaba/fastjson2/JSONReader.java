@@ -1372,7 +1372,11 @@ public abstract class JSONReader
                         name = name.toString();
                     }
                 } else {
-                    name = readFieldNameUnquote();
+                    if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
+                        name = readFieldNameUnquote();
+                    } else {
+                        throw new JSONException(info("not allow unquoted fieldName"));
+                    }
                 }
                 if (ch == ':') {
                     next();

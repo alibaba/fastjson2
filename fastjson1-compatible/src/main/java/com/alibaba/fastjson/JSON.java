@@ -65,6 +65,7 @@ public class JSON {
 
         JSONReader reader = JSONReader.of(str);
         JSONReader.Context context = reader.getContext();
+        context.config(JSONReader.Feature.AllowUnQuotedFieldNames);
         context.setArraySupplier(arraySupplier);
         context.setObjectSupplier(defaultSupplier);
 
@@ -97,6 +98,7 @@ public class JSON {
         JSONReader.Context context = reader.getContext();
         context.setArraySupplier(arraySupplier);
         context.setObjectSupplier(defaultSupplier);
+        context.config(JSONReader.Feature.AllowUnQuotedFieldNames);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
@@ -173,7 +175,7 @@ public class JSON {
         JSONReader.Context context = jsonReader.getContext();
         context.setArraySupplier(arraySupplier);
         context.setObjectSupplier(defaultSupplier);
-        context.config(JSONReader.Feature.SupportSmartMatch);
+        context.config(JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.AllowUnQuotedFieldNames);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
@@ -496,7 +498,7 @@ public class JSON {
 
         boolean disableFieldSmartMatch = false;
         for (Feature feature : features) {
-            if (feature.equals(Feature.DisableFieldSmartMatch)) {
+            if (feature == Feature.DisableFieldSmartMatch) {
                 disableFieldSmartMatch = true;
                 break;
             }
@@ -599,7 +601,7 @@ public class JSON {
             JSONReader.Context context = jsonReader.getContext();
             context.setObjectSupplier(defaultSupplier);
             context.setArraySupplier(arraySupplier);
-            context.config(JSONReader.Feature.SupportSmartMatch);
+            context.config(JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.AllowUnQuotedFieldNames);
 
             config(context, features);
             T object = jsonReader.read(clazz);
@@ -1152,7 +1154,7 @@ public class JSON {
             JSONReader.Context context = reader.getContext();
             context.setObjectSupplier(defaultSupplier);
             context.setArraySupplier(arraySupplier);
-            context.config(JSONReader.Feature.SupportSmartMatch);
+            context.config(JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.AllowUnQuotedFieldNames);
             return reader.read(paramType);
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -1226,7 +1228,7 @@ public class JSON {
             JSONReader.Context context = reader.getContext();
             context.setObjectSupplier(defaultSupplier);
             context.setArraySupplier(arraySupplier);
-            context.config(JSONReader.Feature.SupportSmartMatch);
+            context.config(JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.AllowUnQuotedFieldNames);
 
             reader.startArray();
             for (Type itemType : types) {

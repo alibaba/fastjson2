@@ -416,8 +416,7 @@ final class JSONReaderStr
                     ch = EOI;
                     break;
                 } else {
-                    offset++;
-                    ch = str.charAt(offset);
+                    ch = str.charAt(offset++);
                 }
             }
         }
