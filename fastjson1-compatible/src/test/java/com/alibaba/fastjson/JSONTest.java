@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -36,6 +37,7 @@ public class JSONTest {
     @Test
     public void testNull() throws Exception {
         assertNull(JSON.parseObject((InputStream) null, Object.class));
+        assertNull(JSON.parseObject((InputStream) null, (Type) Object.class));
     }
 
     @Test
