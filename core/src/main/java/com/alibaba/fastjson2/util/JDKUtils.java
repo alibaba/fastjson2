@@ -37,6 +37,10 @@ public class JDKUtils {
                 property = property.substring(2);
             }
             jvmVersion = Integer.parseInt(property);
+
+            if (System.getProperty("java.vm.name").contains("OpenJ9")) {
+                FIELD_STRING_ERROR = true;
+            }
         } catch (Throwable ignored) {
         }
 
