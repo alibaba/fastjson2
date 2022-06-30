@@ -291,6 +291,13 @@ public class JSON {
 
     public static <T> T parseObject(
             InputStream is,
+            Class<T> objectType,
+            Feature... features) throws IOException {
+        return parseObject(is, StandardCharsets.UTF_8, objectType, features);
+    }
+
+    public static <T> T parseObject(
+            InputStream is,
             Charset charset,
             Type objectType,
             Feature... features) throws IOException {
