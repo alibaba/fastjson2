@@ -129,7 +129,48 @@ EishayWriteUTF8Bytes.fastjson2            thrpt    5  1793.183 ?  1.127  ops/ms
 EishayWriteUTF8Bytes.jackson              thrpt    5   976.012 ?  1.317  ops/ms
 ```
 
-
+# zulu18.30.11-ca-jdk18.0.1-linux_x64
+```java
+Benchmark                                  Mode  Cnt     Score    Error   Units
+EishayParseBinary.fastjson2JSONB          thrpt    5  2362.117 ? 44.962  ops/ms
+EishayParseBinary.fastjson2UTF8Bytes      thrpt    5  1177.776 ?  4.966  ops/ms
+EishayParseBinary.hessian                 thrpt    5   244.159 ?  4.747  ops/ms
+EishayParseBinary.javaSerialize           thrpt    5    49.643 ?  1.285  ops/ms
+EishayParseString.fastjson1               thrpt    5  1175.848 ?  6.920  ops/ms
+EishayParseString.fastjson2               thrpt    5  1105.063 ? 11.039  ops/ms
+EishayParseString.jackson                 thrpt    5   493.522 ?  3.434  ops/ms
+EishayParseStringPretty.fastjson1         thrpt    5   274.497 ?  0.956  ops/ms
+EishayParseStringPretty.fastjson2         thrpt    5   890.238 ?  7.131  ops/ms
+EishayParseStringPretty.jackson           thrpt    5   471.865 ?  2.225  ops/ms
+EishayParseTreeString.fastjson1           thrpt    5   542.336 ?  1.722  ops/ms
+EishayParseTreeString.fastjson2           thrpt    5   857.298 ? 12.356  ops/ms
+EishayParseTreeString.jackson             thrpt    5   468.221 ?  4.616  ops/ms
+EishayParseTreeStringPretty.fastjson1     thrpt    5   459.238 ?  2.081  ops/ms
+EishayParseTreeStringPretty.fastjson2     thrpt    5   692.972 ? 25.574  ops/ms
+EishayParseTreeStringPretty.jackson       thrpt    5   430.639 ?  2.592  ops/ms
+EishayParseTreeUTF8Bytes.fastjson1        thrpt    5   497.555 ?  1.606  ops/ms
+EishayParseTreeUTF8Bytes.fastjson2        thrpt    5   735.451 ?  9.074  ops/ms
+EishayParseTreeUTF8Bytes.jackson          thrpt    5   565.546 ?  5.183  ops/ms
+EishayParseTreeUTF8BytesPretty.fastjson1  thrpt    5   410.839 ?  2.797  ops/ms
+EishayParseTreeUTF8BytesPretty.fastjson2  thrpt    5   638.422 ?  1.992  ops/ms
+EishayParseTreeUTF8BytesPretty.jackson    thrpt    5   519.342 ?  9.278  ops/ms
+EishayParseUTF8Bytes.fastjson1            thrpt    5   902.783 ?  8.251  ops/ms
+EishayParseUTF8Bytes.fastjson2            thrpt    5  1155.226 ?  8.419  ops/ms
+EishayParseUTF8Bytes.jackson              thrpt    5   555.699 ?  1.737  ops/ms
+EishayParseUTF8BytesPretty.fastjson1      thrpt    5   256.735 ?  0.429  ops/ms
+EishayParseUTF8BytesPretty.fastjson2      thrpt    5   877.123 ?  4.427  ops/ms
+EishayParseUTF8BytesPretty.jackson        thrpt    5   506.329 ?  2.138  ops/ms
+EishayWriteBinary.fastjson2JSONB          thrpt    5  2969.328 ?  5.093  ops/ms
+EishayWriteBinary.fastjson2UTF8Bytes      thrpt    5  1751.941 ?  6.584  ops/ms
+EishayWriteBinary.hessian                 thrpt    5   317.448 ?  1.405  ops/ms
+EishayWriteBinary.javaSerialize           thrpt    5   223.992 ?  1.385  ops/ms
+EishayWriteString.fastjson1               thrpt    5   598.652 ?  4.162  ops/ms
+EishayWriteString.fastjson2               thrpt    5  1708.710 ? 17.184  ops/ms
+EishayWriteString.jackson                 thrpt    5   940.741 ?  8.431  ops/ms
+EishayWriteUTF8Bytes.fastjson1            thrpt    5   542.214 ?  3.065  ops/ms
+EishayWriteUTF8Bytes.fastjson2            thrpt    5  1736.941 ?  7.775  ops/ms
+EishayWriteUTF8Bytes.jackson              thrpt    5   860.483 ?  2.971  ops/ms
+```
 
 # zulu8.62.0.19-ca-jdk8.0.332-linux_aarch64
 ```
