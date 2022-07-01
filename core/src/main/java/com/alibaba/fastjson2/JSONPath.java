@@ -1098,6 +1098,27 @@ public abstract class JSONPath {
                 return;
             }
 
+            if (object instanceof Sequence) {
+                Sequence sequence = (Sequence) object;
+                JSONArray array = new JSONArray();
+                for (Object value : sequence.values) {
+                    if (value instanceof Collection) {
+                        for (Object valueItem : ((Collection<?>) value)) {
+                            if (apply(context, valueItem)) {
+                                array.add(valueItem);
+                            }
+                        }
+                    } else {
+                        if (apply(context, value)) {
+                            array.add(value);
+                        }
+                    }
+                }
+                context.value = array;
+                context.eval = true;
+                return;
+            }
+
             if (apply(context, object)) {
                 context.value = object;
                 context.eval = true;
