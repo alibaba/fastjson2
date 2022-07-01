@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JdbcSupport;
@@ -440,6 +441,11 @@ public interface FieldWriter<T>
             }
 
             if (LocalDateTime.class.isAssignableFrom(valueClass)) {
+                ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(LocalDateTime.class);
+                if (objectWriter != null && objectWriter != ObjectWriterImplLocalDateTime.INSTANCE) {
+                    return objectWriter;
+                }
+
                 if (format == null || format.isEmpty()) {
                     return ObjectWriterImplLocalDateTime.INSTANCE;
                 } else {
@@ -448,6 +454,11 @@ public interface FieldWriter<T>
             }
 
             if (LocalDate.class.isAssignableFrom(valueClass)) {
+                ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(LocalDate.class);
+                if (objectWriter != null && objectWriter != ObjectWriterImplLocalDate.INSTANCE) {
+                    return objectWriter;
+                }
+
                 if (format == null || format.isEmpty()) {
                     return ObjectWriterImplLocalDate.INSTANCE;
                 } else {
@@ -456,6 +467,11 @@ public interface FieldWriter<T>
             }
 
             if (LocalTime.class.isAssignableFrom(valueClass)) {
+                ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(LocalTime.class);
+                if (objectWriter != null && objectWriter != ObjectWriterImplLocalTime.INSTANCE) {
+                    return objectWriter;
+                }
+
                 if (format == null || format.isEmpty()) {
                     return ObjectWriterImplLocalTime.INSTANCE;
                 } else {
