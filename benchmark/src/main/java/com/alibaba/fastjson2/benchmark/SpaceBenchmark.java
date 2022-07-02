@@ -46,7 +46,7 @@ public class SpaceBenchmark {
         int spaceCount = 0;
         for (int i = 0; i < chars.length; i++) {
             char ch = chars[i];
-            boolean space = ch == '\n' || ch == '\r' || ch == '\f' || ch == '\t' || ch == '\b';
+            boolean space = ch <= ch && (ch == ' ' || ch == '\n' || ch == '\r' || ch == '\f' || ch == '\t' || ch == '\b');
             if (space) {
                 spaceCount++;
             }
@@ -60,6 +60,7 @@ public class SpaceBenchmark {
         for (int i = 0; i < chars.length; i++) {
             char ch = chars[i];
             switch (ch) {
+                case ' ':
                 case '\n':
                 case '\r':
                 case '\t':
