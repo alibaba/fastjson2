@@ -157,6 +157,14 @@ public interface FieldReader<T>
                 if (otherParamType.isAssignableFrom(thisParamType)) {
                     return -1;
                 }
+
+                if (thisParamType.isEnum() && (otherParamType == Integer.class || otherParamType == int.class)) {
+                    return 1;
+                }
+
+                if (otherParamType.isEnum() && (thisParamType == Integer.class || thisParamType == int.class)) {
+                    return -1;
+                }
             }
         }
 
