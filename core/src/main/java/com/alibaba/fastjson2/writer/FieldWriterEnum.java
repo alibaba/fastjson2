@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.SymbolTable;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.util.Arrays;
@@ -37,7 +38,7 @@ abstract class FieldWriterEnum
         boolean usingToString = (features & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0;
 
         int ordinal = e.ordinal();
-        JSONB.SymbolTable symbolTable = jsonWriter.getSymbolTable();
+        SymbolTable symbolTable = jsonWriter.getSymbolTable();
         if (symbolTable != null && usingOrdinal && !usingToString) {
             int namingOrdinal = symbolTable.getOrdinalByHashCode(hashCodes[ordinal]);
             if (namingOrdinal >= 0) {

@@ -2227,7 +2227,7 @@ public abstract class JSONReader
                 JSONFactory.createReadContext(),
                 jsonbBytes,
                 0,
-                jsonbBytes.length, null);
+                jsonbBytes.length);
     }
 
     public static JSONReader ofJSONB(JSONReader.Context context, byte[] jsonbBytes) {
@@ -2235,7 +2235,7 @@ public abstract class JSONReader
                 context,
                 jsonbBytes,
                 0,
-                jsonbBytes.length, null);
+                jsonbBytes.length);
     }
 
     public static JSONReader ofJSONB(byte[] jsonbBytes, JSONReader.Feature... features) {
@@ -2245,7 +2245,7 @@ public abstract class JSONReader
                 context,
                 jsonbBytes,
                 0,
-                jsonbBytes.length, null);
+                jsonbBytes.length);
     }
 
     public static JSONReader ofJSONB(byte[] bytes, int offset, int length) {
@@ -2253,15 +2253,15 @@ public abstract class JSONReader
                 JSONFactory.createReadContext(),
                 bytes,
                 offset,
-                length, null);
+                length);
     }
 
-    public static JSONReader ofJSONB(byte[] bytes, int offset, int length, JSONB.SymbolTable symbolTable) {
+    public static JSONReader ofJSONB(byte[] bytes, int offset, int length, SymbolTable symbolTable) {
         return new JSONReaderJSONB(
-                JSONFactory.createReadContext(),
+                JSONFactory.createReadContext(symbolTable),
                 bytes,
                 offset,
-                length, symbolTable);
+                length);
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length, Charset charset) {
@@ -2706,10 +2706,18 @@ public abstract class JSONReader
         AutoTypeBeforeHandler autoTypeBeforeHandler;
 
         protected final ObjectReaderProvider provider;
+        protected final SymbolTable symbolTable;
 
         public Context(ObjectReaderProvider provider) {
             this.features = defaultReaderFeatures;
             this.provider = provider;
+            this.symbolTable = null;
+        }
+
+        public Context(ObjectReaderProvider provider, SymbolTable symbolTable) {
+            this.features = defaultReaderFeatures;
+            this.provider = provider;
+            this.symbolTable = symbolTable;
         }
 
         public ObjectReader getObjectReader(Type type) {

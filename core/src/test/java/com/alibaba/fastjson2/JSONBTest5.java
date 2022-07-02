@@ -175,7 +175,7 @@ public class JSONBTest5 {
         Int1 bean = new Int1();
         bean.setV0000(100);
 
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable("v0000");
+        SymbolTable symbolTable = JSONB.symbolTable("v0000");
         assertEquals(1, symbolTable.size());
 
         byte[] bytes = JSONB.toBytes(bean, symbolTable, new Filter[0]);
@@ -189,7 +189,7 @@ public class JSONBTest5 {
         Int1 bean = new Int1();
         bean.setV0000(100);
 
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable("v0000");
+        SymbolTable symbolTable = JSONB.symbolTable("v0000");
 
         byte[] bytes = JSONB.toBytes(bean, symbolTable, new Filter[0], JSONWriter.Feature.WriteClassName);
 
@@ -199,7 +199,7 @@ public class JSONBTest5 {
 
     @Test
     public void symbolTable() {
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable("id", "name");
+        SymbolTable symbolTable = JSONB.symbolTable("id", "name");
         assertEquals(2, symbolTable.size());
         assertEquals(hash("id", "name"), symbolTable.hashCode64());
     }

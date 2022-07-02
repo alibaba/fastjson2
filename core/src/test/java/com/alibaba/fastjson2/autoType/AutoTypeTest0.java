@@ -87,7 +87,7 @@ public class AutoTypeTest0 {
 
     @Test
     public void test_jsonb_5() throws Exception {
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable("@type", "java.util.TreeMap", "v0000");
+        SymbolTable symbolTable = JSONB.symbolTable("@type", "java.util.TreeMap", "v0000");
 
         Map map = new LinkedHashMap<>();
         map.put("@type", "java.util.TreeMap");
@@ -103,7 +103,7 @@ public class AutoTypeTest0 {
 
     @Test
     public void test_jsonb_6() throws Exception {
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable("@type", "java.util.TreeMap", "v0000");
+        SymbolTable symbolTable = JSONB.symbolTable("@type", "java.util.TreeMap", "v0000");
 
         Map map = new LinkedHashMap<>();
         map.put("@type", "java.util.TreeMap");
@@ -119,7 +119,7 @@ public class AutoTypeTest0 {
 
     @Test
     public void test_jsonb_7() throws Exception {
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable("@type", "java.util.TreeMap");
+        SymbolTable symbolTable = JSONB.symbolTable("@type", "java.util.TreeMap");
 
         Map map = new LinkedHashMap<>();
         map.put("@type", "java.util.TreeMap");

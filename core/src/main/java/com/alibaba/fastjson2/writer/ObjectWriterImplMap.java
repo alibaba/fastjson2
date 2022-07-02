@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.SymbolTable;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.*;
 
@@ -179,7 +180,7 @@ final class ObjectWriterImplMap
 
         Class itemClass = null;
         ObjectWriter itemWriter = null;
-        JSONB.SymbolTable symbolTable = jsonWriter.getSymbolTable();
+        SymbolTable symbolTable = jsonWriter.getSymbolTable();
         boolean contextRefDetect = (contextFeatures & JSONWriter.Feature.ReferenceDetection.mask) != 0;
 
         int i = 0;
