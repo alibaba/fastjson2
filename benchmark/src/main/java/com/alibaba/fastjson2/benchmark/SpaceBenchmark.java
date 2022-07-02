@@ -46,7 +46,14 @@ public class SpaceBenchmark {
         int spaceCount = 0;
         for (int i = 0; i < chars.length; i++) {
             char ch = chars[i];
-            boolean space = ch <= ch && (ch == ' ' || ch == '\n' || ch == '\r' || ch == '\f' || ch == '\t' || ch == '\b');
+            boolean space = ch <= ' '
+                    && (ch == ' '
+                        || ch == '\n'
+                        || ch == '\r'
+                        || ch == '\f'
+                        || ch == '\t'
+                        || ch == '\b'
+            );
             if (space) {
                 spaceCount++;
             }
@@ -59,6 +66,7 @@ public class SpaceBenchmark {
         int spaceCount = 0;
         for (int i = 0; i < chars.length; i++) {
             char ch = chars[i];
+            boolean space;
             switch (ch) {
                 case ' ':
                 case '\n':
@@ -66,10 +74,14 @@ public class SpaceBenchmark {
                 case '\t':
                 case '\b':
                 case '\f':
-                    spaceCount++;
+                    space = true;
                     break;
                 default:
+                    space = false;
                     break;
+            }
+            if (space) {
+                spaceCount++;
             }
         }
         bh.consume(spaceCount);
@@ -79,7 +91,7 @@ public class SpaceBenchmark {
         Options options = new OptionsBuilder()
                 .include(SpaceBenchmark.class.getName())
                 .mode(Mode.Throughput)
-                .warmupIterations(3)
+                .warmupIterations(1)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .forks(1)
                 .build();
