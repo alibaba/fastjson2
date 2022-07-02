@@ -76,7 +76,7 @@ public class JSONReaderJSONBTest {
         }
 
         {
-            JSONB.SymbolTable symbolTable = JSONB.symbolTable("id");
+            SymbolTable symbolTable = JSONB.symbolTable("id");
             JSONWriter jsonWriter = JSONWriter.ofJSONB(symbolTable);
             jsonWriter.writeSymbol("id");
             byte[] bytes = jsonWriter.getBytes();

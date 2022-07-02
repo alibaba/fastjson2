@@ -600,7 +600,7 @@ public class JSONBTest {
 
     @Test
     public void test_naming() {
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable("id");
+        SymbolTable symbolTable = JSONB.symbolTable("id");
         JSONWriter jsonWriter = JSONWriter.ofJSONB(symbolTable);
         jsonWriter.writeAny(
                 Collections.singletonMap("id", 123)

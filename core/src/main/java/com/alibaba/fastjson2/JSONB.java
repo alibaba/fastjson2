@@ -250,8 +250,7 @@ public interface JSONB {
                 context,
                 jsonbBytes,
                 0,
-                jsonbBytes.length,
-                null);
+                jsonbBytes.length);
 
         JSONObject object = (JSONObject) reader.readObject();
         if (reader.resolveTasks != null) {
@@ -268,8 +267,7 @@ public interface JSONB {
                 context,
                 jsonbBytes,
                 0,
-                jsonbBytes.length,
-                null);
+                jsonbBytes.length);
 
         JSONObject object = (JSONObject) reader.readObject();
         if (reader.resolveTasks != null) {
@@ -284,7 +282,7 @@ public interface JSONB {
                 context,
                 jsonbBytes,
                 0,
-                jsonbBytes.length, null);
+                jsonbBytes.length);
         JSONArray array = (JSONArray) reader.readArray();
         if (reader.resolveTasks != null) {
             reader.handleResolveTasks(array);
@@ -318,7 +316,7 @@ public interface JSONB {
                 ctx,
                 jsonbBytes,
                 0,
-                jsonbBytes.length, null)
+                jsonbBytes.length)
         ) {
             Object object;
             if (objectClass == Object.class) {
@@ -342,8 +340,7 @@ public interface JSONB {
                 ctx,
                 jsonbBytes,
                 0,
-                jsonbBytes.length,
-                null);
+                jsonbBytes.length);
 
         ObjectReader objectReader = provider.getObjectReader(objectType);
 
@@ -356,13 +353,12 @@ public interface JSONB {
 
     static <T> T parseObject(byte[] jsonbBytes, Type objectType, SymbolTable symbolTable) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context ctx = new JSONReader.Context(provider);
+        JSONReader.Context ctx = new JSONReader.Context(provider, symbolTable);
         JSONReader reader = new JSONReaderJSONB(
                 ctx,
                 jsonbBytes,
                 0,
-                jsonbBytes.length,
-                symbolTable);
+                jsonbBytes.length);
 
         ObjectReader objectReader = provider.getObjectReader(objectType);
 
@@ -375,12 +371,12 @@ public interface JSONB {
 
     static <T> T parseObject(byte[] jsonbBytes, Type objectType, SymbolTable symbolTable, JSONReader.Feature... features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context ctx = new JSONReader.Context(provider);
+        JSONReader.Context ctx = new JSONReader.Context(provider, symbolTable);
         JSONReader reader = new JSONReaderJSONB(
                 ctx,
                 jsonbBytes,
                 0,
-                jsonbBytes.length, symbolTable);
+                jsonbBytes.length);
 
         for (JSONReader.Feature feature : features) {
             ctx.features |= feature.mask;
@@ -409,7 +405,7 @@ public interface JSONB {
                 context,
                 jsonbBytes,
                 0,
-                jsonbBytes.length, null)
+                jsonbBytes.length)
         ) {
             for (JSONReader.Feature feature : features) {
                 context.features |= feature.mask;
@@ -449,14 +445,14 @@ public interface JSONB {
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context context = new JSONReader.Context(provider);
+        JSONReader.Context context = new JSONReader.Context(provider, symbolTable);
         context.config(filters, features);
 
         try (JSONReader jsonReader = new JSONReaderJSONB(
                 context,
                 jsonbBytes,
                 0,
-                jsonbBytes.length, symbolTable)
+                jsonbBytes.length)
         ) {
             for (JSONReader.Feature feature : features) {
                 context.features |= feature.mask;
@@ -497,7 +493,7 @@ public interface JSONB {
                 ctx,
                 jsonbBytes,
                 0,
-                jsonbBytes.length, null)
+                jsonbBytes.length)
         ) {
             for (JSONReader.Feature feature : features) {
                 ctx.features |= feature.mask;
@@ -533,7 +529,7 @@ public interface JSONB {
                 ctx,
                 jsonbBytes,
                 0,
-                jsonbBytes.length, null);
+                jsonbBytes.length);
 
         for (JSONReader.Feature feature : features) {
             ctx.features |= feature.mask;
@@ -558,8 +554,7 @@ public interface JSONB {
                 ctx,
                 jsonbBytes,
                 off,
-                len,
-                null);
+                len);
 
         boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
@@ -580,8 +575,7 @@ public interface JSONB {
                 ctx,
                 jsonbBytes,
                 off,
-                len,
-                null);
+                len);
 
         boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
@@ -606,7 +600,7 @@ public interface JSONB {
                 ctx,
                 jsonbBytes,
                 off,
-                len, null);
+                len);
 
         boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
@@ -883,22 +877,6 @@ public interface JSONB {
 
     static SymbolTable symbolTable(String... names) {
         return new JSONFactory.SymbolTableImpl(names);
-    }
-
-    interface SymbolTable {
-        long hashCode64();
-
-        String getNameByHashCode(long hashCode);
-
-        int getOrdinalByHashCode(long hashCode);
-
-        int getOrdinal(String name);
-
-        String getName(int ordinal);
-
-        long getHashCode(int ordinal);
-
-        int size();
     }
 
     static String toJSONString(byte[] jsonbBytes) {

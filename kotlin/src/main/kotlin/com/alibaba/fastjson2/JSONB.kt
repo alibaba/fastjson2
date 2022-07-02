@@ -74,7 +74,7 @@ inline fun Any?.toJSONB() =
     "NOTHING_TO_INLINE"
 )
 inline fun Any?.toJSONB(
-    symbolTable: JSONB.SymbolTable
+    symbolTable: SymbolTable
 ) = JSONB.toBytes(
     this, symbolTable
 )
@@ -92,7 +92,7 @@ inline fun Any?.toJSONB(
     "NOTHING_TO_INLINE"
 )
 inline fun Any?.toJSONB(
-    symbolTable: JSONB.SymbolTable,
+    symbolTable: SymbolTable,
     vararg features: JSONWriter.Feature
 ) = JSONB.toBytes(
     this, symbolTable, *features

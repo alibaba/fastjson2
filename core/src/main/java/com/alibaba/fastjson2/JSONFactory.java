@@ -118,7 +118,7 @@ public final class JSONFactory {
     }
 
     static final class SymbolTableImpl
-            implements JSONB.SymbolTable {
+            implements SymbolTable {
         private final String[] names;
         private final long hashCode64;
         private final short[] mapping;
@@ -265,6 +265,11 @@ public final class JSONFactory {
     public static JSONReader.Context createReadContext() {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         return new JSONReader.Context(provider);
+    }
+
+    public static JSONReader.Context createReadContext(SymbolTable symbolTable) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        return new JSONReader.Context(provider, symbolTable);
     }
 
     public static JSONReader.Context createReadContext(Supplier<Map> objectSupplier, JSONReader.Feature... features) {

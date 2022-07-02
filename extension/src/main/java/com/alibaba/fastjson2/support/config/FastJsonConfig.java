@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.support.config;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.SymbolTable;
 import com.alibaba.fastjson2.filter.Filter;
 
 import java.nio.charset.Charset;
@@ -61,7 +62,7 @@ public class FastJsonConfig {
     /**
      * JSONB symbol table.
      */
-    private JSONB.SymbolTable symbolTable;
+    private SymbolTable symbolTable;
 
     /**
      * init param.
@@ -228,7 +229,7 @@ public class FastJsonConfig {
      * @return the symbol table
      * @since 2.0.5
      */
-    public JSONB.SymbolTable getSymbolTable() {
+    public SymbolTable getSymbolTable() {
         return symbolTable;
     }
 
