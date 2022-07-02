@@ -18,7 +18,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONB.SymbolTable;
 import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.CACHE_BYTES;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
@@ -39,16 +38,16 @@ final class JSONReaderJSONB
     private byte[] valueBytes;
     private final int cachedIndex = JSONFactory.cacheIndex();
 
-    private SymbolTable symbolTable;
+    private final SymbolTable symbolTable;
     private long[] symbols = new long[16];
 
-    JSONReaderJSONB(Context ctx, byte[] bytes, int off, int length, SymbolTable symbolTable) {
+    JSONReaderJSONB(Context ctx, byte[] bytes, int off, int length) {
         super(ctx);
         this.bytes = bytes;
         this.offset = off;
         this.length = length;
         this.end = off + length;
-        this.symbolTable = symbolTable;
+        this.symbolTable = ctx.symbolTable;
     }
 
     @Override

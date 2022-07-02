@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.util;
 
-import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.SymbolTable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONB.SymbolTable;
 import static com.alibaba.fastjson2.JSONB.typeName;
 
 public class JSONBDump {
@@ -32,7 +31,7 @@ public class JSONBDump {
     String lastReference;
 
     JSONWriter jsonWriter;
-    JSONB.SymbolTable symbolTable;
+    SymbolTable symbolTable;
 
     Map<Integer, String> symbols = new HashMap<>();
 

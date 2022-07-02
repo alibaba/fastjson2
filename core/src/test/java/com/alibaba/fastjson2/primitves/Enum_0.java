@@ -444,7 +444,7 @@ public class Enum_0 {
 
     @Test
     public void test_jsonb_symbol_table() {
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable(
+        SymbolTable symbolTable = JSONB.symbolTable(
                 "value"
         );
 

@@ -28,12 +28,12 @@ final class JSONWriterJSONB
     private final int cachedIndex;
 
     private byte[] bytes;
-    private JSONB.SymbolTable symbolTable;
+    private SymbolTable symbolTable;
 
     TLongIntHashMap symbols;
     private int symbolIndex;
 
-    JSONWriterJSONB(Context ctx, JSONB.SymbolTable symbolTable) {
+    JSONWriterJSONB(Context ctx, SymbolTable symbolTable) {
         super(ctx, StandardCharsets.UTF_8);
 
         int identityHashCode = System.identityHashCode(Thread.currentThread());
@@ -72,7 +72,7 @@ final class JSONWriterJSONB
     }
 
     @Override
-    public JSONB.SymbolTable getSymbolTable() {
+    public SymbolTable getSymbolTable() {
         return symbolTable;
     }
 

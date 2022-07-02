@@ -64,7 +64,7 @@ public abstract class JSONWriter
         return (context.features & Feature.IgnoreNoneSerializable.mask) != 0;
     }
 
-    public JSONB.SymbolTable getSymbolTable() {
+    public SymbolTable getSymbolTable() {
         return null;
     }
 
@@ -451,7 +451,7 @@ public abstract class JSONWriter
         );
     }
 
-    public static JSONWriter ofJSONB(JSONB.SymbolTable symbolTable) {
+    public static JSONWriter ofJSONB(SymbolTable symbolTable) {
         return new JSONWriterJSONB(
                 new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider),
                 symbolTable

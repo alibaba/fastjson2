@@ -208,7 +208,7 @@ public class EishayTest {
         mc = JSONReader.of(str)
                 .read(MediaContent.class);
 
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable("com.alibaba.fastjson2.eishay.vo.MediaContent", "images", "media", "height", "size", "title", "uri", "width", "bitrate", "duration", "format", "persons", "player");
+        SymbolTable symbolTable = JSONB.symbolTable("com.alibaba.fastjson2.eishay.vo.MediaContent", "images", "media", "height", "size", "title", "uri", "width", "bitrate", "duration", "format", "persons", "player");
 
         {
             jsonbBytes = JSONB.toBytes(
@@ -594,7 +594,7 @@ public class EishayTest {
         mc = JSONReader.of(str)
                 .read(MediaContent.class);
 
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable(
+        SymbolTable symbolTable = JSONB.symbolTable(
                 "images",
                 "height",
                 "size",
