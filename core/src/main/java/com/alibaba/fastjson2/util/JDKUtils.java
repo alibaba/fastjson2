@@ -30,6 +30,7 @@ public class JDKUtils {
     public static final Function<byte[], String> UNSAFE_ASCII_CREATOR;
 
     static {
+        boolean android = false;
         int jvmVersion = -1;
         try {
             String property = System.getProperty("java.specification.version");
@@ -38,7 +39,8 @@ public class JDKUtils {
             }
             jvmVersion = Integer.parseInt(property);
 
-            if (System.getProperty("java.vm.name").contains("OpenJ9")) {
+            String jmvName = System.getProperty("java.vm.name");
+            if (jmvName.contains("OpenJ9")) {
                 FIELD_STRING_ERROR = true;
             }
         } catch (Throwable ignored) {
