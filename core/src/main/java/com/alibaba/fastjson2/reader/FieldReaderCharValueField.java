@@ -28,6 +28,7 @@ final class FieldReaderCharValueField<T>
         return str == null || str.isEmpty() ? '\0' : str.charAt(0);
     }
 
+    @Override
     public void accept(T object, Object value) {
         char charValue;
         if (value instanceof String) {

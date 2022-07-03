@@ -324,6 +324,7 @@ final class ObjectWriterImplMap
         jsonWriter.endObject();
     }
 
+    @Override
     public boolean writeTypeInfo(JSONWriter jsonWriter) {
         if (jsonWriter.isUTF8()) {
             jsonWriter.writeNameRaw(typeInfoUTF8);
