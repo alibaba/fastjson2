@@ -2,6 +2,10 @@ package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONWriterUTF16Test {
@@ -242,5 +246,162 @@ public class JSONWriterUTF16Test {
         jsonWriter.writeInt64(-9007199254740992L);
         jsonWriter.endArray();
         assertEquals("[-9223372036854775808,-9223372036854775808,9007199254740992,-9007199254740992]", jsonWriter.toString());
+    }
+
+    @Test
+    public void testWriteReference() {
+        JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        writer.writeReference("$");
+        assertEquals("{\"$ref\":\"$\"}", writer.toString());
+        writer.chars = Arrays.copyOf(writer.chars, 23);
+        writer.writeReference("中");
+        assertEquals("{\"$ref\":\"$\"}{\"$ref\":\"中\"}", writer.toString());
+        writer.writeReference("1234567890");
+        assertEquals("{\"$ref\":\"$\"}{\"$ref\":\"中\"}{\"$ref\":\"1234567890\"}", writer.toString());
+    }
+
+    @Test
+    public void writeString() {
+        JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        writer.writeString("中");
+        assertEquals("\"中\"", writer.toString());
+        writer.chars = Arrays.copyOf(writer.chars, 3);
+        writer.writeString("中");
+        assertEquals("\"中\"\"中\"", writer.toString());
+        writer.writeString("1234567890");
+        assertEquals("\"中\"\"中\"\"1234567890\"", writer.toString());
+    }
+
+    @Test
+    public void startObject1() {
+        JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        writer.chars = Arrays.copyOf(writer.chars, 0);
+        writer.startObject();
+        assertEquals("{", writer.toString());
+    }
+
+    @Test
+    public void startArray1() {
+        JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        writer.chars = Arrays.copyOf(writer.chars, 0);
+        writer.startArray();
+        assertEquals("[", writer.toString());
+    }
+
+    @Test
+    public void writeColon1() {
+        JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        writer.chars = Arrays.copyOf(writer.chars, 0);
+        writer.writeColon();
+        assertEquals(":", writer.toString());
+    }
+
+    @Test
+    public void writeComma1() {
+        JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        writer.chars = Arrays.copyOf(writer.chars, 0);
+        writer.writeComma();
+        assertEquals(",", writer.toString());
+    }
+
+    @Test
+    public void testWrite0() {
+        JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        writer.chars = Arrays.copyOf(writer.chars, 0);
+        writer.write0(':');
+        assertEquals(":", writer.toString());
+    }
+
+    @Test
+    public void endObject1() {
+        JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        writer.chars = Arrays.copyOf(writer.chars, 0);
+        writer.endObject();
+        assertEquals("}", writer.toString());
+    }
+
+    @Test
+    public void endArray1() {
+        JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        writer.chars = Arrays.copyOf(writer.chars, 0);
+        writer.endArray();
+        assertEquals("]", writer.toString());
+    }
+
+    @Test
+    public void writeDecimal() {
+        {
+            JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+            writer.writeDecimal(null);
+            assertEquals("null", writer.toString());
+        }
+        {
+            JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+            writer.writeDecimal(BigDecimal.valueOf(-9007199254740992L));
+            assertEquals("-9007199254740992", writer.toString());
+        }
+        {
+            JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+            writer.writeDecimal(BigDecimal.valueOf(9007199254740992L));
+            assertEquals("9007199254740992", writer.toString());
+        }
+        {
+            JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext(JSONWriter.Feature.BrowserCompatible));
+            writer.writeDecimal(BigDecimal.valueOf(-9007199254740992L));
+            assertEquals("\"-9007199254740992\"", writer.toString());
+        }
+        {
+            JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext(JSONWriter.Feature.BrowserCompatible));
+            writer.writeDecimal(BigDecimal.valueOf(9007199254740992L));
+            assertEquals("\"9007199254740992\"", writer.toString());
+        }
+    }
+
+    @Test
+    public void writeBigInt() {
+        {
+            JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+            writer.writeBigInt(null, 0);
+            assertEquals("null", writer.toString());
+        }
+        {
+            JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+            writer.writeBigInt(BigInteger.valueOf(-9007199254740992L), 0);
+            assertEquals("-9007199254740992", writer.toString());
+        }
+        {
+            JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+            writer.writeBigInt(BigInteger.valueOf(9007199254740992L), 0);
+            assertEquals("9007199254740992", writer.toString());
+        }
+        {
+            JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext(JSONWriter.Feature.BrowserCompatible));
+            writer.writeBigInt(BigInteger.valueOf(-9007199254740992L), 0);
+            assertEquals("\"-9007199254740992\"", writer.toString());
+        }
+        {
+            JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext(JSONWriter.Feature.BrowserCompatible));
+            writer.writeBigInt(BigInteger.valueOf(9007199254740992L), 0);
+            assertEquals("\"9007199254740992\"", writer.toString());
+        }
+        {
+            JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+            writer.chars = new char[0];
+            writer.writeBigInt(BigInteger.valueOf(-9007199254740992L), 0);
+            assertEquals("-9007199254740992", writer.toString());
+        }
+        {
+            JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+            writer.chars = new char[16];
+            writer.writeBigInt(BigInteger.valueOf(-9007199254740992L), 0);
+            assertEquals("-9007199254740992", writer.toString());
+        }
+    }
+
+    @Test
+    public void writeUUID() {
+        JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
+        writer.writeUUID(null);
+        assertEquals("null", writer.toString());
     }
 }
