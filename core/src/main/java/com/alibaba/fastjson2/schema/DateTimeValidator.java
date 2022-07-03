@@ -85,8 +85,6 @@ final class DateTimeValidator
                 if (dd > dom) {
                     return false;
                 }
-            } else if (dd > 31) {
-                return false;
             }
 
             if (hh > 24) {
