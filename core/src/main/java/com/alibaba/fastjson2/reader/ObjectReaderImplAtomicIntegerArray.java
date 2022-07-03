@@ -18,6 +18,7 @@ class ObjectReaderImplAtomicIntegerArray
         return AtomicIntegerArray.class;
     }
 
+    @Override
     public Object createInstance(Collection collection) {
         AtomicIntegerArray array = new AtomicIntegerArray(collection.size());
         int index = 0;
