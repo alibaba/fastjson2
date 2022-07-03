@@ -93,7 +93,7 @@ public class ObjectReaderImplDate
             ZonedDateTime zdt;
             if (formatter != null) {
                 String str = jsonReader.readString();
-                if (str.isEmpty() || str.equals("null")) {
+                if (str.isEmpty() || "null".equals(str)) {
                     return null;
                 }
 

@@ -730,7 +730,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return false;
             }
             return Boolean.parseBoolean(str);
@@ -760,7 +760,7 @@ public class TypeUtils {
 
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 return null;
             }
             return Boolean.parseBoolean(str);

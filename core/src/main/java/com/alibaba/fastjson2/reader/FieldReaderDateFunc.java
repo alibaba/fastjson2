@@ -33,6 +33,7 @@ final class FieldReaderDateFunc<T>
         return method;
     }
 
+    @Override
     public void accept(T object, Date value) {
         function.accept(object, value);
     }
