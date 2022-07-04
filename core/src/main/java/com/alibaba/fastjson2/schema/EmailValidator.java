@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2.schema;
 
-import com.alibaba.fastjson2.util.RegexValidator;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,9 +11,6 @@ final class EmailValidator
     static final Pattern EMAIL_PATTERN = Pattern.compile("^\\s*?(.+)@(.+?)\\s*$");
     static final Pattern IP_DOMAIN_PATTERN = Pattern.compile("^\\[(.*)\\]$");
     static final Pattern USER_PATTERN = Pattern.compile("^\\s*(((\\\\.)|[^\\s\\p{Cntrl}\\(\\)<>@,;:'\\\\\\\"\\.\\[\\]]|')+|(\"[^\"]*\"))(\\.(((\\\\.)|[^\\s\\p{Cntrl}\\(\\)<>@,;:'\\\\\\\"\\.\\[\\]]|')+|(\"[^\"]*\")))*$");
-
-    /** IPv4 RegexValidator */
-    static final RegexValidator ipv4Validator = new RegexValidator("^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$");
 
     static final EmailValidator INSTANCE = new EmailValidator();
 

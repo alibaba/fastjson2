@@ -1,16 +1,16 @@
 package com.alibaba.fastjson2.schema;
 
-import com.alibaba.fastjson2.util.RegexValidator;
-
 import java.net.IDN;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class DomainValidator {
     /**
      * RegexValidator for matching domains.
      */
-    private static final RegexValidator domainRegex = new RegexValidator(
+    static final Pattern domainRegex = Pattern.compile(
             "^(?:\\p{Alnum}(?>[\\p{Alnum}-]{0,61}\\p{Alnum})?\\.)+(\\p{Alpha}(?>[\\p{Alnum}-]{0,61}\\p{Alnum})?)\\.?$"
     );
 
@@ -33,8 +33,14 @@ class DomainValidator {
         if (domain.length() > 253) {
             return false;
         }
-        String[] groups = domainRegex.match(domain);
-        if (groups != null && groups.length > 0) {
+
+        Matcher matcher = domainRegex.matcher(domain);
+        if (matcher.matches()) {
+            int count = matcher.groupCount();
+            String[] groups = new String[count];
+            for (int j = 0; j < count; j++) {
+                groups[j] = matcher.group(j + 1);
+            }
             return isValidTld(groups[0]);
         }
 
