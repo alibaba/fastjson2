@@ -55,8 +55,9 @@ public class Differ {
         this.out = out;
     }
 
-    public static void diff(Object a, Object b) {
-        new Differ(a, b).diff();
+    public static boolean diff(Object a, Object b) {
+        return new Differ(a, b)
+                .diff();
     }
 
     public String getLeftName() {
@@ -84,7 +85,12 @@ public class Differ {
     }
 
     public boolean diff() {
-        return diff(left, right, new JSONWriter.Path(null, "$"), null);
+        return diff(
+                left,
+                right,
+                new JSONWriter.Path(null, "$"),
+                null
+        );
     }
 
     boolean diff(Object left, Object right, JSONWriter.Path path, Type type) {
@@ -323,43 +329,6 @@ public class Differ {
 
         if (left instanceof Map) {
             return diffMap((Map) left, (Map) right, path, match, leftClass);
-        }
-
-        if (left instanceof String) {
-            String leftStr = (String) left;
-            String rightStr = (String) right;
-
-            if (leftStr.equals(rightStr)) {
-                return true;
-            }
-
-            if (leftStr.length() != rightStr.length()) {
-                if (out != null) {
-                    out.println("diff str len " + path + ", " + leftName + " " + leftStr.length() + ", " + rightName + " " + rightStr.length());
-                }
-                return false;
-            }
-
-            for (int i = 0; i < leftStr.length(); ++i) {
-                char leftChar = leftStr.charAt(i);
-                char rightChar = rightStr.charAt(i);
-
-                if (leftChar != rightChar) {
-                    if (out != null) {
-                        out.println("diff str " + path + ", at " + i + ", " + leftName + " " + leftChar + ", " + rightName + " " + rightChar);
-                    }
-                    return false;
-                }
-            }
-
-            if (!leftStr.equals(rightStr)) {
-                if (out != null) {
-                    out.println("diff str " + path + ", " + leftName + " " + left + ", " + rightName + " " + right);
-                }
-                return false;
-            }
-
-            return true;
         }
 
         for (Class clazz = leftClass; clazz != null; clazz = clazz.getSuperclass()) {
