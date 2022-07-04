@@ -70,10 +70,6 @@ final class EmailValidator
         // verify that address conforms to generic IPv4 format
         String[] groups = inet4Address.split("\\.");
 
-        if (groups == null) {
-            return false;
-        }
-
         // verify that address subgroups are legal
         for (int i = 0; i <= 3; i++) {
             String ipSegment = groups[i];

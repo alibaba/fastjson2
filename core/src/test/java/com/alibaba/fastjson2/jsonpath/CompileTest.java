@@ -22,6 +22,11 @@ public class CompileTest {
         path.setCallback(bean, increment);
         assertEquals(102, bean.id);
         assertEquals(102, path.eval(bean));
+
+        path.setCallback(bean,
+                o -> ((Integer) o).intValue() + 1
+        );
+        assertEquals(103, bean.id);
     }
 
     @Test
@@ -38,6 +43,9 @@ public class CompileTest {
         path.setCallback(bean, increment);
         assertEquals(102, bean.item.id);
         assertEquals(102, path.eval(bean));
+
+        path.setCallback(bean, o -> ((Integer) o).intValue() + 1);
+        assertEquals(103, bean.item.id);
     }
 
     public static class Bean {

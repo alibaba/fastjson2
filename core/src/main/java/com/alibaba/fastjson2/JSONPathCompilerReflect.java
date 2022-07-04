@@ -7,7 +7,7 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.util.function.BiFunction;
 
-class JSONPathCompilerReflect
+public class JSONPathCompilerReflect
         implements JSONFactory.JSONPathCompiler {
     static final JSONPathCompilerReflect INSTANCE = new JSONPathCompilerReflect();
 
@@ -195,61 +195,6 @@ class JSONPathCompilerReflect
             }
 
             context.value = fieldWriter.getFieldValue(object);
-        }
-
-        @Override
-        public void set(JSONPath.Context context, Object value) {
-            if (fieldReader == null) {
-                throw new UnsupportedOperationException();
-            }
-
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-            fieldReader.accept(object, value);
-        }
-
-        @Override
-        public void setInt(JSONPath.Context context, int value) {
-            if (fieldReader == null) {
-                throw new UnsupportedOperationException();
-            }
-
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-            fieldReader.accept(object, value);
-        }
-
-        @Override
-        public void setLong(JSONPath.Context context, long value) {
-            if (fieldReader == null) {
-                throw new UnsupportedOperationException();
-            }
-
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-            fieldReader.accept(object, value);
-        }
-
-        @Override
-        public void setCallback(JSONPath.Context context, BiFunction callback) {
-            if (fieldReader == null || fieldWriter == null) {
-                throw new UnsupportedOperationException();
-            }
-
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-
-            Object fieldValue = fieldWriter.getFieldValue(object);
-            Object fieldValueApply = callback.apply(object, fieldValue);
-            if (fieldValueApply == fieldValue) {
-                return;
-            }
-
-            fieldReader.accept(object, fieldValueApply);
         }
     }
 
