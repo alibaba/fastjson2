@@ -1,6 +1,11 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Field;
+import java.math.BigInteger;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -94,5 +99,207 @@ public class JSONWriterJSONBTest {
                 "\t2,\n" +
                 "\t3\n" +
                 "]", JSONB.toJSONString(jsonWriter.getBytes()));
+    }
+
+    @Test
+    public void capacity() throws Exception {
+        Field bytes = JSONWriterJSONB.class.getDeclaredField("bytes");
+        bytes.setAccessible(true);
+
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.startArray(new Object[1], 27);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.endObject();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeAny(null);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeString((char[]) null);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeTypeName("abc");
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[1]);
+            jsonWriter.writeTypeName("abc");
+
+            byte[] bytes1 = (byte[]) bytes.get(jsonWriter);
+            bytes.set(jsonWriter, Arrays.copyOf(bytes1, 7));
+            jsonWriter.writeTypeName("abc");
+
+            bytes.set(jsonWriter, new byte[1]);
+            jsonWriter.off = 0;
+            jsonWriter.writeTypeName("abc");
+
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.off = 0;
+            jsonWriter.ensureCapacity(1);
+        }
+
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeMillis(1000);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeMillis(214700 * 3600L * 6000L);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt64(1);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt64(64);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt64(262143);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt64(Integer.MAX_VALUE);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt64(new long[1]);
+            jsonWriter.writeInt64(null);
+            jsonWriter.writeDouble(null);
+            jsonWriter.writeInt32(null);
+            jsonWriter.writeLocalDate(null);
+            jsonWriter.writeLocalTime(null);
+            jsonWriter.writeLocalDateTime(null);
+            jsonWriter.writeZonedDateTime(null);
+            jsonWriter.writeInstant(null);
+            jsonWriter.writeUUID(null);
+            jsonWriter.writeBigInt(null);
+            jsonWriter.writeBinary(null);
+            jsonWriter.writeDecimal(null);
+            jsonWriter.writeBool(null);
+            jsonWriter.writeBigInt(null, 0);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt64(new long[]{64});
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt64(new long[]{262143});
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt64(new long[]{Integer.MAX_VALUE});
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt32(new int[]{8});
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt32(new int[]{64});
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt32(new int[]{262143});
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt32(new int[]{Integer.MAX_VALUE});
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt8((byte) 1);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt16((short) 1);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt32(1);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt32(64);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt32(262143);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeInt32(Integer.MAX_VALUE);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeArrayNull();
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeBigInt(BigInteger.ONE);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeBool(true);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeReference("$");
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeTypeName(new byte[1], 1);
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.off = 0;
+            jsonWriter.writeTypeName(new byte[1], 1);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB(JSONB.symbolTable("id"));
+            bytes.set(jsonWriter, new byte[0]);
+            jsonWriter.writeTypeName(new byte[1], Fnv.hashCode64("id"));
+        }
+    }
+
+    @Test
+    public void sizeOfInt() {
+        assertEquals(5, JSONWriterJSONB.sizeOfInt(Integer.MAX_VALUE));
     }
 }
