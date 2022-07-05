@@ -674,7 +674,7 @@ public abstract class BeanUtils {
         if (RECORD_CLASS == null) {
             String superclassName = superclass.getName();
             if ("java.lang.Record".equals(superclassName)) {
-                RECORD_CLASS = RECORD_CLASS;
+                RECORD_CLASS = objectClass;
                 return true;
             } else {
                 return false;
@@ -784,9 +784,14 @@ public abstract class BeanUtils {
             case "UpperCaseWithUnderScores": {
                 return underScores(methodName, prefixLength, true);
             }
-            case "UpperCase": {
+            case "UpperCamelCaseWithSpaces":
+                return upperCamelWith(methodName, prefixLength, ' ');
+            case "UpperCase":
                 return methodName.substring(prefixLength).toUpperCase();
-            }
+            case "UpperCaseWithDashes":
+                return dashes(methodName, prefixLength, true);
+            case "UpperCaseWithDots":
+                return dots(methodName, prefixLength, true);
             case "KebabCase": {
                 StringBuilder buf = new StringBuilder();
                 final int firstIndex;
@@ -822,7 +827,6 @@ public abstract class BeanUtils {
         methodName.getChars(prefixLength, methodNameLength, chars, 0);
         char c0 = chars[0];
         if (c0 >= 'a' && c0 <= 'z' && chars.length > 1) {
-            boolean c1UCase = chars[1] >= 'a' && chars[1] <= 'z';
             chars[0] = (char) (c0 - 32);
         } else if (c0 == '_' && chars.length > 2) {
             char c1 = chars[1];
@@ -1480,7 +1484,7 @@ public abstract class BeanUtils {
         checkArgument(!(type instanceof Class<?>) || !((Class<?>) type).isPrimitive());
     }
 
-    private static final class ParameterizedTypeImpl
+    static final class ParameterizedTypeImpl
             implements ParameterizedType, Serializable {
         private final Type ownerType;
         private final Type rawType;
@@ -1588,7 +1592,7 @@ public abstract class BeanUtils {
      * lower bounds. We only support what the Java 6 language needs - at most one
      * bound. If a lower bound is set, the upper bound must be Object.class.
      */
-    private static final class WildcardTypeImpl
+    static final class WildcardTypeImpl
             implements WildcardType, Serializable {
         private final Type upperBound;
         private final Type lowerBound;
