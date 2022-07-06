@@ -31,6 +31,5 @@ public class Issue529 {
     }
 
     public static class PriceDetailDTO {
-
     }
 }
