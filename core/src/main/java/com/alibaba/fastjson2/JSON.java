@@ -1140,6 +1140,27 @@ public interface JSON {
     /**
      * Parse UTF8 URL Resource into a Java object with specified {@link JSONReader.Feature}s enabled
      *
+     * @param url the JSON {@link URL} to be parsed
+     * @param objectClass specify the {@link Class} to be converted
+     * @param features features to be enabled in parsing
+     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     * @since 2.0.9
+     */
+    static <T> T parseObject(URL url, Class<T> objectClass, JSONReader.Feature... features) {
+        if (url == null) {
+            return null;
+        }
+
+        try (InputStream is = url.openStream()) {
+            return parseObject(is, objectClass, features);
+        } catch (IOException e) {
+            throw new JSONException("parseObject error", e);
+        }
+    }
+
+    /**
+     * Parse UTF8 URL Resource into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
      * @param url      the JSON {@link URL} to be parsed
      * @param function specify the {@link Function} to be converted
      * @param features features to be enabled in parsing
