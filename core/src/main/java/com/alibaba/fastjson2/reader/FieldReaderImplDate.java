@@ -154,6 +154,7 @@ abstract class FieldReaderImplDate<T>
 
     public abstract void accept(T object, Date value);
 
+    @Override
     public void accept(T object, long value) {
         accept(object, new Date(value));
     }
@@ -162,7 +163,7 @@ abstract class FieldReaderImplDate<T>
     public void accept(T object, Object value) {
         if (value instanceof String) {
             String str = (String) value;
-            if (str.isEmpty() || str.equals("null")) {
+            if (str.isEmpty() || "null".equals(str)) {
                 accept(object, null);
                 return;
             }
@@ -204,7 +205,7 @@ abstract class FieldReaderImplDate<T>
         } else {
             if (format != null) {
                 String str = jsonReader.readString();
-                if (str.isEmpty() || str.equals("null")) {
+                if (str.isEmpty() || "null".equals(str)) {
                     fieldValue = null;
                 } else {
                     long millis;

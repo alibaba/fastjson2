@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2.schema;
 
-import com.alibaba.fastjson2.util.RegexValidator;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,24 +8,9 @@ import java.util.regex.Pattern;
 
 final class EmailValidator
         implements FormatValidator {
-    private static final String SPECIAL_CHARS = "\\p{Cntrl}\\(\\)<>@,;:'\\\\\\\"\\.\\[\\]";
-    private static final String VALID_CHARS = "(\\\\.)|[^\\s" + SPECIAL_CHARS + "]";
-    private static final String QUOTED_USER = "(\"[^\"]*\")";
-    private static final String WORD = "((" + VALID_CHARS + "|')+|" + QUOTED_USER + ")";
-
-    private static final String EMAIL_REGEX = "^\\s*?(.+)@(.+?)\\s*$";
-    private static final String IP_DOMAIN_REGEX = "^\\[(.*)\\]$";
-    private static final String USER_REGEX = "^\\s*" + WORD + "(\\." + WORD + ")*$";
-
-    private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
-    private static final Pattern IP_DOMAIN_PATTERN = Pattern.compile(IP_DOMAIN_REGEX);
-    private static final Pattern USER_PATTERN = Pattern.compile(USER_REGEX);
-
-    private static final String IPV4_REGEX =
-            "^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$";
-
-    /** IPv4 RegexValidator */
-    private static final RegexValidator ipv4Validator = new RegexValidator(IPV4_REGEX);
+    static final Pattern EMAIL_PATTERN = Pattern.compile("^\\s*?(.+)@(.+?)\\s*$");
+    static final Pattern IP_DOMAIN_PATTERN = Pattern.compile("^\\[(.*)\\]$");
+    static final Pattern USER_PATTERN = Pattern.compile("^\\s*(((\\\\.)|[^\\s\\p{Cntrl}\\(\\)<>@,;:'\\\\\\\"\\.\\[\\]]|')+|(\"[^\"]*\"))(\\.(((\\\\.)|[^\\s\\p{Cntrl}\\(\\)<>@,;:'\\\\\\\"\\.\\[\\]]|')+|(\"[^\"]*\")))*$");
 
     static final EmailValidator INSTANCE = new EmailValidator();
 
@@ -80,11 +63,7 @@ final class EmailValidator
 
     static boolean isValidInet4Address(String inet4Address) {
         // verify that address conforms to generic IPv4 format
-        String[] groups = ipv4Validator.match(inet4Address);
-
-        if (groups == null) {
-            return false;
-        }
+        String[] groups = inet4Address.split("\\.");
 
         // verify that address subgroups are legal
         for (int i = 0; i <= 3; i++) {

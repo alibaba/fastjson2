@@ -28,6 +28,7 @@ final class FieldReaderCharValueFunc<T>
         function.accept(object, value);
     }
 
+    @Override
     public void accept(T object, Object value) {
         char charValue;
         if (value instanceof String) {

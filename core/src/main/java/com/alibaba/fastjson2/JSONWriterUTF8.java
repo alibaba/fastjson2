@@ -48,12 +48,8 @@ class JSONWriterUTF8
         writeRaw(REF_PREF);
         writeString(path);
         if (off == bytes.length) {
-            int minCapacity = off + 1;
             int oldCapacity = bytes.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
             if (newCapacity - MAX_ARRAY_SIZE > 0) {
                 throw new OutOfMemoryError();
             }

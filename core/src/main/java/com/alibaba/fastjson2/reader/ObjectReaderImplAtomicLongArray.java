@@ -18,6 +18,7 @@ final class ObjectReaderImplAtomicLongArray
         return AtomicLongArray.class;
     }
 
+    @Override
     public Object createInstance(Collection collection) {
         AtomicLongArray array = new AtomicLongArray(collection.size());
         int index = 0;

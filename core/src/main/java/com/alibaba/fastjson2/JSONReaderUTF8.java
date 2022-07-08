@@ -374,7 +374,7 @@ class JSONReaderUTF8
             if (ch == '}' || isNull()) {
                 return -1;
             }
-            throw new JSONException("illegal character " + ch);
+            throw new JSONException(info("illegal character " + ch));
         }
 
         final char quote = ch;

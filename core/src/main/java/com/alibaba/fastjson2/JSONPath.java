@@ -114,7 +114,7 @@ public abstract class JSONPath {
         Map<Object, String> values = new IdentityHashMap<>();
         Map<String, Object> paths = new HashMap<>();
 
-        JSONPath.of("$").paths(values, paths, "/", javaObject);
+        RootPath.INSTANCE.paths(values, paths, "$", javaObject);
         return paths;
     }
 
@@ -149,7 +149,7 @@ public abstract class JSONPath {
                 Object key = entry.getKey();
 
                 if (key instanceof String) {
-                    String path = "/".equals(parent) ? "/" + key : parent + "/" + key;
+                    String path = parent + "." + key;
                     paths(values, paths, path, entry.getValue());
                 }
             }
@@ -161,7 +161,7 @@ public abstract class JSONPath {
 
             int i = 0;
             for (Object item : collection) {
-                String path = "/".equals(parent) ? "/" + i : parent + "/" + i;
+                String path = parent + "[" + i + "]";
                 paths(values, paths, path, item);
                 ++i;
             }
@@ -177,7 +177,7 @@ public abstract class JSONPath {
             for (int i = 0; i < len; ++i) {
                 Object item = Array.get(javaObject, i);
 
-                String path = "/".equals(parent) ? "/" + i : parent + "/" + i;
+                String path = parent + "[" + i + "]";
                 paths(values, paths, path, item);
             }
 
@@ -198,7 +198,7 @@ public abstract class JSONPath {
                     String key = entry.getKey();
 
                     if (key != null) {
-                        String path = "/".equals(parent) ? "/" + key : parent + "/" + key;
+                        String path = parent + "." + key;
                         paths(values, paths, path, entry.getValue());
                     }
                 }
@@ -621,6 +621,17 @@ public abstract class JSONPath {
                 cmp = ((Double) fieldValue)
                         .compareTo(
                                 Double.valueOf(value));
+            } else if (fieldValue instanceof String) {
+                String fieldValueStr = (String) fieldValue;
+                if (IOUtils.isNumber(fieldValueStr)) {
+                    try {
+                        cmp = Long.valueOf(Long.parseLong(fieldValueStr)).compareTo(Long.valueOf(value));
+                    } catch (Exception ignored) {
+                        cmp = fieldValueStr.compareTo(Long.toString(value));
+                    }
+                } else {
+                    cmp = fieldValueStr.compareTo(Long.toString(value));
+                }
             } else {
                 throw new UnsupportedOperationException();
             }
@@ -4043,6 +4054,7 @@ public abstract class JSONPath {
 
     static final class CycleNameSegment
             extends Segment {
+        static final long HASH_STAR = Fnv.hashCode64("*");
         final String name;
         final long nameHashCode;
 
@@ -4134,6 +4146,8 @@ public abstract class JSONPath {
                     ((Map<?, ?>) value).forEach(this);
                 } else if (value instanceof List) {
                     ((List<?>) value).forEach(this);
+                } else if (nameHashCode == HASH_STAR) {
+                    values.add(value);
                 }
             }
 
@@ -4168,6 +4182,8 @@ public abstract class JSONPath {
                         }
 
                         return;
+                    } else if (nameHashCode == HASH_STAR) {
+                        values.add(value);
                     }
                 }
             }
@@ -6156,9 +6172,14 @@ public abstract class JSONPath {
                 segment = AllSegment.INSTANCE;
             } else if (jsonReader.ch == '.') {
                 jsonReader.next();
-                long hashCode = jsonReader.readFieldNameHashCodeUnquote();
-                String name = jsonReader.getFieldName();
-                segment = new CycleNameSegment(name, hashCode);
+                if (jsonReader.ch == '*') {
+                    jsonReader.next();
+                    segment = new CycleNameSegment("*", Fnv.hashCode64("*"));
+                } else {
+                    long hashCode = jsonReader.readFieldNameHashCodeUnquote();
+                    String name = jsonReader.getFieldName();
+                    segment = new CycleNameSegment(name, hashCode);
+                }
             } else {
                 boolean isNum = jsonReader.isNumber();
                 long hashCode = jsonReader.readFieldNameHashCodeUnquote();
