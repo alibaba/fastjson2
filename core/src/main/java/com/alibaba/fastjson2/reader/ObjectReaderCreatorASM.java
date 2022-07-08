@@ -287,6 +287,12 @@ public class ObjectReaderCreatorASM
                 match = false;
                 break;
             }
+
+            Class fieldClass = fieldReader.getFieldClass();
+            if (!Modifier.isPublic(fieldClass.getModifiers())) {
+                match = false;
+                break;
+            }
         }
 
         if (match && beanInfo.schema != null && !beanInfo.schema.isEmpty()) {
