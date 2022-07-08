@@ -176,18 +176,16 @@ public final class ObjectReaderImplList
             Class<?> valueClass = value.getClass();
             if (valueClass != itemType) {
                 Function typeConvert = provider.getTypeConvert(valueClass, itemType);
-                if (typeConvert != null) {
-                    value = typeConvert.apply(value);
-                } else if (item instanceof Map) {
+                if (Objects.nonNull(typeConvert)){
+                    list.add(typeConvert.apply(value));
+                    continue;
+                }
+
+                ObjectReader itemObjectReader = provider.getObjectReader(valueClass);
+                if (item instanceof Map) {
                     Map map = (Map) item;
-                    if (itemObjectReader == null) {
-                        itemObjectReader = provider.getObjectReader(itemType);
-                    }
                     value = itemObjectReader.createInstance(map, 0L);
                 } else if (value instanceof Collection) {
-                    if (itemObjectReader == null) {
-                        itemObjectReader = provider.getObjectReader(itemType);
-                    }
                     value = itemObjectReader.createInstance((Collection) value);
                 } else if (itemClass.isInstance(value)) {
                     // skip
