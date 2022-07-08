@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.util.Collection;
@@ -15,6 +16,10 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
 public final class ObjectReaderImplObject
         extends ObjectReaderBaseModule.PrimitiveImpl {
     public static final ObjectReaderImplObject INSTANCE = new ObjectReaderImplObject();
+
+    public Object createInstance(long features) {
+        return new JSONObject();
+    }
 
     @Override
     public Object readObject(JSONReader jsonReader, long features) {
