@@ -16,7 +16,7 @@ public class Issue536 {
     private JSONObject jsonObject;
 
     @BeforeEach
-    public void init(){
+    public void init() {
         List objects = new ArrayList();
         Map<String, Object> map = new HashMap<>();
         map.put("test", 1);
@@ -30,11 +30,11 @@ public class Issue536 {
     }
 
     @Test
-    public void test(){
+    public void test() {
         List result = jsonObject.getObject("data", List.class);
         Map<String, Object> rmap = (Map<String, Object>) result.get(0);
-        assertEquals(rmap.get("test"),1);
+        assertEquals(rmap.get("test"), 1);
         List<String> rlist = (List<String>) result.get(1);
-        assertEquals(rlist.get(0),"1");
+        assertEquals(rlist.get(0), "1");
     }
 }
