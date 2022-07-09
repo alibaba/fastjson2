@@ -1889,8 +1889,6 @@ public abstract class JSONReader
             }
             case JSON_TYPE_BOOL:
                 return boolValue ? BigDecimal.ONE : BigDecimal.ZERO;
-            case JSON_TYPE_NULL:
-                return null;
             case JSON_TYPE_STRING: {
                 try {
                     return new BigDecimal(stringValue);
