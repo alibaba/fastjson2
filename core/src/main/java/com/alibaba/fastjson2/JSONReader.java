@@ -1848,7 +1848,7 @@ public abstract class JSONReader
 
         switch (valueType) {
             case JSON_TYPE_INT: {
-                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                if (mag1 == 0 && mag2 == 0 && mag3 >= 0) {
                     return BigDecimal.valueOf(negative ? -mag3 : mag3);
                 }
                 int[] mag;
