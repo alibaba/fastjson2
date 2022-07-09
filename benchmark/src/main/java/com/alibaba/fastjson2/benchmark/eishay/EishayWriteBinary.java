@@ -13,7 +13,6 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
@@ -52,7 +51,7 @@ public class EishayWriteBinary {
 
     @Benchmark
     public void fastjson2JSONB(Blackhole bh) {
-        byte[] bytes = JSONB.toBytes(mc);
+        byte[] bytes = JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName);
         bh.consume(bytes);
     }
 
@@ -126,7 +125,7 @@ public class EishayWriteBinary {
     public static void main(String[] args) throws Exception {
 //        new EishayWriteBinary().fury_perf_test();
 //        new EishayWriteBinary().fastjson2_jsonb_perf_test();
-        new EishayWriteBinary().hessian(bh);
+//        new EishayWriteBinary().hessian(bh);
         Options options = new OptionsBuilder()
                 .include(EishayWriteBinary.class.getName())
                 .mode(Mode.Throughput)
