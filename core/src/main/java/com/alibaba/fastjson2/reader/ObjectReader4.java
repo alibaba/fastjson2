@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
+import java.lang.reflect.Type;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -112,7 +113,7 @@ final class ObjectReader4<T>
     }
 
     @Override
-    public T readJSONBObject(JSONReader jsonReader, long features) {
+    public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isArray()) {
             int entryCnt = jsonReader.startArray();
             Object object = defaultCreator.get();
@@ -130,7 +131,7 @@ final class ObjectReader4<T>
 
         ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
         if (autoTypeReader != null && autoTypeReader.getObjectClass() != this.objectClass) {
-            return (T) autoTypeReader.readJSONBObject(jsonReader, features);
+            return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (!jsonReader.nextIfMatch(BC_OBJECT)) {
@@ -205,9 +206,9 @@ final class ObjectReader4<T>
     }
 
     @Override
-    public T readObject(JSONReader jsonReader, long features) {
+    public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, features);
+            return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (jsonReader.nextIfNull()) {
@@ -266,7 +267,7 @@ final class ObjectReader4<T>
                 }
 
                 if (autoTypeObjectReader != this) {
-                    object = (T) autoTypeObjectReader.readObject(jsonReader, features);
+                    object = (T) autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, features);
                     break;
                 } else {
                     continue;

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
 
+import java.lang.reflect.Type;
 import java.util.function.Function;
 
 public final class ObjectReaderImplFromString<T>
@@ -20,7 +21,7 @@ public final class ObjectReaderImplFromString<T>
     }
 
     @Override
-    public T readJSONBObject(JSONReader jsonReader, long features) {
+    public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         String str = jsonReader.readString();
         if (str == null || str.isEmpty()) {
             return null;
@@ -30,7 +31,7 @@ public final class ObjectReaderImplFromString<T>
     }
 
     @Override
-    public T readObject(JSONReader jsonReader, long features) {
+    public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         String str = jsonReader.readString();
         if (str == null) {
             return null;

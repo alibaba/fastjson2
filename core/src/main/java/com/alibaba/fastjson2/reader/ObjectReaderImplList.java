@@ -269,7 +269,7 @@ public final class ObjectReaderImplList
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         ObjectReader objectReader = jsonReader.checkAutoType(this.listClass, 0, features);
 
         Function builder = this.builder;
@@ -324,7 +324,7 @@ public final class ObjectReaderImplList
                         jsonReader.addResolveTask((List) list, i, JSONPath.of(reference));
                     }
                 } else {
-                    item = itemObjectReader.readJSONBObject(jsonReader, features);
+                    item = itemObjectReader.readJSONBObject(jsonReader, itemType, i, features);
                 }
 
                 array[i] = item;
@@ -381,9 +381,9 @@ public final class ObjectReaderImplList
             } else {
                 ObjectReader autoTypeReader = jsonReader.checkAutoType(itemClass, itemClassNameHash, features);
                 if (autoTypeReader != null) {
-                    item = autoTypeReader.readJSONBObject(jsonReader, features);
+                    item = autoTypeReader.readJSONBObject(jsonReader, itemType, i, features);
                 } else {
-                    item = itemObjectReader.readJSONBObject(jsonReader, features);
+                    item = itemObjectReader.readJSONBObject(jsonReader, itemType, i, features);
                 }
             }
 
@@ -398,7 +398,7 @@ public final class ObjectReaderImplList
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         JSONReader.Context context = jsonReader.getContext();
         if (itemObjectReader == null) {
             itemObjectReader = context
@@ -406,7 +406,7 @@ public final class ObjectReaderImplList
         }
 
         if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, 0);
+            return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
         if (jsonReader.readIfNull()) {
@@ -447,14 +447,14 @@ public final class ObjectReaderImplList
             throw new JSONException(jsonReader.info());
         }
 
-        for (; ; ) {
+        for (int i = 0; ; ++i) {
             if (jsonReader.nextIfMatch(']')) {
                 break;
             }
 
             Object item;
             if (itemObjectReader != null) {
-                item = itemObjectReader.readObject(jsonReader, 0);
+                item = itemObjectReader.readObject(jsonReader, itemType, i, 0);
             } else {
                 if (itemType == String.class) {
                     item = jsonReader.readString();

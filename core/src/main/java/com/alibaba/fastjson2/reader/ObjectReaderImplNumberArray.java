@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
@@ -13,7 +14,7 @@ class ObjectReaderImplNumberArray
     static final ObjectReaderImplNumberArray INSTANCE = new ObjectReaderImplNumberArray();
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.readIfNull()) {
             return null;
         }
@@ -48,7 +49,7 @@ class ObjectReaderImplNumberArray
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         int entryCnt = jsonReader.startArray();
         if (entryCnt == -1) {
             return null;

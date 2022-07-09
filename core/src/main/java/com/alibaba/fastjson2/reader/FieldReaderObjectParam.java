@@ -58,7 +58,7 @@ class FieldReaderObjectParam<T>
                     .getObjectReader(fieldType);
         }
         return jsonReader.isJSONB()
-                ? fieldObjectReader.readJSONBObject(jsonReader, features)
-                : fieldObjectReader.readObject(jsonReader, features);
+                ? fieldObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features)
+                : fieldObjectReader.readObject(jsonReader, fieldType, fieldName, features);
     }
 }

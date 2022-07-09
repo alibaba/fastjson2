@@ -1816,7 +1816,7 @@ public class ObjectReaderBaseModule
         }
 
         @Override
-        public abstract T readJSONBObject(JSONReader jsonReader, long features);
+        public abstract T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features);
     }
 
     static class InterfaceImpl
@@ -1830,7 +1830,7 @@ public class ObjectReaderBaseModule
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.nextIfMatch('{')) {
                 long hash = jsonReader.readFieldNameHashCode();
                 JSONReader.Context context = jsonReader.getContext();
@@ -1847,10 +1847,10 @@ public class ObjectReaderBaseModule
                         }
                     }
 
-                    return autoTypeObjectReader.readObject(jsonReader, 0);
+                    return autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
                 }
 
-                return ObjectReaderImplMap.INSTANCE.readObject(jsonReader, 0);
+                return ObjectReaderImplMap.INSTANCE.readObject(jsonReader, fieldType, fieldName, 0);
             }
 
             Object value;
@@ -1893,7 +1893,7 @@ public class ObjectReaderBaseModule
         }
 
         @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
+        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             return jsonReader.readAny();
         }
     }

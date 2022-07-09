@@ -2,6 +2,8 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
 
+import java.lang.reflect.Type;
+
 class ObjectReaderImplDouble
         extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplDouble INSTANCE = new ObjectReaderImplDouble();
@@ -12,12 +14,12 @@ class ObjectReaderImplDouble
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         return jsonReader.readDouble();
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         return jsonReader.readDouble();
     }
 }

@@ -145,7 +145,7 @@ public class JSONObject
             if (objectReader == null) {
                 objectReader = reader.getObjectReader(JSONObject.class);
             }
-            return objectReader.readObject(reader, 0);
+            return objectReader.readObject(reader, null, null, 0);
         }
 
         if (value instanceof Map) {
@@ -184,7 +184,7 @@ public class JSONObject
             if (arrayReader == null) {
                 arrayReader = reader.getObjectReader(JSONArray.class);
             }
-            return arrayReader.readObject(reader, 0);
+            return arrayReader.readObject(reader, null, null, 0);
         }
 
         if (value instanceof List) {
@@ -240,7 +240,7 @@ public class JSONObject
                     .setDateFormat(defaultDateFormat);
         }
 
-        return (T) objectReader.readObject(jsonReader);
+        return (T) objectReader.readObject(jsonReader, null, null, 0);
     }
 
     public <T> T getObject(String key, TypeReference typeReference) {
@@ -282,7 +282,7 @@ public class JSONObject
                     .setDateFormat(defaultDateFormat);
         }
 
-        return (T) objectReader.readObject(jsonReader);
+        return (T) objectReader.readObject(jsonReader, null, null, 0);
     }
 
     public Boolean getBoolean(String key) {
@@ -394,7 +394,7 @@ public class JSONObject
                     .setDateFormat(defaultDateFormat);
         }
 
-        return (T) objectReader.readObject(jsonReader);
+        return (T) objectReader.readObject(jsonReader, null, null, 0);
     }
 
     public boolean getBooleanValue(String key) {

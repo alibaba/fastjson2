@@ -36,7 +36,7 @@ public class UsingTest {
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             String str = jsonReader.readString();
             str = str.replace("元", "");
             return Integer.parseInt(str);

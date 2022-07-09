@@ -208,14 +208,14 @@ final class JSONReaderJSONB
     public <T> T read(Type type) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
-        return (T) objectReader.readJSONBObject(this, 0);
+        return (T) objectReader.readJSONBObject(this, null, null, 0);
     }
 
     @Override
     public <T> T read(Class<T> type) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
-        return (T) objectReader.readJSONBObject(this, 0);
+        return (T) objectReader.readJSONBObject(this, null, null, 0);
     }
 
     @Override
@@ -227,7 +227,7 @@ final class JSONReaderJSONB
 
         if (type == BC_TYPED_ANY) {
             ObjectReader objectReader = checkAutoType(Map.class, 0, 0);
-            return (Map) objectReader.readObject(this, 0);
+            return (Map) objectReader.readObject(this, null, null, 0);
         }
 
         if (type >= BC_OBJECT) {
@@ -512,7 +512,7 @@ final class JSONReaderJSONB
                         throw new JSONException("auoType not support : " + typeName + ", offset " + offset + "/" + bytes.length);
                     }
                 }
-                return autoTypeObjectReader.readJSONBObject(this, 0);
+                return autoTypeObjectReader.readJSONBObject(this, null, null, 0);
             }
             case BC_DOUBLE_NUM_0:
                 return 0D;
@@ -545,7 +545,7 @@ final class JSONReaderJSONB
                             }
 
                             typeRedirect = true;
-                            return autoTypeObjectReader.readJSONBObject(this, 0);
+                            return autoTypeObjectReader.readJSONBObject(this, null, null, 0);
                         }
                         name = getFieldName();
                     } else {

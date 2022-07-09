@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -129,7 +130,7 @@ public class ObjectReaderAdapter<T>
             }
         }
 
-        return autoTypeObjectReader.readObject(jsonReader, features);
+        return autoTypeObjectReader.readObject(jsonReader, null, null, features);
     }
 
     @Override
@@ -138,7 +139,7 @@ public class ObjectReaderAdapter<T>
     }
 
     @Override
-    public T readArrayMappingObject(JSONReader jsonReader) {
+    public T readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         jsonReader.nextIfMatch('[');
         Object object = creator.get();
 
@@ -160,7 +161,7 @@ public class ObjectReaderAdapter<T>
     }
 
     @Override
-    public T readArrayMappingJSONBObject(JSONReader jsonReader) {
+    public T readArrayMappingJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         jsonReader.startArray();
         Object object = creator.get();
 
@@ -288,23 +289,23 @@ public class ObjectReaderAdapter<T>
             }
         }
 
-        return (T) autoTypeObjectReader.readJSONBObject(jsonReader, features);
+        return (T) autoTypeObjectReader.readJSONBObject(jsonReader, null, null, features);
     }
 
     @Override
-    public T readJSONBObject(JSONReader jsonReader, long features) {
+    public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfNull()) {
             return null;
         }
 
         ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
         if (autoTypeReader != null && autoTypeReader.getObjectClass() != this.objectClass) {
-            return (T) autoTypeReader.readJSONBObject(jsonReader, features);
+            return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (jsonReader.isArray()) {
             if (jsonReader.isSupportBeanArray()) {
-                return readArrayMappingJSONBObject(jsonReader);
+                return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
             } else {
                 throw new JSONException(jsonReader.info("expect object, but " + JSONB.typeName(jsonReader.getType())));
             }
@@ -337,7 +338,7 @@ public class ObjectReaderAdapter<T>
                 }
 
                 jsonReader.setTypeRedirect(true);
-                return (T) autoTypeObjectReader.readJSONBObject(jsonReader, features);
+                return (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
             }
 
             if (hash == 0) {
