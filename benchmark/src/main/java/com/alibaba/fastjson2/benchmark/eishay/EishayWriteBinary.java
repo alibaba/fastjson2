@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.caucho.hessian.io.Hessian2Output;
+import io.fury.Fury;
+import io.fury.Language;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -22,6 +24,8 @@ import java.util.concurrent.TimeUnit;
 
 public class EishayWriteBinary {
     static MediaContent mc;
+    static Fury fury = Fury.builder().withLanguage(Language.JAVA).build();
+    static Blackhole bh = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
 
     static {
         try {
@@ -36,12 +40,20 @@ public class EishayWriteBinary {
 
     @Benchmark
     public void fastjson2UTF8Bytes(Blackhole bh) {
-        bh.consume(JSON.toJSONBytes(mc));
+        byte[] bytes = JSON.toJSONBytes(mc);
+        bh.consume(bytes);
+    }
+
+    public void fastjson2UTF8Bytes_perf() {
+        for (int i = 0; i < 10; i++) {
+            fastjson2UTF8Bytes(bh);
+        }
     }
 
     @Benchmark
     public void fastjson2JSONB(Blackhole bh) {
-        bh.consume(JSONB.toBytes(mc));
+        byte[] bytes = JSONB.toBytes(mc);
+        bh.consume(bytes);
     }
 
     @Benchmark
@@ -62,10 +74,39 @@ public class EishayWriteBinary {
         bh.consume(byteArrayOutputStream.toByteArray());
     }
 
-    //    @Test
-    public void fastjson2_perf_test() {
+    @Benchmark
+    public void fury(Blackhole bh) {
+        byte[] bytes = fury.serialize(mc);
+        bh.consume(fury.deserialize(bytes));
+    }
+
+    public void fury_perf() {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000 * 1000; ++i) {
+            fury(bh);
+        }
+
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("fury : " + millis);
+    }
+
+    public void fury_perf_test() {
         for (int i = 0; i < 10; i++) {
-            fastjson2_jsonb_perf();
+            fury_perf();
+        }
+    }
+
+    //    @Test
+    public void fastjson2_jsonb_perf_test() {
+        for (int i = 0; i < 10; i++) {
+            fastjson2JSONB(bh);
+        }
+    }
+
+    //    @Test
+    public void fastjson2UTF8Bytes_perf_test() {
+        for (int i = 0; i < 10; i++) {
+            fastjson2UTF8Bytes_perf();
         }
     }
 
@@ -82,6 +123,9 @@ public class EishayWriteBinary {
     }
 
     public static void main(String[] args) throws RunnerException {
+//        new EishayWriteBinary().fury_perf_test();
+//        new EishayWriteBinary().fastjson2_jsonb_perf_test();
+//        new EishayWriteBinary().fastjson2UTF8Bytes_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayWriteBinary.class.getName())
                 .mode(Mode.Throughput)
