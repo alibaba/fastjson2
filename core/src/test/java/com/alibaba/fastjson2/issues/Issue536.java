@@ -12,7 +12,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue536 {
-
     private JSONObject jsonObject;
 
     @BeforeEach

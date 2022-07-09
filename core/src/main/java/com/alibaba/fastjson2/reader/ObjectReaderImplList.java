@@ -176,7 +176,7 @@ public final class ObjectReaderImplList
             Class<?> valueClass = value.getClass();
             if (valueClass != itemType) {
                 Function typeConvert = provider.getTypeConvert(valueClass, itemType);
-                if (Objects.nonNull(typeConvert)){
+                if (Objects.nonNull(typeConvert)) {
                     list.add(typeConvert.apply(value));
                     continue;
                 }
