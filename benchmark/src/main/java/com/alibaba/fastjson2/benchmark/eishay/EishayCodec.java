@@ -32,7 +32,7 @@ public class EishayCodec {
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
 
-            fastjson2JSONBBytes = JSONB.toBytes(mc);
+            fastjson2JSONBBytes = JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName);
 
             furyBytes = fury.serialize(mc);
         } catch (Throwable ex) {
