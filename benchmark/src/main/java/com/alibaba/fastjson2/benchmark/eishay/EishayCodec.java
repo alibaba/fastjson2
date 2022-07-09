@@ -65,6 +65,7 @@ public class EishayCodec {
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(EishayCodec.class.getName())
+                .exclude(EishayCodecOnlyJSONB.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .forks(1)
