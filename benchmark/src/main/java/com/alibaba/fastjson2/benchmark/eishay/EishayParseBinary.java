@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
+import io.fury.Fury;
+import io.fury.Language;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -23,6 +25,10 @@ public class EishayParseBinary {
     static byte[] fastjson2JSONBBytes;
     static byte[] hessianBytes;
     static byte[] javaSerializeBytes;
+
+    static Fury fury = Fury.builder().withLanguage(Language.JAVA).build();
+
+    static byte[] furyBytes;
 
     static {
         try {
@@ -48,9 +54,16 @@ public class EishayParseBinary {
                 objectOutputStream.flush();
                 javaSerializeBytes = byteArrayOutputStream.toByteArray();
             }
+
+            furyBytes = fury.serialize(mc);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
+    }
+
+    @Benchmark
+    public void fury(Blackhole bh) {
+        bh.consume(fury.deserialize(furyBytes));
     }
 
     @Benchmark
@@ -135,10 +148,10 @@ public class EishayParseBinary {
     }
 
     public static void main(String[] args) throws Exception {
-        MediaContent mc1 = JSONB.parseObject(fastjson2JSONBBytes, MediaContent.class);
-        MediaContent mc2 = JSON.parseObject(fastjson2UTF8Bytes, MediaContent.class);
-        MediaContent mc3 = (MediaContent) new Hessian2Input(new ByteArrayInputStream(hessianBytes)).readObject();
-        MediaContent mc4 = (MediaContent) new ObjectInputStream(new ByteArrayInputStream(javaSerializeBytes)).readObject();
+//        MediaContent mc1 = JSONB.parseObject(fastjson2JSONBBytes, MediaContent.class);
+//        MediaContent mc2 = JSON.parseObject(fastjson2UTF8Bytes, MediaContent.class);
+//        MediaContent mc3 = (MediaContent) new Hessian2Input(new ByteArrayInputStream(hessianBytes)).readObject();
+//        MediaContent mc4 = (MediaContent) new ObjectInputStream(new ByteArrayInputStream(javaSerializeBytes)).readObject();
 
 //        new EishayParseBinary().fastjson2_jsonb_perf_test();
 //        new EishayParseBinary().hessian_perf_test();

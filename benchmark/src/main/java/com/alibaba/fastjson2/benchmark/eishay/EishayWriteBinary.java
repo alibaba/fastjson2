@@ -71,13 +71,14 @@ public class EishayWriteBinary {
         Hessian2Output hessian2Output = new Hessian2Output(byteArrayOutputStream);
         hessian2Output.writeObject(mc);
         hessian2Output.flush();
-        bh.consume(byteArrayOutputStream.toByteArray());
+        byte[] bytes = byteArrayOutputStream.toByteArray();
+        bh.consume(bytes);
     }
 
     @Benchmark
     public void fury(Blackhole bh) {
         byte[] bytes = fury.serialize(mc);
-        bh.consume(fury.deserialize(bytes));
+        bh.consume(bytes);
     }
 
     public void fury_perf() {
@@ -122,10 +123,10 @@ public class EishayWriteBinary {
         // zulu8.58.0.13 :
     }
 
-    public static void main(String[] args) throws RunnerException {
+    public static void main(String[] args) throws Exception {
 //        new EishayWriteBinary().fury_perf_test();
 //        new EishayWriteBinary().fastjson2_jsonb_perf_test();
-//        new EishayWriteBinary().fastjson2UTF8Bytes_perf_test();
+        new EishayWriteBinary().hessian(bh);
         Options options = new OptionsBuilder()
                 .include(EishayWriteBinary.class.getName())
                 .mode(Mode.Throughput)
