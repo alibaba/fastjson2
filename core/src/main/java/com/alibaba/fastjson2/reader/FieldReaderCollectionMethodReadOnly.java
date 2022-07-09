@@ -105,8 +105,8 @@ class FieldReaderCollectionMethodReadOnly<T>
                     .getObjectReader(fieldType);
         }
         Object value = jsonReader.isJSONB()
-                ? fieldObjectReader.readJSONBObject(jsonReader, 0)
-                : fieldObjectReader.readObject(jsonReader, 0);
+                ? fieldObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, 0)
+                : fieldObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
         accept(object, value);
     }
 }

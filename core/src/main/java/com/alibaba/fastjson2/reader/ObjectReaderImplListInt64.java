@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -53,7 +54,7 @@ public final class ObjectReaderImplListInt64
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfNull()) {
             return null;
         }
@@ -89,9 +90,9 @@ public final class ObjectReaderImplListInt64
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, 0);
+            return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
         if (jsonReader.readIfNull()) {

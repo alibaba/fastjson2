@@ -113,12 +113,12 @@ class FieldReaderObjectMethod<T>
             if (jsonReader.isJSONB()) {
                 ObjectReader autoTypeReader = checkObjectAutoType(jsonReader);
                 if (autoTypeReader != null) {
-                    value = autoTypeReader.readJSONBObject(jsonReader, features);
+                    value = autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
                 } else {
-                    value = objectReader.readJSONBObject(jsonReader, features);
+                    value = objectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
                 }
             } else {
-                value = objectReader.readObject(jsonReader, features);
+                value = objectReader.readObject(jsonReader, fieldType, fieldName, features);
             }
         } catch (JSONException ex) {
             throw new JSONException(jsonReader.info("read field error : " + fieldName), ex);
@@ -136,7 +136,7 @@ class FieldReaderObjectMethod<T>
         }
 
         return jsonReader.isJSONB()
-                ? fieldObjectReader.readJSONBObject(jsonReader, features)
-                : fieldObjectReader.readObject(jsonReader, features);
+                ? fieldObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features)
+                : fieldObjectReader.readObject(jsonReader, fieldType, fieldName, features);
     }
 }

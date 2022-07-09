@@ -71,7 +71,7 @@ public class JSONArray
      *    array.set(-6, -6); // [-6,1,2,null,-2,-1]
      * }</pre>
      *
-     * @param index   index of the element to replace
+     * @param index index of the element to replace
      * @param element element to be stored at the specified position
      * @return the element previously at the specified position
      * @since 2.0.3
@@ -87,13 +87,13 @@ public class JSONArray
                 return null;
             }
             return super.set(
-                index, element
+                    index, element
             );
         }
 
         if (index < size) {
             return super.set(
-                index, element
+                    index, element
             );
         }
 
@@ -130,7 +130,7 @@ public class JSONArray
             }
 
             JSONReader reader = JSONReader.of(str);
-            return JSONFactory.ARRAY_READER.readObject(reader, 0);
+            return JSONFactory.ARRAY_READER.readObject(reader, null, null, 0);
         }
 
         if (value instanceof Collection) {
@@ -182,7 +182,7 @@ public class JSONArray
             }
 
             JSONReader reader = JSONReader.of(str);
-            return JSONFactory.OBJECT_READER.readObject(reader, 0);
+            return JSONFactory.OBJECT_READER.readObject(reader, null, null, 0);
         }
 
         if (value instanceof Map) {
@@ -229,8 +229,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return {@link Double} or null
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable double
-     * @throws JSONException             Unsupported type conversion to {@link Double}
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable double
+     * @throws JSONException Unsupported type conversion to {@link Double}
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Double getDouble(int index) {
@@ -266,8 +266,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return double
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable double
-     * @throws JSONException             Unsupported type conversion to double value
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable double
+     * @throws JSONException Unsupported type conversion to double value
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public double getDoubleValue(int index) {
@@ -299,8 +299,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return {@link Float} or null
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable float
-     * @throws JSONException             Unsupported type conversion to {@link Float}
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable float
+     * @throws JSONException Unsupported type conversion to {@link Float}
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Float getFloat(int index) {
@@ -336,8 +336,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return float
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable float
-     * @throws JSONException             Unsupported type conversion to float value
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable float
+     * @throws JSONException Unsupported type conversion to float value
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public float getFloatValue(int index) {
@@ -369,8 +369,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return {@link Long} or null
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable long
-     * @throws JSONException             Unsupported type conversion to {@link Long}
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable long
+     * @throws JSONException Unsupported type conversion to {@link Long}
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Long getLong(int index) {
@@ -405,8 +405,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return long
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable long
-     * @throws JSONException             Unsupported type conversion to long value
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable long
+     * @throws JSONException Unsupported type conversion to long value
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public long getLongValue(int index) {
@@ -438,8 +438,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return {@link Integer} or null
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable int
-     * @throws JSONException             Unsupported type conversion to {@link Integer}
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable int
+     * @throws JSONException Unsupported type conversion to {@link Integer}
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Integer getInteger(int index) {
@@ -474,8 +474,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return int
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable int
-     * @throws JSONException             Unsupported type conversion to int value
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable int
+     * @throws JSONException Unsupported type conversion to int value
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public int getIntValue(int index) {
@@ -507,8 +507,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return {@link Short} or null
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable short
-     * @throws JSONException             Unsupported type conversion to {@link Short}
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable short
+     * @throws JSONException Unsupported type conversion to {@link Short}
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Short getShort(int index) {
@@ -544,8 +544,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return short
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable short
-     * @throws JSONException             Unsupported type conversion to short value
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable short
+     * @throws JSONException Unsupported type conversion to short value
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public short getShortValue(int index) {
@@ -577,8 +577,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return {@link Byte} or null
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable byte
-     * @throws JSONException             Unsupported type conversion to {@link Byte}
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable byte
+     * @throws JSONException Unsupported type conversion to {@link Byte}
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Byte getByte(int index) {
@@ -610,8 +610,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return byte
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable byte
-     * @throws JSONException             Unsupported type conversion to byte value
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable byte
+     * @throws JSONException Unsupported type conversion to byte value
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public byte getByteValue(int index) {
@@ -643,7 +643,7 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return {@link Boolean} or null
-     * @throws JSONException             Unsupported type conversion to {@link Boolean}
+     * @throws JSONException Unsupported type conversion to {@link Boolean}
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public Boolean getBoolean(int index) {
@@ -679,7 +679,7 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return boolean
-     * @throws JSONException             Unsupported type conversion to boolean value
+     * @throws JSONException Unsupported type conversion to boolean value
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public boolean getBooleanValue(int index) {
@@ -711,8 +711,8 @@ public class JSONArray
      * @param index index of the element to return
      * @return {@link BigInteger} or null
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @throws JSONException             Unsupported type conversion to {@link BigInteger}
-     * @throws NumberFormatException     If the value of get is {@link String} and it is not a valid representation of {@link BigInteger}
+     * @throws JSONException Unsupported type conversion to {@link BigInteger}
+     * @throws NumberFormatException If the value of get is {@link String} and it is not a valid representation of {@link BigInteger}
      */
     public BigInteger getBigInteger(int index) {
         Object value = get(index);
@@ -753,8 +753,8 @@ public class JSONArray
      * @param index index of the element to return
      * @return {@link BigDecimal} or null
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     * @throws JSONException             Unsupported type conversion to {@link BigDecimal}
-     * @throws NumberFormatException     If the value of get is {@link String} and it is not a valid representation of {@link BigDecimal}
+     * @throws JSONException Unsupported type conversion to {@link BigDecimal}
+     * @throws NumberFormatException If the value of get is {@link String} and it is not a valid representation of {@link BigDecimal}
      */
     public BigDecimal getBigDecimal(int index) {
         Object value = get(index);
@@ -876,6 +876,7 @@ public class JSONArray
 
     /**
      * Serialize to JSON {@link String}
+     *
      * @param features features to be enabled in serialization
      * @return JSON {@link String}
      */
@@ -902,6 +903,7 @@ public class JSONArray
 
     /**
      * Serialize to JSONB bytes
+     *
      * @param features features to be enabled in serialization
      * @return JSONB bytes
      */
@@ -1014,6 +1016,7 @@ public class JSONArray
 
         return list;
     }
+
     /**
      * Convert all the members of this {@link JSONArray} into the specified Object.
      *
@@ -1091,9 +1094,9 @@ public class JSONArray
      * }</pre>
      *
      * @param index index of the element to return
-     * @param type  specify the {@link Type} to be converted
+     * @param type specify the {@link Type} to be converted
      * @return {@code <T>} or null
-     * @throws JSONException             If no suitable conversion method is found
+     * @throws JSONException If no suitable conversion method is found
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -1141,7 +1144,7 @@ public class JSONArray
         jsonReader.context.config(features);
 
         ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
-        return (T) objectReader.readObject(jsonReader);
+        return (T) objectReader.readObject(jsonReader, null, null, 0);
     }
 
     /**
@@ -1150,9 +1153,9 @@ public class JSONArray
      * {@code User user = jsonArray.getObject(0, User.class);}
      *
      * @param index index of the element to return
-     * @param type  specify the {@link Class} to be converted
+     * @param type specify the {@link Class} to be converted
      * @return {@code <T>} or null
-     * @throws JSONException             If no suitable conversion method is found
+     * @throws JSONException If no suitable conversion method is found
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -1221,7 +1224,7 @@ public class JSONArray
             objectReader = provider.getObjectReader(clazz, fieldBased);
         }
 
-        T object = (T) objectReader.readObject(jsonReader, 0L);
+        T object = (T) objectReader.readObject(jsonReader, null, null, 0L);
         if (!jsonReader.isEnd()) {
             throw new JSONException("not support input " + json);
         }
@@ -1352,7 +1355,7 @@ public class JSONArray
      * JSONArray array = JSONArray.of("fastjson", 2);
      * </pre>
      *
-     * @param first  first element
+     * @param first first element
      * @param second second element
      */
     public static JSONArray of(Object first, Object second) {
@@ -1369,9 +1372,9 @@ public class JSONArray
      * JSONArray array = JSONArray.of("fastjson", 2, true);
      * </pre>
      *
-     * @param first  first element
+     * @param first first element
      * @param second second element
-     * @param third  third element
+     * @param third third element
      */
     public static JSONArray of(Object first, Object second, Object third) {
         JSONArray array = new JSONArray(3);
@@ -1384,7 +1387,7 @@ public class JSONArray
     /**
      * Parse JSON {@link String} into {@link JSONArray}
      *
-     * @param text     the JSON {@link String} to be parsed
+     * @param text the JSON {@link String} to be parsed
      * @param features features to be enabled in parsing
      */
     public static JSONArray parseArray(String text, JSONReader.Feature... features) {

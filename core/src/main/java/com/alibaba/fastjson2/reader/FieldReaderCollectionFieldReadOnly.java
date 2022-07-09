@@ -54,7 +54,7 @@ final class FieldReaderCollectionFieldReadOnly<T>
                     .getContext()
                     .getObjectReader(fieldType);
         }
-        Object value = fieldObjectReader.readObject(jsonReader, 0);
+        Object value = fieldObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
         accept(object, value);
     }
 }

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
 
+import java.lang.reflect.Type;
 import java.util.OptionalLong;
 
 class ObjectReaderImplOptionalLong
@@ -14,7 +15,7 @@ class ObjectReaderImplOptionalLong
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Long integer = jsonReader.readInt64();
         if (integer == null) {
             return OptionalLong.empty();
@@ -23,7 +24,7 @@ class ObjectReaderImplOptionalLong
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Long integer = jsonReader.readInt64();
         if (integer == null) {
             return OptionalLong.empty();

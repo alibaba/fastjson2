@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,7 +30,7 @@ class ObjectReaderImplAtomicIntegerArray
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.readIfNull()) {
             return null;
         }
@@ -59,7 +60,7 @@ class ObjectReaderImplAtomicIntegerArray
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         int entryCnt = jsonReader.startArray();
         if (entryCnt == -1) {
             return null;

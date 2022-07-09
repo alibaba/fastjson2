@@ -148,7 +148,7 @@ public class JSON {
 
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectClass);
-            T object = objectReader.readObject(jsonReader, 0);
+            T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
@@ -184,7 +184,7 @@ public class JSON {
 
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectClass);
-            T object = objectReader.readObject(jsonReader, 0);
+            T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
@@ -226,7 +226,7 @@ public class JSON {
 
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
-            T object = objectReader.readObject(jsonReader, 0);
+            T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
@@ -268,7 +268,7 @@ public class JSON {
 
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
-            T object = objectReader.readObject(jsonReader, 0);
+            T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
@@ -319,7 +319,7 @@ public class JSON {
 
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
-            T object = objectReader.readObject(jsonReader, 0);
+            T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
@@ -393,7 +393,7 @@ public class JSON {
         config(context, features);
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
-            T object = objectReader.readObject(jsonReader, 0);
+            T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }
@@ -429,7 +429,7 @@ public class JSON {
         config(context, features);
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
-            T object = objectReader.readObject(jsonReader, 0);
+            T object = objectReader.readObject(jsonReader, null, null, 0);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
             }

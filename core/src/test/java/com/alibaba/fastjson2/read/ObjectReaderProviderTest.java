@@ -82,7 +82,7 @@ public class ObjectReaderProviderTest {
     public static class BeanReader
             implements ObjectReader {
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, java.lang.reflect.Type fieldType, Object fieldName, long features) {
             return null;
         }
     }

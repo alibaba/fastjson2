@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -71,7 +72,7 @@ final class ObjectReaderSeeAlso<T>
     }
 
     @Override
-    public T readObject(JSONReader jsonReader, long features) {
+    public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isString()) {
             long valueHashCode = jsonReader.readValueHashCode();
 
@@ -96,6 +97,6 @@ final class ObjectReaderSeeAlso<T>
             throw new JSONException(jsonReader.info("not support input " + strVal));
         }
 
-        return super.readObject(jsonReader, features);
+        return super.readObject(jsonReader, fieldType, fieldName, features);
     }
 }

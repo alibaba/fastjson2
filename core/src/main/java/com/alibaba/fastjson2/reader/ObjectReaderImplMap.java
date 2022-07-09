@@ -219,10 +219,10 @@ public final class ObjectReaderImplMap
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName1, long features) {
         ObjectReader objectReader = jsonReader.checkAutoType(mapType, 0, this.features | features);
         if (objectReader != null && objectReader != this) {
-            return objectReader.readJSONBObject(jsonReader, features);
+            return objectReader.readJSONBObject(jsonReader, fieldType, fieldName1, features);
         }
 
         boolean emptyObject = false;
@@ -308,7 +308,7 @@ public final class ObjectReaderImplMap
                     value = jsonReader.readString();
                 } else if (type == BC_TYPED_ANY) {
                     ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, this.features | features);
-                    value = autoTypeObjectReader.readJSONBObject(jsonReader, features);
+                    value = autoTypeObjectReader.readJSONBObject(jsonReader, null, fieldName, features);
                 } else if (type == BC_TRUE) {
                     value = Boolean.TRUE;
                     jsonReader.next();
@@ -337,7 +337,7 @@ public final class ObjectReaderImplMap
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         JSONReader.Context context = jsonReader.getContext();
         Supplier<Map> objectSupplier = jsonReader.getContext().getObjectSupplier();
         Map object;

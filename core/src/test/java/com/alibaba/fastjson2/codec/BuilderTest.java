@@ -33,12 +33,12 @@ public class BuilderTest {
         }
         {
             byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("id", 123));
-            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
         }
         {
             byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("id", 123));
-            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
         }
     }
@@ -65,12 +65,12 @@ public class BuilderTest {
         map.put("name", "bill");
         byte[] jsonbBytes = JSONB.toBytes(map);
         {
-            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
             assertEquals("bill", o.name);
         }
         {
-            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
             assertEquals("bill", o.name);
         }
@@ -108,13 +108,13 @@ public class BuilderTest {
             map.put("age", 56);
             byte[] jsonbBytes = JSONB.toBytes(map);
             {
-                VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+                VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
                 assertEquals(123, o.id);
                 assertEquals("bill", o.name);
                 assertEquals(56, o.age);
             }
             {
-                VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+                VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
                 assertEquals(123, o.id);
                 assertEquals("bill", o.name);
                 assertEquals(56, o.age);
@@ -159,14 +159,14 @@ public class BuilderTest {
         map.put("tag1", 987654321);
         byte[] jsonbBytes = JSONB.toBytes(map);
         {
-            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
             assertEquals("bill", o.name);
             assertEquals(56, o.age);
             assertEquals(987654321, o.tag1);
         }
         {
-            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
             assertEquals("bill", o.name);
             assertEquals(56, o.age);
@@ -218,7 +218,7 @@ public class BuilderTest {
         map.put("tag3", 101);
         byte[] jsonbBytes = JSONB.toBytes(map);
         {
-            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
             assertEquals("bill", o.name);
             assertEquals(56, o.age);
@@ -227,7 +227,7 @@ public class BuilderTest {
             assertEquals(101L, o.tag3.longValue());
         }
         {
-            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
             assertEquals("bill", o.name);
             assertEquals(56, o.age);

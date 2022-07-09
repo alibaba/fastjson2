@@ -28,7 +28,7 @@ public class Fastjson1xReaderModule
     static class JSONImpl
             implements ObjectReader {
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.isObject()) {
                 return jsonReader.read(JSONObject.class);
             }

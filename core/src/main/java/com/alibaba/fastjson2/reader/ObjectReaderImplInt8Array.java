@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSONReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
@@ -29,7 +30,7 @@ class ObjectReaderImplInt8Array
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.readIfNull()) {
             return null;
         }
@@ -100,7 +101,7 @@ class ObjectReaderImplInt8Array
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         int entryCnt = jsonReader.startArray();
         if (entryCnt == -1) {
             return null;

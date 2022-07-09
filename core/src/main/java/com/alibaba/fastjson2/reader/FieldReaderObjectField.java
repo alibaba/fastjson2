@@ -90,15 +90,15 @@ class FieldReaderObjectField<T>
                 if (fieldClass == Object.class) {
                     ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, features);
                     if (autoTypeObjectReader != null) {
-                        value = autoTypeObjectReader.readJSONBObject(jsonReader, features);
+                        value = autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
                     } else {
                         value = jsonReader.readAny();
                     }
                 } else {
-                    value = fieldObjectReader.readJSONBObject(jsonReader, features);
+                    value = fieldObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
                 }
             } else {
-                value = fieldObjectReader.readObject(jsonReader, features);
+                value = fieldObjectReader.readObject(jsonReader, fieldType, fieldName, features);
             }
             accept(object, value);
         } catch (JSONSchemaValidException ex) {
@@ -124,7 +124,7 @@ class FieldReaderObjectField<T>
             return;
         }
 
-        Object value = fieldObjectReader.readJSONBObject(jsonReader, features);
+        Object value = fieldObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         accept(object, value);
     }
 
@@ -258,8 +258,8 @@ class FieldReaderObjectField<T>
         }
 
         Object object = jsonReader.isJSONB()
-                ? fieldObjectReader.readJSONBObject(jsonReader, features)
-                : fieldObjectReader.readObject(jsonReader, features);
+                ? fieldObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features)
+                : fieldObjectReader.readObject(jsonReader, fieldType, fieldName, features);
 
         Function builder = fieldObjectReader.getBuildFunction();
         if (builder != null) {

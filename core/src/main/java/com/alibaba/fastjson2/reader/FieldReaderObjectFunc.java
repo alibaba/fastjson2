@@ -87,8 +87,8 @@ final class FieldReaderObjectFunc<T, V>
         }
 
         Object value = jsonReader.isJSONB()
-                ? objectReader.readJSONBObject(jsonReader, features)
-                : objectReader.readObject(jsonReader, features);
+                ? objectReader.readJSONBObject(jsonReader, fieldType, fieldName, features)
+                : objectReader.readObject(jsonReader, fieldType, fieldName, features);
         accept(object, value);
     }
 
@@ -111,7 +111,7 @@ final class FieldReaderObjectFunc<T, V>
         }
 
         return jsonReader.isJSONB()
-                ? objectReader.readJSONBObject(jsonReader, features)
-                : objectReader.readObject(jsonReader, features);
+                ? objectReader.readJSONBObject(jsonReader, fieldType, fieldName, features)
+                : objectReader.readObject(jsonReader, fieldType, fieldName, features);
     }
 }

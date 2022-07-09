@@ -101,7 +101,7 @@ class ObjectReaderImplMapTyped
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         ObjectReader objectReader = null;
         Function builder = this.builder;
         if (jsonReader.getType() == BC_TYPED_ANY) {
@@ -110,7 +110,7 @@ class ObjectReaderImplMapTyped
             if (objectReader != null && objectReader != this) {
                 builder = objectReader.getBuildFunction();
                 if (!(objectReader instanceof ObjectReaderImplMap) && !(objectReader instanceof ObjectReaderImplMapTyped)) {
-                    return objectReader.readJSONBObject(jsonReader, features);
+                    return objectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
                 }
             }
         }
@@ -160,7 +160,7 @@ class ObjectReaderImplMapTyped
                     if (keyObjectReader == null) {
                         name = jsonReader.readAny();
                     } else {
-                        name = keyObjectReader.readJSONBObject(jsonReader, features);
+                        name = keyObjectReader.readJSONBObject(jsonReader, null, null, features);
                     }
                 }
             }
@@ -189,12 +189,12 @@ class ObjectReaderImplMapTyped
             } else {
                 ObjectReader autoTypeValueReader = jsonReader.checkAutoType(valueClass, 0, features);
                 if (autoTypeValueReader != null) {
-                    value = autoTypeValueReader.readJSONBObject(jsonReader, features);
+                    value = autoTypeValueReader.readJSONBObject(jsonReader, valueType, name, features);
                 } else {
                     if (valueObjectReader == null) {
                         valueObjectReader = jsonReader.getObjectReader(valueType);
                     }
-                    value = valueObjectReader.readJSONBObject(jsonReader, features);
+                    value = valueObjectReader.readJSONBObject(jsonReader, valueType, name, features);
                 }
             }
             object.put(name, value);
@@ -208,7 +208,7 @@ class ObjectReaderImplMapTyped
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         boolean match = jsonReader.nextIfMatch('{');
         if (!match) {
             throw new JSONException(jsonReader.info("expect '{', but '['"));
@@ -248,7 +248,7 @@ class ObjectReaderImplMapTyped
             if (valueObjectReader == null) {
                 valueObjectReader = jsonReader.getObjectReader(valueType);
             }
-            Object value = valueObjectReader.readObject(jsonReader, 0);
+            Object value = valueObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
             Object origin = object.put(name, value);
             if (origin != null) {
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {

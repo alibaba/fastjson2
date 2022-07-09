@@ -32,7 +32,7 @@ class ObjectReaderImplGenericArray
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         int entryCnt = jsonReader.startArray();
 
         if (entryCnt > 0 && itemObjectReader == null) {
@@ -44,7 +44,7 @@ class ObjectReaderImplGenericArray
         Object array = Array.newInstance(componentClass, entryCnt);
 
         for (int i = 0; i < entryCnt; ++i) {
-            Object item = itemObjectReader.readJSONBObject(jsonReader, 0);
+            Object item = itemObjectReader.readJSONBObject(jsonReader, itemType, null, 0);
             Array.set(array, i, item);
         }
 
@@ -52,7 +52,7 @@ class ObjectReaderImplGenericArray
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (itemObjectReader == null) {
             itemObjectReader = jsonReader
                     .getContext()
@@ -60,7 +60,7 @@ class ObjectReaderImplGenericArray
         }
 
         if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, 0);
+            return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
         if (jsonReader.readIfNull()) {
@@ -89,7 +89,7 @@ class ObjectReaderImplGenericArray
 
             Object item;
             if (itemObjectReader != null) {
-                item = itemObjectReader.readObject(jsonReader, 0);
+                item = itemObjectReader.readObject(jsonReader, itemType, null, 0);
             } else {
                 if (itemType == String.class) {
                     item = jsonReader.readString();

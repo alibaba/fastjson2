@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
+import java.lang.reflect.Type;
+
 public final class ObjectReaderImplShort
         extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplShort INSTANCE = new ObjectReaderImplShort();
@@ -15,7 +17,7 @@ public final class ObjectReaderImplShort
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Integer i = jsonReader.readInt32();
         if (i == null) {
             return null;
@@ -24,7 +26,7 @@ public final class ObjectReaderImplShort
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Integer i = jsonReader.readInt32();
         if (i == null) {
             return null;

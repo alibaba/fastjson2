@@ -49,7 +49,7 @@ class ObjectReaderImplOptional
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Object value;
         if (itemType == null) {
             value = jsonReader.readAny();
@@ -65,7 +65,7 @@ class ObjectReaderImplOptional
                     itemObjectReader = formattedObjectReader;
                 }
             }
-            value = itemObjectReader.readJSONBObject(jsonReader, 0);
+            value = itemObjectReader.readJSONBObject(jsonReader, itemType, fieldName, 0);
         }
 
         if (value == null) {
@@ -75,7 +75,7 @@ class ObjectReaderImplOptional
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Object value;
         if (itemType == null) {
             value = jsonReader.readAny();
@@ -91,7 +91,7 @@ class ObjectReaderImplOptional
                     itemObjectReader = formattedObjectReader;
                 }
             }
-            value = itemObjectReader.readObject(jsonReader, 0);
+            value = itemObjectReader.readObject(jsonReader, itemType, fieldName, 0);
         }
 
         if (value == null) {

@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Type;
+
 final class ObjectReaderImplClass
         extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplClass INSTANCE = new ObjectReaderImplClass();
@@ -17,18 +19,18 @@ final class ObjectReaderImplClass
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long valueHashCode = jsonReader.readTypeHashCode();
             if (valueHashCode != TYPE_HASH) {
                 throw new JSONException(jsonReader.info("not support autoType : " + jsonReader.getString()));
             }
         }
-        return readObject(jsonReader, features);
+        return readObject(jsonReader, fieldType, fieldName, features);
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         String className = jsonReader.readString();
 
         JSONReader.Context context = jsonReader.getContext();

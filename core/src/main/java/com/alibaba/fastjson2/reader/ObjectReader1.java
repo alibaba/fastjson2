@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
+import java.lang.reflect.Type;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -64,14 +65,14 @@ final class ObjectReader1<T>
 
     @Override
     public T readObject(JSONReader jsonReader) {
-        return readObject(jsonReader, features);
+        return readObject(jsonReader, null, null, features);
     }
 
     @Override
-    public T readJSONBObject(JSONReader jsonReader, long features) {
+    public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         ObjectReader autoTypeReader = checkAutoType(jsonReader, this.objectClass, this.features | features);
         if (autoTypeReader != null && autoTypeReader != this && autoTypeReader.getObjectClass() != this.objectClass) {
-            return (T) autoTypeReader.readJSONBObject(jsonReader, features);
+            return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (jsonReader.isArray()) {
@@ -138,7 +139,7 @@ final class ObjectReader1<T>
                     continue;
                 }
 
-                return (T) autoTypeObjectReader.readJSONBObject(jsonReader, features);
+                return (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
             }
 
             if (hashCode == 0) {
@@ -174,9 +175,9 @@ final class ObjectReader1<T>
     }
 
     @Override
-    public T readObject(JSONReader jsonReader, long features) {
+    public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, 0);
+            return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
         if (jsonReader.nextIfNull() || jsonReader.nextIfEmptyString()) {
@@ -230,7 +231,7 @@ final class ObjectReader1<T>
                 }
 
                 if (autoTypeObjectReader != this) {
-                    object = (T) autoTypeObjectReader.readObject(jsonReader, features);
+                    object = (T) autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, features);
                 } else {
                     continue;
                 }

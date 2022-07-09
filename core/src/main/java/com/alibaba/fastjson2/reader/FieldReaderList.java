@@ -45,9 +45,9 @@ public interface FieldReaderList<T, V>
             for (int i = 0; i < entryCnt; ++i) {
                 ObjectReader autoTypeReader = jsonReader.checkAutoType(getItemClass(), getItemClassHash(), getFeatures());
                 if (autoTypeReader != null) {
-                    array[i] = autoTypeReader.readJSONBObject(jsonReader, 0);
+                    array[i] = autoTypeReader.readJSONBObject(jsonReader, getFieldType(), getFieldName(), 0);
                 } else {
-                    array[i] = itemObjectReader.readJSONBObject(jsonReader, 0);
+                    array[i] = itemObjectReader.readJSONBObject(jsonReader, getFieldType(), getFieldName(), 0);
                 }
             }
             List list = Arrays.asList(array);
@@ -67,7 +67,7 @@ public interface FieldReaderList<T, V>
                 }
 
                 list.add(
-                        itemObjectReader.readObject(jsonReader, 0)
+                        itemObjectReader.readObject(jsonReader, null, null, 0)
                 );
 
                 if (jsonReader.nextIfMatch(',')) {
@@ -83,8 +83,8 @@ public interface FieldReaderList<T, V>
         ObjectReader objectReader = getObjectReader(jsonReader);
         long features = getFeatures();
         Object value = jsonReader.isJSONB()
-                ? objectReader.readJSONBObject(jsonReader, features)
-                : objectReader.readObject(jsonReader, features);
+                ? objectReader.readJSONBObject(jsonReader, null, null, features)
+                : objectReader.readObject(jsonReader, null, null, features);
         accept(object, value);
     }
 
@@ -98,7 +98,7 @@ public interface FieldReaderList<T, V>
                     = getItemObjectReader(
                     jsonReader.getContext());
             for (int i = 0; i < entryCnt; ++i) {
-                array[i] = itemObjectReader.readObject(jsonReader, 0);
+                array[i] = itemObjectReader.readObject(jsonReader, null, null, 0);
             }
             return Arrays.asList(array);
         }
@@ -115,7 +115,7 @@ public interface FieldReaderList<T, V>
                 }
 
                 list.add(
-                        itemObjectReader.readObject(jsonReader, 0)
+                        itemObjectReader.readObject(jsonReader, null, null, 0)
                 );
 
                 if (jsonReader.nextIfMatch(',')) {

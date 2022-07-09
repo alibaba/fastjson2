@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 
 public class MediaContent_ObjectReader
@@ -31,7 +32,7 @@ public class MediaContent_ObjectReader
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type filedType, Object fieldName0, long features) {
         jsonReader.nextIfObjectStart();
         MediaContent object = new MediaContent();
         for (;;) {
@@ -50,7 +51,7 @@ public class MediaContent_ObjectReader
                             .getObjectReader(Media.class); // media
                 }
                 object.setMedia((Media)
-                        fieldObjectReader1.readJSONBObject(jsonReader, 0));
+                        fieldObjectReader1.readJSONBObject(jsonReader, null, null, 0));
                 continue;
             }
             if (hashCode64 == -4924010017516690453L) { // images
@@ -58,7 +59,7 @@ public class MediaContent_ObjectReader
                 java.util.List list = new java.util.ArrayList(listItemCnt);
                 for (int j = 0; j < listItemCnt; ++j) {
                     list.add(
-                            fieldListItemReader0.readJSONBObject(jsonReader, 0));
+                            fieldListItemReader0.readJSONBObject(jsonReader, null, null, 0));
                 }
                 object.setImages(list);
                 continue;
@@ -70,9 +71,9 @@ public class MediaContent_ObjectReader
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName0, long features) {
         if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, 0);
+            return readJSONBObject(jsonReader, fieldType, fieldName0, 0);
         }
 
         jsonReader.next();
@@ -91,7 +92,7 @@ public class MediaContent_ObjectReader
                             .getObjectReader(Media.class); // media
                 }
                 object.setMedia((Media)
-                        fieldObjectReader1.readObject(jsonReader, 0));
+                        fieldObjectReader1.readObject(jsonReader, null, null, 0));
                 continue;
             }
             if (hashCode64 == -4924010017516690453L) { // images
@@ -110,7 +111,7 @@ public class MediaContent_ObjectReader
                         }
 
                         list.add(
-                                fieldListItemReader0.readObject(jsonReader, 0));
+                                fieldListItemReader0.readObject(jsonReader, null, null, 0));
 
                         if (jsonReader.current() == ',') {
                             jsonReader.next();

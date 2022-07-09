@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ObjectReaderBaseModuleTest {
@@ -13,12 +15,12 @@ public class ObjectReaderBaseModuleTest {
     public void test() {
         ObjectReaderBaseModule.PrimitiveImpl impl = new ObjectReaderBaseModule.PrimitiveImpl() {
             @Override
-            public Object readJSONBObject(JSONReader jsonReader, long features) {
+            public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
                 return null;
             }
 
             @Override
-            public Object readObject(JSONReader jsonReader, long features) {
+            public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
                 return null;
             }
         };

@@ -1258,7 +1258,7 @@ public abstract class JSONReader
     public <T> T read(Type type) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
-        return (T) objectReader.readObject(this, 0);
+        return (T) objectReader.readObject(this, null, null, 0);
     }
 
     public void read(List list) {
@@ -1455,7 +1455,7 @@ public abstract class JSONReader
     public <T> T read(Class<T> type) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
-        return (T) objectReader.readObject(this, 0);
+        return (T) objectReader.readObject(this, null, null, 0);
     }
 
     public Map<String, Object> readObject() {
@@ -1745,7 +1745,7 @@ public abstract class JSONReader
                     break;
                 case '{':
                     if (context.autoTypeBeforeHandler != null || (context.features & Feature.SupportAutoType.mask) != 0) {
-                        val = ObjectReaderImplObject.INSTANCE.readObject(this, 0);
+                        val = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
                     } else {
                         val = readObject();
                     }

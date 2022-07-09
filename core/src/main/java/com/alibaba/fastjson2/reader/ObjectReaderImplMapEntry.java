@@ -20,7 +20,7 @@ class ObjectReaderImplMapEntry
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         int entryCnt = jsonReader.startArray();
         if (entryCnt != 2) {
             throw new JSONException(jsonReader.info("entryCnt must be 2, but " + entryCnt));
@@ -32,7 +32,7 @@ class ObjectReaderImplMapEntry
             if (keyReader == null) {
                 keyReader = jsonReader.getObjectReader(keyType);
             }
-            key = keyReader.readObject(jsonReader, features);
+            key = keyReader.readObject(jsonReader, fieldType, fieldName, features);
         }
 
         Object value;
@@ -42,14 +42,14 @@ class ObjectReaderImplMapEntry
             if (valueReader == null) {
                 valueReader = jsonReader.getObjectReader(valueType);
             }
-            value = valueReader.readObject(jsonReader, features);
+            value = valueReader.readObject(jsonReader, fieldType, fieldName, features);
         }
 
         return new AbstractMap.SimpleEntry(key, value);
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         jsonReader.nextIfMatch('{');
         Object key = jsonReader.readAny();
         jsonReader.nextIfMatch(':');
@@ -61,7 +61,7 @@ class ObjectReaderImplMapEntry
             if (valueReader == null) {
                 valueReader = jsonReader.getObjectReader(valueType);
             }
-            value = valueReader.readObject(jsonReader, features);
+            value = valueReader.readObject(jsonReader, fieldType, fieldName, features);
         }
 
         jsonReader.nextIfMatch('}');

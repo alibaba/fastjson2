@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.util.Fnv;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
+import java.lang.reflect.Type;
+
 public class GeoJsonPointReader
         implements ObjectReader<GeoJsonPoint> {
     public static final GeoJsonPointReader INSTANCE = new GeoJsonPointReader();
@@ -18,7 +20,7 @@ public class GeoJsonPointReader
     }
 
     @Override
-    public GeoJsonPoint readObject(JSONReader jsonReader, long features) {
+    public GeoJsonPoint readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfNull()) {
             return null;
         }
