@@ -42,7 +42,7 @@ public class EishayCodec {
 
     @Benchmark
     public void deserialize_jsonb(Blackhole bh) {
-        bh.consume(JSONB.parseObject(fastjson2JSONBBytes, MediaContent.class));
+        bh.consume(JSONB.parseObject(fastjson2JSONBBytes, JSONReader.Feature.SupportAutoType));
     }
 
     @Benchmark
@@ -67,6 +67,7 @@ public class EishayCodec {
                 .include(EishayCodec.class.getName())
                 .exclude(EishayCodecOnlyJSONB.class.getName())
                 .mode(Mode.Throughput)
+                .warmupIterations(3)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .forks(1)
                 .build();
