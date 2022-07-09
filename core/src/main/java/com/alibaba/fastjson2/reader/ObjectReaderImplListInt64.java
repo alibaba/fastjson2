@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 
-public final class FieldReaderListInt64
+public final class ObjectReaderImplListInt64
         implements ObjectReader {
     final Class listType;
     final Class instanceType;
     final long instanceTypeHash;
 
-    public FieldReaderListInt64(Class listType, Class instanceType) {
+    public ObjectReaderImplListInt64(Class listType, Class instanceType) {
         this.listType = listType;
         this.instanceType = instanceType;
         this.instanceTypeHash = Fnv.hashCode64(TypeUtils.getTypeName(instanceType));
@@ -37,6 +37,14 @@ public final class FieldReaderListInt64
         } catch (InstantiationException | IllegalAccessException e) {
             throw new JSONException("create list error, type " + instanceType);
         }
+    }
+
+    public Object createInstance(Collection collection) {
+        Collection list = (Collection) createInstance(0);
+        for (Object item : collection) {
+            list.add(TypeUtils.toLong(item));
+        }
+        return list;
     }
 
     @Override

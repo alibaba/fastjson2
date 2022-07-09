@@ -1649,7 +1649,7 @@ public class ObjectReaderBaseModule
                     if (itemClass == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, ArrayList.class);
                     } else if (itemClass == Long.class) {
-                        return new FieldReaderListInt64((Class) rawType, ArrayList.class);
+                        return new ObjectReaderImplListInt64((Class) rawType, ArrayList.class);
                     } else {
                         return ObjectReaderImplList.of(type, null, 0);
                     }
@@ -1662,7 +1662,7 @@ public class ObjectReaderBaseModule
                     if (itemClass == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, LinkedList.class);
                     } else if (itemClass == Long.class) {
-                        return new FieldReaderListInt64((Class) rawType, LinkedList.class);
+                        return new ObjectReaderImplListInt64((Class) rawType, LinkedList.class);
                     } else {
                         return ObjectReaderImplList.of(type, null, 0);
                     }
@@ -1672,7 +1672,7 @@ public class ObjectReaderBaseModule
                     if (itemClass == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, HashSet.class);
                     } else if (itemClass == Long.class) {
-                        return new FieldReaderListInt64((Class) rawType, HashSet.class);
+                        return new ObjectReaderImplListInt64((Class) rawType, HashSet.class);
                     } else {
                         return ObjectReaderImplList.of(type, null, 0);
                     }
@@ -1682,7 +1682,7 @@ public class ObjectReaderBaseModule
                     if (itemType == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, TreeSet.class);
                     } else if (itemClass == Long.class) {
-                        return new FieldReaderListInt64((Class) rawType, TreeSet.class);
+                        return new ObjectReaderImplListInt64((Class) rawType, TreeSet.class);
                     } else {
                         return ObjectReaderImplList.of(type, null, 0);
                     }
@@ -1699,7 +1699,7 @@ public class ObjectReaderBaseModule
                     if (itemType == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, (Class) rawType);
                     } else if (itemClass == Long.class) {
-                        return new FieldReaderListInt64((Class) rawType, (Class) rawType);
+                        return new ObjectReaderImplListInt64((Class) rawType, (Class) rawType);
                     } else {
                         return ObjectReaderImplList.of(type, null, 0);
                     }
