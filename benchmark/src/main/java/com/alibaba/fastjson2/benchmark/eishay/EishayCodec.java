@@ -62,7 +62,7 @@ public class EishayCodec {
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
 
-            fastjson2JSONBBytes = JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName);
+            fastjson2JSONBBytes = JSONB.toBytes(mc, jsonbWriteFeatures);
 
             furyBytes = fury.serialize(mc);
         } catch (Throwable ex) {
@@ -72,16 +72,14 @@ public class EishayCodec {
 
     @Benchmark
     public void deserialize_jsonb(Blackhole bh) {
-        bh.consume(
-                JSONB.parseObject(fastjson2JSONBBytes, Object.class, jsonbReaderFeatures)
-        );
+        MediaContent obj = (MediaContent) JSONB.parseObject(fastjson2JSONBBytes, Object.class, jsonbReaderFeatures);
+        bh.consume(obj);
     }
 
     @Benchmark
     public void deserialize_fury(Blackhole bh) {
-        bh.consume(
-                fury.deserialize(furyBytes)
-        );
+        MediaContent obj = (MediaContent) fury.deserialize(furyBytes);
+        bh.consume(obj);
     }
 
     @Benchmark
