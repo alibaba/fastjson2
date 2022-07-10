@@ -50,12 +50,6 @@ public class EishayCodec {
     };
 
     static {
-        fury.register(MediaContent.class);
-        fury.register(Image.class);
-        fury.register(Image.Size.class);
-        fury.register(Media.class);
-        fury.register(Media.Player.class);
-
         try {
             InputStream is = EishayParseBinary.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
@@ -95,6 +89,8 @@ public class EishayCodec {
     }
 
     public static void main(String[] args) throws RunnerException {
+        System.out.println("fury  size : " + fury.serialize(mc).length);
+        System.out.println("jsonb size : " + JSONB.toBytes(mc, jsonbWriteFeatures).length);
         Options options = new OptionsBuilder()
                 .include(EishayCodec.class.getName())
                 .exclude(EishayCodecOnlyJSONB.class.getName())
