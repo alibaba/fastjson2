@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
@@ -16,6 +17,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class EishayCodec {
@@ -55,6 +57,9 @@ public class EishayCodec {
             fastjson2JSONBBytes = JSONB.toBytes(mc, jsonbWriteFeatures);
 
             MediaContent obj = (MediaContent) JSONB.parseObject(fastjson2JSONBBytes, Object.class, jsonbReaderFeatures);
+            if (!mc.equals(obj)) {
+                throw new JSONException("not equals");
+            }
 
             furyBytes = fury.serialize(mc);
         } catch (Throwable ex) {
