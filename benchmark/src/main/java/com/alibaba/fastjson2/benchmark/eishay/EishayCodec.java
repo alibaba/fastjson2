@@ -3,8 +3,6 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
-import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import io.fury.Fury;
 import io.fury.Language;
