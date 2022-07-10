@@ -30,7 +30,6 @@ public class EishayCodec {
 
     static final JSONWriter.Feature[] jsonbWriteFeatures = {
             JSONWriter.Feature.WriteClassName,
-            JSONWriter.Feature.IgnoreNoneSerializable,
             JSONWriter.Feature.FieldBased,
             JSONWriter.Feature.ReferenceDetection,
             JSONWriter.Feature.WriteNulls,
@@ -41,7 +40,6 @@ public class EishayCodec {
 
     static final JSONReader.Feature[] jsonbReaderFeatures = {
             JSONReader.Feature.SupportAutoType,
-            JSONReader.Feature.IgnoreNoneSerializable,
             JSONReader.Feature.UseDefaultConstructorAsPossible,
             JSONReader.Feature.UseNativeObject,
             JSONReader.Feature.FieldBased
@@ -55,6 +53,8 @@ public class EishayCodec {
                     .read(MediaContent.class);
 
             fastjson2JSONBBytes = JSONB.toBytes(mc, jsonbWriteFeatures);
+
+            MediaContent obj = (MediaContent) JSONB.parseObject(fastjson2JSONBBytes, Object.class, jsonbReaderFeatures);
 
             furyBytes = fury.serialize(mc);
         } catch (Throwable ex) {
