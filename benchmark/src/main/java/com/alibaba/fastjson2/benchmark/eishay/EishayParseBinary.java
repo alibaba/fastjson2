@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
+import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
@@ -26,11 +28,20 @@ public class EishayParseBinary {
     static byte[] hessianBytes;
     static byte[] javaSerializeBytes;
 
-    static Fury fury = Fury.builder().withLanguage(Language.JAVA).build();
+    static Fury fury = Fury.builder()
+            .withLanguage(Language.JAVA)
+            .withReferenceTracking(false)
+            .build();
 
     static byte[] furyBytes;
 
     static {
+        fury.register(MediaContent.class);
+        fury.register(Image.class);
+        fury.register(Image.Size.class);
+        fury.register(Media.class);
+        fury.register(Media.Player.class);
+
         try {
             InputStream is = EishayParseBinary.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
