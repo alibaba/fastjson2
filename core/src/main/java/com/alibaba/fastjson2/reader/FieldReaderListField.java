@@ -129,7 +129,8 @@ class FieldReaderListField<T>
             return;
         }
 
-        if (jsonReader.current() == '[') {
+        boolean set = false;
+        if (jsonReader.current() == '[' || (set = jsonReader.nextIfSet())) {
             JSONReader.Context ctx = context;
             ObjectReader itemObjectReader = null;
 
@@ -173,6 +174,8 @@ class FieldReaderListField<T>
             if (list == null) {
                 if (fieldClass == java.util.List.class) {
                     list = new ArrayList(i);
+                } else if (set && fieldClass == Collection.class) {
+                    list = new LinkedHashSet();
                 } else {
                     list = (Collection) this.fieldObjectReader.createInstance(context.getFeatures() | features);
                 }
