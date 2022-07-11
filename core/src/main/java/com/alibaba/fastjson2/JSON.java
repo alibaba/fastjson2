@@ -243,7 +243,7 @@ public interface JSON {
                 return null;
             }
 
-            reader.getContext().config(features);
+            reader.context.config(features);
             JSONObject object = new JSONObject();
             reader.read(object, 0);
             if (reader.resolveTasks != null) {
@@ -270,7 +270,7 @@ public interface JSON {
                 return null;
             }
 
-            reader.getContext().config(features);
+            reader.context.config(features);
             JSONObject object = new JSONObject();
             reader.read(object, 0);
             if (reader.resolveTasks != null) {
@@ -344,7 +344,7 @@ public interface JSON {
         try (InputStream is = url.openStream()) {
             return parseObject(is, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new JSONException("parseObject error", e);
+            throw new JSONException("JSON#parseObject cannot parse '" + url + "'", e);
         }
     }
 
@@ -1154,7 +1154,7 @@ public interface JSON {
         try (InputStream is = url.openStream()) {
             return parseObject(is, objectClass, features);
         } catch (IOException e) {
-            throw new JSONException("parseObject error", e);
+            throw new JSONException("JSON#parseObject cannot parse '" + url + "' to '" + objectClass + "'", e);
         }
     }
 
@@ -1179,7 +1179,7 @@ public interface JSON {
             }
             return function.apply(object);
         } catch (IOException e) {
-            throw new JSONException("parseObject error", e);
+            throw new JSONException("JSON#parseObject cannot parse '" + url + "'", e);
         }
     }
 
@@ -1370,7 +1370,7 @@ public interface JSON {
                 }
             }
         } catch (IOException e) {
-            throw new JSONException("Interruption in reading", e);
+            throw new JSONException("JSON#parseObject cannot parse the 'InputStream' to '" + type + "'", e);
         } finally {
             if (bytes.length < JSONFactory.CACHE_THREAD) {
                 JSONFactory.CACHE_BYTES.set(cachedIndex, bytes);
@@ -1441,7 +1441,7 @@ public interface JSON {
                 }
             }
         } catch (IOException e) {
-            throw new JSONException("Interruption in reading", e);
+            throw new JSONException("JSON#parseObject cannot parse the 'Reader' to '" + type + "'", e);
         } finally {
             if (chars.length < JSONFactory.CACHE_THREAD) {
                 JSONFactory.CACHE_CHARS.set(cachedIndex, chars);
@@ -1534,7 +1534,7 @@ public interface JSON {
         try (InputStream is = url.openStream()) {
             return parseArray(is, features);
         } catch (IOException e) {
-            throw new JSONException("parseArray error", e);
+            throw new JSONException("JSON#parseArray cannot parse '" + url + "' to '" + JSONArray.class + "'", e);
         }
     }
 
@@ -1727,8 +1727,8 @@ public interface JSON {
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();
-        } catch (NullPointerException | NumberFormatException ex) {
-            throw new JSONException("toJSONString error", ex);
+        } catch (NullPointerException | NumberFormatException e) {
+            throw new JSONException("JSON#toJSONString cannot serialize '" + object + "'", e);
         }
     }
 
@@ -2032,7 +2032,7 @@ public interface JSON {
 
             return writer.flushTo(out);
         } catch (Exception e) {
-            throw new JSONException("FASTJSON-" + JSON.VERSION + " write JSON error" + e.getMessage(), e);
+            throw new JSONException("JSON#writeTo cannot serialize '" + object + "' to 'OutputStream'", e);
         }
     }
 
@@ -2066,7 +2066,7 @@ public interface JSON {
 
             return writer.flushTo(out);
         } catch (Exception e) {
-            throw new JSONException("FASTJSON-" + JSON.VERSION + " write JSON error" + e.getMessage(), e);
+            throw new JSONException("JSON#writeTo cannot serialize '" + object + "' to 'OutputStream'", e);
         }
     }
 
@@ -2234,6 +2234,7 @@ public interface JSON {
      * @param object Java Object to be converted
      * @return Java Object
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     static Object toJSON(Object object, JSONWriter.Feature... features) {
         if (object == null) {
             return null;
