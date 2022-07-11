@@ -1033,6 +1033,33 @@ public class JSONArrayTest {
     }
 
     @Test
+    public void test_getJSONArray3() {
+        JSONArray array = new JSONArray();
+        JSONArray a1 = new JSONArray();
+        ArrayList<?> a2 = new ArrayList<>();
+
+        array.add(1);
+        array.add(null);
+        array.add(a1);
+        array.add(a2);
+        array.add(new Object[]{a1, a2, array});
+        array.add(new long[]{123, 456});
+
+        assertNull(array.getJSONArray(1));
+        assertSame(a1, array.getJSONArray(2));
+        assertNotSame(a2, array.getJSONArray(3));
+
+        JSONArray t1 = array.getJSONArray(4);
+        assertSame(a1, t1.get(0));
+        assertSame(a2, t1.get(1));
+        assertSame(array, t1.get(2));
+
+        JSONArray t2 = array.getJSONArray(5);
+        assertEquals(123L, t2.get(0));
+        assertEquals(456L, t2.get(1));
+    }
+
+    @Test
     public void test_toJavaList() {
         assertThrows(JSONException.class,
                 () -> JSONArray.of(1, 2).toJavaList(Bean.class)
