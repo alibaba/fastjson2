@@ -1420,9 +1420,9 @@ public class JSONObject
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final String methodName = method.getName();
-        Class<?>[] parameterTypes = method.getParameterTypes();
+        int parameterCount = method.getParameterCount();
 
-        if (parameterTypes.length == 1) {
+        if (parameterCount == 1) {
             if ("equals".equals(methodName)) {
                 return this.equals(args[0]);
             }
@@ -1451,7 +1451,7 @@ public class JSONObject
             return null;
         }
 
-        if (parameterTypes.length == 0) {
+        if (parameterCount == 0) {
             if (method.getReturnType() == void.class) {
                 throw new JSONException("This method '" + methodName + "' is not a getter");
             }
