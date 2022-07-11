@@ -1062,7 +1062,7 @@ public class ObjectReaderCreator {
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
                 fieldInfo.features |= JSONReader.Feature.FieldBased.mask;
-                createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, Collections.emptyList());
+                createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, modules);
             });
         } else {
             BeanUtils.fields(objectClass, field -> {
