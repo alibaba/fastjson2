@@ -6,10 +6,15 @@ import io.fury.Fury;
 import io.fury.Language;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
+import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 public class EishayCodec {
     static final Blackhole BH = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
@@ -164,19 +169,20 @@ public class EishayCodec {
     }
 
     public static void main(String[] args) throws RunnerException {
-//        System.out.println("fury  size : " + fury.serialize(mc).length);
-//        System.out.println("jsonb size : " + JSONB.toBytes(mc, jsonbWriteFeatures).length);
+        System.out.println("fury  size : " + fury.serialize(mc).length);
+        System.out.println("jsonb size : " + JSONB.toBytes(mc, jsonbWriteFeatures).length);
+        System.out.println("jsonb_array size : " + JSONB.toBytes(mc, jsonbWriteFeaturesArrayMapping).length);
 
 //        new EishayCodec().serialize_jsonb_arrayMapping_perf_test();
-        new EishayCodec().serialize_fury_perf_test();
-//        Options options = new OptionsBuilder()
-//                .include(EishayCodec.class.getName())
-//                .exclude(EishayCodecOnlyJSONB.class.getName())
-//                .mode(Mode.Throughput)
-//                .warmupIterations(3)
-//                .timeUnit(TimeUnit.MILLISECONDS)
-//                .forks(1)
-//                .build();
-//        new Runner(options).run();
+//        new EishayCodec().serialize_fury_perf_test();
+        Options options = new OptionsBuilder()
+                .include(EishayCodec.class.getName())
+                .exclude(EishayCodecOnlyJSONB.class.getName())
+                .mode(Mode.Throughput)
+                .warmupIterations(3)
+                .timeUnit(TimeUnit.MILLISECONDS)
+                .forks(1)
+                .build();
+        new Runner(options).run();
     }
 }
