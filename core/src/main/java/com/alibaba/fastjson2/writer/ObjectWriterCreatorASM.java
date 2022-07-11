@@ -634,6 +634,23 @@ public class ObjectWriterCreatorASM
         final int FIELD_TYPE = 4;
         final int FIELD_FEATURES = 5;
 
+        {
+            Label notWriteType = new Label();
+            if ((objectFeatures & JSONWriter.Feature.WriteClassName.mask) == 0) {
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+                mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+                mw.visitVarInsn(Opcodes.ALOAD, FIELD_TYPE);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isWriteTypeInfo", "(Ljava/lang/Object;Ljava/lang/reflect/Type;)Z", false);
+                mw.visitJumpInsn(Opcodes.IFEQ, notWriteType);
+            }
+
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "writeClassInfo", METHOD_DESC_WRITE_CLASS_INFO, false);
+
+            mw.visitLabel(notWriteType);
+        }
+
         int size = fieldWriters.size();
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);

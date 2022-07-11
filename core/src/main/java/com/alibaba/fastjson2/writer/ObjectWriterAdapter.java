@@ -173,6 +173,21 @@ public class ObjectWriterAdapter<T>
     }
 
     @Override
+    public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
+            writeClassInfo(jsonWriter);
+        }
+
+        List<FieldWriter> fieldWriters = getFieldWriters();
+        int size = fieldWriters.size();
+        jsonWriter.startArray(size);
+        for (int i = 0; i < size; ++i) {
+            FieldWriter fieldWriter = fieldWriters.get(i);
+            fieldWriter.writeValue(jsonWriter, object);
+        }
+    }
+
+    @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         long featuresAll = features | this.features | jsonWriter.getFeatures();
         if (!serializable) {

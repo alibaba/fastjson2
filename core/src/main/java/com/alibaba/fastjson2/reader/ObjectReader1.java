@@ -68,6 +68,24 @@ final class ObjectReader1<T>
         return readObject(jsonReader, null, null, features);
     }
 
+    public T readArrayMappingJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        ObjectReader autoTypeReader = checkAutoType(jsonReader, this.objectClass, this.features | features);
+        if (autoTypeReader != null && autoTypeReader != this && autoTypeReader.getObjectClass() != this.objectClass) {
+            return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
+        jsonReader.startArray();
+        Object object = defaultCreator.get();
+
+        fieldReader.readFieldValue(jsonReader, object);
+
+        if (buildFunction != null) {
+            return (T) buildFunction.apply(object);
+        }
+
+        return (T) object;
+    }
+
     @Override
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         ObjectReader autoTypeReader = checkAutoType(jsonReader, this.objectClass, this.features | features);
