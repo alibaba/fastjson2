@@ -29,7 +29,6 @@ public class EishayCodecOnlyJSONB {
             JSONWriter.Feature.FieldBased,
             JSONWriter.Feature.ReferenceDetection,
             JSONWriter.Feature.WriteNulls,
-            JSONWriter.Feature.NotWriteDefaultValue,
             JSONWriter.Feature.NotWriteHashMapArrayListClassName,
             JSONWriter.Feature.WriteNameAsSymbol
     };
