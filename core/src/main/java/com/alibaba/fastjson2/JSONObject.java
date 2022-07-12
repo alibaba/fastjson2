@@ -137,7 +137,6 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @param defaultValue the default mapping of the key
      */
-    @SuppressWarnings("unchecked")
     public Object getOrDefault(String key, Object defaultValue) {
         return super.getOrDefault(key, defaultValue);
     }
@@ -148,7 +147,6 @@ public class JSONObject
      * @since 2.0.2
      */
     @Override
-    @SuppressWarnings("unchecked")
     public Object getOrDefault(Object key, Object defaultValue) {
         if (key instanceof Number
                 || key instanceof Character
@@ -174,6 +172,10 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public JSONArray getJSONArray(String key) {
         Object value = super.get(key);
+
+        if (value == null) {
+            return null;
+        }
 
         if (value instanceof JSONArray) {
             return (JSONArray) value;
@@ -203,10 +205,6 @@ public class JSONObject
 
         if (value instanceof Object[]) {
             return JSONArray.of((Object[]) value);
-        }
-
-        if (value == null) {
-            return null;
         }
 
         Class<?> valueClass = value.getClass();
@@ -241,6 +239,10 @@ public class JSONObject
     public JSONObject getJSONObject(String key) {
         Object value = super.get(key);
 
+        if (value == null) {
+            return null;
+        }
+
         if (value instanceof JSONObject) {
             return (JSONObject) value;
         }
@@ -258,10 +260,6 @@ public class JSONObject
 
         if (value instanceof Map) {
             return new JSONObject((Map) value);
-        }
-
-        if (value == null) {
-            return null;
         }
 
         Class valueClass = value.getClass();
@@ -1155,7 +1153,7 @@ public class JSONObject
      * @param features features to be enabled in parsing
      * @since 2.0.7
      */
-    public <T> T to(TypeReference typeReference, JSONReader.Feature... features) {
+    public <T> T to(TypeReference<?> typeReference, JSONReader.Feature... features) {
         return to(typeReference.getType(), features);
     }
 
@@ -1223,7 +1221,7 @@ public class JSONObject
      * @deprecated since 2.0.4, please use {@link #to(Type, JSONReader.Feature...)}
      */
     @Deprecated
-    public <T> T toJavaObject(TypeReference typeReference, JSONReader.Feature... features) {
+    public <T> T toJavaObject(TypeReference<?> typeReference, JSONReader.Feature... features) {
         return to(typeReference, features);
     }
 
@@ -1422,9 +1420,9 @@ public class JSONObject
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final String methodName = method.getName();
-        Class<?>[] parameterTypes = method.getParameterTypes();
+        int parameterCount = method.getParameterCount();
 
-        if (parameterTypes.length == 1) {
+        if (parameterCount == 1) {
             if ("equals".equals(methodName)) {
                 return this.equals(args[0]);
             }
@@ -1453,7 +1451,7 @@ public class JSONObject
             return null;
         }
 
-        if (parameterTypes.length == 0) {
+        if (parameterCount == 0) {
             if (method.getReturnType() == void.class) {
                 throw new JSONException("This method '" + methodName + "' is not a getter");
             }
@@ -1604,13 +1602,12 @@ public class JSONObject
     /**
      * @since 2.0.3
      */
-    static void nameFilter(Iterable iterable, NameFilter nameFilter) {
-        for (Iterator it = iterable.iterator(); it.hasNext(); ) {
-            Object item = it.next();
+    static void nameFilter(Iterable<?> iterable, NameFilter nameFilter) {
+        for (Object item : iterable) {
             if (item instanceof JSONObject) {
                 ((JSONObject) item).nameFilter(nameFilter);
             } else if (item instanceof Iterable) {
-                nameFilter((Iterable) item, nameFilter);
+                nameFilter((Iterable<?>) item, nameFilter);
             }
         }
     }
@@ -1618,9 +1615,10 @@ public class JSONObject
     /**
      * @since 2.0.3
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     static void nameFilter(Map map, NameFilter nameFilter) {
         JSONObject changed = null;
-        for (Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
+        for (Iterator<?> it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             Object entryKey = entry.getKey();
             Object entryValue = entry.getValue();
@@ -1628,13 +1626,13 @@ public class JSONObject
             if (entryValue instanceof JSONObject) {
                 ((JSONObject) entryValue).nameFilter(nameFilter);
             } else if (entryValue instanceof Iterable) {
-                nameFilter((Iterable) entryValue, nameFilter);
+                nameFilter((Iterable<?>) entryValue, nameFilter);
             }
 
             if (entryKey instanceof String) {
                 String key = (String) entryKey;
                 String processName = nameFilter.process(map, key, entryValue);
-                if (processName != null && processName != key && !processName.equals(key)) {
+                if (processName != null && !processName.equals(key)) {
                     if (changed == null) {
                         changed = new JSONObject();
                     }
@@ -1651,13 +1649,13 @@ public class JSONObject
     /**
      * @since 2.0.3
      */
-    static void valueFilter(Iterable iterable, ValueFilter valueFilter) {
-        for (Iterator it = iterable.iterator(); it.hasNext(); ) {
-            Object item = it.next();
+    @SuppressWarnings("rawtypes")
+    static void valueFilter(Iterable<?> iterable, ValueFilter valueFilter) {
+        for (Object item : iterable) {
             if (item instanceof Map) {
                 valueFilter((Map) item, valueFilter);
             } else if (item instanceof Iterable) {
-                valueFilter((Iterable) item, valueFilter);
+                valueFilter((Iterable<?>) item, valueFilter);
             }
         }
     }
@@ -1665,16 +1663,17 @@ public class JSONObject
     /**
      * @since 2.0.3
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     static void valueFilter(Map map, ValueFilter valueFilter) {
-        for (Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry) it.next();
+        for (Object o : map.entrySet()) {
+            Map.Entry entry = (Map.Entry) o;
             Object entryKey = entry.getKey();
             Object entryValue = entry.getValue();
 
             if (entryValue instanceof Map) {
                 valueFilter((Map) entryValue, valueFilter);
             } else if (entryValue instanceof Iterable) {
-                valueFilter((Iterable) entryValue, valueFilter);
+                valueFilter((Iterable<?>) entryValue, valueFilter);
             }
 
             if (entryKey instanceof String) {
@@ -1701,11 +1700,17 @@ public class JSONObject
         nameFilter(this, nameFilter);
     }
 
+    /**
+     * @see JSONObject#JSONObject(Map)
+     */
     @Override
     public JSONObject clone() {
         return new JSONObject(this);
     }
 
+    /**
+     * @see JSONPath#paths(Object)
+     */
     public Object eval(JSONPath path) {
         return path.eval(this);
     }
@@ -1835,7 +1840,7 @@ public class JSONObject
     /**
      * See {@link JSON#parseObject} for details
      */
-    public static <T> T parseObject(String text, TypeReference typeReference, JSONReader.Feature... features) {
+    public static <T> T parseObject(String text, TypeReference<?> typeReference, JSONReader.Feature... features) {
         return JSON.parseObject(text, typeReference, features);
     }
 

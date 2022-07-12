@@ -1088,6 +1088,23 @@ public class JSONObjectTest {
     }
 
     @Test
+    public void test_getJSONObject3() {
+        JSONObject object = new JSONObject();
+        JSONObject j1 = new JSONObject();
+        j1.put("a", "b");
+        HashMap<String, Object> j2 = new HashMap<>();
+        j2.put("k", "v");
+
+        object.put("k0", null);
+        object.put("k1", j1);
+        object.put("k2", j2);
+
+        assertNull(object.getJSONObject("k0"));
+        assertSame(j1, object.getJSONObject("k1"));
+        assertNotSame(j2, object.getJSONObject("k2"));
+    }
+
+    @Test
     public void test_getObject() {
         {
             UUID uuid = UUID.randomUUID();
@@ -1248,6 +1265,41 @@ public class JSONObjectTest {
 
         assertEquals(object.toString(), proxy.toString());
         assertEquals(object.hashCode(), proxy.hashCode());
+    }
+
+    @Test
+    public void test_invoke3() {
+        JSONObject object = new JSONObject();
+        Meta proxy = (Meta) Proxy.newProxyInstance(
+                Meta.class.getClassLoader(),
+                new Class<?>[]{Meta.class, Map.class}, object
+        );
+
+        object.put("mask", "ok");
+
+        // parameterCount = 0
+        assertEquals("ok", proxy.getMask());
+
+        // parameterCount = 1
+        proxy.setMask("okk");
+        assertEquals("okk", proxy.getMask());
+
+        // parameterCount = 2
+        boolean error = false;
+        try {
+            proxy.setHead("a", "b");
+        } catch (Exception e) {
+            error = true;
+        }
+        assertTrue(error);
+    }
+
+    interface Meta {
+        String getMask();
+
+        void setMask(String val);
+
+        void setHead(String a, String b);
     }
 
     public interface InvokeInterface {

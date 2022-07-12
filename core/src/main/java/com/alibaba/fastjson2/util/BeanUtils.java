@@ -61,28 +61,31 @@ public abstract class BeanUtils {
         }
     }
 
-    public static void getKotlinConstructor(Class objectClass, BeanInfo beanInfo) {
-        Constructor[] constructors = constructorCache.get(objectClass);
+    public static void getKotlinConstructor(Class<?> objectClass, BeanInfo beanInfo) {
+        Constructor<?>[] constructors = constructorCache.get(objectClass);
         if (constructors == null) {
             constructors = objectClass.getDeclaredConstructors();
             constructorCache.putIfAbsent(objectClass, constructors);
         }
 
-        Constructor creatorConstructor = null;
+        Constructor<?> creatorConstructor = null;
         String[] paramNames = beanInfo.createParameterNames;
 
         for (Constructor<?> constructor : constructors) {
-            Class<?>[] parameterTypes = constructor.getParameterTypes();
-            if (paramNames != null && parameterTypes.length != paramNames.length) {
+            int parameterCount = constructor.getParameterCount();
+            if (paramNames != null && parameterCount != paramNames.length) {
                 continue;
             }
 
-            if (parameterTypes.length > 0 && "kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterTypes.length - 1].getName())) {
-                beanInfo.markerConstructor = constructor;
-                continue;
+            if (parameterCount > 0) {
+                Class<?>[] parameterTypes = constructor.getParameterTypes();
+                if ("kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterCount - 1].getName())) {
+                    beanInfo.markerConstructor = constructor;
+                    continue;
+                }
             }
 
-            if (creatorConstructor != null && creatorConstructor.getParameterTypes().length >= parameterTypes.length) {
+            if (creatorConstructor != null && creatorConstructor.getParameterCount() >= parameterCount) {
                 continue;
             }
 
@@ -93,47 +96,47 @@ public abstract class BeanUtils {
     }
 
     private static volatile boolean kotlinClassKlassError;
-    private static volatile Constructor kotlinKclassConstructor;
-    private static volatile Method kotlinKclassGetConstructors;
-    private static volatile Method kotlinKfunctionGetParameters;
-    private static volatile Method kotlinKparameterGetName;
+    private static volatile Constructor<?> kotlinKClassConstructor;
+    private static volatile Method kotlinKClassGetConstructors;
+    private static volatile Method kotlinKFunctionGetParameters;
+    private static volatile Method kotlinKParameterGetName;
     private static volatile boolean kotlinError;
 
-    public static String[] getKotlinConstructorParameters(Class clazz) {
-        if (kotlinKclassConstructor == null && !kotlinClassKlassError) {
+    public static String[] getKotlinConstructorParameters(Class<?> clazz) {
+        if (kotlinKClassConstructor == null && !kotlinClassKlassError) {
             try {
-                Class classKotlinKclass = Class.forName("kotlin.reflect.jvm.internal.KClassImpl");
-                kotlinKclassConstructor = classKotlinKclass.getConstructor(Class.class);
+                Class<?> classKotlinKClass = Class.forName("kotlin.reflect.jvm.internal.KClassImpl");
+                kotlinKClassConstructor = classKotlinKClass.getConstructor(Class.class);
             } catch (Throwable e) {
                 kotlinClassKlassError = true;
             }
         }
-        if (kotlinKclassConstructor == null) {
+        if (kotlinKClassConstructor == null) {
             return null;
         }
 
-        if (kotlinKclassGetConstructors == null && !kotlinClassKlassError) {
+        if (kotlinKClassGetConstructors == null && !kotlinClassKlassError) {
             try {
-                Class classKotlinKclass = Class.forName("kotlin.reflect.jvm.internal.KClassImpl");
-                kotlinKclassGetConstructors = classKotlinKclass.getMethod("getConstructors");
+                Class<?> classKotlinKClass = Class.forName("kotlin.reflect.jvm.internal.KClassImpl");
+                kotlinKClassGetConstructors = classKotlinKClass.getMethod("getConstructors");
             } catch (Throwable e) {
                 kotlinClassKlassError = true;
             }
         }
 
-        if (kotlinKfunctionGetParameters == null && !kotlinClassKlassError) {
+        if (kotlinKFunctionGetParameters == null && !kotlinClassKlassError) {
             try {
-                Class classKotlinKfunction = Class.forName("kotlin.reflect.KFunction");
-                kotlinKfunctionGetParameters = classKotlinKfunction.getMethod("getParameters");
+                Class<?> classKotlinKFunction = Class.forName("kotlin.reflect.KFunction");
+                kotlinKFunctionGetParameters = classKotlinKFunction.getMethod("getParameters");
             } catch (Throwable e) {
                 kotlinClassKlassError = true;
             }
         }
 
-        if (kotlinKparameterGetName == null && !kotlinClassKlassError) {
+        if (kotlinKParameterGetName == null && !kotlinClassKlassError) {
             try {
-                Class classKotlinnKparameter = Class.forName("kotlin.reflect.KParameter");
-                kotlinKparameterGetName = classKotlinnKparameter.getMethod("getName");
+                Class<?> classKotlinKParameter = Class.forName("kotlin.reflect.KParameter");
+                kotlinKParameterGetName = classKotlinKParameter.getMethod("getName");
             } catch (Throwable e) {
                 kotlinClassKlassError = true;
             }
@@ -145,11 +148,11 @@ public abstract class BeanUtils {
 
         try {
             Object constructor = null;
-            Object kclassImpl = kotlinKclassConstructor.newInstance(clazz);
-            Iterable it = (Iterable) kotlinKclassGetConstructors.invoke(kclassImpl);
+            Object classImpl = kotlinKClassConstructor.newInstance(clazz);
+            Iterable it = (Iterable) kotlinKClassGetConstructors.invoke(classImpl);
             for (Iterator iterator = it.iterator(); iterator.hasNext(); iterator.hasNext()) {
                 Object item = iterator.next();
-                List parameters = (List) kotlinKfunctionGetParameters.invoke(item);
+                List parameters = (List) kotlinKFunctionGetParameters.invoke(item);
                 if (constructor != null && parameters.size() == 0) {
                     continue;
                 }
@@ -160,11 +163,11 @@ public abstract class BeanUtils {
                 return null;
             }
 
-            List parameters = (List) kotlinKfunctionGetParameters.invoke(constructor);
+            List parameters = (List) kotlinKFunctionGetParameters.invoke(constructor);
             String[] names = new String[parameters.size()];
             for (int i = 0; i < parameters.size(); i++) {
                 Object param = parameters.get(i);
-                names[i] = (String) kotlinKparameterGetName.invoke(param);
+                names[i] = (String) kotlinKParameterGetName.invoke(param);
             }
             return names;
         } catch (Throwable e) {
