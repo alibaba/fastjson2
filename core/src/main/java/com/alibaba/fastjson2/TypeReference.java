@@ -273,7 +273,6 @@ public abstract class TypeReference<T> {
                         } else if (cls == short.class) {
                             ch = 'S';
                         } else {
-                            ch = '\0';
                             break Loader;
                         }
 
