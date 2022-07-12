@@ -114,9 +114,12 @@ public class JSONArray
      * @return {@link JSONArray} or null
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
-    @SuppressWarnings("unchecked")
     public JSONArray getJSONArray(int index) {
         Object value = get(index);
+
+        if (value == null) {
+            return null;
+        }
 
         if (value instanceof JSONArray) {
             return (JSONArray) value;
@@ -139,10 +142,6 @@ public class JSONArray
 
         if (value instanceof Object[]) {
             return JSONArray.of((Object[]) value);
-        }
-
-        if (value == null) {
-            return null;
         }
 
         Class<?> valueClass = value.getClass();
@@ -170,6 +169,10 @@ public class JSONArray
     public JSONObject getJSONObject(int index) {
         Object value = get(index);
 
+        if (value == null) {
+            return null;
+        }
+
         if (value instanceof JSONObject) {
             return (JSONObject) value;
         }
@@ -187,10 +190,6 @@ public class JSONArray
 
         if (value instanceof Map) {
             return new JSONObject((Map) value);
-        }
-
-        if (value == null) {
-            return null;
         }
 
         Class valueClass = value.getClass();
@@ -940,6 +939,10 @@ public class JSONArray
         return objectReader.createInstance(this);
     }
 
+    /**
+     * @since 2.0.9
+     */
+    @SuppressWarnings("unchecked")
     public <T> T to(Class<T> type) {
         if (type == String.class) {
             return (T) toString();
@@ -1000,7 +1003,8 @@ public class JSONArray
             } else if (item == null || itemClass.isInstance(item)) {
                 classItem = (T) item;
             } else {
-                Function typeConvert = provider.getTypeConvert(item.getClass(), itemClass);
+                Class<?> currentItemClass = item.getClass();
+                Function typeConvert = provider.getTypeConvert(currentItemClass, itemClass);
                 if (typeConvert != null) {
                     Object converted = typeConvert.apply(item);
                     list.add((T) converted);
@@ -1008,7 +1012,7 @@ public class JSONArray
                 }
 
                 throw new JSONException(
-                        (item == null ? "null" : item.getClass()) + " cannot be converted to " + itemClass
+                        currentItemClass + " cannot be converted to " + itemClass
                 );
             }
             list.add(classItem);
@@ -1056,7 +1060,8 @@ public class JSONArray
             } else if (item == null || itemClass.isInstance(item)) {
                 classItem = (T) item;
             } else {
-                Function typeConvert = provider.getTypeConvert(item.getClass(), itemClass);
+                Class<?> currentItemClass = item.getClass();
+                Function typeConvert = provider.getTypeConvert(currentItemClass, itemClass);
                 if (typeConvert != null) {
                     Object converted = typeConvert.apply(item);
                     list[i] = (T) converted;
@@ -1064,10 +1069,10 @@ public class JSONArray
                 }
 
                 throw new JSONException(
-                        (item == null ? "null" : item.getClass()) + " cannot be converted to " + itemClass
+                        currentItemClass + " cannot be converted to " + itemClass
                 );
             }
-            list[i] = (T) classItem;
+            list[i] = classItem;
         }
 
         return list;
