@@ -12,7 +12,7 @@ public class Issue1478 {
         model.md5 = "xxx";
 
         String json = JSON.toJSONString(model);
-        assertEquals("{\"MD5\":\"xxx\"}", json);
+        assertEquals("{\"mD5\":\"xxx\"}", json);
     }
 
     public static class Model {

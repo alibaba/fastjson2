@@ -74,6 +74,8 @@ public class BeanUtilsTest {
         assertThrows(Exception.class, () -> BeanUtils.fieldName("setUserId", "x"));
 
         assertEquals("USER_ID", BeanUtils.getterName("getUserId", "UpperCaseWithUnderScores"));
+        assertEquals("uId", BeanUtils.getterName("getUId", "CamelCase"));
+        assertEquals("uid", BeanUtils.getterName("getUid", "CamelCase"));
         assertEquals("better", BeanUtils.getterName("isBetter", "KebabCase"));
         assertEquals("user-id", BeanUtils.getterName("getUserId", "KebabCase"));
         assertEquals("id", BeanUtils.getterName("id", "KebabCase"));
