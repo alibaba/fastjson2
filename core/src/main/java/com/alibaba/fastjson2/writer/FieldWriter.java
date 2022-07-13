@@ -125,6 +125,13 @@ public interface FieldWriter<T>
             }
         }
 
+        if (thisFieldClass == boolean.class) {
+            return 1;
+        }
+        if (otherFieldClass == boolean.class) {
+            return -1;
+        }
+
         return nameCompare;
     }
 
