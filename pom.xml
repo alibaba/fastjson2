@@ -230,7 +230,11 @@
                 <version>${kotest.version}</version>
                 <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-core</artifactId>
+                <version>3.4.19</version>
+            </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-spring-web</artifactId>
