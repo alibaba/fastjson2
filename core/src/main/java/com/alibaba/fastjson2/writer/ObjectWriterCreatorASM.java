@@ -3085,8 +3085,6 @@ public class ObjectWriterCreatorASM
 
             mw.visitInsn(Opcodes.ICONST_0);
             mw.visitVarInsn(Opcodes.ISTORE, var(WRITE_NULLS));
-            mw.visitInsn(Opcodes.LCONST_0);
-            mw.visitVarInsn(Opcodes.LSTORE, var2(CONTEXT_FEATURES));
             mw.visitJumpInsn(Opcodes.GOTO, end_);
 
             mw.visitLabel(notDefault_);
