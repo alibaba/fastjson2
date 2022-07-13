@@ -906,10 +906,6 @@ class ObjectWriterBaseModule
             return ObjectWriterImplCollection.INSTANCE;
         }
 
-        if (Iterable.class.isAssignableFrom(objectClass)) {
-            return ObjectWriterImplIterable.INSTANCE;
-        }
-
         if (Map.class.isAssignableFrom(objectClass)) {
             return ObjectWriterImplMap.of(objectClass);
         }
