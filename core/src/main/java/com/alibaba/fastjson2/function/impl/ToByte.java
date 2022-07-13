@@ -26,6 +26,6 @@ public class ToByte
             return ((Number) o).byteValue();
         }
 
-        throw new JSONException("can not cast to BigInteger " + o.getClass());
+        throw new JSONException("can not cast to Byte " + o.getClass());
     }
 }

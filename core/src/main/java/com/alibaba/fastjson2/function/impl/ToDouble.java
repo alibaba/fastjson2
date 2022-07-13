@@ -47,6 +47,6 @@ public class ToDouble
             return array;
         }
 
-        throw new JSONException("can not cast to Float " + o.getClass());
+        throw new JSONException("can not cast to Double " + o.getClass());
     }
 }
