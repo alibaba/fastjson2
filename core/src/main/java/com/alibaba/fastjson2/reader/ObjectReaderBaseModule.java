@@ -1649,7 +1649,7 @@ public class ObjectReaderBaseModule
                     if (itemClass == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, ArrayList.class);
                     } else if (itemClass == Long.class) {
-                        return new FieldReaderListInt64((Class) rawType, ArrayList.class);
+                        return new ObjectReaderImplListInt64((Class) rawType, ArrayList.class);
                     } else {
                         return ObjectReaderImplList.of(type, null, 0);
                     }
@@ -1662,7 +1662,7 @@ public class ObjectReaderBaseModule
                     if (itemClass == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, LinkedList.class);
                     } else if (itemClass == Long.class) {
-                        return new FieldReaderListInt64((Class) rawType, LinkedList.class);
+                        return new ObjectReaderImplListInt64((Class) rawType, LinkedList.class);
                     } else {
                         return ObjectReaderImplList.of(type, null, 0);
                     }
@@ -1672,7 +1672,7 @@ public class ObjectReaderBaseModule
                     if (itemClass == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, HashSet.class);
                     } else if (itemClass == Long.class) {
-                        return new FieldReaderListInt64((Class) rawType, HashSet.class);
+                        return new ObjectReaderImplListInt64((Class) rawType, HashSet.class);
                     } else {
                         return ObjectReaderImplList.of(type, null, 0);
                     }
@@ -1682,7 +1682,7 @@ public class ObjectReaderBaseModule
                     if (itemType == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, TreeSet.class);
                     } else if (itemClass == Long.class) {
-                        return new FieldReaderListInt64((Class) rawType, TreeSet.class);
+                        return new ObjectReaderImplListInt64((Class) rawType, TreeSet.class);
                     } else {
                         return ObjectReaderImplList.of(type, null, 0);
                     }
@@ -1699,7 +1699,7 @@ public class ObjectReaderBaseModule
                     if (itemType == String.class) {
                         return new ObjectReaderImplListStr((Class) rawType, (Class) rawType);
                     } else if (itemClass == Long.class) {
-                        return new FieldReaderListInt64((Class) rawType, (Class) rawType);
+                        return new ObjectReaderImplListInt64((Class) rawType, (Class) rawType);
                     } else {
                         return ObjectReaderImplList.of(type, null, 0);
                     }
@@ -1816,7 +1816,7 @@ public class ObjectReaderBaseModule
         }
 
         @Override
-        public abstract T readJSONBObject(JSONReader jsonReader, long features);
+        public abstract T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features);
     }
 
     static class InterfaceImpl
@@ -1830,7 +1830,7 @@ public class ObjectReaderBaseModule
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.nextIfMatch('{')) {
                 long hash = jsonReader.readFieldNameHashCode();
                 JSONReader.Context context = jsonReader.getContext();
@@ -1847,10 +1847,10 @@ public class ObjectReaderBaseModule
                         }
                     }
 
-                    return autoTypeObjectReader.readObject(jsonReader, 0);
+                    return autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
                 }
 
-                return ObjectReaderImplMap.INSTANCE.readObject(jsonReader, 0);
+                return ObjectReaderImplMap.INSTANCE.readObject(jsonReader, fieldType, fieldName, 0);
             }
 
             Object value;
@@ -1893,7 +1893,7 @@ public class ObjectReaderBaseModule
         }
 
         @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
+        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             return jsonReader.readAny();
         }
     }

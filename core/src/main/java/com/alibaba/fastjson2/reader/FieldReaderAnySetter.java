@@ -41,7 +41,7 @@ class FieldReaderAnySetter<T>
         String name = jsonReader.getFieldName();
 
         ObjectReader itemObjectReader = getItemObjectReader(jsonReader);
-        Object value = itemObjectReader.readObject(jsonReader, 0);
+        Object value = itemObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
 
         try {
             method.invoke(object, name, value);
@@ -65,9 +65,9 @@ class FieldReaderAnySetter<T>
 
         Object value;
         if (jsonReader.isJSONB()) {
-            value = fieldObjectReader.readJSONBObject(jsonReader, features);
+            value = fieldObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         } else {
-            value = fieldObjectReader.readObject(jsonReader, features);
+            value = fieldObjectReader.readObject(jsonReader, fieldType, fieldName, features);
         }
 
         accept(object, value);

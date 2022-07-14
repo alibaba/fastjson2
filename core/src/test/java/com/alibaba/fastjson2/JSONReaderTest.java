@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.util.Locale;
@@ -388,5 +389,35 @@ public class JSONReaderTest {
 
         context.setArraySupplier(null);
         assertNull(context.getArraySupplier());
+    }
+
+    @Test
+    public void getDecimal() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("null")) {
+            assertNull(
+                    jsonReader.readBigDecimal()
+            );
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("true")) {
+            assertEquals(
+                    BigDecimal.ONE,
+                    jsonReader.readBigDecimal()
+            );
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("{}")) {
+            assertThrows(
+                    Exception.class,
+                    () -> jsonReader.readBigDecimal()
+            );
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("[]")) {
+            assertThrows(
+                    Exception.class,
+                    () -> jsonReader.readBigDecimal()
+            );
+        }
     }
 }

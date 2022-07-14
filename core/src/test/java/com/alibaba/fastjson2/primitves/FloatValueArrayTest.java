@@ -2,14 +2,15 @@ package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class FloatValueArrayTest {
     @Test
@@ -58,6 +59,41 @@ public class FloatValueArrayTest {
         assertEquals("{\"values\":null}",
                 new String(
                         JSON.toJSONBytes(new VO2(), JSONWriter.Feature.WriteNulls)));
+    }
+
+    @Test
+    public void test_autoType() {
+        final JSONWriter.Feature[] jsonbWriteFeatures = {
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+                JSONWriter.Feature.WriteNameAsSymbol
+        };
+
+        final JSONReader.Feature[] jsonbReaderFeatures = {
+                JSONReader.Feature.SupportAutoType,
+                JSONReader.Feature.UseDefaultConstructorAsPossible,
+                JSONReader.Feature.UseNativeObject,
+                JSONReader.Feature.FieldBased,
+                JSONReader.Feature.SupportArrayToBean
+        };
+
+        {
+            float[] values = new float[]{1, 2, 3};
+            byte[] bytes = JSONB.toBytes(values, jsonbWriteFeatures);
+            float[] parsed = (float[]) JSONB.parseObject(bytes, Object.class, jsonbReaderFeatures);
+            assertArrayEquals(values, parsed);
+        }
+        {
+            VO vo = new VO();
+            vo.values = new float[]{1.1F, 1.2F};
+            byte[] bytes = JSONB.toBytes(vo, jsonbWriteFeatures);
+            VO parsed = (VO) JSONB.parseObject(bytes, Object.class, jsonbReaderFeatures);
+            assertArrayEquals(vo.values, parsed.values);
+        }
     }
 
     public static class VO {

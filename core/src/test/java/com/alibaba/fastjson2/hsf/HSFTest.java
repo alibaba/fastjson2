@@ -58,7 +58,7 @@ public class HSFTest {
         reader.getContext().config(JSONReader.Feature.SupportAutoType);
         ObjectReader objectReader = reader.getObjectReader(Object.class);
 
-        ComponentProtocol object = (ComponentProtocol) objectReader.readJSONBObject(reader, 0);
+        ComponentProtocol object = (ComponentProtocol) objectReader.readJSONBObject(reader, null, null, 0);
         reader.handleResolveTasks(object);
 
         assertNotNull(protocol.getData());

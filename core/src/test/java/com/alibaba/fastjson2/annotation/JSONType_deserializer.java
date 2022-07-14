@@ -7,6 +7,8 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONType_deserializer {
@@ -26,7 +28,7 @@ public class JSONType_deserializer {
     public static class BeanReader
             implements ObjectReader<Bean> {
         @Override
-        public Bean readObject(JSONReader jsonReader, long features) {
+        public Bean readObject(JSONReader jsonReader, Type fieldType, Object fieldName0, long features) {
             Bean bean = new Bean();
             jsonReader.nextIfObjectStart();
             for (; ; ) {

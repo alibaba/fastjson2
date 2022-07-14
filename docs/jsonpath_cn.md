@@ -37,13 +37,15 @@ $['store']['book'][0]['title']
 ```
 
 ## 2. 语法举例
-| JSONPath	| 语义 |
-|--------------------------------|-----------------------------------------------------------|
-| $	| 根对象 |
-|$[-1]	 |最后元素 |
-|$[:-2]	 | 第1个至倒数第2个 | 
-| $[1:]	 | 第2个之后所有元素 | 
-| $[1,2,3]	 | 集合中1,2,3个元素 |
+
+| JSONPath   | 语义              |
+| ---------- | ----------------- |
+| $          | 根对象             |
+| $[-1]      | 最后元素           |
+| $[:-2]     | 第1个至倒数第2个    |
+| $[1:]      | 第2个之后所有元素    |
+| $[1,2,3]   | 集合中1,2,3个元素   |
+
 
 # 3. API 示例
 
@@ -147,16 +149,14 @@ JSONPath.arrayAdd(entity, "value", 1, 2, 3); //将value字段的数组添加元�
 
 ### 3.7 例7
 ```java
-Map root = Collections.singletonMap("company", //
-                                    Collections.singletonMap("departs", //
-                                                             Arrays.asList( //
-                                                                            Collections.singletonMap("id",
-                                                                                                     1001), //
-                                                                            Collections.singletonMap("id",
-                                                                                                     1002), //
-                                                                            Collections.singletonMap("id", 1003) //
-                                                             ) //
-                                    ));
+Map root = Collections.singletonMap("company",
+        Collections.singletonMap("departs",
+                Arrays.asList(
+                        Collections.singletonMap("id", 1001),
+                        Collections.singletonMap("id", 1002),
+                        Collections.singletonMap("id", 1003)
+                )
+        ));
 
 List<Object> ids = (List<Object>) JSONPath.eval(root, "$..id");
 assertEquals(3, ids.size());

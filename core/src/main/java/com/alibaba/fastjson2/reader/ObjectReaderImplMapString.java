@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,9 +16,9 @@ final class ObjectReaderImplMapString
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isJSONB()) {
-            return this.readJSONBObject(jsonReader, features);
+            return this.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         boolean match = jsonReader.nextIfMatch('{');
@@ -25,7 +26,7 @@ final class ObjectReaderImplMapString
             if (jsonReader.current() == '[') {
                 jsonReader.next();
                 if (jsonReader.current() == '{') {
-                    Object arrayItem = readObject(jsonReader, features);
+                    Object arrayItem = readObject(jsonReader, String.class, fieldName, features);
                     if (jsonReader.nextIfMatch(']')) {
                         jsonReader.nextIfMatch(',');
                         return arrayItem;

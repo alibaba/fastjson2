@@ -66,12 +66,12 @@ public class JdbcSupport {
         }
 
         @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return readObject(jsonReader, features);
+        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+            return readObject(jsonReader, fieldType, fieldName, features);
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
 
@@ -363,7 +363,7 @@ public class JdbcSupport {
         }
 
         @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
+        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
 
@@ -378,7 +378,7 @@ public class JdbcSupport {
                 return null;
             }
 
-            return readObject(jsonReader, features);
+            return readObject(jsonReader, fieldType, fieldName, features);
         }
 
         Object createTimestamp(long millis, int nanos) {
@@ -394,7 +394,7 @@ public class JdbcSupport {
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
 
@@ -475,12 +475,12 @@ public class JdbcSupport {
         }
 
         @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return readObject(jsonReader, features);
+        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+            return readObject(jsonReader, fieldType, fieldName, features);
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
 

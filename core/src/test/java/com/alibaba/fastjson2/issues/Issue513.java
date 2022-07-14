@@ -40,4 +40,24 @@ public class Issue513 {
     public static class Bean1 {
         public Collection values;
     }
+
+    @Test
+    public void test3() {
+        Bean3 bean = JSON.parseObject("{\"values\":Set[\"1541357098843803649\"]}", Bean3.class);
+        Set set = (Set) bean.values;
+        assertEquals(1, set.size());
+        assertTrue(set.contains("1541357098843803649"));
+    }
+
+    public static class Bean3 {
+        private Collection values;
+
+        public Collection getValues() {
+            return values;
+        }
+
+        public void setValues(Collection values) {
+            this.values = values;
+        }
+    }
 }

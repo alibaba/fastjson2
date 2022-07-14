@@ -77,7 +77,7 @@ public class FieldReaderListMethodTest {
         JSONObject object = JSONObject.of("id", 123, "values", Arrays.asList(101L, 102L));
         byte[] jsonbBytes = JSONB.toBytes(object);
         ObjectReader<Bean1> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean1.class);
-        Bean1 bean1 = objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes), 0);
+        Bean1 bean1 = objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes), null, null, 0);
         assertEquals(101L, bean1.values.get(0));
         assertEquals(102L, bean1.values.get(1));
     }

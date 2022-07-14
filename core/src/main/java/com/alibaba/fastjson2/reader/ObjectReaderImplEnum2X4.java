@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Type;
+
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 final class ObjectReaderImplEnum2X4
@@ -63,7 +65,7 @@ final class ObjectReaderImplEnum2X4
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         byte type = jsonReader.getType();
         if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
             long typeNameHash = jsonReader.readTypeHashCode();
@@ -104,7 +106,7 @@ final class ObjectReaderImplEnum2X4
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Enum fieldValue;
         if (jsonReader.isInt()) {
             int ordinal = jsonReader.readInt32Value();

@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Type;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
@@ -133,9 +134,9 @@ public abstract class ObjectReaderBean<T>
     }
 
     @Override
-    public T readObject(JSONReader jsonReader, long features) {
+    public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, features);
+            return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (jsonReader.nextIfNull()) {
@@ -144,7 +145,7 @@ public abstract class ObjectReaderBean<T>
         }
 
         if (jsonReader.isArray() && jsonReader.isSupportBeanArray(getFeatures() | features)) {
-            return readArrayMappingObject(jsonReader);
+            return readArrayMappingObject(jsonReader, fieldType, fieldName, features);
         }
 
         T object = null;
@@ -202,7 +203,7 @@ public abstract class ObjectReaderBean<T>
                 }
 
                 object = (T) reader.readObject(
-                        jsonReader, features | getFeatures()
+                        jsonReader, null, null, features | getFeatures()
                 );
 
                 if (fieldReader != null) {

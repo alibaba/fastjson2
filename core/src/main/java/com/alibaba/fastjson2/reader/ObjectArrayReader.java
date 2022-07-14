@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -30,7 +31,7 @@ public final class ObjectArrayReader
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.readIfNull()) {
             return null;
         }
@@ -112,11 +113,11 @@ public final class ObjectArrayReader
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.getType() == BC_TYPED_ANY) {
             ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object[].class, TYPE_HASH_CODE, features);
             if (autoTypeObjectReader != this) {
-                return autoTypeObjectReader.readJSONBObject(jsonReader, features);
+                return autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
             }
         }
 
@@ -134,7 +135,7 @@ public final class ObjectArrayReader
                 value = jsonReader.readString();
             } else if (type == BC_TYPED_ANY) {
                 autoTypeValueReader = jsonReader.checkAutoType(Object.class, 0, features);
-                value = autoTypeValueReader.readJSONBObject(jsonReader, features);
+                value = autoTypeValueReader.readJSONBObject(jsonReader, null, null, features);
             } else if (type == BC_NULL) {
                 jsonReader.next();
                 value = null;

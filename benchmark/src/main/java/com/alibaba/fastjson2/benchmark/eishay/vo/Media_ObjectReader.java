@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 
 public class Media_ObjectReader
@@ -57,7 +58,7 @@ public class Media_ObjectReader
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName0, long features) {
         jsonReader.nextIfObjectStart();
         Media object = new Media();
         for (; ; ) {
@@ -162,9 +163,9 @@ public class Media_ObjectReader
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName0, long features) {
         if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, 0);
+            return readJSONBObject(jsonReader, fieldType, fieldName0, 0);
         }
 
         jsonReader.next();

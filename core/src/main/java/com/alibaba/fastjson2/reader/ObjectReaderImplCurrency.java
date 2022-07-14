@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
+import java.lang.reflect.Type;
 import java.util.Currency;
 
 final class ObjectReaderImplCurrency
@@ -20,7 +21,7 @@ final class ObjectReaderImplCurrency
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY) {
             jsonReader.next();
             long typeHash = jsonReader.readTypeHashCode();
@@ -37,7 +38,7 @@ final class ObjectReaderImplCurrency
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         String strVal = jsonReader.readString();
         if (strVal == null || strVal.isEmpty()) {
             return null;

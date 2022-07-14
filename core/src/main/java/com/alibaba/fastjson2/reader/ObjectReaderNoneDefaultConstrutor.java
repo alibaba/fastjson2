@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 
@@ -53,7 +54,7 @@ public class ObjectReaderNoneDefaultConstrutor<T>
     }
 
     @Override
-    public T readJSONBObject(JSONReader jsonReader, long features) {
+    public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         byte type = jsonReader.getType();
         if (type == BC_NULL) {
             jsonReader.next();
@@ -63,7 +64,7 @@ public class ObjectReaderNoneDefaultConstrutor<T>
         if (type == BC_TYPED_ANY) {
             ObjectReader objectReader = jsonReader.checkAutoType(this.objectClass, typeNameHash, this.features | features);
             if (objectReader != this) {
-                return (T) objectReader.readJSONBObject(jsonReader, features);
+                return (T) objectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
             }
         }
 
@@ -109,7 +110,7 @@ public class ObjectReaderNoneDefaultConstrutor<T>
                         }
                     }
 
-                    Object object = (T) autoTypeObjectReader.readJSONBObject(jsonReader, features);
+                    Object object = (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
                     jsonReader.nextIfMatch(',');
                     return (T) object;
                 }
@@ -168,9 +169,9 @@ public class ObjectReaderNoneDefaultConstrutor<T>
     }
 
     @Override
-    public T readObject(JSONReader jsonReader, long features) {
+    public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, 0);
+            return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
         if (jsonReader.isArray() && jsonReader.isSupportBeanArray(features | this.features)) {
@@ -244,7 +245,7 @@ public class ObjectReaderNoneDefaultConstrutor<T>
                 }
 
                 if (autoTypeObjectReader != null) {
-                    Object object = (T) autoTypeObjectReader.readObject(jsonReader, 0);
+                    Object object = (T) autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
                     jsonReader.nextIfMatch(',');
                     return (T) object;
                 }

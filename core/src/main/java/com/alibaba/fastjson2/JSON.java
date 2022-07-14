@@ -27,7 +27,7 @@ public interface JSON {
     /**
      * FASTJSON2 version name
      */
-    String VERSION = "2.0.9";
+    String VERSION = "2.0.10";
 
     /**
      * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject}
@@ -42,7 +42,7 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(text)) {
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            return objectReader.readObject(reader, 0);
+            return objectReader.readObject(reader, null, null, 0);
         }
     }
 
@@ -61,7 +61,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(text)) {
             reader.context.config(features);
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            return objectReader.readObject(reader, 0);
+            return objectReader.readObject(reader, null, null, 0);
         }
     }
 
@@ -82,7 +82,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(text, offset, length)) {
             reader.context.config(features);
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            return objectReader.readObject(reader, 0);
+            return objectReader.readObject(reader, null, null, 0);
         }
     }
 
@@ -100,7 +100,7 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(context, text)) {
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            return objectReader.readObject(reader, 0);
+            return objectReader.readObject(reader, null, null, 0);
         }
     }
 
@@ -119,7 +119,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(bytes)) {
             reader.context.config(features);
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            return objectReader.readObject(reader, 0);
+            return objectReader.readObject(reader, null, null, 0);
         }
     }
 
@@ -243,7 +243,7 @@ public interface JSON {
                 return null;
             }
 
-            reader.getContext().config(features);
+            reader.context.config(features);
             JSONObject object = new JSONObject();
             reader.read(object, 0);
             if (reader.resolveTasks != null) {
@@ -270,7 +270,7 @@ public interface JSON {
                 return null;
             }
 
-            reader.getContext().config(features);
+            reader.context.config(features);
             JSONObject object = new JSONObject();
             reader.read(object, 0);
             if (reader.resolveTasks != null) {
@@ -344,7 +344,7 @@ public interface JSON {
         try (InputStream is = url.openStream()) {
             return parseObject(is, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new JSONException("parseObject error", e);
+            throw new JSONException("JSON#parseObject cannot parse '" + url + "'", e);
         }
     }
 
@@ -450,7 +450,7 @@ public interface JSON {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -488,7 +488,7 @@ public interface JSON {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -528,7 +528,7 @@ public interface JSON {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -551,7 +551,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(text)) {
             ObjectReader<T> objectReader = reader.context.provider.getObjectReader(type);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -578,7 +578,7 @@ public interface JSON {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -606,7 +606,7 @@ public interface JSON {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -634,7 +634,7 @@ public interface JSON {
 
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -664,7 +664,7 @@ public interface JSON {
 
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -689,7 +689,7 @@ public interface JSON {
 
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -721,7 +721,7 @@ public interface JSON {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -746,7 +746,7 @@ public interface JSON {
             reader.context.config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -772,7 +772,7 @@ public interface JSON {
             reader.context.config(filter, features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -802,7 +802,7 @@ public interface JSON {
             context.config(features);
 
             ObjectReader<T> objectReader = reader.getObjectReader(type);
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -824,7 +824,7 @@ public interface JSON {
 
         JSONReader reader = JSONReader.of(bytes);
         ObjectReader<T> objectReader = reader.getObjectReader(type);
-        T object = objectReader.readObject(reader, 0);
+        T object = objectReader.readObject(reader, null, null, 0);
         if (reader.resolveTasks != null) {
             reader.handleResolveTasks(object);
         }
@@ -846,7 +846,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(bytes)) {
             ObjectReader<T> objectReader = reader.getObjectReader(clazz);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -880,7 +880,7 @@ public interface JSON {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -909,7 +909,7 @@ public interface JSON {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -946,7 +946,7 @@ public interface JSON {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -970,7 +970,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(bytes)) {
             reader.context.config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(clazz);
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -994,7 +994,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(bytes)) {
             reader.context.config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -1019,7 +1019,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(bytes)) {
             reader.context.config(filter, features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -1050,7 +1050,7 @@ public interface JSON {
 
             ObjectReader<T> objectReader = reader.getObjectReader(type);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -1079,7 +1079,7 @@ public interface JSON {
             reader.context.config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -1108,7 +1108,7 @@ public interface JSON {
             reader.context.config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
 
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -1140,6 +1140,27 @@ public interface JSON {
     /**
      * Parse UTF8 URL Resource into a Java object with specified {@link JSONReader.Feature}s enabled
      *
+     * @param url the JSON {@link URL} to be parsed
+     * @param objectClass specify the {@link Class} to be converted
+     * @param features features to be enabled in parsing
+     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     * @since 2.0.9
+     */
+    static <T> T parseObject(URL url, Class<T> objectClass, JSONReader.Feature... features) {
+        if (url == null) {
+            return null;
+        }
+
+        try (InputStream is = url.openStream()) {
+            return parseObject(is, objectClass, features);
+        } catch (IOException e) {
+            throw new JSONException("JSON#parseObject cannot parse '" + url + "' to '" + objectClass + "'", e);
+        }
+    }
+
+    /**
+     * Parse UTF8 URL Resource into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
      * @param url      the JSON {@link URL} to be parsed
      * @param function specify the {@link Function} to be converted
      * @param features features to be enabled in parsing
@@ -1158,7 +1179,7 @@ public interface JSON {
             }
             return function.apply(object);
         } catch (IOException e) {
-            throw new JSONException("parseObject error", e);
+            throw new JSONException("JSON#parseObject cannot parse '" + url + "'", e);
         }
     }
 
@@ -1180,7 +1201,7 @@ public interface JSON {
             context.config(features);
 
             ObjectReader<T> objectReader = reader.getObjectReader(type);
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -1201,7 +1222,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(input, charset)) {
             reader.context.config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -1227,7 +1248,7 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(bytes, offset, length, charset)) {
             ObjectReader<T> objectReader = reader.getObjectReader(type);
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -1255,7 +1276,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(bytes, offset, length, charset)) {
             reader.context.config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
-            T object = objectReader.readObject(reader, 0);
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
@@ -1324,7 +1345,7 @@ public interface JSON {
                             objectReader = jsonReader.getObjectReader(type);
                         }
 
-                        T object = objectReader.readObject(jsonReader);
+                        T object = objectReader.readObject(jsonReader, null, null, 0);
                         if (jsonReader.resolveTasks != null) {
                             jsonReader.handleResolveTasks(object);
                         }
@@ -1349,7 +1370,7 @@ public interface JSON {
                 }
             }
         } catch (IOException e) {
-            throw new JSONException("Interruption in reading", e);
+            throw new JSONException("JSON#parseObject cannot parse the 'InputStream' to '" + type + "'", e);
         } finally {
             if (bytes.length < JSONFactory.CACHE_THREAD) {
                 JSONFactory.CACHE_BYTES.set(cachedIndex, bytes);
@@ -1401,7 +1422,7 @@ public interface JSON {
                         }
 
                         consumer.accept(
-                                objectReader.readObject(jsonReader)
+                                objectReader.readObject(jsonReader, null, null, 0)
                         );
                         start = end + 1;
                         dispose = true;
@@ -1420,7 +1441,7 @@ public interface JSON {
                 }
             }
         } catch (IOException e) {
-            throw new JSONException("Interruption in reading", e);
+            throw new JSONException("JSON#parseObject cannot parse the 'Reader' to '" + type + "'", e);
         } finally {
             if (chars.length < JSONFactory.CACHE_THREAD) {
                 JSONFactory.CACHE_CHARS.set(cachedIndex, chars);
@@ -1513,7 +1534,7 @@ public interface JSON {
         try (InputStream is = url.openStream()) {
             return parseArray(is, features);
         } catch (IOException e) {
-            throw new JSONException("parseArray error", e);
+            throw new JSONException("JSON#parseArray cannot parse '" + url + "' to '" + JSONArray.class + "'", e);
         }
     }
 
@@ -1706,8 +1727,8 @@ public interface JSON {
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();
-        } catch (NullPointerException | NumberFormatException ex) {
-            throw new JSONException("toJSONString error", ex);
+        } catch (NullPointerException | NumberFormatException e) {
+            throw new JSONException("JSON#toJSONString cannot serialize '" + object + "'", e);
         }
     }
 
@@ -2011,7 +2032,7 @@ public interface JSON {
 
             return writer.flushTo(out);
         } catch (Exception e) {
-            throw new JSONException("FASTJSON-" + JSON.VERSION + " write JSON error" + e.getMessage(), e);
+            throw new JSONException("JSON#writeTo cannot serialize '" + object + "' to 'OutputStream'", e);
         }
     }
 
@@ -2045,7 +2066,7 @@ public interface JSON {
 
             return writer.flushTo(out);
         } catch (Exception e) {
-            throw new JSONException("FASTJSON-" + JSON.VERSION + " write JSON error" + e.getMessage(), e);
+            throw new JSONException("JSON#writeTo cannot serialize '" + object + "' to 'OutputStream'", e);
         }
     }
 
@@ -2213,6 +2234,7 @@ public interface JSON {
      * @param object Java Object to be converted
      * @return Java Object
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     static Object toJSON(Object object, JSONWriter.Feature... features) {
         if (object == null) {
             return null;

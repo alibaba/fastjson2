@@ -72,13 +72,13 @@ public final class ObjectReaderImplEnum
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         byte type = jsonReader.getType();
         if (jsonReader.getType() == BC_TYPED_ANY) {
             ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(enumClass, 0L, features);
             if (autoTypeObjectReader != null) {
                 if (autoTypeObjectReader != this) {
-                    return autoTypeObjectReader.readJSONBObject(jsonReader, features);
+                    return autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
                 }
             } else {
                 throw new JSONException(jsonReader.info("not support enumType : " + jsonReader.getString()));
@@ -103,7 +103,7 @@ public final class ObjectReaderImplEnum
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (createMethodParamType != null) {
             Object paramValue = jsonReader.read(createMethodParamType);
             try {

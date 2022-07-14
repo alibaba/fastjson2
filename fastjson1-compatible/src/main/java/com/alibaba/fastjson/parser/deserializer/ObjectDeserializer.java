@@ -11,9 +11,9 @@ import java.lang.reflect.Type;
 public interface ObjectDeserializer
         extends ObjectReader {
     @Override
-    default Object readObject(JSONReader jsonReader, long features) {
+    default Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         DefaultJSONParser parser = new DefaultJSONParser(jsonReader, ParserConfig.global);
-        return deserialze(parser, null, null);
+        return deserialze(parser, fieldType, fieldName);
     }
 
     <T> T deserialze(DefaultJSONParser parser, Type type, Object fieldName);

@@ -2,8 +2,10 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,8 +18,12 @@ public final class ObjectReaderImplObject
         extends ObjectReaderBaseModule.PrimitiveImpl {
     public static final ObjectReaderImplObject INSTANCE = new ObjectReaderImplObject();
 
+    public Object createInstance(long features) {
+        return new JSONObject();
+    }
+
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isJSONB()) {
             return jsonReader.readAny();
         }
@@ -78,7 +84,7 @@ public final class ObjectReaderImplObject
                     if (autoTypeObjectReader != null) {
                         jsonReader.setTypeRedirect(true);
 
-                        return autoTypeObjectReader.readObject(jsonReader, features);
+                        return autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, features);
                     }
                 }
             }
@@ -235,7 +241,7 @@ public final class ObjectReaderImplObject
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         byte type = jsonReader.getType();
         if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_UTF16BE) {
             return jsonReader.readString();
@@ -243,7 +249,7 @@ public final class ObjectReaderImplObject
 
         if (type == BC_TYPED_ANY) {
             ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, features);
-            return autoTypeObjectReader.readJSONBObject(jsonReader, features);
+            return autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (type == BC_NULL) {

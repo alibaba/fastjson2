@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Type;
 import java.util.List;
 
 public class ObjectReaderException<T>
@@ -27,7 +28,7 @@ public class ObjectReaderException<T>
     }
 
     @Override
-    public T readObject(JSONReader jsonReader, long features) {
+    public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         jsonReader.nextIfObjectStart();
 
         String message = null;
@@ -108,7 +109,7 @@ public class ObjectReaderException<T>
     }
 
     @Override
-    public T readJSONBObject(JSONReader jsonReader, long features) {
+    public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY && jsonReader.isSupportAutoType(features)) {
             jsonReader.next();
             long typeHash = jsonReader.readTypeHashCode();
@@ -124,10 +125,10 @@ public class ObjectReaderException<T>
                     throw new JSONException("auoType not support : " + typeName + ", offset " + jsonReader.getOffset());
                 }
             }
-            return (T) autoTypeObjectReader.readJSONBObject(jsonReader, 0);
+            return (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
-        return readObject(jsonReader, features);
+        return readObject(jsonReader, fieldType, fieldName, features);
     }
 
     private Throwable createObject(String message, Throwable cause) {

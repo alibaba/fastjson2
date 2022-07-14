@@ -18,7 +18,7 @@ public interface FieldReaderObject<T, V>
     default void readFieldValue(JSONReader jsonReader, T object) {
         accept(object,
                 getFieldObjectReader(jsonReader.getContext())
-                        .readObject(jsonReader, 0));
+                        .readObject(jsonReader, getFieldType(), getFieldName(), 0));
     }
 
     static ObjectReader createFormattedObjectReader(Type fieldType, Class fieldClass, String format, Locale locale) {

@@ -54,6 +54,9 @@ public abstract class JSONPath {
         return jsonPath.extract(jsonReader);
     }
 
+    public static Object eval(String str, String path) {
+        return extract(str, path);
+    }
     public static Object eval(Object rootObject, String path) {
         return JSONPath.of(path)
                 .eval(rootObject);

@@ -117,7 +117,7 @@ class FieldReaderListField<T>
                         value = null;
                     }
                 } else {
-                    value = itemObjectReader.readJSONBObject(jsonReader, features);
+                    value = itemObjectReader.readJSONBObject(jsonReader, itemType, null, features);
                 }
                 list.add(value);
             }
@@ -129,7 +129,8 @@ class FieldReaderListField<T>
             return;
         }
 
-        if (jsonReader.current() == '[') {
+        boolean set = false;
+        if (jsonReader.current() == '[' || (set = jsonReader.nextIfSet())) {
             JSONReader.Context ctx = context;
             ObjectReader itemObjectReader = null;
 
@@ -147,7 +148,7 @@ class FieldReaderListField<T>
                     itemObjectReader = getItemObjectReader(ctx);
                 }
 
-                Object itemObject = itemObjectReader.readObject(jsonReader, features);
+                Object itemObject = itemObjectReader.readObject(jsonReader, itemType, null, features);
                 if (i == 0) {
                     first = itemObject;
                 } else if (i == 1) {
@@ -173,6 +174,8 @@ class FieldReaderListField<T>
             if (list == null) {
                 if (fieldClass == java.util.List.class) {
                     list = new ArrayList(i);
+                } else if (set && fieldClass == Collection.class) {
+                    list = new LinkedHashSet();
                 } else {
                     list = (Collection) this.fieldObjectReader.createInstance(context.getFeatures() | features);
                 }
@@ -206,7 +209,7 @@ class FieldReaderListField<T>
         }
 
         ObjectReader itemObjectReader = getItemObjectReader(jsonReader);
-        Object itemObject = itemObjectReader.readObject(jsonReader, features);
+        Object itemObject = itemObjectReader.readObject(jsonReader, itemType, null, features);
 
         Collection list = (Collection) this.fieldObjectReader.createInstance(context.getFeatures() | features);
         list.add(itemObject);

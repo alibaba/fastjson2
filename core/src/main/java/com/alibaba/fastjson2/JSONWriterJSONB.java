@@ -1636,7 +1636,7 @@ final class JSONWriterJSONB
             return;
         }
 
-        ensureCapacity(off + 5 + bytes.length);
+        ensureCapacity(off + 6 + bytes.length);
         this.bytes[off++] = BC_BINARY;
         writeInt32(bytes.length);
 

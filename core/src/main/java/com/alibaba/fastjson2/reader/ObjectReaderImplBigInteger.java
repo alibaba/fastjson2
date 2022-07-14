@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
 
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 
 final class ObjectReaderImplBigInteger
@@ -14,12 +15,12 @@ final class ObjectReaderImplBigInteger
     }
 
     @Override
-    public BigInteger readJSONBObject(JSONReader jsonReader, long features) {
+    public BigInteger readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         return jsonReader.readBigInteger();
     }
 
     @Override
-    public BigInteger readObject(JSONReader jsonReader, long features) {
+    public BigInteger readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         return jsonReader.readBigInteger();
     }
 }

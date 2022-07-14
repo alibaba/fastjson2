@@ -78,7 +78,7 @@ class FieldReaderMapMethodReadOnly<T>
         String name = jsonReader.getFieldName();
 
         ObjectReader itemObjectReader = getItemObjectReader(jsonReader);
-        Object value = itemObjectReader.readObject(jsonReader, 0);
+        Object value = itemObjectReader.readObject(jsonReader, getItemType(), fieldName, 0);
         map.put(name, value);
     }
 
@@ -97,9 +97,9 @@ class FieldReaderMapMethodReadOnly<T>
 
         Object value;
         if (jsonReader.isJSONB()) {
-            value = fieldObjectReader.readJSONBObject(jsonReader, features);
+            value = fieldObjectReader.readJSONBObject(jsonReader, getItemType(), fieldName, features);
         } else {
-            value = fieldObjectReader.readObject(jsonReader, features);
+            value = fieldObjectReader.readObject(jsonReader, getItemType(), fieldName, features);
         }
 
         accept(object, value);

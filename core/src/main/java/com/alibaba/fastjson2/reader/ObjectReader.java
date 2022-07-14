@@ -113,7 +113,7 @@ public interface ObjectReader<T> {
                     String fieldValueJSONString = JSON.toJSONString(fieldValue);
                     try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {
                         ObjectReader fieldObjectReader = fieldReader.getObjectReader(jsonReader);
-                        typedFieldValue = fieldObjectReader.readObject(jsonReader, 0);
+                        typedFieldValue = fieldObjectReader.readObject(jsonReader, null, entry.getKey(), 0);
                     }
                 }
             }
@@ -210,10 +210,10 @@ public interface ObjectReader<T> {
      * @return {@link T}
      * @throws JSONException If a suitable ObjectReader is not found
      */
-    default T readJSONBObject(JSONReader jsonReader, long features) {
+    default T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isArray() &&
                 jsonReader.isSupportBeanArray()) {
-            return readArrayMappingJSONBObject(jsonReader);
+            return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         T object = null;
@@ -243,7 +243,7 @@ public interface ObjectReader<T> {
                     continue;
                 }
 
-                return (T) reader.readJSONBObject(jsonReader, features);
+                return (T) reader.readJSONBObject(jsonReader, fieldType, fieldName, features);
             }
 
             if (hash == 0) {
@@ -282,7 +282,7 @@ public interface ObjectReader<T> {
      * @return {@link T}
      * @throws UnsupportedOperationException If the method is not overloaded or otherwise
      */
-    default T readArrayMappingJSONBObject(JSONReader jsonReader) {
+    default T readArrayMappingJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         throw new UnsupportedOperationException();
     }
 
@@ -290,7 +290,7 @@ public interface ObjectReader<T> {
      * @return {@link T}
      * @throws UnsupportedOperationException If the method is not overloaded or otherwise
      */
-    default T readArrayMappingObject(JSONReader jsonReader) {
+    default T readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         throw new UnsupportedOperationException();
     }
 
@@ -298,12 +298,16 @@ public interface ObjectReader<T> {
      * @return {@link T}
      */
     default T readObject(JSONReader jsonReader) {
-        return readObject(jsonReader, getFeatures());
+        return readObject(jsonReader, null, null, getFeatures());
+    }
+
+    default T readObject(JSONReader jsonReader, long features) {
+        return readObject(jsonReader, null, null, features);
     }
 
     /**
      * @return {@link T}
      * @throws JSONException If a suitable ObjectReader is not found
      */
-    T readObject(JSONReader jsonReader, long features);
+    T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features);
 }
