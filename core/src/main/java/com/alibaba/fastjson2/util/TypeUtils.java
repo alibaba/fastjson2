@@ -181,6 +181,10 @@ public class TypeUtils {
         }
 
         if (targetClass == String.class) {
+            if (obj instanceof Character) {
+                return (T) obj.toString();
+            }
+
             return (T) JSON.toJSONString(obj);
         }
 
