@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 public final class ObjectReaderImplListInt64
@@ -116,12 +117,20 @@ public final class ObjectReaderImplListInt64
             return list;
         }
 
+        boolean set = jsonReader.nextIfSet();
+
         if (jsonReader.current() != '[') {
             throw new JSONException(jsonReader.info("format error"));
         }
         jsonReader.next();
 
-        Collection list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
+        Collection list;
+        if (set && instanceType == Collection.class) {
+            list = new LinkedHashSet();
+        } else {
+            list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
+        }
+
         for (; ; ) {
             if (jsonReader.nextIfMatch(']')) {
                 break;
