@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.ReferenceKey;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,6 +27,8 @@ class ObjectReaderImplMapTyped
     final long features;
     final Function builder;
 
+    final Constructor defaultConstructor;
+
     ObjectReader valueObjectReader;
     ObjectReader keyObjectReader;
 
@@ -40,6 +44,18 @@ class ObjectReaderImplMapTyped
         this.valueClass = TypeUtils.getClass(valueType);
         this.features = features;
         this.builder = builder;
+
+        Constructor defaultConstructor = null;
+        Constructor[] constructors = this.instanceType.getDeclaredConstructors();
+        for (Constructor constructor : constructors) {
+            if (constructor.getParameterCount() == 0
+                    && !Modifier.isPublic(constructor.getModifiers())) {
+                constructor.setAccessible(true);
+                defaultConstructor = constructor;
+                break;
+            }
+        }
+        this.defaultConstructor = defaultConstructor;
     }
 
     @Override
@@ -92,9 +108,12 @@ class ObjectReaderImplMapTyped
     public Object createInstance(long features) {
         if (instanceType != null && !instanceType.isInterface()) {
             try {
+                if (defaultConstructor != null) {
+                    return defaultConstructor.newInstance();
+                }
                 return instanceType.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new JSONException("create map error");
+            } catch (Exception e) {
+                throw new JSONException("create map error", e);
             }
         }
         return new HashMap();
