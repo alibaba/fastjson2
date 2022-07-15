@@ -677,7 +677,7 @@ public abstract class BeanUtils {
         if (RECORD_CLASS == null) {
             String superclassName = superclass.getName();
             if ("java.lang.Record".equals(superclassName)) {
-                RECORD_CLASS = objectClass;
+                RECORD_CLASS = superclass;
                 return true;
             } else {
                 return false;
