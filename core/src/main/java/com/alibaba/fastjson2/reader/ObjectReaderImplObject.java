@@ -18,6 +18,7 @@ public final class ObjectReaderImplObject
         extends ObjectReaderBaseModule.PrimitiveImpl {
     public static final ObjectReaderImplObject INSTANCE = new ObjectReaderImplObject();
 
+    @Override
     public Object createInstance(long features) {
         return new JSONObject();
     }
