@@ -19,4 +19,16 @@ public class Issue546 {
         private String uId;
         private String cId;
     }
+
+    @Test
+    public void test1() {
+        B vo = new B();
+        vo.cId = "2";
+        assertEquals("{\"cId\":\"2\"}", JSON.toJSONString(vo));
+    }
+
+    public static class B {
+        public String uId;
+        public String cId;
+    }
 }
