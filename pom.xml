@@ -592,7 +592,8 @@
                             <failOnViolation>true</failOnViolation>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                             <configLocation>src/checkstyle/fastjson2-checks.xml</configLocation>
-                            <excludes>com/alibaba/fastjson2/codec/UnicodeClassNameTest.java,
+                            <excludes>module-info.java,
+                                com/alibaba/fastjson2/codec/UnicodeClassNameTest.java,
                                 com/alibaba/fastjson2/hsf/UCaseNameTest.java,
                                 com/alibaba/json/bvtVO/PushMsg.java,
                                 com/alibaba/json/bvtVO/IncomingDataPoint_ext_double.java,
