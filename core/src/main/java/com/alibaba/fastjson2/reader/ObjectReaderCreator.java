@@ -847,7 +847,9 @@ public class ObjectReaderCreator {
         String fieldName;
         if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
             fieldName = field.getName();
-            fieldName = BeanUtils.fieldName(fieldName, namingStrategy);
+            if (namingStrategy != null) {
+                fieldName = BeanUtils.fieldName(fieldName, namingStrategy);
+            }
         } else {
             fieldName = fieldInfo.fieldName;
         }

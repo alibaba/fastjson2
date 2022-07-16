@@ -106,7 +106,7 @@ public class EishayCodecOnlyJSONB {
             serialize_jsonb_arrayMapping(BH);
         }
         long millis = System.currentTimeMillis() - start;
-        System.out.println("jsonb_arrayMapping millis : " + millis);
+        System.out.println("serialize_jsonb_arrayMapping_perf millis : " + millis);
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu8.58.0.13 :
@@ -119,14 +119,14 @@ public class EishayCodecOnlyJSONB {
     }
 
     public static void main(String[] args) throws RunnerException {
-//        new EishayCodecOnlyJSONB().serialize_jsonb_arrayMapping_perf_test();
-        Options options = new OptionsBuilder()
-                .include(EishayCodecOnlyJSONB.class.getName())
-                .mode(Mode.Throughput)
-                .warmupIterations(3)
-                .timeUnit(TimeUnit.MILLISECONDS)
-                .forks(1)
-                .build();
-        new Runner(options).run();
+        new EishayCodecOnlyJSONB().serialize_jsonb_arrayMapping_perf_test();
+//        Options options = new OptionsBuilder()
+//                .include(EishayCodecOnlyJSONB.class.getName())
+//                .mode(Mode.Throughput)
+//                .warmupIterations(3)
+//                .timeUnit(TimeUnit.MILLISECONDS)
+//                .forks(1)
+//                .build();
+//        new Runner(options).run();
     }
 }

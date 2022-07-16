@@ -168,7 +168,7 @@ public class ObjectReaderAdapter<T>
         }
 
         jsonReader.startArray();
-        Object object = creator.get();
+        Object object = createInstance(0);
 
         for (FieldReader fieldReader : fieldReaders) {
             fieldReader.readFieldValue(jsonReader, object);
