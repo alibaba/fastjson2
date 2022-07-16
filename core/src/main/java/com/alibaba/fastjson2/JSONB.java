@@ -515,7 +515,11 @@ public interface JSONB {
             } else {
                 boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
                 ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
-                object = objectReader.readJSONBObject(jsonReader, null, null, 0);
+                if ((ctx.features & JSONReader.Feature.SupportArrayToBean.mask) != 0 && jsonReader.isArray()) {
+                    object = objectReader.readArrayMappingJSONBObject(jsonReader, null, null, 0);
+                } else {
+                    object = objectReader.readJSONBObject(jsonReader, null, null, 0);
+                }
             }
 
             if (jsonReader.resolveTasks != null) {
