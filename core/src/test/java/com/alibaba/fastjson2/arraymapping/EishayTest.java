@@ -73,8 +73,6 @@ public class EishayTest {
         public short shortValue;
         public char charValue;
         public boolean booleanValue;
-
-
         public int[] intArray;
         public long[] longArray;
         public float[] floatArray;
@@ -85,7 +83,6 @@ public class EishayTest {
 
         public String string; // Can be null.
         public Sample sample; // Can be null.
-
 
         @Override
         public boolean equals(Object o) {
