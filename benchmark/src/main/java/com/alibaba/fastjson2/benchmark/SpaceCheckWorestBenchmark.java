@@ -97,6 +97,19 @@ public class SpaceCheckWorestBenchmark {
         bh.consume(spaceCount);
     }
 
+    @Benchmark
+    public void CharacterIsWhitespace(Blackhole bh) {
+        int spaceCount = 0;
+        for (int i = 0; i < chars.length; i++) {
+            char ch = chars[i];
+            boolean space = Character.isWhitespace(ch);
+            if (space) {
+                spaceCount++;
+            }
+        }
+        bh.consume(spaceCount);
+    }
+
     public static void main(String[] args) throws Exception {
         Options options = new OptionsBuilder()
                 .include(SpaceCheckWorestBenchmark.class.getName())
