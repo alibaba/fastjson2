@@ -80,6 +80,19 @@ public class SpaceCheckBenchmark {
     }
 
     @Benchmark
+    public void CharacterIsWhitespace(Blackhole bh) {
+        int spaceCount = 0;
+        for (int i = 0; i < chars.length; i++) {
+            char ch = chars[i];
+            boolean space = Character.isWhitespace(ch);
+            if (space) {
+                spaceCount++;
+            }
+        }
+        bh.consume(spaceCount);
+    }
+
+    @Benchmark
     public void spaceSwitch(Blackhole bh) {
         int spaceCount = 0;
         for (int i = 0; i < chars.length; i++) {
