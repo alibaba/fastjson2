@@ -27,6 +27,8 @@ public class EishayCodec {
     static Fury fury = Fury
             .builder()
             .withLanguage(Language.JAVA)
+            .ignoreStringReference(true)
+            .disableSecureMode()
             .build();
 
     static final JSONWriter.Feature[] jsonbWriteFeatures = {
