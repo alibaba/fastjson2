@@ -10,6 +10,8 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class JSONBSizeTest {
     @Test
     public void test_byte() throws Exception {
@@ -20,17 +22,17 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_1.length; i++) {
             Byte val = values_1[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(2, bytes.length, "input " + val);
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, Number.class), "input " + val);
+            assertEquals(2, bytes.length, "input " + val);
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, Number.class), "input " + val);
 
-            Assertions.assertEquals(Short.valueOf(val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf(val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Short.valueOf(val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf(val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
         }
     }
 
@@ -43,18 +45,18 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_1.length; i++) {
             Short val = values_1[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(3, bytes.length, "input " + val);
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, Number.class), "input " + val);
+            assertEquals(3, bytes.length, "input " + val);
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, Number.class), "input " + val);
 
-            Assertions.assertEquals(Byte.valueOf(val.byteValue()), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf(val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf(val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf(val.byteValue()), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf(val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf(val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
         }
     }
 
@@ -66,20 +68,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_1.length; i++) {
             int val = values_1[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(1, bytes.length, "input " + val);
-            Assertions.assertEquals(val, ((Integer) JSONB.parse(bytes)).intValue());
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, Number.class), "input " + val);
+            assertEquals(1, bytes.length, "input " + val);
+            assertEquals(val, ((Integer) JSONB.parse(bytes)).intValue());
+            assertEquals(val, JSONB.parseObject(bytes, Number.class), "input " + val);
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf(val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf(val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Integer.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Integer.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         int[] values_ = new int[]{
@@ -89,20 +91,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_.length; i++) {
             int val = values_[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(2, bytes.length, "input " + val);
-            Assertions.assertEquals(val, ((Integer) JSONB.parse(bytes)).intValue());
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, Number.class), "input " + val);
+            assertEquals(2, bytes.length, "input " + val);
+            assertEquals(val, ((Integer) JSONB.parse(bytes)).intValue());
+            assertEquals(val, JSONB.parseObject(bytes, Number.class), "input " + val);
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf(val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf(val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Integer.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Integer.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         int[] values_3 = new int[]{
@@ -112,20 +114,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_3.length; i++) {
             int val = values_3[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(3, bytes.length, "input " + val);
-            Assertions.assertEquals(val, ((Integer) JSONB.parse(bytes)).intValue());
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, Number.class), "input " + val);
+            assertEquals(3, bytes.length, "input " + val);
+            assertEquals(val, ((Integer) JSONB.parse(bytes)).intValue());
+            assertEquals(val, JSONB.parseObject(bytes, Number.class), "input " + val);
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf(val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf(val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Integer.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Integer.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         int[] values_5 = new int[]{
@@ -134,20 +136,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_5.length; i++) {
             int val = values_5[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(5, bytes.length, "input " + val);
-            Assertions.assertEquals(val, ((Integer) JSONB.parse(bytes)).intValue());
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, Number.class), "input " + val);
+            assertEquals(5, bytes.length, "input " + val);
+            assertEquals(val, ((Integer) JSONB.parse(bytes)).intValue());
+            assertEquals(val, JSONB.parseObject(bytes, Number.class), "input " + val);
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf(val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf(val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Integer.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Integer.toString(val), JSONB.parseObject(bytes, String.class));
         }
     }
 
@@ -159,21 +161,21 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_1.length; i++) {
             long val = values_1[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(1, bytes.length, "input " + val);
-            Assertions.assertEquals(val, ((Long) JSONB.parse(bytes)).longValue());
+            assertEquals(1, bytes.length, "input " + val);
+            assertEquals(val, ((Long) JSONB.parse(bytes)).longValue());
             Assertions.assertTrue(val == JSONB.parseObject(bytes, Number.class).longValue());
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, Number.class).longValue(), "input " + val);
+            assertEquals(val, JSONB.parseObject(bytes, Number.class).longValue(), "input " + val);
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Long.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Long.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         long[] values_2 = new long[]{
@@ -183,20 +185,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_2.length; i++) {
             long val = values_2[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(2, bytes.length, "input " + val);
-            Assertions.assertEquals(val, ((Long) JSONB.parse(bytes)).longValue());
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, Number.class).longValue(), "input " + val);
+            assertEquals(2, bytes.length, "input " + val);
+            assertEquals(val, ((Long) JSONB.parse(bytes)).longValue());
+            assertEquals(val, JSONB.parseObject(bytes, Number.class).longValue(), "input " + val);
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Long.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Long.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         long[] values_3 = new long[]{
@@ -206,20 +208,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_3.length; i++) {
             long val = values_3[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(3, bytes.length, "input " + val);
-            Assertions.assertEquals(val, ((Long) JSONB.parse(bytes)).longValue());
+            assertEquals(3, bytes.length, "input " + val);
+            assertEquals(val, ((Long) JSONB.parse(bytes)).longValue());
             Assertions.assertTrue(val == JSONB.parseObject(bytes, Number.class).longValue());
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Long.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Long.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         long[] values_5 = new long[]{
@@ -228,20 +230,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_5.length; i++) {
             long val = values_5[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(5, bytes.length, "input " + val);
-            Assertions.assertEquals(val, ((Long) JSONB.parse(bytes)).longValue());
+            assertEquals(5, bytes.length, "input " + val);
+            assertEquals(val, ((Long) JSONB.parse(bytes)).longValue());
             Assertions.assertTrue(val == JSONB.parseObject(bytes, Number.class).longValue());
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Long.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Long.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         long[] values_9 = new long[]{
@@ -250,20 +252,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_9.length; i++) {
             long val = values_9[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(9, bytes.length, "input " + val);
-            Assertions.assertEquals(val, ((Long) JSONB.parse(bytes)).longValue());
+            assertEquals(9, bytes.length, "input " + val);
+            assertEquals(val, ((Long) JSONB.parse(bytes)).longValue());
             Assertions.assertTrue(val == JSONB.parseObject(bytes, Number.class).longValue());
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class), "input " + val);
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class), "input " + val);
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class), "input " + val);
-            Assertions.assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class), "input " + val);
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class), "input " + val);
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class), "input " + val);
-            Assertions.assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class), "input " + val);
-            Assertions.assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class), "input " + val);
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class), "input " + val);
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class), "input " + val);
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class), "input " + val);
+            assertEquals(Long.valueOf(val), JSONB.parseObject(bytes, Long.class), "input " + val);
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class), "input " + val);
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class), "input " + val);
+            assertEquals(BigInteger.valueOf(val), JSONB.parseObject(bytes, BigInteger.class), "input " + val);
+            assertEquals(BigDecimal.valueOf(val), JSONB.parseObject(bytes, BigDecimal.class), "input " + val);
 
-            Assertions.assertEquals(Long.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Long.toString(val), JSONB.parseObject(bytes, String.class));
         }
     }
 
@@ -275,20 +277,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_2.length; i++) {
             float val = values_2[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(2, bytes.length, "input " + val);
+            assertEquals(2, bytes.length, "input " + val);
             Assertions.assertTrue(val == ((Float) JSONB.parse(bytes)).floatValue());
             Assertions.assertTrue(val == JSONB.parseObject(bytes, Number.class).floatValue());
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Float.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Float.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         float[] values_3 = new float[]{
@@ -298,20 +300,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_3.length; i++) {
             float val = values_3[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(3, bytes.length, "input " + val);
+            assertEquals(3, bytes.length, "input " + val);
             Assertions.assertTrue(val == ((Float) JSONB.parse(bytes)).floatValue());
             Assertions.assertTrue(val == JSONB.parseObject(bytes, Number.class).floatValue());
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Float.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Float.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         float[] values_4 = new float[]{
@@ -321,20 +323,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_4.length; i++) {
             float val = values_4[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(4, bytes.length, "input " + val);
+            assertEquals(4, bytes.length, "input " + val);
             Assertions.assertTrue(val == ((Float) JSONB.parse(bytes)).floatValue());
             Assertions.assertTrue(val == JSONB.parseObject(bytes, Number.class).floatValue());
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Float.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Float.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         float[] values_5 = new float[]{
@@ -343,7 +345,7 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_5.length; i++) {
             float val = values_5[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(5, bytes.length, "input " + val);
+            assertEquals(5, bytes.length, "input " + val);
             float parsedValue = ((Float) JSONB.parse(bytes)).floatValue();
             if (Float.isNaN(val)) {
                 Assertions.assertTrue(Float.isNaN(parsedValue));
@@ -352,16 +354,16 @@ public class JSONBSizeTest {
                 Assertions.assertTrue(val == ((Float) JSONB.parseObject(bytes, Number.class)).floatValue());
             }
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class), "input " + val);
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class), "input " + val);
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class), "input " + val);
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class), "input " + val);
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf(val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Float.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Float.toString(val), JSONB.parseObject(bytes, String.class));
         }
     }
 
@@ -373,20 +375,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_1.length; i++) {
             double val = values_1[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(1, bytes.length, "input " + val);
+            assertEquals(1, bytes.length, "input " + val);
             Assertions.assertTrue(val == ((Double) JSONB.parse(bytes)).doubleValue());
             Assertions.assertTrue(val == ((Double) JSONB.parseObject(bytes, Number.class)).doubleValue());
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         double[] values_2 = new double[]{
@@ -395,20 +397,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_2.length; i++) {
             double val = values_2[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(2, bytes.length, "input " + val);
+            assertEquals(2, bytes.length, "input " + val);
             Assertions.assertTrue(val == ((Double) JSONB.parse(bytes)).doubleValue());
             Assertions.assertTrue(val == ((Double) JSONB.parseObject(bytes, Number.class)).doubleValue());
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         double[] values_3 = new double[]{
@@ -418,20 +420,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_3.length; i++) {
             double val = values_3[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(3, bytes.length, "input " + val);
+            assertEquals(3, bytes.length, "input " + val);
             Assertions.assertTrue(val == ((Double) JSONB.parse(bytes)).doubleValue());
             Assertions.assertTrue(val == ((Double) JSONB.parseObject(bytes, Number.class)).doubleValue());
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         double[] values_4 = new double[]{
@@ -441,20 +443,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_4.length; i++) {
             double val = values_4[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(4, bytes.length, "input " + val);
+            assertEquals(4, bytes.length, "input " + val);
             Assertions.assertTrue(val == ((Double) JSONB.parse(bytes)).doubleValue());
             Assertions.assertTrue(val == ((Double) JSONB.parseObject(bytes, Number.class)).doubleValue());
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         double[] values_6 = new double[]{
@@ -463,20 +465,20 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_6.length; i++) {
             double val = values_6[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(6, bytes.length, "input " + val);
+            assertEquals(6, bytes.length, "input " + val);
             Assertions.assertTrue(val == ((Double) JSONB.parse(bytes)).doubleValue());
             Assertions.assertTrue(val == ((Double) JSONB.parseObject(bytes, Number.class)).doubleValue());
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class));
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class));
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
         }
 
         double[] values_9 = new double[]{
@@ -488,7 +490,7 @@ public class JSONBSizeTest {
         for (int i = 0; i < values_9.length; i++) {
             double val = values_9[i];
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(9, bytes.length, "input " + val);
+            assertEquals(9, bytes.length, "input " + val);
             double parsedValue = ((Double) JSONB.parse(bytes)).doubleValue();
             if (Double.isNaN(val)) {
                 Assertions.assertTrue(Double.isNaN(parsedValue));
@@ -497,16 +499,16 @@ public class JSONBSizeTest {
                 Assertions.assertTrue(val == ((Double) JSONB.parseObject(bytes, Number.class)).doubleValue());
             }
 
-            Assertions.assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class), "input " + val);
-            Assertions.assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class), "input " + val);
-            Assertions.assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
-            Assertions.assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
-            Assertions.assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
-            Assertions.assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
-            Assertions.assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
-            Assertions.assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
+            assertEquals(Byte.valueOf((byte) val), JSONB.parseObject(bytes, Byte.class), "input " + val);
+            assertEquals(Short.valueOf((short) val), JSONB.parseObject(bytes, Short.class), "input " + val);
+            assertEquals(Integer.valueOf((int) val), JSONB.parseObject(bytes, Integer.class));
+            assertEquals(Long.valueOf((long) val), JSONB.parseObject(bytes, Long.class));
+            assertEquals(Float.valueOf((float) val), JSONB.parseObject(bytes, Float.class));
+            assertEquals(Double.valueOf(val), JSONB.parseObject(bytes, Double.class));
+            assertEquals(BigInteger.valueOf((long) val), JSONB.parseObject(bytes, BigInteger.class));
+            assertEquals(BigDecimal.valueOf((long) val), JSONB.parseObject(bytes, BigDecimal.class));
 
-            Assertions.assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
+            assertEquals(Double.toString(val), JSONB.parseObject(bytes, String.class));
         }
     }
 
@@ -520,53 +522,53 @@ public class JSONBSizeTest {
         for (int i = 0; i < 48; ++i) {
             String val = new String(chars, 0, i);
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(val.length() + 1, bytes.length, "input " + val);
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, String.class));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
+            assertEquals(val.length() + 1, bytes.length, "input " + val);
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, String.class));
+            assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
         }
 
         for (int i = 48; i < 2048; ++i) {
             String val = new String(chars, 0, i);
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(val.length() + 3, bytes.length, "input " + val);
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, String.class));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
+            assertEquals(val.length() + 3, bytes.length, "input " + val);
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, String.class));
+            assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
         }
 
         {
             String val = new String(chars, 0, 2048);
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(val.length() + 4, bytes.length);
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, String.class));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
+            assertEquals(val.length() + 4, bytes.length);
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, String.class));
+            assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
         }
         {
             String val = new String(chars, 0, 262143);
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(val.length() + 4, bytes.length);
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, String.class));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
+            assertEquals(val.length() + 4, bytes.length);
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, String.class));
+            assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
         }
 
         {
             String val = new String(chars, 0, 262144);
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(val.length() + 6, bytes.length);
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, String.class));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
+            assertEquals(val.length() + 6, bytes.length);
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, String.class));
+            assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
         }
         {
             String val = new String(chars);
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(val.length() + 6, bytes.length);
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, String.class));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
+            assertEquals(val.length() + 6, bytes.length);
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, String.class));
+            assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
         }
     }
 
@@ -577,9 +579,9 @@ public class JSONBSizeTest {
             chars[i] = (char) ('０' + (i % 9));
             String val = new String(chars, 0, i);
             byte[] bytes = JSONB.toBytes(val);
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, String.class));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, String.class));
+            assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
         }
     }
 
@@ -590,10 +592,10 @@ public class JSONBSizeTest {
             chars[i] = (char) ('０' + (i % 9));
             String val = new String(chars, 0, i);
             byte[] bytes = JSONB.toBytes(val, StandardCharsets.UTF_16);
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, String.class));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
-            Assertions.assertEquals(JSON.toJSONString(val), JSONB.toJSONString(bytes));
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, String.class));
+            assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
+            assertEquals(JSON.toJSONString(val), JSONB.toJSONString(bytes));
         }
     }
 
@@ -604,10 +606,10 @@ public class JSONBSizeTest {
             chars[i] = (char) ('０' + (i % 9));
             String val = new String(chars, 0, i);
             byte[] bytes = JSONB.toBytes(val, StandardCharsets.UTF_16BE);
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, String.class));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
-            Assertions.assertEquals(JSON.toJSONString(val), JSONB.toJSONString(bytes));
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, String.class));
+            assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
+            assertEquals(JSON.toJSONString(val), JSONB.toJSONString(bytes));
         }
     }
 
@@ -618,10 +620,10 @@ public class JSONBSizeTest {
             chars[i] = (char) ('０' + (i % 9));
             String val = new String(chars, 0, i);
             byte[] bytes = JSONB.toBytes(val, StandardCharsets.UTF_16LE);
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, String.class));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
-            Assertions.assertEquals(JSON.toJSONString(val), JSONB.toJSONString(bytes));
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, String.class));
+            assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
+            assertEquals(JSON.toJSONString(val), JSONB.toJSONString(bytes));
         }
     }
 
@@ -632,10 +634,10 @@ public class JSONBSizeTest {
             chars[i] = (char) ('０' + (i % 9));
             String val = new String(chars, 0, i);
             byte[] bytes = JSONB.toBytes(val, Charset.forName("GB18030"));
-            Assertions.assertEquals(val, JSONB.parse(bytes));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, String.class));
-            Assertions.assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
-            Assertions.assertEquals(JSON.toJSONString(val), JSONB.toJSONString(bytes));
+            assertEquals(val, JSONB.parse(bytes));
+            assertEquals(val, JSONB.parseObject(bytes, String.class));
+            assertEquals(val, JSONB.parseObject(bytes, CharSequence.class));
+            assertEquals(JSON.toJSONString(val), JSONB.toJSONString(bytes));
         }
     }
 }

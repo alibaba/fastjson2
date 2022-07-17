@@ -922,7 +922,7 @@ final class JSONReaderJSONB
         strBegin = offset;
         if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII_FIX_MAX) {
             strlen = strtype - BC_STR_ASCII_FIX_MIN;
-        } else if (strtype == BC_STR_ASCII) {
+        } else if (strtype == BC_STR_ASCII || strtype == BC_STR_UTF8) {
             strlen = readLength();
             strBegin = offset;
         } else {
@@ -2078,6 +2078,26 @@ final class JSONReaderJSONB
                     return new BigDecimal(str).intValue();
                 }
             }
+            case BC_STR_UTF8: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
+                offset += strlen;
+                if (str.indexOf('.') == -1) {
+                    return new BigInteger(str).intValue();
+                } else {
+                    return new BigDecimal(str).intValue();
+                }
+            }
+            case BC_STR_UTF16LE: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
+                offset += strlen;
+                if (str.indexOf('.') == -1) {
+                    return new BigInteger(str).intValue();
+                } else {
+                    return new BigDecimal(str).intValue();
+                }
+            }
             default:
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
@@ -2191,6 +2211,26 @@ final class JSONReaderJSONB
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                offset += strlen;
+                if (str.indexOf('.') == -1) {
+                    return new BigInteger(str).intValue();
+                } else {
+                    return new BigDecimal(str).intValue();
+                }
+            }
+            case BC_STR_UTF16LE: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
+                offset += strlen;
+                if (str.indexOf('.') == -1) {
+                    return new BigInteger(str).intValue();
+                } else {
+                    return new BigDecimal(str).intValue();
+                }
+            }
+            case BC_STR_UTF8: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
@@ -2366,6 +2406,26 @@ final class JSONReaderJSONB
                     return new BigDecimal(str).intValue();
                 }
             }
+            case BC_STR_UTF16LE: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
+                offset += strlen;
+                if (str.indexOf('.') == -1) {
+                    return new BigInteger(str).intValue();
+                } else {
+                    return new BigDecimal(str).intValue();
+                }
+            }
+            case BC_STR_UTF8: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
+                offset += strlen;
+                if (str.indexOf('.') == -1) {
+                    return new BigInteger(str).intValue();
+                } else {
+                    return new BigDecimal(str).intValue();
+                }
+            }
             case BC_DECIMAL: {
                 int scale = readInt32Value();
                 BigInteger unscaledValue = readBigInteger();
@@ -2507,6 +2567,26 @@ final class JSONReaderJSONB
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                offset += strlen;
+                if (str.indexOf('.') == -1) {
+                    return new BigInteger(str).intValue();
+                } else {
+                    return new BigDecimal(str).intValue();
+                }
+            }
+            case BC_STR_UTF16LE: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
+                offset += strlen;
+                if (str.indexOf('.') == -1) {
+                    return new BigInteger(str).intValue();
+                } else {
+                    return new BigDecimal(str).intValue();
+                }
+            }
+            case BC_STR_UTF8: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
@@ -2734,6 +2814,12 @@ final class JSONReaderJSONB
                 offset += strlen;
                 return new BigDecimal(str);
             }
+            case BC_STR_UTF8: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
+                offset += strlen;
+                return new BigDecimal(str);
+            }
             case BC_TYPED_ANY: {
                 String typeName = readString();
                 throw new JSONException("not support input type : " + typeName);
@@ -2848,6 +2934,18 @@ final class JSONReaderJSONB
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                offset += strlen;
+                return new BigDecimal(str);
+            }
+            case BC_STR_UTF16LE: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
+                offset += strlen;
+                return new BigDecimal(str);
+            }
+            case BC_STR_UTF8: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
                 offset += strlen;
                 return new BigDecimal(str);
             }
@@ -3010,6 +3108,26 @@ final class JSONReaderJSONB
                     return new BigDecimal(str).toBigInteger();
                 }
             }
+            case BC_STR_UTF8: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
+                offset += strlen;
+                if (str.indexOf('.') == -1) {
+                    return new BigInteger(str);
+                } else {
+                    return new BigDecimal(str).toBigInteger();
+                }
+            }
+            case BC_STR_UTF16LE: {
+                int strlen = readInt32Value();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
+                offset += strlen;
+                if (str.indexOf('.') == -1) {
+                    return new BigInteger(str);
+                } else {
+                    return new BigDecimal(str).toBigInteger();
+                }
+            }
             default:
                 if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
                     return BigInteger.valueOf(type);
@@ -3088,6 +3206,29 @@ final class JSONReaderJSONB
                     break;
             }
             throw new JSONException("TODO : " + len + ", " + readString());
+        }
+
+        if (type == BC_STR_UTF8 || type == BC_STR_ASCII) {
+            strtype = (byte) type;
+            offset++;
+            strlen = readLength();
+            switch (strlen) {
+                case 8:
+                    return readLocalDate8()
+                            .toLocalDate();
+                case 9:
+                    return readLocalDate9()
+                            .toLocalDate();
+                case 10: {
+                    return readLocalDate10()
+                            .toLocalDate();
+                }
+                case 11:
+                    return readLocalDate11()
+                            .toLocalDate();
+                default:
+                    break;
+            }
         }
 
         throw new UnsupportedOperationException();
@@ -3221,6 +3362,27 @@ final class JSONReaderJSONB
                     break;
             }
             throw new JSONException("not support len : " + len);
+        }
+
+        if (type == BC_STR_UTF8 || type == BC_STR_ASCII) {
+            strtype = (byte) type;
+            offset++;
+            strlen = readLength();
+            switch (strlen) {
+                case 8:
+                    return readLocalTime8();
+                case 10:
+                    return readLocalTime10();
+                case 11:
+                    return readLocalTime11();
+                case 12:
+                    return readLocalTime12();
+                case 18:
+                    return readLocalTime18();
+                default:
+                    break;
+            }
+            throw new JSONException("not support len : " + strlen);
         }
 
         throw new UnsupportedOperationException();
@@ -3372,6 +3534,50 @@ final class JSONReaderJSONB
                 }
                 throw new JSONException("Invalid UUID string:  " + new String(bytes, offset, 36, StandardCharsets.US_ASCII));
             }
+            case BC_STR_ASCII:
+            case BC_STR_UTF8: {
+                int strlen = readLength();
+                if (strlen == 32) {
+                    long msb1 = parse4Nibbles(bytes, offset + 0);
+                    long msb2 = parse4Nibbles(bytes, offset + 4);
+                    long msb3 = parse4Nibbles(bytes, offset + 8);
+                    long msb4 = parse4Nibbles(bytes, offset + 12);
+                    long lsb1 = parse4Nibbles(bytes, offset + 16);
+                    long lsb2 = parse4Nibbles(bytes, offset + 20);
+                    long lsb3 = parse4Nibbles(bytes, offset + 24);
+                    long lsb4 = parse4Nibbles(bytes, offset + 28);
+                    if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
+                        offset += 32;
+                        return new UUID(
+                                msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
+                                lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+                    }
+                } else if (strlen == 36) {
+                    byte ch1 = bytes[offset + 8];
+                    byte ch2 = bytes[offset + 13];
+                    byte ch3 = bytes[offset + 18];
+                    byte ch4 = bytes[offset + 23];
+                    if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
+                        long msb1 = parse4Nibbles(bytes, offset + 0);
+                        long msb2 = parse4Nibbles(bytes, offset + 4);
+                        long msb3 = parse4Nibbles(bytes, offset + 9);
+                        long msb4 = parse4Nibbles(bytes, offset + 14);
+                        long lsb1 = parse4Nibbles(bytes, offset + 19);
+                        long lsb2 = parse4Nibbles(bytes, offset + 24);
+                        long lsb3 = parse4Nibbles(bytes, offset + 28);
+                        long lsb4 = parse4Nibbles(bytes, offset + 32);
+                        if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
+                            offset += 36;
+                            return new UUID(
+                                    msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
+                                    lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+                        }
+                    }
+                }
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
+                offset += strlen;
+                throw new JSONException("Invalid UUID string:  " + str);
+            }
             default:
                 throw new JSONException("type not support : " + JSONB.typeName(type));
         }
@@ -3436,6 +3642,61 @@ final class JSONReaderJSONB
                     offset += 5;
                     return false;
                 }
+            case BC_STR_ASCII: {
+                strlen = readLength();
+                if (strlen == 1) {
+                    if (bytes[offset] == 'Y') {
+                        offset++;
+                        return true;
+                    }
+                    if (bytes[offset] == 'N') {
+                        offset++;
+                        return true;
+                    }
+                } else if (strlen == 4
+                        && bytes[offset] == 't'
+                        && bytes[offset + 1] == 'r'
+                        && bytes[offset + 2] == 'u'
+                        && bytes[offset + 3] == 'e'
+                ) {
+                    offset += 4;
+                    return true;
+                } else if (strlen == 5) {
+                    if (bytes[offset] == 'f'
+                            && bytes[offset + 1] == 'a'
+                            && bytes[offset + 2] == 'l'
+                            && bytes[offset + 3] == 's'
+                            && bytes[offset + 4] == 'e') {
+                        offset += 5;
+                        return false;
+                    } else if (bytes[offset] == 'F'
+                            && bytes[offset + 1] == 'A'
+                            && bytes[offset + 2] == 'L'
+                            && bytes[offset + 3] == 'S'
+                            && bytes[offset + 4] == 'E') {
+                        offset += 5;
+                        return false;
+                    }
+                }
+                String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                offset += strlen;
+                throw new JSONException("not support input " + str);
+            }
+            case BC_STR_UTF16LE: {
+                strlen = readLength();
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
+                offset += strlen;
+                switch (str) {
+                    case "0":
+                    case "N":
+                        return false;
+                    case "1":
+                    case "Y":
+                        return true;
+                    default:
+                        throw new JSONException("not support input " + str);
+                }
+            }
             default:
                 throw new JSONException("not support type : " + typeName(type));
         }
@@ -3616,21 +3877,32 @@ final class JSONReaderJSONB
 
     @Override
     protected LocalDateTime readLocalDate10() {
-        type = bytes[offset];
-        if (type != BC_STR_ASCII_FIX_MIN + 10) {
+        byte c0, c1, c2, c3, c4, c5, c6, c7, c8, c9;
+        if (bytes[offset] == BC_STR_ASCII_FIX_MIN + 10) {
+            c0 = bytes[offset + 1];
+            c1 = bytes[offset + 2];
+            c2 = bytes[offset + 3];
+            c3 = bytes[offset + 4];
+            c4 = bytes[offset + 5];
+            c5 = bytes[offset + 6];
+            c6 = bytes[offset + 7];
+            c7 = bytes[offset + 8];
+            c8 = bytes[offset + 9];
+            c9 = bytes[offset + 10];
+        } else if ((strtype == BC_STR_UTF8 || strtype == BC_STR_ASCII) && strlen == 10) {
+            c0 = bytes[offset + 0];
+            c1 = bytes[offset + 1];
+            c2 = bytes[offset + 2];
+            c3 = bytes[offset + 3];
+            c4 = bytes[offset + 4];
+            c5 = bytes[offset + 5];
+            c6 = bytes[offset + 6];
+            c7 = bytes[offset + 7];
+            c8 = bytes[offset + 8];
+            c9 = bytes[offset + 9];
+        } else {
             throw new JSONException("date only support string input");
         }
-
-        byte c0 = bytes[offset + 1];
-        byte c1 = bytes[offset + 2];
-        byte c2 = bytes[offset + 3];
-        byte c3 = bytes[offset + 4];
-        byte c4 = bytes[offset + 5];
-        byte c5 = bytes[offset + 6];
-        byte c6 = bytes[offset + 7];
-        byte c7 = bytes[offset + 8];
-        byte c8 = bytes[offset + 9];
-        byte c9 = bytes[offset + 10];
 
         byte y0, y1, y2, y3, m0, m1, d0, d1;
         if (c4 == '-' && c7 == '-') {
@@ -3782,23 +4054,36 @@ final class JSONReaderJSONB
 
     @Override
     protected LocalTime readLocalTime12() {
-        type = bytes[offset];
-        if (type != BC_STR_ASCII_FIX_MIN + 12) {
+        byte c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11;
+        if (bytes[offset] == BC_STR_ASCII_FIX_MIN + 12) {
+            c0 = bytes[offset + 1];
+            c1 = bytes[offset + 2];
+            c2 = bytes[offset + 3];
+            c3 = bytes[offset + 4];
+            c4 = bytes[offset + 5];
+            c5 = bytes[offset + 6];
+            c6 = bytes[offset + 7];
+            c7 = bytes[offset + 8];
+            c8 = bytes[offset + 9];
+            c9 = bytes[offset + 10];
+            c10 = bytes[offset + 11];
+            c11 = bytes[offset + 12];
+        } else if ((strtype == BC_STR_UTF8 || strtype == BC_STR_ASCII) && strlen == 12) {
+            c0 = bytes[offset];
+            c1 = bytes[offset + 1];
+            c2 = bytes[offset + 2];
+            c3 = bytes[offset + 3];
+            c4 = bytes[offset + 4];
+            c5 = bytes[offset + 5];
+            c6 = bytes[offset + 6];
+            c7 = bytes[offset + 7];
+            c8 = bytes[offset + 8];
+            c9 = bytes[offset + 9];
+            c10 = bytes[offset + 10];
+            c11 = bytes[offset + 11];
+        } else {
             throw new JSONException("date only support string input");
         }
-
-        byte c0 = bytes[offset + 1];
-        byte c1 = bytes[offset + 2];
-        byte c2 = bytes[offset + 3];
-        byte c3 = bytes[offset + 4];
-        byte c4 = bytes[offset + 5];
-        byte c5 = bytes[offset + 6];
-        byte c6 = bytes[offset + 7];
-        byte c7 = bytes[offset + 8];
-        byte c8 = bytes[offset + 9];
-        byte c9 = bytes[offset + 10];
-        byte c10 = bytes[offset + 11];
-        byte c11 = bytes[offset + 12];
 
         byte h0, h1, i0, i1, s0, s1, m0, m1, m2;
         if (c2 == ':' && c5 == ':' && c8 == '.') {
@@ -3860,29 +4145,48 @@ final class JSONReaderJSONB
 
     @Override
     protected LocalTime readLocalTime18() {
-        type = bytes[offset];
-        if (type != BC_STR_ASCII_FIX_MIN + 18) {
+        byte c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17;
+        if (bytes[offset] == BC_STR_ASCII_FIX_MIN + 18) {
+            c0 = bytes[offset + 1];
+            c1 = bytes[offset + 2];
+            c2 = bytes[offset + 3];
+            c3 = bytes[offset + 4];
+            c4 = bytes[offset + 5];
+            c5 = bytes[offset + 6];
+            c6 = bytes[offset + 7];
+            c7 = bytes[offset + 8];
+            c8 = bytes[offset + 9];
+            c9 = bytes[offset + 10];
+            c10 = bytes[offset + 11];
+            c11 = bytes[offset + 12];
+            c12 = bytes[offset + 13];
+            c13 = bytes[offset + 14];
+            c14 = bytes[offset + 15];
+            c15 = bytes[offset + 16];
+            c16 = bytes[offset + 17];
+            c17 = bytes[offset + 18];
+        } else if ((strtype == BC_STR_UTF8 || strtype == BC_STR_ASCII) && strlen == 18) {
+            c0 = bytes[offset];
+            c1 = bytes[offset + 1];
+            c2 = bytes[offset + 2];
+            c3 = bytes[offset + 3];
+            c4 = bytes[offset + 4];
+            c5 = bytes[offset + 5];
+            c6 = bytes[offset + 6];
+            c7 = bytes[offset + 7];
+            c8 = bytes[offset + 8];
+            c9 = bytes[offset + 9];
+            c10 = bytes[offset + 10];
+            c11 = bytes[offset + 11];
+            c12 = bytes[offset + 12];
+            c13 = bytes[offset + 13];
+            c14 = bytes[offset + 14];
+            c15 = bytes[offset + 15];
+            c16 = bytes[offset + 16];
+            c17 = bytes[offset + 17];
+        } else {
             throw new JSONException("date only support string input");
         }
-
-        byte c0 = bytes[offset + 1];
-        byte c1 = bytes[offset + 2];
-        byte c2 = bytes[offset + 3];
-        byte c3 = bytes[offset + 4];
-        byte c4 = bytes[offset + 5];
-        byte c5 = bytes[offset + 6];
-        byte c6 = bytes[offset + 7];
-        byte c7 = bytes[offset + 8];
-        byte c8 = bytes[offset + 9];
-        byte c9 = bytes[offset + 10];
-        byte c10 = bytes[offset + 11];
-        byte c11 = bytes[offset + 12];
-        byte c12 = bytes[offset + 13];
-        byte c13 = bytes[offset + 14];
-        byte c14 = bytes[offset + 15];
-        byte c15 = bytes[offset + 16];
-        byte c16 = bytes[offset + 17];
-        byte c17 = bytes[offset + 18];
 
         byte h0, h1, i0, i1, s0, s1, m0, m1, m2, m3, m4, m5, m6, m7, m8;
         if (c2 == ':' && c5 == ':' && c8 == '.') {

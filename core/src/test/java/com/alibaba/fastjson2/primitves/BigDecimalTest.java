@@ -162,6 +162,20 @@ public class BigDecimalTest {
     }
 
     @Test
+    public void test_jsonb_value_cast_str_1() {
+        byte[] jsonbBytes = {124, 2, 48, 0};
+        BigDecimal decimal = JSONB.parseObject(jsonbBytes, BigDecimal.class);
+        assertEquals(BigDecimal.ZERO, decimal);
+    }
+
+    @Test
+    public void test_jsonb_value_cast_str_2() {
+        byte[] jsonbBytes = {122, 8, 45, 56, 51, 56, 56, 54, 48, 56};
+        BigDecimal decimal = JSONB.parseObject(jsonbBytes, BigDecimal.class);
+        assertEquals(BigDecimal.valueOf(-8388608), decimal);
+    }
+
+    @Test
     public void test_utf8() {
         for (BigDecimal id : values) {
             BigDecimal1 vo = new BigDecimal1();

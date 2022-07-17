@@ -31,6 +31,7 @@ public class JDKUtils {
 
     static {
         boolean android = false;
+        boolean openj9 = false;
         int jvmVersion = -1;
         try {
             String property = System.getProperty("java.specification.version");
@@ -40,7 +41,8 @@ public class JDKUtils {
             jvmVersion = Integer.parseInt(property);
 
             String jmvName = System.getProperty("java.vm.name");
-            if (jmvName.contains("OpenJ9")) {
+            openj9 = jmvName.contains("OpenJ9");
+            if (openj9) {
                 FIELD_STRING_ERROR = true;
             }
         } catch (Throwable ignored) {
@@ -124,7 +126,9 @@ public class JDKUtils {
         if (unsafeSupport) {
             try {
                 utf16Creator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorUTF16()).get();
-                asciiCreator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorASCII()).get();
+                if (!openj9) {
+                    asciiCreator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorASCII()).get();
+                }
             } catch (Throwable ignored) {
             }
         }
