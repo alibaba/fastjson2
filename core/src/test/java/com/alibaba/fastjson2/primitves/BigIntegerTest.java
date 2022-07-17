@@ -149,6 +149,20 @@ public class BigIntegerTest {
     }
 
     @Test
+    public void test_jsonb_value_cast_str_1() {
+        byte[] jsonbBytes = {124, 2, 48, 0};
+        BigInteger integer = JSONB.parseObject(jsonbBytes, BigInteger.class);
+        assertEquals(BigInteger.ZERO, integer);
+    }
+
+    @Test
+    public void test_jsonb_value_cast_str_2() {
+        byte[] jsonbBytes = {122, 8, 45, 56, 51, 56, 56, 54, 48, 56};
+        BigInteger integer = JSONB.parseObject(jsonbBytes, BigInteger.class);
+        assertEquals(BigInteger.valueOf(-8388608), integer);
+    }
+
+    @Test
     public void test_utf8() {
         for (BigInteger id : values) {
             BigInteger1 vo = new BigInteger1();

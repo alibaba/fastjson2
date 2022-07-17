@@ -230,6 +230,18 @@ public class LongTest {
     }
 
     @Test
+    public void test_jsonb_value_cast_str_1() {
+        byte[] jsonbBytes = {124, 2, 48, 0};
+        assertEquals(0, JSONB.parseObject(jsonbBytes, Long.class).longValue());
+    }
+
+    @Test
+    public void test_jsonb_value_cast_str_2() {
+        byte[] jsonbBytes = {122, 8, 45, 56, 51, 56, 56, 54, 48, 56};
+        assertEquals(-8388608L, JSONB.parseObject(jsonbBytes, Long.class).longValue());
+    }
+
+    @Test
     public void test_utf8() {
         for (Long id : values) {
             Long1 vo = new Long1();

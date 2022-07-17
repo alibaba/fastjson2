@@ -165,6 +165,18 @@ public class ShortTest {
     }
 
     @Test
+    public void test_jsonb_value_cast_str_short_1() {
+        byte[] jsonbBytes = {124, 2, 48, 0};
+        assertEquals(0, JSONB.parseObject(jsonbBytes, Short.class).shortValue());
+    }
+
+    @Test
+    public void test_jsonb_value_cast_str_short_2() {
+        byte[] jsonbBytes = {122, 8, 45, 56, 51, 56, 56, 54, 48, 56};
+        assertEquals((short) -8388608, JSONB.parseObject(jsonbBytes, Short.class).shortValue());
+    }
+
+    @Test
     public void test_utf8() {
         for (Short id : values) {
             Short1 vo = new Short1();

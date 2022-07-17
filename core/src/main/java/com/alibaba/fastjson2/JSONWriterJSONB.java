@@ -472,6 +472,11 @@ final class JSONWriterJSONB
             return;
         }
 
+        if (str.isEmpty()) {
+            bytes[off++] = BC_STR_ASCII_FIX_0;
+            return;
+        }
+
         if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
             int coder = UnsafeUtils.getStringCoder(str);
             byte[] value = UnsafeUtils.getStringValue(str);
@@ -507,7 +512,7 @@ final class JSONWriterJSONB
                 off += strlen;
                 return;
             } else {
-                int check_cnt = 32;
+                int check_cnt = 128;
                 if (check_cnt > value.length) {
                     check_cnt = value.length;
                 }
@@ -516,7 +521,7 @@ final class JSONWriterJSONB
                 }
 
                 int asciiCount = 0;
-                for (int i = 0; i + 2 < check_cnt; i += 2) {
+                for (int i = 0; i + 2 <= check_cnt; i += 2) {
                     byte b0 = value[i];
                     byte b1 = value[i + 1];
                     if (b0 == 0 || b1 == 0) {
@@ -536,11 +541,23 @@ final class JSONWriterJSONB
                     if (utf8len > value.length) {
                         utf16 = true;
                     } else if (result != -1) {
+                        final byte strtype;
+                        if (utf8len * 2 == value.length) {
+                            if (asciiCount <= STR_ASCII_FIX_LEN) {
+                                bytes[off++] = (byte) (BC_STR_ASCII_FIX_MIN + utf8len);
+                                System.arraycopy(bytes, off + lenByteCnt, bytes, off, utf8len);
+                                off += utf8len;
+                                return;
+                            }
+                            strtype = BC_STR_ASCII;
+                        } else {
+                            strtype = BC_STR_UTF8;
+                        }
                         int utf8lenByteCnt = sizeOfInt(utf8len);
                         if (lenByteCnt != utf8lenByteCnt) {
                             System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
                         }
-                        bytes[off++] = BC_STR_UTF8;
+                        bytes[off++] = strtype;
                         writeInt32(utf8len);
                         off += utf8len;
                         return;

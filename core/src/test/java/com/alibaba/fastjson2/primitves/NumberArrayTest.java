@@ -88,12 +88,22 @@ public class NumberArrayTest {
             assertEquals("123",
                     JSON.toJSONString(vo2.getValue()));
         }
-        {
-            byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("value", "12345678901234567890123456789012345678901234567890123456789012345678901234567890"));
-            Number1 vo2 = JSONB.parseObject(jsonbBytes, Number1.class);
-            assertEquals("12345678901234567890123456789012345678901234567890123456789012345678901234567890",
-                    JSON.toJSONString(vo2.getValue()));
-        }
+    }
+
+    @Test
+    public void test_1_jsonb_1() {
+        byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("value", "12345678901234567890123456789012345678901234567890123456789012345678901234567890"));
+        Number1 vo2 = JSONB.parseObject(jsonbBytes, Number1.class);
+        assertEquals("12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+                JSON.toJSONString(vo2.getValue()));
+    }
+
+    @Test
+    public void test_1_jsonb_1_bytes() {
+        byte[] jsonbBytes = {-90, 78, 118, 97, 108, 117, 101, 122, 56, 80, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, -91};
+        Number1 vo2 = JSONB.parseObject(jsonbBytes, Number1.class);
+        assertEquals("12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+                JSON.toJSONString(vo2.getValue()));
     }
 
     @Test

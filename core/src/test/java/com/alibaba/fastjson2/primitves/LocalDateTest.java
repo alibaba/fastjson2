@@ -32,6 +32,15 @@ public class LocalDateTest {
     }
 
     @Test
+    public void test_jsonb_str_bytes() {
+        LocalDate now = LocalDate.of(2022, 7, 17);
+        byte[] jsonbBytes = {122, 10, 50, 48, 50, 50, 45, 48, 55, 45, 49, 55};
+
+        LocalDate localDate = JSONB.parseObject(jsonbBytes, LocalDate.class);
+        assertEquals(now, localDate);
+    }
+
+    @Test
     public void test_utf8() {
         LocalDate1 vo = new LocalDate1();
         vo.setDate(LocalDate.now());
