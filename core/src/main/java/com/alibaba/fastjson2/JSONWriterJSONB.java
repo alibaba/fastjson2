@@ -1226,6 +1226,42 @@ final class JSONWriterJSONB
         bytes[off++] = (byte) val;
     }
 
+    public void writeEnum(Enum e) {
+        if (e == null) {
+            writeNull();
+            return;
+        }
+
+        if ((context.features & Feature.WriteEnumUsingToString.mask) != 0) {
+            writeString(e.toString());
+        } else if ((context.features & Feature.WriteEnumsUsingName.mask) != 0) {
+            writeString(e.name());
+        } else {
+            int val = e.ordinal();
+            if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
+                if (off == bytes.length) {
+                    int minCapacity = off + 1;
+
+                    int oldCapacity = bytes.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                        throw new OutOfMemoryError();
+                    }
+
+                    // minCapacity is usually close to size, so this is a win:
+                    bytes = Arrays.copyOf(bytes, newCapacity);
+                }
+
+                bytes[off++] = (byte) val;
+                return;
+            }
+            writeInt32(val);
+        }
+    }
+
     @Override
     public void writeInt32(int val) {
         if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
