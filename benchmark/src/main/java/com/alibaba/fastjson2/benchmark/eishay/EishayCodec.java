@@ -85,7 +85,7 @@ public class EishayCodec {
         }
     }
 
-    @Benchmark
+//    @Benchmark
     public void deserialize_jsonb(Blackhole bh) {
         MediaContent obj = (MediaContent) JSONB.parseObject(jsonbBytes, Object.class, jsonbReaderFeatures);
         bh.consume(obj);
@@ -103,7 +103,7 @@ public class EishayCodec {
         bh.consume(obj);
     }
 
-    @Benchmark
+//    @Benchmark
     public void serialize_jsonb(Blackhole bh) {
         byte[] bytes = JSONB.toBytes(mc, jsonbWriteFeatures);
         bh.consume(bytes);
@@ -171,7 +171,7 @@ public class EishayCodec {
 
     public static void main(String[] args) throws RunnerException {
         System.out.println("fury  size : " + fury.serialize(mc).length);
-        System.out.println("jsonb size : " + JSONB.toBytes(mc, jsonbWriteFeatures).length);
+//        System.out.println("jsonb size : " + JSONB.toBytes(mc, jsonbWriteFeatures).length);
         System.out.println("jsonb_array size : " + JSONB.toBytes(mc, jsonbWriteFeaturesArrayMapping).length);
 
 //        new EishayCodec().serialize_jsonb_arrayMapping_perf_test();
