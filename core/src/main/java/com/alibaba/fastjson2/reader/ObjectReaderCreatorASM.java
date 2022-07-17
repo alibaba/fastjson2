@@ -304,11 +304,14 @@ public class ObjectReaderCreatorASM
             return createObjectReaderSeeAlso(objectClass, supplier, beanInfo.typeKey, beanInfo.seeAlso, beanInfo.seeAlsoNames, fieldReaderArray);
         }
 
+        Constructor defaultConstructor = null;
         try {
             Constructor constructor = objectClass.getDeclaredConstructor();
             int modifiers = constructor.getModifiers();
             if (!Modifier.isPublic(modifiers)) {
                 supplier = null;
+            } else {
+                defaultConstructor = constructor;
             }
         } catch (NoSuchMethodException ignored) {
             supplier = null;
@@ -389,11 +392,11 @@ public class ObjectReaderCreatorASM
         {
             MethodWriter mw = cw.visitMethod(
                     Opcodes.ACC_PUBLIC,
-                    fieldBased ? "createInstance0" : "createInstance",
+                    fieldBased && defaultConstructor == null ? "createInstance0" : "createInstance",
                     "(J)Ljava/lang/Object;"
             );
 
-            if (fieldBased) {
+            if (fieldBased && defaultConstructor == null) {
                 mw.visitFieldInsn(Opcodes.GETSTATIC, TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
                 mw.visitVarInsn(Opcodes.ALOAD, 0);
                 mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_OBJECT_READER_ADAPTER, "objectClass", "Ljava/lang/Class;");
