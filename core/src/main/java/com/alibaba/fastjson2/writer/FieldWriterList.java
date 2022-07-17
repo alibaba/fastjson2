@@ -11,6 +11,7 @@ abstract class FieldWriterList<T>
         extends FieldWriterImpl<T> {
     final Type itemType;
     final Class itemClass;
+    final boolean itemClassNotReferenceDetect;
     ObjectWriter listWriter;
     ObjectWriter itemObjectWriter;
 
@@ -32,6 +33,7 @@ abstract class FieldWriterList<T>
         } else {
             itemClass = TypeUtils.getMapping(itemType);
         }
+        this.itemClassNotReferenceDetect = itemClass == null ? false : ObjectWriterProvider.isNotReferenceDetect(itemClass);
 
         if (format != null) {
             if (itemClass == Date.class) {
@@ -116,7 +118,11 @@ abstract class FieldWriterList<T>
                     previousObjectWriter = getItemWriter(jsonWriter, itemClass);
                     previousClass = itemClass;
                     if (refDetect) {
-                        refDetect = !ObjectWriterProvider.isNotReferenceDetect(itemClass);
+                        if (itemClass == this.itemClass) {
+                            refDetect = !itemClassNotReferenceDetect;
+                        } else {
+                            refDetect = !ObjectWriterProvider.isNotReferenceDetect(itemClass);
+                        }
                     }
                 }
                 itemObjectWriter = previousObjectWriter;
