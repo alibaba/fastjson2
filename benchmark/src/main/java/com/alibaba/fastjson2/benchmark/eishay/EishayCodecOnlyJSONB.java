@@ -75,19 +75,19 @@ public class EishayCodecOnlyJSONB {
             ex.printStackTrace();
         }
     }
-    @Benchmark
+//    @Benchmark
     public void deserialize_jsonb(Blackhole bh) {
         MediaContent obj = (MediaContent) JSONB.parseObject(jsonbBytes, Object.class, jsonbReaderFeatures);
         bh.consume(obj);
     }
 
-    @Benchmark
+//    @Benchmark
     public void deserialize_jsonbArrayMapping(Blackhole bh) {
         MediaContent obj = (MediaContent) JSONB.parseObject(jsonbBytesArrayMapping, Object.class, jsonbReaderFeatures);
         bh.consume(obj);
     }
 
-    @Benchmark
+//    @Benchmark
     public void serialize_jsonb(Blackhole bh) {
         byte[] bytes = JSONB.toBytes(mc, jsonbWriteFeatures);
         bh.consume(bytes);
