@@ -472,11 +472,6 @@ final class JSONWriterJSONB
             return;
         }
 
-        if (str.isEmpty()) {
-            bytes[off++] = BC_STR_ASCII_FIX_0;
-            return;
-        }
-
         if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
             int coder = UnsafeUtils.getStringCoder(str);
             byte[] value = UnsafeUtils.getStringValue(str);
@@ -500,6 +495,7 @@ final class JSONWriterJSONB
                     // minCapacity is usually close to size, so this is a win:
                     bytes = Arrays.copyOf(bytes, newCapacity);
                 }
+                str.getBytes();
 
                 int strlen = value.length;
                 if (strlen <= STR_ASCII_FIX_LEN) {
