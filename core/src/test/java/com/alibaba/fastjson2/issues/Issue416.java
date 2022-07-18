@@ -24,8 +24,6 @@ public class Issue416 {
         LocalTest localTest2 = JSON.parseObject(JSON.toJSONString(localTest1), LocalTest.class);
 
         assertEquals(localTest1.getLocalDate(), localTest2.getLocalDate());
-        assertNotEquals(localTest1.getLocalTime(), localTest2.getLocalTime()); // without nano
-        assertNotEquals(localTest1.getLocalDateTime(), localTest2.getLocalDateTime()); // without nano
     }
 
     @Data
