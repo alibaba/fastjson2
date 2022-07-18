@@ -136,10 +136,14 @@ final class JSONReaderJSONB
         }
 
         if (type == BC_INT32) {
-            return (bytes[offset++] << 24)
+            int len = (bytes[offset++] << 24)
                     + ((bytes[offset++] & 0xFF) << 16)
                     + ((bytes[offset++] & 0xFF) << 8)
                     + (bytes[offset++] & 0xFF);
+            if (len > 1024 * 1024 * 256) {
+                throw new JSONException("input length overflow");
+            }
+            return len;
         }
 
         throw new JSONException("not support length type : " + typeName(type));
