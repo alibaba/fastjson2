@@ -1052,4 +1052,10 @@ public class JSONBTest {
         Integer[] array2 = JSONB.parseObject(jsonbBytes, Integer[].class);
         assertArrayEquals(array, array2);
     }
+
+    @Test
+    public void test_largeInput() {
+        byte[] bytes = {(byte) 0xa6, 0x79, 0x48, 0x7f, 0x7f, 0x7f, 0x7f};
+        assertThrows(JSONException.class, () -> JSONB.parseObject(bytes));
+    }
 }
