@@ -4,6 +4,8 @@ import org.openjdk.jmh.runner.RunnerException;
 
 public class EishayCodecOnlyJSONBTest {
     public static void main(String[] args) throws RunnerException {
-        new EishayCodecOnlyJSONB().serialize_jsonb_arrayMapping_perf_test();
+        EishayCodecOnlyJSONB benchmark = new EishayCodecOnlyJSONB();
+//        benchmark.serialize_jsonb_arrayMapping_perf_test();
+        benchmark.deserialize_jsonbArrayMapping_perf_test();
     }
 }
