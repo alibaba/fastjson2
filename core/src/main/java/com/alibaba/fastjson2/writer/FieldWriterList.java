@@ -115,7 +115,11 @@ abstract class FieldWriterList<T>
                 ObjectWriter itemObjectWriter;
                 if (itemClass != previousClass) {
                     refDetect = jsonWriter.isRefDetect();
-                    previousObjectWriter = getItemWriter(jsonWriter, itemClass);
+                    if (itemClass == this.itemType && this.itemObjectWriter != null) {
+                        previousObjectWriter = this.itemObjectWriter;
+                    } else {
+                        previousObjectWriter = getItemWriter(jsonWriter, itemClass);
+                    }
                     previousClass = itemClass;
                     if (refDetect) {
                         if (itemClass == this.itemClass) {
