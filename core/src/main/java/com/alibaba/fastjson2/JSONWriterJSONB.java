@@ -574,26 +574,10 @@ final class JSONWriterJSONB
         char[] chars = JDKUtils.getCharArray(str);
 
         boolean ascii = true;
-        {
-            int i = 0;
-            while (i + 4 <= chars.length) {
-                char c0 = chars[i];
-                char c1 = chars[i + 1];
-                char c2 = chars[i + 2];
-                char c3 = chars[i + 3];
-                if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F) {
-                    ascii = false;
-                    break;
-                }
-                i += 4;
-            }
-            if (ascii) {
-                for (; i < chars.length; ++i) {
-                    if (chars[i] > 0x007F) {
-                        ascii = false;
-                        break;
-                    }
-                }
+        for (int i = 0; i < chars.length; ++i) {
+            if (chars[i] > 0x007F) {
+                ascii = false;
+                break;
             }
         }
 
