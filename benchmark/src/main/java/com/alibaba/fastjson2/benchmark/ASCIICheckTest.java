@@ -9,7 +9,7 @@ public class ASCIICheckTest {
         ASCIICheck benchmark = new ASCIICheck();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000 * 100; ++i) {
-            benchmark.f0(BH);
+            benchmark.f0_vec(BH);
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("f0 millis : " + millis);
