@@ -2,8 +2,6 @@ package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
