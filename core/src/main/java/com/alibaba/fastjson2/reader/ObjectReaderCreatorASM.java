@@ -1309,10 +1309,22 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(object_);
 
+        Label notNull_ = new Label(), end_ = new Label();
+
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
         mw.visitIntInsn(Opcodes.BIPUSH, '{');
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
-        mw.visitInsn(Opcodes.POP);
+        mw.visitJumpInsn(Opcodes.IFNE, notNull_);
+
+        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfNull", "()Z", false);
+        mw.visitJumpInsn(Opcodes.IFEQ, notNull_);
+
+        mw.visitInsn(Opcodes.ACONST_NULL);
+        mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
+        mw.visitJumpInsn(Opcodes.GOTO, end_);
+
+        mw.visitLabel(notNull_);
 
         genCreateObject(mw, classNameType, TYPE_OBJECT, FEATURES, fieldBased);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
@@ -1586,6 +1598,8 @@ public class ObjectReaderCreatorASM
         mw.visitJumpInsn(Opcodes.GOTO, for_start_i_);
 
         mw.visitLabel(for_end_i_);
+
+        mw.visitLabel(end_);
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
         mw.visitIntInsn(Opcodes.BIPUSH, ',');
