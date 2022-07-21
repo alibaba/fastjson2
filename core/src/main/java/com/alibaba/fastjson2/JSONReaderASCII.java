@@ -4,9 +4,6 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 final class JSONReaderASCII
         extends JSONReaderUTF8 {
@@ -434,10 +431,6 @@ final class JSONReaderASCII
             }
 
             if (chars != null) {
-                if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                    return JDKUtils.UNSAFE_ASCII_CREATOR.apply(chars);
-                }
-
                 return new String(chars, 0, chars.length, StandardCharsets.US_ASCII);
             }
         }
@@ -629,24 +622,7 @@ final class JSONReaderASCII
 
             str = new String(chars);
         } else {
-            if (JDKUtils.JVM_VERSION >= 9) {
-                if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {
-                    try {
-                        STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
-                    } catch (Throwable e) {
-                        STRING_CREATOR_ERROR = true;
-                    }
-                }
-
-                if (STRING_CREATOR_JDK11 == null) {
-                    str = new String(bytes, start, this.offset - start, StandardCharsets.US_ASCII);
-                } else {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, start, offset);
-                    str = STRING_CREATOR_JDK11.apply(bytes);
-                }
-            } else {
-                str = new String(bytes, start, this.offset - start, StandardCharsets.US_ASCII);
-            }
+            str = new String(bytes, start, this.offset - start, StandardCharsets.US_ASCII);
         }
 
         int b = bytes[++offset];
@@ -751,24 +727,6 @@ final class JSONReaderASCII
             } else {
                 if (this.str != null) {
                     str = this.str.substring(this.offset, offset);
-                } else if (JDKUtils.JVM_VERSION == 11 && !STRING_CREATOR_ERROR) {
-                    if (STRING_CREATOR_JDK11 == null) {
-                        try {
-                            STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
-                        } catch (Throwable e) {
-                            STRING_CREATOR_ERROR = true;
-                        }
-                    }
-
-                    if (STRING_CREATOR_JDK11 == null) {
-                        str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
-                    } else {
-                        byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                        str = STRING_CREATOR_JDK11.apply(bytes);
-                    }
-                } else if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                    str = JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
                 } else {
                     str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
                 }
