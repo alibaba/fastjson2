@@ -522,6 +522,9 @@ final class JSONReaderJSONB
                 return 0D;
             case BC_DOUBLE_NUM_1:
                 return 1D;
+            case BC_CHAR:
+                int intValue = readInt32Value();
+                return (char) intValue;
             case BC_OBJECT: {
                 Map map = null;
                 boolean supportAutoType = (context.features & Feature.SupportAutoType.mask) != 0;
@@ -1947,6 +1950,24 @@ final class JSONReaderJSONB
         }
 
         return str;
+    }
+
+    public char readCharValue() {
+        byte type = bytes[offset];
+        if (type == BC_CHAR) {
+            offset++;
+            return (char) readInt32Value();
+        } else if (type >= BC_STR_ASCII_FIX_0 && type < BC_STR_ASCII_FIX_MAX) {
+            offset++;
+            return (char) bytes[offset++];
+        }
+
+        String str = readString();
+        if (str == null || str.isEmpty()) {
+            wasNull = true;
+            return '\0';
+        }
+        return str.charAt(0);
     }
 
     @Override

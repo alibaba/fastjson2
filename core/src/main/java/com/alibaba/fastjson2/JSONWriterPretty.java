@@ -267,6 +267,11 @@ final class JSONWriterPretty
     }
 
     @Override
+    public void writeChar(char ch) {
+        jsonWriter.writeChar(ch);
+    }
+
+    @Override
     public String toString() {
         return jsonWriter.toString();
     }

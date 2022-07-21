@@ -527,6 +527,117 @@ class JSONWriterUTF16
         off += chars.length;
     }
 
+    public void writeChar(char ch) {
+        int minCapacity = chars.length + 8;
+        if (minCapacity - chars.length > 0) {
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+
+        chars[off++] = quote;
+        switch (ch) {
+            case '"':
+            case '\'':
+                if (ch == quote) {
+                    chars[off++] = '\\';
+                }
+                chars[off++] = ch;
+                break;
+            case '\\':
+                chars[off++] = '\\';
+                chars[off++] = ch;
+                break;
+            case '\r':
+                chars[off++] = '\\';
+                chars[off++] = 'r';
+                break;
+            case '\n':
+                chars[off++] = '\\';
+                chars[off++] = 'n';
+                break;
+            case '\b':
+                chars[off++] = '\\';
+                chars[off++] = 'b';
+                break;
+            case '\f':
+                chars[off++] = '\\';
+                chars[off++] = 'f';
+                break;
+            case '\t':
+                chars[off++] = '\\';
+                chars[off++] = 't';
+                break;
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+                chars[off++] = '\\';
+                chars[off++] = 'u';
+                chars[off++] = '0';
+                chars[off++] = '0';
+                chars[off++] = '0';
+                chars[off++] = (char) ('0' + (int) ch);
+                break;
+            case 11:
+            case 14:
+            case 15:
+                chars[off++] = '\\';
+                chars[off++] = 'u';
+                chars[off++] = '0';
+                chars[off++] = '0';
+                chars[off++] = '0';
+                chars[off++] = (char) ('a' + (ch - 10));
+                break;
+            case 16:
+            case 17:
+            case 18:
+            case 19:
+            case 20:
+            case 21:
+            case 22:
+            case 23:
+            case 24:
+            case 25:
+                chars[off++] = '\\';
+                chars[off++] = 'u';
+                chars[off++] = '0';
+                chars[off++] = '0';
+                chars[off++] = '1';
+                chars[off++] = (char) ('0' + (ch - 16));
+                break;
+            case 26:
+            case 27:
+            case 28:
+            case 29:
+            case 30:
+            case 31:
+                chars[off++] = '\\';
+                chars[off++] = 'u';
+                chars[off++] = '0';
+                chars[off++] = '0';
+                chars[off++] = '1';
+                chars[off++] = (char) ('a' + (ch - 26));
+                break;
+            default:
+                chars[off++] = ch;
+                break;
+        }
+        chars[off++] = quote;
+    }
+
     @Override
     public void writeRaw(char ch) {
         if (off == chars.length) {

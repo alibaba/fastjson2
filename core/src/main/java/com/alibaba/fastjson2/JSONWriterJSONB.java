@@ -215,6 +215,25 @@ final class JSONWriterJSONB
         bytes[off++] = b;
     }
 
+    public void writeChar(char ch) {
+        if (off == bytes.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+        bytes[off++] = BC_CHAR;
+        writeInt32(ch);
+    }
+
     @Override
     public void writeName(String name) {
         writeString(name);
@@ -252,11 +271,6 @@ final class JSONWriterJSONB
     @Override
     protected void write0(char ch) {
         throw new JSONException("unsupported operation");
-    }
-
-    @Override
-    public void writeString(char ch) {
-        writeString(new char[]{ch});
     }
 
     @Override
