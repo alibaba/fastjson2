@@ -33,13 +33,13 @@ final class FieldWriterCharValField<T>
         char value = (char) getFieldValue(object);
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeString(value);
+        jsonWriter.writeChar(value);
         return true;
     }
 
     @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         char value = (char) getFieldValue(object);
-        jsonWriter.writeString(value);
+        jsonWriter.writeChar(value);
     }
 }

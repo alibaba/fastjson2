@@ -38,7 +38,7 @@ final class FieldWriterCharMethod<T>
             return;
         }
 
-        jsonWriter.writeString(value.charValue());
+        jsonWriter.writeChar(value.charValue());
     }
 
     @Override
@@ -50,7 +50,7 @@ final class FieldWriterCharMethod<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeString(value.charValue());
+        jsonWriter.writeChar(value.charValue());
         return true;
     }
 }

@@ -963,7 +963,7 @@ public class ObjectWriterCreatorASM
             methodName = "writeBool";
             methodDesc = "(Z)V";
         } else if (fieldClass == char.class) {
-            methodName = "writeString";
+            methodName = "writeChar";
             methodDesc = "(C)V";
         } else if (fieldClass == byte.class) {
             methodName = "writeInt32";

@@ -537,6 +537,10 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
+    public void writeChar(char ch) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
     public abstract void writeRaw(char ch);
 
     public abstract void writeNameRaw(byte[] bytes);
@@ -846,12 +850,6 @@ public abstract class JSONWriter
 
     public void writeSymbol(String string) {
         writeString(string);
-    }
-
-    public void writeString(char ch) {
-        write0('"');
-        write0(ch);
-        write0('"');
     }
 
     public void writeString(char[] chars) {

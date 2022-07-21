@@ -197,6 +197,11 @@ public class JSONBDump {
                 jsonWriter.writeString(str);
                 return;
             }
+            case BC_CHAR: {
+                int intValue = readInt32Value();
+                jsonWriter.writeChar((char) intValue);
+                return;
+            }
             case BC_STR_UTF16: {
                 int strlen = readLength();
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16);

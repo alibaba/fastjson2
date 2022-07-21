@@ -17,6 +17,7 @@ import java.util.List;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 /**
+ * x92          # type_char int
  * x91          # binary len_int32 bytes
  * x92          # type [str] symbol_int32 jsonb
  * x93          # reference
@@ -74,6 +75,7 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
  */
 public interface JSONB {
     interface Constants {
+        byte BC_CHAR = -112;                    // 0x92
         byte BC_BINARY = -111;                  // 0x91
         byte BC_TYPED_ANY = -110;               // 0x92
         byte BC_REFERENCE = -109;               // 0x93

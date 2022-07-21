@@ -19,11 +19,9 @@ final class ObjectWriterImplCharacter
             return;
         }
 
-        if (jsonWriter.isWriteTypeInfo(object)) {
-            jsonWriter.writeTypeName(JSONB_TYPE_NAME_BYTES, JSONB_TYPE_HASH);
-        }
+        char ch = (Character) object;
 
-        jsonWriter.writeString(new char[]{(Character) object});
+        jsonWriter.writeChar(ch);
     }
 
     @Override
