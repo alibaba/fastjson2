@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -47,6 +48,16 @@ public class CharValue1Test {
                 assertEquals(1, str1.length());
                 assertEquals(ch, str1.charAt(0));
             }
+        }
+
+        for (int i = 0; i < chars.length; i++) {
+            JSONWriter jsonWriter = JSONWriter.ofJSONB();
+            char ch = chars[i];
+            jsonWriter.writeChar(ch);
+            jsonWriter.writeChar(ch);
+            byte[] bytes = jsonWriter.getBytes();
+            Character character = (Character) JSONB.parse(bytes);
+            assertEquals(ch, character.charValue());
         }
     }
 }
