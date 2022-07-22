@@ -123,6 +123,10 @@ class ConstructorFunction<T>
                     args[i] = arg;
                 } else {
                     flag |= (1 << i);
+                    Class<?> paramType = parameters[i].getType();
+                    if (paramType.isPrimitive()) {
+                        args[i] = TypeUtils.getDefaultValue(paramType);
+                    }
                 }
             }
             args[i] = flag;
