@@ -18,7 +18,8 @@ public class Issue565 {
         assertEquals("GRASS_SQUARE_FLOWER", resp.roomType);
     }
 
-    public class Response implements Serializable {
+    public class Response
+            implements Serializable {
         private static final long serialVersionUID = 7868798773717812999L;
         private String roomType;
         private List<AccountInfo> users;
@@ -74,5 +75,4 @@ public class Issue565 {
             this.users = users;
         }
     }
-
 }
