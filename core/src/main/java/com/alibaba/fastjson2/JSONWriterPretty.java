@@ -117,6 +117,7 @@ final class JSONWriterPretty
     public void startObject() {
         level++;
         jsonWriter.startObject = true;
+        startObject = true;
         write0('{');
         indent++;
         write0('\n');
