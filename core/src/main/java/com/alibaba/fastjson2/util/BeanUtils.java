@@ -77,9 +77,11 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (parameterCount > 0) {
+            if (parameterCount > 2) {
                 Class<?>[] parameterTypes = constructor.getParameterTypes();
-                if ("kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterCount - 1].getName())) {
+                if (parameterTypes[parameterCount - 2] == int.class &&
+                        "kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterCount - 1].getName())
+                ) {
                     beanInfo.markerConstructor = constructor;
                     continue;
                 }
