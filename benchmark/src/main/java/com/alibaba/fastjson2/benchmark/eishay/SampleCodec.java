@@ -8,6 +8,7 @@ public class SampleCodec {
     private static Sample sample;
     private static byte[] furyBytes;
     private static Fury fury;
+
     static {
         sample = new Sample();
         sample.populate(true);
@@ -20,9 +21,8 @@ public class SampleCodec {
 
     @Benchmark
     public Object fury_serialize() {
-       return fury.serialize(sample);
+        return fury.serialize(sample);
     }
-
 
     @Benchmark
     public Object fury_deserialize() {
