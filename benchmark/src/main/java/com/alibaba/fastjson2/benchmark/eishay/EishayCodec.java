@@ -97,10 +97,46 @@ public class EishayCodec {
         bh.consume(obj);
     }
 
+    public void deserialize_jsonbArrayMapping_perf() {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000 * 1000; ++i) {
+            deserialize_jsonbArrayMapping(BH);
+        }
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("jsonb millis : " + millis);
+        // zulu11.52.13  :
+        // zulu17.32.13  :
+        // zulu8.58.0.13 :
+    }
+
+    public void deserialize_jsonbArrayMapping_perf_test() {
+        for (int i = 0; i < 10; i++) {
+            deserialize_jsonbArrayMapping_perf();
+        }
+    }
+
     @Benchmark
     public void deserialize_fury(Blackhole bh) {
         MediaContent obj = (MediaContent) fury.deserialize(furyBytes);
         bh.consume(obj);
+    }
+
+    public void deserialize_fury_perf() {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000 * 1000; ++i) {
+            deserialize_fury(BH);
+        }
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("fury millis : " + millis);
+        // zulu11.52.13  :
+        // zulu17.32.13  :
+        // zulu8.58.0.13 :
+    }
+
+    public void deserialize_fury_perf_test() {
+        for (int i = 0; i < 10; i++) {
+            deserialize_fury_perf();
+        }
     }
 
 //    @Benchmark
@@ -176,6 +212,8 @@ public class EishayCodec {
 
 //        new EishayCodec().serialize_jsonb_arrayMapping_perf_test();
 //        new EishayCodec().serialize_fury_perf_test();
+//        new EishayCodec().deserialize_fury_perf_test();
+//        new EishayCodec().deserialize_jsonbArrayMapping_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayCodec.class.getName())
                 .exclude(EishayCodecOnlyJSONB.class.getName())
