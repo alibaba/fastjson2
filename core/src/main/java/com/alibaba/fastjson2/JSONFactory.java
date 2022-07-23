@@ -44,6 +44,17 @@ public final class JSONFactory {
         static volatile boolean STRING_CREATOR_ERROR;
     }
 
+    static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
+
+    static final class NameCacheEntry {
+        final String name;
+        final long value;
+        public NameCacheEntry(String name, long value) {
+            this.name = name;
+            this.value = value;
+        }
+    }
+
     static final BigDecimal LOW = BigDecimal.valueOf(-9007199254740991L);
     static final BigDecimal HIGH = BigDecimal.valueOf(9007199254740991L);
     static final BigInteger LOW_BIGINT = BigInteger.valueOf(-9007199254740991L);

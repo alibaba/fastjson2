@@ -17,6 +17,8 @@ import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.CACHE_BYTES;
 import static com.alibaba.fastjson2.JSONFactory.CACHE_THREAD;
+import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE;
+import static com.alibaba.fastjson2.JSONFactory.NameCacheEntry;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
@@ -34,7 +36,7 @@ class JSONReaderUTF8
     protected boolean nameAscii;
     protected int referenceBegin;
 
-    protected InputStream in;
+    protected final InputStream in;
 
     protected int cacheIndex = -1;
 
@@ -87,7 +89,7 @@ class JSONReaderUTF8
         this.bytes = bytes;
         this.offset = offset;
         this.length = length;
-        this.in = in;
+        this.in = null;
         this.start = offset;
         this.end = offset + length;
         next();
@@ -957,6 +959,98 @@ class JSONReaderUTF8
         int length = nameEnd - nameBegin;
         if (!nameEscape) {
             if (nameAscii) {
+                long nameValue = -1;
+                switch (length) {
+                    case 1:
+                        nameValue = bytes[nameBegin];
+                        break;
+                    case 2:
+                        nameValue
+                                = (bytes[nameBegin] << 8)
+                                + (bytes[nameBegin + 1]);
+                        break;
+                    case 3:
+                        nameValue
+                                = (bytes[nameBegin] << 16)
+                                + (bytes[nameBegin + 1] << 8)
+                                + (bytes[nameBegin + 2]);
+                        break;
+                    case 4:
+                        nameValue
+                                = (bytes[nameBegin] << 24)
+                                + (bytes[nameBegin + 1] << 16)
+                                + (bytes[nameBegin + 2] << 8)
+                                + (bytes[nameBegin + 3]);
+                        break;
+                    case 5:
+                        nameValue
+                                = (((long) bytes[nameBegin]) << 32)
+                                + (((long) bytes[nameBegin + 1]) << 24)
+                                + (((long) bytes[nameBegin + 2]) << 16)
+                                + (((long) bytes[nameBegin + 3]) << 8)
+                                + ((long) bytes[nameBegin + 4]);
+                        break;
+                    case 6:
+                        nameValue
+                                = (((long) bytes[nameBegin]) << 40)
+                                + (((long) bytes[nameBegin + 1]) << 32)
+                                + (((long) bytes[nameBegin + 2]) << 24)
+                                + (((long) bytes[nameBegin + 3]) << 16)
+                                + (((long) bytes[nameBegin + 4]) << 8)
+                                + ((long) bytes[nameBegin + 5]);
+                        break;
+                    case 7:
+                        nameValue
+                                = (((long) bytes[nameBegin]) << 48)
+                                + (((long) bytes[nameBegin + 1]) << 40)
+                                + (((long) bytes[nameBegin + 2]) << 32)
+                                + (((long) bytes[nameBegin + 3]) << 24)
+                                + (((long) bytes[nameBegin + 4]) << 16)
+                                + (((long) bytes[nameBegin + 5]) << 8)
+                                + ((long) bytes[nameBegin + 6]);
+                        break;
+                    case 8:
+                        nameValue
+                                = (((long) bytes[nameBegin]) << 56)
+                                + (((long) bytes[nameBegin + 1]) << 48)
+                                + (((long) bytes[nameBegin + 2]) << 40)
+                                + (((long) bytes[nameBegin + 3]) << 32)
+                                + (((long) bytes[nameBegin + 4]) << 24)
+                                + (((long) bytes[nameBegin + 5]) << 16)
+                                + (((long) bytes[nameBegin + 6]) << 8)
+                                + ((long) bytes[nameBegin + 7]);
+                        break;
+                }
+
+                if (nameValue != -1) {
+                    int indexMask = ((int) nameValue) & (NAME_CACHE.length - 1);
+                    NameCacheEntry entry = NAME_CACHE[indexMask];
+                    if (entry == null) {
+                        if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                            try {
+                                STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                            } catch (Throwable e) {
+                                STRING_CREATOR_ERROR = true;
+                            }
+                        }
+                        String name;
+                        if (STRING_CREATOR_JDK8 != null) {
+                            char[] chars = new char[length];
+                            for (int i = 0; i < length; ++i) {
+                                chars[i] = (char) bytes[nameBegin + i];
+                            }
+                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                        } else {
+                            name = new String(bytes, nameBegin, length, StandardCharsets.US_ASCII);
+                        }
+
+                        NAME_CACHE[indexMask] = new NameCacheEntry(name, nameValue);
+                        return name;
+                    } else if (entry.value == nameValue) {
+                        return entry.name;
+                    }
+                }
+
                 if (JDKUtils.JVM_VERSION == 8) {
                     if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
                         try {

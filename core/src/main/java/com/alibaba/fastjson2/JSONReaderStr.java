@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 final class JSONReaderStr
@@ -779,6 +780,160 @@ final class JSONReaderStr
         }
 
         if (!nameEscape) {
+            long nameValue = -1;
+            int c0, c1, c2, c3, c4, c5, c6, c7;
+            switch (nameLength) {
+                case 1:
+                    c0 = str.charAt(nameBegin);
+                    if ((c0 & 0xFF) == c0) {
+                        nameValue = c0;
+                    }
+                    break;
+                case 2:
+                    c0 = str.charAt(nameBegin);
+                    c1 = str.charAt(nameBegin + 1);
+                    if ((c0 & 0xFF) == c0 && (c1 & 0xFF) == c1) {
+                        nameValue
+                                = (c0 << 8)
+                                + c1;
+                    }
+                    break;
+                case 3:
+                    c0 = str.charAt(nameBegin);
+                    c1 = str.charAt(nameBegin + 1);
+                    c2 = str.charAt(nameBegin + 2);
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2) {
+                        nameValue
+                                = (c0 << 16)
+                                + (c1 << 8)
+                                + c2;
+                    }
+                    break;
+                case 4:
+                    c0 = str.charAt(nameBegin);
+                    c1 = str.charAt(nameBegin + 1);
+                    c2 = str.charAt(nameBegin + 2);
+                    c3 = str.charAt(nameBegin + 3);
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3) {
+                        nameValue
+                                = (c0 << 24)
+                                + (c1 << 16)
+                                + (c2 << 8)
+                                + c3;
+                    }
+                    break;
+                case 5:
+                    c0 = str.charAt(nameBegin);
+                    c1 = str.charAt(nameBegin + 1);
+                    c2 = str.charAt(nameBegin + 2);
+                    c3 = str.charAt(nameBegin + 3);
+                    c4 = str.charAt(nameBegin + 4);
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3
+                            && (c4 & 0xFF) == c4) {
+                        nameValue
+                                = (((long) c0) << 32)
+                                + (((long) c1) << 24)
+                                + (((long) c2) << 16)
+                                + (((long) c3) << 8)
+                                + ((long) c4);
+                    }
+                case 6:
+                    c0 = str.charAt(nameBegin);
+                    c1 = str.charAt(nameBegin + 1);
+                    c2 = str.charAt(nameBegin + 2);
+                    c3 = str.charAt(nameBegin + 3);
+                    c4 = str.charAt(nameBegin + 4);
+                    c5 = str.charAt(nameBegin + 5);
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3
+                            && (c4 & 0xFF) == c4
+                            && (c5 & 0xFF) == c5) {
+                        nameValue
+                                = (((long) c0) << 40)
+                                + (((long) c1) << 32)
+                                + (((long) c2) << 24)
+                                + (((long) c3) << 16)
+                                + (((long) c4) << 8)
+                                + ((long) c5);
+                    }
+                    break;
+                case 7:
+                    c0 = str.charAt(nameBegin);
+                    c1 = str.charAt(nameBegin + 1);
+                    c2 = str.charAt(nameBegin + 2);
+                    c3 = str.charAt(nameBegin + 3);
+                    c4 = str.charAt(nameBegin + 4);
+                    c5 = str.charAt(nameBegin + 5);
+                    c6 = str.charAt(nameBegin + 6);
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3
+                            && (c4 & 0xFF) == c4
+                            && (c5 & 0xFF) == c5
+                            && (c6 & 0xFF) == c6) {
+                        nameValue
+                                = (((long) c0) << 48)
+                                + (((long) c1) << 40)
+                                + (((long) c2) << 32)
+                                + (((long) c3) << 24)
+                                + (((long) c4) << 16)
+                                + (((long) c5) << 8)
+                                + ((long) c6);
+                    }
+                    break;
+                case 8:
+                    c0 = str.charAt(nameBegin);
+                    c1 = str.charAt(nameBegin + 1);
+                    c2 = str.charAt(nameBegin + 2);
+                    c3 = str.charAt(nameBegin + 3);
+                    c4 = str.charAt(nameBegin + 4);
+                    c5 = str.charAt(nameBegin + 5);
+                    c6 = str.charAt(nameBegin + 6);
+                    c7 = str.charAt(nameBegin + 7);
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3
+                            && (c4 & 0xFF) == c4
+                            && (c5 & 0xFF) == c5
+                            && (c6 & 0xFF) == c6
+                            && (c7 & 0xFF) == c7) {
+                        nameValue
+                                = (((long) c0) << 56)
+                                + (((long) c1) << 48)
+                                + (((long) c2) << 40)
+                                + (((long) c3) << 32)
+                                + (((long) c4) << 24)
+                                + (((long) c5) << 16)
+                                + (((long) c6) << 8)
+                                + ((long) c7);
+                    }
+                    break;
+            }
+
+            if (nameValue != -1) {
+                int indexMask = ((int) nameValue) & (NAME_CACHE.length - 1);
+                JSONFactory.NameCacheEntry entry = NAME_CACHE[indexMask];
+                if (entry == null) {
+                    String name = this.str.substring(nameBegin, nameEnd);
+                    NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(name, nameValue);
+                    return name;
+                } else if (entry.value == nameValue) {
+                    return entry.name;
+                }
+            }
+
             return this.str.substring(nameBegin, nameEnd);
         }
 
