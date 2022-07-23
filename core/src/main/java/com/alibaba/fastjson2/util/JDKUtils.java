@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.util;
 import java.lang.invoke.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.nio.ByteOrder;
 import java.util.function.*;
 
 public class JDKUtils {
@@ -12,12 +13,12 @@ public class JDKUtils {
     static final long FIELD_STRING_VALUE_OFFSET;
     static volatile boolean FIELD_STRING_ERROR;
 
-    static final Class CLASS_SQL_DATASOURCE;
-    static final Class CLASS_SQL_ROW_SET;
+    static final Class<?> CLASS_SQL_DATASOURCE;
+    static final Class<?> CLASS_SQL_ROW_SET;
     public static final boolean HAS_SQL;
 
     public static final Class CLASS_TRANSIENT;
-    public static final byte BIG_ENDIAN;
+    public static final boolean BIG_ENDIAN;
 
     public static final boolean UNSAFE_SUPPORT;
 
@@ -30,7 +31,6 @@ public class JDKUtils {
     public static final Function<byte[], String> UNSAFE_ASCII_CREATOR;
 
     static {
-        boolean android = false;
         boolean openj9 = false;
         int jvmVersion = -1;
         try {
@@ -99,28 +99,7 @@ public class JDKUtils {
         }).test(null);
         UNSAFE_SUPPORT = unsafeSupport;
 
-        Boolean bigEndian = null;
-        if (JDKUtils.JVM_VERSION > 8 && UNSAFE_SUPPORT) {
-            Class clazz;
-            try {
-                clazz = Class.forName("java.lang.StringUTF16");
-                Field field = clazz.getDeclaredField("HI_BYTE_SHIFT");
-                long fieldOffset = UnsafeUtils.UNSAFE.staticFieldOffset(field);
-                int hiByteShift = UnsafeUtils.UNSAFE.getInt(clazz, fieldOffset);
-                if (hiByteShift == 8) {
-                    bigEndian = true;
-                } else {
-                    if (hiByteShift == 0) {
-                        bigEndian = false;
-                    }
-                }
-            } catch (Exception ignored) {
-                ignored.printStackTrace();
-            }
-        }
-        BIG_ENDIAN = bigEndian == null
-                ? -1
-                : bigEndian.booleanValue() ? (byte) 1 : (byte) 0;
+        BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
 
         Function<byte[], String> utf16Creator = null, asciiCreator = null;
         if (unsafeSupport) {
@@ -136,7 +115,7 @@ public class JDKUtils {
         UNSAFE_ASCII_CREATOR = asciiCreator;
     }
 
-    public static boolean isSQLDataSourceOrRowSet(Class type) {
+    public static boolean isSQLDataSourceOrRowSet(Class<?> type) {
         return (CLASS_SQL_DATASOURCE != null && CLASS_SQL_DATASOURCE.isAssignableFrom(type))
                 || (CLASS_SQL_ROW_SET != null && CLASS_SQL_ROW_SET.isAssignableFrom(type));
     }
