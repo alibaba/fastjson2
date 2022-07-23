@@ -1,9 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.function.Function;
@@ -31,15 +31,15 @@ public final class ObjectReaderInterface<T>
         }
 
         JSONObject object = jsonReader.read(JSONObject.class);
-        // GraalVM not support
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+//        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        throw new JSONException("GraalVM not support Proxy");
     }
 
     @Override
     public T createInstance(long features) {
         JSONObject object = new JSONObject();
-        // GraalVM not support
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+//        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        throw new JSONException("GraalVM not support Proxy");
     }
 
     @Override
@@ -50,7 +50,7 @@ public final class ObjectReaderInterface<T>
         } else {
             object = new JSONObject(map);
         }
-        // GraalVM not support
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+//        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        throw new JSONException("GraalVM not support Proxy");
     }
 }
