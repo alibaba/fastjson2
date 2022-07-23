@@ -574,9 +574,9 @@ final class JSONWriterJSONB
                     }
                 }
 
-                if (utf16 && (JDKUtils.BIG_ENDIAN == 1 || JDKUtils.BIG_ENDIAN == 0)) {
+                if (utf16) {
                     ensureCapacity(off + 5 + value.length);
-                    bytes[off++] = JDKUtils.BIG_ENDIAN == 1 ? BC_STR_UTF16BE : BC_STR_UTF16LE;
+                    bytes[off++] = JDKUtils.BIG_ENDIAN ? BC_STR_UTF16BE : BC_STR_UTF16LE;
                     writeInt32(value.length);
                     System.arraycopy(value, 0, bytes, off, value.length);
                     off += value.length;

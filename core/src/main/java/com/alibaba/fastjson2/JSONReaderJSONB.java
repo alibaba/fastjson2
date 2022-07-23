@@ -364,7 +364,7 @@ final class JSONReaderJSONB
             case BC_STR_UTF8: {
                 int strlen = readLength();
 
-                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
+                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                     if (valueBytes == null) {
                         valueBytes = CACHE_BYTES.getAndSet(cachedIndex, null);
                     }
@@ -402,7 +402,7 @@ final class JSONReaderJSONB
                 int strlen = readLength();
 
                 String str;
-                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
+                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
@@ -417,7 +417,7 @@ final class JSONReaderJSONB
                 int strlen = readLength();
 
                 String str;
-                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 1) {
+                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
@@ -1560,7 +1560,7 @@ final class JSONReaderJSONB
             strlen = readLength();
             strBegin = offset;
 
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                 if (valueBytes == null) {
                     valueBytes = CACHE_BYTES.getAndSet(cachedIndex, null);
                 }
@@ -1592,7 +1592,7 @@ final class JSONReaderJSONB
             strlen = readLength();
             strBegin = offset;
 
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
                 str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
@@ -1604,7 +1604,7 @@ final class JSONReaderJSONB
             strlen = readLength();
             strBegin = offset;
 
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 1) {
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
                 str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
@@ -1720,7 +1720,7 @@ final class JSONReaderJSONB
             strlen = readLength();
             strBegin = offset;
 
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                 if (valueBytes == null) {
                     valueBytes = CACHE_BYTES.getAndSet(cachedIndex, null);
                 }
@@ -1762,7 +1762,7 @@ final class JSONReaderJSONB
                 return "";
             }
 
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
                 str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
@@ -1779,7 +1779,7 @@ final class JSONReaderJSONB
             strlen = readLength();
             strBegin = offset;
 
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 1) {
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
                 str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
