@@ -20,6 +20,9 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.CACHE_BYTES;
+import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE;
+import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
+import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 final class JSONReaderJSONB
@@ -249,12 +252,7 @@ final class JSONReaderJSONB
                     break;
                 }
 
-                String name;
-                if (type == BC_SYMBOL) {
-                    name = readFieldName();
-                } else {
-                    name = readString();
-                }
+                String name = readFieldName();
 
                 if (isReference()) {
                     String reference = readReference();
@@ -1512,11 +1510,106 @@ final class JSONReaderJSONB
         Charset charset = null;
         String str = null;
         if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
+            long nameValue = -1;
+
             if (strtype == BC_STR_ASCII) {
                 strlen = readLength();
                 strBegin = offset;
             } else {
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
+
+                switch (strlen) {
+                    case 1:
+                        nameValue = bytes[offset];
+                        break;
+                    case 2:
+                        nameValue
+                                = (bytes[offset] << 8)
+                                + (bytes[offset + 1]);
+                        break;
+                    case 3:
+                        nameValue
+                                = (bytes[offset] << 16)
+                                + (bytes[offset + 1] << 8)
+                                + (bytes[offset + 2]);
+                        break;
+                    case 4:
+                        nameValue
+                                = (bytes[offset] << 24)
+                                + (bytes[offset + 1] << 16)
+                                + (bytes[offset + 2] << 8)
+                                + (bytes[offset + 3]);
+                        break;
+                    case 5:
+                        nameValue
+                                = (((long) bytes[offset]) << 32)
+                                + (((long) bytes[offset + 1]) << 24)
+                                + (((long) bytes[offset + 2]) << 16)
+                                + (((long) bytes[offset + 3]) << 8)
+                                + ((long) bytes[offset + 4]);
+                        break;
+                    case 6:
+                        nameValue
+                                = (((long) bytes[offset]) << 40)
+                                + (((long) bytes[offset + 1]) << 32)
+                                + (((long) bytes[offset + 2]) << 24)
+                                + (((long) bytes[offset + 3]) << 16)
+                                + (((long) bytes[offset + 4]) << 8)
+                                + ((long) bytes[offset + 5]);
+                        break;
+                    case 7:
+                        nameValue
+                                = (((long) bytes[offset]) << 48)
+                                + (((long) bytes[offset + 1]) << 40)
+                                + (((long) bytes[offset + 2]) << 32)
+                                + (((long) bytes[offset + 3]) << 24)
+                                + (((long) bytes[offset + 4]) << 16)
+                                + (((long) bytes[offset + 5]) << 8)
+                                + ((long) bytes[offset + 6]);
+                        break;
+                    case 8:
+                        nameValue
+                                = (((long) bytes[offset]) << 56)
+                                + (((long) bytes[offset + 1]) << 48)
+                                + (((long) bytes[offset + 2]) << 40)
+                                + (((long) bytes[offset + 3]) << 32)
+                                + (((long) bytes[offset + 4]) << 24)
+                                + (((long) bytes[offset + 5]) << 16)
+                                + (((long) bytes[offset + 6]) << 8)
+                                + ((long) bytes[offset + 7]);
+                        break;
+                }
+            }
+
+            if (nameValue != -1) {
+                int indexMask = ((int) nameValue) & (NAME_CACHE.length - 1);
+                JSONFactory.NameCacheEntry entry = NAME_CACHE[indexMask];
+                if (entry == null) {
+                    if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                        try {
+                            STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                        } catch (Throwable e) {
+                            STRING_CREATOR_ERROR = true;
+                        }
+                    }
+                    String name;
+                    if (STRING_CREATOR_JDK8 != null) {
+                        char[] chars = new char[strlen];
+                        for (int i = 0; i < strlen; ++i) {
+                            chars[i] = (char) bytes[offset + i];
+                        }
+                        name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                    } else {
+                        name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                    }
+
+                    NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(name, nameValue);
+                    offset += strlen;
+                    return name;
+                } else if (entry.value == nameValue) {
+                    offset += strlen;
+                    return entry.name;
+                }
             }
 
             if (JDKUtils.JVM_VERSION == 8 && strlen >= 0) {
