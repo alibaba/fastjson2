@@ -19,8 +19,8 @@ public class EishayParseTreeStringTest {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("fastjson2 millis : " + millis);
-        // zulu17.32.13 :
-        // zulu11.52.13 :
+        // zulu17.32.13 : 644
+        // zulu11.52.13 : 880
         // zulu8.58.0.13 : 725 666
     }
 
@@ -38,13 +38,13 @@ public class EishayParseTreeStringTest {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("jackson millis : " + millis);
-        // zulu17.32.13 :
-        // zulu11.52.13 :
-        // zulu8.58.0.13 :
+        // zulu17.32.13 : 1212
+        // zulu11.52.13 : 1300
+        // zulu8.58.0.13 : 1223
     }
 
     public static void main(String[] args) throws Exception {
         fastjson2_perf_test();
-        jackson_perf_test();
+//        jackson_perf_test();
     }
 }
