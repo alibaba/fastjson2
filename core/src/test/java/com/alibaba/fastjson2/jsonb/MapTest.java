@@ -60,18 +60,35 @@ public class MapTest {
 
     @Test
     public void test2() {
+        long[] starts = new long[] {
+                10_000,
+                100_000,
+                1_000_000,
+                10_000_000,
+                100_000_000,
+                1_000_000_000,
+                10_000_000_000L,
+                100_000_000_000L,
+                1_000_000_000_000L,
+                10_000_000_000_000L,
+                100_000_000_000_000L,
+                1_000_000_000_000_000L,
+                10_000_000_000_000_000L,
+                100_000_000_000_000_000L,
+                1_000_000_000_000_000_000L,
+        };
+
         JSONObject object = new JSONObject();
-        for (int i = 10000; i < 20000; i++) {
-            object.put(Integer.toString(i), i);
-        }
-        for (int i = 100000; i < 110000; i++) {
-            object.put(Integer.toString(i), i);
-        }
-        for (int i = 1000000; i < 1010000; i++) {
-            object.put(Integer.toString(i), i);
-        }
-        for (int i = 10000000; i < 10010000; i++) {
-            object.put(Integer.toString(i), i);
+        for (int i = 0; i < starts.length; i++) {
+            long start = starts[i];
+            for (long j = start; j < start + 10000; j++) {
+                String key = Long.toString(j);
+                if (j >= Integer.MIN_VALUE && j <= Integer.MAX_VALUE) {
+                    object.put(key, (int) j);
+                } else {
+                    object.put(key, j);
+                }
+            }
         }
 
         String str = JSON.toJSONString(object);

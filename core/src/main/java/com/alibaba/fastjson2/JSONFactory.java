@@ -45,6 +45,7 @@ public final class JSONFactory {
     }
 
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
+    static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
 
     static final class NameCacheEntry {
         final String name;
@@ -52,6 +53,17 @@ public final class JSONFactory {
         public NameCacheEntry(String name, long value) {
             this.name = name;
             this.value = value;
+        }
+    }
+
+    static final class NameCacheEntry2 {
+        final String name;
+        final long value0;
+        final long value1;
+        public NameCacheEntry2(String name, long value0, long value1) {
+            this.name = name;
+            this.value0 = value0;
+            this.value1 = value1;
         }
     }
 

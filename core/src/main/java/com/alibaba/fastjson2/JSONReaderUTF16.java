@@ -1144,20 +1144,20 @@ final class JSONReaderUTF16
         }
 
         if (!nameEscape) {
-            long nameValue = -1;
-            int c0, c1, c2, c3, c4, c5, c6, c7;
+            long nameValue0 = -1, nameValue1 = -1;
+            int c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15;
             switch (nameLength) {
                 case 1:
                     c0 = chars[nameBegin];
                     if ((c0 & 0xFF) == c0) {
-                        nameValue = c0;
+                        nameValue0 = c0;
                     }
                     break;
                 case 2:
                     c0 = chars[nameBegin];
                     c1 = chars[nameBegin + 1];
                     if ((c0 & 0xFF) == c0 && (c1 & 0xFF) == c1) {
-                        nameValue
+                        nameValue0
                                 = (c0 << 8)
                                 + c1;
                     }
@@ -1169,7 +1169,7 @@ final class JSONReaderUTF16
                     if ((c0 & 0xFF) == c0
                             && (c1 & 0xFF) == c1
                             && (c2 & 0xFF) == c2) {
-                        nameValue
+                        nameValue0
                                 = (c0 << 16)
                                 + (c1 << 8)
                                 + c2;
@@ -1184,7 +1184,7 @@ final class JSONReaderUTF16
                             && (c1 & 0xFF) == c1
                             && (c2 & 0xFF) == c2
                             && (c3 & 0xFF) == c3) {
-                        nameValue
+                        nameValue0
                                 = (c0 << 24)
                                 + (c1 << 16)
                                 + (c2 << 8)
@@ -1202,7 +1202,7 @@ final class JSONReaderUTF16
                             && (c2 & 0xFF) == c2
                             && (c3 & 0xFF) == c3
                             && (c4 & 0xFF) == c4) {
-                        nameValue
+                        nameValue0
                                 = (((long) c0) << 32)
                                 + (((long) c1) << 24)
                                 + (((long) c2) << 16)
@@ -1222,7 +1222,7 @@ final class JSONReaderUTF16
                             && (c3 & 0xFF) == c3
                             && (c4 & 0xFF) == c4
                             && (c5 & 0xFF) == c5) {
-                        nameValue
+                        nameValue0
                                 = (((long) c0) << 40)
                                 + (((long) c1) << 32)
                                 + (((long) c2) << 24)
@@ -1246,7 +1246,7 @@ final class JSONReaderUTF16
                             && (c4 & 0xFF) == c4
                             && (c5 & 0xFF) == c5
                             && (c6 & 0xFF) == c6) {
-                        nameValue
+                        nameValue0
                                 = (((long) c0) << 48)
                                 + (((long) c1) << 40)
                                 + (((long) c2) << 32)
@@ -1273,7 +1273,7 @@ final class JSONReaderUTF16
                             && (c5 & 0xFF) == c5
                             && (c6 & 0xFF) == c6
                             && (c7 & 0xFF) == c7) {
-                        nameValue
+                        nameValue0
                                 = (((long) c0) << 56)
                                 + (((long) c1) << 48)
                                 + (((long) c2) << 40)
@@ -1284,22 +1284,379 @@ final class JSONReaderUTF16
                                 + ((long) c7);
                     }
                     break;
+                case 9:
+                    c0 = chars[nameBegin];
+                    c1 = chars[nameBegin + 1];
+                    c2 = chars[nameBegin + 2];
+                    c3 = chars[nameBegin + 3];
+                    c4 = chars[nameBegin + 4];
+                    c5 = chars[nameBegin + 5];
+                    c6 = chars[nameBegin + 6];
+                    c7 = chars[nameBegin + 7];
+                    c8 = chars[nameBegin + 8];
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3
+                            && (c4 & 0xFF) == c4
+                            && (c5 & 0xFF) == c5
+                            && (c6 & 0xFF) == c6
+                            && (c7 & 0xFF) == c7
+                            && (c8 & 0xFF) == c8) {
+                        nameValue0 = c0;
+                        nameValue1
+                                = (((long) c1) << 56)
+                                + (((long) c2) << 48)
+                                + (((long) c3) << 40)
+                                + (((long) c4) << 32)
+                                + (((long) c5) << 24)
+                                + (((long) c6) << 16)
+                                + (((long) c7) << 8)
+                                + ((long) c8);
+                    }
+                    break;
+                case 10:
+                    c0 = chars[nameBegin];
+                    c1 = chars[nameBegin + 1];
+                    c2 = chars[nameBegin + 2];
+                    c3 = chars[nameBegin + 3];
+                    c4 = chars[nameBegin + 4];
+                    c5 = chars[nameBegin + 5];
+                    c6 = chars[nameBegin + 6];
+                    c7 = chars[nameBegin + 7];
+                    c8 = chars[nameBegin + 8];
+                    c9 = chars[nameBegin + 9];
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3
+                            && (c4 & 0xFF) == c4
+                            && (c5 & 0xFF) == c5
+                            && (c6 & 0xFF) == c6
+                            && (c7 & 0xFF) == c7
+                            && (c8 & 0xFF) == c8
+                            && (c9 & 0xFF) == c9) {
+                        nameValue0 = c0 << 8
+                                + c1;
+                        nameValue1
+                                = (((long) c2) << 56)
+                                + (((long) c3) << 48)
+                                + (((long) c4) << 40)
+                                + (((long) c5) << 32)
+                                + (((long) c6) << 24)
+                                + (((long) c7) << 16)
+                                + (((long) c8) << 8)
+                                + ((long) c9);
+                    }
+                    break;
+                case 11:
+                    c0 = chars[nameBegin];
+                    c1 = chars[nameBegin + 1];
+                    c2 = chars[nameBegin + 2];
+                    c3 = chars[nameBegin + 3];
+                    c4 = chars[nameBegin + 4];
+                    c5 = chars[nameBegin + 5];
+                    c6 = chars[nameBegin + 6];
+                    c7 = chars[nameBegin + 7];
+                    c8 = chars[nameBegin + 8];
+                    c9 = chars[nameBegin + 9];
+                    c10 = chars[nameBegin + 10];
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3
+                            && (c4 & 0xFF) == c4
+                            && (c5 & 0xFF) == c5
+                            && (c6 & 0xFF) == c6
+                            && (c7 & 0xFF) == c7
+                            && (c8 & 0xFF) == c8
+                            && (c9 & 0xFF) == c9
+                            && (c10 & 0xFF) == c10) {
+                        nameValue0
+                                = c0 << 16
+                                + (c1 << 8)
+                                + c2;
+                        nameValue1
+                                = (((long) c3) << 56)
+                                + (((long) c4) << 48)
+                                + (((long) c5) << 40)
+                                + (((long) c6) << 32)
+                                + (((long) c7) << 24)
+                                + (((long) c8) << 16)
+                                + (((long) c9) << 8)
+                                + ((long) c10);
+                    }
+                    break;
+                case 12:
+                    c0 = chars[nameBegin];
+                    c1 = chars[nameBegin + 1];
+                    c2 = chars[nameBegin + 2];
+                    c3 = chars[nameBegin + 3];
+                    c4 = chars[nameBegin + 4];
+                    c5 = chars[nameBegin + 5];
+                    c6 = chars[nameBegin + 6];
+                    c7 = chars[nameBegin + 7];
+                    c8 = chars[nameBegin + 8];
+                    c9 = chars[nameBegin + 9];
+                    c10 = chars[nameBegin + 10];
+                    c11 = chars[nameBegin + 11];
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3
+                            && (c4 & 0xFF) == c4
+                            && (c5 & 0xFF) == c5
+                            && (c6 & 0xFF) == c6
+                            && (c7 & 0xFF) == c7
+                            && (c8 & 0xFF) == c8
+                            && (c9 & 0xFF) == c9
+                            && (c10 & 0xFF) == c10
+                            && (c11 & 0xFF) == c11) {
+                        nameValue0
+                                = c0 << 24
+                                + (c1 << 16)
+                                + (c2 << 8)
+                                + c3;
+                        nameValue1
+                                = (((long) c4) << 56)
+                                + (((long) c5) << 48)
+                                + (((long) c6) << 40)
+                                + (((long) c7) << 32)
+                                + (((long) c8) << 24)
+                                + (((long) c9) << 16)
+                                + (((long) c10) << 8)
+                                + ((long) c11);
+                    }
+                    break;
+                case 13:
+                    c0 = chars[nameBegin];
+                    c1 = chars[nameBegin + 1];
+                    c2 = chars[nameBegin + 2];
+                    c3 = chars[nameBegin + 3];
+                    c4 = chars[nameBegin + 4];
+                    c5 = chars[nameBegin + 5];
+                    c6 = chars[nameBegin + 6];
+                    c7 = chars[nameBegin + 7];
+                    c8 = chars[nameBegin + 8];
+                    c9 = chars[nameBegin + 9];
+                    c10 = chars[nameBegin + 10];
+                    c11 = chars[nameBegin + 11];
+                    c12 = chars[nameBegin + 12];
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3
+                            && (c4 & 0xFF) == c4
+                            && (c5 & 0xFF) == c5
+                            && (c6 & 0xFF) == c6
+                            && (c7 & 0xFF) == c7
+                            && (c8 & 0xFF) == c8
+                            && (c9 & 0xFF) == c9
+                            && (c10 & 0xFF) == c10
+                            && (c11 & 0xFF) == c11
+                            && (c12 & 0xFF) == c12) {
+                        nameValue0
+                                = (((long) c0) << 32)
+                                + (((long) c1) << 24)
+                                + (((long) c2) << 16)
+                                + (((long) c3) << 8)
+                                + ((long) c4);
+                        nameValue1
+                                = (((long) c5) << 56)
+                                + (((long) c6) << 48)
+                                + (((long) c7) << 40)
+                                + (((long) c8) << 32)
+                                + (((long) c9) << 24)
+                                + (((long) c10) << 16)
+                                + (((long) c11) << 8)
+                                + ((long) c12);
+                    }
+                    break;
+                case 14:
+                    c0 = chars[nameBegin];
+                    c1 = chars[nameBegin + 1];
+                    c2 = chars[nameBegin + 2];
+                    c3 = chars[nameBegin + 3];
+                    c4 = chars[nameBegin + 4];
+                    c5 = chars[nameBegin + 5];
+                    c6 = chars[nameBegin + 6];
+                    c7 = chars[nameBegin + 7];
+                    c8 = chars[nameBegin + 8];
+                    c9 = chars[nameBegin + 9];
+                    c10 = chars[nameBegin + 10];
+                    c11 = chars[nameBegin + 11];
+                    c12 = chars[nameBegin + 12];
+                    c13 = chars[nameBegin + 13];
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3
+                            && (c4 & 0xFF) == c4
+                            && (c5 & 0xFF) == c5
+                            && (c6 & 0xFF) == c6
+                            && (c7 & 0xFF) == c7
+                            && (c8 & 0xFF) == c8
+                            && (c9 & 0xFF) == c9
+                            && (c10 & 0xFF) == c10
+                            && (c11 & 0xFF) == c11
+                            && (c12 & 0xFF) == c12
+                            && (c13 & 0xFF) == c13) {
+                        nameValue0
+                                = (((long) c0) << 40)
+                                + (((long) c1) << 32)
+                                + (((long) c2) << 24)
+                                + (((long) c3) << 16)
+                                + (((long) c4) << 8)
+                                + ((long) c5);
+                        nameValue1
+                                = (((long) c6) << 56)
+                                + (((long) c7) << 48)
+                                + (((long) c8) << 40)
+                                + (((long) c9) << 32)
+                                + (((long) c10) << 24)
+                                + (((long) c11) << 16)
+                                + (((long) c12) << 8)
+                                + ((long) c13);
+                    }
+                    break;
+                case 15:
+                    c0 = chars[nameBegin];
+                    c1 = chars[nameBegin + 1];
+                    c2 = chars[nameBegin + 2];
+                    c3 = chars[nameBegin + 3];
+                    c4 = chars[nameBegin + 4];
+                    c5 = chars[nameBegin + 5];
+                    c6 = chars[nameBegin + 6];
+                    c7 = chars[nameBegin + 7];
+                    c8 = chars[nameBegin + 8];
+                    c9 = chars[nameBegin + 9];
+                    c10 = chars[nameBegin + 10];
+                    c11 = chars[nameBegin + 11];
+                    c12 = chars[nameBegin + 12];
+                    c13 = chars[nameBegin + 13];
+                    c14 = chars[nameBegin + 14];
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3
+                            && (c4 & 0xFF) == c4
+                            && (c5 & 0xFF) == c5
+                            && (c6 & 0xFF) == c6
+                            && (c7 & 0xFF) == c7
+                            && (c8 & 0xFF) == c8
+                            && (c9 & 0xFF) == c9
+                            && (c10 & 0xFF) == c10
+                            && (c11 & 0xFF) == c11
+                            && (c12 & 0xFF) == c12
+                            && (c13 & 0xFF) == c13
+                            && (c14 & 0xFF) == c14) {
+                        nameValue0
+                                = (((long) c0) << 48)
+                                + (((long) c1) << 40)
+                                + (((long) c2) << 32)
+                                + (((long) c3) << 24)
+                                + (((long) c4) << 16)
+                                + (((long) c5) << 8)
+                                + ((long) c6);
+                        nameValue1
+                                = (((long) c7) << 56)
+                                + (((long) c8) << 48)
+                                + (((long) c9) << 40)
+                                + (((long) c10) << 32)
+                                + (((long) c11) << 24)
+                                + (((long) c12) << 16)
+                                + (((long) c13) << 8)
+                                + ((long) c14);
+                    }
+                    break;
+                case 16:
+                    c0 = chars[nameBegin];
+                    c1 = chars[nameBegin + 1];
+                    c2 = chars[nameBegin + 2];
+                    c3 = chars[nameBegin + 3];
+                    c4 = chars[nameBegin + 4];
+                    c5 = chars[nameBegin + 5];
+                    c6 = chars[nameBegin + 6];
+                    c7 = chars[nameBegin + 7];
+                    c8 = chars[nameBegin + 8];
+                    c9 = chars[nameBegin + 9];
+                    c10 = chars[nameBegin + 10];
+                    c11 = chars[nameBegin + 11];
+                    c12 = chars[nameBegin + 12];
+                    c13 = chars[nameBegin + 13];
+                    c14 = chars[nameBegin + 14];
+                    c15 = chars[nameBegin + 15];
+                    if ((c0 & 0xFF) == c0
+                            && (c1 & 0xFF) == c1
+                            && (c2 & 0xFF) == c2
+                            && (c3 & 0xFF) == c3
+                            && (c4 & 0xFF) == c4
+                            && (c5 & 0xFF) == c5
+                            && (c6 & 0xFF) == c6
+                            && (c7 & 0xFF) == c7
+                            && (c8 & 0xFF) == c8
+                            && (c9 & 0xFF) == c9
+                            && (c10 & 0xFF) == c10
+                            && (c11 & 0xFF) == c11
+                            && (c12 & 0xFF) == c12
+                            && (c13 & 0xFF) == c13
+                            && (c14 & 0xFF) == c14
+                            && (c15 & 0xFF) == c15) {
+                        nameValue0
+                                = (((long) c0) << 56)
+                                + (((long) c1) << 48)
+                                + (((long) c2) << 40)
+                                + (((long) c3) << 32)
+                                + (((long) c4) << 24)
+                                + (((long) c5) << 16)
+                                + (((long) c6) << 8)
+                                + ((long) c7);
+                        nameValue1
+                                = (((long) c8) << 56)
+                                + (((long) c9) << 48)
+                                + (((long) c10) << 40)
+                                + (((long) c11) << 32)
+                                + (((long) c12) << 24)
+                                + (((long) c13) << 16)
+                                + (((long) c14) << 8)
+                                + ((long) c15);
+                    }
+                    break;
+                default:
+                    break;
             }
 
-            if (nameValue != -1) {
-                int indexMask = ((int) nameValue) & (NAME_CACHE.length - 1);
-                NameCacheEntry entry = NAME_CACHE[indexMask];
-                if (entry == null) {
-                    String name;
-                    if (this.str != null) {
-                        name = this.str.substring(nameBegin, nameEnd);
-                    } else {
-                        name = new String(chars, nameBegin, nameEnd - nameBegin);
+            if (nameValue0 != -1) {
+                if (nameValue1 != -1) {
+                    int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
+                    NameCacheEntry2 entry = NAME_CACHE2[indexMask];
+                    if (entry == null) {
+                        String name;
+                        if (this.str != null) {
+                            name = this.str.substring(nameBegin, nameEnd);
+                        } else {
+                            name = new String(chars, nameBegin, nameEnd - nameBegin);
+                        }
+                        NAME_CACHE2[indexMask] = new NameCacheEntry2(name, nameValue0, nameValue1);
+                        return name;
+                    } else if (entry.value0 == nameValue0 && entry.value0 == nameValue1) {
+                        return entry.name;
                     }
-                    NAME_CACHE[indexMask] = new NameCacheEntry(name, nameValue);
-                    return name;
-                } else if (entry.value == nameValue) {
-                    return entry.name;
+                } else {
+                    int indexMask = ((int) nameValue0) & (NAME_CACHE.length - 1);
+                    NameCacheEntry entry = NAME_CACHE[indexMask];
+                    if (entry == null) {
+                        String name;
+                        if (this.str != null) {
+                            name = this.str.substring(nameBegin, nameEnd);
+                        } else {
+                            name = new String(chars, nameBegin, nameEnd - nameBegin);
+                        }
+                        NAME_CACHE[indexMask] = new NameCacheEntry(name, nameValue0);
+                        return name;
+                    } else if (entry.value == nameValue0) {
+                        return entry.name;
+                    }
                 }
             }
 
