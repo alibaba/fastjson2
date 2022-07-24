@@ -763,15 +763,17 @@ final class JSONReaderASCII
                                 STRING_CREATOR_ERROR = true;
                             }
                         }
+
+                        char[] chars = new char[length];
+                        for (int i = 0; i < length; ++i) {
+                            chars[i] = (char) (bytes[nameBegin + i] & 0xFF);
+                        }
+
                         String name;
                         if (STRING_CREATOR_JDK8 != null) {
-                            char[] chars = new char[length];
-                            for (int i = 0; i < length; ++i) {
-                                chars[i] = (char) bytes[nameBegin + i];
-                            }
                             name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         } else {
-                            name = new String(bytes, nameBegin, length, StandardCharsets.US_ASCII);
+                            name = new String(chars);
                         }
 
                         NAME_CACHE2[indexMask] = new JSONFactory.NameCacheEntry2(name, nameValue0, nameValue1);
@@ -790,15 +792,17 @@ final class JSONReaderASCII
                                 STRING_CREATOR_ERROR = true;
                             }
                         }
+
+                        char[] chars = new char[length];
+                        for (int i = 0; i < length; ++i) {
+                            chars[i] = (char) (bytes[nameBegin + i] & 0xFF);
+                        }
+
                         String name;
                         if (STRING_CREATOR_JDK8 != null) {
-                            char[] chars = new char[length];
-                            for (int i = 0; i < length; ++i) {
-                                chars[i] = (char) bytes[nameBegin + i];
-                            }
                             name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         } else {
-                            name = new String(bytes, nameBegin, length, StandardCharsets.US_ASCII);
+                            name = new String(chars);
                         }
 
                         NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(name, nameValue0);

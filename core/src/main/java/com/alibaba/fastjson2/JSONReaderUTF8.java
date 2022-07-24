@@ -2264,6 +2264,11 @@ class JSONReaderUTF8
                     if (ch == '}' || ch == ']' || ch == '{' || ch == '[') {
                         break;
                     }
+
+                    if (ch == '\"' || ch == '\'') {
+                        throw new JSONException("error, offset " + offset + ", char " + ch);
+                    }
+
                     if (ch == ',') {
                         comma = true;
                         if (offset >= end) {
@@ -2285,6 +2290,12 @@ class JSONReaderUTF8
                     }
                 }
                 break;
+            case 'S':
+                if (nextIfSet()) {
+                    skipValue();
+                    break;
+                }
+                throw new JSONException("error, offset " + offset + ", char " + ch);
             default:
                 throw new JSONException("TODO : " + ch);
         }
