@@ -86,6 +86,45 @@ EishayWriteUTF8Bytes.jackson              thrpt    5   867.352 ?  5.213  ops/ms
 
 # ecs.c7.xlarge-oracle-jdk-17.0.3.1_x64
 ```java
+Benchmark                                  Mode  Cnt     Score    Error   Units
+EishayParseBinary.fastjson2JSONB          thrpt    5  2094.244 ? 15.227  ops/ms
+EishayParseBinary.fastjson2UTF8Bytes      thrpt    5  1237.816 ? 14.642  ops/ms
+EishayParseBinary.hessian                 thrpt    5   257.626 ?  1.479  ops/ms
+EishayParseBinary.javaSerialize           thrpt    5    53.614 ?  0.458  ops/ms
+EishayParseString.fastjson1               thrpt    5  1257.511 ?  7.266  ops/ms
+EishayParseString.fastjson2               thrpt    5  1159.323 ?  5.859  ops/ms
+EishayParseString.jackson                 thrpt    5   492.944 ?  2.891  ops/ms
+EishayParseStringPretty.fastjson1         thrpt    5   298.601 ?  1.017  ops/ms
+EishayParseStringPretty.fastjson2         thrpt    5   893.306 ?  4.082  ops/ms
+EishayParseStringPretty.jackson           thrpt    5   454.256 ?  1.564  ops/ms
+EishayParseTreeString.fastjson1           thrpt    5   552.078 ?  2.253  ops/ms
+EishayParseTreeString.fastjson2           thrpt    5   934.582 ?  8.498  ops/ms
+EishayParseTreeString.jackson             thrpt    5   507.126 ?  3.685  ops/ms
+EishayParseTreeStringPretty.fastjson1     thrpt    5   490.871 ?  2.464  ops/ms
+EishayParseTreeStringPretty.fastjson2     thrpt    5   754.886 ?  6.350  ops/ms
+EishayParseTreeStringPretty.jackson       thrpt    5   461.292 ?  2.257  ops/ms
+EishayParseTreeUTF8Bytes.fastjson1        thrpt    5   473.205 ?  2.292  ops/ms
+EishayParseTreeUTF8Bytes.fastjson2        thrpt    5  1067.493 ? 10.344  ops/ms
+EishayParseTreeUTF8Bytes.jackson          thrpt    5   560.703 ?  1.749  ops/ms
+EishayParseTreeUTF8BytesPretty.fastjson1  thrpt    5   409.694 ?  1.456  ops/ms
+EishayParseTreeUTF8BytesPretty.fastjson2  thrpt    5   862.118 ?  8.527  ops/ms
+EishayParseTreeUTF8BytesPretty.jackson    thrpt    5   506.518 ?  3.957  ops/ms
+EishayParseUTF8Bytes.fastjson1            thrpt    5   955.145 ?  2.154  ops/ms
+EishayParseUTF8Bytes.fastjson2            thrpt    5  1208.725 ?  8.432  ops/ms
+EishayParseUTF8Bytes.jackson              thrpt    5   555.575 ?  2.929  ops/ms
+EishayParseUTF8BytesPretty.fastjson1      thrpt    5   274.884 ?  1.452  ops/ms
+EishayParseUTF8BytesPretty.fastjson2      thrpt    5   904.036 ?  4.744  ops/ms
+EishayParseUTF8BytesPretty.jackson        thrpt    5   501.349 ?  2.996  ops/ms
+EishayWriteBinary.fastjson2JSONB          thrpt    5  2357.170 ? 12.691  ops/ms
+EishayWriteBinary.fastjson2UTF8Bytes      thrpt    5  1891.775 ? 18.449  ops/ms
+EishayWriteBinary.hessian                 thrpt    5   318.809 ?  1.682  ops/ms
+EishayWriteBinary.javaSerialize           thrpt    5   220.946 ?  4.667  ops/ms
+EishayWriteString.fastjson1               thrpt    5   632.316 ?  3.407  ops/ms
+EishayWriteString.fastjson2               thrpt    5  1867.359 ? 18.469  ops/ms
+EishayWriteString.jackson                 thrpt    5  1039.142 ?  8.183  ops/ms
+EishayWriteUTF8Bytes.fastjson1            thrpt    5   562.241 ?  1.963  ops/ms
+EishayWriteUTF8Bytes.fastjson2            thrpt    5  1933.220 ? 17.090  ops/ms
+EishayWriteUTF8Bytes.jackson              thrpt    5   943.369 ?  7.010  ops/ms
 ```
 
 # ecs.c7a.xlarge-oracle-jdk1.8.0_333_x64
@@ -176,6 +215,45 @@ EishayWriteUTF8Bytes.jackson              thrpt    5   822.762 ? 1.633  ops/ms
 
 # ecs.c7a.xlarge-oracle-jdk-17.0.3.1_x64
 ```java
+Benchmark                                  Mode  Cnt     Score    Error   Units
+EishayParseBinary.fastjson2JSONB          thrpt    5  2186.071 ?  9.909  ops/ms
+EishayParseBinary.fastjson2UTF8Bytes      thrpt    5  1156.807 ?  1.553  ops/ms
+EishayParseBinary.hessian                 thrpt    5   249.964 ?  0.504  ops/ms
+EishayParseBinary.javaSerialize           thrpt    5    51.551 ?  0.028  ops/ms
+EishayParseString.fastjson1               thrpt    5  1272.773 ?  5.214  ops/ms
+EishayParseString.fastjson2               thrpt    5  1286.122 ?  1.364  ops/ms
+EishayParseString.jackson                 thrpt    5   535.875 ?  1.165  ops/ms
+EishayParseStringPretty.fastjson1         thrpt    5   303.458 ?  0.602  ops/ms
+EishayParseStringPretty.fastjson2         thrpt    5   874.105 ?  1.908  ops/ms
+EishayParseStringPretty.jackson           thrpt    5   493.996 ?  4.450  ops/ms
+EishayParseTreeString.fastjson1           thrpt    5   525.181 ?  0.604  ops/ms
+EishayParseTreeString.fastjson2           thrpt    5   984.699 ? 11.801  ops/ms
+EishayParseTreeString.jackson             thrpt    5   566.430 ?  1.462  ops/ms
+EishayParseTreeStringPretty.fastjson1     thrpt    5   473.561 ?  1.330  ops/ms
+EishayParseTreeStringPretty.fastjson2     thrpt    5   787.428 ?  2.404  ops/ms
+EishayParseTreeStringPretty.jackson       thrpt    5   477.776 ?  2.200  ops/ms
+EishayParseTreeUTF8Bytes.fastjson1        thrpt    5   469.432 ?  4.311  ops/ms
+EishayParseTreeUTF8Bytes.fastjson2        thrpt    5   994.641 ?  3.316  ops/ms
+EishayParseTreeUTF8Bytes.jackson          thrpt    5   620.892 ?  1.296  ops/ms
+EishayParseTreeUTF8BytesPretty.fastjson1  thrpt    5   388.623 ?  0.337  ops/ms
+EishayParseTreeUTF8BytesPretty.fastjson2  thrpt    5   680.372 ?  3.529  ops/ms
+EishayParseTreeUTF8BytesPretty.jackson    thrpt    5   549.318 ?  1.656  ops/ms
+EishayParseUTF8Bytes.fastjson1            thrpt    5   938.949 ?  4.484  ops/ms
+EishayParseUTF8Bytes.fastjson2            thrpt    5  1106.602 ?  1.716  ops/ms
+EishayParseUTF8Bytes.jackson              thrpt    5   621.766 ?  0.862  ops/ms
+EishayParseUTF8BytesPretty.fastjson1      thrpt    5   270.871 ?  0.325  ops/ms
+EishayParseUTF8BytesPretty.fastjson2      thrpt    5   838.040 ?  0.868  ops/ms
+EishayParseUTF8BytesPretty.jackson        thrpt    5   557.231 ?  2.352  ops/ms
+EishayWriteBinary.fastjson2JSONB          thrpt    5  2021.358 ?  4.723  ops/ms
+EishayWriteBinary.fastjson2UTF8Bytes      thrpt    5  1765.792 ?  2.742  ops/ms
+EishayWriteBinary.hessian                 thrpt    5   395.155 ?  1.337  ops/ms
+EishayWriteBinary.javaSerialize           thrpt    5   256.982 ?  0.973  ops/ms
+EishayWriteString.fastjson1               thrpt    5   651.098 ?  1.792  ops/ms
+EishayWriteString.fastjson2               thrpt    5  1768.041 ?  1.845  ops/ms
+EishayWriteString.jackson                 thrpt    5   986.626 ?  0.889  ops/ms
+EishayWriteUTF8Bytes.fastjson1            thrpt    5   590.158 ?  5.154  ops/ms
+EishayWriteUTF8Bytes.fastjson2            thrpt    5  1749.336 ?  3.072  ops/ms
+EishayWriteUTF8Bytes.jackson              thrpt    5   922.353 ?  1.319  ops/ms
 ```
 
 # ecs.c6r.xlarge-oracle-jdk1.8.0_333_aarch64
@@ -266,6 +344,45 @@ EishayWriteUTF8Bytes.jackson              thrpt    5   562.823 ? 0.216  ops/ms
 
 # ecs.c6r.xlarge-oracle-jdk-17.0.3.1_aarch64
 ```java
+Benchmark                                  Mode  Cnt     Score   Error   Units
+EishayParseBinary.fastjson2JSONB          thrpt    5  1319.801 ? 0.660  ops/ms
+EishayParseBinary.fastjson2UTF8Bytes      thrpt    5   780.992 ? 0.991  ops/ms
+EishayParseBinary.hessian                 thrpt    5   184.018 ? 0.309  ops/ms
+EishayParseBinary.javaSerialize           thrpt    5    38.641 ? 0.029  ops/ms
+EishayParseString.fastjson1               thrpt    5  1008.966 ? 0.810  ops/ms
+EishayParseString.fastjson2               thrpt    5   810.904 ? 0.383  ops/ms
+EishayParseString.jackson                 thrpt    5   373.039 ? 0.107  ops/ms
+EishayParseStringPretty.fastjson1         thrpt    5   242.885 ? 0.061  ops/ms
+EishayParseStringPretty.fastjson2         thrpt    5   635.552 ? 0.754  ops/ms
+EishayParseStringPretty.jackson           thrpt    5   353.894 ? 0.274  ops/ms
+EishayParseTreeString.fastjson1           thrpt    5   361.414 ? 0.433  ops/ms
+EishayParseTreeString.fastjson2           thrpt    5   595.046 ? 1.990  ops/ms
+EishayParseTreeString.jackson             thrpt    5   385.405 ? 0.121  ops/ms
+EishayParseTreeStringPretty.fastjson1     thrpt    5   309.855 ? 0.352  ops/ms
+EishayParseTreeStringPretty.fastjson2     thrpt    5   497.350 ? 1.139  ops/ms
+EishayParseTreeStringPretty.jackson       thrpt    5   349.843 ? 0.185  ops/ms
+EishayParseTreeUTF8Bytes.fastjson1        thrpt    5   323.562 ? 0.500  ops/ms
+EishayParseTreeUTF8Bytes.fastjson2        thrpt    5   589.820 ? 0.539  ops/ms
+EishayParseTreeUTF8Bytes.jackson          thrpt    5   452.836 ? 0.241  ops/ms
+EishayParseTreeUTF8BytesPretty.fastjson1  thrpt    5   271.766 ? 1.090  ops/ms
+EishayParseTreeUTF8BytesPretty.fastjson2  thrpt    5   501.642 ? 0.202  ops/ms
+EishayParseTreeUTF8BytesPretty.jackson    thrpt    5   414.930 ? 0.533  ops/ms
+EishayParseUTF8Bytes.fastjson1            thrpt    5   755.714 ? 0.345  ops/ms
+EishayParseUTF8Bytes.fastjson2            thrpt    5   770.490 ? 1.727  ops/ms
+EishayParseUTF8Bytes.jackson              thrpt    5   439.576 ? 0.848  ops/ms
+EishayParseUTF8BytesPretty.fastjson1      thrpt    5   220.729 ? 0.155  ops/ms
+EishayParseUTF8BytesPretty.fastjson2      thrpt    5   608.706 ? 1.354  ops/ms
+EishayParseUTF8BytesPretty.jackson        thrpt    5   393.511 ? 0.499  ops/ms
+EishayWriteBinary.fastjson2JSONB          thrpt    5  1488.185 ? 2.012  ops/ms
+EishayWriteBinary.fastjson2UTF8Bytes      thrpt    5  1182.275 ? 5.207  ops/ms
+EishayWriteBinary.hessian                 thrpt    5   316.485 ? 1.290  ops/ms
+EishayWriteBinary.javaSerialize           thrpt    5   185.209 ? 1.826  ops/ms
+EishayWriteString.fastjson1               thrpt    5   474.359 ? 1.606  ops/ms
+EishayWriteString.fastjson2               thrpt    5  1129.230 ? 2.114  ops/ms
+EishayWriteString.jackson                 thrpt    5   632.878 ? 0.405  ops/ms
+EishayWriteUTF8Bytes.fastjson1            thrpt    5   393.357 ? 1.699  ops/ms
+EishayWriteUTF8Bytes.fastjson2            thrpt    5  1167.971 ? 0.719  ops/ms
+EishayWriteUTF8Bytes.jackson              thrpt    5   601.125 ? 0.408  ops/ms
 ```
 
 
@@ -358,6 +475,44 @@ EishayWriteUTF8Bytes.jackson              thrpt    5   652.491 ?  2.373  ops/ms
 
 # ecs.g8m.xlarge-oracle-jdk-17.0.3.1_aarch64
 ```java
-
+Benchmark                                  Mode  Cnt     Score     Error   Units
+EishayParseBinary.fastjson2JSONB          thrpt    5  1674.077 ?  22.817  ops/ms
+EishayParseBinary.fastjson2UTF8Bytes      thrpt    5  1011.328 ?   3.530  ops/ms
+EishayParseBinary.hessian                 thrpt    5   207.644 ?  16.097  ops/ms
+EishayParseBinary.javaSerialize           thrpt    5    39.006 ?   0.985  ops/ms
+EishayParseString.fastjson1               thrpt    5  1085.235 ?  95.055  ops/ms
+EishayParseString.fastjson2               thrpt    5   933.481 ?  46.347  ops/ms
+EishayParseString.jackson                 thrpt    5   405.224 ?  42.586  ops/ms
+EishayParseStringPretty.fastjson1         thrpt    5   265.027 ?  32.330  ops/ms
+EishayParseStringPretty.fastjson2         thrpt    5   715.965 ?   2.379  ops/ms
+EishayParseStringPretty.jackson           thrpt    5   390.627 ?   3.141  ops/ms
+EishayParseTreeString.fastjson1           thrpt    5   395.999 ?  68.616  ops/ms
+EishayParseTreeString.fastjson2           thrpt    5   330.966 ?  55.280  ops/ms
+EishayParseTreeString.jackson             thrpt    5   423.022 ?   4.702  ops/ms
+EishayParseTreeStringPretty.fastjson1     thrpt    5   367.015 ?   7.473  ops/ms
+EishayParseTreeStringPretty.fastjson2     thrpt    5   547.510 ?   5.452  ops/ms
+EishayParseTreeStringPretty.jackson       thrpt    5   372.302 ?  40.808  ops/ms
+EishayParseTreeUTF8Bytes.fastjson1        thrpt    5   371.750 ?   8.263  ops/ms
+EishayParseTreeUTF8Bytes.fastjson2        thrpt    5   771.879 ?   5.782  ops/ms
+EishayParseTreeUTF8Bytes.jackson          thrpt    5   496.454 ?   2.374  ops/ms
+EishayParseTreeUTF8BytesPretty.fastjson1  thrpt    5   315.534 ?   8.059  ops/ms
+EishayParseTreeUTF8BytesPretty.fastjson2  thrpt    5   625.247 ?   3.240  ops/ms
+EishayParseTreeUTF8BytesPretty.jackson    thrpt    5   433.603 ?   2.492  ops/ms
+EishayParseUTF8Bytes.fastjson1            thrpt    5   839.852 ?  12.594  ops/ms
+EishayParseUTF8Bytes.fastjson2            thrpt    5   940.624 ?  89.352  ops/ms
+EishayParseUTF8Bytes.jackson              thrpt    5   330.408 ? 127.643  ops/ms
+EishayParseUTF8BytesPretty.fastjson1      thrpt    5   248.590 ?   1.086  ops/ms
+EishayParseUTF8BytesPretty.fastjson2      thrpt    5   760.242 ?   2.854  ops/ms
+EishayParseUTF8BytesPretty.jackson        thrpt    5   413.108 ?  41.647  ops/ms
+EishayWriteBinary.fastjson2JSONB          thrpt    5  1859.169 ?  21.506  ops/ms
+EishayWriteBinary.fastjson2UTF8Bytes      thrpt    5  1407.231 ?  17.322  ops/ms
+EishayWriteBinary.hessian                 thrpt    5   346.710 ?   0.991  ops/ms
+EishayWriteBinary.javaSerialize           thrpt    5   208.531 ?   1.485  ops/ms
+EishayWriteString.fastjson1               thrpt    5   437.891 ?  30.711  ops/ms
+EishayWriteString.fastjson2               thrpt    5  1364.969 ?  10.079  ops/ms
+EishayWriteString.jackson                 thrpt    5   559.152 ?  68.790  ops/ms
+EishayWriteUTF8Bytes.fastjson1            thrpt    5   435.355 ?  43.059  ops/ms
+EishayWriteUTF8Bytes.fastjson2            thrpt    5  1423.428 ?   7.042  ops/ms
+EishayWriteUTF8Bytes.jackson              thrpt    5   538.341 ?  77.722  ops/ms
 ```
 
