@@ -21,7 +21,7 @@ public class EishayParseTreeUTF8BytesTest {
         System.out.println("fastjson2 millis : " + millis);
         // zulu17.32.13 :
         // zulu11.52.13 :
-        // zulu8.58.0.13 : 995
+        // zulu8.58.0.13 : 995 715
     }
 
     public static void jackson_perf_test() throws Exception {
@@ -45,6 +45,6 @@ public class EishayParseTreeUTF8BytesTest {
 
     public static void main(String[] args) throws Exception {
         fastjson2_perf_test();
-        jackson_perf_test();
+//        jackson_perf_test();
     }
 }
