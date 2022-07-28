@@ -14,7 +14,7 @@ class ObjectWriterImplBoolValueArray
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        if (jsonWriter.isWriteTypeInfo(object)) {
+        if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
             jsonWriter.writeTypeName(JSONB_TYPE_NAME_BYTES, JSONB_TYPE_HASH);
         }
         jsonWriter.writeBool((boolean[]) object);

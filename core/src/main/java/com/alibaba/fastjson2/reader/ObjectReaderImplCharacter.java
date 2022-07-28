@@ -15,11 +15,11 @@ class ObjectReaderImplCharacter
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        String str = jsonReader.readString();
-        if (str == null) {
+        if (jsonReader.nextIfNull()) {
             return null;
         }
-        return str.charAt(0);
+
+        return jsonReader.readCharValue();
     }
 
     @Override

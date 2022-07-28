@@ -197,6 +197,11 @@ public class JSONBDump {
                 jsonWriter.writeString(str);
                 return;
             }
+            case BC_CHAR: {
+                int intValue = readInt32Value();
+                jsonWriter.writeChar((char) intValue);
+                return;
+            }
             case BC_STR_UTF16: {
                 int strlen = readLength();
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16);
@@ -208,7 +213,7 @@ public class JSONBDump {
                 int strlen = readLength();
 
                 String str;
-                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
+                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
@@ -224,7 +229,7 @@ public class JSONBDump {
                 int strlen = readLength();
 
                 String str;
-                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 1) {
+                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
@@ -866,7 +871,7 @@ public class JSONBDump {
             strlen = readLength();
             strBegin = offset;
 
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 0) {
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
                 String str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
@@ -879,7 +884,7 @@ public class JSONBDump {
             strlen = readLength();
             strBegin = offset;
 
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN == 1) {
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
                 String str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);

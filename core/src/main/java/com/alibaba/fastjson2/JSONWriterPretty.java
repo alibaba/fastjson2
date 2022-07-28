@@ -117,6 +117,7 @@ final class JSONWriterPretty
     public void startObject() {
         level++;
         jsonWriter.startObject = true;
+        startObject = true;
         write0('{');
         indent++;
         write0('\n');
@@ -264,6 +265,11 @@ final class JSONWriterPretty
     @Override
     public void writeRaw(char ch) {
         jsonWriter.writeRaw(ch);
+    }
+
+    @Override
+    public void writeChar(char ch) {
+        jsonWriter.writeChar(ch);
     }
 
     @Override

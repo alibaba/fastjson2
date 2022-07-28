@@ -48,6 +48,7 @@ abstract class FieldWriterObject<T>
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
             ObjectWriter formattedWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
             if (formattedWriter == null) {
+                initValueClass = valueClass;
                 return initObjectWriter = jsonWriter.getObjectWriter(valueClass);
             } else {
                 return initObjectWriter = formattedWriter;

@@ -77,9 +77,11 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (parameterCount > 0) {
+            if (parameterCount > 2) {
                 Class<?>[] parameterTypes = constructor.getParameterTypes();
-                if ("kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterCount - 1].getName())) {
+                if (parameterTypes[parameterCount - 2] == int.class &&
+                        "kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterCount - 1].getName())
+                ) {
                     beanInfo.markerConstructor = constructor;
                     continue;
                 }
@@ -617,21 +619,17 @@ public abstract class BeanUtils {
             }
 
             final int methodNameLength = methodName.length();
-
-            boolean nameMatch;
-            if (returnClass == boolean.class) {
-                nameMatch = methodName.startsWith("is") && methodNameLength > 2;
+            boolean nameMatch = methodNameLength > 3 && methodName.startsWith("get");
+            if (nameMatch) {
+                char firstChar = methodName.charAt(3);
+                if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 4) {
+                    nameMatch = false;
+                }
+            } else if (returnClass == boolean.class) {
+                nameMatch = methodNameLength > 2 && methodName.startsWith("is");
                 if (nameMatch) {
                     char firstChar = methodName.charAt(2);
                     if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 3) {
-                        nameMatch = false;
-                    }
-                }
-            } else {
-                nameMatch = methodName.startsWith("get") && methodNameLength > 3;
-                if (nameMatch) {
-                    char firstChar = methodName.charAt(3);
-                    if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 4) {
                         nameMatch = false;
                     }
                 }
@@ -677,7 +675,7 @@ public abstract class BeanUtils {
         if (RECORD_CLASS == null) {
             String superclassName = superclass.getName();
             if ("java.lang.Record".equals(superclassName)) {
-                RECORD_CLASS = objectClass;
+                RECORD_CLASS = superclass;
                 return true;
             } else {
                 return false;

@@ -24,14 +24,14 @@ final class FieldWriterCharValFunc
     @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         char value = function.applyAsChar(object);
-        jsonWriter.writeString(value);
+        jsonWriter.writeChar(value);
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, Object object) {
         char value = function.applyAsChar(object);
         writeFieldName(jsonWriter);
-        jsonWriter.writeString(value);
+        jsonWriter.writeChar(value);
         return true;
     }
 }

@@ -11,7 +11,9 @@ public class Issue410 {
     @Test
     public void test() {
         String json = "{\"key1\":11444-sdsdsd\"key2\":\"sdsdssdsda\"}";
-        assertFalse(JSON.isValid(json));
+        assertFalse(
+                JSON.isValid(json)
+        );
 
         assertThrows(
                 JSONException.class,

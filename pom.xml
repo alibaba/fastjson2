@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.10-SNAPSHOT</version>
+    <version>2.0.11-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -592,7 +592,9 @@
                             <failOnViolation>true</failOnViolation>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                             <configLocation>src/checkstyle/fastjson2-checks.xml</configLocation>
-                            <excludes>com/alibaba/fastjson2/codec/UnicodeClassNameTest.java,
+                            <excludes>module-info.java,
+                                com/alibaba/fastjson2/fieldbased/Case1.java,
+                                com/alibaba/fastjson2/codec/UnicodeClassNameTest.java,
                                 com/alibaba/fastjson2/hsf/UCaseNameTest.java,
                                 com/alibaba/json/bvtVO/PushMsg.java,
                                 com/alibaba/json/bvtVO/IncomingDataPoint_ext_double.java,

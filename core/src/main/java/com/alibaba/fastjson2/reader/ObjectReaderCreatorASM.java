@@ -45,8 +45,6 @@ public class ObjectReaderCreatorASM
     static final String DESC_SUPPLIER = ASMUtils.desc(Supplier.class);
     static final String DESC_JSONSCHEMA = ASMUtils.desc(JSONSchema.class);
     static final String DESC_FIELD_READER_ARRAY = ASMUtils.desc(FieldReader[].class);
-
-    static final String METHOD_DESC_GET_OBJECT_READER = "(Ljava/lang/reflect/Type;)" + DESC_OBJECT_READER;
     static final String METHOD_DESC_GET_ITEM_OBJECT_READER = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
     static final String METHOD_DESC_GET_OBJECT_READER_1 = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
     static final String METHOD_DESC_INIT = "(Ljava/lang/Class;" + DESC_SUPPLIER + DESC_FIELD_READER_ARRAY + ")V";
@@ -306,11 +304,14 @@ public class ObjectReaderCreatorASM
             return createObjectReaderSeeAlso(objectClass, supplier, beanInfo.typeKey, beanInfo.seeAlso, beanInfo.seeAlsoNames, fieldReaderArray);
         }
 
+        Constructor defaultConstructor = null;
         try {
             Constructor constructor = objectClass.getDeclaredConstructor();
             int modifiers = constructor.getModifiers();
             if (!Modifier.isPublic(modifiers)) {
                 supplier = null;
+            } else {
+                defaultConstructor = constructor;
             }
         } catch (NoSuchMethodException ignored) {
             supplier = null;
@@ -391,11 +392,11 @@ public class ObjectReaderCreatorASM
         {
             MethodWriter mw = cw.visitMethod(
                     Opcodes.ACC_PUBLIC,
-                    fieldBased ? "createInstance0" : "createInstance",
+                    fieldBased && defaultConstructor == null ? "createInstance0" : "createInstance",
                     "(J)Ljava/lang/Object;"
             );
 
-            if (fieldBased) {
+            if (fieldBased && defaultConstructor == null) {
                 mw.visitFieldInsn(Opcodes.GETSTATIC, TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
                 mw.visitVarInsn(Opcodes.ALOAD, 0);
                 mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_OBJECT_READER_ADAPTER, "objectClass", "Ljava/lang/Class;");
@@ -420,6 +421,7 @@ public class ObjectReaderCreatorASM
             ObjectReaderAdapter objectReaderAdapter = new ObjectReaderAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, readerFeatures, null, supplier, null, fieldReaderArray);
 
             genMethodReadJSONBObject(objectClass, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
+            genMethodReadJSONBObjectArrayMapping(objectClass, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
 
             genMethodReadObject(objectClass, readerFeatures, TYPE_OBJECT, supplier, fieldReaderArray, cw, classNameType, objectReaderAdapter);
 
@@ -1086,6 +1088,82 @@ public class ObjectReaderCreatorASM
         mw.visitEnd();
     }
 
+    private <T> void genMethodReadJSONBObjectArrayMapping(
+            Class<T> objectType,
+            long readerFeatures,
+            String TYPE_OBJECT,
+            FieldReader[] fieldReaderArray,
+            ClassWriter cw,
+            String classNameType,
+            ObjectReaderAdapter objectReaderAdapter
+    ) {
+        boolean fieldBased = (readerFeatures & JSONReader.Feature.FieldBased.mask) != 0;
+
+        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC,
+                "readArrayMappingJSONBObject",
+                METHOD_DESC_READ_OBJECT
+        );
+
+        final int JSON_READER = 1;
+        final int FIELD_TYPE = 2;
+        final int FIELD_NAME = 3;
+        final int FEATURES = 4;
+        final int OBJECT = 6;
+        final int ENTRY_CNT = 7;
+        final int ITEM_CNT = 8;
+        final int J = 9;
+        final int AUTO_TYPE_OBJECT_READER = 10;
+
+        genCheckAutoType(classNameType, mw, JSON_READER, FIELD_TYPE, FIELD_NAME, FEATURES, AUTO_TYPE_OBJECT_READER);
+
+        int varIndex = 11;
+        Map<Object, Integer> variants = new HashMap<>();
+
+        {
+            Label notNull_ = new Label();
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfNull", "()Z", false);
+            mw.visitJumpInsn(Opcodes.IFEQ, notNull_);
+            mw.visitInsn(Opcodes.ACONST_NULL);
+            mw.visitInsn(Opcodes.ARETURN);
+            mw.visitLabel(notNull_);
+        }
+
+        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "startArray", "()I", false);
+        mw.visitVarInsn(Opcodes.ISTORE, ENTRY_CNT);
+
+        genCreateObject(mw, classNameType, TYPE_OBJECT, FEATURES, fieldBased);
+        mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
+
+        for (int i = 0; i < fieldReaderArray.length; ++i) {
+            FieldReader fieldReader = fieldReaderArray[i];
+            varIndex = genReadFieldValue(objectType,
+                    fieldReader,
+                    fieldBased,
+                    classNameType,
+                    mw,
+                    THIS,
+                    JSON_READER,
+                    OBJECT,
+                    FEATURES,
+                    varIndex,
+                    variants,
+                    ITEM_CNT,
+                    J,
+                    i,
+                    true,   // JSONB
+                    TYPE_OBJECT
+            );
+        }
+
+        mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+        mw.visitInsn(Opcodes.ARETURN);
+
+        mw.visitMaxs(5, 10);
+        mw.visitEnd();
+    }
+
     private void genCheckAutoType(
             String classNameType,
             MethodWriter mw,
@@ -1231,10 +1309,22 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(object_);
 
+        Label notNull_ = new Label(), end_ = new Label();
+
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
         mw.visitIntInsn(Opcodes.BIPUSH, '{');
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
-        mw.visitInsn(Opcodes.POP);
+        mw.visitJumpInsn(Opcodes.IFNE, notNull_);
+
+        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfNull", "()Z", false);
+        mw.visitJumpInsn(Opcodes.IFEQ, notNull_);
+
+        mw.visitInsn(Opcodes.ACONST_NULL);
+        mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
+        mw.visitJumpInsn(Opcodes.GOTO, end_);
+
+        mw.visitLabel(notNull_);
 
         genCreateObject(mw, classNameType, TYPE_OBJECT, FEATURES, fieldBased);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
@@ -1508,6 +1598,8 @@ public class ObjectReaderCreatorASM
         mw.visitJumpInsn(Opcodes.GOTO, for_start_i_);
 
         mw.visitLabel(for_end_i_);
+
+        mw.visitLabel(end_);
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
         mw.visitIntInsn(Opcodes.BIPUSH, ',');

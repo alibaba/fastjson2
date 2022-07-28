@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.primitves;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -30,6 +32,32 @@ public class CharValue1Test {
                 objectWriter.write(jsonWriter, vo);
                 assertEquals("[\"A\"]", jsonWriter.toString());
             }
+        }
+    }
+
+    @Test
+    public void test_chars() {
+        char[] chars = {'\0', 'a', 'A', '0', '中', '\\', '"', '©', '®', '¼', '½', '¾'};
+        for (int i = 0; i < chars.length; i++) {
+            JSONWriter[] jsonWriters = TestUtils.createJSONWriters();
+            for (JSONWriter jsonWriter : jsonWriters) {
+                char ch = chars[i];
+                jsonWriter.writeChar(ch);
+                String str = jsonWriter.toString();
+                String str1 = (String) JSON.parse(str);
+                assertEquals(1, str1.length());
+                assertEquals(ch, str1.charAt(0));
+            }
+        }
+
+        for (int i = 0; i < chars.length; i++) {
+            JSONWriter jsonWriter = JSONWriter.ofJSONB();
+            char ch = chars[i];
+            jsonWriter.writeChar(ch);
+            jsonWriter.writeChar(ch);
+            byte[] bytes = jsonWriter.getBytes();
+            Character character = (Character) JSONB.parse(bytes);
+            assertEquals(ch, character.charValue());
         }
     }
 }

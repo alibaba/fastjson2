@@ -215,6 +215,25 @@ final class JSONWriterJSONB
         bytes[off++] = b;
     }
 
+    public void writeChar(char ch) {
+        if (off == bytes.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+        bytes[off++] = BC_CHAR;
+        writeInt32(ch);
+    }
+
     @Override
     public void writeName(String name) {
         writeString(name);
@@ -252,11 +271,6 @@ final class JSONWriterJSONB
     @Override
     protected void write0(char ch) {
         throw new JSONException("unsupported operation");
-    }
-
-    @Override
-    public void writeString(char ch) {
-        writeString(new char[]{ch});
     }
 
     @Override
@@ -495,6 +509,7 @@ final class JSONWriterJSONB
                     // minCapacity is usually close to size, so this is a win:
                     bytes = Arrays.copyOf(bytes, newCapacity);
                 }
+                str.getBytes();
 
                 int strlen = value.length;
                 if (strlen <= STR_ASCII_FIX_LEN) {
@@ -507,7 +522,7 @@ final class JSONWriterJSONB
                 off += strlen;
                 return;
             } else {
-                int check_cnt = 32;
+                int check_cnt = 128;
                 if (check_cnt > value.length) {
                     check_cnt = value.length;
                 }
@@ -516,7 +531,7 @@ final class JSONWriterJSONB
                 }
 
                 int asciiCount = 0;
-                for (int i = 0; i + 2 < check_cnt; i += 2) {
+                for (int i = 0; i + 2 <= check_cnt; i += 2) {
                     byte b0 = value[i];
                     byte b1 = value[i + 1];
                     if (b0 == 0 || b1 == 0) {
@@ -536,20 +551,32 @@ final class JSONWriterJSONB
                     if (utf8len > value.length) {
                         utf16 = true;
                     } else if (result != -1) {
+                        final byte strtype;
+                        if (utf8len * 2 == value.length) {
+                            if (asciiCount <= STR_ASCII_FIX_LEN) {
+                                bytes[off++] = (byte) (BC_STR_ASCII_FIX_MIN + utf8len);
+                                System.arraycopy(bytes, off + lenByteCnt, bytes, off, utf8len);
+                                off += utf8len;
+                                return;
+                            }
+                            strtype = BC_STR_ASCII;
+                        } else {
+                            strtype = BC_STR_UTF8;
+                        }
                         int utf8lenByteCnt = sizeOfInt(utf8len);
                         if (lenByteCnt != utf8lenByteCnt) {
                             System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
                         }
-                        bytes[off++] = BC_STR_UTF8;
+                        bytes[off++] = strtype;
                         writeInt32(utf8len);
                         off += utf8len;
                         return;
                     }
                 }
 
-                if (utf16 && (JDKUtils.BIG_ENDIAN == 1 || JDKUtils.BIG_ENDIAN == 0)) {
+                if (utf16) {
                     ensureCapacity(off + 5 + value.length);
-                    bytes[off++] = JDKUtils.BIG_ENDIAN == 1 ? BC_STR_UTF16BE : BC_STR_UTF16LE;
+                    bytes[off++] = JDKUtils.BIG_ENDIAN ? BC_STR_UTF16BE : BC_STR_UTF16LE;
                     writeInt32(value.length);
                     System.arraycopy(value, 0, bytes, off, value.length);
                     off += value.length;
@@ -561,10 +588,26 @@ final class JSONWriterJSONB
         char[] chars = JDKUtils.getCharArray(str);
 
         boolean ascii = true;
-        for (int i = 0; i < chars.length; ++i) {
-            if (chars[i] > 0x007F) {
-                ascii = false;
-                break;
+        {
+            int i = 0;
+            while (i + 4 <= chars.length) {
+                char c0 = chars[i];
+                char c1 = chars[i + 1];
+                char c2 = chars[i + 2];
+                char c3 = chars[i + 3];
+                if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F) {
+                    ascii = false;
+                    break;
+                }
+                i += 4;
+            }
+            if (ascii) {
+                for (; i < chars.length; ++i) {
+                    if (chars[i] > 0x007F) {
+                        ascii = false;
+                        break;
+                    }
+                }
             }
         }
 
@@ -1224,6 +1267,42 @@ final class JSONWriterJSONB
         bytes[off++] = BC_INT16;
         bytes[off++] = (byte) (val >>> 8);
         bytes[off++] = (byte) val;
+    }
+
+    public void writeEnum(Enum e) {
+        if (e == null) {
+            writeNull();
+            return;
+        }
+
+        if ((context.features & Feature.WriteEnumUsingToString.mask) != 0) {
+            writeString(e.toString());
+        } else if ((context.features & Feature.WriteEnumsUsingName.mask) != 0) {
+            writeString(e.name());
+        } else {
+            int val = e.ordinal();
+            if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
+                if (off == bytes.length) {
+                    int minCapacity = off + 1;
+
+                    int oldCapacity = bytes.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                        throw new OutOfMemoryError();
+                    }
+
+                    // minCapacity is usually close to size, so this is a win:
+                    bytes = Arrays.copyOf(bytes, newCapacity);
+                }
+
+                bytes[off++] = (byte) val;
+                return;
+            }
+            writeInt32(val);
+        }
     }
 
     @Override
