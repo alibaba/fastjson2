@@ -4597,6 +4597,56 @@ class JSONReaderUTF8
     }
 
     @Override
+    protected LocalTime readLocalTime5() {
+        if (ch != '"' && ch != '\'') {
+            throw new JSONException("localTime only support string input");
+        }
+
+        byte c0 = bytes[offset + 0];
+        byte c1 = bytes[offset + 1];
+        byte c2 = bytes[offset + 2];
+        byte c3 = bytes[offset + 3];
+        byte c4 = bytes[offset + 4];
+
+        byte h0, h1, i0, i1;
+        if (c2 == ':') {
+            h0 = c0;
+            h1 = c1;
+            i0 = c3;
+            i1 = c4;
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        offset += 6;
+        next();
+        if (ch == ',') {
+            this.comma = true;
+            next();
+        }
+
+        return LocalTime.of(hour, minute);
+    }
+
+    @Override
     protected LocalTime readLocalTime8() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localTime only support string input");

@@ -982,6 +982,8 @@ public abstract class JSONReader
 
         int len = getStringLength();
         switch (len) {
+            case 5:
+                return readLocalTime5();
             case 8:
                 return readLocalTime8();
             case 10:
@@ -1196,6 +1198,8 @@ public abstract class JSONReader
     protected abstract LocalDateTime readLocalDateTime19();
 
     protected abstract LocalDateTime readLocalDateTimeX(int len);
+
+    protected abstract LocalTime readLocalTime5();
 
     protected abstract LocalTime readLocalTime8();
 

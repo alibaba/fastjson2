@@ -46,4 +46,46 @@ public class LocalTimeTest {
         @JSONField(format = "yyyy-MM-dd HH:mm:ss")
         public LocalTime time;
     }
+
+    @Test
+    public void test3() {
+        Bean3 bean = new Bean3();
+        bean.time = LocalTime.of(12, 13, 0);
+        String str = JSON.toJSONString(bean, "yyyy-MM-dd HH:mm:ss");
+        assertEquals("{\"time\":\"12:13\"}", str);
+        Bean3 bean1 = JSON.parseObject(str, Bean3.class);
+        assertEquals(bean.time.getHour(), bean1.time.getHour());
+        assertEquals(bean.time.getMinute(), bean1.time.getMinute());
+        assertEquals(bean.time.getSecond(), bean1.time.getSecond());
+    }
+
+    public static class Bean3 {
+        @JSONField(format = "HH:mm")
+        public LocalTime time;
+    }
+
+    @Test
+    public void test4() {
+        Bean4 bean = new Bean4();
+        bean.time = LocalTime.of(12, 13, 0);
+        String str = JSON.toJSONString(bean, "yyyy-MM-dd HH:mm:ss");
+        assertEquals("{\"time\":\"12:13\"}", str);
+        Bean4 bean1 = JSON.parseObject(str, Bean4.class);
+        assertEquals(bean.time.getHour(), bean1.time.getHour());
+        assertEquals(bean.time.getMinute(), bean1.time.getMinute());
+        assertEquals(bean.time.getSecond(), bean1.time.getSecond());
+    }
+
+    public static class Bean4 {
+        @JSONField(format = "HH:mm")
+        private LocalTime time;
+
+        public LocalTime getTime() {
+            return time;
+        }
+
+        public void setTime(LocalTime time) {
+            this.time = time;
+        }
+    }
 }
