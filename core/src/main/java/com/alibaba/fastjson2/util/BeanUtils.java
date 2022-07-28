@@ -619,21 +619,17 @@ public abstract class BeanUtils {
             }
 
             final int methodNameLength = methodName.length();
-
-            boolean nameMatch;
-            if (returnClass == boolean.class) {
-                nameMatch = methodName.startsWith("is") && methodNameLength > 2;
+            boolean nameMatch = methodNameLength > 3 && methodName.startsWith("get");
+            if (nameMatch) {
+                char firstChar = methodName.charAt(3);
+                if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 4) {
+                    nameMatch = false;
+                }
+            } else if (returnClass == boolean.class) {
+                nameMatch = methodNameLength > 2 && methodName.startsWith("is");
                 if (nameMatch) {
                     char firstChar = methodName.charAt(2);
                     if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 3) {
-                        nameMatch = false;
-                    }
-                }
-            } else {
-                nameMatch = methodName.startsWith("get") && methodNameLength > 3;
-                if (nameMatch) {
-                    char firstChar = methodName.charAt(3);
-                    if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 4) {
                         nameMatch = false;
                     }
                 }
