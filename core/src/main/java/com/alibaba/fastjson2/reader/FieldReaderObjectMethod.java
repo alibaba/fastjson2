@@ -77,11 +77,16 @@ class FieldReaderObjectMethod<T>
 
     @Override
     public ObjectReader getObjectReader(JSONReader jsonReader) {
-        if (fieldObjectReader == null) {
-            fieldObjectReader = jsonReader
-                    .getObjectReader(fieldType);
+        if (fieldObjectReader != null) {
+            return fieldObjectReader;
         }
-        return fieldObjectReader;
+
+        ObjectReader formattedObjectReader = FieldReaderObject.createFormattedObjectReader(fieldType, fieldClass, format, null);
+        if (formattedObjectReader != null) {
+            return fieldObjectReader = formattedObjectReader;
+        }
+
+        return fieldObjectReader = jsonReader.getObjectReader(fieldType);
     }
 
     @Override
@@ -130,9 +135,7 @@ class FieldReaderObjectMethod<T>
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
         if (fieldObjectReader == null) {
-            fieldObjectReader = jsonReader
-                    .getContext()
-                    .getObjectReader(fieldType);
+            fieldObjectReader = getObjectReader(jsonReader);
         }
 
         return jsonReader.isJSONB()
