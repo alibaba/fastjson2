@@ -136,10 +136,8 @@ public class ObjectWriterCreatorASM
         }
 
         long writerFeatures = features | beanInfo.writerFeatures;
-        boolean fieldBased = (writerFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
-        if (fieldBased && (objectClass.isInterface() || objectClass.isInterface())) {
-            fieldBased = false;
-        }
+        final boolean fieldBased = (writerFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                && !(objectClass.isInterface() || objectClass.isInterface());
 
         if (fieldBased && JDKUtils.JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
             return super.createObjectWriter(objectClass, features, modules);
@@ -187,6 +185,10 @@ public class ObjectWriterCreatorASM
 
                 if (!record) {
                     BeanUtils.fields(objectClass, field -> {
+                        if (!fieldBased && !Modifier.isPublic(field.getModifiers())) {
+                            return;
+                        }
+
                         fieldInfo.init();
                         FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
