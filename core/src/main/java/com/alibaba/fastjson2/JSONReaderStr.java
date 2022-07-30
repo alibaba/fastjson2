@@ -846,6 +846,7 @@ final class JSONReaderStr
                                 + (((long) c3) << 8)
                                 + ((long) c4);
                     }
+                    break;
                 case 6:
                     c0 = str.charAt(nameBegin);
                     c1 = str.charAt(nameBegin + 1);
