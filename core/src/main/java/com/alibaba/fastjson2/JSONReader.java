@@ -2360,7 +2360,9 @@ public abstract class JSONReader
                 throw new JSONException("unsafe get String.coder error");
             }
 
-            return new JSONReaderStr(context, str, 0, str.length());
+            if (str.length() > 1024 * 1024) {
+                return new JSONReaderStr(context, str, 0, str.length());
+            }
         }
 
         final int length = str.length();
