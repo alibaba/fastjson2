@@ -1215,6 +1215,17 @@ class ObjectWriterBaseModule
                 return ObjectWriterImplClass.INSTANCE;
             }
 
+            if (Method.class == clazz) {
+                return new ObjectWriterAdapter<>(
+                        Method.class,
+                        Arrays.asList(
+                                ObjectWriters.fieldWriter("declaringClass", Class.class, Method::getDeclaringClass),
+                                ObjectWriters.fieldWriter("name", String.class, Method::getName),
+                                ObjectWriters.fieldWriter("parameterTypes", Class[].class, Method::getParameterTypes)
+                        )
+                );
+            }
+
             if (ParameterizedType.class.isAssignableFrom(clazz)) {
                 return ObjectWriters.objectWriter(
                         ParameterizedType.class,

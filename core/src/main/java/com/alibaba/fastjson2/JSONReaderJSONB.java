@@ -748,6 +748,20 @@ final class JSONReaderJSONB
     }
 
     @Override
+    public List readArray(Type itemType) {
+        if (nextIfNull()) {
+            return null;
+        }
+
+        int entryCnt = startArray();
+        JSONArray array = new JSONArray(entryCnt);
+        for (int i = 0; i < entryCnt; i++) {
+            array.add(read(itemType));
+        }
+        return array;
+    }
+
+    @Override
     public boolean isReference() {
         return offset < bytes.length && bytes[offset] == BC_REFERENCE;
     }
