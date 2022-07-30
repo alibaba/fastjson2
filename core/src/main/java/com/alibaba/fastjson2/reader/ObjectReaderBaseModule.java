@@ -1265,6 +1265,10 @@ public class ObjectReaderBaseModule
             return new ObjectReaderImplMethod();
         }
 
+        if (type == Field.class) {
+            return new ObjectReaderImplField();
+        }
+
         if (type == Type.class) {
             return ObjectReaderImplClass.INSTANCE;
         }
