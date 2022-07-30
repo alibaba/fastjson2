@@ -1226,6 +1226,16 @@ class ObjectWriterBaseModule
                 );
             }
 
+            if (Field.class == clazz) {
+                return new ObjectWriterAdapter<>(
+                        Method.class,
+                        Arrays.asList(
+                                ObjectWriters.fieldWriter("declaringClass", Class.class, Field::getDeclaringClass),
+                                ObjectWriters.fieldWriter("name", String.class, Field::getName)
+                        )
+                );
+            }
+
             if (ParameterizedType.class.isAssignableFrom(clazz)) {
                 return ObjectWriters.objectWriter(
                         ParameterizedType.class,
