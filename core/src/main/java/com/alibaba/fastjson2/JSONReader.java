@@ -52,6 +52,134 @@ public abstract class JSONReader
     static final char EOI = 0x1A;
     static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
 
+    static final float[] FLOAT_SMALL_1 = new float[]{0.0F, 0.1F, 0.2F, 0.3F, 0.4F, 0.5F, 0.6F, 0.7F, 0.8F, 0.9F};
+    static final double[] DOUBLE_SMALL_1 = new double[]{0.0D, 0.1D, 0.2D, 0.3D, 0.4D, 0.5D, 0.6D, 0.7D, 0.8D, 0.9D};
+    static final float[] FLOAT_SMALL_2 = new float[]{
+            0.0F, 0.01F, 0.02F, 0.03F, 0.04F, 0.05F, 0.06F, 0.07F, 0.08F, 0.09F,
+            0.1F, 0.11F, 0.12F, 0.13F, 0.14F, 0.15F, 0.16F, 0.17F, 0.18F, 0.19F,
+            0.2F, 0.21F, 0.22F, 0.23F, 0.24F, 0.25F, 0.26F, 0.27F, 0.28F, 0.29F,
+            0.3F, 0.31F, 0.32F, 0.33F, 0.34F, 0.35F, 0.36F, 0.37F, 0.38F, 0.39F,
+            0.4F, 0.41F, 0.42F, 0.43F, 0.44F, 0.45F, 0.46F, 0.47F, 0.48F, 0.49F,
+            0.5F, 0.51F, 0.52F, 0.53F, 0.54F, 0.55F, 0.56F, 0.57F, 0.58F, 0.59F,
+            0.6F, 0.61F, 0.62F, 0.63F, 0.64F, 0.65F, 0.66F, 0.67F, 0.68F, 0.69F,
+            0.7F, 0.71F, 0.72F, 0.73F, 0.74F, 0.75F, 0.76F, 0.77F, 0.78F, 0.79F,
+            0.8F, 0.81F, 0.82F, 0.83F, 0.84F, 0.85F, 0.86F, 0.87F, 0.88F, 0.89F,
+            0.9F, 0.91F, 0.92F, 0.93F, 0.94F, 0.95F, 0.96F, 0.97F, 0.98F, 0.99F};
+    static final double[] DOUBLE_SMALL_2 = new double[]{
+            0.0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09,
+            0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19,
+            0.2, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29,
+            0.3, 0.31, 0.32, 0.33, 0.34, 0.35, 0.36, 0.37, 0.38, 0.39,
+            0.4, 0.41, 0.42, 0.43, 0.44, 0.45, 0.46, 0.47, 0.48, 0.49,
+            0.5, 0.51, 0.52, 0.53, 0.54, 0.55, 0.56, 0.57, 0.58, 0.59,
+            0.6, 0.61, 0.62, 0.63, 0.64, 0.65, 0.66, 0.67, 0.68, 0.69,
+            0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79,
+            0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89,
+            0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99
+    };
+    static final float[] FLOAT_SMALL_3 = new float[]{
+            0.0F, 0.001F, 0.002F, 0.003F, 0.004F, 0.005F, 0.006F, 0.007F, 0.008F, 0.009F, 0.01F, 0.011F, 0.012F, 0.013F, 0.014F, 0.015F, 0.016F, 0.017F, 0.018F, 0.019F, 0.02F, 0.021F, 0.022F, 0.023F, 0.024F,
+            0.025F, 0.026F, 0.027F, 0.028F, 0.029F, 0.03F, 0.031F, 0.032F, 0.033F, 0.034F, 0.035F, 0.036F, 0.037F, 0.038F, 0.039F, 0.04F, 0.041F, 0.042F, 0.043F, 0.044F, 0.045F, 0.046F, 0.047F, 0.048F, 0.049F,
+            0.05F, 0.051F, 0.052F, 0.053F, 0.054F, 0.055F, 0.056F, 0.057F, 0.058F, 0.059F, 0.06F, 0.061F, 0.062F, 0.063F, 0.064F, 0.065F, 0.066F, 0.067F, 0.068F, 0.069F, 0.07F, 0.071F, 0.072F, 0.073F, 0.074F,
+            0.075F, 0.076F, 0.077F, 0.078F, 0.079F, 0.08F, 0.081F, 0.082F, 0.083F, 0.084F, 0.085F, 0.086F, 0.087F, 0.088F, 0.089F, 0.09F, 0.091F, 0.092F, 0.093F, 0.094F, 0.095F, 0.096F, 0.097F, 0.098F, 0.099F,
+            0.1F, 0.101F, 0.102F, 0.103F, 0.104F, 0.105F, 0.106F, 0.107F, 0.108F, 0.109F, 0.11F, 0.111F, 0.112F, 0.113F, 0.114F, 0.115F, 0.116F, 0.117F, 0.118F, 0.119F, 0.12F, 0.121F, 0.122F, 0.123F, 0.124F,
+            0.125F, 0.126F, 0.127F, 0.128F, 0.129F, 0.13F, 0.131F, 0.132F, 0.133F, 0.134F, 0.135F, 0.136F, 0.137F, 0.138F, 0.139F, 0.14F, 0.141F, 0.142F, 0.143F, 0.144F, 0.145F, 0.146F, 0.147F, 0.148F, 0.149F,
+            0.15F, 0.151F, 0.152F, 0.153F, 0.154F, 0.155F, 0.156F, 0.157F, 0.158F, 0.159F, 0.16F, 0.161F, 0.162F, 0.163F, 0.164F, 0.165F, 0.166F, 0.167F, 0.168F, 0.169F, 0.17F, 0.171F, 0.172F, 0.173F, 0.174F,
+            0.175F, 0.176F, 0.177F, 0.178F, 0.179F, 0.18F, 0.181F, 0.182F, 0.183F, 0.184F, 0.185F, 0.186F, 0.187F, 0.188F, 0.189F, 0.19F, 0.191F, 0.192F, 0.193F, 0.194F, 0.195F, 0.196F, 0.197F, 0.198F, 0.199F,
+            0.2F, 0.201F, 0.202F, 0.203F, 0.204F, 0.205F, 0.206F, 0.207F, 0.208F, 0.209F, 0.21F, 0.211F, 0.212F, 0.213F, 0.214F, 0.215F, 0.216F, 0.217F, 0.218F, 0.219F, 0.22F, 0.221F, 0.222F, 0.223F, 0.224F,
+            0.225F, 0.226F, 0.227F, 0.228F, 0.229F, 0.23F, 0.231F, 0.232F, 0.233F, 0.234F, 0.235F, 0.236F, 0.237F, 0.238F, 0.239F, 0.24F, 0.241F, 0.242F, 0.243F, 0.244F, 0.245F, 0.246F, 0.247F, 0.248F, 0.249F,
+            0.25F, 0.251F, 0.252F, 0.253F, 0.254F, 0.255F, 0.256F, 0.257F, 0.258F, 0.259F, 0.26F, 0.261F, 0.262F, 0.263F, 0.264F, 0.265F, 0.266F, 0.267F, 0.268F, 0.269F, 0.27F, 0.271F, 0.272F, 0.273F, 0.274F,
+            0.275F, 0.276F, 0.277F, 0.278F, 0.279F, 0.28F, 0.281F, 0.282F, 0.283F, 0.284F, 0.285F, 0.286F, 0.287F, 0.288F, 0.289F, 0.29F, 0.291F, 0.292F, 0.293F, 0.294F, 0.295F, 0.296F, 0.297F, 0.298F, 0.299F,
+            0.3F, 0.301F, 0.302F, 0.303F, 0.304F, 0.305F, 0.306F, 0.307F, 0.308F, 0.309F, 0.31F, 0.311F, 0.312F, 0.313F, 0.314F, 0.315F, 0.316F, 0.317F, 0.318F, 0.319F, 0.32F, 0.321F, 0.322F, 0.323F, 0.324F,
+            0.325F, 0.326F, 0.327F, 0.328F, 0.329F, 0.33F, 0.331F, 0.332F, 0.333F, 0.334F, 0.335F, 0.336F, 0.337F, 0.338F, 0.339F, 0.34F, 0.341F, 0.342F, 0.343F, 0.344F, 0.345F, 0.346F, 0.347F, 0.348F, 0.349F,
+            0.35F, 0.351F, 0.352F, 0.353F, 0.354F, 0.355F, 0.356F, 0.357F, 0.358F, 0.359F, 0.36F, 0.361F, 0.362F, 0.363F, 0.364F, 0.365F, 0.366F, 0.367F, 0.368F, 0.369F, 0.37F, 0.371F, 0.372F, 0.373F, 0.374F,
+            0.375F, 0.376F, 0.377F, 0.378F, 0.379F, 0.38F, 0.381F, 0.382F, 0.383F, 0.384F, 0.385F, 0.386F, 0.387F, 0.388F, 0.389F, 0.39F, 0.391F, 0.392F, 0.393F, 0.394F, 0.395F, 0.396F, 0.397F, 0.398F, 0.399F,
+            0.4F, 0.401F, 0.402F, 0.403F, 0.404F, 0.405F, 0.406F, 0.407F, 0.408F, 0.409F, 0.41F, 0.411F, 0.412F, 0.413F, 0.414F, 0.415F, 0.416F, 0.417F, 0.418F, 0.419F, 0.42F, 0.421F, 0.422F, 0.423F, 0.424F,
+            0.425F, 0.426F, 0.427F, 0.428F, 0.429F, 0.43F, 0.431F, 0.432F, 0.433F, 0.434F, 0.435F, 0.436F, 0.437F, 0.438F, 0.439F, 0.44F, 0.441F, 0.442F, 0.443F, 0.444F, 0.445F, 0.446F, 0.447F, 0.448F, 0.449F,
+            0.45F, 0.451F, 0.452F, 0.453F, 0.454F, 0.455F, 0.456F, 0.457F, 0.458F, 0.459F, 0.46F, 0.461F, 0.462F, 0.463F, 0.464F, 0.465F, 0.466F, 0.467F, 0.468F, 0.469F, 0.47F, 0.471F, 0.472F, 0.473F, 0.474F,
+            0.475F, 0.476F, 0.477F, 0.478F, 0.479F, 0.48F, 0.481F, 0.482F, 0.483F, 0.484F, 0.485F, 0.486F, 0.487F, 0.488F, 0.489F, 0.49F, 0.491F, 0.492F, 0.493F, 0.494F, 0.495F, 0.496F, 0.497F, 0.498F, 0.499F,
+            0.5F, 0.501F, 0.502F, 0.503F, 0.504F, 0.505F, 0.506F, 0.507F, 0.508F, 0.509F, 0.51F, 0.511F, 0.512F, 0.513F, 0.514F, 0.515F, 0.516F, 0.517F, 0.518F, 0.519F, 0.52F, 0.521F, 0.522F, 0.523F, 0.524F,
+            0.525F, 0.526F, 0.527F, 0.528F, 0.529F, 0.53F, 0.531F, 0.532F, 0.533F, 0.534F, 0.535F, 0.536F, 0.537F, 0.538F, 0.539F, 0.54F, 0.541F, 0.542F, 0.543F, 0.544F, 0.545F, 0.546F, 0.547F, 0.548F, 0.549F,
+            0.55F, 0.551F, 0.552F, 0.553F, 0.554F, 0.555F, 0.556F, 0.557F, 0.558F, 0.559F, 0.56F, 0.561F, 0.562F, 0.563F, 0.564F, 0.565F, 0.566F, 0.567F, 0.568F, 0.569F, 0.57F, 0.571F, 0.572F, 0.573F, 0.574F,
+            0.575F, 0.576F, 0.577F, 0.578F, 0.579F, 0.58F, 0.581F, 0.582F, 0.583F, 0.584F, 0.585F, 0.586F, 0.587F, 0.588F, 0.589F, 0.59F, 0.591F, 0.592F, 0.593F, 0.594F, 0.595F, 0.596F, 0.597F, 0.598F, 0.599F,
+            0.6F, 0.601F, 0.602F, 0.603F, 0.604F, 0.605F, 0.606F, 0.607F, 0.608F, 0.609F, 0.61F, 0.611F, 0.612F, 0.613F, 0.614F, 0.615F, 0.616F, 0.617F, 0.618F, 0.619F, 0.62F, 0.621F, 0.622F, 0.623F, 0.624F,
+            0.625F, 0.626F, 0.627F, 0.628F, 0.629F, 0.63F, 0.631F, 0.632F, 0.633F, 0.634F, 0.635F, 0.636F, 0.637F, 0.638F, 0.639F, 0.64F, 0.641F, 0.642F, 0.643F, 0.644F, 0.645F, 0.646F, 0.647F, 0.648F, 0.649F,
+            0.65F, 0.651F, 0.652F, 0.653F, 0.654F, 0.655F, 0.656F, 0.657F, 0.658F, 0.659F, 0.66F, 0.661F, 0.662F, 0.663F, 0.664F, 0.665F, 0.666F, 0.667F, 0.668F, 0.669F, 0.67F, 0.671F, 0.672F, 0.673F, 0.674F,
+            0.675F, 0.676F, 0.677F, 0.678F, 0.679F, 0.68F, 0.681F, 0.682F, 0.683F, 0.684F, 0.685F, 0.686F, 0.687F, 0.688F, 0.689F, 0.69F, 0.691F, 0.692F, 0.693F, 0.694F, 0.695F, 0.696F, 0.697F, 0.698F, 0.699F,
+            0.7F, 0.701F, 0.702F, 0.703F, 0.704F, 0.705F, 0.706F, 0.707F, 0.708F, 0.709F, 0.71F, 0.711F, 0.712F, 0.713F, 0.714F, 0.715F, 0.716F, 0.717F, 0.718F, 0.719F, 0.72F, 0.721F, 0.722F, 0.723F, 0.724F,
+            0.725F, 0.726F, 0.727F, 0.728F, 0.729F, 0.73F, 0.731F, 0.732F, 0.733F, 0.734F, 0.735F, 0.736F, 0.737F, 0.738F, 0.739F, 0.74F, 0.741F, 0.742F, 0.743F, 0.744F, 0.745F, 0.746F, 0.747F, 0.748F, 0.749F,
+            0.75F, 0.751F, 0.752F, 0.753F, 0.754F, 0.755F, 0.756F, 0.757F, 0.758F, 0.759F, 0.76F, 0.761F, 0.762F, 0.763F, 0.764F, 0.765F, 0.766F, 0.767F, 0.768F, 0.769F, 0.77F, 0.771F, 0.772F, 0.773F, 0.774F,
+            0.775F, 0.776F, 0.777F, 0.778F, 0.779F, 0.78F, 0.781F, 0.782F, 0.783F, 0.784F, 0.785F, 0.786F, 0.787F, 0.788F, 0.789F, 0.79F, 0.791F, 0.792F, 0.793F, 0.794F, 0.795F, 0.796F, 0.797F, 0.798F, 0.799F,
+            0.8F, 0.801F, 0.802F, 0.803F, 0.804F, 0.805F, 0.806F, 0.807F, 0.808F, 0.809F, 0.81F, 0.811F, 0.812F, 0.813F, 0.814F, 0.815F, 0.816F, 0.817F, 0.818F, 0.819F, 0.82F, 0.821F, 0.822F, 0.823F, 0.824F,
+            0.825F, 0.826F, 0.827F, 0.828F, 0.829F, 0.83F, 0.831F, 0.832F, 0.833F, 0.834F, 0.835F, 0.836F, 0.837F, 0.838F, 0.839F, 0.84F, 0.841F, 0.842F, 0.843F, 0.844F, 0.845F, 0.846F, 0.847F, 0.848F, 0.849F,
+            0.85F, 0.851F, 0.852F, 0.853F, 0.854F, 0.855F, 0.856F, 0.857F, 0.858F, 0.859F, 0.86F, 0.861F, 0.862F, 0.863F, 0.864F, 0.865F, 0.866F, 0.867F, 0.868F, 0.869F, 0.87F, 0.871F, 0.872F, 0.873F, 0.874F,
+            0.875F, 0.876F, 0.877F, 0.878F, 0.879F, 0.88F, 0.881F, 0.882F, 0.883F, 0.884F, 0.885F, 0.886F, 0.887F, 0.888F, 0.889F, 0.89F, 0.891F, 0.892F, 0.893F, 0.894F, 0.895F, 0.896F, 0.897F, 0.898F, 0.899F,
+            0.9F, 0.901F, 0.902F, 0.903F, 0.904F, 0.905F, 0.906F, 0.907F, 0.908F, 0.909F, 0.91F, 0.911F, 0.912F, 0.913F, 0.914F, 0.915F, 0.916F, 0.917F, 0.918F, 0.919F, 0.92F, 0.921F, 0.922F, 0.923F, 0.924F,
+            0.925F, 0.926F, 0.927F, 0.928F, 0.929F, 0.93F, 0.931F, 0.932F, 0.933F, 0.934F, 0.935F, 0.936F, 0.937F, 0.938F, 0.939F, 0.94F, 0.941F, 0.942F, 0.943F, 0.944F, 0.945F, 0.946F, 0.947F, 0.948F, 0.949F,
+            0.95F, 0.951F, 0.952F, 0.953F, 0.954F, 0.955F, 0.956F, 0.957F, 0.958F, 0.959F, 0.96F, 0.961F, 0.962F, 0.963F, 0.964F, 0.965F, 0.966F, 0.967F, 0.968F, 0.969F, 0.97F, 0.971F, 0.972F, 0.973F, 0.974F,
+            0.975F, 0.976F, 0.977F, 0.978F, 0.979F, 0.98F, 0.981F, 0.982F, 0.983F, 0.984F, 0.985F, 0.986F, 0.987F, 0.988F, 0.989F, 0.99F, 0.991F, 0.992F, 0.993F, 0.994F, 0.995F, 0.996F, 0.997F, 0.998F, 0.999F
+    };
+
+    static final double[] DOUBLE_SMALL_3 = new double[]{
+            0.0, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.011, 0.012, 0.013, 0.014, 0.015, 0.016, 0.017, 0.018, 0.019, 0.02, 0.021, 0.022, 0.023, 0.024,
+            0.025, 0.026, 0.027, 0.028, 0.029, 0.03, 0.031, 0.032, 0.033, 0.034, 0.035, 0.036, 0.037, 0.038, 0.039, 0.04, 0.041, 0.042, 0.043, 0.044, 0.045, 0.046, 0.047, 0.048, 0.049,
+            0.05, 0.051, 0.052, 0.053, 0.054, 0.055, 0.056, 0.057, 0.058, 0.059, 0.06, 0.061, 0.062, 0.063, 0.064, 0.065, 0.066, 0.067, 0.068, 0.069, 0.07, 0.071, 0.072, 0.073, 0.074,
+            0.075, 0.076, 0.077, 0.078, 0.079, 0.08, 0.081, 0.082, 0.083, 0.084, 0.085, 0.086, 0.087, 0.088, 0.089, 0.09, 0.091, 0.092, 0.093, 0.094, 0.095, 0.096, 0.097, 0.098, 0.099,
+            0.1, 0.101, 0.102, 0.103, 0.104, 0.105, 0.106, 0.107, 0.108, 0.109, 0.11, 0.111, 0.112, 0.113, 0.114, 0.115, 0.116, 0.117, 0.118, 0.119, 0.12, 0.121, 0.122, 0.123, 0.124,
+            0.125, 0.126, 0.127, 0.128, 0.129, 0.13, 0.131, 0.132, 0.133, 0.134, 0.135, 0.136, 0.137, 0.138, 0.139, 0.14, 0.141, 0.142, 0.143, 0.144, 0.145, 0.146, 0.147, 0.148, 0.149,
+            0.15, 0.151, 0.152, 0.153, 0.154, 0.155, 0.156, 0.157, 0.158, 0.159, 0.16, 0.161, 0.162, 0.163, 0.164, 0.165, 0.166, 0.167, 0.168, 0.169, 0.17, 0.171, 0.172, 0.173, 0.174,
+            0.175, 0.176, 0.177, 0.178, 0.179, 0.18, 0.181, 0.182, 0.183, 0.184, 0.185, 0.186, 0.187, 0.188, 0.189, 0.19, 0.191, 0.192, 0.193, 0.194, 0.195, 0.196, 0.197, 0.198, 0.199,
+            0.2, 0.201, 0.202, 0.203, 0.204, 0.205, 0.206, 0.207, 0.208, 0.209, 0.21, 0.211, 0.212, 0.213, 0.214, 0.215, 0.216, 0.217, 0.218, 0.219, 0.22, 0.221, 0.222, 0.223, 0.224,
+            0.225, 0.226, 0.227, 0.228, 0.229, 0.23, 0.231, 0.232, 0.233, 0.234, 0.235, 0.236, 0.237, 0.238, 0.239, 0.24, 0.241, 0.242, 0.243, 0.244, 0.245, 0.246, 0.247, 0.248, 0.249,
+            0.25, 0.251, 0.252, 0.253, 0.254, 0.255, 0.256, 0.257, 0.258, 0.259, 0.26, 0.261, 0.262, 0.263, 0.264, 0.265, 0.266, 0.267, 0.268, 0.269, 0.27, 0.271, 0.272, 0.273, 0.274,
+            0.275, 0.276, 0.277, 0.278, 0.279, 0.28, 0.281, 0.282, 0.283, 0.284, 0.285, 0.286, 0.287, 0.288, 0.289, 0.29, 0.291, 0.292, 0.293, 0.294, 0.295, 0.296, 0.297, 0.298, 0.299,
+            0.3, 0.301, 0.302, 0.303, 0.304, 0.305, 0.306, 0.307, 0.308, 0.309, 0.31, 0.311, 0.312, 0.313, 0.314, 0.315, 0.316, 0.317, 0.318, 0.319, 0.32, 0.321, 0.322, 0.323, 0.324,
+            0.325, 0.326, 0.327, 0.328, 0.329, 0.33, 0.331, 0.332, 0.333, 0.334, 0.335, 0.336, 0.337, 0.338, 0.339, 0.34, 0.341, 0.342, 0.343, 0.344, 0.345, 0.346, 0.347, 0.348, 0.349,
+            0.35, 0.351, 0.352, 0.353, 0.354, 0.355, 0.356, 0.357, 0.358, 0.359, 0.36, 0.361, 0.362, 0.363, 0.364, 0.365, 0.366, 0.367, 0.368, 0.369, 0.37, 0.371, 0.372, 0.373, 0.374,
+            0.375, 0.376, 0.377, 0.378, 0.379, 0.38, 0.381, 0.382, 0.383, 0.384, 0.385, 0.386, 0.387, 0.388, 0.389, 0.39, 0.391, 0.392, 0.393, 0.394, 0.395, 0.396, 0.397, 0.398, 0.399,
+            0.4, 0.401, 0.402, 0.403, 0.404, 0.405, 0.406, 0.407, 0.408, 0.409, 0.41, 0.411, 0.412, 0.413, 0.414, 0.415, 0.416, 0.417, 0.418, 0.419, 0.42, 0.421, 0.422, 0.423, 0.424,
+            0.425, 0.426, 0.427, 0.428, 0.429, 0.43, 0.431, 0.432, 0.433, 0.434, 0.435, 0.436, 0.437, 0.438, 0.439, 0.44, 0.441, 0.442, 0.443, 0.444, 0.445, 0.446, 0.447, 0.448, 0.449,
+            0.45, 0.451, 0.452, 0.453, 0.454, 0.455, 0.456, 0.457, 0.458, 0.459, 0.46, 0.461, 0.462, 0.463, 0.464, 0.465, 0.466, 0.467, 0.468, 0.469, 0.47, 0.471, 0.472, 0.473, 0.474,
+            0.475, 0.476, 0.477, 0.478, 0.479, 0.48, 0.481, 0.482, 0.483, 0.484, 0.485, 0.486, 0.487, 0.488, 0.489, 0.49, 0.491, 0.492, 0.493, 0.494, 0.495, 0.496, 0.497, 0.498, 0.499,
+            0.5, 0.501, 0.502, 0.503, 0.504, 0.505, 0.506, 0.507, 0.508, 0.509, 0.51, 0.511, 0.512, 0.513, 0.514, 0.515, 0.516, 0.517, 0.518, 0.519, 0.52, 0.521, 0.522, 0.523, 0.524,
+            0.525, 0.526, 0.527, 0.528, 0.529, 0.53, 0.531, 0.532, 0.533, 0.534, 0.535, 0.536, 0.537, 0.538, 0.539, 0.54, 0.541, 0.542, 0.543, 0.544, 0.545, 0.546, 0.547, 0.548, 0.549,
+            0.55, 0.551, 0.552, 0.553, 0.554, 0.555, 0.556, 0.557, 0.558, 0.559, 0.56, 0.561, 0.562, 0.563, 0.564, 0.565, 0.566, 0.567, 0.568, 0.569, 0.57, 0.571, 0.572, 0.573, 0.574,
+            0.575, 0.576, 0.577, 0.578, 0.579, 0.58, 0.581, 0.582, 0.583, 0.584, 0.585, 0.586, 0.587, 0.588, 0.589, 0.59, 0.591, 0.592, 0.593, 0.594, 0.595, 0.596, 0.597, 0.598, 0.599,
+            0.6, 0.601, 0.602, 0.603, 0.604, 0.605, 0.606, 0.607, 0.608, 0.609, 0.61, 0.611, 0.612, 0.613, 0.614, 0.615, 0.616, 0.617, 0.618, 0.619, 0.62, 0.621, 0.622, 0.623, 0.624,
+            0.625, 0.626, 0.627, 0.628, 0.629, 0.63, 0.631, 0.632, 0.633, 0.634, 0.635, 0.636, 0.637, 0.638, 0.639, 0.64, 0.641, 0.642, 0.643, 0.644, 0.645, 0.646, 0.647, 0.648, 0.649,
+            0.65, 0.651, 0.652, 0.653, 0.654, 0.655, 0.656, 0.657, 0.658, 0.659, 0.66, 0.661, 0.662, 0.663, 0.664, 0.665, 0.666, 0.667, 0.668, 0.669, 0.67, 0.671, 0.672, 0.673, 0.674,
+            0.675, 0.676, 0.677, 0.678, 0.679, 0.68, 0.681, 0.682, 0.683, 0.684, 0.685, 0.686, 0.687, 0.688, 0.689, 0.69, 0.691, 0.692, 0.693, 0.694, 0.695, 0.696, 0.697, 0.698, 0.699,
+            0.7, 0.701, 0.702, 0.703, 0.704, 0.705, 0.706, 0.707, 0.708, 0.709, 0.71, 0.711, 0.712, 0.713, 0.714, 0.715, 0.716, 0.717, 0.718, 0.719, 0.72, 0.721, 0.722, 0.723, 0.724,
+            0.725, 0.726, 0.727, 0.728, 0.729, 0.73, 0.731, 0.732, 0.733, 0.734, 0.735, 0.736, 0.737, 0.738, 0.739, 0.74, 0.741, 0.742, 0.743, 0.744, 0.745, 0.746, 0.747, 0.748, 0.749,
+            0.75, 0.751, 0.752, 0.753, 0.754, 0.755, 0.756, 0.757, 0.758, 0.759, 0.76, 0.761, 0.762, 0.763, 0.764, 0.765, 0.766, 0.767, 0.768, 0.769, 0.77, 0.771, 0.772, 0.773, 0.774,
+            0.775, 0.776, 0.777, 0.778, 0.779, 0.78, 0.781, 0.782, 0.783, 0.784, 0.785, 0.786, 0.787, 0.788, 0.789, 0.79, 0.791, 0.792, 0.793, 0.794, 0.795, 0.796, 0.797, 0.798, 0.799,
+            0.8, 0.801, 0.802, 0.803, 0.804, 0.805, 0.806, 0.807, 0.808, 0.809, 0.81, 0.811, 0.812, 0.813, 0.814, 0.815, 0.816, 0.817, 0.818, 0.819, 0.82, 0.821, 0.822, 0.823, 0.824,
+            0.825, 0.826, 0.827, 0.828, 0.829, 0.83, 0.831, 0.832, 0.833, 0.834, 0.835, 0.836, 0.837, 0.838, 0.839, 0.84, 0.841, 0.842, 0.843, 0.844, 0.845, 0.846, 0.847, 0.848, 0.849,
+            0.85, 0.851, 0.852, 0.853, 0.854, 0.855, 0.856, 0.857, 0.858, 0.859, 0.86, 0.861, 0.862, 0.863, 0.864, 0.865, 0.866, 0.867, 0.868, 0.869, 0.87, 0.871, 0.872, 0.873, 0.874,
+            0.875, 0.876, 0.877, 0.878, 0.879, 0.88, 0.881, 0.882, 0.883, 0.884, 0.885, 0.886, 0.887, 0.888, 0.889, 0.89, 0.891, 0.892, 0.893, 0.894, 0.895, 0.896, 0.897, 0.898, 0.899,
+            0.9, 0.901, 0.902, 0.903, 0.904, 0.905, 0.906, 0.907, 0.908, 0.909, 0.91, 0.911, 0.912, 0.913, 0.914, 0.915, 0.916, 0.917, 0.918, 0.919, 0.92, 0.921, 0.922, 0.923, 0.924,
+            0.925, 0.926, 0.927, 0.928, 0.929, 0.93, 0.931, 0.932, 0.933, 0.934, 0.935, 0.936, 0.937, 0.938, 0.939, 0.94, 0.941, 0.942, 0.943, 0.944, 0.945, 0.946, 0.947, 0.948, 0.949,
+            0.95, 0.951, 0.952, 0.953, 0.954, 0.955, 0.956, 0.957, 0.958, 0.959, 0.96, 0.961, 0.962, 0.963, 0.964, 0.965, 0.966, 0.967, 0.968, 0.969, 0.97, 0.971, 0.972, 0.973, 0.974,
+            0.975, 0.976, 0.977, 0.978, 0.979, 0.98, 0.981, 0.982, 0.983, 0.984, 0.985, 0.986, 0.987, 0.988, 0.989, 0.99, 0.991, 0.992, 0.993, 0.994, 0.995, 0.996, 0.997, 0.998, 0.999
+    };
+
+    static final double[] DOUBLES_4 = new double[]{
+            0.0000D, 0.0001D, 0.0002D, 0.0003D, 0.0004D, 0.0005D, 0.0006D, 0.0007D, 0.0008D, 0.0009D
+    };
+
+    static final double[] DOUBLES_5 = new double[]{
+            0.00000D, 0.00001D, 0.00002D, 0.00003D, 0.00004D, 0.00005D, 0.00006D, 0.00007D, 0.00008D, 0.00009D,
+            0.00010D, 0.00011D, 0.00012D, 0.00013D, 0.00014D, 0.00015D, 0.00016D, 0.00017D, 0.00018D, 0.00019D,
+            0.00020D, 0.00021D, 0.00022D, 0.00023D, 0.00024D, 0.00025D, 0.00026D, 0.00027D, 0.00028D, 0.00029D,
+            0.00030D, 0.00031D, 0.00032D, 0.00033D, 0.00034D, 0.00035D, 0.00036D, 0.00037D, 0.00038D, 0.00039D,
+            0.00040D, 0.00041D, 0.00042D, 0.00043D, 0.00044D, 0.00045D, 0.00046D, 0.00047D, 0.00048D, 0.00049D,
+            0.00050D, 0.00051D, 0.00052D, 0.00053D, 0.00054D, 0.00055D, 0.00056D, 0.00057D, 0.00058D, 0.00059D,
+            0.00060D, 0.00061D, 0.00062D, 0.00063D, 0.00064D, 0.00065D, 0.00066D, 0.00067D, 0.00068D, 0.00069D,
+            0.00070D, 0.00071D, 0.00072D, 0.00073D, 0.00074D, 0.00075D, 0.00076D, 0.00077D, 0.00078D, 0.00079D,
+            0.00080D, 0.00081D, 0.00082D, 0.00083D, 0.00084D, 0.00085D, 0.00086D, 0.00087D, 0.00088D, 0.00089D,
+            0.00090D, 0.00091D, 0.00092D, 0.00093D, 0.00094D, 0.00095D, 0.00096D, 0.00097D, 0.00098D, 0.00099D,
+    };
+
     final Context context;
     List<ResolveTask> resolveTasks;
 
@@ -616,33 +744,301 @@ public abstract class JSONReader
     public abstract Long readInt64();
 
     public float readFloatValue() {
-        readNumber();
+        readNumber0();
+
+        if (wasNull) {
+            return 0;
+        }
+
+        switch (valueType) {
+            case JSON_TYPE_INT:
+            case JSON_TYPE_INT64: {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                    int intVlaue;
+                    if (negative) {
+                        if (mag3 < 0) {
+                            return -(mag3 & 0xFFFFFFFFL);
+                        }
+                        intVlaue = -mag3;
+                    } else {
+                        if (mag3 < 0) {
+                            return mag3 & 0xFFFFFFFFL;
+                        }
+                        intVlaue = mag3;
+                    }
+
+                    return (float) intVlaue;
+                }
+                int[] mag;
+                if (mag0 == 0) {
+                    if (mag1 == 0) {
+                        long v3 = mag3 & LONG_MASK;
+                        long v2 = mag2 & LONG_MASK;
+
+                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                            long v23 = (v2 << 32) + (v3);
+                            return negative ? -v23 : v23;
+                        }
+                        mag = new int[]{mag2, mag3};
+                    } else {
+                        mag = new int[]{mag1, mag2, mag3};
+                    }
+                } else {
+                    mag = new int[]{mag0, mag1, mag2, mag3};
+                }
+
+                return getBigInt(negative, mag).floatValue();
+            }
+            case JSON_TYPE_INT16: {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
+                    int intValue = negative ? -mag3 : mag3;
+                    return (float) intValue;
+                }
+                break;
+            }
+            case JSON_TYPE_INT8: {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
+                    int intValue = negative ? -mag3 : mag3;
+                    return (float) intValue;
+                }
+                break;
+            }
+            case JSON_TYPE_DEC: {
+                if (exponent == 0 && mag0 == 0 && mag1 == 0) {
+                    if (mag2 == 0 && mag3 >= 0) {
+                        int unscaledVal = negative ? -mag3 : mag3;
+                        if (scale == 1) {
+                            int small = unscaledVal % 10;
+                            float floatVal = unscaledVal / 10 + FLOAT_SMALL_1[small];
+                            return floatVal;
+                        } else if (scale == 2) {
+                            int small = unscaledVal % 100;
+                            float floatVal = unscaledVal / 100 + FLOAT_SMALL_2[small];
+                            return floatVal;
+                        } else if (scale == 3) {
+                            int small = unscaledVal % 1000;
+                            return unscaledVal / 1000 + FLOAT_SMALL_3[small];
+                        } else if (scale == 4) {
+                            return floatValue4(unscaledVal);
+                        } else if (scale == 5) {
+                            return floatValue5(unscaledVal);
+                        }
+                    } else {
+                        long v3 = mag3 & LONG_MASK;
+                        long v2 = mag2 & LONG_MASK;
+
+                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                            long v23 = (v2 << 32) + (v3);
+                            long unscaledVal = negative ? -v23 : v23;
+                            if (scale == 1) {
+                                int small = (int) (unscaledVal % 10);
+                                float floatVal = unscaledVal / 10 + FLOAT_SMALL_1[small];
+                                return floatVal;
+                            } else if (scale == 2) {
+                                int small = (int) (unscaledVal % 100);
+                                float floatVal = unscaledVal / 100 + FLOAT_SMALL_2[small];
+                                return floatVal;
+                            } else if (scale == 3) {
+                                int small = (int) (unscaledVal % 1000);
+                                return unscaledVal / 1000 + FLOAT_SMALL_3[small];
+                            } else if (scale == 4) {
+                                return floatValue4(unscaledVal);
+                            } else if (scale == 5) {
+                                return floatValue5(unscaledVal);
+                            }
+                        }
+                    }
+                }
+
+                int[] mag = mag0 == 0
+                        ? mag1 == 0
+                        ? mag2 == 0
+                        ? new int[]{mag3}
+                        : new int[]{mag2, mag3}
+                        : new int[]{mag1, mag2, mag3}
+                        : new int[]{mag0, mag1, mag2, mag3};
+                BigInteger bigInt = getBigInt(negative, mag);
+                BigDecimal decimal = new BigDecimal(bigInt, scale);
+
+                if (exponent != 0) {
+                    return Float.parseFloat(
+                            decimal + "E" + exponent);
+                }
+
+                return decimal.floatValue();
+            }
+            default:
+                break;
+        }
+
         Number number = getNumber();
         return number == null ? 0 : number.floatValue();
     }
 
+    static float floatValue4(long unscaledVal) {
+        int smallValue = (int) (unscaledVal % 10000);
+
+        double d3 = DOUBLE_SMALL_3[smallValue / 10];
+        double d4 = DOUBLES_4[smallValue % 10];
+        float floatSmallValue = (float) (d3 + d4);
+
+        return unscaledVal / 10000 + floatSmallValue;
+    }
+
+    static float floatValue5(long unscaledVal) {
+        int smallValue = (int) (unscaledVal % 100000);
+
+        double d3 = DOUBLE_SMALL_3[smallValue / 100];
+        double d5 = DOUBLES_5[smallValue % 100];
+        float floatSmallValue = (float) (d3 + d5);
+
+        return unscaledVal / 100000 + floatSmallValue;
+    }
+
     public Float readFloat() {
-        readNumber();
-        Number number = getNumber();
-        if (number instanceof Float) {
-            return (Float) number;
+        float value = readFloatValue();
+        if (value == 0 && wasNull) {
+            return null;
         }
-        return number == null ? null : number.floatValue();
+        return value;
     }
 
     public double readDoubleValue() {
-        readNumber();
+        readNumber0();
+
+        if (wasNull) {
+            return 0;
+        }
+
+        switch (valueType) {
+            case JSON_TYPE_INT:
+            case JSON_TYPE_INT64: {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                    int intVlaue;
+                    if (negative) {
+                        if (mag3 < 0) {
+                            return -(mag3 & 0xFFFFFFFFL);
+                        }
+                        intVlaue = -mag3;
+                    } else {
+                        if (mag3 < 0) {
+                            return mag3 & 0xFFFFFFFFL;
+                        }
+                        intVlaue = mag3;
+                    }
+
+                    return intVlaue;
+                }
+                int[] mag;
+                if (mag0 == 0) {
+                    if (mag1 == 0) {
+                        long v3 = mag3 & LONG_MASK;
+                        long v2 = mag2 & LONG_MASK;
+
+                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                            long v23 = (v2 << 32) + (v3);
+                            return negative ? -v23 : v23;
+                        }
+                        mag = new int[]{mag2, mag3};
+                    } else {
+                        mag = new int[]{mag1, mag2, mag3};
+                    }
+                } else {
+                    mag = new int[]{mag0, mag1, mag2, mag3};
+                }
+
+                return getBigInt(negative, mag).floatValue();
+            }
+            case JSON_TYPE_INT16: {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
+                    int intValue = negative ? -mag3 : mag3;
+                    return intValue;
+                }
+                break;
+            }
+            case JSON_TYPE_INT8: {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
+                    int intValue = negative ? -mag3 : mag3;
+                    return intValue;
+                }
+                break;
+            }
+            case JSON_TYPE_DEC: {
+                BigDecimal decimal = null;
+
+                if (exponent == 0 && mag0 == 0 && mag1 == 0) {
+                    if (mag2 == 0 && mag3 >= 0) {
+                        int unscaledVal = negative ? -mag3 : mag3;
+                        if (scale == 1) {
+                            int small = unscaledVal % 10;
+                            double floatVal = unscaledVal / 10 + DOUBLE_SMALL_1[small];
+                            return floatVal;
+                        } else if (scale == 2) {
+                            int small = unscaledVal % 100;
+                            double floatVal = unscaledVal / 100 + DOUBLE_SMALL_2[small];
+                            return floatVal;
+                        } else if (scale == 3) {
+                            int small = unscaledVal % 1000;
+                            double floatVal = unscaledVal / 1000 + DOUBLE_SMALL_3[small];
+                            return floatVal;
+                        }
+                    } else {
+                        long v3 = mag3 & LONG_MASK;
+                        long v2 = mag2 & LONG_MASK;
+
+                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                            long v23 = (v2 << 32) + (v3);
+                            long unscaledVal = negative ? -v23 : v23;
+                            if (scale == 1) {
+                                int small = (int) (unscaledVal % 10);
+                                double floatVal = unscaledVal / 10 + DOUBLE_SMALL_1[small];
+                                return floatVal;
+                            } else if (scale == 2) {
+                                int small = (int) (unscaledVal % 100);
+                                double floatVal = unscaledVal / 100 + DOUBLE_SMALL_2[small];
+                                return floatVal;
+                            } else if (scale == 3) {
+                                int small = (int) (unscaledVal % 1000);
+                                double floatVal = unscaledVal / 1000 + DOUBLE_SMALL_3[small];
+                                return floatVal;
+                            }
+                        }
+                    }
+                }
+
+                if (decimal == null) {
+                    int[] mag = mag0 == 0
+                            ? mag1 == 0
+                            ? mag2 == 0
+                            ? new int[]{mag3}
+                            : new int[]{mag2, mag3}
+                            : new int[]{mag1, mag2, mag3}
+                            : new int[]{mag0, mag1, mag2, mag3};
+                    BigInteger bigInt = getBigInt(negative, mag);
+                    decimal = new BigDecimal(bigInt, scale);
+                }
+
+                if (exponent != 0) {
+                    return Double.parseDouble(
+                            decimal + "E" + exponent);
+                }
+
+                return decimal.doubleValue();
+            }
+            default:
+                break;
+        }
+
         Number number = getNumber();
         return number == null ? 0 : number.doubleValue();
     }
 
     public Double readDouble() {
-        readNumber();
-        Number number = getNumber();
-        if (number instanceof Double) {
-            return (Double) number;
+        double value = readDoubleValue();
+        if (value == 0 && wasNull) {
+            return null;
         }
-        return number == null ? null : number.doubleValue();
+        return value;
     }
 
     public Number readNumber() {
@@ -1645,7 +2041,7 @@ public abstract class JSONReader
             throw new JSONException("syntax error : " + ch);
         }
 
-        for (;;) {
+        for (; ; ) {
             if (nextIfMatch(']')) {
                 break;
             }
@@ -1667,7 +2063,7 @@ public abstract class JSONReader
 
     public void readArray(List list, Type itemType) {
         if (nextIfMatch('[')) {
-            for (;;) {
+            for (; ; ) {
                 if (nextIfMatch(']')) {
                     break;
                 }
@@ -1863,16 +2259,42 @@ public abstract class JSONReader
                 return new BigDecimal(getBigInt(negative, mag));
             }
             case JSON_TYPE_DEC: {
-                int[] mag = mag0 == 0
-                        ? mag1 == 0
-                        ? mag2 == 0
-                        ? new int[]{mag3}
-                        : new int[]{mag2, mag3}
-                        : new int[]{mag1, mag2, mag3}
-                        : new int[]{mag0, mag1, mag2, mag3};
-                BigInteger bigInt = getBigInt(negative, mag);
-                int adjustedScale = scale - exponent;
-                BigDecimal decimal = new BigDecimal(bigInt, adjustedScale);
+                BigDecimal decimal = null;
+
+                if (exponent == 0 && mag0 == 0 && mag1 == 0) {
+                    if (mag2 == 0 && mag3 >= 0) {
+                        int unscaledVal = negative ? -mag3 : mag3;
+                        decimal = BigDecimal.valueOf(unscaledVal, scale);
+                    } else {
+                        long v3 = mag3 & LONG_MASK;
+                        long v2 = mag2 & LONG_MASK;
+
+                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                            long v23 = (v2 << 32) + (v3);
+                            long unscaledVal = negative ? -v23 : v23;
+                            decimal = BigDecimal.valueOf(unscaledVal, scale);
+                        }
+                    }
+                }
+
+                if (decimal == null) {
+                    int[] mag = mag0 == 0
+                            ? mag1 == 0
+                            ? mag2 == 0
+                            ? new int[]{mag3}
+                            : new int[]{mag2, mag3}
+                            : new int[]{mag1, mag2, mag3}
+                            : new int[]{mag0, mag1, mag2, mag3};
+                    BigInteger bigInt = getBigInt(negative, mag);
+                    decimal = new BigDecimal(bigInt, scale);
+                }
+
+                if (exponent != 0) {
+                    double doubleValue = Double.parseDouble(
+                            decimal + "E" + exponent);
+                    return BigDecimal.valueOf(doubleValue);
+                }
+
                 return decimal;
             }
             case JSON_TYPE_BIG_DEC: {
@@ -1911,7 +2333,7 @@ public abstract class JSONReader
         switch (valueType) {
             case JSON_TYPE_INT:
             case JSON_TYPE_INT64: {
-                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     int intVlaue;
                     if (negative) {
                         if (mag3 < 0) {
@@ -1950,30 +2372,122 @@ public abstract class JSONReader
                 return getBigInt(negative, mag);
             }
             case JSON_TYPE_INT16: {
-                if (mag1 == 0 && mag2 == 0 && mag3 >= 0) {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
                     int intValue = negative ? -mag3 : mag3;
                     return Short.valueOf((short) intValue);
                 }
                 throw new JSONException(info("shortValue overflow"));
             }
             case JSON_TYPE_INT8: {
-                if (mag1 == 0 && mag2 == 0 && mag3 >= 0) {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
                     int intValue = negative ? -mag3 : mag3;
                     return Byte.valueOf((byte) intValue);
                 }
                 throw new JSONException(info("shortValue overflow"));
             }
             case JSON_TYPE_DEC: {
-                int[] mag = mag0 == 0
-                        ? mag1 == 0
-                        ? mag2 == 0
-                        ? new int[]{mag3}
-                        : new int[]{mag2, mag3}
-                        : new int[]{mag1, mag2, mag3}
-                        : new int[]{mag0, mag1, mag2, mag3};
-                BigInteger bigInt = getBigInt(negative, mag);
-                BigDecimal decimal = new BigDecimal(bigInt, scale);
-                if (exponent != 0) { // TODO
+                BigDecimal decimal = null;
+
+                if (mag0 == 0 && mag1 == 0) {
+                    if (mag2 == 0 && mag3 >= 0) {
+                        int unscaledVal = negative ? -mag3 : mag3;
+
+                        if (exponent == 0) {
+                            if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
+                                if (scale == 1) {
+                                    int small = unscaledVal % 10;
+                                    float floatVal = unscaledVal / 10 + FLOAT_SMALL_1[small];
+                                    return floatVal;
+                                } else if (scale == 2) {
+                                    int small = unscaledVal % 100;
+                                    float floatVal = unscaledVal / 100 + FLOAT_SMALL_2[small];
+                                    return floatVal;
+                                } else if (scale == 3) {
+                                    int small = unscaledVal % 1000;
+                                    return unscaledVal / 1000 + FLOAT_SMALL_3[small];
+                                } else if (scale == 4) {
+                                    return floatValue4(unscaledVal);
+                                } else if (scale == 5) {
+                                    return floatValue5(unscaledVal);
+                                }
+                            } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
+                                if (scale == 1) {
+                                    int small = unscaledVal % 10;
+                                    double floatVal = unscaledVal / 10 + DOUBLE_SMALL_1[small];
+                                    return floatVal;
+                                } else if (scale == 2) {
+                                    int small = unscaledVal % 100;
+                                    double floatVal = unscaledVal / 100 + DOUBLE_SMALL_2[small];
+                                    return floatVal;
+                                } else if (scale == 3) {
+                                    int small = unscaledVal % 1000;
+                                    double floatVal = unscaledVal / 1000 + DOUBLE_SMALL_3[small];
+                                    return floatVal;
+                                }
+                            }
+                        }
+                        decimal = BigDecimal.valueOf(unscaledVal, scale);
+                    } else {
+                        long v3 = mag3 & LONG_MASK;
+                        long v2 = mag2 & LONG_MASK;
+
+                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                            long v23 = (v2 << 32) + (v3);
+                            long unscaledVal = negative ? -v23 : v23;
+
+                            if (exponent == 0) {
+                                if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
+                                    if (scale == 1) {
+                                        int small = (int) (unscaledVal % 10);
+                                        float floatVal = unscaledVal / 10 + FLOAT_SMALL_1[small];
+                                        return floatVal;
+                                    } else if (scale == 2) {
+                                        int small = (int) (unscaledVal % 100);
+                                        float floatVal = unscaledVal / 100 + FLOAT_SMALL_2[small];
+                                        return floatVal;
+                                    } else if (scale == 3) {
+                                        int small = (int) (unscaledVal % 1000);
+                                        return unscaledVal / 1000 + FLOAT_SMALL_3[small];
+                                    } else if (scale == 4) {
+                                        return floatValue4(unscaledVal);
+                                    } else if (scale == 5) {
+                                        return floatValue5(unscaledVal);
+                                    }
+                                } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
+                                    if (scale == 1) {
+                                        int small = (int) (unscaledVal % 10);
+                                        double floatVal = unscaledVal / 10 + DOUBLE_SMALL_1[small];
+                                        return floatVal;
+                                    } else if (scale == 2) {
+                                        int small = (int) (unscaledVal % 100);
+                                        double floatVal = unscaledVal / 100 + DOUBLE_SMALL_2[small];
+                                        return floatVal;
+                                    } else if (scale == 3) {
+                                        int small = (int) (unscaledVal % 1000);
+                                        double floatVal = unscaledVal / 1000 + DOUBLE_SMALL_3[small];
+                                        return floatVal;
+                                    }
+                                }
+                            }
+                            decimal = BigDecimal.valueOf(unscaledVal, scale);
+                        }
+                    }
+                }
+
+                if (decimal == null) {
+                    int[] mag = mag0 == 0
+                            ? mag1 == 0
+                            ? mag2 == 0
+                            ? new int[]{mag3}
+                            : new int[]{mag2, mag3}
+                            : new int[]{mag1, mag2, mag3}
+                            : new int[]{mag0, mag1, mag2, mag3};
+                    BigInteger bigInt = getBigInt(negative, mag);
+                    int adjustedScale = scale - exponent;
+                    decimal = new BigDecimal(bigInt, adjustedScale);
+                }
+
+                if (exponent != 0) {
                     double doubleValue = Double.parseDouble(
                             decimal + "E" + exponent);
                     return Double.valueOf(doubleValue);
