@@ -4535,10 +4535,7 @@ final class JSONReaderStr
             }
         }
 
-        ZonedDateTime zdt = ldt.atZone(zoneId);
-        if (zdt == null) {
-            return null;
-        }
+        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
 
         offset += (len + 1);
         next();
