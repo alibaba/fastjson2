@@ -809,12 +809,10 @@ public abstract class JSONReader
                         int unscaledVal = negative ? -mag3 : mag3;
                         if (scale == 1) {
                             int small = unscaledVal % 10;
-                            float floatVal = unscaledVal / 10 + FLOAT_SMALL_1[small];
-                            return floatVal;
+                            return unscaledVal / 10 + FLOAT_SMALL_1[small];
                         } else if (scale == 2) {
                             int small = unscaledVal % 100;
-                            float floatVal = unscaledVal / 100 + FLOAT_SMALL_2[small];
-                            return floatVal;
+                            return unscaledVal / 100 + FLOAT_SMALL_2[small];
                         } else if (scale == 3) {
                             int small = unscaledVal % 1000;
                             return unscaledVal / 1000 + FLOAT_SMALL_3[small];
@@ -832,12 +830,10 @@ public abstract class JSONReader
                             long unscaledVal = negative ? -v23 : v23;
                             if (scale == 1) {
                                 int small = (int) (unscaledVal % 10);
-                                float floatVal = unscaledVal / 10 + FLOAT_SMALL_1[small];
-                                return floatVal;
+                                return unscaledVal / 10 + FLOAT_SMALL_1[small];
                             } else if (scale == 2) {
                                 int small = (int) (unscaledVal % 100);
-                                float floatVal = unscaledVal / 100 + FLOAT_SMALL_2[small];
-                                return floatVal;
+                                return unscaledVal / 100 + FLOAT_SMALL_2[small];
                             } else if (scale == 3) {
                                 int small = (int) (unscaledVal % 1000);
                                 return unscaledVal / 1000 + FLOAT_SMALL_3[small];
@@ -971,16 +967,13 @@ public abstract class JSONReader
                         int unscaledVal = negative ? -mag3 : mag3;
                         if (scale == 1) {
                             int small = unscaledVal % 10;
-                            double floatVal = unscaledVal / 10 + DOUBLE_SMALL_1[small];
-                            return floatVal;
+                            return unscaledVal / 10 + DOUBLE_SMALL_1[small];
                         } else if (scale == 2) {
                             int small = unscaledVal % 100;
-                            double floatVal = unscaledVal / 100 + DOUBLE_SMALL_2[small];
-                            return floatVal;
+                            return unscaledVal / 100 + DOUBLE_SMALL_2[small];
                         } else if (scale == 3) {
                             int small = unscaledVal % 1000;
-                            double floatVal = unscaledVal / 1000 + DOUBLE_SMALL_3[small];
-                            return floatVal;
+                            return unscaledVal / 1000 + DOUBLE_SMALL_3[small];
                         }
                     } else {
                         long v3 = mag3 & LONG_MASK;
@@ -991,16 +984,13 @@ public abstract class JSONReader
                             long unscaledVal = negative ? -v23 : v23;
                             if (scale == 1) {
                                 int small = (int) (unscaledVal % 10);
-                                double floatVal = unscaledVal / 10 + DOUBLE_SMALL_1[small];
-                                return floatVal;
+                                return unscaledVal / 10 + DOUBLE_SMALL_1[small];
                             } else if (scale == 2) {
                                 int small = (int) (unscaledVal % 100);
-                                double floatVal = unscaledVal / 100 + DOUBLE_SMALL_2[small];
-                                return floatVal;
+                                return unscaledVal / 100 + DOUBLE_SMALL_2[small];
                             } else if (scale == 3) {
                                 int small = (int) (unscaledVal % 1000);
-                                double floatVal = unscaledVal / 1000 + DOUBLE_SMALL_3[small];
-                                return floatVal;
+                                return unscaledVal / 1000 + DOUBLE_SMALL_3[small];
                             }
                         }
                     }
@@ -2396,12 +2386,10 @@ public abstract class JSONReader
                             if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
                                 if (scale == 1) {
                                     int small = unscaledVal % 10;
-                                    float floatVal = unscaledVal / 10 + FLOAT_SMALL_1[small];
-                                    return floatVal;
+                                    return unscaledVal / 10 + FLOAT_SMALL_1[small];
                                 } else if (scale == 2) {
                                     int small = unscaledVal % 100;
-                                    float floatVal = unscaledVal / 100 + FLOAT_SMALL_2[small];
-                                    return floatVal;
+                                    return unscaledVal / 100 + FLOAT_SMALL_2[small];
                                 } else if (scale == 3) {
                                     int small = unscaledVal % 1000;
                                     return unscaledVal / 1000 + FLOAT_SMALL_3[small];
@@ -2413,16 +2401,13 @@ public abstract class JSONReader
                             } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
                                 if (scale == 1) {
                                     int small = unscaledVal % 10;
-                                    double floatVal = unscaledVal / 10 + DOUBLE_SMALL_1[small];
-                                    return floatVal;
+                                    return unscaledVal / 10 + DOUBLE_SMALL_1[small];
                                 } else if (scale == 2) {
                                     int small = unscaledVal % 100;
-                                    double floatVal = unscaledVal / 100 + DOUBLE_SMALL_2[small];
-                                    return floatVal;
+                                    return unscaledVal / 100 + DOUBLE_SMALL_2[small];
                                 } else if (scale == 3) {
                                     int small = unscaledVal % 1000;
-                                    double floatVal = unscaledVal / 1000 + DOUBLE_SMALL_3[small];
-                                    return floatVal;
+                                    return unscaledVal / 1000 + DOUBLE_SMALL_3[small];
                                 }
                             }
                         }
@@ -2439,12 +2424,10 @@ public abstract class JSONReader
                                 if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
                                     if (scale == 1) {
                                         int small = (int) (unscaledVal % 10);
-                                        float floatVal = unscaledVal / 10 + FLOAT_SMALL_1[small];
-                                        return floatVal;
+                                        return unscaledVal / 10 + FLOAT_SMALL_1[small];
                                     } else if (scale == 2) {
                                         int small = (int) (unscaledVal % 100);
-                                        float floatVal = unscaledVal / 100 + FLOAT_SMALL_2[small];
-                                        return floatVal;
+                                        return unscaledVal / 100 + FLOAT_SMALL_2[small];
                                     } else if (scale == 3) {
                                         int small = (int) (unscaledVal % 1000);
                                         return unscaledVal / 1000 + FLOAT_SMALL_3[small];
@@ -2456,16 +2439,13 @@ public abstract class JSONReader
                                 } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
                                     if (scale == 1) {
                                         int small = (int) (unscaledVal % 10);
-                                        double floatVal = unscaledVal / 10 + DOUBLE_SMALL_1[small];
-                                        return floatVal;
+                                        return unscaledVal / 10 + DOUBLE_SMALL_1[small];
                                     } else if (scale == 2) {
                                         int small = (int) (unscaledVal % 100);
-                                        double floatVal = unscaledVal / 100 + DOUBLE_SMALL_2[small];
-                                        return floatVal;
+                                        return unscaledVal / 100 + DOUBLE_SMALL_2[small];
                                     } else if (scale == 3) {
                                         int small = (int) (unscaledVal % 1000);
-                                        double floatVal = unscaledVal / 1000 + DOUBLE_SMALL_3[small];
-                                        return floatVal;
+                                        return unscaledVal / 1000 + DOUBLE_SMALL_3[small];
                                     }
                                 }
                             }
