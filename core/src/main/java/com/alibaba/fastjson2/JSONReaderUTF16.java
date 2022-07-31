@@ -1209,6 +1209,7 @@ final class JSONReaderUTF16
                                 + (((long) c3) << 8)
                                 + ((long) c4);
                     }
+                    break;
                 case 6:
                     c0 = chars[nameBegin];
                     c1 = chars[nameBegin + 1];
