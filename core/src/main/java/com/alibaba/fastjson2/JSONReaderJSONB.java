@@ -2222,6 +2222,7 @@ final class JSONReaderJSONB
         return str;
     }
 
+    @Override
     public char readCharValue() {
         byte type = bytes[offset];
         if (type == BC_CHAR) {

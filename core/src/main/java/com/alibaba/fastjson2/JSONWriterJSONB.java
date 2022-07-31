@@ -215,6 +215,7 @@ final class JSONWriterJSONB
         bytes[off++] = b;
     }
 
+    @Override
     public void writeChar(char ch) {
         if (off == bytes.length) {
             int minCapacity = off + 1;
@@ -1269,6 +1270,7 @@ final class JSONWriterJSONB
         bytes[off++] = (byte) val;
     }
 
+    @Override
     public void writeEnum(Enum e) {
         if (e == null) {
             writeNull();
