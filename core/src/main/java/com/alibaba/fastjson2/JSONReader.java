@@ -30,6 +30,7 @@ public abstract class JSONReader
     static final int MAX_EXP = 512;
 
     static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
+    static final ZoneId SHANGHAI_ZONE_ID = DEFAULT_ZONE_ID.getId().equals("Asia/Shanghai") ? DEFAULT_ZONE_ID : ZoneId.of("Asia/Shanghai");
     static final ZoneId UTC = ZoneId.of("UTC");
     static final long LONG_MASK = 0XFFFFFFFFL;
 
@@ -1043,7 +1044,10 @@ public abstract class JSONReader
         if (zdt == null) {
             return null;
         }
-        return zdt.toInstant();
+
+        return Instant.ofEpochSecond(
+                zdt.toEpochSecond(),
+                zdt.toLocalTime().getNano());
     }
 
     public long readMillisFromString() {
@@ -1054,90 +1058,73 @@ public abstract class JSONReader
                 || context.formatyyyyMMdd8
                 || context.formatISO8601) {
             int len = getStringLength();
+            LocalDateTime ldt = null;
             switch (len) {
                 case 8: {
-                    LocalDateTime date = readLocalDate8();
-                    if (date != null) {
-                        return ZonedDateTime.of(date,
-                                        context.getZoneId())
-                                .toInstant()
-                                .toEpochMilli();
+                    ldt = readLocalDate8();
+                    if (ldt == null) {
+                        throw new JSONException("TODO : " + readString());
                     }
-                    throw new JSONException("TODO : " + readString());
+                    break;
                 }
                 case 9: {
-                    LocalDateTime date = readLocalDate9();
-                    if (date == null) {
-                        break;
-                    }
-
-                    return ZonedDateTime.of(date,
-                                    context.getZoneId())
-                            .toInstant()
-                            .toEpochMilli();
+                    ldt = readLocalDate9();
+                    break;
                 }
                 case 10: {
-                    LocalDateTime date = readLocalDate10();
-                    if (date != null) {
-                        return ZonedDateTime.of(date,
-                                        context.getZoneId())
-                                .toInstant()
-                                .toEpochMilli();
+                    ldt = readLocalDate10();
+                    if (ldt == null) {
+                        String str = readString();
+                        if ("0000-00-00".equals(str)) {
+                            return 0;
+                        }
+                        if (IOUtils.isNumber(str)) {
+                            return Long.parseLong(str);
+                        }
+                        throw new JSONException("TODO : " + str);
                     }
-                    String str = readString();
-                    if ("0000-00-00".equals(str)) {
-                        return 0;
-                    }
-                    if (IOUtils.isNumber(str)) {
-                        return Long.parseLong(str);
-                    }
-                    throw new JSONException("TODO : " + str);
+                    break;
                 }
                 case 11: {
-                    LocalDateTime date = readLocalDate11();
-                    return ZonedDateTime.of(date,
-                                    context.getZoneId())
-                            .toInstant()
-                            .toEpochMilli();
+                    ldt = readLocalDate11();
+                    break;
                 }
                 case 16: {
-                    LocalDateTime date = readLocalDateTime16();
-                    return ZonedDateTime.of(date,
-                                    context.getZoneId())
-                            .toInstant()
-                            .toEpochMilli();
+                    ldt = readLocalDateTime16();
+                    break;
                 }
                 case 17: {
-                    LocalDateTime ldt = readLocalDateTime17();
-                    return ZonedDateTime.of(ldt,
-                                    context.getZoneId())
-                            .toInstant()
-                            .toEpochMilli();
+                    ldt = readLocalDateTime17();
+                    break;
                 }
                 case 18: {
-                    LocalDateTime date = readLocalDateTime18();
-                    return ZonedDateTime.of(
-                                    date,
-                                    context.getZoneId())
-                            .toInstant()
-                            .toEpochMilli();
+                    ldt = readLocalDateTime18();
+                    break;
                 }
                 case 19: {
-                    LocalDateTime date = readLocalDateTime19();
-                    return ZonedDateTime.of(
-                                    date,
-                                    context.getZoneId())
-                            .toInstant()
-                            .toEpochMilli();
+                    ldt = readLocalDateTime19();
                 }
                 default:
                     break;
             }
 
-            if (len >= 20) {
-                ZonedDateTime zdt = readZonedDateTimeX(len);
-                if (zdt != null) {
-                    return zdt.toInstant().toEpochMilli();
+            ZonedDateTime zdt = null;
+            if (ldt != null) {
+                zdt = ZonedDateTime.ofLocal(ldt, context.getZoneId(), null);
+            } else if (len >= 20) {
+                zdt = readZonedDateTimeX(len);
+            }
+
+            if (zdt != null) {
+                long seconds = zdt.toEpochSecond();
+                int nanos = zdt.toLocalTime().getNano();
+                if (seconds < 0 && nanos > 0) {
+                    long millis = Math.multiplyExact(seconds + 1, 1000);
+                    long adjustment = nanos / 1000_000 - 1000;
+                    return Math.addExact(millis, adjustment);
+                } else {
+                    long millis = Math.multiplyExact(seconds, 1000);
+                    return Math.addExact(millis, nanos / 1000_000);
                 }
             }
         }
@@ -3080,7 +3067,9 @@ public abstract class JSONReader
             return null;
         }
 
-        return LocalDateTime.of(year, month, dom, hour, minute, second, nanos);
+        LocalDate date = LocalDate.of(year, month, dom);
+        LocalTime time = LocalTime.of(hour, minute, second, nanos);
+        return LocalDateTime.of(date, time);
     }
 
     protected ZoneId getZoneId(LocalDateTime ldt, String zoneIdStr) {
