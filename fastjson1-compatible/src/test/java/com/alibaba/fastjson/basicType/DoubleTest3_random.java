@@ -23,14 +23,6 @@ public class DoubleTest3_random {
     }
 
     @Test
-    public void test_extract1() throws Exception {
-        double val = 0.00000010000000;
-        String str = JSON.toJSONString(new Model(val));
-        double doubleValue = Double.parseDouble(str);
-        assertEquals(val, doubleValue);
-    }
-
-    @Test
     public void test_ran() throws Exception {
         Random rand = new Random();
 
