@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.misc;
 
-public class XFloatingDecimal {
+public class FloatingDecimal {
     static final int EXP_SHIFT = DoubleConsts.SIGNIFICAND_WIDTH - 1;
     static final long FRACT_HOB = (1L << EXP_SHIFT); // assumed High-Order bit
     static final long EXP_ONE = ((long) DoubleConsts.EXP_BIAS) << EXP_SHIFT; // exponent of 1.0
