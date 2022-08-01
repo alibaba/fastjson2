@@ -6,7 +6,7 @@ import java.text.NumberFormat;
 
 public class FloatValidate {
     static final NumberFormat format = NumberFormat.getNumberInstance();
-    final static char[] chars = new char[]{
+    static final char[] chars = new char[]{
             '0', '.',
             '0', '0', '0', '0', '0',
             '0', '0', '0', '0', '0',
@@ -54,11 +54,11 @@ public class FloatValidate {
                                     char c6 = (char) ('0' + i6);
                                     chars[8] = c6;
 
-                                    double d6 = x6 / JSONFactory.SMALL_10_POW[7];
+                                    float d6 = (float) (x6 / JSONFactory.SMALL_10_POW[7]);
                                     if (d6 == 0) {
                                         continue;
                                     }
-                                    double dx6 = FloatingDecimal.parseDouble(chars, 9);
+                                    float dx6 = FloatingDecimal.parseFloat(chars, 9);
                                     if (dx6 != d6) {
                                         throw new JSONException("not match " + dx6);
                                     }
@@ -68,11 +68,11 @@ public class FloatValidate {
                                         char c7 = (char) ('0' + i7);
                                         chars[9] = c7;
 
-                                        double d7 = x7 / JSONFactory.SMALL_10_POW[8];
+                                        float d7 = (float) (x7 / JSONFactory.SMALL_10_POW[8]);
                                         if (d7 == 0) {
                                             continue;
                                         }
-                                        double dx7 = FloatingDecimal.parseDouble(chars, 10);
+                                        float dx7 = FloatingDecimal.parseFloat(chars, 10);
                                         if (dx7 != d7) {
                                             throw new JSONException("not match " + dx7);
                                         }
@@ -82,11 +82,11 @@ public class FloatValidate {
                                             char c8 = (char) ('0' + i8);
                                             chars[10] = c8;
 
-                                            double d8 = x8 / JSONFactory.SMALL_10_POW[9];
+                                            float d8 = (float) (x8 / JSONFactory.SMALL_10_POW[9]);
                                             if (d8 == 0) {
                                                 continue;
                                             }
-                                            double dx8 = FloatingDecimal.parseDouble(chars, 11);
+                                            float dx8 = FloatingDecimal.parseFloat(chars, 11);
                                             if (dx8 != d8) {
                                                 throw new JSONException("not match " + dx8);
                                             }
@@ -96,104 +96,104 @@ public class FloatValidate {
                                                 char c9 = (char) ('0' + i9);
                                                 chars[11] = c9;
 
-                                                double d9 = x9 / JSONFactory.SMALL_10_POW[10];
+                                                float d9 = (float) (x9 / JSONFactory.SMALL_10_POW[10]);
                                                 if (d9 == 0) {
                                                     continue;
                                                 }
-                                                double dx9 = FloatingDecimal.parseDouble(chars, 12);
+                                                float dx9 = FloatingDecimal.parseFloat(chars, 12);
                                                 if (dx9 != d9) {
                                                     throw new JSONException("not match " + dx9);
                                                 }
 
-//                                                for (int i10 = 0; i10 < E10; i10++) {
-//                                                    long x10 = x9 * 10 + i10;
-//                                                    char c10 = (char) ('0' + i10);
-//                                                    chars[12] = c10;
-//
-//                                                    double d10 = x10 / JSONFactory.SMALL_10_POW[11];
-//                                                    if (d10 == 0) {
-//                                                        continue;
-//                                                    }
-//                                                    double dx10 = FloatingDecimal.parseDouble(chars, 13);
-//                                                    if (dx10 != d10) {
-//                                                        throw new JSONException("not match " + dx10);
-//                                                    }
-//
-//                                                    for (int i11 = 0; i11 < E11; i11++) {
-//                                                        long x11 = x10 * 10 + i11;
-//                                                        char c11 = (char) ('0' + i11);
-//                                                        chars[13] = c11;
-//
-//                                                        double d11 = x11 / JSONFactory.SMALL_10_POW[12];
-//                                                        if (d11 == 0) {
-//                                                            continue;
-//                                                        }
-//                                                        double dx11 = FloatingDecimal.parseDouble(chars, 14);
-//                                                        if (dx11 != d11) {
-//                                                            throw new JSONException("not match " + dx11);
-//                                                        }
-//
-//                                                        for (int i12 = 0; i12 < E12; i12++) {
-//                                                            long x12 = x11 * 10 + i12;
-//                                                            char c12 = (char) ('0' + i12);
-//                                                            chars[14] = c12;
-//
-//                                                            double d12 = x12 / JSONFactory.SMALL_10_POW[13];
-//                                                            if (d12 == 0) {
-//                                                                continue;
-//                                                            }
-//                                                            double dx12 = FloatingDecimal.parseDouble(chars, 15);
-//                                                            if (dx12 != d12) {
-//                                                                throw new JSONException("not match " + dx12);
-//                                                            }
-//
-//                                                            for (int i13 = 0; i13 < E13; i13++) {
-//                                                                long x13 = x12 * 10 + i13;
-//                                                                char c13 = (char) ('0' + i13);
-//                                                                chars[16] = c13;
-//
-//                                                                double d13 = x13 / JSONFactory.SMALL_10_POW[14];
-//                                                                if (d13 == 0) {
-//                                                                    continue;
-//                                                                }
-//                                                                double dx13 = FloatingDecimal.parseDouble(chars, 16);
-//                                                                if (dx13 != d13) {
-//                                                                    throw new JSONException("not match " + dx13);
-//                                                                }
-//
-//                                                                for (int i14 = 0; i14 < E14; i14++) {
-//                                                                    long x14 = x13 * 10 + i14;
-//                                                                    char c14 = (char) ('0' + i14);
-//                                                                    chars[16] = c14;
-//
-//                                                                    double d14 = x14 / JSONFactory.SMALL_10_POW[15];
-//                                                                    if (d14 == 0) {
-//                                                                        continue;
-//                                                                    }
-//                                                                    double dx14 = FloatingDecimal.parseDouble(chars, 17);
-//                                                                    if (dx14 != d14) {
-//                                                                        throw new JSONException("not match " + dx14);
-//                                                                    }
-//
-//                                                                    for (int i15 = 0; i15 < E15; i15++) {
-//                                                                        long x15 = x14 * 10 + i15;
-//                                                                        char c15 = (char) ('0' + i15);
-//                                                                        chars[15] = c15;
-//
-//                                                                        double d15 = x15 / JSONFactory.SMALL_10_POW[16];
-//                                                                        if (d15 == 0) {
-//                                                                            continue;
-//                                                                        }
-//                                                                        double dx15 = FloatingDecimal.parseDouble(chars, 18);
-//                                                                        if (dx15 != d15) {
-//                                                                            throw new JSONException("not match " + dx15);
-//                                                                        }
-//                                                                    }
-//                                                                }
-//                                                            }
-//                                                        }
-//                                                    }
-//                                                }
+                                                for (int i10 = 0; i10 < E10; i10++) {
+                                                    long x10 = x9 * 10 + i10;
+                                                    char c10 = (char) ('0' + i10);
+                                                    chars[12] = c10;
+
+                                                    float d10 = (float) (x10 / JSONFactory.SMALL_10_POW[11]);
+                                                    if (d10 == 0) {
+                                                        continue;
+                                                    }
+                                                    float dx10 = FloatingDecimal.parseFloat(chars, 13);
+                                                    if (dx10 != d10) {
+                                                        throw new JSONException("not match " + dx10);
+                                                    }
+
+                                                    for (int i11 = 0; i11 < E11; i11++) {
+                                                        long x11 = x10 * 10 + i11;
+                                                        char c11 = (char) ('0' + i11);
+                                                        chars[13] = c11;
+
+                                                        float d11 = (float) (x11 / JSONFactory.SMALL_10_POW[12]);
+                                                        if (d11 == 0) {
+                                                            continue;
+                                                        }
+                                                        float dx11 = FloatingDecimal.parseFloat(chars, 14);
+                                                        if (dx11 != d11) {
+                                                            throw new JSONException("not match " + dx11);
+                                                        }
+
+                                                        for (int i12 = 0; i12 < E12; i12++) {
+                                                            long x12 = x11 * 10 + i12;
+                                                            char c12 = (char) ('0' + i12);
+                                                            chars[14] = c12;
+
+                                                            float d12 = (float) (x12 / JSONFactory.SMALL_10_POW[13]);
+                                                            if (d12 == 0) {
+                                                                continue;
+                                                            }
+                                                            float dx12 = FloatingDecimal.parseFloat(chars, 15);
+                                                            if (dx12 != d12) {
+                                                                throw new JSONException("not match " + dx12);
+                                                            }
+
+                                                            for (int i13 = 0; i13 < E13; i13++) {
+                                                                long x13 = x12 * 10 + i13;
+                                                                char c13 = (char) ('0' + i13);
+                                                                chars[16] = c13;
+
+                                                                float d13 = (float) (x13 / JSONFactory.SMALL_10_POW[14]);
+                                                                if (d13 == 0) {
+                                                                    continue;
+                                                                }
+                                                                float dx13 = FloatingDecimal.parseFloat(chars, 16);
+                                                                if (dx13 != d13) {
+                                                                    throw new JSONException("not match " + dx13);
+                                                                }
+
+                                                                for (int i14 = 0; i14 < E14; i14++) {
+                                                                    long x14 = x13 * 10 + i14;
+                                                                    char c14 = (char) ('0' + i14);
+                                                                    chars[16] = c14;
+
+                                                                    float d14 = (float) (x14 / JSONFactory.SMALL_10_POW[15]);
+                                                                    if (d14 == 0) {
+                                                                        continue;
+                                                                    }
+                                                                    float dx14 = FloatingDecimal.parseFloat(chars, 17);
+                                                                    if (dx14 != d14) {
+                                                                        throw new JSONException("not match " + dx14);
+                                                                    }
+
+                                                                    for (int i15 = 0; i15 < E15; i15++) {
+                                                                        long x15 = x14 * 10 + i15;
+                                                                        char c15 = (char) ('0' + i15);
+                                                                        chars[15] = c15;
+
+                                                                        float d15 = (float) (x15 / JSONFactory.SMALL_10_POW[16]);
+                                                                        if (d15 == 0) {
+                                                                            continue;
+                                                                        }
+                                                                        float dx15 = FloatingDecimal.parseFloat(chars, 18);
+                                                                        if (dx15 != d15) {
+                                                                            throw new JSONException("not match " + dx15);
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
