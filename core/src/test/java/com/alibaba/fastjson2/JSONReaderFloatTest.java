@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -527,6 +528,111 @@ public class JSONReaderFloatTest {
                     }
                 }
             }
+        }
+    }
+
+    @Test
+    public void test_x6() {
+        char[] chars = new char[64];
+        chars[0] = '0';
+        chars[1] = '.';
+
+        for (int i = 0; i < 1000_000; ++i) {
+            int len = IOUtils.stringSize(i);
+            IOUtils.getChars(i, len + 2, chars);
+            JSONReader jsonReader = JSONReader.of(chars, 0, len + 2);
+
+            String str = new String(chars, 0, len + 2);
+            double doubleValue = Double.parseDouble(str);
+            assertEquals(doubleValue, jsonReader.readDoubleValue());
+        }
+    }
+
+    @Test
+    public void test_x10() {
+        int off = 4;
+
+        char[] chars = new char[64];
+        chars[0] = '0';
+        chars[1] = '.';
+        for (int i = 2; i < 2 + off; i++) {
+            chars[i] = '0';
+        }
+
+        for (int i = 0; i < 1000_000; ++i) {
+            int len = IOUtils.stringSize(i);
+            IOUtils.getChars(i, len + off + 2, chars);
+            JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
+
+            String str = new String(chars, 0, len + off + 2);
+            double doubleValue = Double.parseDouble(str);
+            assertEquals(doubleValue, jsonReader.readDoubleValue());
+        }
+    }
+
+    @Test
+    public void test_x12() {
+        int off = 6;
+
+        char[] chars = new char[64];
+        chars[0] = '0';
+        chars[1] = '.';
+        for (int i = 2; i < 2 + off; i++) {
+            chars[i] = '0';
+        }
+
+        for (int i = 0; i < 1000_000; ++i) {
+            int len = IOUtils.stringSize(i);
+            IOUtils.getChars(i, len + off + 2, chars);
+            JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
+
+            String str = new String(chars, 0, len + off + 2);
+            double doubleValue = Double.parseDouble(str);
+            assertEquals(doubleValue, jsonReader.readDoubleValue());
+        }
+    }
+
+    @Test
+    public void test_x15() {
+        int off = 9;
+
+        char[] chars = new char[64];
+        chars[0] = '0';
+        chars[1] = '.';
+        for (int i = 2; i < 2 + off; i++) {
+            chars[i] = '0';
+        }
+
+        for (int i = 0; i < 1000_000; ++i) {
+            int len = IOUtils.stringSize(i);
+            IOUtils.getChars(i, len + off + 2, chars);
+            JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
+
+            String str = new String(chars, 0, len + off + 2);
+            double doubleValue = Double.parseDouble(str);
+            assertEquals(doubleValue, jsonReader.readDoubleValue());
+        }
+    }
+
+    @Test
+    public void test_x16() {
+        int off = 10;
+
+        char[] chars = new char[64];
+        chars[0] = '0';
+        chars[1] = '.';
+        for (int i = 2; i < 2 + off; i++) {
+            chars[i] = '0';
+        }
+
+        for (int i = 0; i < 1000_000; ++i) {
+            int len = IOUtils.stringSize(i);
+            IOUtils.getChars(i, len + off + 2, chars);
+            JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
+
+            String str = new String(chars, 0, len + off + 2);
+            double doubleValue = Double.parseDouble(str);
+            assertEquals(doubleValue, jsonReader.readDoubleValue());
         }
     }
 }
