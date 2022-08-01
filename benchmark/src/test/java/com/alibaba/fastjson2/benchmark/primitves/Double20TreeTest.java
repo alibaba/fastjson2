@@ -19,7 +19,7 @@ public class Double20TreeTest {
         long millis = System.currentTimeMillis() - start;
         System.out.println("Dec20Tree-fastjson2 : " + millis);
 
-        // zulu8.62.0.19 : 933 924
+        // zulu8.62.0.19 : 933 924 912
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :

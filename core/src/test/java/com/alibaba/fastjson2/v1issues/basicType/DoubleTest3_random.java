@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.v1issues.basicType;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONReader.Feature;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,26 @@ public class DoubleTest3_random {
     @Test
     public void test_extract() throws Exception {
         double val = 7.754693899073573E-4;
+        String str = JSON.toJSONString(new Model(val));
+        System.out.println(str);
+        Model m = JSON.parseObject(str, Model.class);
+
+        assertEquals(val, m.value);
+    }
+
+    @Test
+    public void test_extract1() throws Exception {
+        double val = 0.9825253073521191;
+        String str = JSON.toJSONString(new Model(val));
+        System.out.println(str);
+        Model m = JSON.parseObject(str, Model.class);
+
+        assertEquals(val, m.value);
+    }
+
+    @Test
+    public void test_extract2() throws Exception {
+        double val = 0.9221745180028585;
         String str = JSON.toJSONString(new Model(val));
         System.out.println(str);
         Model m = JSON.parseObject(str, Model.class);
@@ -42,7 +63,7 @@ public class DoubleTest3_random {
     }
 
     @Test
-    public void test_ran() throws Exception {
+    public void test_ran() {
         Random rand = new Random();
 
         for (int i = 0; i < 1000 * 1000 * 1; ++i) {
@@ -52,6 +73,16 @@ public class DoubleTest3_random {
             Model m = JSON.parseObject(str, Model.class);
 
             assertEquals(val, m.value);
+        }
+    }
+
+    @Test
+    public void test_ran_1() {
+        Random rand = new Random();
+        for (int i = 0; i < 1000 * 1000 * 1; ++i) {
+            double val = rand.nextDouble();
+            String str = Double.toString(val);
+            assertEquals(val, JSONReader.of(str).readDoubleValue());
         }
     }
 

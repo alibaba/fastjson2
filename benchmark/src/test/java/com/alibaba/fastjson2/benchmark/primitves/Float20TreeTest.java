@@ -19,7 +19,7 @@ public class Float20TreeTest {
         long millis = System.currentTimeMillis() - start;
         System.out.println("Dec20Tree-fastjson2 : " + millis);
 
-        // zulu8.62.0.19 : 3519 987
+        // zulu8.62.0.19 : 3519 987 1012
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :

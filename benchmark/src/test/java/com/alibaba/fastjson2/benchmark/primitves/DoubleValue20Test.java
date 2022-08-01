@@ -19,7 +19,7 @@ public class DoubleValue20Test {
         long millis = System.currentTimeMillis() - start;
         System.out.println("DoubleValue20-fastjson2 : " + millis);
 
-        // zulu8.62.0.19 : 857 808 731
+        // zulu8.62.0.19 : 857 808 731 720
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :
