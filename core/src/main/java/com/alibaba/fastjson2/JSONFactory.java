@@ -100,6 +100,15 @@ public final class JSONFactory {
         +0, 10, 11, 12, 13, 14, 15
     };
 
+    static final double[] SMALL_10_POW = {
+            1.0e0,
+            1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5,
+            1.0e6, 1.0e7, 1.0e8, 1.0e9, 1.0e10,
+            1.0e11, 1.0e12, 1.0e13, 1.0e14, 1.0e15,
+            1.0e16, 1.0e17, 1.0e18, 1.0e19, 1.0e20,
+            1.0e21, 1.0e22
+    };
+
     static {
         Properties properties = new Properties();
 
