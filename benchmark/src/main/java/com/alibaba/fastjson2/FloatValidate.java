@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.misc.XFloatingDecimal;
+import com.alibaba.fastjson2.misc.FloatingDecimal;
 
 import java.text.NumberFormat;
 
@@ -56,7 +56,7 @@ public class FloatValidate {
                                     if (d6 == 0) {
                                         continue;
                                     }
-                                    double dx6 = XFloatingDecimal.parseDouble(chars, 9);
+                                    double dx6 = FloatingDecimal.parseDouble(chars, 9);
                                     if (dx6 != d6) {
                                         throw new JSONException("not match " + dx6);
                                     }
@@ -70,7 +70,7 @@ public class FloatValidate {
                                         if (d7 == 0) {
                                             continue;
                                         }
-                                        double dx7 = XFloatingDecimal.parseDouble(chars, 10);
+                                        double dx7 = FloatingDecimal.parseDouble(chars, 10);
                                         if (dx7 != d7) {
                                             throw new JSONException("not match " + dx7);
                                         }
@@ -84,7 +84,7 @@ public class FloatValidate {
                                             if (d8 == 0) {
                                                 continue;
                                             }
-                                            double dx8 = XFloatingDecimal.parseDouble(chars, 11);
+                                            double dx8 = FloatingDecimal.parseDouble(chars, 11);
                                             if (dx8 != d8) {
                                                 throw new JSONException("not match " + dx8);
                                             }
@@ -98,7 +98,7 @@ public class FloatValidate {
                                                 if (d9 == 0) {
                                                     continue;
                                                 }
-                                                double dx9 = XFloatingDecimal.parseDouble(chars, 12);
+                                                double dx9 = FloatingDecimal.parseDouble(chars, 12);
                                                 if (dx9 != d9) {
                                                     throw new JSONException("not match " + dx9);
                                                 }

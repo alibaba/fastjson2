@@ -94,7 +94,7 @@ public class FDBigInteger {
         this.isImmutable = true;
     }
 
-    private /*@ helper @*/ void multAddMe(int iv, int addend) {
+    private void multAddMe(int iv, int addend) {
         long v = iv & LONG_MASK;
         // unroll 0th iteration, doing addition.
         long p = v * (data[0] & LONG_MASK) + (addend & LONG_MASK);
@@ -110,7 +110,7 @@ public class FDBigInteger {
         }
     }
 
-    private /*@ helper @*/ void trimLeadingZeros() {
+    private void trimLeadingZeros() {
         int i = nWords;
         if (i > 0 && (data[--i] == 0)) {
             //for (; i > 0 && data[i - 1] == 0; i--) ;
@@ -124,7 +124,7 @@ public class FDBigInteger {
         }
     }
 
-    private /*@ pure @*/ int size() {
+    private int size() {
         return nWords + offset;
     }
 
@@ -209,22 +209,6 @@ public class FDBigInteger {
         }
     }
 
-    /**
-     * Multiplies by a constant value a big integer represented as an array.
-     * The constant factor is a long represent as two <code>int</code>s.
-     *
-     * @param src The array representation of the big integer.
-     * @param srcLen The number of elements of <code>src</code> to use.
-     * @param v0 The lower 32 bits of the long factor.
-     * @param v1 The upper 32 bits of the long factor.
-     * @param dst The product array.
-     */
-    /*@
-     @ requires src != dst;
-     @ requires src.length >= srcLen && dst.length >= srcLen + 2;
-     @ assignable dst[0 .. srcLen + 1];
-     @ ensures AP(dst, srcLen + 2) == \old(AP(src, srcLen) * (UNSIGNED(v0) + (UNSIGNED(v1) << 32)));
-     @*/
     private static void mult(int[] src, int srcLen, int v0, int v1, int[] dst) {
         long v = v0 & LONG_MASK;
         long carry = 0;
@@ -390,7 +374,7 @@ public class FDBigInteger {
         return new FDBigInteger(new int[]{v0, v1}, 0);
     }
 
-    public /*@ pure @*/ int cmp(FDBigInteger other) {
+    public int cmp(FDBigInteger other) {
         int aSize = nWords + offset;
         int bSize = other.nWords + other.offset;
         if (aSize > bSize) {
@@ -416,7 +400,7 @@ public class FDBigInteger {
         return 0;
     }
 
-    private /*@ pure @*/ static int checkZeroTail(int[] a, int from) {
+    private static int checkZeroTail(int[] a, int from) {
         while (from > 0) {
             if (a[--from] != 0) {
                 return 1;
@@ -530,7 +514,7 @@ public class FDBigInteger {
         return subtrahend;
     }
 
-    public /*@ pure @*/ int cmpPow52(int p5, int p2) {
+    public int cmpPow52(int p5, int p2) {
         if (p5 == 0) {
             int wordcount = p2 >> 5;
             int bitcount = p2 & 0x1f;
