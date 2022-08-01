@@ -12,7 +12,7 @@ public class FloatValidate {
     static final NumberFormat format = NumberFormat.getNumberInstance();
 
     public static void main(String[] args) throws Exception {
-        ExecutorService executors = Executors.newFixedThreadPool(4);
+        ExecutorService executors = Executors.newFixedThreadPool(64);
         long end = 1_000_000_000_000_000L;
         int split = (int) (end / 10_000_000);
         long startMillis = System.currentTimeMillis();
