@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONReader.Feature;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.RyuDouble;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -79,10 +80,12 @@ public class DoubleTest3_random {
     @Test
     public void test_ran_1() {
         Random rand = new Random();
-        for (int i = 0; i < 1000 * 1000 * 1; ++i) {
+        char[] chars = new char[64];
+        for (int i = 0; i < 1000 * 1000 * 100; ++i) {
             double val = rand.nextDouble();
-            String str = Double.toString(val);
-            assertEquals(val, JSONReader.of(str).readDoubleValue());
+            int len = RyuDouble.toString(val, chars, 0);
+            JSONReader jsonReader = JSONReader.of(chars, 0, len);
+            assertEquals(val, jsonReader.readDoubleValue());
         }
     }
 
