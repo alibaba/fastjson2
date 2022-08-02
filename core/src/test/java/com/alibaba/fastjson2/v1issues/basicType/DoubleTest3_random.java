@@ -64,6 +64,17 @@ public class DoubleTest3_random {
     }
 
     @Test
+    public void test_extract_2() {
+        String str = "1.0006725";
+
+        assertEquals(
+                Double.parseDouble(str),
+                JSONReader.of(str)
+                        .readDoubleValue()
+        );
+    }
+
+    @Test
     public void test_ran() {
         Random rand = new Random();
 
