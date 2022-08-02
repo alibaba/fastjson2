@@ -33,7 +33,7 @@ final class ObjectWriterImplLocalTime
 
         LocalTime time = (LocalTime) object;
 
-        if (formatMillis || ctx.isDateFormatMillis()) {
+        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
             LocalDateTime dateTime = LocalDateTime.of(
                     LocalDate.of(1970, 1, 1),
                     time
@@ -44,7 +44,7 @@ final class ObjectWriterImplLocalTime
             return;
         }
 
-        if (formatUnixTime || ctx.isDateFormatUnixTime()) {
+        if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
             LocalDateTime dateTime = LocalDateTime.of(
                     LocalDate.of(1970, 1, 1),
                     time

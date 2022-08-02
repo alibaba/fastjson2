@@ -38,7 +38,7 @@ final class ObjectWriterImplLocalDate
 
         LocalDate date = (LocalDate) object;
 
-        if (formatUnixTime || ctx.isDateFormatUnixTime()) {
+        if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
             LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
             long millis = dateTime.atZone(ctx.getZoneId())
                     .toInstant()
@@ -47,7 +47,7 @@ final class ObjectWriterImplLocalDate
             return;
         }
 
-        if (formatMillis || ctx.isDateFormatMillis()) {
+        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
             LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
             long millis = dateTime.atZone(ctx.getZoneId())
                     .toInstant()

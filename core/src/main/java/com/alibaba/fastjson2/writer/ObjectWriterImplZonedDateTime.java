@@ -33,13 +33,13 @@ final class ObjectWriterImplZonedDateTime
 
         JSONWriter.Context ctx = jsonWriter.getContext();
 
-        if (formatUnixTime || ctx.isDateFormatUnixTime()) {
+        if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
             long millis = zdt.toInstant().toEpochMilli();
             jsonWriter.writeInt64(millis / 1000);
             return;
         }
 
-        if (formatMillis || ctx.isDateFormatMillis()) {
+        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
             jsonWriter.writeInt64(zdt
                     .toInstant()
                     .toEpochMilli());
