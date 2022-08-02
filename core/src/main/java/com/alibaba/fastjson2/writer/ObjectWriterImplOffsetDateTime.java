@@ -28,7 +28,7 @@ final class ObjectWriterImplOffsetDateTime
 
         OffsetDateTime dateTime = (OffsetDateTime) object;
 
-        if (formatUnixTime || ctx.isDateFormatUnixTime()) {
+        if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
             long millis = dateTime
                     .toInstant()
                     .toEpochMilli();
@@ -36,7 +36,7 @@ final class ObjectWriterImplOffsetDateTime
             return;
         }
 
-        if (formatMillis || ctx.isDateFormatMillis()) {
+        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
             long millis = dateTime
                     .toInstant()
                     .toEpochMilli();

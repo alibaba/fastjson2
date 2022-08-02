@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.misc.FloatingDecimal;
 import com.alibaba.fastjson2.util.IOUtils;
 
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 public class DoubleValidate {
@@ -11,7 +12,7 @@ public class DoubleValidate {
 
     public static void main(String[] args) throws Exception {
         char[] chars = new char[]{
-                '0', '.',
+                0, '.',
                 '0', '0', '0', '0', '0',
                 '0', '0', '0', '0', '0',
                 '0', '0', '0', '0', '0',
@@ -21,8 +22,9 @@ public class DoubleValidate {
         chars[0] = '0';
         chars[1] = '.';
 
+        final int iValue = 10;
         long max = 1;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 11; i++) {
             max *= 10;
 
             int index = 3 + i;
@@ -42,7 +44,7 @@ public class DoubleValidate {
             }
 
             long millis = System.currentTimeMillis() - startMillis;
-            System.out.println(p + "-completed, millis " + format.format(millis));
+            System.out.println(p + "-completed, millis " + format.format(millis) + " " + LocalDateTime.now());
         }
     }
 }
