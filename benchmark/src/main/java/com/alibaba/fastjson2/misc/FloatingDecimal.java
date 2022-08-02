@@ -1,18 +1,26 @@
 package com.alibaba.fastjson2.misc;
 
-public class FloatingDecimal {
-    static final int EXP_SHIFT = DoubleConsts.SIGNIFICAND_WIDTH - 1;
+public final class FloatingDecimal {
+    static final int DOUBLE_SIGNIFICAND_WIDTH = 53;
+
+    static final int DOUBLE_EXP_BIAS = 1023;
+    static final long DOUBLE_SIGN_BIT_MASK = 0x8000000000000000L;
+    static final long DOUBLE_EXP_BIT_MASK = 0x7FF0000000000000L;
+    static final long DOUBLE_SIGNIF_BIT_MASK = 0x000FFFFFFFFFFFFFL;
+    static final int FLOAT_SIGNIFICAND_WIDTH = 24;
+    static final int FLOAT_EXP_BIAS = 127;
+    static final int FLOAT_SIGNIF_BIT_MASK = 0x007FFFFF;
+    static final int FLOAT_EXP_BIT_MASK = 0x7F800000;
+    static final int FLOAT_SIGN_BIT_MASK = 0x80000000;
+
+    static final int EXP_SHIFT = DOUBLE_SIGNIFICAND_WIDTH - 1;
     static final long FRACT_HOB = (1L << EXP_SHIFT); // assumed High-Order bit
-    static final long EXP_ONE = ((long) DoubleConsts.EXP_BIAS) << EXP_SHIFT; // exponent of 1.0
-    static final int MAX_SMALL_BIN_EXP = 62;
-    static final int MIN_SMALL_BIN_EXP = -(63 / 3);
     static final int MAX_DECIMAL_DIGITS = 15;
     static final int MAX_DECIMAL_EXPONENT = 308;
     static final int MIN_DECIMAL_EXPONENT = -324;
-    static final int BIG_DECIMAL_EXPONENT = 324; // i.e. abs(MIN_DECIMAL_EXPONENT)
     static final int MAX_NDIGITS = 1100;
 
-    static final int SINGLE_EXP_SHIFT = FloatConsts.SIGNIFICAND_WIDTH - 1;
+    static final int SINGLE_EXP_SHIFT = FLOAT_SIGNIFICAND_WIDTH - 1;
     static final int SINGLE_FRACT_HOB = 1 << SINGLE_EXP_SHIFT;
     static final int SINGLE_MAX_DECIMAL_DIGITS = 7;
     static final int SINGLE_MAX_DECIMAL_EXPONENT = 38;
@@ -21,10 +29,12 @@ public class FloatingDecimal {
 
     static final int INT_DECIMAL_DIGITS = 9;
 
-    public static double parseDouble(char[] in, int len) throws NumberFormatException {
+    public static double parseDouble(char[] in, int off, int len) throws NumberFormatException {
         boolean isNegative = false;
+        boolean signSeen = false;
         int decExp;
         char c;
+        int end = off + len;
 
         parseNumber:
         try {
@@ -32,30 +42,46 @@ public class FloatingDecimal {
             if (len == 0) {
                 throw new NumberFormatException("empty String");
             }
-            int i = 0;
+            int i = off;
+            switch (in[i]){
+                case '-':
+                    isNegative = true;
+                    //FALLTHROUGH
+                case '+':
+                    i++;
+                    signSeen = true;
+            }
 
             char[] digits = new char[len];
-//            char[] digits = arrays[len];
-//            Arrays.fill(digits, '\0');
 
             int nDigits = 0;
+            boolean decSeen = false;
+            int decPt = 0;
             int nLeadZero = 0;
             int nTrailZero = 0;
 
             skipLeadingZerosLoop:
-            while (i < len) {
+            while (i < end) {
                 c = in[i];
                 if (c == '0') {
                     nLeadZero++;
                 } else if (c == '.') {
-                    // decPt = i;
+                    if (decSeen) {
+                        // already saw one ., this is the 2nd.
+                        throw new NumberFormatException("multiple points");
+                    }
+                    decPt = i - off;
+                    if (signSeen) {
+                        decPt -= 1;
+                    }
+                    decSeen = true;
                 } else {
                     break skipLeadingZerosLoop;
                 }
                 i++;
             }
             digitLoop:
-            while (i < len) {
+            while (i < end) {
                 c = in[i];
                 if (c >= '1' && c <= '9') {
                     digits[nDigits++] = c;
@@ -64,46 +90,33 @@ public class FloatingDecimal {
                     digits[nDigits++] = c;
                     nTrailZero++;
                 } else if (c == '.') {
-                    // decPt = i;
+                    if (decSeen) {
+                        // already saw one ., this is the 2nd.
+                        throw new NumberFormatException("multiple points");
+                    }
+                    decPt = i - off;
+                    if (signSeen) {
+                        decPt -= 1;
+                    }
+                    decSeen = true;
                 } else {
                     break digitLoop;
                 }
                 i++;
             }
             nDigits -= nTrailZero;
-            //
-            // At this point, we've scanned all the digits and decimal
-            // point we're going to see. Trim off leading and trailing
-            // zeros, which will just confuse us later, and adjust
-            // our initial decimal exponent accordingly.
-            // To review:
-            // we have seen i total characters.
-            // nLeadZero of them were zeros before any other digits.
-            // nTrailZero of them were zeros after any other digits.
-            // if ( decSeen ), then a . was seen after decPt characters
-            // ( including leading zeros which have been discarded )
-            // nDigits characters were neither lead nor trailing
-            // zeros, nor point
-            //
-            //
-            // special hack: if we saw no non-zero digits, then the
-            // answer is zero!
-            // Unfortunately, we feel honor-bound to keep parsing!
-            //
+
             boolean isZero = (nDigits == 0);
             if (isZero && nLeadZero == 0) {
-                // we saw NO DIGITS AT ALL,
-                // not even a crummy 0!
-                // this is not allowed.
                 break parseNumber; // go throw exception
             }
-            decExp = 1 - nLeadZero;
+            if (decSeen) {
+                decExp = decPt - nLeadZero;
+            } else {
+                decExp = nDigits + nTrailZero;
+            }
 
-            //
-            // We parsed everything we could.
-            // If there are leftovers, then this is not good input!
-            //
-            if (i < len && (i != len - 1)) {
+            if (i < end && (i != end - 1)) {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
@@ -117,10 +130,7 @@ public class FloatingDecimal {
 
     static double doubleValue(boolean isNegative, int decExp, char[] digits, int nDigits) {
         int kDigits = Math.min(nDigits, MAX_DECIMAL_DIGITS + 1);
-        //
-        // convert the lead kDigits to a long integer.
-        //
-        // (special performance hack: start to do it using int)
+
         int iValue = (int) digits[0] - (int) '0';
         int iDigits = Math.min(kDigits, INT_DECIMAL_DIGITS);
         for (int i = 1; i < iDigits; i++) {
@@ -229,7 +239,7 @@ public class FloatingDecimal {
         while (true) {
             // here ieeeBits can't be NaN, Infinity or zero
             int binexp = (int) (ieeeBits >>> EXP_SHIFT);
-            long bigBbits = ieeeBits & DoubleConsts.SIGNIF_BIT_MASK;
+            long bigBbits = ieeeBits & DOUBLE_SIGNIF_BIT_MASK;
             if (binexp > 0) {
                 bigBbits |= FRACT_HOB;
             } else { // Normalize denormalized numbers.
@@ -239,7 +249,7 @@ public class FloatingDecimal {
                 bigBbits <<= shift;
                 binexp = 1 - shift;
             }
-            binexp -= DoubleConsts.EXP_BIAS;
+            binexp -= DOUBLE_EXP_BIAS;
             int lowOrderZeros = Long.numberOfTrailingZeros(bigBbits);
             bigBbits >>>= lowOrderZeros;
             final int bigIntExp = binexp - EXP_SHIFT + lowOrderZeros;
@@ -257,11 +267,11 @@ public class FloatingDecimal {
             // shift bigB and bigD left by a number s. t.
             // halfUlp is still an integer.
             int hulpbias;
-            if (binexp <= -DoubleConsts.EXP_BIAS) {
+            if (binexp <= -DOUBLE_EXP_BIAS) {
                 // This is going to be a denormalized number
                 // (if not actually zero).
-                // half an ULP is at 2^-(DoubleConsts.EXP_BIAS+EXP_SHIFT+1)
-                hulpbias = binexp + lowOrderZeros + DoubleConsts.EXP_BIAS;
+                // half an ULP is at 2^-(EXP_BIAS+EXP_SHIFT+1)
+                hulpbias = binexp + lowOrderZeros + DOUBLE_EXP_BIAS;
             } else {
                 hulpbias = 1 + lowOrderZeros;
             }
@@ -286,7 +296,7 @@ public class FloatingDecimal {
             if ((cmpResult = bigB.cmp(bigD)) > 0) {
                 overvalue = true; // our candidate is too big.
                 diff = bigB.leftInplaceSub(bigD); // bigB is not user further - reuse
-                if ((bigIntNBits == 1) && (bigIntExp > -DoubleConsts.EXP_BIAS + 1)) {
+                if ((bigIntNBits == 1) && (bigIntExp > -DOUBLE_EXP_BIAS + 1)) {
                     // candidate is a normalized exact power of 2 and
                     // is too big (larger than Double.MIN_NORMAL). We will be subtracting.
                     // For our purposes, ulp is the ulp of the
@@ -325,22 +335,24 @@ public class FloatingDecimal {
                 // halfUlp here, if we bothered to compute that difference.
                 // Most of the time ( I hope ) it is about 1 anyway.
                 ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
-                if (ieeeBits == 0 || ieeeBits == DoubleConsts.EXP_BIT_MASK) { // 0.0 or Double.POSITIVE_INFINITY
+                if (ieeeBits == 0 || ieeeBits == DOUBLE_EXP_BIT_MASK) { // 0.0 or Double.POSITIVE_INFINITY
                     break correctionLoop; // oops. Fell off end of range.
                 }
                 continue; // try again.
             }
         }
         if (isNegative) {
-            ieeeBits |= DoubleConsts.SIGN_BIT_MASK;
+            ieeeBits |= DOUBLE_SIGN_BIT_MASK;
         }
         return Double.longBitsToDouble(ieeeBits);
     }
 
-    public static float parseFloat(char[] in, int len) throws NumberFormatException {
+    public static float parseFloat(char[] in, int off, int len) throws NumberFormatException {
         boolean isNegative = false;
+        boolean signSeen = false;
         int decExp;
         char c;
+        final int end = off + len;
 
         parseNumber:
         try {
@@ -348,30 +360,46 @@ public class FloatingDecimal {
             if (len == 0) {
                 throw new NumberFormatException("empty String");
             }
-            int i = 0;
+            int i = off;
+            switch (in[i]){
+                case '-':
+                    isNegative = true;
+                    //FALLTHROUGH
+                case '+':
+                    i++;
+                    signSeen = true;
+            }
 
             char[] digits = new char[len];
-//            char[] digits = arrays[len];
-//            Arrays.fill(digits, '\0');
 
             int nDigits = 0;
+            boolean decSeen = false;
+            int decPt = 0;
             int nLeadZero = 0;
             int nTrailZero = 0;
 
             skipLeadingZerosLoop:
-            while (i < len) {
+            while (i < end) {
                 c = in[i];
                 if (c == '0') {
                     nLeadZero++;
                 } else if (c == '.') {
-                    // decPt = i;
+                    if (decSeen) {
+                        // already saw one ., this is the 2nd.
+                        throw new NumberFormatException("multiple points");
+                    }
+                    decPt = i - off;
+                    if (signSeen) {
+                        decPt -= 1;
+                    }
+                    decSeen = true;
                 } else {
                     break skipLeadingZerosLoop;
                 }
                 i++;
             }
             digitLoop:
-            while (i < len) {
+            while (i < end) {
                 c = in[i];
                 if (c >= '1' && c <= '9') {
                     digits[nDigits++] = c;
@@ -380,46 +408,33 @@ public class FloatingDecimal {
                     digits[nDigits++] = c;
                     nTrailZero++;
                 } else if (c == '.') {
-                    // decPt = i;
+                    if (decSeen) {
+                        // already saw one ., this is the 2nd.
+                        throw new NumberFormatException("multiple points");
+                    }
+                    decPt = i - off;
+                    if (signSeen) {
+                        decPt -= 1;
+                    }
+                    decSeen = true;
                 } else {
                     break digitLoop;
                 }
                 i++;
             }
             nDigits -= nTrailZero;
-            //
-            // At this point, we've scanned all the digits and decimal
-            // point we're going to see. Trim off leading and trailing
-            // zeros, which will just confuse us later, and adjust
-            // our initial decimal exponent accordingly.
-            // To review:
-            // we have seen i total characters.
-            // nLeadZero of them were zeros before any other digits.
-            // nTrailZero of them were zeros after any other digits.
-            // if ( decSeen ), then a . was seen after decPt characters
-            // ( including leading zeros which have been discarded )
-            // nDigits characters were neither lead nor trailing
-            // zeros, nor point
-            //
-            //
-            // special hack: if we saw no non-zero digits, then the
-            // answer is zero!
-            // Unfortunately, we feel honor-bound to keep parsing!
-            //
+
             boolean isZero = (nDigits == 0);
             if (isZero && nLeadZero == 0) {
-                // we saw NO DIGITS AT ALL,
-                // not even a crummy 0!
-                // this is not allowed.
                 break parseNumber; // go throw exception
             }
-            decExp = 1 - nLeadZero;
+            if (decSeen) {
+                decExp = decPt - nLeadZero;
+            } else {
+                decExp = nDigits + nTrailZero;
+            }
 
-            //
-            // We parsed everything we could.
-            // If there are leftovers, then this is not good input!
-            //
-            if (i < len && (i != len - 1)) {
+            if (i < end && (i != end - 1)) {
                 break parseNumber; // go throw exception
             }
             if (isZero) {
@@ -433,80 +448,34 @@ public class FloatingDecimal {
 
     static float floatValue(boolean isNegative, int decExponent, char[] digits, int nDigits) {
         int kDigits = Math.min(nDigits, SINGLE_MAX_DECIMAL_DIGITS + 1);
-        //
-        // convert the lead kDigits to an integer.
-        //
         int iValue = (int) digits[0] - (int) '0';
         for (int i = 1; i < kDigits; i++) {
             iValue = iValue * 10 + (int) digits[i] - (int) '0';
         }
         float fValue = (float) iValue;
         int exp = decExponent - kDigits;
-        //
-        // iValue now contains an integer with the value of
-        // the first kDigits digits of the number.
-        // fValue contains the (float) of the same.
-        //
 
         if (nDigits <= SINGLE_MAX_DECIMAL_DIGITS) {
-            //
-            // possibly an easy case.
-            // We know that the digits can be represented
-            // exactly. And if the exponent isn't too outrageous,
-            // the whole thing can be done with one operation,
-            // thus one rounding error.
-            // Note that all our constructors trim all leading and
-            // trailing zeros, so simple values (including zero)
-            // will always end up here.
-            //
             if (exp == 0 || fValue == 0.0f) {
                 return (isNegative) ? -fValue : fValue; // small floating integer
             } else if (exp >= 0) {
                 if (exp <= SINGLE_MAX_SMALL_TEN) {
-                    //
-                    // Can get the answer with one operation,
-                    // thus one roundoff.
-                    //
                     fValue *= SINGLE_SMALL_10_POW[exp];
                     return (isNegative) ? -fValue : fValue;
                 }
                 int slop = SINGLE_MAX_DECIMAL_DIGITS - kDigits;
                 if (exp <= SINGLE_MAX_SMALL_TEN + slop) {
-                    //
-                    // We can multiply fValue by 10^(slop)
-                    // and it is still "small" and exact.
-                    // Then we can multiply by 10^(exp-slop)
-                    // with one rounding.
-                    //
                     fValue *= SINGLE_SMALL_10_POW[slop];
                     fValue *= SINGLE_SMALL_10_POW[exp - slop];
                     return (isNegative) ? -fValue : fValue;
                 }
-                //
-                // Else we have a hard case with a positive exp.
-                //
             } else {
                 if (exp >= -SINGLE_MAX_SMALL_TEN) {
-                    //
-                    // Can get the answer in one division.
-                    //
                     fValue /= SINGLE_SMALL_10_POW[-exp];
                     return (isNegative) ? -fValue : fValue;
                 }
-                //
-                // Else we have a hard case with a negative exp.
-                //
             }
         } else if ((decExponent >= nDigits) && (nDigits + decExponent <= MAX_DECIMAL_DIGITS)) {
-            //
-            // In double-precision, this is an exact floating integer.
-            // So we can compute to double, then shorten to float
-            // with one round, and get the right answer.
-            //
-            // First, finish accumulating digits.
-            // Then convert that integer to a double, multiply
-            // by the appropriate power of ten, and convert to float.
-            //
             long lValue = (long) iValue;
             for (int i = kDigits; i < nDigits; i++) {
                 lValue = lValue * 10L + (long) ((int) digits[i] - (int) '0');
@@ -517,22 +486,9 @@ public class FloatingDecimal {
             fValue = (float) dValue;
             return (isNegative) ? -fValue : fValue;
         }
-        //
-        // Harder cases:
-        // The sum of digits plus exponent is greater than
-        // what we think we can do with one error.
-        //
-        // Start by approximating the right answer by,
-        // naively, scaling by powers of 10.
-        // Scaling uses doubles to avoid overflow/underflow.
-        //
         double dValue = fValue;
         if (exp > 0) {
             if (decExponent > SINGLE_MAX_DECIMAL_EXPONENT + 1) {
-                //
-                // Lets face it. This is going to be
-                // Infinity. Cut to the chase.
-                //
                 return (isNegative) ? Float.NEGATIVE_INFINITY : Float.POSITIVE_INFINITY;
             }
             if ((exp & 15) != 0) {
@@ -549,10 +505,6 @@ public class FloatingDecimal {
         } else if (exp < 0) {
             exp = -exp;
             if (decExponent < SINGLE_MIN_DECIMAL_EXPONENT - 1) {
-                //
-                // Lets face it. This is going to be
-                // zero. Cut to the chase.
-                //
                 return (isNegative) ? -0.0f : 0.0f;
             }
             if ((exp & 15) != 0) {
@@ -569,13 +521,6 @@ public class FloatingDecimal {
         }
         fValue = Math.max(Float.MIN_VALUE, Math.min(Float.MAX_VALUE, (float) dValue));
 
-        //
-        // fValue is now approximately the result.
-        // The hard part is adjusting it, by comparison
-        // with FDBigInteger arithmetic.
-        // Formulate the EXACT big-number result as
-        // bigD0 * 10^exp
-        //
         if (nDigits > SINGLE_MAX_NDIGITS) {
             nDigits = SINGLE_MAX_NDIGITS + 1;
             digits[SINGLE_MAX_NDIGITS] = '1';
@@ -595,7 +540,7 @@ public class FloatingDecimal {
         while (true) {
             // here ieeeBits can't be NaN, Infinity or zero
             int binexp = ieeeBits >>> SINGLE_EXP_SHIFT;
-            int bigBbits = ieeeBits & FloatConsts.SIGNIF_BIT_MASK;
+            int bigBbits = ieeeBits & FLOAT_SIGNIF_BIT_MASK;
             if (binexp > 0) {
                 bigBbits |= SINGLE_FRACT_HOB;
             } else { // Normalize denormalized numbers.
@@ -605,21 +550,12 @@ public class FloatingDecimal {
                 bigBbits <<= shift;
                 binexp = 1 - shift;
             }
-            binexp -= FloatConsts.EXP_BIAS;
+            binexp -= FLOAT_EXP_BIAS;
             int lowOrderZeros = Integer.numberOfTrailingZeros(bigBbits);
             bigBbits >>>= lowOrderZeros;
             final int bigIntExp = binexp - SINGLE_EXP_SHIFT + lowOrderZeros;
             final int bigIntNBits = SINGLE_EXP_SHIFT + 1 - lowOrderZeros;
 
-            //
-            // Scale bigD, bigB appropriately for
-            // big-integer operations.
-            // Naively, we multiply by powers of ten
-            // and powers of two. What we actually do
-            // is keep track of the powers of 5 and
-            // powers of 2 we would use, then factor out
-            // common divisors before doing the work.
-            //
             int B2 = B5; // powers of 2 in bigB
             int D2 = D5; // powers of 2 in bigD
             int Ulp2;   // powers of 2 in halfUlp.
@@ -629,21 +565,16 @@ public class FloatingDecimal {
                 D2 -= bigIntExp;
             }
             Ulp2 = B2;
-            // shift bigB and bigD left by a number s. t.
-            // halfUlp is still an integer.
+
             int hulpbias;
-            if (binexp <= -FloatConsts.EXP_BIAS) {
-                // This is going to be a denormalized number
-                // (if not actually zero).
-                // half an ULP is at 2^-(FloatConsts.EXP_BIAS+SINGLE_EXP_SHIFT+1)
-                hulpbias = binexp + lowOrderZeros + FloatConsts.EXP_BIAS;
+            if (binexp <= -FLOAT_EXP_BIAS) {
+                hulpbias = binexp + lowOrderZeros + FLOAT_EXP_BIAS;
             } else {
                 hulpbias = 1 + lowOrderZeros;
             }
             B2 += hulpbias;
             D2 += hulpbias;
-            // if there are common factors of 2, we might just as well
-            // factor them out, as they add nothing useful.
+
             int common2 = Math.min(B2, Math.min(D2, Ulp2));
             B2 -= common2;
             D2 -= common2;
@@ -654,35 +585,16 @@ public class FloatingDecimal {
                 bigD = bigD0.leftShift(D2);
                 prevD2 = D2;
             }
-            //
-            // to recap:
-            // bigB is the scaled-big-int version of our floating-point
-            // candidate.
-            // bigD is the scaled-big-int version of the exact value
-            // as we understand it.
-            // halfUlp is 1/2 an ulp of bigB, except for special cases
-            // of exact powers of 2
-            //
-            // the plan is to compare bigB with bigD, and if the difference
-            // is less than halfUlp, then we're satisfied. Otherwise,
-            // use the ratio of difference to halfUlp to calculate a fudge
-            // factor to add to the floating value, then go 'round again.
-            //
+
             FDBigInteger diff;
             int cmpResult;
             boolean overvalue;
             if ((cmpResult = bigB.cmp(bigD)) > 0) {
                 overvalue = true; // our candidate is too big.
                 diff = bigB.leftInplaceSub(bigD); // bigB is not user further - reuse
-                if ((bigIntNBits == 1) && (bigIntExp > -FloatConsts.EXP_BIAS + 1)) {
-                    // candidate is a normalized exact power of 2 and
-                    // is too big (larger than Float.MIN_NORMAL). We will be subtracting.
-                    // For our purposes, ulp is the ulp of the
-                    // next smaller range.
+                if ((bigIntNBits == 1) && (bigIntExp > -FLOAT_EXP_BIAS + 1)) {
                     Ulp2 -= 1;
                     if (Ulp2 < 0) {
-                        // rats. Cannot de-scale ulp this far.
-                        // must scale diff in other direction.
                         Ulp2 = 0;
                         diff = diff.leftShift(1);
                     }
@@ -691,36 +603,26 @@ public class FloatingDecimal {
                 overvalue = false; // our candidate is too small.
                 diff = bigD.rightInplaceSub(bigB); // bigB is not user further - reuse
             } else {
-                // the candidate is exactly right!
-                // this happens with surprising frequency
                 break correctionLoop;
             }
             cmpResult = diff.cmpPow52(B5, Ulp2);
             if ((cmpResult) < 0) {
-                // difference is small.
-                // this is close enough
                 break correctionLoop;
             } else if (cmpResult == 0) {
-                // difference is exactly half an ULP
-                // round to some other value maybe, then finish
                 if ((ieeeBits & 1) != 0) { // half ties to even
                     ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
                 }
                 break correctionLoop;
             } else {
-                // difference is non-trivial.
-                // could scale addend by ratio of difference to
-                // halfUlp here, if we bothered to compute that difference.
-                // Most of the time ( I hope ) it is about 1 anyway.
                 ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
-                if (ieeeBits == 0 || ieeeBits == FloatConsts.EXP_BIT_MASK) { // 0.0 or Float.POSITIVE_INFINITY
+                if (ieeeBits == 0 || ieeeBits == FLOAT_EXP_BIT_MASK) { // 0.0 or Float.POSITIVE_INFINITY
                     break correctionLoop; // oops. Fell off end of range.
                 }
                 continue; // try again.
             }
         }
         if (isNegative) {
-            ieeeBits |= FloatConsts.SIGN_BIT_MASK;
+            ieeeBits |= FLOAT_SIGN_BIT_MASK;
         }
         return Float.intBitsToFloat(ieeeBits);
     }
@@ -751,50 +653,4 @@ public class FloatingDecimal {
 
     private static final int MAX_SMALL_TEN = SMALL_10_POW.length - 1;
     private static final int SINGLE_MAX_SMALL_TEN = SINGLE_SMALL_10_POW.length - 1;
-
-    static interface DoubleConsts {
-        public static final double MIN_NORMAL = 2.2250738585072014E-308;
-
-        /**
-         * The number of logical bits in the significand of a
-         * <code>double</code> number, including the implicit bit.
-         */
-        public static final int SIGNIFICAND_WIDTH = 53;
-
-        /**
-         * Maximum exponent a finite <code>double</code> number may have.
-         * It is equal to the value returned by
-         * <code>Math.ilogb(Double.MAX_VALUE)</code>.
-         */
-        public static final int MAX_EXPONENT = 1023;
-
-        /**
-         * Minimum exponent a normalized <code>double</code> number may
-         * have.  It is equal to the value returned by
-         * <code>Math.ilogb(Double.MIN_NORMAL)</code>.
-         */
-        public static final int MIN_EXPONENT = -1022;
-
-        public static final int MIN_SUB_EXPONENT = MIN_EXPONENT -
-                (SIGNIFICAND_WIDTH - 1);
-
-        public static final int EXP_BIAS = 1023;
-
-        /**
-         * Bit mask to isolate the sign bit of a <code>double</code>.
-         */
-        public static final long SIGN_BIT_MASK = 0x8000000000000000L;
-
-        /**
-         * Bit mask to isolate the exponent field of a
-         * <code>double</code>.
-         */
-        public static final long EXP_BIT_MASK = 0x7FF0000000000000L;
-
-        /**
-         * Bit mask to isolate the significand field of a
-         * <code>double</code>.
-         */
-        public static final long SIGNIF_BIT_MASK = 0x000FFFFFFFFFFFFFL;
-    }
 }

@@ -3,7 +3,7 @@ package com.alibaba.fastjson2.misc;
 import java.util.Arrays;
 
 public class FDBigInteger {
-    private static final long LONG_MASK = 0xffffffffL;
+    private static final long LONG_MASK = 0XFFFFFFFFL;
 
     static final int[] SMALL_5_POW = {
             1,
