@@ -19,7 +19,6 @@ public class DoubleTest3_random {
     public void test_extract() throws Exception {
         double val = 7.754693899073573E-4;
         String str = JSON.toJSONString(new Model(val));
-        System.out.println(str);
         Model m = JSON.parseObject(str, Model.class);
 
         assertEquals(val, m.value);
@@ -29,7 +28,6 @@ public class DoubleTest3_random {
     public void test_extract1() throws Exception {
         double val = 0.9825253073521191;
         String str = JSON.toJSONString(new Model(val));
-        System.out.println(str);
         Model m = JSON.parseObject(str, Model.class);
 
         assertEquals(val, m.value);
@@ -39,7 +37,6 @@ public class DoubleTest3_random {
     public void test_extract2() throws Exception {
         double val = 0.9221745180028585;
         String str = JSON.toJSONString(new Model(val));
-        System.out.println(str);
         Model m = JSON.parseObject(str, Model.class);
 
         assertEquals(val, m.value);
@@ -66,6 +63,17 @@ public class DoubleTest3_random {
     @Test
     public void test_extract_2() {
         String str = "1.0006725";
+
+        assertEquals(
+                Double.parseDouble(str),
+                JSONReader.of(str)
+                        .readDoubleValue()
+        );
+    }
+
+    @Test
+    public void test_extract_3() {
+        String str = "3744167620101949.3959040795987012";
 
         assertEquals(
                 Double.parseDouble(str),
