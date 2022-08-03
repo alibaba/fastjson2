@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.FloatingDecimal;
+import com.alibaba.fastjson2.util.FloatingDecimalStr;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.math.BigInteger;
@@ -2056,7 +2056,7 @@ final class JSONReaderStr
                     throw new JSONException(info(), ex);
                 }
             } else {
-                doubleValue = FloatingDecimal.parseDouble(this.str, start - 1, len);
+                doubleValue = FloatingDecimalStr.parseDouble(this.str, start - 1, len);
             }
 
             if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
@@ -2294,7 +2294,7 @@ final class JSONReaderStr
                     throw new JSONException(info(), ex);
                 }
             } else {
-                floatValue = FloatingDecimal.parseFloat(this.str, start - 1, len);
+                floatValue = FloatingDecimalStr.parseFloat(this.str, start - 1, len);
             }
 
             if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
