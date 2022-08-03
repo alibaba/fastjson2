@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.util;
+package com.alibaba.fastjson2;
 
 public class FloatingDecimalStr {
     public static double parseDouble(String in, int off, int len) throws NumberFormatException {
