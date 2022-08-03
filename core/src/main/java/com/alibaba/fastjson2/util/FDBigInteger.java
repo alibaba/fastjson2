@@ -1,11 +1,11 @@
-package com.alibaba.fastjson2.misc;
+package com.alibaba.fastjson2.util;
 
 import java.util.Arrays;
 
-public class FDBigInteger {
+final class FDBigInteger {
     private static final long LONG_MASK = 0XFFFFFFFFL;
 
-    static final int[] SMALL_5_POW = {
+    private static final int[] SMALL_5_POW = {
             1,
             5,
             5 * 5,
@@ -43,14 +43,9 @@ public class FDBigInteger {
         }
     }
 
-    //@ spec_public non_null;
     private int[] data;  // value: data[0] is least significant
-    //@ spec_public;
     private int offset;  // number of least significant zero padding ints
-    //@ spec_public;
     private int nWords;  // data[nWords-1]!=0, all values above are zero
-    // if nWords==0 -> this FDBigInteger is zero
-    //@ spec_public;
     private boolean isImmutable;
 
     private FDBigInteger(int[] data, int offset) {
@@ -485,14 +480,7 @@ public class FDBigInteger {
                 subtrahend.data = sData = Arrays.copyOf(sData, rLen);
             }
         }
-        //@ assert minuend == this && minuend.value() == \old(this.value());
-        //@ assert mData == minuend.data && minLen == minuend.nWords;
-        //@ assert subtrahend.offset + subtrahend.data.length >= minuend.size();
-        //@ assert sData == subtrahend.data;
-        //@ assert AP(subtrahend.data, subtrahend.data.length) << subtrahend.offset == \old(subtrahend.value());
-        //@ assert subtrahend.offset == Math.min(\old(this.offset), minuend.offset);
-        //@ assert offsetDiff == minuend.offset - subtrahend.offset;
-        //@ assert 0 <= offsetDiff && offsetDiff + minLen <= sData.length;
+
         int sIndex = 0;
         long borrow = 0L;
         for (; sIndex < offsetDiff; sIndex++) {
@@ -500,9 +488,8 @@ public class FDBigInteger {
             sData[sIndex] = (int) diff;
             borrow = diff >> 32; // signed shift
         }
-        //@ assert sIndex == offsetDiff;
+
         for (int mIndex = 0; mIndex < minLen; sIndex++, mIndex++) {
-            //@ assert sIndex == offsetDiff + mIndex;
             long diff = (mData[mIndex] & LONG_MASK) - (sData[sIndex] & LONG_MASK) + borrow;
             sData[sIndex] = (int) diff;
             borrow = diff >> 32; // signed shift

@@ -3,10 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.*;
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.ReferenceKey;
-import com.alibaba.fastjson2.util.UnsafeUtils;
+import com.alibaba.fastjson2.util.*;
 
 import java.io.Closeable;
 import java.io.InputStream;
@@ -27,7 +24,7 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 
 public abstract class JSONReader
         implements Closeable {
-    static final int MAX_EXP = 512;
+    static final int MAX_EXP = 1023;
 
     static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
     static final ZoneId UTC = ZoneId.of("UTC");
@@ -614,281 +611,23 @@ public abstract class JSONReader
 
     public abstract Long readInt64();
 
-    public float readFloatValue() {
-        readNumber0();
-
-        if (wasNull) {
-            return 0;
-        }
-
-        switch (valueType) {
-            case JSON_TYPE_INT:
-            case JSON_TYPE_INT64: {
-                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    int intVlaue;
-                    if (negative) {
-                        if (mag3 < 0) {
-                            return -(mag3 & 0xFFFFFFFFL);
-                        }
-                        intVlaue = -mag3;
-                    } else {
-                        if (mag3 < 0) {
-                            return mag3 & 0xFFFFFFFFL;
-                        }
-                        intVlaue = mag3;
-                    }
-
-                    return (float) intVlaue;
-                }
-                int[] mag;
-                if (mag0 == 0) {
-                    if (mag1 == 0) {
-                        long v3 = mag3 & LONG_MASK;
-                        long v2 = mag2 & LONG_MASK;
-
-                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
-                            long v23 = (v2 << 32) + (v3);
-                            return negative ? -v23 : v23;
-                        }
-                        mag = new int[]{mag2, mag3};
-                    } else {
-                        mag = new int[]{mag1, mag2, mag3};
-                    }
-                } else {
-                    mag = new int[]{mag0, mag1, mag2, mag3};
-                }
-
-                return getBigInt(negative, mag).floatValue();
-            }
-            case JSON_TYPE_INT16: {
-                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
-                    int intValue = negative ? -mag3 : mag3;
-                    return (float) intValue;
-                }
-                break;
-            }
-            case JSON_TYPE_INT8: {
-                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
-                    int intValue = negative ? -mag3 : mag3;
-                    return (float) intValue;
-                }
-                break;
-            }
-            case JSON_TYPE_DEC: {
-                if (exponent == 0 && mag0 == 0 && mag1 == 0) {
-                    if (mag2 == 0 && mag3 >= 0) {
-                        int unscaledVal = negative ? -mag3 : mag3;
-                        switch (scale) {
-                            case 1:
-                            case 2:
-                            case 3:
-                            case 4:
-                            case 5:
-                            case 6:
-                            case 7:
-                            case 8:
-                            case 9:
-                            case 10:
-                                return (float) (unscaledVal / SMALL_10_POW[scale]);
-                            default:
-                                break;
-                        }
-                    } else {
-                        long v3 = mag3 & LONG_MASK;
-                        long v2 = mag2 & LONG_MASK;
-
-                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
-                            long v23 = (v2 << 32) + (v3);
-                            long unscaledVal = negative ? -v23 : v23;
-                            switch (scale) {
-                                case 1:
-                                case 2:
-                                case 3:
-                                case 4:
-                                case 5:
-                                case 6:
-                                case 7:
-                                case 8:
-                                case 9:
-                                case 10:
-                                    return (float) (unscaledVal / SMALL_10_POW[scale]);
-                                default:
-                                    break;
-                            }
-                        }
-                    }
-                }
-
-                int[] mag = mag0 == 0
-                        ? mag1 == 0
-                        ? mag2 == 0
-                        ? new int[]{mag3}
-                        : new int[]{mag2, mag3}
-                        : new int[]{mag1, mag2, mag3}
-                        : new int[]{mag0, mag1, mag2, mag3};
-                BigInteger bigInt = getBigInt(negative, mag);
-                BigDecimal decimal = new BigDecimal(bigInt, scale);
-
-                if (exponent != 0) {
-                    return Float.parseFloat(
-                            decimal + "E" + exponent);
-                }
-
-                return decimal.floatValue();
-            }
-            default:
-                break;
-        }
-
-        Number number = getNumber();
-        return number == null ? 0 : number.floatValue();
-    }
+    public abstract float readFloatValue();
 
     public Float readFloat() {
+        wasNull = false;
         float value = readFloatValue();
-        if (value == 0 && wasNull) {
+        if (wasNull) {
             return null;
         }
         return value;
     }
 
-    public double readDoubleValue() {
-        readNumber0();
-
-        if (wasNull) {
-            return 0;
-        }
-
-        switch (valueType) {
-            case JSON_TYPE_INT:
-            case JSON_TYPE_INT64: {
-                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    int intVlaue;
-                    if (negative) {
-                        if (mag3 < 0) {
-                            return -(mag3 & 0xFFFFFFFFL);
-                        }
-                        intVlaue = -mag3;
-                    } else {
-                        if (mag3 < 0) {
-                            return mag3 & 0xFFFFFFFFL;
-                        }
-                        intVlaue = mag3;
-                    }
-
-                    return intVlaue;
-                }
-                int[] mag;
-                if (mag0 == 0) {
-                    if (mag1 == 0) {
-                        long v3 = mag3 & LONG_MASK;
-                        long v2 = mag2 & LONG_MASK;
-
-                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
-                            long v23 = (v2 << 32) + (v3);
-                            return negative ? -v23 : v23;
-                        }
-                        mag = new int[]{mag2, mag3};
-                    } else {
-                        mag = new int[]{mag1, mag2, mag3};
-                    }
-                } else {
-                    mag = new int[]{mag0, mag1, mag2, mag3};
-                }
-
-                return getBigInt(negative, mag).floatValue();
-            }
-            case JSON_TYPE_INT16: {
-                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
-                    int intValue = negative ? -mag3 : mag3;
-                    return intValue;
-                }
-                break;
-            }
-            case JSON_TYPE_INT8: {
-                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
-                    int intValue = negative ? -mag3 : mag3;
-                    return intValue;
-                }
-                break;
-            }
-            case JSON_TYPE_DEC: {
-                BigDecimal decimal = null;
-
-                if (exponent == 0 && mag0 == 0 && mag1 == 0) {
-                    if (mag2 == 0 && mag3 >= 0) {
-                        int unscaledVal = negative ? -mag3 : mag3;
-                        switch (scale) {
-                            case 1:
-                            case 2:
-                            case 3:
-                            case 4:
-                            case 5:
-                            case 6:
-                            case 7:
-                            case 8:
-                            case 9:
-                            case 10:
-                                return unscaledVal / SMALL_10_POW[scale];
-                            default:
-                                break;
-                        }
-                    } else {
-                        long v3 = mag3 & LONG_MASK;
-                        long v2 = mag2 & LONG_MASK;
-
-                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
-                            long v23 = (v2 << 32) + (v3);
-                            long unscaledVal = negative ? -v23 : v23;
-                            switch (scale) {
-                                case 1:
-                                case 2:
-                                case 3:
-                                case 4:
-                                case 5:
-                                case 6:
-                                case 7:
-                                case 8:
-                                case 9:
-                                case 10:
-                                    return unscaledVal / SMALL_10_POW[scale];
-                                default:
-                                    break;
-                            }
-                        }
-                    }
-                }
-
-                if (decimal == null) {
-                    int[] mag = mag0 == 0
-                            ? mag1 == 0
-                            ? mag2 == 0
-                            ? new int[]{mag3}
-                            : new int[]{mag2, mag3}
-                            : new int[]{mag1, mag2, mag3}
-                            : new int[]{mag0, mag1, mag2, mag3};
-                    BigInteger bigInt = getBigInt(negative, mag);
-                    decimal = new BigDecimal(bigInt, scale);
-                }
-
-                if (exponent != 0) {
-                    return Double.parseDouble(
-                            decimal + "E" + exponent);
-                }
-
-                return decimal.doubleValue();
-            }
-            default:
-                break;
-        }
-
-        Number number = getNumber();
-        return number == null ? 0 : number.doubleValue();
-    }
+    public abstract double readDoubleValue();
 
     public Double readDouble() {
+        wasNull = false;
         double value = readDoubleValue();
-        if (value == 0 && wasNull) {
+        if (wasNull) {
             return null;
         }
         return value;
@@ -2303,8 +2042,13 @@ public abstract class JSONReader
                                         case 9:
                                         case 10:
                                             return (float) (unscaledVal / SMALL_10_POW[scale]);
-                                        default:
-                                            break;
+                                        default: {
+                                            boolean isNegative = unscaledVal < 0;
+                                            int len = isNegative ? IOUtils.stringSize(-unscaledVal) + 1 : IOUtils.stringSize(unscaledVal);
+                                            char[] chars = new char[len];
+                                            IOUtils.getChars(unscaledVal, len, chars);
+                                            return FloatingDecimal.floatValue(isNegative, scale, chars, len);
+                                        }
                                     }
                                 } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
                                     switch (scale) {
@@ -2319,8 +2063,13 @@ public abstract class JSONReader
                                         case 9:
                                         case 10:
                                             return unscaledVal / SMALL_10_POW[scale];
-                                        default:
-                                            break;
+                                        default: {
+                                            boolean isNegative = unscaledVal < 0;
+                                            int len = isNegative ? IOUtils.stringSize(-unscaledVal) + 1 : IOUtils.stringSize(unscaledVal);
+                                            char[] chars = new char[len];
+                                            IOUtils.getChars(unscaledVal, len, chars);
+                                            return FloatingDecimal.doubleValue(isNegative, scale, chars, len);
+                                        }
                                     }
                                 }
                             }

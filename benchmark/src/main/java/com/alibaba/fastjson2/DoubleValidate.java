@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.misc.FloatingDecimal;
+import com.alibaba.fastjson2.util.FloatingDecimal;
 import com.alibaba.fastjson2.util.IOUtils;
 
 import java.text.NumberFormat;
@@ -22,7 +22,6 @@ public class DoubleValidate {
         chars[0] = '0';
         chars[1] = '.';
 
-        final int iValue = 10;
         long max = 1;
         for (int i = 0; i < 11; i++) {
             max *= 10;
