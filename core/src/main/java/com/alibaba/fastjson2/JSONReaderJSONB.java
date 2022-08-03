@@ -2788,16 +2788,6 @@ final class JSONReaderJSONB
     }
 
     @Override
-    public Float readFloat() {
-        wasNull = false;
-        float floatValue = readFloatValue();
-        if (wasNull) {
-            return null;
-        }
-        return floatValue;
-    }
-
-    @Override
     public double readDoubleValue() {
         byte type = bytes[offset++];
         switch (type) {
@@ -2953,16 +2943,6 @@ final class JSONReaderJSONB
                 break;
         }
         throw new JSONException("TODO : " + typeName(type));
-    }
-
-    @Override
-    public Double readDouble() {
-        wasNull = false;
-        double doubleValue = readDoubleValue();
-        if (wasNull) {
-            return null;
-        }
-        return doubleValue;
     }
 
     @Override

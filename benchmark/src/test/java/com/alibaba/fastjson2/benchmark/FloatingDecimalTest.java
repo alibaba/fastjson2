@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
-import com.alibaba.fastjson2.misc.FloatingDecimal;
+import com.alibaba.fastjson2.util.FloatingDecimal;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

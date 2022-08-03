@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.FloatingDecimal;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 
@@ -9,10 +10,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigInteger;
 import java.time.*;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
@@ -2245,6 +2243,482 @@ final class JSONReaderUTF16
         }
 
         return negative ? -longValue : longValue;
+    }
+
+    @Override
+    public double readDoubleValue() {
+        this.wasNull = false;
+
+        boolean value = false;
+        double doubleValue = 0;
+
+        char quote = '\0';
+        if (ch == '"' || ch == '\'') {
+            quote = ch;
+            ch = chars[offset++];
+
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+                nextIfMatch(',');
+                wasNull = true;
+                return 0;
+            }
+        }
+
+        final int start = offset;
+        if (ch == '-') {
+            negative = true;
+            ch = chars[offset++];
+        } else {
+            if (ch == '+') {
+                ch = chars[offset++];
+            }
+        }
+
+        valueType = JSON_TYPE_INT;
+        while (ch >= '0' && ch <= '9') {
+            if (offset == end) {
+                ch = EOI;
+                offset++;
+                break;
+            }
+            ch = chars[offset++];
+        }
+
+        if (ch == '.') {
+            valueType = JSON_TYPE_DEC;
+            ch = chars[offset++];
+            while (ch >= '0' && ch <= '9') {
+                this.scale++;
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = chars[offset++];
+            }
+        }
+
+        if (ch == 'e' || ch == 'E') {
+            boolean negativeExp = false;
+            int expValue = 0;
+            ch = chars[offset++];
+
+            if (ch == '-') {
+                negativeExp = true;
+                ch = chars[offset++];
+            } else if (ch == '+') {
+                ch = chars[offset++];
+            }
+
+            while (ch >= '0' && ch <= '9') {
+                int byteVal = (ch - '0');
+                expValue = expValue * 10 + byteVal;
+                if (expValue > MAX_EXP) {
+                    throw new JSONException("too large exp value : " + expValue);
+                }
+
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = chars[offset++];
+            }
+
+            if (negativeExp) {
+                expValue = -expValue;
+            }
+
+            this.exponent = (byte) expValue;
+            valueType = JSON_TYPE_DEC;
+        }
+
+        if (offset == start) {
+            if (ch == 'n') {
+                if (chars[offset++] == 'u'
+                        && chars[offset++] == 'l'
+                        && chars[offset++] == 'l'
+                ) {
+                    wasNull = true;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == 't') {
+                if (chars[offset++] == 'r'
+                        && chars[offset++] == 'u'
+                        && chars[offset++] == 'e'
+                ) {
+                    value = true;
+                    doubleValue = 1;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == 'f') {
+                if (chars[offset++] == 'a'
+                        && chars[offset++] == 'l'
+                        && chars[offset++] == 's'
+                        && chars[offset++] == 'e'
+                ) {
+                    doubleValue = 0;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == '{' && quote == 0) {
+                Map<String, Object> obj = readObject();
+                if (!obj.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            } else if (ch == '[' && quote == 0) {
+                List array = readArray();
+                if (!array.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            }
+        }
+
+        int len = offset - start;
+
+        String str = null;
+        if (quote != 0) {
+            if (ch != quote) {
+                this.offset -= 1;
+                this.ch = quote;
+                str = readString();
+            }
+
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+        }
+
+        if (!value) {
+            if (str != null) {
+                try {
+                    doubleValue = Double.parseDouble(str);
+                } catch (NumberFormatException ex) {
+                    throw new JSONException(info(), ex);
+                }
+            } else {
+                doubleValue = FloatingDecimal.parseDouble(chars, start - 1, len);
+            }
+
+            if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                switch (ch) {
+                    case 'B':
+                        valueType = JSON_TYPE_INT8;
+                        break;
+                    case 'S':
+                        valueType = JSON_TYPE_INT16;
+                        break;
+                    case 'L':
+                        valueType = JSON_TYPE_INT64;
+                        break;
+                    case 'F':
+                        valueType = JSON_TYPE_FLOAT;
+                        break;
+                    case 'D':
+                        valueType = JSON_TYPE_DOUBLE;
+                        break;
+                    default:
+                        break;
+                }
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+            }
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+        }
+
+        if (ch == ',') {
+            this.comma = true;
+            this.ch = chars[this.offset++];
+            // next inline
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            }
+        }
+
+        return doubleValue;
+    }
+
+    @Override
+    public float readFloatValue() {
+        this.wasNull = false;
+
+        boolean value = false;
+        float floatValue = 0;
+
+        char quote = '\0';
+        if (ch == '"' || ch == '\'') {
+            quote = ch;
+            ch = chars[offset++];
+
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+                nextIfMatch(',');
+                wasNull = true;
+                return 0;
+            }
+        }
+
+        final int start = offset;
+        if (ch == '-') {
+            negative = true;
+            ch = chars[offset++];
+        } else {
+            if (ch == '+') {
+                ch = chars[offset++];
+            }
+        }
+
+        valueType = JSON_TYPE_INT;
+        while (ch >= '0' && ch <= '9') {
+            if (offset == end) {
+                ch = EOI;
+                offset++;
+                break;
+            }
+            ch = chars[offset++];
+        }
+
+        if (ch == '.') {
+            valueType = JSON_TYPE_DEC;
+            ch = chars[offset++];
+            while (ch >= '0' && ch <= '9') {
+                this.scale++;
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = chars[offset++];
+            }
+        }
+
+        if (ch == 'e' || ch == 'E') {
+            boolean negativeExp = false;
+            int expValue = 0;
+            ch = chars[offset++];
+
+            if (ch == '-') {
+                negativeExp = true;
+                ch = chars[offset++];
+            } else if (ch == '+') {
+                ch = chars[offset++];
+            }
+
+            while (ch >= '0' && ch <= '9') {
+                int byteVal = (ch - '0');
+                expValue = expValue * 10 + byteVal;
+                if (expValue > MAX_EXP) {
+                    throw new JSONException("too large exp value : " + expValue);
+                }
+
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = chars[offset++];
+            }
+
+            if (negativeExp) {
+                expValue = -expValue;
+            }
+
+            this.exponent = (byte) expValue;
+            valueType = JSON_TYPE_DEC;
+        }
+
+        if (offset == start) {
+            if (ch == 'n') {
+                if (chars[offset++] == 'u'
+                        && chars[offset++] == 'l'
+                        && chars[offset++] == 'l'
+                ) {
+                    wasNull = true;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == 't') {
+                if (chars[offset++] == 'r'
+                        && chars[offset++] == 'u'
+                        && chars[offset++] == 'e'
+                ) {
+                    value = true;
+                    floatValue = 1;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == 'f') {
+                if (chars[offset++] == 'a'
+                        && chars[offset++] == 'l'
+                        && chars[offset++] == 's'
+                        && chars[offset++] == 'e'
+                ) {
+                    floatValue = 0;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == '{' && quote == 0) {
+                Map<String, Object> obj = readObject();
+                if (!obj.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            } else if (ch == '[' && quote == 0) {
+                List array = readArray();
+                if (!array.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            }
+        }
+
+        int len = offset - start;
+
+        String str = null;
+        if (quote != 0) {
+            if (ch != quote) {
+                this.offset -= 1;
+                this.ch = quote;
+                str = readString();
+            }
+
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+        }
+
+        if (!value) {
+            if (str != null) {
+                try {
+                    floatValue = Float.parseFloat(str);
+                } catch (NumberFormatException ex) {
+                    throw new JSONException(info(), ex);
+                }
+            } else {
+                floatValue = FloatingDecimal.parseFloat(chars, start - 1, len);
+            }
+
+            if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                switch (ch) {
+                    case 'B':
+                        valueType = JSON_TYPE_INT8;
+                        break;
+                    case 'S':
+                        valueType = JSON_TYPE_INT16;
+                        break;
+                    case 'L':
+                        valueType = JSON_TYPE_INT64;
+                        break;
+                    case 'F':
+                        valueType = JSON_TYPE_FLOAT;
+                        break;
+                    case 'D':
+                        valueType = JSON_TYPE_DOUBLE;
+                        break;
+                    default:
+                        break;
+                }
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+            }
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+        }
+
+        if (ch == ',') {
+            this.comma = true;
+            this.ch = chars[this.offset++];
+            // next inline
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            }
+        }
+
+        return floatValue;
     }
 
     private void skipString() {
