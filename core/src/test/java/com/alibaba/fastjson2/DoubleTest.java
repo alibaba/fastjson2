@@ -1,9 +1,5 @@
-package com.alibaba.fastjson2.primitves;
+package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONBTest;
-import com.alibaba.fastjson2.util.FloatingDecimal;
 import com.alibaba.fastjson2_vo.Double1;
 import org.junit.jupiter.api.Test;
 

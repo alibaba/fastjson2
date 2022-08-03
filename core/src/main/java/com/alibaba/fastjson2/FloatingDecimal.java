@@ -1,6 +1,6 @@
-package com.alibaba.fastjson2.util;
+package com.alibaba.fastjson2;
 
-public final class FloatingDecimal {
+final class FloatingDecimal {
     static final int DOUBLE_SIGNIFICAND_WIDTH = 53;
 
     static final int DOUBLE_EXP_BIAS = 1023;
