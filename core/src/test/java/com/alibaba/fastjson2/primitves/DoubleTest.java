@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.primitves;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONBTest;
+import com.alibaba.fastjson2.util.FloatingDecimal;
 import com.alibaba.fastjson2_vo.Double1;
 import org.junit.jupiter.api.Test;
 
@@ -295,5 +296,12 @@ public class DoubleTest {
         byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("v0000", 1F));
         Double1 vo = JSONB.parseObject(jsonbBytes, Double1.class);
         assertEquals(Double.valueOf(1), vo.getV0000());
+    }
+
+    @Test
+    public void parseDouble0() {
+        String str = "12345.6789";
+        char[] chars = str.toCharArray();
+        double d0 = FloatingDecimal.parseDouble(chars, 0, chars.length);
     }
 }

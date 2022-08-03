@@ -2013,6 +2013,11 @@ public abstract class JSONReader
                                     case 8:
                                     case 9:
                                     case 10:
+                                    case 11:
+                                    case 12:
+                                    case 13:
+                                    case 14:
+                                    case 15:
                                         return unscaledVal / SMALL_10_POW[scale];
                                     default:
                                         break;
