@@ -2438,8 +2438,6 @@ public abstract class JSONReader
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
             }
-
-            return new JSONReaderStr(context, str, 0, str.length());
         }
 
         final int length = str.length();
@@ -2468,10 +2466,6 @@ public abstract class JSONReader
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
-            }
-
-            if (str.length() > 1024 * 1024) {
-                return new JSONReaderStr(context, str, 0, str.length());
             }
         }
 
@@ -2502,8 +2496,6 @@ public abstract class JSONReader
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
             }
-
-            return new JSONReaderStr(context, str, 0, str.length());
         }
 
         char[] chars;
