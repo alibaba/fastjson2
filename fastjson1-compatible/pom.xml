@@ -253,7 +253,7 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy</artifactId>
-            <version>2.4.21</version>
+            <version>3.0.12</version>
             <scope>test</scope>
         </dependency>
 
