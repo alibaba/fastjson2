@@ -15,6 +15,7 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     strategy:
       matrix:
         os: [ ubuntu-18.04 ]
@@ -32,9 +33,9 @@ jobs:
           java-version: ${{ matrix.java }}
           cache: 'maven'
       - name: Build with Maven
-        run: ./mvnw -Pgen-javadoc -Pgen-dokka clean package -B
+        run: ./mvnw -V --no-transfer-progress -Pgen-javadoc -Pgen-dokka clean package
       - name: Generate code coverage
-        run: ./mvnw -Pgen-code-cov clean test
+        run: ./mvnw -V --no-transfer-progress -Pgen-code-cov clean test
       # https://github.com/marketplace/actions/codecov
       - uses: codecov/codecov-action@v3
         with:
