@@ -1111,7 +1111,7 @@ public abstract class JSONReader
                     long adjustment = nanos / 1000_000 - 1000;
                     return Math.addExact(millis, adjustment);
                 } else {
-                    long millis = Math.multiplyExact(seconds, 1000);
+                    long millis = Math.multiplyExact(seconds, 1000L);
                     return Math.addExact(millis, nanos / 1000_000);
                 }
             }
