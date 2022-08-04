@@ -19,6 +19,8 @@ public final class ObjectReaderImplMap
     static final Class CLASS_FASTJSON_OBJECT;
     static Function UNSAFE_OBJECT_CREATOR;
 
+    static final long M = Fnv.hashCode64("M");
+
     static {
         Class objectClass = null;
         try {
