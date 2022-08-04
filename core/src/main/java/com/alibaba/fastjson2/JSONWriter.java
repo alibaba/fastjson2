@@ -1474,7 +1474,11 @@ public abstract class JSONWriter
          */
         NotWriteEmptyArray(1 << 25),
         WriteNonStringKeyAsString(1 << 26),
-        ErrorOnNoneSerializable(1 << 27);
+        ErrorOnNoneSerializable(1 << 27),
+        /**
+         * @since 2.0.11
+         */
+        WritePairAsJavaBean(1 << 28);
 
         public final long mask;
 

@@ -88,19 +88,19 @@ class ObjectWriterBaseModule
 
             if (jsonType == null) {
                 Class mixInSource = provider.mixInCache.get(objectClass);
-                if (mixInSource == null) {
-                    String typeName = objectClass.getName();
-                    switch (typeName) {
-                        case "org.apache.commons.lang3.tuple.ImmutablePair":
-                            provider.mixIn(objectClass, mixInSource = ApacheLang3Support.PairMixIn.class);
-                            break;
-                        case "org.apache.commons.lang3.tuple.MutablePair":
-                            provider.mixIn(objectClass, mixInSource = ApacheLang3Support.MutablePairMixIn.class);
-                            break;
-                        default:
-                            break;
-                    }
-                }
+//                if (mixInSource == null) {
+//                    String typeName = objectClass.getName();
+//                    switch (typeName) {
+//                        case "org.apache.commons.lang3.tuple.ImmutablePair":
+//                            provider.mixIn(objectClass, mixInSource = ApacheLang3Support.PairMixIn.class);
+//                            break;
+//                        case "org.apache.commons.lang3.tuple.MutablePair":
+//                            provider.mixIn(objectClass, mixInSource = ApacheLang3Support.MutablePairMixIn.class);
+//                            break;
+//                        default:
+//                            break;
+//                    }
+//                }
 
                 if (mixInSource != null) {
                     beanInfo.mixIn = true;
@@ -201,16 +201,16 @@ class ObjectWriterBaseModule
         @Override
         public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectType, Field field) {
             Class mixInSource = provider.mixInCache.get(objectType);
-            if (objectType != null) {
-                String typeName = objectType.getName();
-                switch (typeName) {
-                    case "org.apache.commons.lang3.tuple.ImmutablePair":
-                        provider.mixIn(objectType, mixInSource = ApacheLang3Support.PairMixIn.class);
-                        break;
-                    default:
-                        break;
-                }
-            }
+//            if (objectType != null) {
+//                String typeName = objectType.getName();
+//                switch (typeName) {
+//                    case "org.apache.commons.lang3.tuple.ImmutablePair":
+//                        provider.mixIn(objectType, mixInSource = ApacheLang3Support.PairMixIn.class);
+//                        break;
+//                    default:
+//                        break;
+//                }
+//            }
 
             if (mixInSource != null && mixInSource != objectType) {
                 Field mixInField = null;
@@ -873,6 +873,10 @@ class ObjectWriterBaseModule
             case "java.net.InetSocketAddress":
             case "java.text.SimpleDateFormat":
                 return ObjectWriterMisc.INSTANCE;
+            case "org.apache.commons.lang3.tuple.Pair":
+            case "org.apache.commons.lang3.tuple.MutablePair":
+            case "org.apache.commons.lang3.tuple.ImmutablePair":
+                return new ApacheLang3Support.PairWriter(objectClass);
             default:
                 break;
         }
