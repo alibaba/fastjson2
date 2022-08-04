@@ -5021,7 +5021,7 @@ final class JSONReaderStr
     }
 
     @Override
-    protected LocalDateTime readLocalDateTime19() {
+    public LocalDateTime readLocalDateTime19() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
         }

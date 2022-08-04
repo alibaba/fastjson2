@@ -4593,7 +4593,7 @@ final class JSONReaderJSONB
     }
 
     @Override
-    protected LocalDateTime readLocalDateTime19() {
+    public LocalDateTime readLocalDateTime19() {
         type = bytes[offset];
         if (type != BC_STR_ASCII_FIX_MIN + 19) {
             throw new JSONException("date only support string input");
