@@ -194,10 +194,6 @@ public class ObjectReaderBaseModule
             if (mixInSource == null) {
                 String typeName = objectClass.getName();
                 switch (typeName) {
-                    case "org.apache.commons.lang3.tuple.Pair":
-                    case "org.apache.commons.lang3.tuple.ImmutablePair":
-                        provider.mixIn(objectClass, mixInSource = ApacheLang3Support.PairMixIn.class);
-                        break;
                     case "org.apache.commons.lang3.tuple.Triple":
                         provider.mixIn(objectClass, mixInSource = ApacheLang3Support.TripleMixIn.class);
                         break;
@@ -1639,6 +1635,9 @@ public class ObjectReaderBaseModule
                         return new ObjectReaderImplMapTyped((Class) rawType, HashMap.class, actualTypeParam0, actualTypeParam1, 0, GuavaSupport.singletonBiMapConverter());
                     case "org.springframework.util.LinkedMultiValueMap":
                         return ObjectReaderImplMap.of(type, (Class) rawType, 0L);
+                    case "org.apache.commons.lang3.tuple.Pair":
+                    case "org.apache.commons.lang3.tuple.ImmutablePair":
+                        return new ApacheLang3Support.PairReader((Class) rawType, actualTypeParam0, actualTypeParam1);
                     default:
                         break;
                 }
@@ -1797,6 +1796,9 @@ public class ObjectReaderBaseModule
                     return new ObjectReaderException((Class) type);
                 }
                 break;
+            case "org.apache.commons.lang3.tuple.Pair":
+            case "org.apache.commons.lang3.tuple.ImmutablePair":
+                return new ApacheLang3Support.PairReader((Class) type, Object.class, Object.class);
             default:
                 break;
         }
