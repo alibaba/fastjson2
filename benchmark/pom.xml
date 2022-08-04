@@ -61,6 +61,11 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.github.wycst</groupId>
+            <artifactId>wast</artifactId>
+            <version>0.0.3</version>
+        </dependency>
+        <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
         </dependency>

@@ -1170,7 +1170,7 @@ public abstract class JSONReader
 
     protected abstract LocalDateTime readLocalDateTime18();
 
-    protected abstract LocalDateTime readLocalDateTime19();
+    public abstract LocalDateTime readLocalDateTime19();
 
     protected abstract LocalDateTime readLocalDateTimeX(int len);
 
