@@ -34,6 +34,10 @@ final class ObjectReaderImplMapString
                 }
                 throw new JSONException(jsonReader.info("expect '{', but '['"));
             }
+
+            if (jsonReader.nextIfNull()) {
+                return null;
+            }
         }
 
         JSONReader.Context context = jsonReader.getContext();
