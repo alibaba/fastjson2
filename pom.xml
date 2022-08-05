@@ -40,6 +40,8 @@
         <kotlin.version>1.7.10</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+        <!-- https://kotlinlang.org/docs/maven.html#specifying-compiler-options -->
+        <kotlin.compiler.apiVersion>1.5</kotlin.compiler.apiVersion>
 
         <junit5.version>5.9.0</junit5.version>
         <kotest.version>5.3.0</kotest.version>
