@@ -4458,7 +4458,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public LocalDateTime readLocalDate8() {
+    public LocalDate readLocalDate8() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -4526,9 +4526,9 @@ final class JSONReaderUTF16
             return null;
         }
 
-        LocalDateTime ldt;
+        LocalDate ldt;
         try {
-            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+            ldt = LocalDate.of(year, month, dom);
         } catch (DateTimeException e) {
             throw new JSONException(info(), e);
         }
@@ -4543,7 +4543,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public LocalDateTime readLocalDate9() {
+    public LocalDate readLocalDate9() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -4636,9 +4636,9 @@ final class JSONReaderUTF16
             return null;
         }
 
-        LocalDateTime ldt;
+        LocalDate ldt;
         try {
-            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+            ldt = LocalDate.of(year, month, dom);
         } catch (DateTimeException e) {
             throw new JSONException(info(), e);
         }
@@ -4653,7 +4653,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public LocalDateTime readLocalDate10() {
+    public LocalDate readLocalDate10() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -4795,9 +4795,9 @@ final class JSONReaderUTF16
             return null;
         }
 
-        LocalDateTime ldt;
+        LocalDate ldt;
         try {
-            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+            ldt = LocalDate.of(year, month, dom);
         } catch (DateTimeException e) {
             throw new JSONException(info(), e);
         }
@@ -4812,7 +4812,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public LocalDateTime readLocalDate11() {
+    public LocalDate readLocalDate11() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -4885,7 +4885,7 @@ final class JSONReaderUTF16
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+        LocalDate ldt = LocalDate.of(year, month, dom);
 
         offset += 12;
         next();
@@ -5456,7 +5456,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public LocalDateTime readLocalDateTime19() {
+    protected LocalDateTime readLocalDateTime19() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
         }

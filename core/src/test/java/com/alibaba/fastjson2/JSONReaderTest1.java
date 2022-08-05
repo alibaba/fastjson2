@@ -737,12 +737,12 @@ public class JSONReaderTest1 {
     public void test_readLocalDate8() {
         LocalDate localTime = LocalDate.of(2018, 4, 1);
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"2018-4-1\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate8().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate8());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'2018-4-1' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate8().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate8());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -751,7 +751,6 @@ public class JSONReaderTest1 {
             assertEquals(localTime,
                     jsonReader
                             .readLocalDate8()
-                            .toLocalDate()
             );
             assertTrue(jsonReader.isEnd());
             assertFalse(jsonReader.comma);
@@ -771,12 +770,12 @@ public class JSONReaderTest1 {
     public void test_readLocalDate9() {
         LocalDate localTime = LocalDate.of(2018, 4, 11);
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"2018-4-11\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate9().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate9());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'2018-4-11' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate9().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate9());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -790,18 +789,18 @@ public class JSONReaderTest1 {
     public void test_readLocalDate9_1() {
         LocalDate localTime = LocalDate.of(2018, 4, 1);
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("\"2018年4月1日\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate9().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate9());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("'2018年4月1日' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate9().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate9());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("\"2018년4월1일\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate9().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate9());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -811,29 +810,29 @@ public class JSONReaderTest1 {
     public void test_readLocalDate10() {
         LocalDate localTime = LocalDate.of(2018, 11, 12);
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"2018-11-12\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'2018-11-12' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"2018/11/12\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"12.11.2018\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"12-11-2018\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -847,12 +846,12 @@ public class JSONReaderTest1 {
     public void test_readLocalDate10_1() {
         LocalDate localTime = LocalDate.of(2018, 1, 12);
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("\"2018年1月12日\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("'2018년1월12일' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -862,12 +861,12 @@ public class JSONReaderTest1 {
     public void test_readLocalDate10_2() {
         LocalDate localTime = LocalDate.of(2018, 12, 1);
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("\"2018年12月1日\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("'2018년12월1일' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -877,12 +876,12 @@ public class JSONReaderTest1 {
     public void test_readLocalDate11() {
         LocalDate localTime = LocalDate.of(2018, 12, 13);
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("\"2018年12月13日\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate11().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate11());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("'2018년12월13일' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate11().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate11());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }

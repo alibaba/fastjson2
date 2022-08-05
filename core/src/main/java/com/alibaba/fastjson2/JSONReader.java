@@ -655,32 +655,30 @@ public abstract class JSONReader
             return false;
         }
 
-        LocalDateTime localDateTime;
+        LocalDate localDate;
         int len = getStringLength();
         switch (len) {
             case 8:
-                localDateTime = readLocalDate8();
+                localDate = readLocalDate8();
                 break;
             case 9:
-                localDateTime = readLocalDate9();
+                localDate = readLocalDate9();
                 break;
             case 10:
-                localDateTime = readLocalDate10();
+                localDate = readLocalDate10();
                 break;
             case 11:
-                localDateTime = readLocalDate11();
+                localDate = readLocalDate11();
                 break;
             default:
                 return false;
         }
 
-        if (localDateTime == null) {
+        if (localDate == null) {
             return false;
         }
-        return localDateTime.getHour() == 0
-                && localDateTime.getMinute() == 0
-                && localDateTime.getSecond() == 0
-                && localDateTime.getNano() == 0;
+
+        return true;
     }
 
     public LocalDate readLocalDate() {
@@ -705,18 +703,23 @@ public abstract class JSONReader
                 || context.formatISO8601) {
             int len = getStringLength();
             LocalDateTime ldt = null;
+            LocalDate localDate;
             switch (len) {
                 case 8:
-                    ldt = readLocalDate8();
+                    localDate = readLocalDate8();
+                    ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                     break;
                 case 9:
-                    ldt = readLocalDate9();
+                    localDate = readLocalDate9();
+                    ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                     break;
                 case 10:
-                    ldt = readLocalDate10();
+                    localDate = readLocalDate10();
+                    ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                     break;
                 case 11:
-                    ldt = readLocalDate11();
+                    localDate = readLocalDate11();
+                    ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                     break;
                 case 19:
                     ldt = readLocalDateTime19();
@@ -802,15 +805,20 @@ public abstract class JSONReader
                 || context.formatyyyyMMdd8
                 || context.formatISO8601) {
             int len = getStringLength();
+            LocalDate localDate;
             switch (len) {
                 case 8:
-                    return readLocalDate8();
+                    localDate = readLocalDate8();
+                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 9:
-                    return readLocalDate9();
+                    localDate = readLocalDate9();
+                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 10:
-                    return readLocalDate10();
+                    localDate = readLocalDate10();
+                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 11:
-                    return readLocalDate11();
+                    localDate = readLocalDate11();
+                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 16:
                     return readLocalDateTime16();
                 case 17:
@@ -894,18 +902,23 @@ public abstract class JSONReader
                     || context.formatISO8601) {
                 int len = getStringLength();
                 LocalDateTime ldt = null;
+                LocalDate localDate;
                 switch (len) {
                     case 8:
-                        ldt = readLocalDate8();
+                        localDate = readLocalDate8();
+                        ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                         break;
                     case 9:
-                        ldt = readLocalDate9();
+                        localDate = readLocalDate9();
+                        ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                         break;
                     case 10:
-                        ldt = readLocalDate10();
+                        localDate = readLocalDate10();
+                        ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                         break;
                     case 11:
-                        ldt = readLocalDate11();
+                        localDate = readLocalDate11();
+                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                         break;
                     case 16:
                         ldt = readLocalDateTime16();
@@ -1047,21 +1060,26 @@ public abstract class JSONReader
                 || context.formatISO8601) {
             int len = getStringLength();
             LocalDateTime ldt = null;
+            LocalDate localDate = null;
             switch (len) {
                 case 8: {
-                    ldt = readLocalDate8();
-                    if (ldt == null) {
+                    localDate = readLocalDate8();
+                    if (localDate == null) {
                         throw new JSONException("TODO : " + readString());
                     }
+                    ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                     break;
                 }
                 case 9: {
-                    ldt = readLocalDate9();
+                    localDate = readLocalDate9();
+                    if (localDate != null) {
+                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
+                    }
                     break;
                 }
                 case 10: {
-                    ldt = readLocalDate10();
-                    if (ldt == null) {
+                    localDate = readLocalDate10();
+                    if (localDate == null) {
                         String str = readString();
                         if ("0000-00-00".equals(str)) {
                             return 0;
@@ -1070,11 +1088,16 @@ public abstract class JSONReader
                             return Long.parseLong(str);
                         }
                         throw new JSONException("TODO : " + str);
+                    } else {
+                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                     }
                     break;
                 }
                 case 11: {
-                    ldt = readLocalDate11();
+                    localDate = readLocalDate11();
+                    if (localDate != null) {
+                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
+                    }
                     break;
                 }
                 case 16: {
@@ -1170,7 +1193,7 @@ public abstract class JSONReader
 
     protected abstract LocalDateTime readLocalDateTime18();
 
-    public abstract LocalDateTime readLocalDateTime19();
+    protected abstract LocalDateTime readLocalDateTime19();
 
     protected abstract LocalDateTime readLocalDateTimeX(int len);
 
@@ -1186,13 +1209,13 @@ public abstract class JSONReader
 
     protected abstract LocalTime readLocalTime18();
 
-    protected abstract LocalDateTime readLocalDate8();
+    protected abstract LocalDate readLocalDate8();
 
-    protected abstract LocalDateTime readLocalDate9();
+    protected abstract LocalDate readLocalDate9();
 
-    protected abstract LocalDateTime readLocalDate10();
+    protected abstract LocalDate readLocalDate10();
 
-    protected abstract LocalDateTime readLocalDate11();
+    protected abstract LocalDate readLocalDate11();
 
     protected abstract ZonedDateTime readZonedDateTimeX(int len);
 

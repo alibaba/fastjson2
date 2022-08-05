@@ -62,7 +62,7 @@ final class ObjectReaderImplCalendar
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.current() == '"') {
+        if (jsonReader.isString()) {
             if (format != null) {
                 DateTimeFormatter formatter = getDateFormatter();
                 if (formatter != null) {

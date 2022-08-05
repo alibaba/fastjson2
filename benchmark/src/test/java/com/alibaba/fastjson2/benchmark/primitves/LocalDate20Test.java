@@ -1,8 +1,8 @@
-package com.alibaba.fastjson2.benchmark.wast;
+package com.alibaba.fastjson2.benchmark.primitves;
 
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
-public class WriteTest {
+public class LocalDate20Test {
     public static void fastjson2_perf_test() {
         for (int i = 0; i < 10; i++) {
             fastjson2_perf();
@@ -10,16 +10,16 @@ public class WriteTest {
     }
 
     public static void fastjson2_perf() {
-        WriteCase benchmark = new WriteCase();
+        LocalDate20 benchmark = new LocalDate20();
 
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 1_000_000; ++i) {
+        for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.fastjson2(BH);
         }
         long millis = System.currentTimeMillis() - start;
-        System.out.println("Write-fastjson2 : " + millis);
+        System.out.println("LocalDate20-fastjson2 : " + millis);
 
-        // zulu8.62.0.19 : 2304
+        // zulu8.62.0.19 : 624 642
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :
@@ -32,23 +32,22 @@ public class WriteTest {
         // oracle-jdk-18.0.2 :
     }
 
-    public static void wastjson_perf_test() {
+    public static void fastjson1_perf_test() throws Exception {
         for (int i = 0; i < 10; i++) {
-            wastjson_perf();
+            fastjson1_perf();
         }
     }
 
-    public static void wastjson_perf() {
-        WriteCase benchmark = new WriteCase();
+    public static void fastjson1_perf() throws Exception {
+        LocalDate20 benchmark = new LocalDate20();
 
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 1_000_000; ++i) {
-            benchmark.wastjson(BH);
+        for (int i = 0; i < 1000 * 1000; ++i) {
+            benchmark.fastjson1(BH);
         }
         long millis = System.currentTimeMillis() - start;
-        System.out.println("Write-wast : " + millis);
-
-        // zulu8.62.0.19 : 1615
+        System.out.println("LocalDate20-fastjson1 : " + millis);
+        // zulu8.62.0.19 : 6932
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :
@@ -62,8 +61,7 @@ public class WriteTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2_perf_test();
-//        jackson_perf_test();
-        wastjson_perf_test();
+        fastjson2_perf_test();
+//        fastjson1_perf_test();
     }
 }
