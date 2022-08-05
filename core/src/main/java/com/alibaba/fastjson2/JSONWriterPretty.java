@@ -217,6 +217,16 @@ final class JSONWriterPretty
         jsonWriter.writeNameRaw(bytes, offset, len);
     }
 
+    public void writeNameAny(Object name) {
+        if (jsonWriter.startObject) {
+            jsonWriter.startObject = false;
+        } else {
+            writeComma();
+        }
+
+        jsonWriter.writeAny(name);
+    }
+
     @Override
     protected void write0(char ch) {
         jsonWriter.write0(ch);
