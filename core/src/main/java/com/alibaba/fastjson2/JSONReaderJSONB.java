@@ -3466,18 +3466,14 @@ final class JSONReaderJSONB
             int len = getStringLength();
             switch (len) {
                 case 8:
-                    return readLocalDate8()
-                            .toLocalDate();
+                    return readLocalDate8();
                 case 9:
-                    return readLocalDate9()
-                            .toLocalDate();
+                    return readLocalDate9();
                 case 10: {
-                    return readLocalDate10()
-                            .toLocalDate();
+                    return readLocalDate10();
                 }
                 case 11:
-                    return readLocalDate11()
-                            .toLocalDate();
+                    return readLocalDate11();
                 default:
                     break;
             }
@@ -3490,18 +3486,14 @@ final class JSONReaderJSONB
             strlen = readLength();
             switch (strlen) {
                 case 8:
-                    return readLocalDate8()
-                            .toLocalDate();
+                    return readLocalDate8();
                 case 9:
-                    return readLocalDate9()
-                            .toLocalDate();
+                    return readLocalDate9();
                 case 10: {
-                    return readLocalDate10()
-                            .toLocalDate();
+                    return readLocalDate10();
                 }
                 case 11:
-                    return readLocalDate11()
-                            .toLocalDate();
+                    return readLocalDate11();
                 default:
                     break;
             }
@@ -3529,15 +3521,20 @@ final class JSONReaderJSONB
 
         if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
             int len = getStringLength();
+            LocalDate localDate;
             switch (len) {
                 case 8:
-                    return readLocalDate8();
+                    localDate = readLocalDate8();
+                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 9:
-                    return readLocalDate9();
+                    localDate = readLocalDate9();
+                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 10:
-                    return readLocalDate10();
+                    localDate = readLocalDate10();
+                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 11:
-                    return readLocalDate11();
+                    localDate = readLocalDate11();
+                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 16:
                     return readLocalDateTime16();
                 case 17:
@@ -3595,7 +3592,7 @@ final class JSONReaderJSONB
     }
 
     @Override
-    protected LocalDateTime readLocalDate11() {
+    protected LocalDate readLocalDate11() {
         throw new JSONException("UnsupportedOperation");
     }
 
@@ -3997,7 +3994,7 @@ final class JSONReaderJSONB
     }
 
     @Override
-    public LocalDateTime readLocalDate8() {
+    public LocalDate readLocalDate8() {
         type = bytes[offset];
         if (type != BC_STR_ASCII_FIX_MIN + 8) {
             throw new JSONException("date only support string input");
@@ -4066,14 +4063,14 @@ final class JSONReaderJSONB
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+        LocalDate ldt = LocalDate.of(year, month, dom);
 
         offset += 9;
         return ldt;
     }
 
     @Override
-    public LocalDateTime readLocalDate9() {
+    public LocalDate readLocalDate9() {
         type = bytes[offset];
         if (type != BC_STR_ASCII_FIX_MIN + 9) {
             throw new JSONException("date only support string input");
@@ -4145,14 +4142,14 @@ final class JSONReaderJSONB
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+        LocalDate ldt = LocalDate.of(year, month, dom);
 
         offset += 10;
         return ldt;
     }
 
     @Override
-    protected LocalDateTime readLocalDate10() {
+    protected LocalDate readLocalDate10() {
         byte c0, c1, c2, c3, c4, c5, c6, c7, c8, c9;
         if (bytes[offset] == BC_STR_ASCII_FIX_MIN + 10) {
             c0 = bytes[offset + 1];
@@ -4262,7 +4259,7 @@ final class JSONReaderJSONB
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+        LocalDate ldt = LocalDate.of(year, month, dom);
 
         offset += 11;
         return ldt;
@@ -4593,7 +4590,7 @@ final class JSONReaderJSONB
     }
 
     @Override
-    public LocalDateTime readLocalDateTime19() {
+    protected LocalDateTime readLocalDateTime19() {
         type = bytes[offset];
         if (type != BC_STR_ASCII_FIX_MIN + 19) {
             throw new JSONException("date only support string input");
