@@ -1107,12 +1107,12 @@ public abstract class JSONReader
                 long seconds = zdt.toEpochSecond();
                 int nanos = zdt.toLocalTime().getNano();
                 if (seconds < 0 && nanos > 0) {
-                    long millis = Math.multiplyExact(seconds + 1, 1000);
+                    long millis = (seconds + 1) * 1000;
                     long adjustment = nanos / 1000_000 - 1000;
-                    return Math.addExact(millis, adjustment);
+                    return millis + adjustment;
                 } else {
-                    long millis = Math.multiplyExact(seconds, 1000L);
-                    return Math.addExact(millis, nanos / 1000_000);
+                    long millis = seconds * 1000L;
+                    return millis + nanos / 1000_000;
                 }
             }
         }
