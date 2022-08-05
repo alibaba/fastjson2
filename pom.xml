@@ -262,7 +262,6 @@
             </dependency>
 
 
-
             <!--
                various json/serialization libs.
                for comparison test by test code
@@ -533,43 +532,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
-                <extensions>true</extensions>
-                <!--
-                    In multi-module builds using the deploy-at-end feature,
-                    the deployment of all components is performed in the last module based on the reactor order.
-                    If this property is set to true in the last module,
-                    all staging deployment for all modules will be skipped.
-                    so, we'll config nexus deploy after deploy phase of every module
-                    see: https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin#configuring-the-plugin
-                -->
-                <executions>
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        <!--
-                        If you are deploying to Maven Central,
-                        it is the Nexus Staging Plugin that is doing the deployment instead of the `deploy` plugin,
-                        so the configuration of the `deploy` plugin has no effect.
-                        To make the Nexus deploy plugin skip,
-                        set skipNexusStagingDeployMojo in its configuration to true.
-                        see: https://stackoverflow.com/questions/59552549/preventing-maven-modules-from-being-deployed
-                    -->
-                    <skipNexusStagingDeployMojo>${maven.deploy.skip}</skipNexusStagingDeployMojo>
-                </configuration>
-            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -679,15 +641,24 @@
                                 <requireJavaVersion>
                                     <version>[1.8,)</version>
                                 </requireJavaVersion>
-                                <compound implementation="com.github.ferstl.maven.pomenforcers.CompoundPedanticEnforcer">
-                                    <enforcers>POM_SECTION_ORDER,MODULE_ORDER,DEPENDENCY_MANAGEMENT_ORDER,DEPENDENCY_ORDER,DEPENDENCY_ELEMENT</enforcers>
-                                    <pomSectionPriorities>modelVersion,parent,groupId,artifactId,version,name,description,packaging,url,inceptionYear,licenses,scm,properties,modules</pomSectionPriorities>
-                                    <dependenciesGroupIdPriorities>com.alibaba.fastjson2,com.alibaba</dependenciesGroupIdPriorities>
+                                <compound
+                                        implementation="com.github.ferstl.maven.pomenforcers.CompoundPedanticEnforcer">
+                                    <enforcers>
+                                        POM_SECTION_ORDER,MODULE_ORDER,DEPENDENCY_MANAGEMENT_ORDER,DEPENDENCY_ORDER,DEPENDENCY_ELEMENT
+                                    </enforcers>
+                                    <pomSectionPriorities>
+                                        modelVersion,parent,groupId,artifactId,version,name,description,packaging,url,inceptionYear,licenses,scm,properties,modules
+                                    </pomSectionPriorities>
+                                    <dependenciesGroupIdPriorities>com.alibaba.fastjson2,com.alibaba
+                                    </dependenciesGroupIdPriorities>
                                     <dependenciesOrderBy>scope,groupId,artifactId</dependenciesOrderBy>
-                                    <dependenciesScopePriorities>compile,runtime,provided,test</dependenciesScopePriorities>
+                                    <dependenciesScopePriorities>compile,runtime,provided,test
+                                    </dependenciesScopePriorities>
                                     <dependencyManagementOrderBy>groupId,artifactId</dependencyManagementOrderBy>
-                                    <dependencyManagementGroupIdPriorities>com.alibaba.fastjson2,com.alibaba</dependencyManagementGroupIdPriorities>
-                                    <dependencyElementOrdering>groupId,artifactId,type,version</dependencyElementOrdering>
+                                    <dependencyManagementGroupIdPriorities>com.alibaba.fastjson2,com.alibaba
+                                    </dependencyManagementGroupIdPriorities>
+                                    <dependencyElementOrdering>groupId,artifactId,type,version
+                                    </dependencyElementOrdering>
                                 </compound>
                             </rules>
                         </configuration>
@@ -755,6 +726,11 @@
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>3.3.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.6.13</version>
                 </plugin>
                 <plugin>
                     <groupId>org.moditect</groupId>
@@ -954,6 +930,55 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>deploy-settings</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <!--
+                            In multi-module builds using the deploy-at-end feature,
+                            the deployment of all components is performed in the last module based on the reactor order.
+                            If this property is set to true in the last module,
+                            all staging deployment for all modules will be skipped.
+                            so, we'll config nexus deploy after deploy phase of every module
+                            see: https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin#configuring-the-plugin
+                        -->
+                        <executions>
+                            <execution>
+                                <id>default-deploy</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>deploy</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                            <!--
+                            If you are deploying to Maven Central,
+                            it is the Nexus Staging Plugin that is doing the deployment instead of the `deploy` plugin,
+                            so the configuration of the `deploy` plugin has no effect.
+                            To make the Nexus deploy plugin skip,
+                            set skipNexusStagingDeployMojo in its configuration to true.
+                            see: https://stackoverflow.com/questions/59552549/preventing-maven-modules-from-being-deployed
+                        -->
+                            <skipNexusStagingDeployMojo>${maven.deploy.skip}</skipNexusStagingDeployMojo>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
