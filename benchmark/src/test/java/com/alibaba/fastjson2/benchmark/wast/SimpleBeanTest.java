@@ -19,7 +19,7 @@ public class SimpleBeanTest {
         long millis = System.currentTimeMillis() - start;
         System.out.println("SimpleBean-fastjson2 : " + millis);
 
-        // zulu8.62.0.19 : 837 465
+        // zulu8.62.0.19 : 837 465 439
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :
@@ -46,9 +46,9 @@ public class SimpleBeanTest {
             benchmark.wastjson(BH);
         }
         long millis = System.currentTimeMillis() - start;
-        System.out.println("SimpleBean-fastjson2 : " + millis);
+        System.out.println("SimpleBean-wastjson : " + millis);
 
-        // zulu8.62.0.19 : 483
+        // zulu8.62.0.19 : 483 290
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :
