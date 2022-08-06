@@ -132,10 +132,16 @@ public class ObjectReaderImplDate
                 return null;
             }
 
-            millis = Instant
-                    .ofEpochSecond(
-                            zdt.toEpochSecond(), zdt.toLocalTime().getNano()
-                    ).toEpochMilli();
+            long seconds = zdt.toEpochSecond();
+            int nanos = zdt.toLocalTime().getNano();
+            if (seconds < 0 && nanos > 0) {
+                millis = (seconds + 1) * 1000;
+                long adjustment = nanos / 1000_000 - 1000;
+                millis += adjustment;
+            } else {
+                millis = seconds * 1000L;
+                millis += nanos / 1000_000;
+            }
         } else {
             millis = jsonReader.readMillisFromString();
             if (millis == 0 && jsonReader.wasNull()) {

@@ -19,17 +19,17 @@ public class LongTextParseCaseTest {
         long millis = System.currentTimeMillis() - start;
         System.out.println("LongTextParseCase-fastjson2 : " + millis);
 
-        // zulu8.62.0.19 : 1583
+        // zulu8.62.0.19 : 1583 897
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :
         // zulu19.0.47 :
         // corretto-8 :
-        // corretto-11 :
+        // corretto-11 : 1228 806
         // corretto-17 :
         // corretto-18 :
-        // oracle-jdk-17.0.4 :
-        // oracle-jdk-18.0.2 :
+        // oracle-jdk-17.0.4 : 802
+        // oracle-jdk-18.0.2 : 802
     }
 
     public static void wastjson_perf_test() {
@@ -54,11 +54,11 @@ public class LongTextParseCaseTest {
         // zulu18.28.13 :
         // zulu19.0.47 :
         // corretto-8 :
-        // corretto-11 :
+        // corretto-11 : 1070
         // corretto-17 :
         // corretto-18 :
-        // oracle-jdk-17.0.4 :
-        // oracle-jdk-18.0.2 :
+        // oracle-jdk-17.0.4 : 1068
+        // oracle-jdk-18.0.2 : 1062
     }
 
     public static void main(String[] args) throws Exception {
