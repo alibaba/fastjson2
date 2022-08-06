@@ -17,7 +17,7 @@ public class SimpleBeanTest {
             benchmark.fastjson2(BH);
         }
         long millis = System.currentTimeMillis() - start;
-        System.out.println("CartTree-fastjson2 : " + millis);
+        System.out.println("SimpleBean-fastjson2 : " + millis);
 
         // zulu8.62.0.19 : 837 465
         // zulu11.52.13 :
@@ -46,7 +46,7 @@ public class SimpleBeanTest {
             benchmark.wastjson(BH);
         }
         long millis = System.currentTimeMillis() - start;
-        System.out.println("CartTree-fastjson2 : " + millis);
+        System.out.println("SimpleBean-fastjson2 : " + millis);
 
         // zulu8.62.0.19 : 483
         // zulu11.52.13 :
@@ -62,8 +62,8 @@ public class SimpleBeanTest {
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2_perf_test();
+//        fastjson2_perf_test();
 //        jackson_perf_test();
-//        wastjson_perf_test();
+        wastjson_perf_test();
     }
 }
