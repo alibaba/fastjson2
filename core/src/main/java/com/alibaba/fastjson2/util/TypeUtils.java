@@ -453,6 +453,13 @@ public class TypeUtils {
         NAME_MAPPINGS.put(new ConcurrentHashMap().values().getClass(), "List");
         NAME_MAPPINGS.put(new ConcurrentSkipListMap().values().getClass(), "List");
         TYPE_MAPPINGS.put("List", ArrayList.class);
+        TYPE_MAPPINGS.put("java.util.ImmutableCollections$Map1", HashMap.class);
+        TYPE_MAPPINGS.put("java.util.ImmutableCollections$MapN", LinkedHashMap.class);
+        TYPE_MAPPINGS.put("java.util.ImmutableCollections$Set12", LinkedHashSet.class);
+        TYPE_MAPPINGS.put("java.util.ImmutableCollections$SetN", LinkedHashSet.class);
+        TYPE_MAPPINGS.put("java.util.ImmutableCollections$List12", ArrayList.class);
+        TYPE_MAPPINGS.put("java.util.ImmutableCollections$ListN", ArrayList.class);
+        TYPE_MAPPINGS.put("java.util.ImmutableCollections$SubList", ArrayList.class);
 
         for (Map.Entry<Class, String> entry : NAME_MAPPINGS.entrySet()) {
             TYPE_MAPPINGS.putIfAbsent(entry.getValue(), entry.getKey());
