@@ -31,7 +31,7 @@ public class EishayWriteString {
         }
     }
 
-     @Benchmark
+    @Benchmark
     public void fastjson1(Blackhole bh) {
         bh.consume(com.alibaba.fastjson.JSON.toJSONString(mc));
     }
@@ -41,12 +41,12 @@ public class EishayWriteString {
         bh.consume(JSON.toJSONString(mc));
     }
 
-     @Benchmark
+    @Benchmark
     public void jackson(Blackhole bh) throws Exception {
         bh.consume(mapper.writeValueAsString(mc));
     }
 
-//    @Benchmark
+    //    @Benchmark
     public void wastjson(Blackhole bh) throws Exception {
         bh.consume(
                 io.github.wycst.wast.json.JSON.toJsonString(mc)

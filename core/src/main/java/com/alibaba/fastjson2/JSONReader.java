@@ -929,6 +929,9 @@ public abstract class JSONReader
                     case 18:
                         ldt = readLocalDateTime18();
                         break;
+                    case 19:
+                        ldt = readLocalDateTime19();
+                        break;
                     default:
                         ZonedDateTime zdt = readZonedDateTimeX(len);
                         if (zdt != null) {
@@ -937,7 +940,11 @@ public abstract class JSONReader
                         break;
                 }
                 if (ldt != null) {
-                    return ZonedDateTime.of(ldt, context.getZoneId());
+                    return ZonedDateTime.ofLocal(
+                            ldt,
+                            context.getZoneId(),
+                            null
+                    );
                 }
             }
 
