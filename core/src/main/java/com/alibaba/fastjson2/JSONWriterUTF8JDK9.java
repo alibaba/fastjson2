@@ -59,10 +59,30 @@ final class JSONWriterUTF8JDK9
             }
         }
         bytes[off++] = (byte) quote;
-        boolean special = false;
+        boolean escape = false;
         {
             int i = 0;
-            // vector optimize
+            // vector optimize 8
+            while (i + 8 <= value.length) {
+                byte c0 = value[i];
+                byte c1 = value[i + 1];
+                byte c2 = value[i + 2];
+                byte c3 = value[i + 3];
+                byte c4 = value[i + 4];
+                byte c5 = value[i + 5];
+                byte c6 = value[i + 6];
+                byte c7 = value[i + 7];
+                if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote
+                        || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
+                        || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ' || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
+                ) {
+                    escape = true;
+                    break;
+                }
+                i += 8;
+            }
+
+            // vector optimize 4
             while (i + 4 <= value.length) {
                 byte c0 = value[i];
                 byte c1 = value[i + 1];
@@ -72,27 +92,28 @@ final class JSONWriterUTF8JDK9
                         || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
                         || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
                 ) {
-                    special = true;
+                    escape = true;
                     break;
                 }
                 i += 4;
             }
-            if (!special && i + 2 <= value.length) {
+
+            if (!escape && i + 2 <= value.length) {
                 byte c0 = value[i];
                 byte c1 = value[i + 1];
                 if (c0 == quote || c1 == quote || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' ') {
-                    special = true;
+                    escape = true;
                 } else {
                     i += 2;
                 }
             }
-            if (!special && i + 1 == value.length) {
+            if (!escape && i + 1 == value.length) {
                 byte c0 = value[i];
-                special = c0 == quote || c0 == '\\' || c0 < ' ';
+                escape = c0 == quote || c0 == '\\' || c0 < ' ';
             }
         }
 
-        if (!special) {
+        if (!escape) {
             System.arraycopy(value, 0, bytes, off, value.length);
             off += value.length;
         } else {

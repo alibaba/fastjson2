@@ -19,7 +19,7 @@ public class LongTextParseCaseTest {
         long millis = System.currentTimeMillis() - start;
         System.out.println("LongTextParseCase-fastjson2 : " + millis);
 
-        // zulu8.62.0.19 : 1583 897
+        // zulu8.62.0.19 : 1583 897 821
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :
@@ -46,9 +46,9 @@ public class LongTextParseCaseTest {
             benchmark.wastjson(BH);
         }
         long millis = System.currentTimeMillis() - start;
-        System.out.println("LongTextParseCase-fastjson2 : " + millis);
+        System.out.println("LongTextParseCase-wastjson : " + millis);
 
-        // zulu8.62.0.19 : 789
+        // zulu8.62.0.19 : 789 1061
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :
