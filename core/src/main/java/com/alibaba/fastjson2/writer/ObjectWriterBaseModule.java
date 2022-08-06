@@ -88,19 +88,6 @@ class ObjectWriterBaseModule
 
             if (jsonType == null) {
                 Class mixInSource = provider.mixInCache.get(objectClass);
-//                if (mixInSource == null) {
-//                    String typeName = objectClass.getName();
-//                    switch (typeName) {
-//                        case "org.apache.commons.lang3.tuple.ImmutablePair":
-//                            provider.mixIn(objectClass, mixInSource = ApacheLang3Support.PairMixIn.class);
-//                            break;
-//                        case "org.apache.commons.lang3.tuple.MutablePair":
-//                            provider.mixIn(objectClass, mixInSource = ApacheLang3Support.MutablePairMixIn.class);
-//                            break;
-//                        default:
-//                            break;
-//                    }
-//                }
 
                 if (mixInSource != null) {
                     beanInfo.mixIn = true;
@@ -201,16 +188,6 @@ class ObjectWriterBaseModule
         @Override
         public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectType, Field field) {
             Class mixInSource = provider.mixInCache.get(objectType);
-//            if (objectType != null) {
-//                String typeName = objectType.getName();
-//                switch (typeName) {
-//                    case "org.apache.commons.lang3.tuple.ImmutablePair":
-//                        provider.mixIn(objectType, mixInSource = ApacheLang3Support.PairMixIn.class);
-//                        break;
-//                    default:
-//                        break;
-//                }
-//            }
 
             if (mixInSource != null && mixInSource != objectType) {
                 Field mixInField = null;
@@ -575,8 +552,18 @@ class ObjectWriterBaseModule
             if (!objectClass.getName().startsWith("java.lang") && !BeanUtils.isRecord(objectClass)) {
                 String fieldName = BeanUtils.getterName(methodName, null);
 
+                char firstChar = fieldName.charAt(0);
+                final String fieldName0;
+                if (firstChar >= 'A' && firstChar <= 'Z') {
+                    char[] chars = fieldName.toCharArray();
+                    chars[0] = (char) (firstChar + 32);
+                    fieldName0 = new String(chars);
+                } else {
+                    fieldName0 = null;
+                }
                 BeanUtils.declaredFields(objectClass, field -> {
-                    if (field.getName().equals(fieldName)) {
+                    String name = field.getName();
+                    if (name.equals(fieldName) || (fieldName0 != null && name.equals(fieldName0))) {
                         int modifiers = field.getModifiers();
                         if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                             getFieldInfo(beanInfo, fieldInfo, objectClass, field);
