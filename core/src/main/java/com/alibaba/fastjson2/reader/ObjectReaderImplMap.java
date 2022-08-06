@@ -205,6 +205,10 @@ public final class ObjectReaderImplMap
                             throw new JSONException("create map error : " + instanceType);
                         }
                     }).get();
+                case "java.util.ImmutableCollections$Map1":
+                    return new HashMap<>();
+                case "java.util.ImmutableCollections$MapN":
+                    return new LinkedHashMap<>();
                 default:
                     break;
             }

@@ -103,7 +103,14 @@ public final class ObjectReaderImplObject
             }
 
             if (typeName != null) {
-                object.put("@type", typeName);
+                switch (typeName) {
+                    case "java.util.ImmutableCollections$Map1":
+                    case "java.util.ImmutableCollections$MapN":
+                        break;
+                    default:
+                        object.put("@type", typeName);
+                        break;
+                }
                 hash = 0;
             }
 
