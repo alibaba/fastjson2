@@ -248,7 +248,9 @@ final class JSONReaderUTF16
                 off += n;
 
                 if (off == chars.length) {
-                    chars = Arrays.copyOf(chars, chars.length + 8192);
+                    int oldCapacity = chars.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    chars = Arrays.copyOf(chars, newCapacity);
                 }
             }
         } catch (IOException ioe) {
