@@ -8,6 +8,7 @@ import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -37,9 +38,10 @@ public class Issue609 {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(Issue609.class.getName())
-                .warmupIterations(5)
+                .warmupIterations(3)
                 .measurementIterations(5)
                 .forks(1)
+                .jvmArgsAppend("-Xms128m", "-Xmx128m")
                 .build();
 
         new Runner(opt).run();
@@ -48,129 +50,147 @@ public class Issue609 {
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public void fastJSON1ObjSeThroughput() {
+    public void fastJSON1ObjSeThroughput(Blackhole bh) {
         for (Student student : objList) {
-            JSON.toJSONString(student);
+            bh.consume(JSON.toJSONString(student));
         }
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public void fastJSON1ObjDeThroughput() {
+    public void fastJSON1ObjDeThroughput(Blackhole bh) {
         for (String student : strList) {
-            JSON.parseObject(student, Student.class);
+            bh.consume(JSON.parseObject(student, Student.class));
         }
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public void fastJSON2ObjSeThroughput() {
+    public void fastJSON2ObjSeThroughput(Blackhole bh) {
         for (Student student : objList) {
-            com.alibaba.fastjson2.JSON.toJSONString(student);
+            bh.consume(
+                    com.alibaba.fastjson2.JSON.toJSONString(student)
+            );
         }
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public void fastJSON2ObjDeThroughput() {
+    public void fastJSON2ObjDeThroughput(Blackhole bh) {
         for (String student : strList) {
-            com.alibaba.fastjson2.JSON.parseObject(student, Student.class);
+            bh.consume(com.alibaba.fastjson2.JSON.parseObject(student, Student.class));
         }
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public void fastJSON1ArraySeThroughput() {
-        JSON.toJSONString(objList);
+    public void fastJSON1ArraySeThroughput(Blackhole bh) {
+        bh.consume(
+                JSON.toJSONString(objList)
+        );
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public void fastJSON1ArrayDeThroughput() {
-        JSON.parseArray(source, Student.class);
+    public void fastJSON1ArrayDeThroughput(Blackhole bh) {
+        bh.consume(
+                JSON.parseArray(source, Student.class)
+        );
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public void fastJSON2ArraySeThroughput() {
-        com.alibaba.fastjson2.JSON.toJSONString(objList, JSONWriter.Feature.ReferenceDetection);
+    public void fastJSON2ArraySeThroughput(Blackhole bh) {
+        bh.consume(
+                com.alibaba.fastjson2.JSON.toJSONString(objList, JSONWriter.Feature.ReferenceDetection)
+        );
     }
 
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public void fastJSON2ArrayDeThroughput() {
-        com.alibaba.fastjson2.JSON.parseArray(source, Student.class);
+    public void fastJSON2ArrayDeThroughput(Blackhole bh) {
+        bh.consume(
+                com.alibaba.fastjson2.JSON.parseArray(source, Student.class)
+        );
     }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void fastJSON1ObjSeTime() {
+    public void fastJSON1ObjSeTime(Blackhole bh) {
         for (Student student : objList) {
-            JSON.toJSONString(student);
+            bh.consume(
+                    JSON.toJSONString(student)
+            );
         }
     }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void fastJSON1ObjDeTime() {
+    public void fastJSON1ObjDeTime(Blackhole bh) {
         for (String student : strList) {
-            JSON.parseObject(student, Student.class);
+            bh.consume(
+                    JSON.parseObject(student, Student.class)
+            );
         }
     }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void fastJSON2ObjSeTime() {
+    public void fastJSON2ObjSeTime(Blackhole bh) {
         for (Student student : objList) {
-            com.alibaba.fastjson2.JSON.toJSONString(student);
+            bh.consume(
+                    com.alibaba.fastjson2.JSON.toJSONString(student)
+            );
         }
     }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void fastJSON2ObjDeTime() {
+    public void fastJSON2ObjDeTime(Blackhole bh) {
         for (String student : strList) {
-            com.alibaba.fastjson2.JSON.parseObject(student, Student.class);
+            bh.consume(com.alibaba.fastjson2.JSON.parseObject(student, Student.class));
         }
     }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void fastJSON1ArraySeTime() {
-        JSON.toJSONString(objList);
+    public void fastJSON1ArraySeTime(Blackhole bh) {
+        bh.consume(JSON.toJSONString(objList));
     }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void fastJSON1ArrayDeTime() {
-        JSON.parseArray(source, Student.class);
+    public void fastJSON1ArrayDeTime(Blackhole bh) {
+        bh.consume(
+                JSON.parseArray(source, Student.class)
+        );
     }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void fastJSON2ArraySeTime() {
-        com.alibaba.fastjson2.JSON.toJSONString(objList, JSONWriter.Feature.ReferenceDetection);
+    public void fastJSON2ArraySeTime(Blackhole bh) {
+        bh.consume(com.alibaba.fastjson2.JSON.toJSONString(objList, JSONWriter.Feature.ReferenceDetection));
     }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void fastJSON2ArrayDeTime() {
-        com.alibaba.fastjson2.JSON.parseArray(source, Student.class);
+    public void fastJSON2ArrayDeTime(Blackhole bh) {
+        bh.consume(com.alibaba.fastjson2.JSON.parseArray(source, Student.class));
     }
 
     private static class Student {
