@@ -31,7 +31,7 @@ public class EishayWriteString {
         }
     }
 
-    @Benchmark
+     @Benchmark
     public void fastjson1(Blackhole bh) {
         bh.consume(com.alibaba.fastjson.JSON.toJSONString(mc));
     }
@@ -41,35 +41,23 @@ public class EishayWriteString {
         bh.consume(JSON.toJSONString(mc));
     }
 
-    @Benchmark
+     @Benchmark
     public void jackson(Blackhole bh) throws Exception {
         bh.consume(mapper.writeValueAsString(mc));
     }
 
-    public static void fastjson2_perf(Blackhole bh) {
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
-            bh.consume(JSON.toJSONString(mc));
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("EishayParseUTF8Bytes : " + millis);
-        // zulu17.32.13 :
-        // zulu11.52.13 : 361 354
-        // zulu8.58.0.13 : 353
-    }
-
-    public void fastjson2_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            Blackhole bh = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
-            fastjson2_perf(bh);
-        }
+//    @Benchmark
+    public void wastjson(Blackhole bh) throws Exception {
+        bh.consume(
+                io.github.wycst.wast.json.JSON.toJsonString(mc)
+        );
     }
 
     public static void main(String[] args) throws RunnerException {
-//        new EishayWriteString().fastjson2_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayWriteString.class.getName())
                 .mode(Mode.Throughput)
+                .warmupIterations(3)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .forks(1)
                 .build();

@@ -53,6 +53,16 @@ public class DoubleArray20 {
         // zulu8.58.0.13 : 309.855
     }
 
+    @Benchmark
+    public void wastjson(Blackhole bh) throws Exception {
+        bh.consume(
+                io.github.wycst.wast.json.JSON.parseObject(str, double[].class)
+        );
+        // zulu11.52.13 :
+        // zulu17.32.13 :
+        // zulu8.58.0.13 :
+    }
+
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(DoubleArray20.class.getName())
