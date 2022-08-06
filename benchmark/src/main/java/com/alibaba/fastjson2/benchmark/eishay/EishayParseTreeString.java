@@ -45,6 +45,12 @@ public class EishayParseTreeString {
         bh.consume(mapper.readValue(str, HashMap.class));
     }
 
+    public void wastjson(Blackhole bh) throws Exception {
+        bh.consume(
+                io.github.wycst.wast.json.JSON.parse(str)
+        );
+    }
+
     //    @Test
     public void fastjson1_perf_test() {
         for (int i = 0; i < 10; i++) {
