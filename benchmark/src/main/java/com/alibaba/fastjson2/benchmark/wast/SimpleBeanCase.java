@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.benchmark.wast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.wycst.wast.json.JSON;
 import io.github.wycst.wast.json.options.WriteOption;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -37,7 +36,7 @@ public class SimpleBeanCase {
         versions.add("v0.0.3");
         simpleMap.put("versions", versions);
 
-        result = JSON.toJsonString(simpleMap, WriteOption.FormatOut);
+        result = io.github.wycst.wast.json.JSON.toJsonString(simpleMap, WriteOption.FormatOut);
     }
 
     @Benchmark
@@ -52,7 +51,7 @@ public class SimpleBeanCase {
 
     @Benchmark
     public void wastjson(Blackhole bh) {
-        bh.consume(JSON.parseObject(result, SimpleBean.class));
+        bh.consume(io.github.wycst.wast.json.JSON.parseObject(result, SimpleBean.class));
     }
 
     @Benchmark
