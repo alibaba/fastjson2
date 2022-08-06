@@ -56,14 +56,43 @@ public class SimpleBeanTest {
         // corretto-8 :
         // corretto-11 :
         // corretto-17 :
-        // corretto-18 :
+        // corretto-18 : 365 291
+        // oracle-jdk-17.0.4 :
+        // oracle-jdk-18.0.2 :
+    }
+
+    public static void jackson_test() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            jackson();
+        }
+    }
+
+    public static void jackson() throws Exception {
+        SimpleBeanCase benchmark = new SimpleBeanCase();
+
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1_000_000; ++i) {
+            benchmark.jackson(BH);
+        }
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("SimpleBean-jackson : " + millis);
+
+        // zulu8.62.0.19 : 1005
+        // zulu11.52.13 :
+        // zulu17.32.13 :
+        // zulu18.28.13 :
+        // zulu19.0.47 :
+        // corretto-8 :
+        // corretto-11 :
+        // corretto-17 :
+        // corretto-18 : 1002
         // oracle-jdk-17.0.4 :
         // oracle-jdk-18.0.2 :
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2_perf_test();
-//        jackson_perf_test();
+//        fastjson2_perf_test();
+        jackson_test();
 //        wastjson_perf_test();
     }
 }

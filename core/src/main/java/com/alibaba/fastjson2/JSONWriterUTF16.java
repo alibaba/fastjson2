@@ -205,45 +205,64 @@ class JSONWriterUTF16
 
         final int strlen = str.length();
 
-        boolean special = false;
+        boolean escape = false;
         {
             int i = 0;
-            // vector optimize
-            while (i + 4 <= strlen) {
+            // vector optimize 8
+            while (i + 8 <= strlen) {
                 char c0 = str.charAt(i);
                 char c1 = str.charAt(i + 1);
                 char c2 = str.charAt(i + 2);
                 char c3 = str.charAt(i + 3);
-                if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
-                    special = true;
+                char c4 = str.charAt(i + 4);
+                char c5 = str.charAt(i + 5);
+                char c6 = str.charAt(i + 6);
+                char c7 = str.charAt(i + 7);
+
+                if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
+                        || c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote
+                        || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ' || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' ') {
+                    escape = true;
                     break;
                 }
-                if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\') {
-                    special = true;
-                    break;
-                }
-                if (c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ') {
-                    special = true;
-                    break;
-                }
-                i += 4;
+
+                i += 8;
             }
-            if (!special && i + 2 <= strlen) {
+
+            if (!escape) {
+                // vector optimize 4
+                while (i + 4 <= strlen) {
+                    char c0 = str.charAt(i);
+                    char c1 = str.charAt(i + 1);
+                    char c2 = str.charAt(i + 2);
+                    char c3 = str.charAt(i + 3);
+                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
+                            || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
+                            || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                    ) {
+                        escape = true;
+                        break;
+                    }
+                    i += 4;
+                }
+            }
+
+            if (!escape && i + 2 <= strlen) {
                 char c0 = str.charAt(i);
                 char c1 = str.charAt(i + 1);
                 if (c0 == quote || c1 == quote || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' ') {
-                    special = true;
+                    escape = true;
                 } else {
                     i += 2;
                 }
             }
-            if (!special && i + 1 == strlen) {
+            if (!escape && i + 1 == strlen) {
                 char c0 = str.charAt(i);
-                special = c0 == '"' || c0 == '\\' || c0 < ' ';
+                escape = c0 == '"' || c0 == '\\' || c0 < ' ';
             }
         }
 
-        if (!special) {
+        if (!escape) {
             // inline ensureCapacity(off + strlen + 2);
             int minCapacity = off + strlen + 2;
             if (minCapacity - chars.length > 0) {

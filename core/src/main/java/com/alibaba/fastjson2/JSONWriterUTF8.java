@@ -292,25 +292,50 @@ class JSONWriterUTF8
 
         bytes[off++] = (byte) quote;
 
-        // vector optimize
         int i = 0;
+
+        // vector optimize 8
+        while (i + 8 <= chars.length) {
+            char c0 = chars[i];
+            char c1 = chars[i + 1];
+            char c2 = chars[i + 2];
+            char c3 = chars[i + 3];
+            char c4 = chars[i + 4];
+            char c5 = chars[i + 5];
+            char c6 = chars[i + 6];
+            char c7 = chars[i + 7];
+            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote
+                    || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
+                    || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ' || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
+                    || c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F || c4 > 0x007F || c5 > 0x007F || c6 > 0x007F || c7 > 0x007F) {
+                break;
+            }
+
+            bytes[off] = (byte) c0;
+            bytes[off + 1] = (byte) c1;
+            bytes[off + 2] = (byte) c2;
+            bytes[off + 3] = (byte) c3;
+            bytes[off + 4] = (byte) c4;
+            bytes[off + 5] = (byte) c5;
+            bytes[off + 6] = (byte) c6;
+            bytes[off + 7] = (byte) c7;
+            off += 8;
+            i += 8;
+        }
+
+        // vector optimize 4
         while (i + 4 <= chars.length) {
             char c0 = chars[i];
             char c1 = chars[i + 1];
             char c2 = chars[i + 2];
             char c3 = chars[i + 3];
-            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
+            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
+                    || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
+                    || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                    || c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F) {
                 break;
             }
-            if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\') {
-                break;
-            }
-            if (c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ') {
-                break;
-            }
-            if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F) {
-                break;
-            }
+
             bytes[off] = (byte) c0;
             bytes[off + 1] = (byte) c1;
             bytes[off + 2] = (byte) c2;
@@ -318,6 +343,7 @@ class JSONWriterUTF8
             off += 4;
             i += 4;
         }
+
         if (i + 2 <= chars.length) {
             char c0 = chars[i];
             char c1 = chars[i + 1];
