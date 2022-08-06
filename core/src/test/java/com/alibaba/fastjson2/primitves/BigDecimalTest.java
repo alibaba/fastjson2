@@ -291,4 +291,11 @@ public class BigDecimalTest {
         BigDecimal1 vo = JSONB.parseObject(jsonbBytes, BigDecimal1.class);
         assertEquals(new BigDecimal("638860.1"), vo.getId());
     }
+
+    @Test
+    public void test_decimal_5() {
+        JSON.parse("{\"doubleval\": 12345.123E256}");
+        JSON.parse("{\"doubleval\": 1.123E300}");
+        JSON.parse("{\"doubleval\": 123.123E256}");
+    }
 }
