@@ -217,6 +217,7 @@ final class JSONWriterPretty
         jsonWriter.writeNameRaw(bytes, offset, len);
     }
 
+    @Override
     public void writeNameAny(Object name) {
         if (jsonWriter.startObject) {
             jsonWriter.startObject = false;
