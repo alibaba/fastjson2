@@ -74,8 +74,8 @@ public class Issue609Test {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("fastJSON2ArrayDeTime : " + millis);
-        // zulu8.62.0.19 :
-        // zulu11.52.13 : 3012 2222 2220
+        // zulu8.62.0.19 : 1055
+        // zulu11.52.13 : 3012 2222 2220 1153
         // zulu17.32.13 :
         // zulu18.28.13 :
         // zulu19.0.47 :
@@ -102,7 +102,7 @@ public class Issue609Test {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("fastJSON1ArrayDeTime : " + millis);
-        // zulu8.62.0.19 :
+        // zulu8.62.0.19 : 1737
         // zulu11.52.13 : 1820
         // zulu17.32.13 :
         // zulu18.28.13 :
@@ -116,7 +116,7 @@ public class Issue609Test {
     }
 
     public static void main(String[] args) throws Exception {
-        fastJSON2ObjSeTime_test();
-//        fastJSON1ObjSeTime_test();
+//        fastJSON2ObjSeTime_test();
+        fastJSON1ObjSeTime_test();
     }
 }
