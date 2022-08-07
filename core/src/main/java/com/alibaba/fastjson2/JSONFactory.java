@@ -11,13 +11,10 @@ import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceArray;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class JSONFactory {
@@ -34,22 +31,13 @@ public final class JSONFactory {
 
     static long defaultReaderFeatures;
     static long defaultWriterFeatures;
-
-    static final class Utils {
-        // GraalVM not support
-        // Android not support
-        static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
-        static Function<byte[], String> STRING_CREATOR_JDK11;
-        static BiFunction<byte[], Charset, String> STRING_CREATOR_JDK17;
-        static volatile boolean STRING_CREATOR_ERROR;
-    }
-
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
 
     static final class NameCacheEntry {
         final String name;
         final long value;
+
         public NameCacheEntry(String name, long value) {
             this.name = name;
             this.value = value;
@@ -60,6 +48,7 @@ public final class JSONFactory {
         final String name;
         final long value0;
         final long value1;
+
         public NameCacheEntry2(String name, long value0, long value1) {
             this.name = name;
             this.value0 = value0;
@@ -73,31 +62,31 @@ public final class JSONFactory {
     static final BigInteger HIGH_BIGINT = BigInteger.valueOf(9007199254740991L);
 
     static final char[] CA = new char[]{
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-        'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-        'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-        'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-        'w', 'x', 'y', 'z', '0', '1', '2', '3',
-        '4', '5', '6', '7', '8', '9', '+', '/'
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+            'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+            'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+            'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+            'w', 'x', 'y', 'z', '0', '1', '2', '3',
+            '4', '5', '6', '7', '8', '9', '+', '/'
     };
 
     static final char[] DIGITS = {
-        '0', '1', '2', '3',
-        '4', '5', '6', '7',
-        '8', '9', 'a', 'b',
-        'c', 'd', 'e', 'f'
+            '0', '1', '2', '3',
+            '4', '5', '6', '7',
+            '8', '9', 'a', 'b',
+            'c', 'd', 'e', 'f'
     };
 
     static final int[] DIGITS2 = new int[]{
-        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, +1, +2, +3, +4, +5, +6, +7, +8, +9, +0, +0, +0, +0, +0, +0,
-        +0, 10, 11, 12, 13, 14, 15, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, 10, 11, 12, 13, 14, 15
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +1, +2, +3, +4, +5, +6, +7, +8, +9, +0, +0, +0, +0, +0, +0,
+            +0, 10, 11, 12, 13, 14, 15, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, 10, 11, 12, 13, 14, 15
     };
 
     static final double[] SMALL_10_POW = {
@@ -254,25 +243,9 @@ public final class JSONFactory {
     static ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
 
     static final JSONPathCompiler defaultJSONPathCompiler;
+
     static {
-        JSONPathCompilerReflect compiler = null;
-        switch (JSONFactory.CREATOR) {
-            case "reflect":
-            case "lambda":
-                compiler = JSONPathCompilerReflect.INSTANCE;
-                break;
-            default:
-                try {
-                    compiler = JSONPathCompilerReflectASM.INSTANCE;
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-                if (compiler == null) {
-                    compiler = JSONPathCompilerReflect.INSTANCE;
-                }
-                break;
-        }
-        defaultJSONPathCompiler = compiler;
+        defaultJSONPathCompiler = JSONPathCompilerReflect.INSTANCE;
     }
 
     static final ThreadLocal<ObjectReaderCreator> readerCreatorLocal = new ThreadLocal<>();

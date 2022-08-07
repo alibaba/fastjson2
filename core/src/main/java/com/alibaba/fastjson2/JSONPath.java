@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.function.impl.ToDouble;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -4962,14 +4961,7 @@ public abstract class JSONPath {
             bytes[0] = '[';
             IOUtils.getChars(index, bytes.length - 1, bytes);
             bytes[bytes.length - 1] = ']';
-
-            String str;
-            if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                str = JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
-            } else {
-                str = new String(bytes, StandardCharsets.US_ASCII);
-            }
-            return str;
+            return new String(bytes, StandardCharsets.US_ASCII);
         }
     }
 

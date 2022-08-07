@@ -7,7 +7,7 @@ import com.alibaba.fastjson2.function.ToShortFunction;
 import java.util.function.*;
 
 public class ObjectWriters {
-    static ObjectWriterCreator INSTANCE = ObjectWriterCreatorLambda.INSTANCE;
+    static ObjectWriterCreator INSTANCE = ObjectWriterCreator.INSTANCE;
 
     public static ObjectWriter ofReflect(Class objectType) {
         return ObjectWriterCreator.INSTANCE.createObjectWriter(objectType);

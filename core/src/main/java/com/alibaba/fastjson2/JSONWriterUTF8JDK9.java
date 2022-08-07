@@ -1,12 +1,7 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 final class JSONWriterUTF8JDK9
         extends JSONWriterUTF8 {
@@ -26,19 +21,8 @@ final class JSONWriterUTF8JDK9
             return;
         }
 
-        byte[] value = null;
-        int coder = 1;
+        byte[] value = str.getBytes(StandardCharsets.UTF_8);
 
-        if (JDKUtils.UNSAFE_SUPPORT) {
-            coder = UnsafeUtils.getStringCoder(str);
-            if (coder == 0) {
-                value = UnsafeUtils.getStringValue(str);
-            }
-        }
-
-        if (value == null) {
-            value = str.getBytes(StandardCharsets.UTF_8);
-        }
         {
             int minCapacity = off
                     + value.length * 3 // utf8 3 bytes
@@ -203,11 +187,6 @@ final class JSONWriterUTF8JDK9
                         if (ch == quote) {
                             bytes[off++] = (byte) '\\';
                             bytes[off++] = (byte) quote;
-                        } else if (coder == 0 && ch < 0) {
-                            // latin
-                            int c = ch & 0xFF;
-                            bytes[off++] = (byte) (0xc0 | (c >> 6));
-                            bytes[off++] = (byte) (0x80 | (c & 0x3f));
                         } else {
                             bytes[off++] = (byte) ch;
                         }
