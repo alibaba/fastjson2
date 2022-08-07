@@ -50,6 +50,8 @@ public class ObjectReaderImplMethod
             throw new JSONException("not support input " + jsonReader.info());
         }
 
+        jsonReader.nextIfMatch(',');
+
         return getMethod(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);
     }
 
