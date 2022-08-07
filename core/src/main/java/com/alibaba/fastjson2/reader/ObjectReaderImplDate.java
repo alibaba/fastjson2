@@ -92,6 +92,10 @@ public class ObjectReaderImplDate
         } else if (format != null) {
             ZonedDateTime zdt;
             if (yyyyMMddhhmmss19) {
+                millis = jsonReader.readMillis19();
+                if (millis != 0 || !jsonReader.wasNull()) {
+                    return new Date(millis);
+                }
                 zdt = jsonReader.readZonedDateTime();
             } else {
                 DateTimeFormatter formatter = getDateFormatter(jsonReader.getLocale());
