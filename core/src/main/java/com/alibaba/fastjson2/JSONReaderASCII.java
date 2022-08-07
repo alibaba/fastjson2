@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.nio.charset.StandardCharsets;
 
@@ -374,7 +373,7 @@ final class JSONReaderASCII
             }
         }
 
-        if (JDKUtils.JVM_VERSION > 8) {
+        {
             byte[] chars = new byte[nameLength];
 
             int offset = nameBegin;

@@ -2,7 +2,6 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
@@ -20,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+
 public abstract class JSONWriter
         implements Closeable {
     protected final Context context;
@@ -392,14 +392,11 @@ public abstract class JSONWriter
 
     public static JSONWriter of() {
         Context writeContext = createWriteContext();
-        return JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF8JDK9(writeContext);
+        return new JSONWriterUTF8JDK9(writeContext);
     }
 
     public static JSONWriter of(Context writeContext) {
-        JSONWriter jsonWriter = JDKUtils.JVM_VERSION == 8
-                ? new JSONWriterUTF16JDK8(writeContext)
-                : new JSONWriterUTF8JDK9(writeContext);
-
+        JSONWriter jsonWriter = new JSONWriterUTF8JDK9(writeContext);
         if (writeContext.isEnabled(Feature.PrettyFormat)) {
             jsonWriter = new JSONWriterPretty(jsonWriter);
         }
@@ -408,10 +405,7 @@ public abstract class JSONWriter
 
     public static JSONWriter of(Feature... features) {
         Context writeContext = JSONFactory.createWriteContext(features);
-        JSONWriter jsonWriter = JDKUtils.JVM_VERSION == 8
-                ? new JSONWriterUTF16JDK8(writeContext)
-                : new JSONWriterUTF8JDK9(writeContext);
-
+        JSONWriter jsonWriter = new JSONWriterUTF8JDK9(writeContext);
         for (int i = 0; i < features.length; i++) {
             if (features[i] == Feature.PrettyFormat) {
                 return new JSONWriterPretty(jsonWriter);
@@ -422,9 +416,7 @@ public abstract class JSONWriter
 
     public static JSONWriter ofUTF16(Feature... features) {
         Context writeContext = JSONFactory.createWriteContext(features);
-        JSONWriter jsonWriter = JDKUtils.JVM_VERSION == 8
-                ? new JSONWriterUTF16JDK8(writeContext)
-                : new JSONWriterUTF16(writeContext);
+        JSONWriter jsonWriter = new JSONWriterUTF16(writeContext);
 
         for (int i = 0; i < features.length; i++) {
             if (features[i] == Feature.PrettyFormat) {
@@ -465,33 +457,17 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofUTF8() {
-        if (JDKUtils.JVM_VERSION >= 9) {
-            return new JSONWriterUTF8JDK9(
-                    JSONFactory.createWriteContext());
-        } else {
-            return new JSONWriterUTF8(
-                    JSONFactory.createWriteContext());
-        }
+        return new JSONWriterUTF8JDK9(
+                JSONFactory.createWriteContext());
     }
 
     public static JSONWriter ofUTF8(JSONWriter.Context context) {
-        if (JDKUtils.JVM_VERSION >= 9) {
-            return new JSONWriterUTF8JDK9(context);
-        } else {
-            return new JSONWriterUTF8(context);
-        }
+        return new JSONWriterUTF8JDK9(context);
     }
 
     public static JSONWriter ofUTF8(Feature... features) {
         Context writeContext = createWriteContext(features);
-
-        JSONWriter jsonWriter;
-        if (JDKUtils.JVM_VERSION >= 9) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
-        } else {
-            jsonWriter = new JSONWriterUTF8(writeContext);
-        }
-
+        JSONWriter jsonWriter = new JSONWriterUTF8JDK9(writeContext);
         boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
         if (pretty) {
             jsonWriter = new JSONWriterPretty(jsonWriter);
@@ -1129,6 +1105,7 @@ public abstract class JSONWriter
     public abstract int flushTo(OutputStream to) throws IOException;
 
     public abstract int flushTo(OutputStream out, Charset charset) throws IOException;
+
     static int MAX_ARRAY_SIZE = 1024 * 1024 * 64; // 64M
 
     public static class Context {

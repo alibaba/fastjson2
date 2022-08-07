@@ -1,15 +1,10 @@
 package com.alibaba.fastjson2.util;
 
-import java.lang.reflect.Field;
 import java.nio.ByteOrder;
 import java.util.function.*;
 
 public class JDKUtils {
     public static final int JVM_VERSION;
-
-    static final Field FIELD_STRING_VALUE;
-    static final long FIELD_STRING_VALUE_OFFSET;
-    static volatile boolean FIELD_STRING_ERROR;
 
     static final Class<?> CLASS_SQL_DATASOURCE;
     static final Class<?> CLASS_SQL_ROW_SET;
@@ -21,7 +16,6 @@ public class JDKUtils {
     public static final boolean UNSAFE_SUPPORT;
 
     static {
-        boolean openj9 = false;
         int jvmVersion = -1;
         try {
             String property = System.getProperty("java.specification.version");
@@ -29,12 +23,6 @@ public class JDKUtils {
                 property = property.substring(2);
             }
             jvmVersion = Integer.parseInt(property);
-
-            String jmvName = System.getProperty("java.vm.name");
-            openj9 = jmvName.contains("OpenJ9");
-            if (openj9) {
-                FIELD_STRING_ERROR = true;
-            }
         } catch (Throwable ignored) {
         }
 
@@ -59,25 +47,6 @@ public class JDKUtils {
         CLASS_TRANSIENT = transientClass;
 
         JVM_VERSION = jvmVersion;
-
-        if (JVM_VERSION == 8) {
-            Field field = null;
-            long fieldOffset = -1;
-            try {
-                field = String.class.getDeclaredField("value");
-                field.setAccessible(true);
-                fieldOffset = UnsafeUtils.objectFieldOffset(field);
-            } catch (Exception ignored) {
-                FIELD_STRING_ERROR = true;
-            }
-
-            FIELD_STRING_VALUE = field;
-            FIELD_STRING_VALUE_OFFSET = fieldOffset;
-        } else {
-            FIELD_STRING_ERROR = true;
-            FIELD_STRING_VALUE = null;
-            FIELD_STRING_VALUE_OFFSET = -1;
-        }
 
         boolean unsafeSupport;
         unsafeSupport = ((Predicate) o -> {

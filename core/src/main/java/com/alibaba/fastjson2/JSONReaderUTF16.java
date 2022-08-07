@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -3068,7 +3067,7 @@ final class JSONReaderUTF16
 
                 str = new String(chars);
             } else {
-                if (this.str != null && JDKUtils.JVM_VERSION > 8) {
+                if (this.str != null) {
                     str = this.str.substring(this.offset, offset);
                 } else {
                     str = new String(chars, this.offset, offset - this.offset);
