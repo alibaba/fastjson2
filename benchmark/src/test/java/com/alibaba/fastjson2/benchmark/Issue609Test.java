@@ -87,7 +87,6 @@ public class Issue609Test {
         // oracle-jdk-18.0.2 :
     }
 
-
     public static void fastJSON1ObjSeTime_test() throws Exception {
         for (int i = 0; i < 10; i++) {
             fastJSON1ObjSeTime();
