@@ -42,7 +42,7 @@ class ObjectReaderImplLocalDate
         }
 
         String str = jsonReader.readString();
-        if (str.isEmpty() || str.equals("null")) {
+        if (str.isEmpty() || "null".equals(str)) {
             return null;
         }
 
