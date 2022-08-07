@@ -1,13 +1,9 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 final class JSONWriterUTF8JDK9
         extends JSONWriterUTF8 {
@@ -90,7 +86,6 @@ final class JSONWriterUTF8JDK9
                 byte c0 = value[valueOffset];
                 escape = c0 == quote || c0 == '\\' || c0 < ' ';
             }
-
 
             int minCapacity = off
                     + (escape ? value.length * 4 : value.length)
