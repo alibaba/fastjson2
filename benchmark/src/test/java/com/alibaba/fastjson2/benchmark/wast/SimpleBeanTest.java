@@ -19,7 +19,7 @@ public class SimpleBeanTest {
         long millis = System.currentTimeMillis() - start;
         System.out.println("SimpleBean-fastjson2 : " + millis);
 
-        // zulu8.62.0.19 : 837 465 439
+        // zulu8.62.0.19 : 837 465 439 447
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :
@@ -91,8 +91,8 @@ public class SimpleBeanTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2_perf_test();
-        jackson_test();
+        fastjson2_perf_test();
+//        jackson_test();
 //        wastjson_perf_test();
     }
 }

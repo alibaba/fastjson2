@@ -19,7 +19,7 @@ public class Instant20Test {
         long millis = System.currentTimeMillis() - start;
         System.out.println("Instant20-fastjson2 : " + millis);
 
-        // zulu8.62.0.19 : 1242
+        // zulu8.62.0.19 : 1242 1181
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :
