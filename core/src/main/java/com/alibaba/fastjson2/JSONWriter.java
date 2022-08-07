@@ -395,13 +395,26 @@ public abstract class JSONWriter
 
     public static JSONWriter of() {
         Context writeContext = createWriteContext();
-        return JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF8JDK9(writeContext);
+        if (JDKUtils.JVM_VERSION == 8) {
+            return new JSONWriterUTF16JDK8(writeContext);
+        }
+
+        if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
+            return new JSONWriterUTF8JDK9(writeContext);
+        }
+
+        return new JSONWriterUTF16(writeContext);
     }
 
     public static JSONWriter of(Context writeContext) {
-        JSONWriter jsonWriter = JDKUtils.JVM_VERSION == 8
-                ? new JSONWriterUTF16JDK8(writeContext)
-                : new JSONWriterUTF8JDK9(writeContext);
+        JSONWriter jsonWriter;
+        if (JDKUtils.JVM_VERSION == 8) {
+            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+        } else if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
+            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+        } else {
+            jsonWriter = new JSONWriterUTF16(writeContext);
+        }
 
         if (writeContext.isEnabled(Feature.PrettyFormat)) {
             jsonWriter = new JSONWriterPretty(jsonWriter);
@@ -411,9 +424,14 @@ public abstract class JSONWriter
 
     public static JSONWriter of(Feature... features) {
         Context writeContext = JSONFactory.createWriteContext(features);
-        JSONWriter jsonWriter = JDKUtils.JVM_VERSION == 8
-                ? new JSONWriterUTF16JDK8(writeContext)
-                : new JSONWriterUTF8JDK9(writeContext);
+        JSONWriter jsonWriter;
+        if (JDKUtils.JVM_VERSION == 8) {
+            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+        } else if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
+            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+        } else {
+            jsonWriter = new JSONWriterUTF16(writeContext);
+        }
 
         for (int i = 0; i < features.length; i++) {
             if (features[i] == Feature.PrettyFormat) {
@@ -1478,7 +1496,12 @@ public abstract class JSONWriter
         /**
          * @since 2.0.11
          */
-        WritePairAsJavaBean(1 << 28);
+        WritePairAsJavaBean(1 << 28),
+
+        /**
+         * @since 2.0.12
+         */
+        OptimizedForAscii(1 << 29);
 
         public final long mask;
 

@@ -36,41 +36,41 @@ final class JSONWriterUTF8JDK9
 
             int valueOffset = 0;
             // vector optimize 8
-            if (value.length > 32) {
-                while (valueOffset + 8 <= value.length) {
-                    byte c0 = value[valueOffset];
-                    byte c1 = value[valueOffset + 1];
-                    byte c2 = value[valueOffset + 2];
-                    byte c3 = value[valueOffset + 3];
-                    byte c4 = value[valueOffset + 4];
-                    byte c5 = value[valueOffset + 5];
-                    byte c6 = value[valueOffset + 6];
-                    byte c7 = value[valueOffset + 7];
-                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote
-                            || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
-                            || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ' || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
-                    ) {
-                        escape = true;
-                        break;
-                    }
-                    valueOffset += 8;
-                }
-            }
-
-            // vector optimize 4
-            while (valueOffset + 4 <= value.length) {
+            while (valueOffset + 8 <= value.length) {
                 byte c0 = value[valueOffset];
                 byte c1 = value[valueOffset + 1];
                 byte c2 = value[valueOffset + 2];
                 byte c3 = value[valueOffset + 3];
-                if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
-                        || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
-                        || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                byte c4 = value[valueOffset + 4];
+                byte c5 = value[valueOffset + 5];
+                byte c6 = value[valueOffset + 6];
+                byte c7 = value[valueOffset + 7];
+                if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote
+                        || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
+                        || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ' || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
                 ) {
                     escape = true;
                     break;
                 }
-                valueOffset += 4;
+                valueOffset += 8;
+            }
+
+            // vector optimize 4
+            if (!escape) {
+                while (valueOffset + 4 <= value.length) {
+                    byte c0 = value[valueOffset];
+                    byte c1 = value[valueOffset + 1];
+                    byte c2 = value[valueOffset + 2];
+                    byte c3 = value[valueOffset + 3];
+                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
+                            || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
+                            || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                    ) {
+                        escape = true;
+                        break;
+                    }
+                    valueOffset += 4;
+                }
             }
 
             if (!escape && valueOffset + 2 <= value.length) {
