@@ -87,6 +87,10 @@ public class ObjectReaderImplMethod
             }
         }
 
+        if (!jsonReader.isJSONB()) {
+            jsonReader.nextIfMatch(',');
+        }
+
         return getMethod(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);
     }
 
