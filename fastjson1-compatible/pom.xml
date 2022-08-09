@@ -247,7 +247,7 @@
         <dependency>
             <groupId>org.clojure</groupId>
             <artifactId>clojure</artifactId>
-            <version>1.5.1</version>
+            <version>1.11.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
