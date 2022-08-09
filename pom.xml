@@ -210,7 +210,7 @@
                 <groupId>io.airlift</groupId>
                 <artifactId>slice</artifactId>
                 <!-- DO NOT upgrade to 0.42+, since don't support java 8 -->
-                <version>0.41</version>
+                <version>0.42</version>
             </dependency>
 
             <!-- https://github.com/kotlintest/kotlintest -->
