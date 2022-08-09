@@ -16,6 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.zone.ZoneRules;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -28,13 +29,8 @@ public abstract class JSONReader
 
     static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
     static final ZoneId SHANGHAI_ZONE_ID = DEFAULT_ZONE_ID.getId().equals("Asia/Shanghai") ? DEFAULT_ZONE_ID : ZoneId.of("Asia/Shanghai");
-    static final ZoneOffset SHANGHAI_ZONE_OFFSET = SHANGHAI_ZONE_ID
-            .getRules()
-            .getOffset(
-                    LocalDateTime.of(
-                            LocalDate.of(1992, 1, 1), LocalTime.MIN
-                    )
-            );
+    static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
+    static final ZoneOffset SHANGHAI_ZONE_OFFSET = SHANGHAI_ZONE_RULES.getOffset(LocalDateTime.of(LocalDate.of(1992, 1, 1), LocalTime.MIN));
 
     static final int SHANGHAI_ZONE_OFFSET_TOTAL_SECONDS = SHANGHAI_ZONE_OFFSET.getTotalSeconds();
     static final ZoneId UTC = ZoneId.of("UTC");
@@ -1244,7 +1240,8 @@ public abstract class JSONReader
     protected abstract ZonedDateTime readZonedDateTimeX(int len);
 
     protected long millis(int year, int month, int dom, int hour, int minute, int second, int nanoOfSecond) {
-        if (year >= 1992 && context.getZoneId() == SHANGHAI_ZONE_ID) {
+        final ZoneId zoneId = context.getZoneId();
+        if (year >= 1992 && (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES)) {
             final int DAYS_PER_CYCLE = 146097;
             final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
 
@@ -1280,7 +1277,7 @@ public abstract class JSONReader
         LocalDate localDate = LocalDate.of(year, month, dom);
         LocalTime localTime = LocalTime.of(hour, minute, second, nanoOfSecond);
         LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
-        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, context.getZoneId(), null);
+        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
         long seconds = zdt.toEpochSecond();
         int nanos = nanoOfSecond;
         if (seconds < 0 && nanos > 0) {

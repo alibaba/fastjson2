@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
@@ -1496,8 +1495,6 @@ public class JSONReaderTest1 {
 
     @Test
     public void testDates() {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        format.setTimeZone(TimeZone.getTimeZone(JSONReader.SHANGHAI_ZONE_ID));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         char[] chars = "\"1900-01-01 00:00:00\"".toCharArray();
@@ -1528,14 +1525,27 @@ public class JSONReaderTest1 {
                     for (int h = 1; h <= 12; h++) {
                         chars[12] = '0';
                         IOUtils.getChars(h, 14, chars);
-                        JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
-                        jsonReader.getContext().setZoneId(JSONReader.SHANGHAI_ZONE_ID);
-                        long millis19 = jsonReader.readMillis19();
+                        String str = new String(chars, 1, 19);
 
-                        String str1 = new String(chars, 1, 19);
-                        LocalDateTime ldt = LocalDateTime.parse(str1, formatter);
-                        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, JSONReader.SHANGHAI_ZONE_ID, null);
-                        assertEquals(zdt.toInstant().toEpochMilli(), millis19);
+                        {
+                            JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
+                            jsonReader.getContext().setZoneId(JSONReader.SHANGHAI_ZONE_ID);
+                            long millis19 = jsonReader.readMillis19();
+
+                            LocalDateTime ldt = LocalDateTime.parse(str, formatter);
+                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, JSONReader.SHANGHAI_ZONE_ID, null);
+                            assertEquals(zdt.toInstant().toEpochMilli(), millis19);
+                        }
+
+                        {
+                            JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
+                            jsonReader.getContext().setZoneId(JSONReader.UTC);
+                            long millis19 = jsonReader.readMillis19();
+
+                            LocalDateTime ldt = LocalDateTime.parse(str, formatter);
+                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, JSONReader.UTC, null);
+                            assertEquals(zdt.toInstant().toEpochMilli(), millis19);
+                        }
                     }
                 }
             }
