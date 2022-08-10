@@ -135,7 +135,7 @@
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
                 <artifactId>odps-sdk-udf</artifactId>
-                <version>0.40.8-public</version>
+                <version>0.40.10-public</version>
             </dependency>
             <dependency>
                 <groupId>com.caucho</groupId>
@@ -668,7 +668,7 @@
                     <dependency>
                         <groupId>com.github.ferstl</groupId>
                         <artifactId>pedantic-pom-enforcers</artifactId>
-                        <version>2.0.0</version>
+                        <version>2.1.0</version>
                     </dependency>
                 </dependencies>
             </plugin>
