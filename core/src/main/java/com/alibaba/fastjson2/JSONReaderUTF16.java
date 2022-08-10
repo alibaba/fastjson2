@@ -378,7 +378,7 @@ final class JSONReaderUTF16
         } catch (IOException ioe) {
             throw new JSONException("read error", ioe);
         } finally {
-            if (bytes.length < CACHE_THREAD) {
+            if (bytes.length < CACHE_THRESHOLD) {
                 CACHE_BYTES.set(cacheIndex, bytes);
             }
         }
@@ -6380,7 +6380,7 @@ final class JSONReaderUTF16
 
     @Override
     public void close() {
-        if (cacheIndex != -1 && chars.length <= CACHE_THREAD) {
+        if (cacheIndex != -1 && chars.length <= CACHE_THRESHOLD) {
             CACHE_CHARS.set(cacheIndex, chars);
         }
 

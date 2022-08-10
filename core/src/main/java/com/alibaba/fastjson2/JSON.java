@@ -1372,7 +1372,7 @@ public interface JSON {
         } catch (IOException e) {
             throw new JSONException("JSON#parseObject cannot parse the 'InputStream' to '" + type + "'", e);
         } finally {
-            if (bytes.length < JSONFactory.CACHE_THREAD) {
+            if (bytes.length < JSONFactory.CACHE_THRESHOLD) {
                 JSONFactory.CACHE_BYTES.set(cachedIndex, bytes);
             }
         }
@@ -1443,7 +1443,7 @@ public interface JSON {
         } catch (IOException e) {
             throw new JSONException("JSON#parseObject cannot parse the 'Reader' to '" + type + "'", e);
         } finally {
-            if (chars.length < JSONFactory.CACHE_THREAD) {
+            if (chars.length < JSONFactory.CACHE_THRESHOLD) {
                 JSONFactory.CACHE_CHARS.set(cachedIndex, chars);
             }
         }
