@@ -30,7 +30,7 @@ public class DateParse {
     static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
-    static final ZoneId SHANGHAI_ZONE_ID = DEFAULT_ZONE_ID.getId().equals("Asia/Shanghai") ? DEFAULT_ZONE_ID : ZoneId.of("Asia/Shanghai");
+    static final ZoneId SHANGHAI_ZONE_ID = "Asia/Shanghai".equals(DEFAULT_ZONE_ID.getId()) ? DEFAULT_ZONE_ID : ZoneId.of("Asia/Shanghai");
     static final ZoneOffset SHANGHAI_ZONE_OFFSET = SHANGHAI_ZONE_ID
             .getRules()
             .getOffset(
