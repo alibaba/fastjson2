@@ -5628,6 +5628,183 @@ final class JSONReaderUTF16
     }
 
     @Override
+    public long readMillis19() {
+        if (ch != '"' && ch != '\'') {
+            throw new JSONException("date only support string input");
+        }
+
+        if (offset + 18 >= end) {
+            wasNull = true;
+            return 0;
+        }
+
+        char c0 = chars[offset];
+        char c1 = chars[offset + 1];
+        char c2 = chars[offset + 2];
+        char c3 = chars[offset + 3];
+        char c4 = chars[offset + 4];
+        char c5 = chars[offset + 5];
+        char c6 = chars[offset + 6];
+        char c7 = chars[offset + 7];
+        char c8 = chars[offset + 8];
+        char c9 = chars[offset + 9];
+        char c10 = chars[offset + 10];
+        char c11 = chars[offset + 11];
+        char c12 = chars[offset + 12];
+        char c13 = chars[offset + 13];
+        char c14 = chars[offset + 14];
+        char c15 = chars[offset + 15];
+        char c16 = chars[offset + 16];
+        char c17 = chars[offset + 17];
+        char c18 = chars[offset + 18];
+
+        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2;
+        if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+        } else if (c4 == '/' && c7 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+        } else {
+            wasNull = true;
+            return 0L;
+        }
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int second;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            second = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int nanoOfSecond;
+        if (S0 >= '0' && S0 <= '9'
+                && S1 >= '0' && S1 <= '9'
+                && S2 >= '0' && S2 <= '9'
+        ) {
+            nanoOfSecond = (S0 - '0') * 100
+                    + (S1 - '0') * 10
+                    + (S2 - '0');
+            nanoOfSecond *= 1000_000;
+        } else {
+            wasNull = false;
+            return 0L;
+        }
+
+        if (year == 0 && month == 0 && dom == 0) {
+            year = 1970;
+            month = 1;
+            dom = 1;
+        }
+
+        offset += 20;
+        next();
+        if (ch == ',') {
+            this.comma = true;
+            next();
+        }
+
+        return millis(year, month, dom, hour, minute, second, nanoOfSecond);
+    }
+
+    @Override
     protected LocalDateTime readLocalDateTimeX(int len) {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
