@@ -46,7 +46,7 @@ class JSONWriterUTF16
 
     @Override
     public void close() {
-        if (chars.length > CACHE_THREAD) {
+        if (chars.length > CACHE_THRESHOLD) {
             return;
         }
         JSONFactory.CACHE_CHARS.set(cachedIndex, chars);

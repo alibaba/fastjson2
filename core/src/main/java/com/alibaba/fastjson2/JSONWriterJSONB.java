@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONFactory.CACHE_THREAD;
+import static com.alibaba.fastjson2.JSONFactory.CACHE_THRESHOLD;
 
 final class JSONWriterJSONB
         extends JSONWriter {
@@ -50,7 +50,7 @@ final class JSONWriterJSONB
 
     @Override
     public void close() {
-        if (bytes.length > CACHE_THREAD) {
+        if (bytes.length > CACHE_THRESHOLD) {
             return;
         }
         JSONFactory.CACHE_BYTES.set(cachedIndex, bytes);

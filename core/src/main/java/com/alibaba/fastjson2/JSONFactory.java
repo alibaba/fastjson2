@@ -139,7 +139,7 @@ public final class JSONFactory {
         CREATOR = property == null ? "asm" : property;
     }
 
-    static final int CACHE_THREAD = 1024 * 1024;
+    static final int CACHE_THRESHOLD = 1024 * 1024;
     static final AtomicReferenceArray<byte[]> CACHE_BYTES = new AtomicReferenceArray<>(4);
     static final AtomicReferenceArray<char[]> CACHE_CHARS = new AtomicReferenceArray<>(4);
 

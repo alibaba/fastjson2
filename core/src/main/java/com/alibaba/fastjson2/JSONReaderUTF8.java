@@ -13,7 +13,7 @@ import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.CACHE_BYTES;
-import static com.alibaba.fastjson2.JSONFactory.CACHE_THREAD;
+import static com.alibaba.fastjson2.JSONFactory.CACHE_THRESHOLD;
 import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE;
 import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE2;
 import static com.alibaba.fastjson2.JSONFactory.NameCacheEntry;
@@ -6898,7 +6898,7 @@ class JSONReaderUTF8
 
     @Override
     public void close() {
-        if (cacheIndex != -1 && bytes.length < CACHE_THREAD) {
+        if (cacheIndex != -1 && bytes.length < CACHE_THRESHOLD) {
             CACHE_BYTES.set(cacheIndex, bytes);
         }
         if (in != null) {
