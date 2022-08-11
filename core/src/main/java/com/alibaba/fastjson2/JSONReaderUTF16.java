@@ -6374,7 +6374,10 @@ final class JSONReaderUTF16
                 .append(", column ").append(column)
                 .append(", fastjson-version ").append(JSON.VERSION)
                 .append(line > 1 ? '\n' : ' ');
-        buf.append(chars, this.start, length < 65535 ? length : 65535);
+
+        final int MAX_OUTPUT_LENGTH = 65535;
+        buf.append(chars, this.start, length < MAX_OUTPUT_LENGTH ? length : MAX_OUTPUT_LENGTH);
+
         return buf.toString();
     }
 
