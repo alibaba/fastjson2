@@ -2452,6 +2452,10 @@ final class JSONReaderStr
     }
 
     @Override
+    public void close() {
+    }
+
+    @Override
     public String getString() {
         if (stringValue != null) {
             return stringValue;
