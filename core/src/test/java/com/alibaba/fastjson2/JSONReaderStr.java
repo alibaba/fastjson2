@@ -489,7 +489,7 @@ final class JSONReaderStr
                     ch = EOI;
                 }
                 if (c != ':') {
-                    return -1;
+                    throw new JSONException(info("expect ':', but " + c));
                 }
 
                 offset++;

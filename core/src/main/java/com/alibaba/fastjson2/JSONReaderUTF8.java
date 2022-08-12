@@ -427,7 +427,8 @@ class JSONReaderUTF8
                     c = bytes[offset];
                 }
                 if (c != ':') {
-                    return -1;
+                    // return -1;
+                    throw new JSONException(info("expect ':', but " + c));
                 }
 
                 offset++;
