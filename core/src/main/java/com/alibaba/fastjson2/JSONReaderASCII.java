@@ -182,7 +182,7 @@ final class JSONReaderASCII
                     c = (char) bytes[offset];
                 }
                 if (c != ':') {
-                    return -1;
+                    throw new JSONException(info("expect ':', but " + c));
                 }
 
                 offset++;
