@@ -35,7 +35,7 @@
         <jackson.version>2.13.3</jackson.version>
         <jetty.version>11.0.11</jetty.version>
         <jersey.version>2.36</jersey.version>
-        <springframework.version>5.3.19</springframework.version>
+        <springframework.version>5.3.22</springframework.version>
 
         <kotlin.version>1.7.10</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
@@ -344,7 +344,7 @@
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.29.0-GA</version>
+                <version>3.29.1-GA</version>
             </dependency>
 
             <dependency>
@@ -681,7 +681,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
@@ -870,7 +870,7 @@
                         <groupId>io.github.git-commit-id</groupId>
                         <artifactId>git-commit-id-maven-plugin</artifactId>
                         <!-- DO NOT upgrade to v5+, since don't support java 8 -->
-                        <version>4.9.9</version>
+                        <version>5.0.0</version>
                         <executions>
                             <execution>
                                 <id>get-the-git-infos</id>
