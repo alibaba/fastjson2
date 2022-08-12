@@ -212,7 +212,13 @@ final class JSONWriterUTF8JDK9
             // end of latin
         }
 
+        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+
         int minCapacity = off + value.length * 4 + 2;
+        if (escapeNoneAscii) {
+            minCapacity += value.length * 2;
+        }
+
         if (minCapacity - this.bytes.length > 0) {
             int oldCapacity = this.bytes.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
@@ -332,6 +338,13 @@ final class JSONWriterUTF8JDK9
                     // 2 bytes, 11 bits
                     bytes[off++] = (byte) (0xc0 | (c >> 6));
                     bytes[off++] = (byte) (0x80 | (c & 0x3f));
+                } else if (escapeNoneAscii) {
+                    bytes[off++] = '\\';
+                    bytes[off++] = 'u';
+                    bytes[off++] = (byte) DIGITS[(c >>> 12) & 15];
+                    bytes[off++] = (byte) DIGITS[(c >>> 8) & 15];
+                    bytes[off++] = (byte) DIGITS[(c >>> 4) & 15];
+                    bytes[off++] = (byte) DIGITS[c & 15];
                 } else if (c >= '\uD800' && c < ('\uDFFF' + 1)) { //Character.isSurrogate(c) but 1.7
                     final int uc;
                     int ip = valueOffset - 1;

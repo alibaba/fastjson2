@@ -25,6 +25,8 @@ import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
 
 public abstract class JSONWriter
         implements Closeable {
+    static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
     protected final Context context;
     protected final Charset charset;
     protected final boolean utf8;
@@ -1501,7 +1503,15 @@ public abstract class JSONWriter
         /**
          * @since 2.0.12
          */
-        OptimizedForAscii(1 << 29);
+        OptimizedForAscii(1 << 29),
+
+        /**
+         * @since 2.0.12
+         * Feature that specifies that all characters beyond 7-bit ASCII range (i.e. code points of 128 and above) need to be output using format-specific escapes (for JSON, backslash escapes),
+         * if format uses escaping mechanisms (which is generally true for textual formats but not for binary formats).
+         * Feature is disabled by default.
+         */
+        EscapeNoneAscii(1 << 30);
 
         public final long mask;
 

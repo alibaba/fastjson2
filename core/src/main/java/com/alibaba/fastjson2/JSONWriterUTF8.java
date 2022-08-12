@@ -271,10 +271,16 @@ class JSONWriterUTF8
 
         char[] chars = JDKUtils.getCharArray(str);
 
+        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+
         // ensureCapacity
         int minCapacity = off
                 + chars.length * 3 // utf8 3 bytes
                 + 2;
+
+        if (escapeNoneAscii) {
+            minCapacity += chars.length * 2;
+        }
 
         if (minCapacity - this.bytes.length > 0) {
             int oldCapacity = this.bytes.length;
@@ -371,6 +377,7 @@ class JSONWriterUTF8
                 return;
             }
         }
+
         for (; i < chars.length; ++i) { // ascii none special fast write
             char ch = chars[i];
             if ((ch >= 0x0000) && (ch <= 0x007F)) {
@@ -463,6 +470,13 @@ class JSONWriterUTF8
                         }
                         break;
                 }
+            } else if (escapeNoneAscii) {
+                bytes[off++] = '\\';
+                bytes[off++] = 'u';
+                bytes[off++] = (byte) DIGITS[(ch >>> 12) & 15];
+                bytes[off++] = (byte) DIGITS[(ch >>> 8) & 15];
+                bytes[off++] = (byte) DIGITS[(ch >>> 4) & 15];
+                bytes[off++] = (byte) DIGITS[ch & 15];
             } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
                 final int uc;
                 if (ch >= '\uD800' && ch < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
