@@ -203,8 +203,8 @@ class JSONWriterUTF16
             return;
         }
 
+        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
         final int strlen = str.length();
-
         boolean escape = false;
         {
             int i = 0;
@@ -226,6 +226,13 @@ class JSONWriterUTF16
                     break;
                 }
 
+                if (escapeNoneAscii) {
+                    if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F || c4 > 0x007F || c5 > 0x007F || c6 > 0x007F || c7 > 0x007F) {
+                        escape = true;
+                        break;
+                    }
+                }
+
                 i += 8;
             }
 
@@ -243,6 +250,14 @@ class JSONWriterUTF16
                         escape = true;
                         break;
                     }
+
+                    if (escapeNoneAscii) {
+                        if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F) {
+                            escape = true;
+                            break;
+                        }
+                    }
+
                     i += 4;
                 }
             }
@@ -252,13 +267,15 @@ class JSONWriterUTF16
                 char c1 = str.charAt(i + 1);
                 if (c0 == quote || c1 == quote || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' ') {
                     escape = true;
+                } else if (escapeNoneAscii && (c0 > 0x007F || c1 > 0x007F)) {
+                    escape = true;
                 } else {
                     i += 2;
                 }
             }
             if (!escape && i + 1 == strlen) {
                 char c0 = str.charAt(i);
-                escape = c0 == '"' || c0 == '\\' || c0 < ' ';
+                escape = c0 == '"' || c0 == '\\' || c0 < ' ' || (escapeNoneAscii && c0 > 0x007F);
             }
         }
 
@@ -286,7 +303,12 @@ class JSONWriterUTF16
             return;
         }
 
-        ensureCapacity(off + strlen * 2 + 2);
+        if (escapeNoneAscii) {
+            ensureCapacity(off + strlen * 6 + 2);
+        } else {
+            ensureCapacity(off + strlen * 2 + 2);
+        }
+
         chars[off++] = quote;
         for (int i = 0; i < strlen; ++i) {
             char ch = str.charAt(i);
@@ -378,7 +400,16 @@ class JSONWriterUTF16
                     chars[off++] = (char) ('a' + (ch - 26));
                     break;
                 default:
-                    chars[off++] = ch;
+                    if (escapeNoneAscii && ch > 0x007F) {
+                        chars[off++] = '\\';
+                        chars[off++] = 'u';
+                        chars[off++] = DIGITS[(ch >>> 12) & 15];
+                        chars[off++] = DIGITS[(ch >>> 8) & 15];
+                        chars[off++] = DIGITS[(ch >>> 4) & 15];
+                        chars[off++] = DIGITS[ch & 15];
+                    } else {
+                        chars[off++] = ch;
+                    }
                     break;
             }
         }
