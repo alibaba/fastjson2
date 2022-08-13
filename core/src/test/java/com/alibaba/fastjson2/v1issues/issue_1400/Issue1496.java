@@ -13,7 +13,7 @@ public class Issue1496 {
     @Test
     public void test_for_issue() throws Exception {
         String json = JSON.toJSONString(SetupStatus.FINAL_TRAIL);
-        assertEquals("{\"canRefuse\":true,\"code\":3,\"name\":\"FINAL_TRAIL\",\"nameCn\":\"公益委员会/理事会/理事长审核\"}", json);
+        assertEquals("{\"canRefuse\":true,\"code\":3,\"first\":false,\"last\":false,\"name\":\"FINAL_TRAIL\",\"nameCn\":\"公益委员会/理事会/理事长审核\"}", json);
     }
 
     public interface ISetupStatusInfo {
