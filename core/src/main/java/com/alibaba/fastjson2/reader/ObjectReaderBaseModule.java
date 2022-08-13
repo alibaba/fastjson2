@@ -186,7 +186,7 @@ public class ObjectReaderBaseModule
         }
     }
 
-    class ReaderAnnotationProcessor
+    public class ReaderAnnotationProcessor
             implements ObjectReaderAnnotationProcessor {
         @Override
         public void getBeanInfo(BeanInfo beanInfo, Class<?> objectClass) {
