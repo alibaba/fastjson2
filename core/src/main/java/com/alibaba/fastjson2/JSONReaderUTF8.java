@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.*;
 
-import static com.alibaba.fastjson2.JSONFactory.CACHE_BYTES;
 import static com.alibaba.fastjson2.JSONFactory.CACHE_THRESHOLD;
 import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE;
 import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE2;
@@ -43,7 +42,7 @@ class JSONReaderUTF8
         super(ctx);
 
         cacheIndex = JSONFactory.cacheIndex();
-        byte[] bytes = CACHE_BYTES.getAndSet(cacheIndex, null);
+        byte[] bytes = JSONFactory.allocateByteArray(cacheIndex);
         if (bytes == null) {
             bytes = new byte[8192];
         }
@@ -6900,8 +6899,9 @@ class JSONReaderUTF8
     @Override
     public void close() {
         if (cacheIndex != -1 && bytes.length < CACHE_THRESHOLD) {
-            CACHE_BYTES.set(cacheIndex, bytes);
+            JSONFactory.releaseByteArray(cacheIndex, bytes);
         }
+
         if (in != null) {
             try {
                 in.close();

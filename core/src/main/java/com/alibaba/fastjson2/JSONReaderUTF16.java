@@ -233,7 +233,7 @@ final class JSONReaderUTF16
         this.input = input;
 
         cacheIndex = JSONFactory.cacheIndex();
-        char[] chars = CACHE_CHARS.getAndSet(cacheIndex, null);
+        char[] chars = JSONFactory.allocateCharArray(cacheIndex);
 
         if (chars == null) {
             chars = new char[8192];
@@ -344,11 +344,7 @@ final class JSONReaderUTF16
         super(ctx);
         this.input = input;
         final int cacheIndex = JSONFactory.cacheIndex();
-
-        byte[] bytes = CACHE_BYTES.getAndSet(cacheIndex, null);
-        if (bytes == null) {
-            bytes = new byte[8192];
-        }
+        byte[] bytes = JSONFactory.allocateByteArray(cacheIndex);
 
         char[] chars;
         try {
@@ -378,9 +374,7 @@ final class JSONReaderUTF16
         } catch (IOException ioe) {
             throw new JSONException("read error", ioe);
         } finally {
-            if (bytes.length < CACHE_THRESHOLD) {
-                CACHE_BYTES.set(cacheIndex, bytes);
-            }
+            JSONFactory.releaseByteArray(cacheIndex, bytes);
         }
 
         this.str = null;
@@ -6383,9 +6377,10 @@ final class JSONReaderUTF16
 
     @Override
     public void close() {
-        if (cacheIndex != -1 && chars.length <= CACHE_THRESHOLD) {
-            CACHE_CHARS.set(cacheIndex, chars);
+        if (cacheIndex != -1) {
+            JSONFactory.releaseCharArray(cacheIndex, chars);
         }
+
 
         if (input != null) {
             try {
