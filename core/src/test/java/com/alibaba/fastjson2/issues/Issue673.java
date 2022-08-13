@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author kraity
  */
 public class Issue673 {
-
     @Test
     public void test() {
         String json = JSON.toJSONString(new Bean());
@@ -17,7 +16,6 @@ public class Issue673 {
     }
 
     static class Bean {
-
         public boolean isMe() {
             return true;
         }
