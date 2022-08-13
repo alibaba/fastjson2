@@ -36,9 +36,8 @@ public class Issue632 {
     @Test
     public void test1() throws Exception {
         AppResp appResp = new AppResp();
-        appResp.setTimestamp(LocalDateTime.now());
-        assertEquals("{\"message\":\"成功\",\"status\":\"200\",\"timestamp\":\"2022-08-13 12:18:07\"}", JSON.toJSONString(appResp));
-        assertEquals("{\"message\":\"成功\",\"status\":\"200\",\"timestamp\":\"2022-08-13 12:18:07\"}", com.alibaba.fastjson2.JSON.toJSONString(appResp));
+        appResp.setTimestamp(LocalDateTime.of(2017, 03, 15, 12, 13, 14));
+        assertEquals("{\"message\":\"成功\",\"status\":\"200\",\"timestamp\":\"2017-03-15 12:13:14\"}", JSON.toJSONString(appResp));
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("appResp", appResp);
         System.out.println(jsonObject.toJSONString());
