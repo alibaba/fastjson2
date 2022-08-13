@@ -28,8 +28,6 @@ public class TypeUtils {
         volatile char[] chars;
     }
 
-    static final int ENUM = 0x00004000;
-
     static final Cache CACHE = new Cache();
     static final AtomicReferenceFieldUpdater<Cache, char[]> CHARS_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(Cache.class, char[].class, "chars");
