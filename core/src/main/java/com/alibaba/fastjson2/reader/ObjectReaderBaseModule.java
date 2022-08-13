@@ -1469,6 +1469,26 @@ public class ObjectReaderBaseModule
             return ObjectArrayReader.INSTANCE;
         }
 
+        if (type == StringBuffer.class || type == StringBuilder.class) {
+            try {
+                Class objectClass = (Class) type;
+                return new ObjectReaderImplValue(
+                        objectClass,
+                        String.class,
+                        String.class,
+                        0,
+                        null,
+                        null,
+                        null,
+                        objectClass.getConstructor(String.class),
+                        null,
+                        null
+                );
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         if (type == Iterable.class
                 || type == Collection.class
                 || type == List.class
