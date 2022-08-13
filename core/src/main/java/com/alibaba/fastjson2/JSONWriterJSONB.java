@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONFactory.CACHE_THRESHOLD;
 
 final class JSONWriterJSONB
         extends JSONWriter {
