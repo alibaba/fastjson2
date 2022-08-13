@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
-class ObjectWriterBaseModule
+public class ObjectWriterBaseModule
         implements ObjectWriterModule {
     static ObjectWriterAdapter STACK_TRACE_ELEMENT_WRITER;
 
@@ -1028,6 +1028,10 @@ class ObjectWriterBaseModule
 
             if (clazz == char[].class) {
                 return ObjectWriterImplCharValueArray.INSTANCE;
+            }
+
+            if (clazz == StringBuffer.class || clazz == StringBuilder.class) {
+                return ObjectWriterImplToString.INSTANCE;
             }
 
             if (clazz == byte[].class) {
