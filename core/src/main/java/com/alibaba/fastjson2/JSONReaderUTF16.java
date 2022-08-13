@@ -6381,7 +6381,6 @@ final class JSONReaderUTF16
             JSONFactory.releaseCharArray(cacheIndex, chars);
         }
 
-
         if (input != null) {
             try {
                 input.close();
