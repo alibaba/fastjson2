@@ -41,7 +41,7 @@ public class ObjectWriterBaseModule
         return annotationProcessor;
     }
 
-    class WriterAnnotationProcessor
+    public class WriterAnnotationProcessor
             implements ObjectWriterAnnotationProcessor {
         @Override
         public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
