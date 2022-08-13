@@ -138,9 +138,9 @@ public final class JSONFactory {
         CREATOR = property == null ? "asm" : property;
     }
 
-    static final int CACHE_THRESHOLD = 1024 * 1024;
-    static final byte[][] BYTE_ARRAY_CACHE = new byte[4][];
-    static final char[][] CHAR_ARRAY_CACHE = new char[4][];
+    private static final int CACHE_THRESHOLD = 1024 * 1024;
+    private static final byte[][] BYTE_ARRAY_CACHE = new byte[4][];
+    private static final char[][] CHAR_ARRAY_CACHE = new char[4][];
 
     static int cacheIndex() {
         return System.identityHashCode(Thread.currentThread()) & 3;
