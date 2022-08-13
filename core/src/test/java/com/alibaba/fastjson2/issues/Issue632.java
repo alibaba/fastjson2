@@ -1,9 +1,13 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 import org.junit.jupiter.api.Test;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,6 +30,34 @@ public class Issue632 {
 
         public void setTimestamp(LocalDateTime timestamp) {
             this.timestamp = timestamp;
+        }
+    }
+
+    @Test
+    public void test1() throws Exception {
+        AppResp appResp = new AppResp();
+        appResp.setTimestamp(LocalDateTime.now());
+        assertEquals("{\"message\":\"成功\",\"status\":\"200\",\"timestamp\":\"2022-08-13 12:18:07\"}", JSON.toJSONString(appResp));
+        assertEquals("{\"message\":\"成功\",\"status\":\"200\",\"timestamp\":\"2022-08-13 12:18:07\"}", com.alibaba.fastjson2.JSON.toJSONString(appResp));
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("appResp", appResp);
+        System.out.println(jsonObject.toJSONString());
+    }
+
+    @Data
+    public class AppResp<T>
+            implements Serializable {
+        private String status;
+        @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+        private LocalDateTime timestamp;
+        private String message;
+        private T body;
+
+        public AppResp() {
+            timestamp = LocalDateTime.now();
+            this.status = "200";
+            this.message = "成功";
         }
     }
 }
