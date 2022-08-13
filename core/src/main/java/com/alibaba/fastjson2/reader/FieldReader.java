@@ -10,6 +10,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -85,6 +86,14 @@ public interface FieldReader<T>
         return null;
     }
 
+    default Member getFieldOrMethod() {
+        Field field = getField();
+        if (field != null) {
+            return field;
+        }
+        return getMethod();
+    }
+
     @Override
     default int compareTo(FieldReader o) {
         String thisFieldName = this.getFieldName();
@@ -107,6 +116,20 @@ public interface FieldReader<T>
         int cmp = (isReadOnly() == o.isReadOnly()) ? 0 : (isReadOnly() ? 1 : -1);
         if (cmp != 0) {
             return cmp;
+        }
+
+        Member thisMember = this.getFieldOrMethod();
+        Member otherMember = o.getFieldOrMethod();
+        if (thisMember != null && otherMember != null && thisMember.getClass() != otherMember.getClass()) {
+            Class otherDeclaringClass = otherMember.getDeclaringClass();
+            Class thisDeclaringClass = thisMember.getDeclaringClass();
+            if (thisDeclaringClass != otherDeclaringClass && thisDeclaringClass != null && otherDeclaringClass != null) {
+                if (thisDeclaringClass.isAssignableFrom(otherDeclaringClass)) {
+                    return 1;
+                } else if (otherDeclaringClass.isAssignableFrom(thisDeclaringClass)) {
+                    return -1;
+                }
+            }
         }
 
         Field thisField = getField();
