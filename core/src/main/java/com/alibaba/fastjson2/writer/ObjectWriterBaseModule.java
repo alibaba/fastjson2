@@ -817,9 +817,10 @@ class ObjectWriterBaseModule
                 return JodaSupport.createLocalDateWriter(objectClass, null);
             case "org.joda.time.LocalDateTime":
                 return JodaSupport.createLocalDateTimeWriter(objectClass, null);
-//            case "com.alibaba.fastjson.JSONObject":
-//                return Fastjson1xSupport.createObjectReader();
             default:
+                if (JdbcSupport.isClob(objectClass)) {
+                    return JdbcSupport.createClobWriter(objectClass);
+                }
                 return null;
         }
     }

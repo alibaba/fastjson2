@@ -275,6 +275,11 @@ final class JSONWriterJSONB
     }
 
     @Override
+    public void writeString(char[] chars, int off, int len, boolean quote) {
+        throw new JSONException("unsupported operation");
+    }
+
+    @Override
     public void writeString(char[] str) {
         if (str == null) {
             writeNull();
