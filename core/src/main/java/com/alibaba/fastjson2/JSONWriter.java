@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -866,6 +867,28 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
+    public void writeString(Reader reader) {
+        writeRaw(quote);
+
+        try {
+            char[] chars = new char[2048];
+            for (; ; ) {
+                int len = reader.read(chars, 0, chars.length);
+                if (len < 0) {
+                    break;
+                }
+
+                if (len > 0) {
+                    writeString(chars, 0, len, false);
+                }
+            }
+        } catch (Exception ex) {
+            throw new JSONException("read string from reader error", ex);
+        }
+
+        writeRaw(quote);
+    }
+
     public abstract void writeString(String str);
 
     public void writeSymbol(String string) {
@@ -900,6 +923,8 @@ public abstract class JSONWriter
         }
         write0('"');
     }
+
+    protected abstract void writeString(char[] chars, int off, int len, boolean quote);
 
     public abstract void writeLocalDate(LocalDate date);
 
@@ -1152,6 +1177,7 @@ public abstract class JSONWriter
     public abstract int flushTo(OutputStream to) throws IOException;
 
     public abstract int flushTo(OutputStream out, Charset charset) throws IOException;
+
     static int MAX_ARRAY_SIZE = 1024 * 1024 * 64; // 64M
 
     public static class Context {
