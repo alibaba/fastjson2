@@ -30,15 +30,8 @@ class JSONWriterUTF8
 
     JSONWriterUTF8(Context ctx) {
         super(ctx, StandardCharsets.UTF_8);
-
-        int identityHashCode = System.identityHashCode(Thread.currentThread());
-        bytes = JSONFactory.CACHE_BYTES.getAndSet(
-                cachedIndex = identityHashCode & 3, null
-        );
-
-        if (bytes == null) {
-            bytes = new byte[1024];
-        }
+        cachedIndex = JSONFactory.cacheIndex();
+        bytes = JSONFactory.allocateByteArray(cachedIndex);
     }
 
     @Override
@@ -98,10 +91,7 @@ class JSONWriterUTF8
 
     @Override
     public void close() {
-        if (bytes.length > CACHE_THRESHOLD) {
-            return;
-        }
-        JSONFactory.CACHE_BYTES.set(cachedIndex, bytes);
+        JSONFactory.releaseByteArray(cachedIndex, bytes);
     }
 
     @Override

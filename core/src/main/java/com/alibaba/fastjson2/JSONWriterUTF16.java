@@ -29,7 +29,7 @@ class JSONWriterUTF16
         super(ctx, StandardCharsets.UTF_16);
 
         cachedIndex = JSONFactory.cacheIndex();
-        chars = JSONFactory.CACHE_CHARS.getAndSet(cachedIndex, null);
+        chars = JSONFactory.allocateCharArray(cachedIndex);
         if (chars == null) {
             chars = new char[1024];
         }
@@ -46,10 +46,7 @@ class JSONWriterUTF16
 
     @Override
     public void close() {
-        if (chars.length > CACHE_THRESHOLD) {
-            return;
-        }
-        JSONFactory.CACHE_CHARS.set(cachedIndex, chars);
+        JSONFactory.releaseCharArray(cachedIndex, chars);
     }
 
     @Override
