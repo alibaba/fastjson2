@@ -1203,6 +1203,10 @@ public class JSON {
         return com.alibaba.fastjson2.JSON.isValidArray(str);
     }
 
+    public static boolean isValidObject(String str) {
+        return com.alibaba.fastjson2.JSON.isValidObject(str);
+    }
+
     public static <T> T toJavaObject(JSON json, Class<T> clazz) {
         if (json instanceof JSONObject) {
             return ((JSONObject) json).toJavaObject(clazz);

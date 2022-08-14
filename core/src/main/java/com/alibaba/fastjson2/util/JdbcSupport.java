@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
+import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,6 +19,9 @@ import java.util.Date;
 import java.util.Locale;
 
 public class JdbcSupport {
+    static Class CLASS_CLOB;
+    static volatile boolean CLASS_CLOB_ERROR;
+
     public static ObjectReader createTimeReader(Class objectClass, String format, Locale locale) {
         return new TimeReader(objectClass, format, locale);
     }
@@ -38,8 +42,51 @@ public class JdbcSupport {
         return new TimeWriter(format);
     }
 
+    public static ObjectWriter createClobWriter(Class objectClass) {
+        return new ClobWriter(objectClass);
+    }
+
     public static ObjectWriter createTimestampWriter(Class objectClass, String format) {
         return new TimestampWriter(objectClass, format);
+    }
+
+    public static boolean isClob(Class objectClass) {
+        if (CLASS_CLOB == null && !CLASS_CLOB_ERROR) {
+            try {
+                CLASS_CLOB = Class.forName("java.sql.Clob");
+            } catch (Throwable e) {
+                CLASS_CLOB_ERROR = true;
+            }
+        }
+
+        return CLASS_CLOB != null && CLASS_CLOB.isAssignableFrom(objectClass);
+    }
+
+    static class ClobWriter
+            implements ObjectWriter {
+        final Class objectClass;
+        final Method getCharacterStream;
+
+        public ClobWriter(Class objectClass) {
+            this.objectClass = objectClass;
+            try {
+                getCharacterStream = CLASS_CLOB.getMethod("getCharacterStream");
+            } catch (Throwable e) {
+                throw new JSONException("getMethod getCharacterStream error", e);
+            }
+        }
+
+        @Override
+        public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+            Reader reader;
+            try {
+                reader = (Reader) getCharacterStream.invoke(object);
+            } catch (Throwable e) {
+                throw new JSONException("invoke method getCharacterStream error", e);
+            }
+
+            jsonWriter.writeString(reader);
+        }
     }
 
     static class TimeReader

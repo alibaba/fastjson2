@@ -2258,8 +2258,7 @@ public abstract class JSONReader
     }
 
     @Override
-    public void close() {
-    }
+    public abstract void close();
 
     static BigInteger getBigInt(boolean negative, int[] mag) {
         int signum = mag.length == 0 ? 0 : negative ? -1 : 1;

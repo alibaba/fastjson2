@@ -19,7 +19,6 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
-import static com.alibaba.fastjson2.JSONFactory.CACHE_BYTES;
 import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE;
 import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE2;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
@@ -363,7 +362,7 @@ final class JSONReaderJSONB
 
                 if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                     if (valueBytes == null) {
-                        valueBytes = CACHE_BYTES.getAndSet(cachedIndex, null);
+                        valueBytes = JSONFactory.allocateByteArray(cachedIndex);
                     }
 
                     int minCapacity = strlen << 1;
@@ -1832,7 +1831,7 @@ final class JSONReaderJSONB
 
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                 if (valueBytes == null) {
-                    valueBytes = CACHE_BYTES.getAndSet(cachedIndex, null);
+                    valueBytes = JSONFactory.allocateByteArray(cachedIndex);
                 }
 
                 int minCapacity = strlen << 1;
@@ -1992,7 +1991,7 @@ final class JSONReaderJSONB
 
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                 if (valueBytes == null) {
-                    valueBytes = CACHE_BYTES.getAndSet(cachedIndex, null);
+                    valueBytes = JSONFactory.allocateByteArray(cachedIndex);
                 }
 
                 int minCapacity = strlen << 1;
@@ -5080,7 +5079,7 @@ final class JSONReaderJSONB
     @Override
     public void close() {
         if (valueBytes != null) {
-            CACHE_BYTES.set(cachedIndex, valueBytes);
+            JSONFactory.releaseByteArray(cachedIndex, valueBytes);
         }
     }
 }

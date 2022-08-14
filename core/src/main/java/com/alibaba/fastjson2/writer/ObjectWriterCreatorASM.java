@@ -583,8 +583,6 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(endErrorOnNoneSerializable_);
         }
 
-        int entryCnt = fieldWriters.size();
-
         Label notWriteType = new Label();
         if ((objectFeatures & JSONWriter.Feature.WriteClassName.mask) == 0) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -843,14 +841,12 @@ public class ObjectWriterCreatorASM
 
         boolean listStr = false;
         Type itemType;
-        Class itemClass = null;
         if (fieldType instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) fieldType;
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
             if (actualTypeArguments.length == 1) {
                 itemType = actualTypeArguments[0];
-                itemClass = TypeUtils.getMapping(itemType);
                 listStr = itemType == String.class;
             }
         }

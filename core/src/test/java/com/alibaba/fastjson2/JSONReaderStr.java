@@ -489,7 +489,7 @@ final class JSONReaderStr
                     ch = EOI;
                 }
                 if (c != ':') {
-                    return -1;
+                    throw new JSONException(info("expect ':', but " + c));
                 }
 
                 offset++;
@@ -2449,6 +2449,10 @@ final class JSONReaderStr
             }
             ch = str.charAt(offset);
         }
+    }
+
+    @Override
+    public void close() {
     }
 
     @Override

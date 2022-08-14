@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
-class ObjectWriterBaseModule
+public class ObjectWriterBaseModule
         implements ObjectWriterModule {
     static ObjectWriterAdapter STACK_TRACE_ELEMENT_WRITER;
 
@@ -41,7 +41,7 @@ class ObjectWriterBaseModule
         return annotationProcessor;
     }
 
-    class WriterAnnotationProcessor
+    public class WriterAnnotationProcessor
             implements ObjectWriterAnnotationProcessor {
         @Override
         public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
@@ -817,9 +817,10 @@ class ObjectWriterBaseModule
                 return JodaSupport.createLocalDateWriter(objectClass, null);
             case "org.joda.time.LocalDateTime":
                 return JodaSupport.createLocalDateTimeWriter(objectClass, null);
-//            case "com.alibaba.fastjson.JSONObject":
-//                return Fastjson1xSupport.createObjectReader();
             default:
+                if (JdbcSupport.isClob(objectClass)) {
+                    return JdbcSupport.createClobWriter(objectClass);
+                }
                 return null;
         }
     }
@@ -1027,6 +1028,10 @@ class ObjectWriterBaseModule
 
             if (clazz == char[].class) {
                 return ObjectWriterImplCharValueArray.INSTANCE;
+            }
+
+            if (clazz == StringBuffer.class || clazz == StringBuilder.class) {
+                return ObjectWriterImplToString.INSTANCE;
             }
 
             if (clazz == byte[].class) {

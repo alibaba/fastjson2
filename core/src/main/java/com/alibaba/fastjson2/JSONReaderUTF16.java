@@ -233,7 +233,7 @@ final class JSONReaderUTF16
         this.input = input;
 
         cacheIndex = JSONFactory.cacheIndex();
-        char[] chars = CACHE_CHARS.getAndSet(cacheIndex, null);
+        char[] chars = JSONFactory.allocateCharArray(cacheIndex);
 
         if (chars == null) {
             chars = new char[8192];
@@ -344,11 +344,7 @@ final class JSONReaderUTF16
         super(ctx);
         this.input = input;
         final int cacheIndex = JSONFactory.cacheIndex();
-
-        byte[] bytes = CACHE_BYTES.getAndSet(cacheIndex, null);
-        if (bytes == null) {
-            bytes = new byte[8192];
-        }
+        byte[] bytes = JSONFactory.allocateByteArray(cacheIndex);
 
         char[] chars;
         try {
@@ -378,9 +374,7 @@ final class JSONReaderUTF16
         } catch (IOException ioe) {
             throw new JSONException("read error", ioe);
         } finally {
-            if (bytes.length < CACHE_THREAD) {
-                CACHE_BYTES.set(cacheIndex, bytes);
-            }
+            JSONFactory.releaseByteArray(cacheIndex, bytes);
         }
 
         this.str = null;
@@ -845,7 +839,7 @@ final class JSONReaderUTF16
                     ch = EOI;
                 }
                 if (c != ':') {
-                    return -1;
+                    throw new JSONException(info("expect ':', but " + c));
                 }
 
                 offset++;
@@ -6374,14 +6368,17 @@ final class JSONReaderUTF16
                 .append(", column ").append(column)
                 .append(", fastjson-version ").append(JSON.VERSION)
                 .append(line > 1 ? '\n' : ' ');
-        buf.append(chars, this.start, length < 65535 ? length : 65535);
+
+        final int MAX_OUTPUT_LENGTH = 65535;
+        buf.append(chars, this.start, length < MAX_OUTPUT_LENGTH ? length : MAX_OUTPUT_LENGTH);
+
         return buf.toString();
     }
 
     @Override
     public void close() {
-        if (cacheIndex != -1 && chars.length <= CACHE_THREAD) {
-            CACHE_CHARS.set(cacheIndex, chars);
+        if (cacheIndex != -1) {
+            JSONFactory.releaseCharArray(cacheIndex, chars);
         }
 
         if (input != null) {

@@ -89,6 +89,21 @@ public interface FieldWriter<T>
 
         int nameCompare = thisName.compareTo(otherName);
 
+        Member thisMember = this.getFieldOrMethod();
+        Member otherMember = otherFieldWriter.getFieldOrMethod();
+
+        if (thisMember != null && otherMember != null && thisMember.getClass() != otherMember.getClass()) {
+            Class otherDeclaringClass = otherMember.getDeclaringClass();
+            Class thisDeclaringClass = thisMember.getDeclaringClass();
+            if (thisDeclaringClass != otherDeclaringClass && thisDeclaringClass != null && otherDeclaringClass != null) {
+                if (thisDeclaringClass.isAssignableFrom(otherDeclaringClass)) {
+                    return 1;
+                } else if (otherDeclaringClass.isAssignableFrom(thisDeclaringClass)) {
+                    return -1;
+                }
+            }
+        }
+
         if (nameCompare != 0) {
             int thisOrdinal = this.ordinal();
             int otherOrdinal = otherFieldWriter.ordinal();
@@ -99,9 +114,6 @@ public interface FieldWriter<T>
                 return 1;
             }
         } else {
-            Member thisMember = this.getFieldOrMethod();
-            Member otherMember = otherFieldWriter.getFieldOrMethod();
-
             if (thisMember instanceof Field && otherMember instanceof Method) {
                 return -1;
             }
