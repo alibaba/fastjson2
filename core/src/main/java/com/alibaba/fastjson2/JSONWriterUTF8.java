@@ -1318,9 +1318,25 @@ class JSONWriterUTF8
             return;
         }
 
-        ensureCapacity(off + 15);
+        boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int minCapacity = off + 15;
+        if (writeNonStringValueAsString) {
+            minCapacity += 2;
+        }
+
+        ensureCapacity(minCapacity);
+
+        if (writeNonStringValueAsString) {
+            bytes[off++] = '"';
+        }
+
         int len = RyuFloat.toString(value, bytes, off);
         off += len;
+
+        if (writeNonStringValueAsString) {
+            bytes[off++] = '"';
+        }
     }
 
     @Override
@@ -1330,9 +1346,25 @@ class JSONWriterUTF8
             return;
         }
 
-        ensureCapacity(off + 24);
+        boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int minCapacity = off + 24;
+        if (writeNonStringValueAsString) {
+            minCapacity += 2;
+        }
+
+        ensureCapacity(minCapacity);
+
+        if (writeNonStringValueAsString) {
+            bytes[off++] = '"';
+        }
+
         int len = RyuDouble.toString(value, bytes, off);
         off += len;
+
+        if (writeNonStringValueAsString) {
+            bytes[off++] = '"';
+        }
     }
 
     @Override

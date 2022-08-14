@@ -460,4 +460,21 @@ public class JSONWriterUTF8Test {
         writer.writeUUID(null);
         assertEquals("null", writer.toString());
     }
+
+    @Test
+    public void testNoneStringAsString() {
+        JSONWriterUTF8 writer = new JSONWriterUTF8(JSONFactory.createWriteContext(JSONWriter.Feature.WriteNonStringValueAsString));
+
+        writer.startArray();
+        writer.writeFloat(1);
+        writer.writeComma();
+        writer.writeDouble(2);
+        writer.writeComma();
+        writer.writeFloat(new float[]{3, 4});
+        writer.writeComma();
+        writer.writeDouble(new double[]{5, 6});
+        writer.endArray();
+
+        assertEquals("[\"1.0\",\"2.0\",[\"3.0\",\"4.0\"],[\"5.0\",\"6.0\"]]", writer.toString());
+    }
 }
