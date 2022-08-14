@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONFactory.defaultWriterFeatures;
+
 public interface JSON {
     /**
      * FASTJSON2 version name
@@ -1728,7 +1730,15 @@ public interface JSON {
         JSONWriter.Context writeContext = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
 
         boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
-        JSONWriterUTF16 jsonWriter = JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF16(writeContext);
+
+        JSONWriter jsonWriter;
+        if (JDKUtils.JVM_VERSION == 8) {
+            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+        } else if ((defaultWriterFeatures & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
+            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+        } else {
+            jsonWriter = new JSONWriterUTF16(writeContext);
+        }
 
         try (JSONWriter writer = pretty ?
                 new JSONWriterPretty(jsonWriter) : jsonWriter) {
