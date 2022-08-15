@@ -45,42 +45,11 @@ public class EishayParseTreeString {
         bh.consume(mapper.readValue(str, HashMap.class));
     }
 
-    //    @Test
-    public void fastjson1_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            fastjson1_perf();
-        }
-    }
-
-    //    @Test
-    public void fastjson2_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
-        }
-    }
-
-    public static void fastjson2_perf() {
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
-            JSON.parseObject(str);
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("millis : " + millis);
-        // zulu17.32.13 : 769 777 760
-        // zulu11.52.13 : 796 900 891
-        // zulu8.58.0.13 : 720 745 750 713
-    }
-
-    public static void fastjson1_perf() {
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
-            com.alibaba.fastjson.JSON.parseObject(str);
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("millis : " + millis);
-        // zulu17.32.13 :
-        // zulu11.52.13 : 928
-        // zulu8.58.0.13 :
+//    @Benchmark
+    public void wastjson(Blackhole bh) throws Exception {
+        bh.consume(
+                io.github.wycst.wast.json.JSON.parse(str)
+        );
     }
 
     public static void main(String[] args) throws RunnerException {
@@ -90,6 +59,7 @@ public class EishayParseTreeString {
                 .exclude(EishayParseTreeStringPretty.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
+                .warmupIterations(3)
                 .forks(1)
                 .build();
         new Runner(options).run();

@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONFactory.CACHE_THREAD;
 
 final class JSONWriterJSONB
         extends JSONWriter {
@@ -35,25 +34,14 @@ final class JSONWriterJSONB
 
     JSONWriterJSONB(Context ctx, SymbolTable symbolTable) {
         super(ctx, StandardCharsets.UTF_8);
-
-        int identityHashCode = System.identityHashCode(Thread.currentThread());
-        bytes = JSONFactory.CACHE_BYTES.getAndSet(
-                cachedIndex = identityHashCode & 3, null
-        );
-
-        if (bytes == null) {
-            bytes = new byte[1024];
-        }
-
+        cachedIndex = JSONFactory.cacheIndex();
+        bytes = JSONFactory.allocateByteArray(cachedIndex);
         this.symbolTable = symbolTable;
     }
 
     @Override
     public void close() {
-        if (bytes.length > CACHE_THREAD) {
-            return;
-        }
-        JSONFactory.CACHE_BYTES.set(cachedIndex, bytes);
+        JSONFactory.releaseByteArray(cachedIndex, bytes);
     }
 
     @Override
@@ -215,6 +203,7 @@ final class JSONWriterJSONB
         bytes[off++] = b;
     }
 
+    @Override
     public void writeChar(char ch) {
         if (off == bytes.length) {
             int minCapacity = off + 1;
@@ -270,6 +259,11 @@ final class JSONWriterJSONB
 
     @Override
     protected void write0(char ch) {
+        throw new JSONException("unsupported operation");
+    }
+
+    @Override
+    public void writeString(char[] chars, int off, int len, boolean quote) {
         throw new JSONException("unsupported operation");
     }
 
@@ -1269,6 +1263,7 @@ final class JSONWriterJSONB
         bytes[off++] = (byte) val;
     }
 
+    @Override
     public void writeEnum(Enum e) {
         if (e == null) {
             writeNull();

@@ -230,6 +230,10 @@ class ObjectReaderImplMapTyped
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         boolean match = jsonReader.nextIfMatch('{');
         if (!match) {
+            if (jsonReader.nextIfNull()) {
+                return null;
+            }
+
             throw new JSONException(jsonReader.info("expect '{', but '['"));
         }
 

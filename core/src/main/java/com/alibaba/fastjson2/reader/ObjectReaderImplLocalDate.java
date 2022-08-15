@@ -42,7 +42,7 @@ class ObjectReaderImplLocalDate
         }
 
         String str = jsonReader.readString();
-        if (str.isEmpty()) {
+        if (str.isEmpty() || "null".equals(str)) {
             return null;
         }
 
@@ -56,6 +56,7 @@ class ObjectReaderImplLocalDate
         }
 
         DateTimeFormatter formatter = getDateFormatter(context.getLocale());
+
         if (!formatHasHour) {
             return LocalDate.parse(str, formatter);
         }

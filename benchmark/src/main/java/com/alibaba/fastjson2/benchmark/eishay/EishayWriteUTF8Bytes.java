@@ -26,7 +26,6 @@ public class EishayWriteUTF8Bytes {
             String str = IOUtils.toString(is, "UTF-8");
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
-            fastjson2_perf();
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -45,24 +44,6 @@ public class EishayWriteUTF8Bytes {
     @Benchmark
     public void jackson(Blackhole bh) throws Exception {
         bh.consume(mapper.writeValueAsBytes(mc));
-    }
-
-    //    @Test
-    public void fastjson2_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
-        }
-    }
-
-    public static void fastjson2_perf() {
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
-            JSON.toJSONBytes(mc);
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("millis : " + millis);
-        // zulu17.32.13 : 330
-        // zulu8.58.0.13 : 379 332
     }
 
     public static void main(String[] args) throws RunnerException {

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.v1issues.basicType;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONReader.Feature;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,17 @@ public class FloatTest3_random {
     }
 
     @Test
-    public void test_ran_2() throws Exception {
+    public void test_ran_1() {
+        Random rand = new Random();
+        for (int i = 0; i < 1000 * 1000 * 1; ++i) {
+            float val = rand.nextFloat();
+            String str = Float.toString(val);
+            assertEquals(val, JSONReader.of(str).readFloatValue());
+        }
+    }
+
+    @Test
+    public void test_ran_2() {
         Random rand = new Random();
 
         for (int i = 0; i < 1000 * 1000 * 1; ++i) {

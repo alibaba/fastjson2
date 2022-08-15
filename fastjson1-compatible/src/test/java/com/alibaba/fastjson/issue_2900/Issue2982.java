@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue2982 {
@@ -14,5 +15,6 @@ public class Issue2982 {
         assertTrue(JSONArray.isValidArray(jsonStr));
         assertTrue(JSON.isValidArray(jsonStr));
         assertTrue(JSONObject.isValidArray(jsonStr));
+        assertFalse(JSONObject.isValidObject(jsonStr));
     }
 }

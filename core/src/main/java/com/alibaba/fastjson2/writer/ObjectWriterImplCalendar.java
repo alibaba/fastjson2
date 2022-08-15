@@ -42,12 +42,12 @@ final class ObjectWriterImplCalendar
         Calendar date = (Calendar) object;
         long millis = date.getTimeInMillis();
 
-        if (formatUnixTime || ctx.isDateFormatUnixTime()) {
+        if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
             jsonWriter.writeInt64(millis / 1000L);
             return;
         }
 
-        if (format == null && ctx.isDateFormatMillis()) {
+        if (format == null && (format == null && ctx.isDateFormatMillis())) {
             jsonWriter.writeInt64(millis);
             return;
         }

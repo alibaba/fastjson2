@@ -15,7 +15,6 @@ import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -100,6 +99,13 @@ public final class JSONFactory {
         +0, 10, 11, 12, 13, 14, 15
     };
 
+    static final double[] SMALL_10_POW = {
+            1.0e0,
+            1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5,
+            1.0e6, 1.0e7, 1.0e8, 1.0e9, 1.0e10,
+            1.0e11, 1.0e12, 1.0e13, 1.0e14, 1.0e15
+    };
+
     static {
         Properties properties = new Properties();
 
@@ -132,12 +138,58 @@ public final class JSONFactory {
         CREATOR = property == null ? "asm" : property;
     }
 
-    static final int CACHE_THREAD = 1024 * 1024;
-    static final AtomicReferenceArray<byte[]> CACHE_BYTES = new AtomicReferenceArray<>(4);
-    static final AtomicReferenceArray<char[]> CACHE_CHARS = new AtomicReferenceArray<>(4);
+    private static final int CACHE_THRESHOLD = 1024 * 1024;
+    private static final byte[][] BYTE_ARRAY_CACHE = new byte[4][];
+    private static final char[][] CHAR_ARRAY_CACHE = new char[4][];
 
     static int cacheIndex() {
-        return System.identityHashCode(Thread.currentThread()) & 3; //
+        return System.identityHashCode(Thread.currentThread()) & 3;
+    }
+
+    static char[] allocateCharArray(int cacheIndex) {
+        char[] chars;
+        synchronized (CHAR_ARRAY_CACHE) {
+            chars = CHAR_ARRAY_CACHE[cacheIndex];
+            if (chars != null) {
+                CHAR_ARRAY_CACHE[cacheIndex] = null;
+            }
+        }
+        if (chars == null) {
+            chars = new char[8192];
+        }
+        return chars;
+    }
+
+    static void releaseCharArray(int cacheIndex, char[] chars) {
+        if (chars == null || chars.length > CACHE_THRESHOLD) {
+            return;
+        }
+        synchronized (CHAR_ARRAY_CACHE) {
+            CHAR_ARRAY_CACHE[cacheIndex] = chars;
+        }
+    }
+
+    static byte[] allocateByteArray(int cacheIndex) {
+        byte[] bytes;
+        synchronized (BYTE_ARRAY_CACHE) {
+            bytes = BYTE_ARRAY_CACHE[cacheIndex];
+            if (bytes != null) {
+                BYTE_ARRAY_CACHE[cacheIndex] = null;
+            }
+        }
+        if (bytes == null) {
+            bytes = new byte[8192];
+        }
+        return bytes;
+    }
+
+    static void releaseByteArray(int cacheIndex, byte[] chars) {
+        if (chars == null || chars.length > CACHE_THRESHOLD) {
+            return;
+        }
+        synchronized (BYTE_ARRAY_CACHE) {
+            BYTE_ARRAY_CACHE[cacheIndex] = chars;
+        }
     }
 
     static final class SymbolTableImpl

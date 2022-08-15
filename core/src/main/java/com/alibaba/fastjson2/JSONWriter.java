@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -25,6 +26,8 @@ import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
 
 public abstract class JSONWriter
         implements Closeable {
+    static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
     protected final Context context;
     protected final Charset charset;
     protected final boolean utf8;
@@ -395,13 +398,26 @@ public abstract class JSONWriter
 
     public static JSONWriter of() {
         Context writeContext = createWriteContext();
-        return JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF8JDK9(writeContext);
+        if (JDKUtils.JVM_VERSION == 8) {
+            return new JSONWriterUTF16JDK8(writeContext);
+        }
+
+        if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
+            return new JSONWriterUTF8JDK9(writeContext);
+        }
+
+        return new JSONWriterUTF16(writeContext);
     }
 
     public static JSONWriter of(Context writeContext) {
-        JSONWriter jsonWriter = JDKUtils.JVM_VERSION == 8
-                ? new JSONWriterUTF16JDK8(writeContext)
-                : new JSONWriterUTF8JDK9(writeContext);
+        JSONWriter jsonWriter;
+        if (JDKUtils.JVM_VERSION == 8) {
+            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+        } else if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
+            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+        } else {
+            jsonWriter = new JSONWriterUTF16(writeContext);
+        }
 
         if (writeContext.isEnabled(Feature.PrettyFormat)) {
             jsonWriter = new JSONWriterPretty(jsonWriter);
@@ -411,9 +427,14 @@ public abstract class JSONWriter
 
     public static JSONWriter of(Feature... features) {
         Context writeContext = JSONFactory.createWriteContext(features);
-        JSONWriter jsonWriter = JDKUtils.JVM_VERSION == 8
-                ? new JSONWriterUTF16JDK8(writeContext)
-                : new JSONWriterUTF8JDK9(writeContext);
+        JSONWriter jsonWriter;
+        if (JDKUtils.JVM_VERSION == 8) {
+            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+        } else if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
+            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+        } else {
+            jsonWriter = new JSONWriterUTF16(writeContext);
+        }
 
         for (int i = 0; i < features.length; i++) {
             if (features[i] == Feature.PrettyFormat) {
@@ -846,6 +867,28 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
+    public void writeString(Reader reader) {
+        writeRaw(quote);
+
+        try {
+            char[] chars = new char[2048];
+            for (; ; ) {
+                int len = reader.read(chars, 0, chars.length);
+                if (len < 0) {
+                    break;
+                }
+
+                if (len > 0) {
+                    writeString(chars, 0, len, false);
+                }
+            }
+        } catch (Exception ex) {
+            throw new JSONException("read string from reader error", ex);
+        }
+
+        writeRaw(quote);
+    }
+
     public abstract void writeString(String str);
 
     public void writeSymbol(String string) {
@@ -880,6 +923,8 @@ public abstract class JSONWriter
         }
         write0('"');
     }
+
+    protected abstract void writeString(char[] chars, int off, int len, boolean quote);
 
     public abstract void writeLocalDate(LocalDate date);
 
@@ -1132,6 +1177,7 @@ public abstract class JSONWriter
     public abstract int flushTo(OutputStream to) throws IOException;
 
     public abstract int flushTo(OutputStream out, Charset charset) throws IOException;
+
     static int MAX_ARRAY_SIZE = 1024 * 1024 * 64; // 64M
 
     public static class Context {
@@ -1474,7 +1520,24 @@ public abstract class JSONWriter
          */
         NotWriteEmptyArray(1 << 25),
         WriteNonStringKeyAsString(1 << 26),
-        ErrorOnNoneSerializable(1 << 27);
+        ErrorOnNoneSerializable(1 << 27),
+        /**
+         * @since 2.0.11
+         */
+        WritePairAsJavaBean(1 << 28),
+
+        /**
+         * @since 2.0.12
+         */
+        OptimizedForAscii(1 << 29),
+
+        /**
+         * @since 2.0.12
+         * Feature that specifies that all characters beyond 7-bit ASCII range (i.e. code points of 128 and above) need to be output using format-specific escapes (for JSON, backslash escapes),
+         * if format uses escaping mechanisms (which is generally true for textual formats but not for binary formats).
+         * Feature is disabled by default.
+         */
+        EscapeNoneAscii(1 << 30);
 
         public final long mask;
 

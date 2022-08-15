@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.11-SNAPSHOT</version>
+    <version>2.0.12-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -33,16 +33,18 @@
 
         <fastjson1x.version>1.2.83</fastjson1x.version>
         <jackson.version>2.13.3</jackson.version>
-        <jetty.version>9.4.17.v20190418</jetty.version>
-        <jersey.version>2.23.2</jersey.version>
-        <springframework.version>5.3.19</springframework.version>
+        <jetty.version>11.0.11</jetty.version>
+        <jersey.version>2.36</jersey.version>
+        <springframework.version>5.3.22</springframework.version>
 
-        <kotlin.version>1.6.10</kotlin.version>
+        <kotlin.version>1.7.10</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+        <!-- https://kotlinlang.org/docs/maven.html#specifying-compiler-options -->
+        <kotlin.compiler.apiVersion>1.5</kotlin.compiler.apiVersion>
 
-        <junit5.version>5.8.2</junit5.version>
-        <kotest.version>5.3.0</kotest.version>
+        <junit5.version>5.9.0</junit5.version>
+        <kotest.version>5.4.2</kotest.version>
         <jmh.version>1.35</jmh.version>
 
         <!-- overridden by submodule that need skip deploy -->
@@ -133,7 +135,7 @@
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
                 <artifactId>odps-sdk-udf</artifactId>
-                <version>0.38.4-public</version>
+                <version>0.40.10-public</version>
             </dependency>
             <dependency>
                 <groupId>com.caucho</groupId>
@@ -143,7 +145,7 @@
             <dependency>
                 <groupId>com.chinamobile.cmos</groupId>
                 <artifactId>sms-core</artifactId>
-                <version>2.1.12.5</version>
+                <version>2.1.13.1</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
@@ -160,7 +162,7 @@
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.9.0</version>
+                <version>2.9.1</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -171,7 +173,7 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-bom</artifactId>
                 <type>pom</type>
-                <version>3.20.1</version>
+                <version>3.21.5</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
@@ -192,7 +194,7 @@
             <dependency>
                 <groupId>com.networknt</groupId>
                 <artifactId>json-schema-validator</artifactId>
-                <version>1.0.69</version>
+                <version>1.0.72</version>
             </dependency>
             <dependency>
                 <groupId>com.squareup.retrofit2</groupId>
@@ -233,7 +235,7 @@
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-core</artifactId>
-                <version>3.4.19</version>
+                <version>3.4.22</version>
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
@@ -256,9 +258,8 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.10.14</version>
+                <version>2.11.0</version>
             </dependency>
-
 
 
             <!--
@@ -326,7 +327,7 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>5.4.24.Final</version>
+                <version>5.6.10.Final</version>
             </dependency>
 
             <dependency>
@@ -343,7 +344,7 @@
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.28.0-GA</version>
+                <version>3.29.1-GA</version>
             </dependency>
 
             <dependency>
@@ -378,7 +379,7 @@
             <dependency>
                 <groupId>org.msgpack</groupId>
                 <artifactId>msgpack-core</artifactId>
-                <version>0.9.1</version>
+                <version>0.9.3</version>
             </dependency>
 
             <dependency>
@@ -411,14 +412,14 @@
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-bom</artifactId>
                 <type>pom</type>
-                <version>2021.1.4</version>
+                <version>2021.2.2</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-bom</artifactId>
                 <type>pom</type>
-                <version>5.6.3</version>
+                <version>5.7.2</version>
                 <scope>import</scope>
             </dependency>
 
@@ -531,43 +532,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
-                <extensions>true</extensions>
-                <!--
-                    In multi-module builds using the deploy-at-end feature,
-                    the deployment of all components is performed in the last module based on the reactor order.
-                    If this property is set to true in the last module,
-                    all staging deployment for all modules will be skipped.
-                    so, we'll config nexus deploy after deploy phase of every module
-                    see: https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin#configuring-the-plugin
-                -->
-                <executions>
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        <!--
-                        If you are deploying to Maven Central,
-                        it is the Nexus Staging Plugin that is doing the deployment instead of the `deploy` plugin,
-                        so the configuration of the `deploy` plugin has no effect.
-                        To make the Nexus deploy plugin skip,
-                        set skipNexusStagingDeployMojo in its configuration to true.
-                        see: https://stackoverflow.com/questions/59552549/preventing-maven-modules-from-being-deployed
-                    -->
-                    <skipNexusStagingDeployMojo>${maven.deploy.skip}</skipNexusStagingDeployMojo>
-                </configuration>
-            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -662,7 +626,7 @@
             -->
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -677,15 +641,24 @@
                                 <requireJavaVersion>
                                     <version>[1.8,)</version>
                                 </requireJavaVersion>
-                                <compound implementation="com.github.ferstl.maven.pomenforcers.CompoundPedanticEnforcer">
-                                    <enforcers>POM_SECTION_ORDER,MODULE_ORDER,DEPENDENCY_MANAGEMENT_ORDER,DEPENDENCY_ORDER,DEPENDENCY_ELEMENT</enforcers>
-                                    <pomSectionPriorities>modelVersion,parent,groupId,artifactId,version,name,description,packaging,url,inceptionYear,licenses,scm,properties,modules</pomSectionPriorities>
-                                    <dependenciesGroupIdPriorities>com.alibaba.fastjson2,com.alibaba</dependenciesGroupIdPriorities>
+                                <compound
+                                        implementation="com.github.ferstl.maven.pomenforcers.CompoundPedanticEnforcer">
+                                    <enforcers>
+                                        POM_SECTION_ORDER,MODULE_ORDER,DEPENDENCY_MANAGEMENT_ORDER,DEPENDENCY_ORDER,DEPENDENCY_ELEMENT
+                                    </enforcers>
+                                    <pomSectionPriorities>
+                                        modelVersion,parent,groupId,artifactId,version,name,description,packaging,url,inceptionYear,licenses,scm,properties,modules
+                                    </pomSectionPriorities>
+                                    <dependenciesGroupIdPriorities>com.alibaba.fastjson2,com.alibaba
+                                    </dependenciesGroupIdPriorities>
                                     <dependenciesOrderBy>scope,groupId,artifactId</dependenciesOrderBy>
-                                    <dependenciesScopePriorities>compile,runtime,provided,test</dependenciesScopePriorities>
+                                    <dependenciesScopePriorities>compile,runtime,provided,test
+                                    </dependenciesScopePriorities>
                                     <dependencyManagementOrderBy>groupId,artifactId</dependencyManagementOrderBy>
-                                    <dependencyManagementGroupIdPriorities>com.alibaba.fastjson2,com.alibaba</dependencyManagementGroupIdPriorities>
-                                    <dependencyElementOrdering>groupId,artifactId,type,version</dependencyElementOrdering>
+                                    <dependencyManagementGroupIdPriorities>com.alibaba.fastjson2,com.alibaba
+                                    </dependencyManagementGroupIdPriorities>
+                                    <dependencyElementOrdering>groupId,artifactId,type,version
+                                    </dependencyElementOrdering>
                                 </compound>
                             </rules>
                         </configuration>
@@ -695,7 +668,7 @@
                     <dependency>
                         <groupId>com.github.ferstl</groupId>
                         <artifactId>pedantic-pom-enforcers</artifactId>
-                        <version>2.0.0</version>
+                        <version>2.1.0</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -708,7 +681,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
@@ -724,19 +697,19 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.3.2</version>
+                    <version>3.4.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M6</version>
+                    <version>3.0.0-M7</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.4.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.11.0</version>
+                    <version>3.12.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-gpg-plugin</artifactId>
@@ -744,15 +717,20 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>2.5.2</version>
+                    <version>3.0.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>2.8.2</version>
+                    <version>3.0.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>3.3.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.6.13</version>
                 </plugin>
                 <plugin>
                     <groupId>org.moditect</groupId>
@@ -892,7 +870,7 @@
                         <groupId>io.github.git-commit-id</groupId>
                         <artifactId>git-commit-id-maven-plugin</artifactId>
                         <!-- DO NOT upgrade to v5+, since don't support java 8 -->
-                        <version>4.9.9</version>
+                        <version>5.0.0</version>
                         <executions>
                             <execution>
                                 <id>get-the-git-infos</id>
@@ -952,6 +930,55 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>deploy-settings</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <!--
+                            In multi-module builds using the deploy-at-end feature,
+                            the deployment of all components is performed in the last module based on the reactor order.
+                            If this property is set to true in the last module,
+                            all staging deployment for all modules will be skipped.
+                            so, we'll config nexus deploy after deploy phase of every module
+                            see: https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin#configuring-the-plugin
+                        -->
+                        <executions>
+                            <execution>
+                                <id>default-deploy</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>deploy</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                            <!--
+                            If you are deploying to Maven Central,
+                            it is the Nexus Staging Plugin that is doing the deployment instead of the `deploy` plugin,
+                            so the configuration of the `deploy` plugin has no effect.
+                            To make the Nexus deploy plugin skip,
+                            set skipNexusStagingDeployMojo in its configuration to true.
+                            see: https://stackoverflow.com/questions/59552549/preventing-maven-modules-from-being-deployed
+                        -->
+                            <skipNexusStagingDeployMojo>${maven.deploy.skip}</skipNexusStagingDeployMojo>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

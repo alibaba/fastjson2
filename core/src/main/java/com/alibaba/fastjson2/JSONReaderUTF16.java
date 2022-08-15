@@ -9,10 +9,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigInteger;
 import java.time.*;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
@@ -236,7 +233,7 @@ final class JSONReaderUTF16
         this.input = input;
 
         cacheIndex = JSONFactory.cacheIndex();
-        char[] chars = CACHE_CHARS.getAndSet(cacheIndex, null);
+        char[] chars = JSONFactory.allocateCharArray(cacheIndex);
 
         if (chars == null) {
             chars = new char[8192];
@@ -251,7 +248,9 @@ final class JSONReaderUTF16
                 off += n;
 
                 if (off == chars.length) {
-                    chars = Arrays.copyOf(chars, chars.length + 8192);
+                    int oldCapacity = chars.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    chars = Arrays.copyOf(chars, newCapacity);
                 }
             }
         } catch (IOException ioe) {
@@ -345,11 +344,7 @@ final class JSONReaderUTF16
         super(ctx);
         this.input = input;
         final int cacheIndex = JSONFactory.cacheIndex();
-
-        byte[] bytes = CACHE_BYTES.getAndSet(cacheIndex, null);
-        if (bytes == null) {
-            bytes = new byte[8192];
-        }
+        byte[] bytes = JSONFactory.allocateByteArray(cacheIndex);
 
         char[] chars;
         try {
@@ -379,9 +374,7 @@ final class JSONReaderUTF16
         } catch (IOException ioe) {
             throw new JSONException("read error", ioe);
         } finally {
-            if (bytes.length < CACHE_THREAD) {
-                CACHE_BYTES.set(cacheIndex, bytes);
-            }
+            JSONFactory.releaseByteArray(cacheIndex, bytes);
         }
 
         this.str = null;
@@ -846,7 +839,7 @@ final class JSONReaderUTF16
                     ch = EOI;
                 }
                 if (c != ':') {
-                    return -1;
+                    throw new JSONException(info("expect ':', but " + c));
                 }
 
                 offset++;
@@ -1209,6 +1202,7 @@ final class JSONReaderUTF16
                                 + (((long) c3) << 8)
                                 + ((long) c4);
                     }
+                    break;
                 case 6:
                     c0 = chars[nameBegin];
                     c1 = chars[nameBegin + 1];
@@ -2246,6 +2240,482 @@ final class JSONReaderUTF16
         return negative ? -longValue : longValue;
     }
 
+    @Override
+    public double readDoubleValue() {
+        this.wasNull = false;
+
+        boolean value = false;
+        double doubleValue = 0;
+
+        char quote = '\0';
+        if (ch == '"' || ch == '\'') {
+            quote = ch;
+            ch = chars[offset++];
+
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+                nextIfMatch(',');
+                wasNull = true;
+                return 0;
+            }
+        }
+
+        final int start = offset;
+        if (ch == '-') {
+            negative = true;
+            ch = chars[offset++];
+        } else {
+            if (ch == '+') {
+                ch = chars[offset++];
+            }
+        }
+
+        valueType = JSON_TYPE_INT;
+        while (ch >= '0' && ch <= '9') {
+            if (offset == end) {
+                ch = EOI;
+                offset++;
+                break;
+            }
+            ch = chars[offset++];
+        }
+
+        if (ch == '.') {
+            valueType = JSON_TYPE_DEC;
+            ch = chars[offset++];
+            while (ch >= '0' && ch <= '9') {
+                this.scale++;
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = chars[offset++];
+            }
+        }
+
+        if (ch == 'e' || ch == 'E') {
+            boolean negativeExp = false;
+            int expValue = 0;
+            ch = chars[offset++];
+
+            if (ch == '-') {
+                negativeExp = true;
+                ch = chars[offset++];
+            } else if (ch == '+') {
+                ch = chars[offset++];
+            }
+
+            while (ch >= '0' && ch <= '9') {
+                int byteVal = (ch - '0');
+                expValue = expValue * 10 + byteVal;
+                if (expValue > MAX_EXP) {
+                    throw new JSONException("too large exp value : " + expValue);
+                }
+
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = chars[offset++];
+            }
+
+            if (negativeExp) {
+                expValue = -expValue;
+            }
+
+            this.exponent = (byte) expValue;
+            valueType = JSON_TYPE_DEC;
+        }
+
+        if (offset == start) {
+            if (ch == 'n') {
+                if (chars[offset++] == 'u'
+                        && chars[offset++] == 'l'
+                        && chars[offset++] == 'l'
+                ) {
+                    wasNull = true;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == 't') {
+                if (chars[offset++] == 'r'
+                        && chars[offset++] == 'u'
+                        && chars[offset++] == 'e'
+                ) {
+                    value = true;
+                    doubleValue = 1;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == 'f') {
+                if (chars[offset++] == 'a'
+                        && chars[offset++] == 'l'
+                        && chars[offset++] == 's'
+                        && chars[offset++] == 'e'
+                ) {
+                    doubleValue = 0;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == '{' && quote == 0) {
+                Map<String, Object> obj = readObject();
+                if (!obj.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            } else if (ch == '[' && quote == 0) {
+                List array = readArray();
+                if (!array.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            }
+        }
+
+        int len = offset - start;
+
+        String str = null;
+        if (quote != 0) {
+            if (ch != quote) {
+                this.offset -= 1;
+                this.ch = quote;
+                str = readString();
+            }
+
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+        }
+
+        if (!value) {
+            if (str != null) {
+                try {
+                    doubleValue = Double.parseDouble(str);
+                } catch (NumberFormatException ex) {
+                    throw new JSONException(info(), ex);
+                }
+            } else {
+                doubleValue = FloatingDecimal.parseDouble(chars, start - 1, len);
+            }
+
+            if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                switch (ch) {
+                    case 'B':
+                        valueType = JSON_TYPE_INT8;
+                        break;
+                    case 'S':
+                        valueType = JSON_TYPE_INT16;
+                        break;
+                    case 'L':
+                        valueType = JSON_TYPE_INT64;
+                        break;
+                    case 'F':
+                        valueType = JSON_TYPE_FLOAT;
+                        break;
+                    case 'D':
+                        valueType = JSON_TYPE_DOUBLE;
+                        break;
+                    default:
+                        break;
+                }
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+            }
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+        }
+
+        if (ch == ',') {
+            this.comma = true;
+            this.ch = chars[this.offset++];
+            // next inline
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            }
+        }
+
+        return doubleValue;
+    }
+
+    @Override
+    public float readFloatValue() {
+        this.wasNull = false;
+
+        boolean value = false;
+        float floatValue = 0;
+
+        char quote = '\0';
+        if (ch == '"' || ch == '\'') {
+            quote = ch;
+            ch = chars[offset++];
+
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+                nextIfMatch(',');
+                wasNull = true;
+                return 0;
+            }
+        }
+
+        final int start = offset;
+        if (ch == '-') {
+            negative = true;
+            ch = chars[offset++];
+        } else {
+            if (ch == '+') {
+                ch = chars[offset++];
+            }
+        }
+
+        valueType = JSON_TYPE_INT;
+        while (ch >= '0' && ch <= '9') {
+            if (offset == end) {
+                ch = EOI;
+                offset++;
+                break;
+            }
+            ch = chars[offset++];
+        }
+
+        if (ch == '.') {
+            valueType = JSON_TYPE_DEC;
+            ch = chars[offset++];
+            while (ch >= '0' && ch <= '9') {
+                this.scale++;
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = chars[offset++];
+            }
+        }
+
+        if (ch == 'e' || ch == 'E') {
+            boolean negativeExp = false;
+            int expValue = 0;
+            ch = chars[offset++];
+
+            if (ch == '-') {
+                negativeExp = true;
+                ch = chars[offset++];
+            } else if (ch == '+') {
+                ch = chars[offset++];
+            }
+
+            while (ch >= '0' && ch <= '9') {
+                int byteVal = (ch - '0');
+                expValue = expValue * 10 + byteVal;
+                if (expValue > MAX_EXP) {
+                    throw new JSONException("too large exp value : " + expValue);
+                }
+
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = chars[offset++];
+            }
+
+            if (negativeExp) {
+                expValue = -expValue;
+            }
+
+            this.exponent = (byte) expValue;
+            valueType = JSON_TYPE_DEC;
+        }
+
+        if (offset == start) {
+            if (ch == 'n') {
+                if (chars[offset++] == 'u'
+                        && chars[offset++] == 'l'
+                        && chars[offset++] == 'l'
+                ) {
+                    wasNull = true;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == 't') {
+                if (chars[offset++] == 'r'
+                        && chars[offset++] == 'u'
+                        && chars[offset++] == 'e'
+                ) {
+                    value = true;
+                    floatValue = 1;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == 'f') {
+                if (chars[offset++] == 'a'
+                        && chars[offset++] == 'l'
+                        && chars[offset++] == 's'
+                        && chars[offset++] == 'e'
+                ) {
+                    floatValue = 0;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == '{' && quote == 0) {
+                Map<String, Object> obj = readObject();
+                if (!obj.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            } else if (ch == '[' && quote == 0) {
+                List array = readArray();
+                if (!array.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            }
+        }
+
+        int len = offset - start;
+
+        String str = null;
+        if (quote != 0) {
+            if (ch != quote) {
+                this.offset -= 1;
+                this.ch = quote;
+                str = readString();
+            }
+
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+        }
+
+        if (!value) {
+            if (str != null) {
+                try {
+                    floatValue = Float.parseFloat(str);
+                } catch (NumberFormatException ex) {
+                    throw new JSONException(info(), ex);
+                }
+            } else {
+                floatValue = FloatingDecimal.parseFloat(chars, start - 1, len);
+            }
+
+            if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                switch (ch) {
+                    case 'B':
+                        valueType = JSON_TYPE_INT8;
+                        break;
+                    case 'S':
+                        valueType = JSON_TYPE_INT16;
+                        break;
+                    case 'L':
+                        valueType = JSON_TYPE_INT64;
+                        break;
+                    case 'F':
+                        valueType = JSON_TYPE_FLOAT;
+                        break;
+                    case 'D':
+                        valueType = JSON_TYPE_DOUBLE;
+                        break;
+                    default:
+                        break;
+                }
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+            }
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+        }
+
+        if (ch == ',') {
+            this.comma = true;
+            this.ch = chars[this.offset++];
+            // next inline
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            }
+        }
+
+        return floatValue;
+    }
+
     private void skipString() {
         char quote = this.ch;
         ch = chars[offset++];
@@ -2482,42 +2952,47 @@ final class JSONReaderUTF16
             int valueLength;
             boolean valueEscape = false;
 
-            if (JDKUtils.JVM_VERSION > 8) {
-                _for:
-                for (int i = 0; ; ++i) {
-                    if (offset >= end) {
-                        throw new JSONException("invalid escape character EOI");
-                    }
-                    char c = chars[offset];
-                    if (c == '\\') {
-                        valueEscape = true;
-                        c = chars[++offset];
-                        switch (c) {
-                            case 'u': {
-                                offset += 4;
-                                break;
-                            }
-                            case 'x': {
-                                offset += 2;
-                                break;
-                            }
-                            default:
-                                // skip
-                                break;
-                        }
-                        offset++;
-                        continue;
-                    }
+            _for:
+            {
+                int i = 0;
 
-                    if (c == quote) {
-                        valueLength = i;
-                        break _for;
+                // vector optimize
+                while (offset + 8 <= end) {
+                    char c0 = chars[offset];
+                    char c1 = chars[offset + 1];
+                    char c2 = chars[offset + 2];
+                    char c3 = chars[offset + 3];
+                    char c4 = chars[offset + 4];
+                    char c5 = chars[offset + 5];
+                    char c6 = chars[offset + 6];
+                    char c7 = chars[offset + 7];
+                    if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\') {
+                        break;
                     }
-                    offset++;
+                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote) {
+                        break;
+                    }
+                    offset += 8;
+                    i += 8;
                 }
-            } else {
-                _for:
-                for (int i = 0; ; ++i) {
+
+                // vector optimize
+                while (offset + 4 <= end) {
+                    char c0 = chars[offset];
+                    char c1 = chars[offset + 1];
+                    char c2 = chars[offset + 2];
+                    char c3 = chars[offset + 3];
+                    if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\') {
+                        break;
+                    }
+                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
+                        break;
+                    }
+                    offset += 4;
+                    i += 4;
+                }
+
+                for (; ; ++i) {
                     if (offset >= end) {
                         throw new JSONException(info("invalid escape character EOI"));
                     }
@@ -3984,7 +4459,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public LocalDateTime readLocalDate8() {
+    public LocalDate readLocalDate8() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -4052,9 +4527,9 @@ final class JSONReaderUTF16
             return null;
         }
 
-        LocalDateTime ldt;
+        LocalDate ldt;
         try {
-            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+            ldt = LocalDate.of(year, month, dom);
         } catch (DateTimeException e) {
             throw new JSONException(info(), e);
         }
@@ -4069,7 +4544,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public LocalDateTime readLocalDate9() {
+    public LocalDate readLocalDate9() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -4162,9 +4637,9 @@ final class JSONReaderUTF16
             return null;
         }
 
-        LocalDateTime ldt;
+        LocalDate ldt;
         try {
-            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+            ldt = LocalDate.of(year, month, dom);
         } catch (DateTimeException e) {
             throw new JSONException(info(), e);
         }
@@ -4179,7 +4654,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public LocalDateTime readLocalDate10() {
+    public LocalDate readLocalDate10() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -4321,9 +4796,9 @@ final class JSONReaderUTF16
             return null;
         }
 
-        LocalDateTime ldt;
+        LocalDate ldt;
         try {
-            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+            ldt = LocalDate.of(year, month, dom);
         } catch (DateTimeException e) {
             throw new JSONException(info(), e);
         }
@@ -4338,7 +4813,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public LocalDateTime readLocalDate11() {
+    public LocalDate readLocalDate11() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -4411,7 +4886,7 @@ final class JSONReaderUTF16
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+        LocalDate ldt = LocalDate.of(year, month, dom);
 
         offset += 12;
         next();
@@ -4970,10 +5445,7 @@ final class JSONReaderUTF16
             }
         }
 
-        ZonedDateTime zdt = ldt.atZone(zoneId);
-        if (zdt == null) {
-            return null;
-        }
+        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
 
         offset += (len + 1);
         next();
@@ -5147,6 +5619,183 @@ final class JSONReaderUTF16
             next();
         }
         return ldt;
+    }
+
+    @Override
+    public long readMillis19() {
+        if (ch != '"' && ch != '\'') {
+            throw new JSONException("date only support string input");
+        }
+
+        if (offset + 18 >= end) {
+            wasNull = true;
+            return 0;
+        }
+
+        char c0 = chars[offset];
+        char c1 = chars[offset + 1];
+        char c2 = chars[offset + 2];
+        char c3 = chars[offset + 3];
+        char c4 = chars[offset + 4];
+        char c5 = chars[offset + 5];
+        char c6 = chars[offset + 6];
+        char c7 = chars[offset + 7];
+        char c8 = chars[offset + 8];
+        char c9 = chars[offset + 9];
+        char c10 = chars[offset + 10];
+        char c11 = chars[offset + 11];
+        char c12 = chars[offset + 12];
+        char c13 = chars[offset + 13];
+        char c14 = chars[offset + 14];
+        char c15 = chars[offset + 15];
+        char c16 = chars[offset + 16];
+        char c17 = chars[offset + 17];
+        char c18 = chars[offset + 18];
+
+        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2;
+        if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+        } else if (c4 == '/' && c7 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+        } else {
+            wasNull = true;
+            return 0L;
+        }
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int second;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            second = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int nanoOfSecond;
+        if (S0 >= '0' && S0 <= '9'
+                && S1 >= '0' && S1 <= '9'
+                && S2 >= '0' && S2 <= '9'
+        ) {
+            nanoOfSecond = (S0 - '0') * 100
+                    + (S1 - '0') * 10
+                    + (S2 - '0');
+            nanoOfSecond *= 1000_000;
+        } else {
+            wasNull = false;
+            return 0L;
+        }
+
+        if (year == 0 && month == 0 && dom == 0) {
+            year = 1970;
+            month = 1;
+            dom = 1;
+        }
+
+        offset += 20;
+        next();
+        if (ch == ',') {
+            this.comma = true;
+            next();
+        }
+
+        return millis(year, month, dom, hour, minute, second, nanoOfSecond);
     }
 
     @Override
@@ -5719,14 +6368,17 @@ final class JSONReaderUTF16
                 .append(", column ").append(column)
                 .append(", fastjson-version ").append(JSON.VERSION)
                 .append(line > 1 ? '\n' : ' ');
-        buf.append(chars, this.start, length < 65535 ? length : 65535);
+
+        final int MAX_OUTPUT_LENGTH = 65535;
+        buf.append(chars, this.start, length < MAX_OUTPUT_LENGTH ? length : MAX_OUTPUT_LENGTH);
+
         return buf.toString();
     }
 
     @Override
     public void close() {
-        if (cacheIndex != -1 && chars.length <= CACHE_THREAD) {
-            CACHE_CHARS.set(cacheIndex, chars);
+        if (cacheIndex != -1) {
+            JSONFactory.releaseCharArray(cacheIndex, chars);
         }
 
         if (input != null) {

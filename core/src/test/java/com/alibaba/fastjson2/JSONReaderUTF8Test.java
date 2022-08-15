@@ -14,6 +14,6 @@ public class JSONReaderUTF8Test {
         LocalDate localDate = LocalDate.of(2018, 7, 14);
         byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
         JSONReader jsonReader = JSONReader.of(bytes, 0, bytes.length, StandardCharsets.UTF_8);
-        assertEquals(localDate, jsonReader.readLocalDate11().toLocalDate());
+        assertEquals(localDate, jsonReader.readLocalDate11());
     }
 }
