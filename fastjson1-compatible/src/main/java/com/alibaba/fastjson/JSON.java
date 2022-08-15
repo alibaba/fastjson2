@@ -773,7 +773,7 @@ public class JSON {
             return writer.toString();
         } catch (com.alibaba.fastjson2.JSONException ex) {
             Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
-            throw new JSONException("toJSONString error", cause);
+            throw new JSONException(ex.getMessage(), cause);
         } catch (RuntimeException ex) {
             throw new JSONException("toJSONString error", ex);
         }
