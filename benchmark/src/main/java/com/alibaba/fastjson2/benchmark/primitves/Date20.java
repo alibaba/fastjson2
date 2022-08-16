@@ -70,6 +70,12 @@ public class Date20 {
         );
     }
 
+    public void wastjson(Blackhole bh) throws Exception {
+        bh.consume(
+                io.github.wycst.wast.json.JSON.parseObject(str, Date20Field.class)
+        );
+    }
+
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(Date20.class.getName())

@@ -186,7 +186,7 @@ public class ObjectReaderBaseModule
         }
     }
 
-    class ReaderAnnotationProcessor
+    public class ReaderAnnotationProcessor
             implements ObjectReaderAnnotationProcessor {
         @Override
         public void getBeanInfo(BeanInfo beanInfo, Class<?> objectClass) {
@@ -1467,6 +1467,26 @@ public class ObjectReaderBaseModule
 
         if (type == Object[].class) {
             return ObjectArrayReader.INSTANCE;
+        }
+
+        if (type == StringBuffer.class || type == StringBuilder.class) {
+            try {
+                Class objectClass = (Class) type;
+                return new ObjectReaderImplValue(
+                        objectClass,
+                        String.class,
+                        String.class,
+                        0,
+                        null,
+                        null,
+                        null,
+                        objectClass.getConstructor(String.class),
+                        null,
+                        null
+                );
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         if (type == Iterable.class

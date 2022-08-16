@@ -71,6 +71,11 @@ final class JSONWriterPretty
     }
 
     @Override
+    public void writeString(char[] chars, int off, int len, boolean quote) {
+        jsonWriter.writeString(chars, off, len, quote);
+    }
+
+    @Override
     public void writeLocalDate(LocalDate date) {
         jsonWriter.writeLocalDate(date);
     }
@@ -217,6 +222,7 @@ final class JSONWriterPretty
         jsonWriter.writeNameRaw(bytes, offset, len);
     }
 
+    @Override
     public void writeNameAny(Object name) {
         if (jsonWriter.startObject) {
             jsonWriter.startObject = false;
