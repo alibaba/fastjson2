@@ -1,9 +1,11 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.BeanInfo;
+import com.alibaba.fastjson2.modules.ObjectReaderModule;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -492,6 +494,10 @@ public abstract class BeanUtils {
     }
 
     public static Member getEnumValueField(Class clazz) {
+        return getEnumValueField(clazz, null);
+    }
+
+    public static Member getEnumValueField(Class clazz, List<ObjectReaderModule> modules) {
         if (clazz == null) {
             return null;
         }
@@ -524,10 +530,21 @@ public abstract class BeanUtils {
                     getters(enumInterface, e -> {
                         if (e.getName().equals(method.getName())) {
                             if (isJSONField(e.getAnnotations())) {
-                                memberRef.set(e);
+                                memberRef.set(method);
                             }
                         }
                     });
+
+                    Class mixIn = JSONFactory.getDefaultObjectReaderProvider().getMixIn(enumInterface);
+                    if (mixIn != null) {
+                        getters(mixIn, e -> {
+                            if (e.getName().equals(method.getName())) {
+                                if (isJSONField(e.getAnnotations())) {
+                                    memberRef.set(method);
+                                }
+                            }
+                        });
+                    }
                 }
                 Member refMember = memberRef.get();
                 if (refMember != null) {
