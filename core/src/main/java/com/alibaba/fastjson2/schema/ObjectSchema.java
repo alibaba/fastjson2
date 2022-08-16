@@ -222,7 +222,7 @@ public final class ObjectSchema
 
             ValidateResult result = schema.validate(propertyValue);
             if (!result.isSuccess()) {
-                return result;
+                return new ValidateResult(result, "property %s invalid", key);
             }
         }
 
