@@ -496,8 +496,9 @@ public abstract class BeanUtils {
             return null;
         }
 
-        Member member = null;
+        Class[] interfaces = clazz.getInterfaces();
 
+        Member member = null;
         Method[] methods = methodCache.get(clazz);
         if (methods == null) {
             methods = clazz.getMethods();
@@ -509,17 +510,28 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            Annotation[] annotations = method.getAnnotations();
-            for (Annotation annotation : annotations) {
-                Class<? extends Annotation> annotationType = annotation.annotationType();
-                switch (annotationType.getName()) {
-                    case "com.alibaba.fastjson.annotation.JSONField":
-                    case "com.alibaba.fastjson2.annotation.JSONField":
-                    case "com.fasterxml.jackson.annotation.JsonValue":
-                        member = method;
-                        break;
-                    default:
-                        break;
+            if (method.getParameterCount() != 0) {
+                continue;
+            }
+
+            if (isJSONField(method.getAnnotations())) {
+                return method;
+            }
+
+            if (member == null) {
+                AtomicReference<Member> memberRef = new AtomicReference<>();
+                for (Class enumInterface : interfaces) {
+                    getters(enumInterface, e -> {
+                        if (e.getName().equals(method.getName())) {
+                            if (isJSONField(e.getAnnotations())) {
+                                memberRef.set(e);
+                            }
+                        }
+                    });
+                }
+                Member refMember = memberRef.get();
+                if (refMember != null) {
+                    return refMember;
                 }
             }
         }
@@ -531,21 +543,28 @@ public abstract class BeanUtils {
         }
 
         for (Field field : fields) {
-            Annotation[] annotations = field.getAnnotations();
-            for (Annotation annotation : annotations) {
-                Class<? extends Annotation> annotationType = annotation.annotationType();
-                switch (annotationType.getName()) {
-                    case "com.alibaba.fastjson.annotation.JSONField":
-                    case "com.alibaba.fastjson.annotation2.JSONField":
-                        member = field;
-                        break;
-                    default:
-                        break;
-                }
+            if (isJSONField(field.getAnnotations())) {
+                member = field;
+                break;
             }
         }
 
         return member;
+    }
+
+    private static boolean isJSONField(Annotation[] annotations) {
+        for (Annotation annotation : annotations) {
+            Class<? extends Annotation> annotationType = annotation.annotationType();
+            switch (annotationType.getName()) {
+                case "com.alibaba.fastjson.annotation.JSONField":
+                case "com.alibaba.fastjson2.annotation.JSONField":
+                case "com.fasterxml.jackson.annotation.JsonValue":
+                    return true;
+                default:
+                    break;
+            }
+        }
+        return false;
     }
 
     public static void getters(Class objectClass, Consumer<Method> methodConsumer) {
