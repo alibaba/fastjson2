@@ -1816,6 +1816,8 @@ public class ObjectReaderCreatorASM
 
                 Label loadList_ = new Label(), listNotNull_ = new Label();
 
+                boolean initCapacity = JDKUtils.JVM_VERSION == 8 && "java/util/ArrayList".equals(LIST_TYPE);
+
                 if (jsonb) {
                     Label checkAutoTypeNull_ = new Label();
 
@@ -1875,7 +1877,12 @@ public class ObjectReaderCreatorASM
 
                         mw.visitTypeInsn(Opcodes.NEW, LIST_TYPE);
                         mw.visitInsn(Opcodes.DUP);
-                        mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
+                        if (initCapacity) {
+                            mw.visitLdcInsn(10);
+                            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "(I)V", false);
+                        } else {
+                            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
+                        }
                         mw.visitVarInsn(Opcodes.ASTORE, LIST);
 
                         mw.visitVarInsn(Opcodes.ALOAD, LIST);
@@ -1893,7 +1900,12 @@ public class ObjectReaderCreatorASM
                         // nextIfEmptyString
                         mw.visitTypeInsn(Opcodes.NEW, LIST_TYPE);
                         mw.visitInsn(Opcodes.DUP);
-                        mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
+                        if (initCapacity) {
+                            mw.visitLdcInsn(10);
+                            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "(I)V", false);
+                        } else {
+                            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
+                        }
                         mw.visitVarInsn(Opcodes.ASTORE, LIST);
 
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
@@ -1916,7 +1928,12 @@ public class ObjectReaderCreatorASM
                     mw.visitLabel(match_);
                     mw.visitTypeInsn(Opcodes.NEW, LIST_TYPE);
                     mw.visitInsn(Opcodes.DUP);
-                    mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
+                    if (initCapacity) {
+                        mw.visitLdcInsn(10);
+                        mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "(I)V", false);
+                    } else {
+                        mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
+                    }
                     mw.visitVarInsn(Opcodes.ASTORE, LIST);
                 }
 
