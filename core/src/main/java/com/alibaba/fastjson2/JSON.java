@@ -3,11 +3,15 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
+import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +27,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static com.alibaba.fastjson2.JSONFactory.defaultWriterFeatures;
+import static com.alibaba.fastjson2.JSONFactory.*;
 
 public interface JSON {
     /**
@@ -2441,5 +2445,68 @@ public interface JSON {
      */
     static boolean isEnabled(JSONWriter.Feature feature) {
         return (JSONFactory.defaultWriterFeatures & feature.mask) != 0;
+    }
+
+    /**
+     * use ObjectWriter and ObjectReader copy java object
+     * @param object the object to be copy
+     * @param features the specified features
+     *
+     * @since 2.0.12
+     */
+    static <T> T copy(T object, JSONWriter.Feature... features) {
+        if (object == null) {
+            return null;
+        }
+
+        Class<?> objectClass = object.getClass();
+        if (ObjectWriterProvider.isPrimitiveOrEnum(objectClass)) {
+            return object;
+        }
+
+        boolean fieldBased = false, beanToArray = false;
+        for (JSONWriter.Feature feature : features) {
+            if (feature == JSONWriter.Feature.FieldBased) {
+                fieldBased = true;
+            } else if (feature == JSONWriter.Feature.BeanToArray) {
+                beanToArray = true;
+            }
+        }
+
+        ObjectWriter objectWriter = defaultObjectWriterProvider.getObjectWriter(objectClass, objectClass, fieldBased);
+        ObjectReader objectReader = defaultObjectReaderProvider.getObjectReader(objectClass, fieldBased);
+
+        if (objectWriter instanceof ObjectWriterAdapter && objectReader instanceof ObjectReaderBean) {
+            T instance = (T) objectReader.createInstance();
+
+            List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
+            for (FieldWriter fieldWriter : fieldWriters) {
+                FieldReader fieldReader = objectReader.getFieldReader(fieldWriter.getFieldName());
+                if (fieldReader == null) {
+                    continue;
+                }
+
+                Object fieldValue = fieldWriter.getFieldValue(object);
+                Object fieldValueCopied = copy(fieldValue);
+                fieldReader.accept(instance, fieldValueCopied);
+            }
+
+            return instance;
+        }
+
+        byte[] jsonbBytes;
+        try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
+            writer.config(JSONWriter.Feature.WriteClassName);
+            objectWriter.writeJSONB(writer, object, null, null, 0);
+            jsonbBytes = writer.getBytes();
+        }
+
+        try (JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes, JSONReader.Feature.SupportAutoType, JSONReader.Feature.SupportClassForName)) {
+            if (beanToArray) {
+                jsonReader.context.config(JSONReader.Feature.SupportArrayToBean);
+            }
+
+            return (T) objectReader.readJSONBObject(jsonReader, null, null, 0);
+        }
     }
 }
