@@ -3,9 +3,11 @@ package com.alibaba.fastjson2.jsonb;
 import com.alibaba.fastjson2.*;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MapTest {
     @Test
@@ -60,7 +62,7 @@ public class MapTest {
 
     @Test
     public void test2() {
-        long[] starts = new long[] {
+        long[] starts = new long[]{
                 10_000,
                 100_000,
                 1_000_000,
@@ -110,5 +112,22 @@ public class MapTest {
 
     public static class Bean {
         public Map values;
+    }
+
+    @Test
+    public void testNullKey() {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("1", "1");
+        map.put("2", "2");
+        map.put(null, "3");
+        byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName);
+        HashMap map1 = JSONB.parseObject(bytes, HashMap.class, JSONReader.Feature.SupportAutoType);
+        assertEquals(map.size(), map1.size());
+        assertTrue(map1.containsKey(null));
+        assertEquals(map.get(null), map1.get(null));
+
+        String str = JSON.toJSONString(map);
+        HashMap map2 = JSON.parseObject(str, HashMap.class, JSONReader.Feature.SupportAutoType);
+        assertEquals(map.size(), map2.size());
     }
 }
