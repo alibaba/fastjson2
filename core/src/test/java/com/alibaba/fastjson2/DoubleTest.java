@@ -299,18 +299,26 @@ public class DoubleTest {
         String str = "12345.6789";
         char[] chars = str.toCharArray();
         double d0 = FloatingDecimal.parseDouble(chars, 0, chars.length);
+        assertEquals(Double.parseDouble(str), d0);
     }
 
     @Test
     public void parseDouble1() {
         String str = "123.123E256";
-        Double value = JSON.parseObject(str, Double.class);
-        assertEquals(value, Double.parseDouble(str));
+        double expected = Double.parseDouble(str);
 
-        Double value1 = (Double) JSON.parse(str);
-        assertEquals(value, value1);
+        assertEquals(expected, JSON.parseObject(str, Double.class));
+        assertEquals(expected, (Double) JSON.parse(str));
+        assertEquals(expected, JSON.parseObject(str, BigDecimal.class).doubleValue());
 
-        BigDecimal decimal = JSON.parseObject(str, BigDecimal.class);
-        assertEquals(value, decimal.doubleValue());
+        byte[] bytes = str.getBytes();
+        assertEquals(expected, JSON.parseObject(bytes, Double.class));
+        assertEquals(expected, (Double) JSON.parse(bytes));
+        assertEquals(expected, JSON.parseObject(bytes, BigDecimal.class).doubleValue());
+
+        char[] chars = str.toCharArray();
+        assertEquals(expected, JSONReader.of(chars).readDoubleValue());
+        assertEquals(expected, (Double) JSONReader.of(chars).readNumber());
+        assertEquals(expected, JSONReader.of(chars).readBigDecimal().doubleValue());
     }
 }
