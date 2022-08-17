@@ -300,4 +300,17 @@ public class DoubleTest {
         char[] chars = str.toCharArray();
         double d0 = FloatingDecimal.parseDouble(chars, 0, chars.length);
     }
+
+    @Test
+    public void parseDouble1() {
+        String str = "123.123E256";
+        Double value = JSON.parseObject(str, Double.class);
+        assertEquals(value, Double.parseDouble(str));
+
+        Double value1 = (Double) JSON.parse(str);
+        assertEquals(value, value1);
+
+        BigDecimal decimal = JSON.parseObject(str, BigDecimal.class);
+        assertEquals(value, decimal.doubleValue());
+    }
 }
