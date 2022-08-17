@@ -88,9 +88,37 @@ public class EishayParseStringTest {
         // oracle-jdk-18.0.2 :
     }
 
+    public static void gson_test() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            gson();
+        }
+    }
+
+    public static void gson() throws Exception {
+        EishayParseString benchmark = new EishayParseString();
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000 * 1000; ++i) {
+            benchmark.gson(BH);
+        }
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("EishayParseString-wastjson millis : " + millis);
+        // zulu8.62.0.19 : 1449
+        // zulu11.52.13 :
+        // zulu17.32.13 :
+        // zulu18.28.13 :
+        // zulu19.0.47 :
+        // corretto-8 :
+        // corretto-11 :
+        // corretto-17 :
+        // corretto-18 :
+        // oracle-jdk-17.0.4 :
+        // oracle-jdk-18.0.2 :
+    }
+
     public static void main(String[] args) throws Exception {
 //        fastjson2_perf_test();
 //        jackson_perf_test();
-        wastjson_perf_test();
+        gson_test();
+//        wastjson_perf_test();
     }
 }

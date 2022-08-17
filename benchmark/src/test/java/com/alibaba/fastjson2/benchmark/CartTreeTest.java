@@ -19,7 +19,7 @@ public class CartTreeTest {
         long millis = System.currentTimeMillis() - start;
         System.out.println("CartTree-fastjson2 : " + millis);
 
-        // zulu8.62.0.19 : 1332
+        // zulu8.62.0.19 : 1332 1212
         // zulu11.52.13 : 1515
         // zulu17.32.13 : 1266
         // zulu18.28.13 : 1245
