@@ -932,6 +932,8 @@ public abstract class BeanUtils {
                 return dots(methodName, 0, false);
             case "UpperCase":
                 return methodName.toUpperCase();
+            case "LowerCase":
+                return methodName.toLowerCase();
             case "UpperCamelCaseWithSpaces":
                 return upperCamelWith(methodName, 0, ' ');
             case "UpperCamelCaseWithUnderScores":
