@@ -62,8 +62,27 @@ public class EishayWriteStringTest {
         // zulu8.58.0.13 : 467
     }
 
+    public static void gson_test() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            gson();
+        }
+    }
+
+    public static void gson() throws Exception {
+        EishayWriteString perf = new EishayWriteString();
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000 * 1000; ++i) {
+            perf.gson(BH);
+        }
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("jackson millis : " + millis);
+        // zulu8.58.0.13 : 1455
+        // zulu11.52.13 :
+        // zulu17.32.13 :
+    }
+
     public static void main(String[] args) throws Exception {
-        fastjson2_perf_test();
+//        fastjson2_perf_test();
 //        jackson_perf_test();
 //        wastjson_perf_test();
     }

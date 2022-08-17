@@ -4,15 +4,15 @@ import org.openjdk.jmh.infra.Blackhole;
 
 public class EishayWriteUTF8BytesTest {
     static final Blackhole BH = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
+    static EishayWriteUTF8Bytes benchmark = new EishayWriteUTF8Bytes();
 
-    public static void fastjson2_perf_test() {
+    public static void fastjson2_test() {
         for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
+            fastjson2();
         }
     }
 
-    public static void fastjson2_perf() {
-        EishayWriteUTF8Bytes benchmark = new EishayWriteUTF8Bytes();
+    public static void fastjson2() {
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.fastjson2(BH);
@@ -24,14 +24,13 @@ public class EishayWriteUTF8BytesTest {
         // zulu17.32.13 :
     }
 
-    public static void jackson_perf_test() throws Exception {
+    public static void jackson_test() throws Exception {
         for (int i = 0; i < 10; i++) {
-            jackson_perf();
+            jackson();
         }
     }
 
-    public static void jackson_perf() throws Exception {
-        EishayWriteUTF8Bytes benchmark = new EishayWriteUTF8Bytes();
+    public static void jackson() throws Exception {
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.jackson(BH);
@@ -43,8 +42,27 @@ public class EishayWriteUTF8BytesTest {
         // zulu17.32.13 :
     }
 
+    public static void gson_test() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            gson();
+        }
+    }
+
+    public static void gson() throws Exception {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000 * 1000; ++i) {
+            benchmark.gson(BH);
+        }
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("gson millis : " + millis);
+        // zulu8.58.0.13 : 1569
+        // zulu11.52.13 :
+        // zulu17.32.13 :
+    }
+
     public static void main(String[] args) throws Exception {
-        fastjson2_perf_test();
+//        fastjson2_test();
+        gson_test();
 //        jackson_perf_test();
     }
 }
