@@ -2547,7 +2547,7 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+        if (JDKUtils.JVM_VERSION == 11 && JDKUtils.UNSAFE_SUPPORT) {
             try {
                 byte coder = UnsafeUtils.getStringCoder(str);
                 if (coder == 0) {
@@ -2576,7 +2576,7 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+        if (JDKUtils.JVM_VERSION == 11 && JDKUtils.UNSAFE_SUPPORT) {
             try {
                 byte coder = UnsafeUtils.getStringCoder(str);
                 if (coder == 0) {
