@@ -34,4 +34,14 @@ public class Fnv {
         }
         return hashCode;
     }
+
+    public static long hashCode64(byte... name) {
+        long hashCode = MAGIC_HASH_CODE;
+        for (int i = 0; i < name.length; ++i) {
+            char ch = (char) name[i];
+            hashCode ^= ch;
+            hashCode *= MAGIC_PRIME;
+        }
+        return hashCode;
+    }
 }

@@ -20,9 +20,9 @@ public class EishayParseStringTest {
         long millis = System.currentTimeMillis() - start;
         System.out.println("fastjson2 millis : " + millis);
         // zulu8.62.0.19 : 666 578
-        // zulu11.52.13 : 821 546
-        // zulu17.32.13 : 601 552
-        // zulu18.28.13 : 598 555 534
+        // zulu11.52.13 : 821 546 521 494
+        // zulu17.32.13 : 601 552 532
+        // zulu18.28.13 : 598 555 534 527
         // zulu19.0.47 :
         // corretto-8 :
         // corretto-11 :
@@ -143,10 +143,10 @@ public class EishayParseStringTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2_test();
+        fastjson2_test();
 //        jackson_test();
 //        fastjson1_test();
 //        gson_test();
-        wastjson_test();
+//        wastjson_test();
     }
 }
