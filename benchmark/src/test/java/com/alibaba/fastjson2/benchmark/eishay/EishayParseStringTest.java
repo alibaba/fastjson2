@@ -88,7 +88,7 @@ public class EishayParseStringTest {
         // oracle-jdk-18.0.2 :
     }
 
-    public static void wastjson_perf_test() throws Exception {
+    public static void wastjson_test() throws Exception {
         for (int i = 0; i < 10; i++) {
             wastjson();
         }
@@ -143,10 +143,10 @@ public class EishayParseStringTest {
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2_test();
+//        fastjson2_test();
 //        jackson_test();
 //        fastjson1_test();
 //        gson_test();
-//        wastjson_perf_test();
+        wastjson_test();
     }
 }
