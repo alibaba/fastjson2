@@ -307,7 +307,13 @@ final class JSONReaderASCII
             }
         }
 
-        char c = (char) bytes[offset];
+        char c;
+        if (offset < end) {
+            c = (char) bytes[offset];
+        } else {
+            c = EOI;
+        }
+
         while (c <= ' ' && ((1L << c) & SPACE) != 0) {
             offset++;
             c = (char) bytes[offset];
