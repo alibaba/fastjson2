@@ -932,7 +932,8 @@ final class JSONReaderASCII
     @Override
     public String readString() {
         if (ch == '"' || ch == '\'') {
-            final char quote = ch;
+            final byte quote = (byte) ch;
+            final byte slash = (byte) '\\';
 
             int offset = this.offset;
             int start = offset;
@@ -953,7 +954,7 @@ final class JSONReaderASCII
                     byte c5 = bytes[offset + 5];
                     byte c6 = bytes[offset + 6];
                     byte c7 = bytes[offset + 7];
-                    if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\') {
+                    if (c0 == slash || c1 == slash || c2 == slash || c3 == slash || c4 == slash || c5 == slash || c6 == slash || c7 == slash) {
                         break;
                     }
                     if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote) {
@@ -969,7 +970,7 @@ final class JSONReaderASCII
                     byte c1 = bytes[offset + 1];
                     byte c2 = bytes[offset + 2];
                     byte c3 = bytes[offset + 3];
-                    if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\') {
+                    if (c0 == slash || c1 == slash || c2 == slash || c3 == slash) {
                         break;
                     }
                     if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
@@ -985,7 +986,7 @@ final class JSONReaderASCII
                     }
 
                     byte c = bytes[offset];
-                    if (c == '\\') {
+                    if (c == slash) {
                         valueEscape = true;
                         c = bytes[++offset];
                         switch (c) {

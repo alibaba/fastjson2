@@ -5,13 +5,13 @@ import org.openjdk.jmh.infra.Blackhole;
 public class EishayParseStringTest {
     static final Blackhole BH = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
 
-    public static void fastjson2_perf_test() {
+    public static void fastjson2_test() {
         for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
+            fastjson2();
         }
     }
 
-    public static void fastjson2_perf() {
+    public static void fastjson2() {
         EishayParseString benchmark = new EishayParseString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
@@ -22,7 +22,36 @@ public class EishayParseStringTest {
         // zulu8.62.0.19 : 666 578
         // zulu11.52.13 : 821 546
         // zulu17.32.13 : 601 552
-        // zulu18.28.13 : 598 555
+        // zulu18.28.13 : 598 555 534
+        // zulu19.0.47 :
+        // corretto-8 :
+        // corretto-11 :
+        // corretto-17 :
+        // corretto-18 :
+        // oracle-jdk-17.0.4 : 562 536
+        // oracle-jdk-18.0.2 : 552 530
+        // ibm-aarch64_mac_11.0.15_10 : 1240
+        // ibm-aarch64_mac_17.0.3_7 : 1311
+    }
+
+    public static void fastjson1_test() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            fastjson1();
+        }
+    }
+
+    public static void fastjson1() throws Exception {
+        EishayParseString benchmark = new EishayParseString();
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000 * 1000; ++i) {
+            benchmark.fastjson1(BH);
+        }
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("fastjson1 millis : " + millis);
+        // zulu8.62.0.19 : 664
+        // zulu11.52.13 : 677
+        // zulu17.32.13 : 522
+        // zulu18.28.13 :
         // zulu19.0.47 :
         // corretto-8 :
         // corretto-11 :
@@ -30,17 +59,15 @@ public class EishayParseStringTest {
         // corretto-18 :
         // oracle-jdk-17.0.4 :
         // oracle-jdk-18.0.2 :
-        // ibm-aarch64_mac_11.0.15_10 : 1240
-        // ibm-aarch64_mac_17.0.3_7 : 1311
     }
 
-    public static void jackson_perf_test() throws Exception {
+    public static void jackson_test() throws Exception {
         for (int i = 0; i < 10; i++) {
-            jackson_perf();
+            jackson();
         }
     }
 
-    public static void jackson_perf() throws Exception {
+    public static void jackson() throws Exception {
         EishayParseString benchmark = new EishayParseString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
@@ -116,9 +143,10 @@ public class EishayParseStringTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2_perf_test();
-//        jackson_perf_test();
-        gson_test();
+        fastjson2_test();
+//        jackson_test();
+//        fastjson1_test();
+//        gson_test();
 //        wastjson_perf_test();
     }
 }
