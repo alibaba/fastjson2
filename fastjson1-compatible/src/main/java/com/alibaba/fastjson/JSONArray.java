@@ -801,8 +801,8 @@ public class JSONArray
             if (item instanceof Map) {
                 classItem = (T) objectReader.createInstance((Map) item, 0L);
             } else {
-                if (item == null) {
-                    list.add(null);
+                if (item == null || item.getClass() == clazz) {
+                    list.add((T) item);
                     continue;
                 }
 
