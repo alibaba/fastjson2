@@ -1083,9 +1083,8 @@ public class JSONArray
      *
      * @param clazz specify the {@code Class<T>} to be converted
      * @param features features to be enabled in parsing
-     * @deprecated since 2.0.4, please use {@link #toList(Class, JSONReader.Feature...)}
+     * please use {@link #toList(Class, JSONReader.Feature...)}
      */
-    @Deprecated
     public <T> List<T> toJavaList(Class<T> clazz, JSONReader.Feature... features) {
         return toList(clazz, features);
     }

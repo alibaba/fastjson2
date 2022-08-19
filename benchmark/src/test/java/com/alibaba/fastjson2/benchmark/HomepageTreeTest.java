@@ -19,7 +19,7 @@ public class HomepageTreeTest {
         long millis = System.currentTimeMillis() - start;
         System.out.println("HomepageTree-fastjson2 : " + millis);
 
-        // zulu8.62.0.19 : 577
+        // zulu8.62.0.19 : 577 550
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :

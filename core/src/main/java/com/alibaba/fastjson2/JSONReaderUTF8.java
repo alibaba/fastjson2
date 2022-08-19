@@ -1777,7 +1777,7 @@ class JSONReaderUTF8
                 expValue = -expValue;
             }
 
-            this.exponent = (byte) expValue;
+            this.exponent = (short) expValue;
             valueType = JSON_TYPE_DEC;
         }
 
@@ -2015,7 +2015,7 @@ class JSONReaderUTF8
                 expValue = -expValue;
             }
 
-            this.exponent = (byte) expValue;
+            this.exponent = (short) expValue;
             valueType = JSON_TYPE_DEC;
         }
 
@@ -3302,7 +3302,7 @@ class JSONReaderUTF8
                 expValue = -expValue;
             }
 
-            this.exponent = (byte) expValue;
+            this.exponent = (short) expValue;
             valueType = JSON_TYPE_DEC;
         }
 
@@ -3516,7 +3516,7 @@ class JSONReaderUTF8
                 expValue = -expValue;
             }
 
-            this.exponent = (byte) expValue;
+            this.exponent = (short) expValue;
             valueType = JSON_TYPE_DEC;
         }
 

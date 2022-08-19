@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class EishayParseString {
     static String str;
     static ObjectMapper mapper = new ObjectMapper();
+    static Gson gson = new Gson();
 
     static {
         try {
@@ -51,12 +53,19 @@ public class EishayParseString {
         );
     }
 
+    public void gson(Blackhole bh) throws Exception {
+        bh.consume(
+                gson.fromJson(str, MediaContent.class)
+        );
+    }
+
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(EishayParseString.class.getName())
                 .exclude(EishayParseStringPretty.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
+                .warmupIterations(3)
                 .forks(1)
                 .build();
         new Runner(options).run();

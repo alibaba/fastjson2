@@ -342,6 +342,10 @@ public final class ObjectReaderImplMap
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.isJSONB()) {
+            return readJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
         JSONReader.Context context = jsonReader.getContext();
         Supplier<Map> objectSupplier = jsonReader.getContext().getObjectSupplier();
         Map object;

@@ -238,6 +238,8 @@ final class ObjectWriterImplMap
                 } else {
                     jsonWriter.writeString(key);
                 }
+            } else if (entryKey == null) {
+                jsonWriter.writeNull();
             } else {
                 if (contextRefDetect) {
                     jsonWriter.config(JSONWriter.Feature.ReferenceDetection, false);
