@@ -30,15 +30,17 @@ public class GenReport {
         }
 
         for (BenchmarkResult benchmarkResult : benchResults.values()) {
-            if (benchmarkResult.libraryResults.size() == 3) {
-                LibResult fastjson1 = benchmarkResult.libraryResults.get("fastjson1");
+            if (benchmarkResult.libraryResults.size() == 4) {
                 LibResult fastjson2 = benchmarkResult.libraryResults.get("fastjson2");
+                LibResult fastjson1 = benchmarkResult.libraryResults.get("fastjson1");
                 LibResult jackson = benchmarkResult.libraryResults.get("jackson");
-                if (fastjson1 != null && fastjson2 != null && jackson != null) {
+                LibResult gson = benchmarkResult.libraryResults.get("gson");
+                if (fastjson1 != null && fastjson2 != null && jackson != null && gson != null) {
                     benchmarkResult.libraryResults.clear();
                     benchmarkResult.libraryResults.put("fastjson2", fastjson2);
                     benchmarkResult.libraryResults.put("fastjson1", fastjson1);
                     benchmarkResult.libraryResults.put("jackson", jackson);
+                    benchmarkResult.libraryResults.put("gson", gson);
                 }
             }
 
