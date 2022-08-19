@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 
 public class EishayWriteString {
     static MediaContent mc;
-    static ObjectMapper mapper = new ObjectMapper();
-    static Gson gson = new Gson();
+    static final ObjectMapper mapper = new ObjectMapper();
+    static final Gson gson = new Gson();
 
     static {
         try {
@@ -55,6 +55,7 @@ public class EishayWriteString {
         );
     }
 
+    @Benchmark
     public void gson(Blackhole bh) throws Exception {
         bh.consume(
                 gson.toJson(mc)

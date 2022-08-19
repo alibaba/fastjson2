@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 
 public class EishayParseTreeUTF8Bytes {
     static byte[] utf8Bytes;
-    static ObjectMapper mapper = new ObjectMapper();
-    static Gson gson = new Gson();
+    static final ObjectMapper mapper = new ObjectMapper();
+    static final Gson gson = new Gson();
 
     static {
         try {
@@ -46,7 +46,7 @@ public class EishayParseTreeUTF8Bytes {
         bh.consume(mapper.readValue(utf8Bytes, HashMap.class));
     }
 
-//    @Benchmark
+    @Benchmark
     public void gson(Blackhole bh) throws Exception {
         bh.consume(gson
                 .fromJson(
