@@ -44,46 +44,7 @@ public class EishayParseUTF8Bytes {
         bh.consume(mapper.readValue(utf8Bytes, MediaContent.class));
     }
 
-    //    @Test
-    public void fastjson2_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
-        }
-    }
-
-    public static void fastjson2_perf() {
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
-            JSON.parseObject(utf8Bytes, MediaContent.class);
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("EishayParseUTF8Bytes : " + millis);
-        // zulu17.32.13 : 722 586
-        // zulu11.52.13 : 565
-        // zulu8.58.0.13 :
-    }
-
-    public void fastjson1_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            fastjson1_perf();
-        }
-    }
-
-    public static void fastjson1_perf() {
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
-            com.alibaba.fastjson.JSON.parseObject(utf8Bytes, MediaContent.class);
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("millis : " + millis);
-        // zulu17.32.13 : 588
-        // zulu11.52.13 :
-        // zulu8.58.0.13 :
-    }
-
     public static void main(String[] args) throws RunnerException {
-//        new EishayParseUTF8Bytes().fastjson1_perf_test();
-//        new EishayParseUTF8Bytes().fastjson2_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayParseUTF8Bytes.class.getName())
                 .exclude(EishayParseUTF8BytesPretty.class.getName())

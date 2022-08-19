@@ -2,8 +2,8 @@ package com.alibaba.fastjson2.benchmark.eishay;
 
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
-public class EishayParseTreeUTF8BytesTest {
-    static final EishayParseTreeUTF8Bytes benchmark = new EishayParseTreeUTF8Bytes();
+public class EishayParseUTF8BytesTest {
+    static final EishayParseUTF8Bytes benchmark = new EishayParseUTF8Bytes();
 
     public static void fastjson2_perf_test() {
         for (int i = 0; i < 10; i++) {
@@ -18,9 +18,9 @@ public class EishayParseTreeUTF8BytesTest {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("fastjson2 millis : " + millis);
-        // zulu17.32.13 : 967 696
-        // zulu11.52.13 : 900 836
-        // zulu8.58.0.13 : 995 715
+        // zulu8.62.0.19 : 703
+        // zulu11.52.13 : 579 565
+        // zulu17.32.13 : 563
     }
 
     public static void jackson_test() throws Exception {
@@ -36,13 +36,13 @@ public class EishayParseTreeUTF8BytesTest {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("jackson millis : " + millis);
-        // zulu17.32.13 : 1011
-        // zulu11.52.13 : 1132
-        // zulu8.58.0.13 : 1084
+        // zulu8.62.0.19 : 963
+        // zulu11.52.13 : 1058
+        // zulu17.32.13 : 1064
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2_perf_test();
-        jackson_test();
+        fastjson2_perf_test();
+//        jackson_test();
     }
 }
