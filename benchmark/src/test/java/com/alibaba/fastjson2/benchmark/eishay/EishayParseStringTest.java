@@ -19,9 +19,9 @@ public class EishayParseStringTest {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("fastjson2 millis : " + millis);
-        // zulu8.62.0.19 : 666 578
-        // zulu11.52.13 : 821 546 521 494
-        // zulu17.32.13 : 601 552 532
+        // zulu8.62.0.19 : 666 578 554
+        // zulu11.52.13 : 821 546 521 494 492
+        // zulu17.32.13 : 601 552 532 516 511
         // zulu18.28.13 : 598 555 534 527
         // zulu19.0.47 :
         // corretto-8 :
