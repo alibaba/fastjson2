@@ -1,9 +1,9 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
-import org.openjdk.jmh.infra.Blackhole;
+import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class EishayWriteStringTest {
-    static final Blackhole BH = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
+    static final EishayWriteString benchmark = new EishayWriteString();
 
     public static void fastjson2_perf_test() {
         for (int i = 0; i < 10; i++) {
@@ -12,10 +12,9 @@ public class EishayWriteStringTest {
     }
 
     public static void fastjson2_perf() {
-        EishayWriteString perf = new EishayWriteString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
-            perf.fastjson2(BH);
+            benchmark.fastjson2(BH);
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("fastjson2 millis : " + millis);
@@ -31,10 +30,9 @@ public class EishayWriteStringTest {
     }
 
     public static void jackson_perf() throws Exception {
-        EishayWriteString perf = new EishayWriteString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
-            perf.jackson(BH);
+            benchmark.jackson(BH);
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("jackson millis : " + millis);
@@ -50,10 +48,9 @@ public class EishayWriteStringTest {
     }
 
     public static void wastjson() throws Exception {
-        EishayWriteString perf = new EishayWriteString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
-            perf.wastjson(BH);
+            benchmark.wastjson(BH);
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("jackson millis : " + millis);
@@ -69,10 +66,9 @@ public class EishayWriteStringTest {
     }
 
     public static void gson() throws Exception {
-        EishayWriteString perf = new EishayWriteString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
-            perf.gson(BH);
+            benchmark.gson(BH);
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("jackson millis : " + millis);

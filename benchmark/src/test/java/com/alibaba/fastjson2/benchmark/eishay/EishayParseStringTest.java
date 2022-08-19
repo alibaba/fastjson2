@@ -4,6 +4,7 @@ import org.openjdk.jmh.infra.Blackhole;
 
 public class EishayParseStringTest {
     static final Blackhole BH = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
+    static final EishayParseString benchmark = new EishayParseString();
 
     public static void fastjson2_test() {
         for (int i = 0; i < 10; i++) {
@@ -12,7 +13,6 @@ public class EishayParseStringTest {
     }
 
     public static void fastjson2() {
-        EishayParseString benchmark = new EishayParseString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.fastjson2(BH);
@@ -41,7 +41,6 @@ public class EishayParseStringTest {
     }
 
     public static void fastjson1() throws Exception {
-        EishayParseString benchmark = new EishayParseString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.fastjson1(BH);
@@ -68,7 +67,6 @@ public class EishayParseStringTest {
     }
 
     public static void jackson() throws Exception {
-        EishayParseString benchmark = new EishayParseString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.jackson(BH);
@@ -95,7 +93,6 @@ public class EishayParseStringTest {
     }
 
     public static void wastjson() throws Exception {
-        EishayParseString benchmark = new EishayParseString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.wastjson(BH);
@@ -122,7 +119,6 @@ public class EishayParseStringTest {
     }
 
     public static void gson() throws Exception {
-        EishayParseString benchmark = new EishayParseString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.gson(BH);

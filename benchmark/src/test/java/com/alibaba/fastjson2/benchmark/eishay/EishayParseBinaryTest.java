@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class EishayParseBinaryTest {
+    static final EishayParseBinary benchmark = new EishayParseBinary();
+
     public static void kryo_test() throws Exception {
         System.out.println("kryo size " + EishayParseBinary.kryoBytes.length); // 214
         System.out.println();
@@ -12,7 +14,6 @@ public class EishayParseBinaryTest {
     }
 
     public static void kryo() throws Exception {
-        EishayParseBinary benchmark = new EishayParseBinary();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.kryo(BH);
@@ -34,7 +35,6 @@ public class EishayParseBinaryTest {
     }
 
     public static void fastjson2JSONB() throws Exception {
-        EishayParseBinary benchmark = new EishayParseBinary();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.fastjson2JSONB(BH);
@@ -56,7 +56,6 @@ public class EishayParseBinaryTest {
     }
 
     public static void fastjson2JSONBArrayMapping() throws Exception {
-        EishayParseBinary benchmark = new EishayParseBinary();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.fastjson2JSONBArrayMapping(BH);

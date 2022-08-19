@@ -4,7 +4,7 @@ import org.openjdk.jmh.infra.Blackhole;
 
 public class EishayWriteUTF8BytesTest {
     static final Blackhole BH = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
-    static EishayWriteUTF8Bytes benchmark = new EishayWriteUTF8Bytes();
+    static final EishayWriteUTF8Bytes benchmark = new EishayWriteUTF8Bytes();
 
     public static void fastjson2_test() {
         for (int i = 0; i < 10; i++) {
