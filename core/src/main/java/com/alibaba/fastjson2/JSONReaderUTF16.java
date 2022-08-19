@@ -2329,7 +2329,7 @@ final class JSONReaderUTF16
                 expValue = -expValue;
             }
 
-            this.exponent = (byte) expValue;
+            this.exponent = (short) expValue;
             valueType = JSON_TYPE_DEC;
         }
 
@@ -2567,7 +2567,7 @@ final class JSONReaderUTF16
                 expValue = -expValue;
             }
 
-            this.exponent = (byte) expValue;
+            this.exponent = (short) expValue;
             valueType = JSON_TYPE_DEC;
         }
 
@@ -3452,7 +3452,7 @@ final class JSONReaderUTF16
                 expValue = -expValue;
             }
 
-            this.exponent = (byte) expValue;
+            this.exponent = (short) expValue;
             valueType = JSON_TYPE_DEC;
         }
 

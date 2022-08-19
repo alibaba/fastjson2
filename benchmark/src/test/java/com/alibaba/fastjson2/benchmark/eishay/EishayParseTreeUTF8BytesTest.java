@@ -24,13 +24,13 @@ public class EishayParseTreeUTF8BytesTest {
         // zulu8.58.0.13 : 995 715
     }
 
-    public static void jackson_perf_test() throws Exception {
+    public static void jackson_test() throws Exception {
         for (int i = 0; i < 10; i++) {
-            jackson_perf();
+            jackson();
         }
     }
 
-    public static void jackson_perf() throws Exception {
+    public static void jackson() throws Exception {
         EishayParseTreeUTF8Bytes perf = new EishayParseTreeUTF8Bytes();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
@@ -45,6 +45,6 @@ public class EishayParseTreeUTF8BytesTest {
 
     public static void main(String[] args) throws Exception {
 //        fastjson2_perf_test();
-        jackson_perf_test();
+        jackson_test();
     }
 }

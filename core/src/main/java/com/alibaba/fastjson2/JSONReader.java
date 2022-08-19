@@ -68,7 +68,7 @@ public abstract class JSONReader
     protected boolean negative;
 
     protected byte valueType;
-    protected byte exponent;
+    protected short exponent;
     protected byte scale;
 
     protected int mag0;
@@ -2518,7 +2518,7 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT && str.length() > 1024 * 1024) {
+        if (JDKUtils.JVM_VERSION == 8 && JDKUtils.UNSAFE_SUPPORT && str.length() > 1024 * 1024) {
             try {
                 byte coder = UnsafeUtils.getStringCoder(str);
                 if (coder == 0) {

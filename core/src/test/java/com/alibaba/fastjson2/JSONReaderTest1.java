@@ -1551,4 +1551,107 @@ public class JSONReaderTest1 {
             }
         }
     }
+
+    @Test
+    public void readNameHashCode() {
+        String[] names = new String[] {
+                "",
+                "0",
+                "01",
+                "012",
+                "0123",
+                "01234",
+                "012345",
+                "0123456",
+                "01234567",
+                "012345678",
+                "0123456789",
+                "0123456789A"
+        };
+
+        for (String name : names) {
+            String str = "{\"" + name + "\":123456789}";
+            byte[] bytes = str.getBytes();
+            JSONReaderASCII jsonReader = new JSONReaderASCII(JSONFactory.createReadContext(), str, bytes, 0, bytes.length);
+            assertTrue(jsonReader.nextIfObjectStart());
+            assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
+            assertEquals(name, jsonReader.getFieldName());
+        }
+    }
+
+    @Test
+    public void readNameHashCode_x2() {
+        JSONReader.Context context = JSONFactory.createReadContext();
+
+        byte[] bytes = "{\"01\":123456789}".getBytes();
+        for (int i0 = 'a'; i0 <= 'z'; i0++) {
+            for (int i1 = 'a'; i1 <= 'z'; i1++) {
+                bytes[2] = (byte) i0;
+                bytes[3] = (byte) i1;
+                String name = new String(new char[]{(char) i0, (char) i1});
+                JSONReaderASCII jsonReader = new JSONReaderASCII(context, null, bytes, 0, bytes.length);
+                assertTrue(jsonReader.nextIfObjectStart());
+                assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
+            }
+        }
+    }
+
+    @Test
+    public void readNameHashCode_x3() {
+        JSONReader.Context context = JSONFactory.createReadContext();
+
+        byte[] bytes = "{\"012\":12}".getBytes();
+        for (int i0 = 'a'; i0 <= 'z'; i0++) {
+            for (int i1 = 'a'; i1 <= 'z'; i1++) {
+                for (int i2 = 'a'; i2 <= 'z'; i2++) {
+                    bytes[2] = (byte) i0;
+                    bytes[3] = (byte) i1;
+                    bytes[4] = (byte) i2;
+                    String name = new String(new char[]{(char) i0, (char) i1, (char) i2});
+                    JSONReaderASCII jsonReader = new JSONReaderASCII(context, null, bytes, 0, bytes.length);
+                    assertTrue(jsonReader.nextIfObjectStart());
+                    assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
+                }
+            }
+        }
+
+        bytes = "{\"012\":123456789}".getBytes();
+        for (int i0 = 'a'; i0 <= 'z'; i0++) {
+            for (int i1 = 'a'; i1 <= 'z'; i1++) {
+                for (int i2 = 'a'; i2 <= 'z'; i2++) {
+                    bytes[2] = (byte) i0;
+                    bytes[3] = (byte) i1;
+                    bytes[4] = (byte) i2;
+                    String name = new String(new char[]{(char) i0, (char) i1, (char) i2});
+                    JSONReaderASCII jsonReader = new JSONReaderASCII(context, null, bytes, 0, bytes.length);
+                    assertTrue(jsonReader.nextIfObjectStart());
+                    assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void readNameHashCode_x4() {
+        JSONReader.Context context = JSONFactory.createReadContext();
+
+        byte[] bytes = "{\"0123\":123456789}".getBytes();
+        for (int i0 = 'a'; i0 <= 'z'; i0++) {
+            for (int i1 = 'a'; i1 <= 'z'; i1++) {
+                for (int i2 = 'a'; i2 <= 'z'; i2++) {
+                    for (int i3 = 'a'; i3 <= 'z'; i3++) {
+                        bytes[2] = (byte) i0;
+                        bytes[3] = (byte) i1;
+                        bytes[4] = (byte) i2;
+                        bytes[5] = (byte) i3;
+
+                        String name = new String(new char[]{(char) i0, (char) i1, (char) i2, (char) i3});
+                        JSONReaderASCII jsonReader = new JSONReaderASCII(context, null, bytes, 0, bytes.length);
+                        assertTrue(jsonReader.nextIfObjectStart());
+                        assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
+                    }
+                }
+            }
+        }
+    }
 }

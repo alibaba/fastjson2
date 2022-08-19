@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -14,11 +15,13 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 public class EishayWriteUTF8Bytes {
     static MediaContent mc;
     static ObjectMapper mapper = new ObjectMapper();
+    static Gson gson = new Gson();
 
     static {
         try {
@@ -44,6 +47,13 @@ public class EishayWriteUTF8Bytes {
     @Benchmark
     public void jackson(Blackhole bh) throws Exception {
         bh.consume(mapper.writeValueAsBytes(mc));
+    }
+
+    public void gson(Blackhole bh) throws Exception {
+        bh.consume(gson
+                .toJson(mc)
+                .getBytes(StandardCharsets.UTF_8)
+        );
     }
 
     public static void main(String[] args) throws RunnerException {

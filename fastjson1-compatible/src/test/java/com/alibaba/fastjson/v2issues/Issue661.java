@@ -2,9 +2,11 @@ package com.alibaba.fastjson.v2issues;
 
 import com.alibaba.fastjson.JSON;
 import lombok.Data;
-import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class Issue661 {
     @Data
@@ -22,18 +24,30 @@ public class Issue661 {
         int a;
     }
 
-    @RepeatedTest(100)
-    void testB() {
-        for (int i = 0; i < 1000; i++) {
-            JSON.toJSONString(new Response<>(new A()));
-        }
-    }
-
-    @RepeatedTest(100)
-    void testList() {
-        for (int i = 0; i < 1000; i++) {
-            // Collections.singletonList(0)改成0也会异常，异常概率小一些
-            JSON.toJSONString(new Response<>(Collections.singletonList(0)));
-        }
+    @Test
+    public void testParallel() {
+        final Consumer consumer = e -> {};
+        // 在ForkJoinPool中异常
+        Stream.of(
+                () -> {
+                    for (int i = 0; i < 100000; i++) {
+                        consumer.accept(
+                                JSON.toJSONString(
+                                        new Response<>(Collections.singletonList(0))
+                                )
+                        );
+                    }
+                },
+                (Runnable) () -> {
+                    for (int i = 0; i < 100000; i++) {
+                        consumer.accept(
+                                JSON.toJSONString(
+                                        new Response<>(new A())
+                                )
+                        );
+                    }
+                })
+                .parallel()
+                .forEach(Runnable::run);
     }
 }
