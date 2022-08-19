@@ -186,7 +186,7 @@ public class ObjectReaderBaseModule
         }
     }
 
-    class ReaderAnnotationProcessor
+    public class ReaderAnnotationProcessor
             implements ObjectReaderAnnotationProcessor {
         @Override
         public void getBeanInfo(BeanInfo beanInfo, Class<?> objectClass) {
@@ -194,10 +194,6 @@ public class ObjectReaderBaseModule
             if (mixInSource == null) {
                 String typeName = objectClass.getName();
                 switch (typeName) {
-                    case "org.apache.commons.lang3.tuple.Pair":
-                    case "org.apache.commons.lang3.tuple.ImmutablePair":
-                        provider.mixIn(objectClass, mixInSource = ApacheLang3Support.PairMixIn.class);
-                        break;
                     case "org.apache.commons.lang3.tuple.Triple":
                         provider.mixIn(objectClass, mixInSource = ApacheLang3Support.TripleMixIn.class);
                         break;
@@ -1261,6 +1257,14 @@ public class ObjectReaderBaseModule
             return ObjectReaderImplClass.INSTANCE;
         }
 
+        if (type == Method.class) {
+            return new ObjectReaderImplMethod();
+        }
+
+        if (type == Field.class) {
+            return new ObjectReaderImplField();
+        }
+
         if (type == Type.class) {
             return ObjectReaderImplClass.INSTANCE;
         }
@@ -1465,6 +1469,26 @@ public class ObjectReaderBaseModule
             return ObjectArrayReader.INSTANCE;
         }
 
+        if (type == StringBuffer.class || type == StringBuilder.class) {
+            try {
+                Class objectClass = (Class) type;
+                return new ObjectReaderImplValue(
+                        objectClass,
+                        String.class,
+                        String.class,
+                        0,
+                        null,
+                        null,
+                        null,
+                        objectClass.getConstructor(String.class),
+                        null,
+                        null
+                );
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         if (type == Iterable.class
                 || type == Collection.class
                 || type == List.class
@@ -1631,6 +1655,9 @@ public class ObjectReaderBaseModule
                         return new ObjectReaderImplMapTyped((Class) rawType, HashMap.class, actualTypeParam0, actualTypeParam1, 0, GuavaSupport.singletonBiMapConverter());
                     case "org.springframework.util.LinkedMultiValueMap":
                         return ObjectReaderImplMap.of(type, (Class) rawType, 0L);
+                    case "org.apache.commons.lang3.tuple.Pair":
+                    case "org.apache.commons.lang3.tuple.ImmutablePair":
+                        return new ApacheLang3Support.PairReader((Class) rawType, actualTypeParam0, actualTypeParam1);
                     default:
                         break;
                 }
@@ -1789,6 +1816,9 @@ public class ObjectReaderBaseModule
                     return new ObjectReaderException((Class) type);
                 }
                 break;
+            case "org.apache.commons.lang3.tuple.Pair":
+            case "org.apache.commons.lang3.tuple.ImmutablePair":
+                return new ApacheLang3Support.PairReader((Class) type, Object.class, Object.class);
             default:
                 break;
         }

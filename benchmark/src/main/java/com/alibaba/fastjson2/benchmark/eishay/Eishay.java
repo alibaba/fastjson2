@@ -12,8 +12,10 @@ public class Eishay {
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(Eishay.class.getName())
+                .exclude(EishayCodecOnlyJSONB.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
+                .warmupIterations(3)
                 .forks(1)
                 .build();
         new Runner(options).run();

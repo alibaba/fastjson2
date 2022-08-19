@@ -13,6 +13,8 @@ import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JDKUtilsTest {
+    static boolean OPEN_J9 = System.getProperty("java.vm.name").contains("OpenJ9");
+
     @Test
     public void test_0() throws Throwable {
         if (JDKUtils.JVM_VERSION == 8) {
@@ -27,7 +29,7 @@ public class JDKUtilsTest {
     @Test
     public void test_11() throws Throwable {
         System.out.println("JVM_VERSION : " + JDKUtils.JVM_VERSION);
-        if (JDKUtils.JVM_VERSION == 11) {
+        if (JDKUtils.JVM_VERSION == 11 && !OPEN_J9) {
             Function<byte[], String> stringCreator = JDKUtils.getStringCreatorJDK11();
 
             byte[] bytes = new byte[]{'a', 'b', 'c'};
@@ -43,7 +45,7 @@ public class JDKUtilsTest {
         String str1 = "abc";
         if (JDKUtils.JVM_VERSION == 8) {
             assertEquals(1, UnsafeUtils.getStringCoder(str1));
-        } else {
+        } else if (!OPEN_J9) {
             assertEquals(0, UnsafeUtils.getStringCoder(str1));
             byte[] value = UnsafeUtils.getStringValue(str1);
             assertNotNull(value);

@@ -122,4 +122,24 @@ class JSONTest {
         val id: Int,
         val name: String
     )
+
+    @Test
+    fun test_parseDefaultMarker() {
+        val m0 = """{}""".to<Meta>()
+        assertEquals(1, m0.id)
+        assertEquals("json", m0.tag)
+
+        val m1 = """{"id":2}""".to<Meta>()
+        assertEquals(2, m1.id)
+        assertEquals("json", m1.tag)
+
+        val m2 = """{"tag":"kraity"}""".to<Meta>()
+        assertEquals(1, m2.id)
+        assertEquals("kraity", m2.tag)
+    }
+
+    data class Meta(
+        var id: Int = 1,
+        var tag: String = "json"
+    )
 }

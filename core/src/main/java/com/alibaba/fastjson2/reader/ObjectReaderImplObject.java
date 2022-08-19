@@ -18,6 +18,7 @@ public final class ObjectReaderImplObject
         extends ObjectReaderBaseModule.PrimitiveImpl {
     public static final ObjectReaderImplObject INSTANCE = new ObjectReaderImplObject();
 
+    @Override
     public Object createInstance(long features) {
         return new JSONObject();
     }
@@ -102,7 +103,14 @@ public final class ObjectReaderImplObject
             }
 
             if (typeName != null) {
-                object.put("@type", typeName);
+                switch (typeName) {
+                    case "java.util.ImmutableCollections$Map1":
+                    case "java.util.ImmutableCollections$MapN":
+                        break;
+                    default:
+                        object.put("@type", typeName);
+                        break;
+                }
                 hash = 0;
             }
 

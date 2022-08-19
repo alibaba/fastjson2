@@ -9,7 +9,7 @@ import java.util.*;
 public class GenReport {
     @Test
     public void gen() throws Exception {
-        File file = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.9_raw.md");
+        File file = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.12_raw.md");
 
         Map<String, BenchmarkResult> benchResults = new LinkedHashMap<>();
 
@@ -142,7 +142,14 @@ public class GenReport {
                 return null;
             }
 
-            line = reader.readLine();
+            do {
+                line = reader.readLine();
+            } while (line.isEmpty());
+
+            if (line.startsWith("```")) {
+                return block;
+            }
+
             if (!line.startsWith("Benchmark")) {
                 return null;
             }

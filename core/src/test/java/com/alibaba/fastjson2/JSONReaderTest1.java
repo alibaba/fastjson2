@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2_vo.*;
 import org.junit.jupiter.api.Test;
 
@@ -10,9 +11,9 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
+import java.time.chrono.IsoChronology;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -737,12 +738,12 @@ public class JSONReaderTest1 {
     public void test_readLocalDate8() {
         LocalDate localTime = LocalDate.of(2018, 4, 1);
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"2018-4-1\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate8().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate8());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'2018-4-1' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate8().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate8());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -751,7 +752,6 @@ public class JSONReaderTest1 {
             assertEquals(localTime,
                     jsonReader
                             .readLocalDate8()
-                            .toLocalDate()
             );
             assertTrue(jsonReader.isEnd());
             assertFalse(jsonReader.comma);
@@ -771,12 +771,12 @@ public class JSONReaderTest1 {
     public void test_readLocalDate9() {
         LocalDate localTime = LocalDate.of(2018, 4, 11);
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"2018-4-11\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate9().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate9());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'2018-4-11' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate9().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate9());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -790,18 +790,18 @@ public class JSONReaderTest1 {
     public void test_readLocalDate9_1() {
         LocalDate localTime = LocalDate.of(2018, 4, 1);
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("\"2018年4月1日\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate9().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate9());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("'2018年4月1日' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate9().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate9());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("\"2018년4월1일\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate9().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate9());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -811,29 +811,29 @@ public class JSONReaderTest1 {
     public void test_readLocalDate10() {
         LocalDate localTime = LocalDate.of(2018, 11, 12);
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"2018-11-12\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'2018-11-12' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"2018/11/12\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"12.11.2018\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"12-11-2018\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -847,12 +847,12 @@ public class JSONReaderTest1 {
     public void test_readLocalDate10_1() {
         LocalDate localTime = LocalDate.of(2018, 1, 12);
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("\"2018年1月12日\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("'2018년1월12일' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -862,12 +862,12 @@ public class JSONReaderTest1 {
     public void test_readLocalDate10_2() {
         LocalDate localTime = LocalDate.of(2018, 12, 1);
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("\"2018年12月1日\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("'2018년12월1일' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate10().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate10());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -877,12 +877,12 @@ public class JSONReaderTest1 {
     public void test_readLocalDate11() {
         LocalDate localTime = LocalDate.of(2018, 12, 13);
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("\"2018年12月13日\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalDate11().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate11());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders2("'2018년12월13일' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalDate11().toLocalDate());
+            assertEquals(localTime, jsonReader.readLocalDate11());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
@@ -1491,5 +1491,167 @@ public class JSONReaderTest1 {
                 filter
         });
         assertSame(filter, jsonReader.getContext().getContextAutoTypeBeforeHandler());
+    }
+
+    @Test
+    public void testDates() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        char[] chars = "\"1900-01-01 00:00:00\"".toCharArray();
+        for (int year = 1900; year < 2200; year++) {
+            IOUtils.getChars(year, 5, chars);
+
+            for (int month = 1; month <= 12; month++) {
+                chars[6] = '0';
+                IOUtils.getChars(month, 8, chars);
+
+                int dom = 31;
+                switch (month) {
+                    case 2:
+                        dom = (IsoChronology.INSTANCE.isLeapYear(year) ? 29 : 28);
+                        break;
+                    case 4:
+                    case 6:
+                    case 9:
+                    case 11:
+                        dom = 30;
+                        break;
+                }
+
+                for (int d = 1; d <= dom; d++) {
+                    chars[9] = '0';
+                    IOUtils.getChars(d, 11, chars);
+
+                    for (int h = 1; h <= 12; h++) {
+                        chars[12] = '0';
+                        IOUtils.getChars(h, 14, chars);
+                        String str = new String(chars, 1, 19);
+
+                        {
+                            JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
+                            jsonReader.getContext().setZoneId(JSONReader.SHANGHAI_ZONE_ID);
+                            long millis19 = jsonReader.readMillis19();
+
+                            LocalDateTime ldt = LocalDateTime.parse(str, formatter);
+                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, JSONReader.SHANGHAI_ZONE_ID, null);
+                            assertEquals(zdt.toInstant().toEpochMilli(), millis19);
+                        }
+
+                        {
+                            JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
+                            jsonReader.getContext().setZoneId(JSONReader.UTC);
+                            long millis19 = jsonReader.readMillis19();
+
+                            LocalDateTime ldt = LocalDateTime.parse(str, formatter);
+                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, JSONReader.UTC, null);
+                            assertEquals(zdt.toInstant().toEpochMilli(), millis19);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void readNameHashCode() {
+        String[] names = new String[] {
+                "",
+                "0",
+                "01",
+                "012",
+                "0123",
+                "01234",
+                "012345",
+                "0123456",
+                "01234567",
+                "012345678",
+                "0123456789",
+                "0123456789A"
+        };
+
+        for (String name : names) {
+            String str = "{\"" + name + "\":123456789}";
+            byte[] bytes = str.getBytes();
+            JSONReaderASCII jsonReader = new JSONReaderASCII(JSONFactory.createReadContext(), str, bytes, 0, bytes.length);
+            assertTrue(jsonReader.nextIfObjectStart());
+            assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
+            assertEquals(name, jsonReader.getFieldName());
+        }
+    }
+
+    @Test
+    public void readNameHashCode_x2() {
+        JSONReader.Context context = JSONFactory.createReadContext();
+
+        byte[] bytes = "{\"01\":123456789}".getBytes();
+        for (int i0 = 'a'; i0 <= 'z'; i0++) {
+            for (int i1 = 'a'; i1 <= 'z'; i1++) {
+                bytes[2] = (byte) i0;
+                bytes[3] = (byte) i1;
+                String name = new String(new char[]{(char) i0, (char) i1});
+                JSONReaderASCII jsonReader = new JSONReaderASCII(context, null, bytes, 0, bytes.length);
+                assertTrue(jsonReader.nextIfObjectStart());
+                assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
+            }
+        }
+    }
+
+    @Test
+    public void readNameHashCode_x3() {
+        JSONReader.Context context = JSONFactory.createReadContext();
+
+        byte[] bytes = "{\"012\":12}".getBytes();
+        for (int i0 = 'a'; i0 <= 'z'; i0++) {
+            for (int i1 = 'a'; i1 <= 'z'; i1++) {
+                for (int i2 = 'a'; i2 <= 'z'; i2++) {
+                    bytes[2] = (byte) i0;
+                    bytes[3] = (byte) i1;
+                    bytes[4] = (byte) i2;
+                    String name = new String(new char[]{(char) i0, (char) i1, (char) i2});
+                    JSONReaderASCII jsonReader = new JSONReaderASCII(context, null, bytes, 0, bytes.length);
+                    assertTrue(jsonReader.nextIfObjectStart());
+                    assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
+                }
+            }
+        }
+
+        bytes = "{\"012\":123456789}".getBytes();
+        for (int i0 = 'a'; i0 <= 'z'; i0++) {
+            for (int i1 = 'a'; i1 <= 'z'; i1++) {
+                for (int i2 = 'a'; i2 <= 'z'; i2++) {
+                    bytes[2] = (byte) i0;
+                    bytes[3] = (byte) i1;
+                    bytes[4] = (byte) i2;
+                    String name = new String(new char[]{(char) i0, (char) i1, (char) i2});
+                    JSONReaderASCII jsonReader = new JSONReaderASCII(context, null, bytes, 0, bytes.length);
+                    assertTrue(jsonReader.nextIfObjectStart());
+                    assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void readNameHashCode_x4() {
+        JSONReader.Context context = JSONFactory.createReadContext();
+
+        byte[] bytes = "{\"0123\":123456789}".getBytes();
+        for (int i0 = 'a'; i0 <= 'z'; i0++) {
+            for (int i1 = 'a'; i1 <= 'z'; i1++) {
+                for (int i2 = 'a'; i2 <= 'z'; i2++) {
+                    for (int i3 = 'a'; i3 <= 'z'; i3++) {
+                        bytes[2] = (byte) i0;
+                        bytes[3] = (byte) i1;
+                        bytes[4] = (byte) i2;
+                        bytes[5] = (byte) i3;
+
+                        String name = new String(new char[]{(char) i0, (char) i1, (char) i2, (char) i3});
+                        JSONReaderASCII jsonReader = new JSONReaderASCII(context, null, bytes, 0, bytes.length);
+                        assertTrue(jsonReader.nextIfObjectStart());
+                        assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
+                    }
+                }
+            }
+        }
     }
 }

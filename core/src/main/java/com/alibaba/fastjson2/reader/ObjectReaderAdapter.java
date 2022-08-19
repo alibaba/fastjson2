@@ -168,7 +168,7 @@ public class ObjectReaderAdapter<T>
         }
 
         jsonReader.startArray();
-        Object object = creator.get();
+        Object object = createInstance(0);
 
         for (FieldReader fieldReader : fieldReaders) {
             fieldReader.readFieldValue(jsonReader, object);
@@ -182,6 +182,23 @@ public class ObjectReaderAdapter<T>
     }
 
     protected Object createInstance0(long features) throws InstantiationException {
+        if ((features & JSONReader.Feature.UseDefaultConstructorAsPossible.mask) != 0
+                && constructor != null
+                && constructor.getParameterCount() == 0) {
+            T object;
+            try {
+                object = (T) constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+                throw new JSONException("create instance error, " + objectClass, ex);
+            }
+
+            if (hasDefaultValue) {
+                initDefaultValue(object);
+            }
+
+            return object;
+        }
+
         if (creator == null) {
             throw new JSONException("create instance error, " + objectClass);
         }
@@ -201,23 +218,6 @@ public class ObjectReaderAdapter<T>
     @Override
     public T createInstance(long features) {
         if (instantiationError && constructor != null) {
-            T object;
-            try {
-                object = (T) constructor.newInstance();
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
-                throw new JSONException("create instance error, " + objectClass, ex);
-            }
-
-            if (hasDefaultValue) {
-                initDefaultValue(object);
-            }
-
-            return object;
-        }
-
-        if ((features & JSONReader.Feature.UseDefaultConstructorAsPossible.mask) != 0
-                && constructor != null
-                && constructor.getParameterCount() == 0) {
             T object;
             try {
                 object = (T) constructor.newInstance();

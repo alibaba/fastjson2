@@ -136,10 +136,8 @@ public class ObjectWriterCreatorASM
         }
 
         long writerFeatures = features | beanInfo.writerFeatures;
-        boolean fieldBased = (writerFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
-        if (fieldBased && (objectClass.isInterface() || objectClass.isInterface())) {
-            fieldBased = false;
-        }
+        final boolean fieldBased = (writerFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                && !(objectClass.isInterface() || objectClass.isInterface());
 
         if (fieldBased && JDKUtils.JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
             return super.createObjectWriter(objectClass, features, modules);
@@ -187,6 +185,10 @@ public class ObjectWriterCreatorASM
 
                 if (!record) {
                     BeanUtils.fields(objectClass, field -> {
+                        if (!fieldBased && !Modifier.isPublic(field.getModifiers())) {
+                            return;
+                        }
+
                         fieldInfo.init();
                         FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
@@ -581,8 +583,6 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(endErrorOnNoneSerializable_);
         }
 
-        int entryCnt = fieldWriters.size();
-
         Label notWriteType = new Label();
         if ((objectFeatures & JSONWriter.Feature.WriteClassName.mask) == 0) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -841,14 +841,12 @@ public class ObjectWriterCreatorASM
 
         boolean listStr = false;
         Type itemType;
-        Class itemClass = null;
         if (fieldType instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) fieldType;
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
             if (actualTypeArguments.length == 1) {
                 itemType = actualTypeArguments[0];
-                itemClass = TypeUtils.getMapping(itemType);
                 listStr = itemType == String.class;
             }
         }
@@ -963,7 +961,7 @@ public class ObjectWriterCreatorASM
             methodName = "writeBool";
             methodDesc = "(Z)V";
         } else if (fieldClass == char.class) {
-            methodName = "writeString";
+            methodName = "writeChar";
             methodDesc = "(C)V";
         } else if (fieldClass == byte.class) {
             methodName = "writeInt32";

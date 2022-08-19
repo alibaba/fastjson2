@@ -124,7 +124,7 @@ public class UnsafeUtils {
             try {
                 Object str = UNSAFE.allocateInstance(String.class);
                 UNSAFE.putByte(str, coderOffset, (byte) 1);
-                UNSAFE.putObject(str, valueOffset, (byte[]) bytes);
+                UNSAFE.putObject(str, valueOffset, bytes);
                 return (String) str;
             } catch (Throwable ex) {
                 throw new JSONException("create string error");

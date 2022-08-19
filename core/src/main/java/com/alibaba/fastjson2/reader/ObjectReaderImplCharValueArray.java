@@ -1,7 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -9,6 +11,7 @@ import java.util.Arrays;
 final class ObjectReaderImplCharValueArray
         extends ObjectReaderBaseModule.PrimitiveImpl {
     static final ObjectReaderImplCharValueArray INSTANCE = new ObjectReaderImplCharValueArray();
+    static final long TYPE_HASH = Fnv.hashCode64("[C");
 
     @Override
     public Class getObjectClass() {
@@ -62,6 +65,13 @@ final class ObjectReaderImplCharValueArray
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
+            long typeHashCode = jsonReader.readTypeHashCode();
+            if (typeHashCode != TYPE_HASH) {
+                throw new JSONException("not support autoType : " + jsonReader.getString());
+            }
+        }
+
         if (jsonReader.isString()) {
             String str = jsonReader.readString();
             return str.toCharArray();

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -18,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class EishayParseString {
     static String str;
     static ObjectMapper mapper = new ObjectMapper();
+    static Gson gson = new Gson();
 
     static {
         try {
@@ -44,54 +46,26 @@ public class EishayParseString {
         bh.consume(mapper.readValue(str, MediaContent.class));
     }
 
-    //    @Test
-    public void fastjson1_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            fastjson1_perf();
-        }
+//    @Benchmark
+    public void wastjson(Blackhole bh) throws Exception {
+        bh.consume(
+                io.github.wycst.wast.json.JSON.parseObject(str, MediaContent.class)
+        );
     }
 
-    //    @Test
-    public void fastjson2_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
-        }
-    }
-
-    public static void fastjson2_perf() {
-        Blackhole bh = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
-            bh.consume(JSON.parseObject(str, MediaContent.class));
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("millis : " + millis);
-        // zulu11.52.13 : 535 490 474
-        // zulu17.32.13 : 500 485
-        // zulu8.58.0.13 : 517
-    }
-
-    public static void fastjson1_perf() {
-        Blackhole bh = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
-            bh.consume(com.alibaba.fastjson.JSON.parseObject(str, MediaContent.class));
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("millis : " + millis);
-        // zulu17.32.13 : 544 503
-        // zulu11.52.13 : 678
-        // zulu8.58.0.13 : 647
+    public void gson(Blackhole bh) throws Exception {
+        bh.consume(
+                gson.fromJson(str, MediaContent.class)
+        );
     }
 
     public static void main(String[] args) throws RunnerException {
-//        new EishayParseString().fastjson2_perf_test();
-//        new EishayParseString().fastjson1_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayParseString.class.getName())
                 .exclude(EishayParseStringPretty.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
+                .warmupIterations(3)
                 .forks(1)
                 .build();
         new Runner(options).run();

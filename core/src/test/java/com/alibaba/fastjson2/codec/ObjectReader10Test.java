@@ -133,6 +133,8 @@ public class ObjectReader10Test {
         map.put("x0005", "中华人民共和国");
         byte[] jsonbBytes = JSONB.toBytes(map);
 
+        System.out.println(JSONB.toJSONString(jsonbBytes));
+
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<LongValueField10> objectReader = creator.createObjectReader(LongValueField10.class);
 

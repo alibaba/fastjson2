@@ -189,6 +189,30 @@ public class DoubleValueTest {
     }
 
     @Test
+    public void test_jsonb_value_cast_str_float_1() {
+        byte[] jsonbBytes = {124, 2, 48, 0};
+        assertEquals(0, JSONB.parseObject(jsonbBytes, Float.class).floatValue());
+    }
+
+    @Test
+    public void test_jsonb_value_cast_str_float_2() {
+        byte[] jsonbBytes = {122, 8, 45, 56, 51, 56, 56, 54, 48, 56};
+        assertEquals(-8388608F, JSONB.parseObject(jsonbBytes, Float.class).floatValue());
+    }
+
+    @Test
+    public void test_jsonb_value_cast_str_double_1() {
+        byte[] jsonbBytes = {124, 2, 48, 0};
+        assertEquals(0, JSONB.parseObject(jsonbBytes, Double.class).doubleValue());
+    }
+
+    @Test
+    public void test_jsonb_value_cast_str_double_2() {
+        byte[] jsonbBytes = {122, 8, 45, 56, 51, 56, 56, 54, 48, 56};
+        assertEquals(-8388608F, JSONB.parseObject(jsonbBytes, Double.class).doubleValue());
+    }
+
+    @Test
     public void test_utf8() {
         for (Double id : values) {
             if (id == null) {

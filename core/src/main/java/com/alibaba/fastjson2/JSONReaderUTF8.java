@@ -10,13 +10,12 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 
-import static com.alibaba.fastjson2.JSONFactory.CACHE_BYTES;
-import static com.alibaba.fastjson2.JSONFactory.CACHE_THREAD;
+import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE;
+import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE2;
+import static com.alibaba.fastjson2.JSONFactory.NameCacheEntry;
+import static com.alibaba.fastjson2.JSONFactory.NameCacheEntry2;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
@@ -34,7 +33,7 @@ class JSONReaderUTF8
     protected boolean nameAscii;
     protected int referenceBegin;
 
-    protected InputStream in;
+    protected final InputStream in;
 
     protected int cacheIndex = -1;
 
@@ -42,7 +41,7 @@ class JSONReaderUTF8
         super(ctx);
 
         cacheIndex = JSONFactory.cacheIndex();
-        byte[] bytes = CACHE_BYTES.getAndSet(cacheIndex, null);
+        byte[] bytes = JSONFactory.allocateByteArray(cacheIndex);
         if (bytes == null) {
             bytes = new byte[8192];
         }
@@ -87,7 +86,7 @@ class JSONReaderUTF8
         this.bytes = bytes;
         this.offset = offset;
         this.length = length;
-        this.in = in;
+        this.in = null;
         this.start = offset;
         this.end = offset + length;
         next();
@@ -426,7 +425,8 @@ class JSONReaderUTF8
                     c = bytes[offset];
                 }
                 if (c != ':') {
-                    return -1;
+                    // return -1;
+                    throw new JSONException(info("expect ':', but " + c));
                 }
 
                 offset++;
@@ -957,6 +957,260 @@ class JSONReaderUTF8
         int length = nameEnd - nameBegin;
         if (!nameEscape) {
             if (nameAscii) {
+                long nameValue0 = -1, nameValue1 = -1;
+                switch (length) {
+                    case 1:
+                        nameValue0 = bytes[nameBegin];
+                        break;
+                    case 2:
+                        nameValue0
+                                = (bytes[nameBegin] << 8)
+                                + (bytes[nameBegin + 1]);
+                        break;
+                    case 3:
+                        nameValue0
+                                = (bytes[nameBegin] << 16)
+                                + (bytes[nameBegin + 1] << 8)
+                                + (bytes[nameBegin + 2]);
+                        break;
+                    case 4:
+                        nameValue0
+                                = (bytes[nameBegin] << 24)
+                                + (bytes[nameBegin + 1] << 16)
+                                + (bytes[nameBegin + 2] << 8)
+                                + (bytes[nameBegin + 3]);
+                        break;
+                    case 5:
+                        nameValue0
+                                = (((long) bytes[nameBegin]) << 32)
+                                + (((long) bytes[nameBegin + 1]) << 24)
+                                + (((long) bytes[nameBegin + 2]) << 16)
+                                + (((long) bytes[nameBegin + 3]) << 8)
+                                + ((long) bytes[nameBegin + 4]);
+                        break;
+                    case 6:
+                        nameValue0
+                                = (((long) bytes[nameBegin]) << 40)
+                                + (((long) bytes[nameBegin + 1]) << 32)
+                                + (((long) bytes[nameBegin + 2]) << 24)
+                                + (((long) bytes[nameBegin + 3]) << 16)
+                                + (((long) bytes[nameBegin + 4]) << 8)
+                                + ((long) bytes[nameBegin + 5]);
+                        break;
+                    case 7:
+                        nameValue0
+                                = (((long) bytes[nameBegin]) << 48)
+                                + (((long) bytes[nameBegin + 1]) << 40)
+                                + (((long) bytes[nameBegin + 2]) << 32)
+                                + (((long) bytes[nameBegin + 3]) << 24)
+                                + (((long) bytes[nameBegin + 4]) << 16)
+                                + (((long) bytes[nameBegin + 5]) << 8)
+                                + ((long) bytes[nameBegin + 6]);
+                        break;
+                    case 8:
+                        nameValue0
+                                = (((long) bytes[nameBegin]) << 56)
+                                + (((long) bytes[nameBegin + 1]) << 48)
+                                + (((long) bytes[nameBegin + 2]) << 40)
+                                + (((long) bytes[nameBegin + 3]) << 32)
+                                + (((long) bytes[nameBegin + 4]) << 24)
+                                + (((long) bytes[nameBegin + 5]) << 16)
+                                + (((long) bytes[nameBegin + 6]) << 8)
+                                + ((long) bytes[nameBegin + 7]);
+                        break;
+                    case 9:
+                        nameValue0 = bytes[nameBegin + 0];
+                        nameValue1
+                                = (((long) bytes[nameBegin] + 1) << 56)
+                                + (((long) bytes[nameBegin + 2]) << 48)
+                                + (((long) bytes[nameBegin + 3]) << 40)
+                                + (((long) bytes[nameBegin + 4]) << 32)
+                                + (((long) bytes[nameBegin + 5]) << 24)
+                                + (((long) bytes[nameBegin + 6]) << 16)
+                                + (((long) bytes[nameBegin + 7]) << 8)
+                                + ((long) bytes[nameBegin + 8]);
+                        break;
+                    case 10:
+                        nameValue0
+                                = (bytes[nameBegin] << 8)
+                                + (bytes[nameBegin + 1]);
+                        nameValue1
+                                = (((long) bytes[nameBegin + 2]) << 56)
+                                + (((long) bytes[nameBegin + 3]) << 48)
+                                + (((long) bytes[nameBegin + 4]) << 40)
+                                + (((long) bytes[nameBegin + 5]) << 32)
+                                + (((long) bytes[nameBegin + 6]) << 24)
+                                + (((long) bytes[nameBegin + 7]) << 16)
+                                + (((long) bytes[nameBegin + 8]) << 8)
+                                + ((long) bytes[nameBegin + 9]);
+                        break;
+                    case 11:
+                        nameValue0
+                                = (bytes[nameBegin] << 16)
+                                + (bytes[nameBegin + 1] << 8)
+                                + (bytes[nameBegin + 2]);
+                        nameValue1
+                                = (((long) bytes[nameBegin + 3]) << 56)
+                                + (((long) bytes[nameBegin + 4]) << 48)
+                                + (((long) bytes[nameBegin + 5]) << 40)
+                                + (((long) bytes[nameBegin + 6]) << 32)
+                                + (((long) bytes[nameBegin + 7]) << 24)
+                                + (((long) bytes[nameBegin + 8]) << 16)
+                                + (((long) bytes[nameBegin + 9]) << 8)
+                                + ((long) bytes[nameBegin + 10]);
+                        break;
+                    case 12:
+                        nameValue0
+                                = (bytes[nameBegin] << 24)
+                                + (bytes[nameBegin + 1] << 16)
+                                + (bytes[nameBegin + 2] << 8)
+                                + (bytes[nameBegin + 3]);
+                        nameValue1
+                                = (((long) bytes[nameBegin + 4]) << 56)
+                                + (((long) bytes[nameBegin + 5]) << 48)
+                                + (((long) bytes[nameBegin + 6]) << 40)
+                                + (((long) bytes[nameBegin + 7]) << 32)
+                                + (((long) bytes[nameBegin + 8]) << 24)
+                                + (((long) bytes[nameBegin + 9]) << 16)
+                                + (((long) bytes[nameBegin + 10]) << 8)
+                                + ((long) bytes[nameBegin + 11]);
+                        break;
+                    case 13:
+                        nameValue0
+                                = (((long) bytes[nameBegin]) << 32)
+                                + (((long) bytes[nameBegin + 1]) << 24)
+                                + (((long) bytes[nameBegin + 2]) << 16)
+                                + (((long) bytes[nameBegin + 3]) << 8)
+                                + ((long) bytes[nameBegin + 4]);
+                        nameValue1
+                                = (((long) bytes[nameBegin + 5]) << 56)
+                                + (((long) bytes[nameBegin + 6]) << 48)
+                                + (((long) bytes[nameBegin + 7]) << 40)
+                                + (((long) bytes[nameBegin + 8]) << 32)
+                                + (((long) bytes[nameBegin + 9]) << 24)
+                                + (((long) bytes[nameBegin + 10]) << 16)
+                                + (((long) bytes[nameBegin + 11]) << 8)
+                                + ((long) bytes[nameBegin + 12]);
+                        break;
+                    case 14:
+                        nameValue0
+                                = (((long) bytes[nameBegin]) << 40)
+                                + (((long) bytes[nameBegin + 1]) << 32)
+                                + (((long) bytes[nameBegin + 2]) << 24)
+                                + (((long) bytes[nameBegin + 3]) << 16)
+                                + (((long) bytes[nameBegin + 4]) << 8)
+                                + ((long) bytes[nameBegin + 5]);
+                        nameValue1
+                                = (((long) bytes[nameBegin + 6]) << 56)
+                                + (((long) bytes[nameBegin + 7]) << 48)
+                                + (((long) bytes[nameBegin + 8]) << 40)
+                                + (((long) bytes[nameBegin + 9]) << 32)
+                                + (((long) bytes[nameBegin + 10]) << 24)
+                                + (((long) bytes[nameBegin + 11]) << 16)
+                                + (((long) bytes[nameBegin + 12]) << 8)
+                                + ((long) bytes[nameBegin + 13]);
+                        break;
+                    case 15:
+                        nameValue0
+                                = (((long) bytes[nameBegin]) << 48)
+                                + (((long) bytes[nameBegin + 1]) << 40)
+                                + (((long) bytes[nameBegin + 2]) << 32)
+                                + (((long) bytes[nameBegin + 3]) << 24)
+                                + (((long) bytes[nameBegin + 4]) << 16)
+                                + (((long) bytes[nameBegin + 5]) << 8)
+                                + ((long) bytes[nameBegin + 6]);
+                        nameValue1
+                                = (((long) bytes[nameBegin + 7]) << 56)
+                                + (((long) bytes[nameBegin + 8]) << 48)
+                                + (((long) bytes[nameBegin + 9]) << 40)
+                                + (((long) bytes[nameBegin + 10]) << 32)
+                                + (((long) bytes[nameBegin + 11]) << 24)
+                                + (((long) bytes[nameBegin + 12]) << 16)
+                                + (((long) bytes[nameBegin + 13]) << 8)
+                                + ((long) bytes[nameBegin + 14]);
+                        break;
+                    case 16:
+                        nameValue0
+                                = (((long) bytes[nameBegin]) << 56)
+                                + (((long) bytes[nameBegin + 1]) << 48)
+                                + (((long) bytes[nameBegin + 2]) << 40)
+                                + (((long) bytes[nameBegin + 3]) << 32)
+                                + (((long) bytes[nameBegin + 4]) << 24)
+                                + (((long) bytes[nameBegin + 5]) << 16)
+                                + (((long) bytes[nameBegin + 6]) << 8)
+                                + ((long) bytes[nameBegin + 7]);
+                        nameValue1
+                                = (((long) bytes[nameBegin + 8]) << 56)
+                                + (((long) bytes[nameBegin + 9]) << 48)
+                                + (((long) bytes[nameBegin + 10]) << 40)
+                                + (((long) bytes[nameBegin + 11]) << 32)
+                                + (((long) bytes[nameBegin + 12]) << 24)
+                                + (((long) bytes[nameBegin + 13]) << 16)
+                                + (((long) bytes[nameBegin + 14]) << 8)
+                                + ((long) bytes[nameBegin + 15]);
+                        break;
+                    default:
+                        break;
+                }
+
+                if (nameValue0 != -1) {
+                    if (nameValue1 != -1) {
+                        int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
+                        NameCacheEntry2 entry = NAME_CACHE2[indexMask];
+                        if (entry == null) {
+                            if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                                try {
+                                    STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                                } catch (Throwable e) {
+                                    STRING_CREATOR_ERROR = true;
+                                }
+                            }
+                            String name;
+                            if (STRING_CREATOR_JDK8 != null) {
+                                char[] chars = new char[length];
+                                for (int i = 0; i < length; ++i) {
+                                    chars[i] = (char) bytes[nameBegin + i];
+                                }
+                                name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                            } else {
+                                name = new String(bytes, nameBegin, length, StandardCharsets.US_ASCII);
+                            }
+
+                            NAME_CACHE2[indexMask] = new NameCacheEntry2(name, nameValue0, nameValue1);
+                            return name;
+                        } else if (entry.value0 == nameValue0 && entry.value1 == nameValue1) {
+                            return entry.name;
+                        }
+                    } else {
+                        int indexMask = ((int) nameValue0) & (NAME_CACHE.length - 1);
+                        NameCacheEntry entry = NAME_CACHE[indexMask];
+                        if (entry == null) {
+                            if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                                try {
+                                    STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                                } catch (Throwable e) {
+                                    STRING_CREATOR_ERROR = true;
+                                }
+                            }
+                            String name;
+                            if (STRING_CREATOR_JDK8 != null) {
+                                char[] chars = new char[length];
+                                for (int i = 0; i < length; ++i) {
+                                    chars[i] = (char) bytes[nameBegin + i];
+                                }
+                                name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                            } else {
+                                name = new String(bytes, nameBegin, length, StandardCharsets.US_ASCII);
+                            }
+
+                            NAME_CACHE[indexMask] = new NameCacheEntry(name, nameValue0);
+                            return name;
+                        } else if (entry.value == nameValue0) {
+                            return entry.name;
+                        }
+                    }
+                }
+
                 if (JDKUtils.JVM_VERSION == 8) {
                     if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
                         try {
@@ -1533,6 +1787,482 @@ class JSONReaderUTF8
     }
 
     @Override
+    public double readDoubleValue() {
+        this.wasNull = false;
+
+        boolean value = false;
+        double doubleValue = 0;
+
+        char quote = '\0';
+        if (ch == '"' || ch == '\'') {
+            quote = ch;
+            ch = (char) bytes[offset++];
+
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[offset++];
+                }
+                nextIfMatch(',');
+                wasNull = true;
+                return 0;
+            }
+        }
+
+        final int start = offset;
+        if (ch == '-') {
+            negative = true;
+            ch = (char) bytes[offset++];
+        } else {
+            if (ch == '+') {
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        valueType = JSON_TYPE_INT;
+        while (ch >= '0' && ch <= '9') {
+            if (offset == end) {
+                ch = EOI;
+                offset++;
+                break;
+            }
+            ch = (char) bytes[offset++];
+        }
+
+        if (ch == '.') {
+            valueType = JSON_TYPE_DEC;
+            ch = (char) bytes[offset++];
+            while (ch >= '0' && ch <= '9') {
+                this.scale++;
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        if (ch == 'e' || ch == 'E') {
+            boolean negativeExp = false;
+            int expValue = 0;
+            ch = (char) bytes[offset++];
+
+            if (ch == '-') {
+                negativeExp = true;
+                ch = (char) bytes[offset++];
+            } else if (ch == '+') {
+                ch = (char) bytes[offset++];
+            }
+
+            while (ch >= '0' && ch <= '9') {
+                int byteVal = (ch - '0');
+                expValue = expValue * 10 + byteVal;
+                if (expValue > MAX_EXP) {
+                    throw new JSONException("too large exp value : " + expValue);
+                }
+
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = (char) bytes[offset++];
+            }
+
+            if (negativeExp) {
+                expValue = -expValue;
+            }
+
+            this.exponent = (short) expValue;
+            valueType = JSON_TYPE_DEC;
+        }
+
+        if (offset == start) {
+            if (ch == 'n') {
+                if (bytes[offset++] == 'u'
+                        && bytes[offset++] == 'l'
+                        && bytes[offset++] == 'l'
+                ) {
+                    wasNull = true;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = (char) bytes[offset++];
+                    }
+                }
+            } else if (ch == 't') {
+                if (bytes[offset++] == 'r'
+                        && bytes[offset++] == 'u'
+                        && bytes[offset++] == 'e'
+                ) {
+                    value = true;
+                    doubleValue = 1;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = (char) bytes[offset++];
+                    }
+                }
+            } else if (ch == 'f') {
+                if (bytes[offset++] == 'a'
+                        && bytes[offset++] == 'l'
+                        && bytes[offset++] == 's'
+                        && bytes[offset++] == 'e'
+                ) {
+                    doubleValue = 0;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = (char) bytes[offset++];
+                    }
+                }
+            } else if (ch == '{' && quote == 0) {
+                Map<String, Object> obj = readObject();
+                if (!obj.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            } else if (ch == '[' && quote == 0) {
+                List array = readArray();
+                if (!array.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            }
+        }
+
+        int len = offset - start;
+
+        String str = null;
+        if (quote != 0) {
+            if (ch != quote) {
+                this.offset -= 1;
+                this.ch = quote;
+                str = readString();
+            }
+
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        if (!value) {
+            if (str != null) {
+                try {
+                    doubleValue = Double.parseDouble(str);
+                } catch (NumberFormatException ex) {
+                    throw new JSONException(info(), ex);
+                }
+            } else {
+                doubleValue = FloatingDecimal.parseDouble(bytes, start - 1, len);
+            }
+
+            if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                switch (ch) {
+                    case 'B':
+                        valueType = JSON_TYPE_INT8;
+                        break;
+                    case 'S':
+                        valueType = JSON_TYPE_INT16;
+                        break;
+                    case 'L':
+                        valueType = JSON_TYPE_INT64;
+                        break;
+                    case 'F':
+                        valueType = JSON_TYPE_FLOAT;
+                        break;
+                    case 'D':
+                        valueType = JSON_TYPE_DOUBLE;
+                        break;
+                    default:
+                        break;
+                }
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[offset++];
+                }
+            }
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        if (ch == ',') {
+            this.comma = true;
+            this.ch = (char) bytes[this.offset++];
+            // next inline
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = (char) bytes[offset++];
+                    }
+                }
+            }
+        }
+
+        return doubleValue;
+    }
+
+    @Override
+    public float readFloatValue() {
+        this.wasNull = false;
+
+        boolean value = false;
+        float floatValue = 0;
+
+        char quote = '\0';
+        if (ch == '"' || ch == '\'') {
+            quote = ch;
+            ch = (char) bytes[offset++];
+
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[offset++];
+                }
+                nextIfMatch(',');
+                wasNull = true;
+                return 0;
+            }
+        }
+
+        final int start = offset;
+        if (ch == '-') {
+            negative = true;
+            ch = (char) bytes[offset++];
+        } else {
+            if (ch == '+') {
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        valueType = JSON_TYPE_INT;
+        while (ch >= '0' && ch <= '9') {
+            if (offset == end) {
+                ch = EOI;
+                offset++;
+                break;
+            }
+            ch = (char) bytes[offset++];
+        }
+
+        if (ch == '.') {
+            valueType = JSON_TYPE_DEC;
+            ch = (char) bytes[offset++];
+            while (ch >= '0' && ch <= '9') {
+                this.scale++;
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        if (ch == 'e' || ch == 'E') {
+            boolean negativeExp = false;
+            int expValue = 0;
+            ch = (char) bytes[offset++];
+
+            if (ch == '-') {
+                negativeExp = true;
+                ch = (char) bytes[offset++];
+            } else if (ch == '+') {
+                ch = (char) bytes[offset++];
+            }
+
+            while (ch >= '0' && ch <= '9') {
+                int byteVal = (ch - '0');
+                expValue = expValue * 10 + byteVal;
+                if (expValue > MAX_EXP) {
+                    throw new JSONException("too large exp value : " + expValue);
+                }
+
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = (char) bytes[offset++];
+            }
+
+            if (negativeExp) {
+                expValue = -expValue;
+            }
+
+            this.exponent = (short) expValue;
+            valueType = JSON_TYPE_DEC;
+        }
+
+        if (offset == start) {
+            if (ch == 'n') {
+                if (bytes[offset++] == 'u'
+                        && bytes[offset++] == 'l'
+                        && bytes[offset++] == 'l'
+                ) {
+                    wasNull = true;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = (char) bytes[offset++];
+                    }
+                }
+            } else if (ch == 't') {
+                if (bytes[offset++] == 'r'
+                        && bytes[offset++] == 'u'
+                        && bytes[offset++] == 'e'
+                ) {
+                    value = true;
+                    floatValue = 1;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = (char) bytes[offset++];
+                    }
+                }
+            } else if (ch == 'f') {
+                if (bytes[offset++] == 'a'
+                        && bytes[offset++] == 'l'
+                        && bytes[offset++] == 's'
+                        && bytes[offset++] == 'e'
+                ) {
+                    floatValue = 0;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = (char) bytes[offset++];
+                    }
+                }
+            } else if (ch == '{' && quote == 0) {
+                Map<String, Object> obj = readObject();
+                if (!obj.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            } else if (ch == '[' && quote == 0) {
+                List array = readArray();
+                if (!array.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            }
+        }
+
+        int len = offset - start;
+
+        String str = null;
+        if (quote != 0) {
+            if (ch != quote) {
+                this.offset -= 1;
+                this.ch = quote;
+                str = readString();
+            }
+
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        if (!value) {
+            if (str != null) {
+                try {
+                    floatValue = Float.parseFloat(str);
+                } catch (NumberFormatException ex) {
+                    throw new JSONException(info(), ex);
+                }
+            } else {
+                floatValue = FloatingDecimal.parseFloat(bytes, start - 1, len);
+            }
+
+            if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                switch (ch) {
+                    case 'B':
+                        valueType = JSON_TYPE_INT8;
+                        break;
+                    case 'S':
+                        valueType = JSON_TYPE_INT16;
+                        break;
+                    case 'L':
+                        valueType = JSON_TYPE_INT64;
+                        break;
+                    case 'F':
+                        valueType = JSON_TYPE_FLOAT;
+                        break;
+                    case 'D':
+                        valueType = JSON_TYPE_DOUBLE;
+                        break;
+                    default:
+                        break;
+                }
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[offset++];
+                }
+            }
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        if (ch == ',') {
+            this.comma = true;
+            this.ch = (char) bytes[this.offset++];
+            // next inline
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = (char) bytes[offset++];
+                    }
+                }
+            }
+        }
+
+        return floatValue;
+    }
+
+    @Override
     public void readString(ValueConsumer consumer, boolean quoted) {
         char quote = this.ch;
         int valueLength;
@@ -2006,6 +2736,11 @@ class JSONReaderUTF8
                     if (ch == '}' || ch == ']' || ch == '{' || ch == '[') {
                         break;
                     }
+
+                    if (ch == '\"' || ch == '\'') {
+                        throw new JSONException("error, offset " + offset + ", char " + ch);
+                    }
+
                     if (ch == ',') {
                         comma = true;
                         if (offset >= end) {
@@ -2027,6 +2762,12 @@ class JSONReaderUTF8
                     }
                 }
                 break;
+            case 'S':
+                if (nextIfSet()) {
+                    skipValue();
+                    break;
+                }
+                throw new JSONException("error, offset " + offset + ", char " + ch);
             default:
                 throw new JSONException("TODO : " + ch);
         }
@@ -2488,7 +3229,7 @@ class JSONReaderUTF8
                         byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
                         str = STRING_CREATOR_JDK11.apply(bytes);
                     }
-                } else if (JDKUtils.JVM_VERSION == 17 && JDKUtils.UNSAFE_SUPPORT) {
+                } else if (JDKUtils.JVM_VERSION == 17 && JDKUtils.UNSAFE_ASCII_CREATOR != null) {
                     byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
                     str = JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
                 } else {
@@ -2700,7 +3441,7 @@ class JSONReaderUTF8
                 expValue = -expValue;
             }
 
-            this.exponent = (byte) expValue;
+            this.exponent = (short) expValue;
             valueType = JSON_TYPE_DEC;
         }
 
@@ -2914,7 +3655,7 @@ class JSONReaderUTF8
                 expValue = -expValue;
             }
 
-            this.exponent = (byte) expValue;
+            this.exponent = (short) expValue;
             valueType = JSON_TYPE_DEC;
         }
 
@@ -3783,10 +4524,7 @@ class JSONReaderUTF8
             }
         }
 
-        ZonedDateTime zdt = ldt.atZone(zoneId);
-        if (zdt == null) {
-            return null;
-        }
+        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
 
         offset += (len + 1);
         next();
@@ -3798,7 +4536,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public LocalDateTime readLocalDate8() {
+    public LocalDate readLocalDate8() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -3866,9 +4604,9 @@ class JSONReaderUTF8
             return null;
         }
 
-        LocalDateTime ldt;
+        LocalDate ldt;
         try {
-            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+            ldt = LocalDate.of(year, month, dom);
         } catch (DateTimeException e) {
             throw new JSONException(info(), e);
         }
@@ -3883,7 +4621,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public LocalDateTime readLocalDate9() {
+    public LocalDate readLocalDate9() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -3954,9 +4692,9 @@ class JSONReaderUTF8
             return null;
         }
 
-        LocalDateTime ldt;
+        LocalDate ldt;
         try {
-            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+            ldt = LocalDate.of(year, month, dom);
         } catch (DateTimeException e) {
             throw new JSONException(info(), e);
         }
@@ -3971,7 +4709,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public LocalDateTime readLocalDate10() {
+    public LocalDate readLocalDate10() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -4069,9 +4807,9 @@ class JSONReaderUTF8
             return null;
         }
 
-        LocalDateTime ldt;
+        LocalDate ldt;
         try {
-            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+            ldt = LocalDate.of(year, month, dom);
         } catch (DateTimeException e) {
             throw new JSONException(info(), e);
         }
@@ -4086,7 +4824,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    protected LocalDateTime readLocalDate11() {
+    protected LocalDate readLocalDate11() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
@@ -4152,9 +4890,9 @@ class JSONReaderUTF8
             return null;
         }
 
-        LocalDateTime ldt;
+        LocalDate ldt;
         try {
-            ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+            ldt = LocalDate.of(year, month, dom);
         } catch (DateTimeException e) {
             throw new JSONException(info(), e);
         }
@@ -4325,6 +5063,56 @@ class JSONReaderUTF8
             next();
         }
         return ldt;
+    }
+
+    @Override
+    protected LocalTime readLocalTime5() {
+        if (ch != '"' && ch != '\'') {
+            throw new JSONException("localTime only support string input");
+        }
+
+        byte c0 = bytes[offset + 0];
+        byte c1 = bytes[offset + 1];
+        byte c2 = bytes[offset + 2];
+        byte c3 = bytes[offset + 3];
+        byte c4 = bytes[offset + 4];
+
+        byte h0, h1, i0, i1;
+        if (c2 == ':') {
+            h0 = c0;
+            h1 = c1;
+            i0 = c3;
+            i1 = c4;
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        offset += 6;
+        next();
+        if (ch == ',') {
+            this.comma = true;
+            next();
+        }
+
+        return LocalTime.of(hour, minute);
     }
 
     @Override
@@ -5274,6 +6062,183 @@ class JSONReaderUTF8
     }
 
     @Override
+    public long readMillis19() {
+        if (ch != '"' && ch != '\'') {
+            throw new JSONException("date only support string input");
+        }
+
+        if (offset + 18 >= end) {
+            wasNull = true;
+            return 0;
+        }
+
+        byte c0 = bytes[offset + 0];
+        byte c1 = bytes[offset + 1];
+        byte c2 = bytes[offset + 2];
+        byte c3 = bytes[offset + 3];
+        byte c4 = bytes[offset + 4];
+        byte c5 = bytes[offset + 5];
+        byte c6 = bytes[offset + 6];
+        byte c7 = bytes[offset + 7];
+        byte c8 = bytes[offset + 8];
+        byte c9 = bytes[offset + 9];
+        byte c10 = bytes[offset + 10];
+        byte c11 = bytes[offset + 11];
+        byte c12 = bytes[offset + 12];
+        byte c13 = bytes[offset + 13];
+        byte c14 = bytes[offset + 14];
+        byte c15 = bytes[offset + 15];
+        byte c16 = bytes[offset + 16];
+        byte c17 = bytes[offset + 17];
+        byte c18 = bytes[offset + 18];
+
+        byte y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2;
+        if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+        } else if (c4 == '/' && c7 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int second;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            second = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        int nanoOfSecond;
+        if (S0 >= '0' && S0 <= '9'
+                && S1 >= '0' && S1 <= '9'
+                && S2 >= '0' && S2 <= '9'
+        ) {
+            nanoOfSecond = (S0 - '0') * 100
+                    + (S1 - '0') * 10
+                    + (S2 - '0');
+            nanoOfSecond *= 1000_000;
+        } else {
+            wasNull = true;
+            return 0;
+        }
+
+        if (year == 0 && month == 0 && dom == 0) {
+            year = 1970;
+            month = 1;
+            dom = 1;
+        }
+
+        offset += 20;
+        next();
+        if (ch == ',') {
+            this.comma = true;
+            next();
+        }
+
+        return millis(year, month, dom, hour, minute, second, nanoOfSecond);
+    }
+
+    @Override
     protected LocalDateTime readLocalDateTimeX(int len) {
         if (ch != '"') {
             throw new JSONException("date only support string input");
@@ -5932,9 +6897,10 @@ class JSONReaderUTF8
 
     @Override
     public void close() {
-        if (cacheIndex != -1 && bytes.length < CACHE_THREAD) {
-            CACHE_BYTES.set(cacheIndex, bytes);
+        if (cacheIndex != -1) {
+            JSONFactory.releaseByteArray(cacheIndex, bytes);
         }
+
         if (in != null) {
             try {
                 in.close();

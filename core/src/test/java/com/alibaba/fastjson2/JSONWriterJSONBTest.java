@@ -82,7 +82,7 @@ public class JSONWriterJSONBTest {
     @Test
     public void writeString() {
         JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
-        jsonWriter.writeString('A');
+        jsonWriter.writeChar('A');
         assertEquals("\"A\"", JSONB.toJSONString(jsonWriter.getBytes()));
     }
 

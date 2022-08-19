@@ -40,20 +40,20 @@ final class ObjectWriterImplInstant
 
         ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, context.getZoneId());
 
-        if (formatUnixTime || context.isDateFormatUnixTime()) {
+        if (formatUnixTime || (format == null && context.isDateFormatUnixTime())) {
             long millis = zdt.toInstant().toEpochMilli();
             jsonWriter.writeInt64(millis / 1000);
             return;
         }
 
-        if (formatMillis || context.isDateFormatMillis()) {
+        if (formatMillis || (format == null && context.isDateFormatMillis())) {
             jsonWriter.writeInt64(zdt
                     .toInstant()
                     .toEpochMilli());
             return;
         }
 
-        if (formatISO8601 || context.isDateFormatISO8601()) {
+        if (formatISO8601 || (format == null && context.isDateFormatISO8601())) {
             jsonWriter.writeDateTimeISO8601(
                     zdt.getYear(),
                     zdt.getMonthValue(),

@@ -904,9 +904,35 @@ public class JSONBTest {
             HashMap o = JSONB.parseObject(jsonbBytes, HashMap.class);
             assertTrue(o.isEmpty());
         }
+
         byte[] jsonbBytes = JSONB.toBytes(map, JSONWriter.Feature.WriteNulls);
-        HashMap o = JSONB.parseObject(jsonbBytes, HashMap.class);
-        assertEquals(map, o);
+        HashMap map1 = JSONB.parseObject(jsonbBytes, HashMap.class);
+        assertEquals(map.size(), map1.size());
+        assertEquals(map, map1);
+    }
+
+    @Test
+    public void testWriteMap() {
+        HashMap map = new HashMap(1024 * 8);
+        for (int i = 0; i < 1024 * 8; ++i) {
+            map.put(Integer.toString(i), i);
+        }
+
+        {
+            byte[] jsonbBytes = JSONB.toBytes(map);
+            HashMap map1 = JSONB.parseObject(jsonbBytes, HashMap.class);
+            assertEquals(map.size(), map1.size());
+            assertEquals(map, map1);
+        }
+
+        String str = JSON.toJSONString(map);
+        JSONReader[] jsonReaders4 = TestUtils.createJSONReaders4(str);
+        for (int i = 0; i < jsonReaders4.length; i++) {
+            JSONReader jsonReader = jsonReaders4[i];
+            Map<String, Object> map1 = jsonReader.readObject();
+            assertEquals(map.size(), map1.size());
+            assertEquals(map, map1);
+        }
     }
 
     @Test
@@ -1051,5 +1077,11 @@ public class JSONBTest {
         byte[] jsonbBytes = JSONB.toBytes(array);
         Integer[] array2 = JSONB.parseObject(jsonbBytes, Integer[].class);
         assertArrayEquals(array, array2);
+    }
+
+    @Test
+    public void test_largeInput() {
+        byte[] bytes = {(byte) 0xa6, 0x79, 0x48, 0x7f, 0x7f, 0x7f, 0x7f};
+        assertThrows(JSONException.class, () -> JSONB.parseObject(bytes));
     }
 }

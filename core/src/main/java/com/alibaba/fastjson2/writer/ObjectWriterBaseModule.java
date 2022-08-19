@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
-class ObjectWriterBaseModule
+public class ObjectWriterBaseModule
         implements ObjectWriterModule {
     static ObjectWriterAdapter STACK_TRACE_ELEMENT_WRITER;
 
@@ -41,7 +41,7 @@ class ObjectWriterBaseModule
         return annotationProcessor;
     }
 
-    class WriterAnnotationProcessor
+    public class WriterAnnotationProcessor
             implements ObjectWriterAnnotationProcessor {
         @Override
         public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
@@ -88,19 +88,6 @@ class ObjectWriterBaseModule
 
             if (jsonType == null) {
                 Class mixInSource = provider.mixInCache.get(objectClass);
-                if (mixInSource == null) {
-                    String typeName = objectClass.getName();
-                    switch (typeName) {
-                        case "org.apache.commons.lang3.tuple.ImmutablePair":
-                            provider.mixIn(objectClass, mixInSource = ApacheLang3Support.PairMixIn.class);
-                            break;
-                        case "org.apache.commons.lang3.tuple.MutablePair":
-                            provider.mixIn(objectClass, mixInSource = ApacheLang3Support.MutablePairMixIn.class);
-                            break;
-                        default:
-                            break;
-                    }
-                }
 
                 if (mixInSource != null) {
                     beanInfo.mixIn = true;
@@ -201,16 +188,6 @@ class ObjectWriterBaseModule
         @Override
         public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectType, Field field) {
             Class mixInSource = provider.mixInCache.get(objectType);
-            if (objectType != null) {
-                String typeName = objectType.getName();
-                switch (typeName) {
-                    case "org.apache.commons.lang3.tuple.ImmutablePair":
-                        provider.mixIn(objectType, mixInSource = ApacheLang3Support.PairMixIn.class);
-                        break;
-                    default:
-                        break;
-                }
-            }
 
             if (mixInSource != null && mixInSource != objectType) {
                 Field mixInField = null;
@@ -575,8 +552,18 @@ class ObjectWriterBaseModule
             if (!objectClass.getName().startsWith("java.lang") && !BeanUtils.isRecord(objectClass)) {
                 String fieldName = BeanUtils.getterName(methodName, null);
 
+                char firstChar = fieldName.charAt(0);
+                final String fieldName0;
+                if (firstChar >= 'A' && firstChar <= 'Z') {
+                    char[] chars = fieldName.toCharArray();
+                    chars[0] = (char) (firstChar + 32);
+                    fieldName0 = new String(chars);
+                } else {
+                    fieldName0 = null;
+                }
                 BeanUtils.declaredFields(objectClass, field -> {
-                    if (field.getName().equals(fieldName)) {
+                    String name = field.getName();
+                    if (name.equals(fieldName) || (fieldName0 != null && name.equals(fieldName0))) {
                         int modifiers = field.getModifiers();
                         if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                             getFieldInfo(beanInfo, fieldInfo, objectClass, field);
@@ -830,9 +817,10 @@ class ObjectWriterBaseModule
                 return JodaSupport.createLocalDateWriter(objectClass, null);
             case "org.joda.time.LocalDateTime":
                 return JodaSupport.createLocalDateTimeWriter(objectClass, null);
-//            case "com.alibaba.fastjson.JSONObject":
-//                return Fastjson1xSupport.createObjectReader();
             default:
+                if (JdbcSupport.isClob(objectClass)) {
+                    return JdbcSupport.createClobWriter(objectClass);
+                }
                 return null;
         }
     }
@@ -873,6 +861,10 @@ class ObjectWriterBaseModule
             case "java.net.InetSocketAddress":
             case "java.text.SimpleDateFormat":
                 return ObjectWriterMisc.INSTANCE;
+            case "org.apache.commons.lang3.tuple.Pair":
+            case "org.apache.commons.lang3.tuple.MutablePair":
+            case "org.apache.commons.lang3.tuple.ImmutablePair":
+                return new ApacheLang3Support.PairWriter(objectClass);
             default:
                 break;
         }
@@ -1036,6 +1028,10 @@ class ObjectWriterBaseModule
 
             if (clazz == char[].class) {
                 return ObjectWriterImplCharValueArray.INSTANCE;
+            }
+
+            if (clazz == StringBuffer.class || clazz == StringBuilder.class) {
+                return ObjectWriterImplToString.INSTANCE;
             }
 
             if (clazz == byte[].class) {
@@ -1213,6 +1209,27 @@ class ObjectWriterBaseModule
 
             if (Class.class == clazz) {
                 return ObjectWriterImplClass.INSTANCE;
+            }
+
+            if (Method.class == clazz) {
+                return new ObjectWriterAdapter<>(
+                        Method.class,
+                        Arrays.asList(
+                                ObjectWriters.fieldWriter("declaringClass", Class.class, Method::getDeclaringClass),
+                                ObjectWriters.fieldWriter("name", String.class, Method::getName),
+                                ObjectWriters.fieldWriter("parameterTypes", Class[].class, Method::getParameterTypes)
+                        )
+                );
+            }
+
+            if (Field.class == clazz) {
+                return new ObjectWriterAdapter<>(
+                        Method.class,
+                        Arrays.asList(
+                                ObjectWriters.fieldWriter("declaringClass", Class.class, Field::getDeclaringClass),
+                                ObjectWriters.fieldWriter("name", String.class, Field::getName)
+                        )
+                );
             }
 
             if (ParameterizedType.class.isAssignableFrom(clazz)) {

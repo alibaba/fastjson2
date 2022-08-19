@@ -416,7 +416,7 @@ public class JSONWriterTest {
     @Test
     public void getBytes() {
         JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
-        jsonWriter.writeString('a');
+        jsonWriter.writeChar('a');
         assertArrayEquals(new byte[] {'"', 'a', '"'}, jsonWriter.getBytes());
     }
 }

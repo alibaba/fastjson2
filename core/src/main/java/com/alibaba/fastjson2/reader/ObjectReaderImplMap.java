@@ -3,8 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.*;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -17,6 +16,7 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 public final class ObjectReaderImplMap
         implements ObjectReader {
+    static Function UNSAFE_OBJECT_CREATOR;
     static final Class CLASS_SINGLETON_MAP = Collections.singletonMap(1, 1).getClass();
     static final Class CLASS_EMPTY_MAP = Collections.EMPTY_MAP.getClass();
     static final Class CLASS_EMPTY_SORTED_MAP = Collections.emptySortedMap().getClass();
@@ -99,7 +99,7 @@ public final class ObjectReaderImplMap
         String instanceTypeName = instanceType.getName();
         switch (instanceTypeName) {
             case "com.alibaba.fastjson.JSONObject":
-                builder = Fastjson1xSupport.createObjectSupplier(instanceType);
+                builder = createObjectSupplier(instanceType);
                 instanceType = HashMap.class;
                 break;
             case "com.google.common.collect.RegularImmutableMap":
@@ -117,7 +117,7 @@ public final class ObjectReaderImplMap
             default:
                 if (instanceType == JSONObject1O.class) {
                     Class objectClass = TypeUtils.loadClass("com.alibaba.fastjson.JSONObject");
-                    builder = Fastjson1xSupport.createObjectSupplier(objectClass);
+                    builder = createObjectSupplier(objectClass);
                     instanceType = LinkedHashMap.class;
                 } else if (mapType == CLASS_UNMODIFIABLE_MAP) {
                     builder = (Function<Map, Map>) Collections::unmodifiableMap;
@@ -192,6 +192,10 @@ public final class ObjectReaderImplMap
                             throw new JSONException("create map error : " + instanceType);
                         }
                     }).get();
+                case "java.util.ImmutableCollections$Map1":
+                    return new HashMap<>();
+                case "java.util.ImmutableCollections$MapN":
+                    return new LinkedHashMap<>();
                 default:
                     break;
             }
@@ -338,6 +342,10 @@ public final class ObjectReaderImplMap
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.isJSONB()) {
+            return readJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
         JSONReader.Context context = jsonReader.getContext();
         Supplier<Map> objectSupplier = jsonReader.getContext().getObjectSupplier();
         Map object;
@@ -356,5 +364,62 @@ public final class ObjectReaderImplMap
         }
 
         return object;
+    }
+
+    static Function createObjectSupplier(Class objectClass) {
+        if (JDKUtils.UNSAFE_SUPPORT) {
+            if (UNSAFE_OBJECT_CREATOR != null) {
+                return UNSAFE_OBJECT_CREATOR;
+            }
+            return UNSAFE_OBJECT_CREATOR = new ObjectCreatorUF(objectClass);
+        }
+
+        Constructor constructor;
+        try {
+            constructor = objectClass.getConstructor(Map.class);
+        } catch (NoSuchMethodException e) {
+            throw new JSONException("create JSONObject1 error");
+        }
+
+        return (Object arg) -> {
+            try {
+                return constructor.newInstance(arg);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new JSONException("create JSONObject1 error");
+            }
+        };
+    }
+
+    static class ObjectCreatorUF
+            implements Function {
+        final Class objectClass;
+        final Field map;
+        final long mapOffset;
+
+        ObjectCreatorUF(Class objectClass) {
+            this.objectClass = objectClass;
+            try {
+                map = objectClass.getDeclaredField("map");
+            } catch (NoSuchFieldException e) {
+                throw new JSONException("field map not found", e);
+            }
+            mapOffset = UnsafeUtils.UNSAFE.objectFieldOffset(map);
+        }
+
+        @Override
+        public Object apply(Object map) {
+            if (map == null) {
+                map = new HashMap<>();
+            }
+
+            Object object;
+            try {
+                object = UnsafeUtils.UNSAFE.allocateInstance(objectClass);
+                UnsafeUtils.UNSAFE.putObject(object, mapOffset, (Map) map);
+            } catch (InstantiationException e) {
+                throw new JSONException("create " + objectClass.getName() + " error", e);
+            }
+            return object;
+        }
     }
 }

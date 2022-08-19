@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.util.JDKUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.*;
 
 final class JSONReaderASCII
@@ -134,72 +135,203 @@ final class JSONReaderASCII
 
         int offset = this.nameBegin = this.offset;
         long hashCode = Fnv.MAGIC_HASH_CODE;
-        for (int i = 0; ; ++i) {
-            char c = (char) bytes[offset];
-            if (c == '\\') {
-                if (!this.nameEscape) {
-                    nameEscape = true;
+        int i = 0;
+        long nameValue = 0;
+        if (offset + 9 <= end) {
+            byte c0 = bytes[offset];
+            byte c1 = bytes[offset + 1];
+            byte c2 = bytes[offset + 2];
+            byte c3 = bytes[offset + 3];
+            byte c4 = bytes[offset + 4];
+            byte c5 = bytes[offset + 5];
+            byte c6 = bytes[offset + 6];
+            byte c7 = bytes[offset + 7];
+            byte c8 = bytes[offset + 8];
+
+            if (c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\' && c6 != '\\' && c7 != '\\') {
+                if (c0 == quote) {
+                    i = 0;
+                } else if (c1 == quote) {
+                    nameValue = c0;
+                    i = 1;
+                } else if (c2 == quote) {
+                    nameValue
+                            = (((long) c0) << 8)
+                            + (c1 & 0xFFL);
+                    i = 2;
+                } else if (c3 == quote) {
+                    nameValue
+                            = (((long) c0) << 16)
+                            + ((c1 & 0xFFL) << 8)
+                            + (c2 & 0xFFL);
+                    i = 3;
+                } else if (c4 == quote) {
+                    nameValue
+                            = (((long) c0) << 24)
+                            + ((c1 & 0xFFL) << 16)
+                            + ((c2 & 0xFFL) << 8)
+                            + (c3 & 0xFFL);
+                    i = 4;
+                } else if (c5 == quote) {
+                    nameValue
+                            = (((long) c0) << 32)
+                            + ((c1 & 0xFFL) << 24)
+                            + ((c2 & 0xFFL) << 16)
+                            + ((c3 & 0xFFL) << 8)
+                            + (c4 & 0xFFL);
+                    i = 5;
+                } else if (c6 == quote) {
+                    nameValue
+                            = (((long) c0) << 40)
+                            + ((c1 & 0xFFL) << 32)
+                            + ((c2 & 0xFFL) << 24)
+                            + ((c3 & 0xFFL) << 16)
+                            + ((c4 & 0xFFL) << 8)
+                            + (c5 & 0xFFL);
+                    i = 6;
+                } else if (c7 == quote) {
+                    nameValue
+                            = (((long) c0) << 48)
+                            + ((c1 & 0xFFL) << 40)
+                            + ((c2 & 0xFFL) << 32)
+                            + ((c3 & 0xFFL) << 24)
+                            + ((c4 & 0xFFL) << 16)
+                            + ((c5 & 0xFFL) << 8)
+                            + (c6 & 0xFFL);
+                    i = 7;
+                } else if (c8 == quote) {
+                    nameValue
+                            = (((long) c0) << 56)
+                            + ((c1 & 0xFFL) << 48)
+                            + ((c2 & 0xFFL) << 40)
+                            + ((c3 & 0xFFL) << 32)
+                            + ((c4 & 0xFFL) << 24)
+                            + ((c5 & 0xFFL) << 16)
+                            + ((c6 & 0xFFL) << 8)
+                            + (c7 & 0xFFL);
+                    i = 8;
                 }
-                c = (char) bytes[++offset];
-                switch (c) {
-                    case 'u': {
-                        byte c1 = bytes[++offset];
-                        byte c2 = bytes[++offset];
-                        byte c3 = bytes[++offset];
-                        byte c4 = bytes[++offset];
-                        c = char4(c1, c2, c3, c4);
-                        break;
+
+                if (nameValue != 0) {
+                    this.nameEnd = offset = this.offset + i;
+                    this.nameLength = i;
+                    offset++;
+
+                    int indexMask = ((int) nameValue) & (NAME_HASH_64_CACHE2.length - 1);
+                    NameHash64Cache nameHash64Cache = NAME_HASH_64_CACHE2[indexMask];
+                    if (nameHash64Cache != null && nameHash64Cache.nameValue == nameValue) {
+                        hashCode = nameHash64Cache.hashCode64;
+                    } else {
+                        switch (i) {
+                            case 1:
+                                hashCode = Fnv.hashCode64(c0);
+                                break;
+                            case 2:
+                                hashCode = Fnv.hashCode64(c0, c1);
+                                break;
+                            case 3:
+                                hashCode = Fnv.hashCode64(c0, c1, c2);
+                                break;
+                            case 4:
+                                hashCode = Fnv.hashCode64(c0, c1, c2, c3);
+                                break;
+                            case 5:
+                                hashCode = Fnv.hashCode64(c0, c1, c2, c3, c4);
+                                break;
+                            case 6:
+                                hashCode = Fnv.hashCode64(c0, c1, c2, c3, c4, c5);
+                                break;
+                            case 7:
+                                hashCode = Fnv.hashCode64(c0, c1, c2, c3, c4, c5, c6);
+                                break;
+                            case 8:
+                                hashCode = Fnv.hashCode64(c0, c1, c2, c3, c4, c5, c6, c7);
+                                break;
+                            default:
+                                break;
+                        }
+                        if (nameHash64Cache == null) {
+                            NAME_HASH_64_CACHE2[indexMask] = new JSONFactory.NameHash64Cache(nameValue, hashCode);
+                        }
                     }
-                    case 'x': {
-                        byte c1 = bytes[++offset];
-                        byte c2 = bytes[++offset];
-                        c = char2(c1, c2);
-                        break;
-                    }
-                    case '\\':
-                    case '"':
-                        break;
-                    default:
-                        c = char1(c);
-                        break;
                 }
+            }
+        }
+
+        if (nameValue == 0) {
+            for (; ; ++i) {
+                char c = (char) bytes[offset];
+                if (c == '\\') {
+                    if (!this.nameEscape) {
+                        nameEscape = true;
+                    }
+                    c = (char) bytes[++offset];
+                    switch (c) {
+                        case 'u': {
+                            byte c1 = bytes[++offset];
+                            byte c2 = bytes[++offset];
+                            byte c3 = bytes[++offset];
+                            byte c4 = bytes[++offset];
+                            c = char4(c1, c2, c3, c4);
+                            break;
+                        }
+                        case 'x': {
+                            byte c1 = bytes[++offset];
+                            byte c2 = bytes[++offset];
+                            c = char2(c1, c2);
+                            break;
+                        }
+                        case '\\':
+                        case '"':
+                            break;
+                        default:
+                            c = char1(c);
+                            break;
+                    }
+                    offset++;
+                    hashCode ^= c;
+                    hashCode *= Fnv.MAGIC_PRIME;
+                    continue;
+                }
+
+                if (c == quote) {
+                    this.nameLength = i;
+                    this.nameEnd = offset;
+                    offset++;
+                    break;
+                }
+
                 offset++;
                 hashCode ^= c;
                 hashCode *= Fnv.MAGIC_PRIME;
-                continue;
             }
-
-            if (c == quote) {
-                this.nameLength = i;
-                this.nameEnd = offset;
-                offset++;
-                c = (char) bytes[offset];
-
-                while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-                    offset++;
-                    c = (char) bytes[offset];
-                }
-                if (c != ':') {
-                    return -1;
-                }
-
-                offset++;
-                c = (char) bytes[offset];
-
-                while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-                    offset++;
-                    c = (char) bytes[offset];
-                }
-
-                this.offset = offset + 1;
-                this.ch = c;
-                break;
-            }
-
-            offset++;
-            hashCode ^= c;
-            hashCode *= Fnv.MAGIC_PRIME;
         }
+
+        char c;
+        if (offset < end) {
+            c = (char) bytes[offset];
+        } else {
+            c = EOI;
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = (char) bytes[offset];
+        }
+        if (c != ':') {
+            throw new JSONException(info("expect ':', but " + c));
+        }
+
+        offset++;
+        c = (char) bytes[offset];
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = (char) bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
 
         return hashCode;
     }
@@ -551,6 +683,267 @@ final class JSONReaderASCII
             offset++;
         }
 
+        if (!nameEscape) {
+            long nameValue0 = -1, nameValue1 = -1;
+            int length = nameEnd - nameBegin;
+            switch (length) {
+                case 1:
+                    nameValue0 = bytes[nameBegin];
+                    break;
+                case 2:
+                    nameValue0
+                            = (bytes[nameBegin] << 8)
+                            + (bytes[nameBegin + 1]);
+                    break;
+                case 3:
+                    nameValue0
+                            = (bytes[nameBegin] << 16)
+                            + (bytes[nameBegin + 1] << 8)
+                            + (bytes[nameBegin + 2]);
+                    break;
+                case 4:
+                    nameValue0
+                            = (bytes[nameBegin] << 24)
+                            + (bytes[nameBegin + 1] << 16)
+                            + (bytes[nameBegin + 2] << 8)
+                            + (bytes[nameBegin + 3]);
+                    break;
+                case 5:
+                    nameValue0
+                            = (((long) bytes[nameBegin]) << 32)
+                            + (((long) bytes[nameBegin + 1]) << 24)
+                            + (((long) bytes[nameBegin + 2]) << 16)
+                            + (((long) bytes[nameBegin + 3]) << 8)
+                            + ((long) bytes[nameBegin + 4]);
+                    break;
+                case 6:
+                    nameValue0
+                            = (((long) bytes[nameBegin]) << 40)
+                            + (((long) bytes[nameBegin + 1]) << 32)
+                            + (((long) bytes[nameBegin + 2]) << 24)
+                            + (((long) bytes[nameBegin + 3]) << 16)
+                            + (((long) bytes[nameBegin + 4]) << 8)
+                            + ((long) bytes[nameBegin + 5]);
+                    break;
+                case 7:
+                    nameValue0
+                            = (((long) bytes[nameBegin]) << 48)
+                            + (((long) bytes[nameBegin + 1]) << 40)
+                            + (((long) bytes[nameBegin + 2]) << 32)
+                            + (((long) bytes[nameBegin + 3]) << 24)
+                            + (((long) bytes[nameBegin + 4]) << 16)
+                            + (((long) bytes[nameBegin + 5]) << 8)
+                            + ((long) bytes[nameBegin + 6]);
+                    break;
+                case 8:
+                    nameValue0
+                            = (((long) bytes[nameBegin]) << 56)
+                            + (((long) bytes[nameBegin + 1]) << 48)
+                            + (((long) bytes[nameBegin + 2]) << 40)
+                            + (((long) bytes[nameBegin + 3]) << 32)
+                            + (((long) bytes[nameBegin + 4]) << 24)
+                            + (((long) bytes[nameBegin + 5]) << 16)
+                            + (((long) bytes[nameBegin + 6]) << 8)
+                            + ((long) bytes[nameBegin + 7]);
+                    break;
+                case 9:
+                    nameValue0 = bytes[nameBegin + 0];
+                    nameValue1
+                            = (((long) bytes[nameBegin] + 1) << 56)
+                            + (((long) bytes[nameBegin + 2]) << 48)
+                            + (((long) bytes[nameBegin + 3]) << 40)
+                            + (((long) bytes[nameBegin + 4]) << 32)
+                            + (((long) bytes[nameBegin + 5]) << 24)
+                            + (((long) bytes[nameBegin + 6]) << 16)
+                            + (((long) bytes[nameBegin + 7]) << 8)
+                            + ((long) bytes[nameBegin + 8]);
+                    break;
+                case 10:
+                    nameValue0
+                            = (bytes[nameBegin] << 8)
+                            + (bytes[nameBegin + 1]);
+                    nameValue1
+                            = (((long) bytes[nameBegin + 2]) << 56)
+                            + (((long) bytes[nameBegin + 3]) << 48)
+                            + (((long) bytes[nameBegin + 4]) << 40)
+                            + (((long) bytes[nameBegin + 5]) << 32)
+                            + (((long) bytes[nameBegin + 6]) << 24)
+                            + (((long) bytes[nameBegin + 7]) << 16)
+                            + (((long) bytes[nameBegin + 8]) << 8)
+                            + ((long) bytes[nameBegin + 9]);
+                    break;
+                case 11:
+                    nameValue0
+                            = (bytes[nameBegin] << 16)
+                            + (bytes[nameBegin + 1] << 8)
+                            + (bytes[nameBegin + 2]);
+                    nameValue1
+                            = (((long) bytes[nameBegin + 3]) << 56)
+                            + (((long) bytes[nameBegin + 4]) << 48)
+                            + (((long) bytes[nameBegin + 5]) << 40)
+                            + (((long) bytes[nameBegin + 6]) << 32)
+                            + (((long) bytes[nameBegin + 7]) << 24)
+                            + (((long) bytes[nameBegin + 8]) << 16)
+                            + (((long) bytes[nameBegin + 9]) << 8)
+                            + ((long) bytes[nameBegin + 10]);
+                    break;
+                case 12:
+                    nameValue0
+                            = (bytes[nameBegin] << 24)
+                            + (bytes[nameBegin + 1] << 16)
+                            + (bytes[nameBegin + 2] << 8)
+                            + (bytes[nameBegin + 3]);
+                    nameValue1
+                            = (((long) bytes[nameBegin + 4]) << 56)
+                            + (((long) bytes[nameBegin + 5]) << 48)
+                            + (((long) bytes[nameBegin + 6]) << 40)
+                            + (((long) bytes[nameBegin + 7]) << 32)
+                            + (((long) bytes[nameBegin + 8]) << 24)
+                            + (((long) bytes[nameBegin + 9]) << 16)
+                            + (((long) bytes[nameBegin + 10]) << 8)
+                            + ((long) bytes[nameBegin + 11]);
+                    break;
+                case 13:
+                    nameValue0
+                            = (((long) bytes[nameBegin]) << 32)
+                            + (((long) bytes[nameBegin + 1]) << 24)
+                            + (((long) bytes[nameBegin + 2]) << 16)
+                            + (((long) bytes[nameBegin + 3]) << 8)
+                            + ((long) bytes[nameBegin + 4]);
+                    nameValue1
+                            = (((long) bytes[nameBegin + 5]) << 56)
+                            + (((long) bytes[nameBegin + 6]) << 48)
+                            + (((long) bytes[nameBegin + 7]) << 40)
+                            + (((long) bytes[nameBegin + 8]) << 32)
+                            + (((long) bytes[nameBegin + 9]) << 24)
+                            + (((long) bytes[nameBegin + 10]) << 16)
+                            + (((long) bytes[nameBegin + 11]) << 8)
+                            + ((long) bytes[nameBegin + 12]);
+                    break;
+                case 14:
+                    nameValue0
+                            = (((long) bytes[nameBegin]) << 40)
+                            + (((long) bytes[nameBegin + 1]) << 32)
+                            + (((long) bytes[nameBegin + 2]) << 24)
+                            + (((long) bytes[nameBegin + 3]) << 16)
+                            + (((long) bytes[nameBegin + 4]) << 8)
+                            + ((long) bytes[nameBegin + 5]);
+                    nameValue1
+                            = (((long) bytes[nameBegin + 6]) << 56)
+                            + (((long) bytes[nameBegin + 7]) << 48)
+                            + (((long) bytes[nameBegin + 8]) << 40)
+                            + (((long) bytes[nameBegin + 9]) << 32)
+                            + (((long) bytes[nameBegin + 10]) << 24)
+                            + (((long) bytes[nameBegin + 11]) << 16)
+                            + (((long) bytes[nameBegin + 12]) << 8)
+                            + ((long) bytes[nameBegin + 13]);
+                    break;
+                case 15:
+                    nameValue0
+                            = (((long) bytes[nameBegin]) << 48)
+                            + (((long) bytes[nameBegin + 1]) << 40)
+                            + (((long) bytes[nameBegin + 2]) << 32)
+                            + (((long) bytes[nameBegin + 3]) << 24)
+                            + (((long) bytes[nameBegin + 4]) << 16)
+                            + (((long) bytes[nameBegin + 5]) << 8)
+                            + ((long) bytes[nameBegin + 6]);
+                    nameValue1
+                            = (((long) bytes[nameBegin + 7]) << 56)
+                            + (((long) bytes[nameBegin + 8]) << 48)
+                            + (((long) bytes[nameBegin + 9]) << 40)
+                            + (((long) bytes[nameBegin + 10]) << 32)
+                            + (((long) bytes[nameBegin + 11]) << 24)
+                            + (((long) bytes[nameBegin + 12]) << 16)
+                            + (((long) bytes[nameBegin + 13]) << 8)
+                            + ((long) bytes[nameBegin + 14]);
+                    break;
+                case 16:
+                    nameValue0
+                            = (((long) bytes[nameBegin]) << 56)
+                            + (((long) bytes[nameBegin + 1]) << 48)
+                            + (((long) bytes[nameBegin + 2]) << 40)
+                            + (((long) bytes[nameBegin + 3]) << 32)
+                            + (((long) bytes[nameBegin + 4]) << 24)
+                            + (((long) bytes[nameBegin + 5]) << 16)
+                            + (((long) bytes[nameBegin + 6]) << 8)
+                            + ((long) bytes[nameBegin + 7]);
+                    nameValue1
+                            = (((long) bytes[nameBegin + 8]) << 56)
+                            + (((long) bytes[nameBegin + 9]) << 48)
+                            + (((long) bytes[nameBegin + 10]) << 40)
+                            + (((long) bytes[nameBegin + 11]) << 32)
+                            + (((long) bytes[nameBegin + 12]) << 24)
+                            + (((long) bytes[nameBegin + 13]) << 16)
+                            + (((long) bytes[nameBegin + 14]) << 8)
+                            + ((long) bytes[nameBegin + 15]);
+                    break;
+                default:
+                    break;
+            }
+
+            if (nameValue0 != -1) {
+                if (nameValue1 != -1) {
+                    int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
+                    JSONFactory.NameCacheEntry2 entry = NAME_CACHE2[indexMask];
+                    if (entry == null) {
+                        if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                            try {
+                                STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                            } catch (Throwable e) {
+                                STRING_CREATOR_ERROR = true;
+                            }
+                        }
+
+                        char[] chars = new char[length];
+                        for (int i = 0; i < length; ++i) {
+                            chars[i] = (char) (bytes[nameBegin + i] & 0xFF);
+                        }
+
+                        String name;
+                        if (STRING_CREATOR_JDK8 != null) {
+                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                        } else {
+                            name = new String(chars);
+                        }
+
+                        NAME_CACHE2[indexMask] = new JSONFactory.NameCacheEntry2(name, nameValue0, nameValue1);
+                        return name;
+                    } else if (entry.value0 == nameValue0 && entry.value1 == nameValue1) {
+                        return entry.name;
+                    }
+                } else {
+                    int indexMask = ((int) nameValue0) & (NAME_CACHE.length - 1);
+                    JSONFactory.NameCacheEntry entry = NAME_CACHE[indexMask];
+                    if (entry == null) {
+                        if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                            try {
+                                STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                            } catch (Throwable e) {
+                                STRING_CREATOR_ERROR = true;
+                            }
+                        }
+
+                        char[] chars = new char[length];
+                        for (int i = 0; i < length; ++i) {
+                            chars[i] = (char) (bytes[nameBegin + i] & 0xFF);
+                        }
+
+                        String name;
+                        if (STRING_CREATOR_JDK8 != null) {
+                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                        } else {
+                            name = new String(chars);
+                        }
+
+                        NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(name, nameValue0);
+                        return name;
+                    } else if (entry.value == nameValue0) {
+                        return entry.name;
+                    }
+                }
+            }
+        }
+
         return getFieldName();
     }
 
@@ -669,7 +1062,8 @@ final class JSONReaderASCII
     @Override
     public String readString() {
         if (ch == '"' || ch == '\'') {
-            final char quote = ch;
+            final byte quote = (byte) ch;
+            final byte slash = (byte) '\\';
 
             int offset = this.offset;
             int start = offset;
@@ -677,37 +1071,77 @@ final class JSONReaderASCII
             boolean valueEscape = false;
 
             _for:
-            for (int i = 0; ; ++i) {
-                if (offset >= end) {
-                    throw new JSONException("invalid escape character EOI");
+            {
+                int i = 0;
+
+                // vector optimize
+                while (offset + 8 <= end) {
+                    byte c0 = bytes[offset];
+                    byte c1 = bytes[offset + 1];
+                    byte c2 = bytes[offset + 2];
+                    byte c3 = bytes[offset + 3];
+                    byte c4 = bytes[offset + 4];
+                    byte c5 = bytes[offset + 5];
+                    byte c6 = bytes[offset + 6];
+                    byte c7 = bytes[offset + 7];
+                    if (c0 == slash || c1 == slash || c2 == slash || c3 == slash || c4 == slash || c5 == slash || c6 == slash || c7 == slash) {
+                        break;
+                    }
+                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote) {
+                        break;
+                    }
+                    offset += 8;
+                    i += 8;
                 }
 
-                byte c = bytes[offset];
-                if (c == '\\') {
-                    valueEscape = true;
-                    c = bytes[++offset];
-                    switch (c) {
-                        case 'u': {
-                            offset += 4;
-                            break;
+                // vector optimize
+                while (offset + 4 <= end) {
+                    byte c0 = bytes[offset];
+                    byte c1 = bytes[offset + 1];
+                    byte c2 = bytes[offset + 2];
+                    byte c3 = bytes[offset + 3];
+                    if (c0 == slash || c1 == slash || c2 == slash || c3 == slash) {
+                        break;
+                    }
+                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
+                        break;
+                    }
+                    offset += 4;
+                    i += 4;
+                }
+
+                for (; ; ++i) {
+                    if (offset >= end) {
+                        throw new JSONException("invalid escape character EOI");
+                    }
+
+                    byte c = bytes[offset];
+                    if (c == slash) {
+                        valueEscape = true;
+                        c = bytes[++offset];
+                        switch (c) {
+                            case 'u': {
+                                offset += 4;
+                                break;
+                            }
+                            case 'x': {
+                                offset += 2;
+                                break;
+                            }
+                            default:
+                                // skip
+                                break;
                         }
-                        case 'x': {
-                            offset += 2;
-                            break;
-                        }
-                        default:
-                            // skip
-                            break;
+                        offset++;
+                        continue;
+                    }
+
+                    if (c == quote) {
+                        valueLength = i;
+                        break _for;
                     }
                     offset++;
-                    continue;
                 }
-
-                if (c == quote) {
-                    valueLength = i;
-                    break _for;
-                }
-                offset++;
             }
 
             String str;
@@ -766,7 +1200,7 @@ final class JSONReaderASCII
                         byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
                         str = STRING_CREATOR_JDK11.apply(bytes);
                     }
-                } else if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+                } else if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_ASCII_CREATOR != null) {
                     byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
                     str = JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
                 } else {

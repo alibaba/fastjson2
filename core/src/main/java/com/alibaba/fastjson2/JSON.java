@@ -3,11 +3,15 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
+import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,11 +27,13 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONFactory.*;
+
 public interface JSON {
     /**
      * FASTJSON2 version name
      */
-    String VERSION = "2.0.10";
+    String VERSION = "2.0.12";
 
     /**
      * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject}
@@ -1314,12 +1320,7 @@ public interface JSON {
     @SuppressWarnings("unchecked")
     static <T> void parseObject(InputStream input, Charset charset, char delimiter, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
         int cachedIndex = JSONFactory.cacheIndex();
-        byte[] bytes = JSONFactory.CACHE_BYTES.getAndSet(
-                cachedIndex, null
-        );
-        if (bytes == null) {
-            bytes = new byte[8192];
-        }
+        byte[] bytes = JSONFactory.allocateByteArray(cachedIndex);
 
         int offset = 0, start = 0, end;
         ObjectReader<? extends T> objectReader = null;
@@ -1372,9 +1373,7 @@ public interface JSON {
         } catch (IOException e) {
             throw new JSONException("JSON#parseObject cannot parse the 'InputStream' to '" + type + "'", e);
         } finally {
-            if (bytes.length < JSONFactory.CACHE_THREAD) {
-                JSONFactory.CACHE_BYTES.set(cachedIndex, bytes);
-            }
+            JSONFactory.releaseByteArray(cachedIndex, bytes);
         }
     }
 
@@ -1391,12 +1390,7 @@ public interface JSON {
     @SuppressWarnings("unchecked")
     static <T> void parseObject(Reader input, char delimiter, Type type, Consumer<T> consumer) {
         final int cachedIndex = JSONFactory.cacheIndex();
-        char[] chars = JSONFactory.CACHE_CHARS.getAndSet(
-                cachedIndex, null
-        );
-        if (chars == null) {
-            chars = new char[8192];
-        }
+        char[] chars = JSONFactory.allocateCharArray(cachedIndex);
 
         int offset = 0, start = 0, end;
         ObjectReader<? extends T> objectReader = null;
@@ -1443,9 +1437,7 @@ public interface JSON {
         } catch (IOException e) {
             throw new JSONException("JSON#parseObject cannot parse the 'Reader' to '" + type + "'", e);
         } finally {
-            if (chars.length < JSONFactory.CACHE_THREAD) {
-                JSONFactory.CACHE_CHARS.set(cachedIndex, chars);
-            }
+            JSONFactory.releaseCharArray(cachedIndex, chars);
         }
     }
 
@@ -1742,7 +1734,15 @@ public interface JSON {
         JSONWriter.Context writeContext = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
 
         boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
-        JSONWriterUTF16 jsonWriter = JDKUtils.JVM_VERSION == 8 ? new JSONWriterUTF16JDK8(writeContext) : new JSONWriterUTF16(writeContext);
+
+        JSONWriter jsonWriter;
+        if (JDKUtils.JVM_VERSION == 8) {
+            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+        } else if ((defaultWriterFeatures & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
+            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+        } else {
+            jsonWriter = new JSONWriterUTF16(writeContext);
+        }
 
         try (JSONWriter writer = pretty ?
                 new JSONWriterPretty(jsonWriter) : jsonWriter) {
@@ -2445,5 +2445,68 @@ public interface JSON {
      */
     static boolean isEnabled(JSONWriter.Feature feature) {
         return (JSONFactory.defaultWriterFeatures & feature.mask) != 0;
+    }
+
+    /**
+     * use ObjectWriter and ObjectReader copy java object
+     * @param object the object to be copy
+     * @param features the specified features
+     *
+     * @since 2.0.12
+     */
+    static <T> T copy(T object, JSONWriter.Feature... features) {
+        if (object == null) {
+            return null;
+        }
+
+        Class<?> objectClass = object.getClass();
+        if (ObjectWriterProvider.isPrimitiveOrEnum(objectClass)) {
+            return object;
+        }
+
+        boolean fieldBased = false, beanToArray = false;
+        for (JSONWriter.Feature feature : features) {
+            if (feature == JSONWriter.Feature.FieldBased) {
+                fieldBased = true;
+            } else if (feature == JSONWriter.Feature.BeanToArray) {
+                beanToArray = true;
+            }
+        }
+
+        ObjectWriter objectWriter = defaultObjectWriterProvider.getObjectWriter(objectClass, objectClass, fieldBased);
+        ObjectReader objectReader = defaultObjectReaderProvider.getObjectReader(objectClass, fieldBased);
+
+        if (objectWriter instanceof ObjectWriterAdapter && objectReader instanceof ObjectReaderBean) {
+            T instance = (T) objectReader.createInstance();
+
+            List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
+            for (FieldWriter fieldWriter : fieldWriters) {
+                FieldReader fieldReader = objectReader.getFieldReader(fieldWriter.getFieldName());
+                if (fieldReader == null) {
+                    continue;
+                }
+
+                Object fieldValue = fieldWriter.getFieldValue(object);
+                Object fieldValueCopied = copy(fieldValue);
+                fieldReader.accept(instance, fieldValueCopied);
+            }
+
+            return instance;
+        }
+
+        byte[] jsonbBytes;
+        try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
+            writer.config(JSONWriter.Feature.WriteClassName);
+            objectWriter.writeJSONB(writer, object, null, null, 0);
+            jsonbBytes = writer.getBytes();
+        }
+
+        try (JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes, JSONReader.Feature.SupportAutoType, JSONReader.Feature.SupportClassForName)) {
+            if (beanToArray) {
+                jsonReader.context.config(JSONReader.Feature.SupportArrayToBean);
+            }
+
+            return (T) objectReader.readJSONBObject(jsonReader, null, null, 0);
+        }
     }
 }

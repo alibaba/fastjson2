@@ -38,7 +38,8 @@ public class LocalDateTimeTest {
 
     @Test
     public void test_jsonb() {
-        for (LocalDateTime dateTime : dateTimes) {
+        for (int i = 0; i < dateTimes.length; i++) {
+            LocalDateTime dateTime = dateTimes[i];
             LocalDateTime1 vo = new LocalDateTime1();
             vo.setDate(dateTime);
             byte[] jsonbBytes = JSONB.toBytes(vo);
@@ -50,7 +51,8 @@ public class LocalDateTimeTest {
 
     @Test
     public void test_jsonb_str() {
-        for (LocalDateTime dateTime : dateTimes) {
+        for (int i = 0; i < dateTimes.length; i++) {
+            LocalDateTime dateTime = dateTimes[i];
             String str = dateTime.toString();
             byte[] jsonbBytes = JSONB.toBytes(str);
 
@@ -58,6 +60,9 @@ public class LocalDateTimeTest {
             assertEquals(dateTime, ldt);
         }
     }
+
+    // [102, 50, 48, 50, 49, 45, 49, 48, 45, 50, 48, 84, 49, 54, 58, 50, 50, 58, 49, 53, 46, 48, 48, 48, 48, 48, 48, 48, 48, 49]
+    // [102, 50, 0, 48, 0, 50, 0, 49, 0, 45, 0, 49, 0, 48, 0, 45, 0, 50, 0, 48, 0, 84, 0, 49, 0, 54, 0, 58, 0, 50]
 
     @Test
     public void test_jsonb_str_1() {

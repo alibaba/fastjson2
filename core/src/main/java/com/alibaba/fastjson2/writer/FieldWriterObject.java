@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 abstract class FieldWriterObject<T>
         extends FieldWriterImpl<T> {
@@ -16,6 +17,18 @@ abstract class FieldWriterObject<T>
     final boolean unwrapped;
     final boolean array;
     final boolean number;
+
+    static final AtomicReferenceFieldUpdater<FieldWriterObject, Class> initValueClassUpdater = AtomicReferenceFieldUpdater.newUpdater(
+            FieldWriterObject.class,
+            Class.class,
+            "initValueClass"
+    );
+
+    static final AtomicReferenceFieldUpdater<FieldWriterObject, ObjectWriter> initObjectWriterUpdater = AtomicReferenceFieldUpdater.newUpdater(
+            FieldWriterObject.class,
+            ObjectWriter.class,
+            "initObjectWriter"
+    );
 
     protected FieldWriterObject(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
         super(name, ordinal, features, format, label, fieldType, fieldClass);
@@ -48,24 +61,36 @@ abstract class FieldWriterObject<T>
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
             ObjectWriter formattedWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
             if (formattedWriter == null) {
-                return initObjectWriter = jsonWriter.getObjectWriter(valueClass);
+                boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
+                formattedWriter = jsonWriter.getObjectWriter(valueClass);
+                if (success) {
+                    initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
+                }
+                return formattedWriter;
             } else {
-                return initObjectWriter = formattedWriter;
+                if (initObjectWriter == null) {
+                    initObjectWriterUpdater.compareAndSet(this, null, initObjectWriter);
+                }
+                return formattedWriter;
             }
         } else {
             if (initValueClass == valueClass) {
+                ObjectWriter objectWriter;
                 if (initObjectWriter == null) {
                     if (Map.class.isAssignableFrom(valueClass)) {
                         if (fieldClass.isAssignableFrom(valueClass)) {
-                            initObjectWriter = ObjectWriterImplMap.of(fieldType, valueClass);
+                            objectWriter = ObjectWriterImplMap.of(fieldType, valueClass);
                         } else {
-                            initObjectWriter = ObjectWriterImplMap.of(valueClass);
+                            objectWriter = ObjectWriterImplMap.of(valueClass);
                         }
                     } else {
-                        initObjectWriter = jsonWriter.getObjectWriter(valueClass);
+                        objectWriter = jsonWriter.getObjectWriter(valueClass);
                     }
+                    initObjectWriterUpdater.compareAndSet(this, null, objectWriter);
+                } else {
+                    objectWriter = initObjectWriter;
                 }
-                return initObjectWriter;
+                return objectWriter;
             } else {
                 if (Map.class.isAssignableFrom(valueClass)) {
                     if (fieldClass.isAssignableFrom(valueClass)) {
@@ -217,7 +242,8 @@ abstract class FieldWriterObject<T>
         ObjectWriter valueWriter;
         if (initValueClass == null) {
             initValueClass = valueClass;
-            initObjectWriter = valueWriter = jsonWriter.getObjectWriter(valueClass);
+            valueWriter = jsonWriter.getObjectWriter(valueClass);
+            initObjectWriterUpdater.compareAndSet(this, null, valueWriter);
         } else {
             if (initValueClass == valueClass) {
                 valueWriter = initObjectWriter;

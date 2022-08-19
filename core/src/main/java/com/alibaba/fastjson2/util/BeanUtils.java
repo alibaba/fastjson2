@@ -1,9 +1,11 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.BeanInfo;
+import com.alibaba.fastjson2.modules.ObjectReaderModule;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -77,9 +79,11 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (parameterCount > 0) {
+            if (parameterCount > 2) {
                 Class<?>[] parameterTypes = constructor.getParameterTypes();
-                if ("kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterCount - 1].getName())) {
+                if (parameterTypes[parameterCount - 2] == int.class &&
+                        "kotlin.jvm.internal.DefaultConstructorMarker".equals(parameterTypes[parameterCount - 1].getName())
+                ) {
                     beanInfo.markerConstructor = constructor;
                     continue;
                 }
@@ -490,12 +494,17 @@ public abstract class BeanUtils {
     }
 
     public static Member getEnumValueField(Class clazz) {
+        return getEnumValueField(clazz, null);
+    }
+
+    public static Member getEnumValueField(Class clazz, List<ObjectReaderModule> modules) {
         if (clazz == null) {
             return null;
         }
 
-        Member member = null;
+        Class[] interfaces = clazz.getInterfaces();
 
+        Member member = null;
         Method[] methods = methodCache.get(clazz);
         if (methods == null) {
             methods = clazz.getMethods();
@@ -507,17 +516,39 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            Annotation[] annotations = method.getAnnotations();
-            for (Annotation annotation : annotations) {
-                Class<? extends Annotation> annotationType = annotation.annotationType();
-                switch (annotationType.getName()) {
-                    case "com.alibaba.fastjson.annotation.JSONField":
-                    case "com.alibaba.fastjson2.annotation.JSONField":
-                    case "com.fasterxml.jackson.annotation.JsonValue":
-                        member = method;
-                        break;
-                    default:
-                        break;
+            if (method.getParameterCount() != 0) {
+                continue;
+            }
+
+            if (isJSONField(method.getAnnotations())) {
+                return method;
+            }
+
+            if (member == null) {
+                AtomicReference<Member> memberRef = new AtomicReference<>();
+                for (Class enumInterface : interfaces) {
+                    getters(enumInterface, e -> {
+                        if (e.getName().equals(method.getName())) {
+                            if (isJSONField(e.getAnnotations())) {
+                                memberRef.set(method);
+                            }
+                        }
+                    });
+
+                    Class mixIn = JSONFactory.getDefaultObjectReaderProvider().getMixIn(enumInterface);
+                    if (mixIn != null) {
+                        getters(mixIn, e -> {
+                            if (e.getName().equals(method.getName())) {
+                                if (isJSONField(e.getAnnotations())) {
+                                    memberRef.set(method);
+                                }
+                            }
+                        });
+                    }
+                }
+                Member refMember = memberRef.get();
+                if (refMember != null) {
+                    return refMember;
                 }
             }
         }
@@ -529,21 +560,28 @@ public abstract class BeanUtils {
         }
 
         for (Field field : fields) {
-            Annotation[] annotations = field.getAnnotations();
-            for (Annotation annotation : annotations) {
-                Class<? extends Annotation> annotationType = annotation.annotationType();
-                switch (annotationType.getName()) {
-                    case "com.alibaba.fastjson.annotation.JSONField":
-                    case "com.alibaba.fastjson.annotation2.JSONField":
-                        member = field;
-                        break;
-                    default:
-                        break;
-                }
+            if (isJSONField(field.getAnnotations())) {
+                member = field;
+                break;
             }
         }
 
         return member;
+    }
+
+    private static boolean isJSONField(Annotation[] annotations) {
+        for (Annotation annotation : annotations) {
+            Class<? extends Annotation> annotationType = annotation.annotationType();
+            switch (annotationType.getName()) {
+                case "com.alibaba.fastjson.annotation.JSONField":
+                case "com.alibaba.fastjson2.annotation.JSONField":
+                case "com.fasterxml.jackson.annotation.JsonValue":
+                    return true;
+                default:
+                    break;
+            }
+        }
+        return false;
     }
 
     public static void getters(Class objectClass, Consumer<Method> methodConsumer) {
@@ -617,21 +655,17 @@ public abstract class BeanUtils {
             }
 
             final int methodNameLength = methodName.length();
-
-            boolean nameMatch;
-            if (returnClass == boolean.class) {
-                nameMatch = methodName.startsWith("is") && methodNameLength > 2;
+            boolean nameMatch = methodNameLength > 3 && methodName.startsWith("get");
+            if (nameMatch) {
+                char firstChar = methodName.charAt(3);
+                if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 4) {
+                    nameMatch = false;
+                }
+            } else if (returnClass == boolean.class) {
+                nameMatch = methodNameLength > 2 && methodName.startsWith("is");
                 if (nameMatch) {
                     char firstChar = methodName.charAt(2);
                     if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 3) {
-                        nameMatch = false;
-                    }
-                }
-            } else {
-                nameMatch = methodName.startsWith("get") && methodNameLength > 3;
-                if (nameMatch) {
-                    char firstChar = methodName.charAt(3);
-                    if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 4) {
                         nameMatch = false;
                     }
                 }
@@ -677,7 +711,7 @@ public abstract class BeanUtils {
         if (RECORD_CLASS == null) {
             String superclassName = superclass.getName();
             if ("java.lang.Record".equals(superclassName)) {
-                RECORD_CLASS = objectClass;
+                RECORD_CLASS = superclass;
                 return true;
             } else {
                 return false;
@@ -898,6 +932,8 @@ public abstract class BeanUtils {
                 return dots(methodName, 0, false);
             case "UpperCase":
                 return methodName.toUpperCase();
+            case "LowerCase":
+                return methodName.toLowerCase();
             case "UpperCamelCaseWithSpaces":
                 return upperCamelWith(methodName, 0, ' ');
             case "UpperCamelCaseWithUnderScores":

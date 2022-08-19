@@ -207,7 +207,7 @@ public final class ObjectSchema
     public ValidateResult validate(Map map) {
         for (String item : required) {
             if (!map.containsKey(item)) {
-                return REQUIRED_NOT_MATCH;
+                return new ValidateResult(false, "required %s", item);
             }
         }
 
@@ -222,7 +222,7 @@ public final class ObjectSchema
 
             ValidateResult result = schema.validate(propertyValue);
             if (!result.isSuccess()) {
-                return result;
+                return new ValidateResult(result, "property %s invalid", key);
             }
         }
 

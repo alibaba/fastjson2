@@ -3,10 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.*;
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.ReferenceKey;
-import com.alibaba.fastjson2.util.UnsafeUtils;
+import com.alibaba.fastjson2.util.*;
 
 import java.io.Closeable;
 import java.io.InputStream;
@@ -19,6 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.zone.ZoneRules;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -27,9 +25,14 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 
 public abstract class JSONReader
         implements Closeable {
-    static final int MAX_EXP = 512;
+    static final int MAX_EXP = 1023;
 
     static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
+    static final ZoneId SHANGHAI_ZONE_ID = "Asia/Shanghai".equals(DEFAULT_ZONE_ID.getId()) ? DEFAULT_ZONE_ID : ZoneId.of("Asia/Shanghai");
+    static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
+    static final ZoneOffset SHANGHAI_ZONE_OFFSET = SHANGHAI_ZONE_RULES.getOffset(LocalDateTime.of(LocalDate.of(1992, 1, 1), LocalTime.MIN));
+
+    static final int SHANGHAI_ZONE_OFFSET_TOTAL_SECONDS = SHANGHAI_ZONE_OFFSET.getTotalSeconds();
     static final ZoneId UTC = ZoneId.of("UTC");
     static final long LONG_MASK = 0XFFFFFFFFL;
 
@@ -65,7 +68,7 @@ public abstract class JSONReader
     protected boolean negative;
 
     protected byte valueType;
-    protected byte exponent;
+    protected short exponent;
     protected byte scale;
 
     protected int mag0;
@@ -614,34 +617,26 @@ public abstract class JSONReader
 
     public abstract Long readInt64();
 
-    public float readFloatValue() {
-        readNumber();
-        Number number = getNumber();
-        return number == null ? 0 : number.floatValue();
-    }
+    public abstract float readFloatValue();
 
     public Float readFloat() {
-        readNumber();
-        Number number = getNumber();
-        if (number instanceof Float) {
-            return (Float) number;
+        wasNull = false;
+        float value = readFloatValue();
+        if (wasNull) {
+            return null;
         }
-        return number == null ? null : number.floatValue();
+        return value;
     }
 
-    public double readDoubleValue() {
-        readNumber();
-        Number number = getNumber();
-        return number == null ? 0 : number.doubleValue();
-    }
+    public abstract double readDoubleValue();
 
     public Double readDouble() {
-        readNumber();
-        Number number = getNumber();
-        if (number instanceof Double) {
-            return (Double) number;
+        wasNull = false;
+        double value = readDoubleValue();
+        if (wasNull) {
+            return null;
         }
-        return number == null ? null : number.doubleValue();
+        return value;
     }
 
     public Number readNumber() {
@@ -666,32 +661,30 @@ public abstract class JSONReader
             return false;
         }
 
-        LocalDateTime localDateTime;
+        LocalDate localDate;
         int len = getStringLength();
         switch (len) {
             case 8:
-                localDateTime = readLocalDate8();
+                localDate = readLocalDate8();
                 break;
             case 9:
-                localDateTime = readLocalDate9();
+                localDate = readLocalDate9();
                 break;
             case 10:
-                localDateTime = readLocalDate10();
+                localDate = readLocalDate10();
                 break;
             case 11:
-                localDateTime = readLocalDate11();
+                localDate = readLocalDate11();
                 break;
             default:
                 return false;
         }
 
-        if (localDateTime == null) {
+        if (localDate == null) {
             return false;
         }
-        return localDateTime.getHour() == 0
-                && localDateTime.getMinute() == 0
-                && localDateTime.getSecond() == 0
-                && localDateTime.getNano() == 0;
+
+        return true;
     }
 
     public LocalDate readLocalDate() {
@@ -716,18 +709,23 @@ public abstract class JSONReader
                 || context.formatISO8601) {
             int len = getStringLength();
             LocalDateTime ldt = null;
+            LocalDate localDate;
             switch (len) {
                 case 8:
-                    ldt = readLocalDate8();
+                    localDate = readLocalDate8();
+                    ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                     break;
                 case 9:
-                    ldt = readLocalDate9();
+                    localDate = readLocalDate9();
+                    ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                     break;
                 case 10:
-                    ldt = readLocalDate10();
+                    localDate = readLocalDate10();
+                    ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                     break;
                 case 11:
-                    ldt = readLocalDate11();
+                    localDate = readLocalDate11();
+                    ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                     break;
                 case 19:
                     ldt = readLocalDateTime19();
@@ -813,15 +811,20 @@ public abstract class JSONReader
                 || context.formatyyyyMMdd8
                 || context.formatISO8601) {
             int len = getStringLength();
+            LocalDate localDate;
             switch (len) {
                 case 8:
-                    return readLocalDate8();
+                    localDate = readLocalDate8();
+                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 9:
-                    return readLocalDate9();
+                    localDate = readLocalDate9();
+                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 10:
-                    return readLocalDate10();
+                    localDate = readLocalDate10();
+                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 11:
-                    return readLocalDate11();
+                    localDate = readLocalDate11();
+                    return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 16:
                     return readLocalDateTime16();
                 case 17:
@@ -905,18 +908,23 @@ public abstract class JSONReader
                     || context.formatISO8601) {
                 int len = getStringLength();
                 LocalDateTime ldt = null;
+                LocalDate localDate;
                 switch (len) {
                     case 8:
-                        ldt = readLocalDate8();
+                        localDate = readLocalDate8();
+                        ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                         break;
                     case 9:
-                        ldt = readLocalDate9();
+                        localDate = readLocalDate9();
+                        ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                         break;
                     case 10:
-                        ldt = readLocalDate10();
+                        localDate = readLocalDate10();
+                        ldt = localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                         break;
                     case 11:
-                        ldt = readLocalDate11();
+                        localDate = readLocalDate11();
+                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                         break;
                     case 16:
                         ldt = readLocalDateTime16();
@@ -927,6 +935,9 @@ public abstract class JSONReader
                     case 18:
                         ldt = readLocalDateTime18();
                         break;
+                    case 19:
+                        ldt = readLocalDateTime19();
+                        break;
                     default:
                         ZonedDateTime zdt = readZonedDateTimeX(len);
                         if (zdt != null) {
@@ -935,7 +946,11 @@ public abstract class JSONReader
                         break;
                 }
                 if (ldt != null) {
-                    return ZonedDateTime.of(ldt, context.getZoneId());
+                    return ZonedDateTime.ofLocal(
+                            ldt,
+                            context.getZoneId(),
+                            null
+                    );
                 }
             }
 
@@ -982,6 +997,8 @@ public abstract class JSONReader
 
         int len = getStringLength();
         switch (len) {
+            case 5:
+                return readLocalTime5();
             case 8:
                 return readLocalTime8();
             case 10:
@@ -1041,7 +1058,10 @@ public abstract class JSONReader
         if (zdt == null) {
             return null;
         }
-        return zdt.toInstant();
+
+        return Instant.ofEpochSecond(
+                zdt.toEpochSecond(),
+                zdt.toLocalTime().getNano());
     }
 
     public long readMillisFromString() {
@@ -1052,90 +1072,88 @@ public abstract class JSONReader
                 || context.formatyyyyMMdd8
                 || context.formatISO8601) {
             int len = getStringLength();
+            LocalDateTime ldt = null;
+            LocalDate localDate = null;
             switch (len) {
                 case 8: {
-                    LocalDateTime date = readLocalDate8();
-                    if (date != null) {
-                        return ZonedDateTime.of(date,
-                                        context.getZoneId())
-                                .toInstant()
-                                .toEpochMilli();
+                    localDate = readLocalDate8();
+                    if (localDate == null) {
+                        throw new JSONException("TODO : " + readString());
                     }
-                    throw new JSONException("TODO : " + readString());
+                    ldt = LocalDateTime.of(localDate, LocalTime.MIN);
+                    break;
                 }
                 case 9: {
-                    LocalDateTime date = readLocalDate9();
-                    if (date == null) {
-                        break;
+                    localDate = readLocalDate9();
+                    if (localDate != null) {
+                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                     }
-
-                    return ZonedDateTime.of(date,
-                                    context.getZoneId())
-                            .toInstant()
-                            .toEpochMilli();
+                    break;
                 }
                 case 10: {
-                    LocalDateTime date = readLocalDate10();
-                    if (date != null) {
-                        return ZonedDateTime.of(date,
-                                        context.getZoneId())
-                                .toInstant()
-                                .toEpochMilli();
+                    localDate = readLocalDate10();
+                    if (localDate == null) {
+                        String str = readString();
+                        if ("0000-00-00".equals(str)) {
+                            return 0;
+                        }
+                        if (IOUtils.isNumber(str)) {
+                            return Long.parseLong(str);
+                        }
+                        throw new JSONException("TODO : " + str);
+                    } else {
+                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                     }
-                    String str = readString();
-                    if ("0000-00-00".equals(str)) {
-                        return 0;
-                    }
-                    if (IOUtils.isNumber(str)) {
-                        return Long.parseLong(str);
-                    }
-                    throw new JSONException("TODO : " + str);
+                    break;
                 }
                 case 11: {
-                    LocalDateTime date = readLocalDate11();
-                    return ZonedDateTime.of(date,
-                                    context.getZoneId())
-                            .toInstant()
-                            .toEpochMilli();
+                    localDate = readLocalDate11();
+                    if (localDate != null) {
+                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
+                    }
+                    break;
                 }
                 case 16: {
-                    LocalDateTime date = readLocalDateTime16();
-                    return ZonedDateTime.of(date,
-                                    context.getZoneId())
-                            .toInstant()
-                            .toEpochMilli();
+                    ldt = readLocalDateTime16();
+                    break;
                 }
                 case 17: {
-                    LocalDateTime ldt = readLocalDateTime17();
-                    return ZonedDateTime.of(ldt,
-                                    context.getZoneId())
-                            .toInstant()
-                            .toEpochMilli();
+                    ldt = readLocalDateTime17();
+                    break;
                 }
                 case 18: {
-                    LocalDateTime date = readLocalDateTime18();
-                    return ZonedDateTime.of(
-                                    date,
-                                    context.getZoneId())
-                            .toInstant()
-                            .toEpochMilli();
+                    ldt = readLocalDateTime18();
+                    break;
                 }
                 case 19: {
-                    LocalDateTime date = readLocalDateTime19();
-                    return ZonedDateTime.of(
-                                    date,
-                                    context.getZoneId())
-                            .toInstant()
-                            .toEpochMilli();
+                    long millis = readMillis19();
+                    if (millis != 0 || !wasNull) {
+                        return millis;
+                    }
+
+                    ldt = readLocalDateTime19();
                 }
                 default:
                     break;
             }
 
-            if (len >= 20) {
-                ZonedDateTime zdt = readZonedDateTimeX(len);
-                if (zdt != null) {
-                    return zdt.toInstant().toEpochMilli();
+            ZonedDateTime zdt = null;
+            if (ldt != null) {
+                zdt = ZonedDateTime.ofLocal(ldt, context.getZoneId(), null);
+            } else if (len >= 20) {
+                zdt = readZonedDateTimeX(len);
+            }
+
+            if (zdt != null) {
+                long seconds = zdt.toEpochSecond();
+                int nanos = zdt.toLocalTime().getNano();
+                if (seconds < 0 && nanos > 0) {
+                    long millis = (seconds + 1) * 1000;
+                    long adjustment = nanos / 1000_000 - 1000;
+                    return millis + adjustment;
+                } else {
+                    long millis = seconds * 1000L;
+                    return millis + nanos / 1000_000;
                 }
             }
         }
@@ -1195,7 +1213,11 @@ public abstract class JSONReader
 
     protected abstract LocalDateTime readLocalDateTime19();
 
+    public abstract long readMillis19();
+
     protected abstract LocalDateTime readLocalDateTimeX(int len);
+
+    protected abstract LocalTime readLocalTime5();
 
     protected abstract LocalTime readLocalTime8();
 
@@ -1207,15 +1229,63 @@ public abstract class JSONReader
 
     protected abstract LocalTime readLocalTime18();
 
-    protected abstract LocalDateTime readLocalDate8();
+    protected abstract LocalDate readLocalDate8();
 
-    protected abstract LocalDateTime readLocalDate9();
+    protected abstract LocalDate readLocalDate9();
 
-    protected abstract LocalDateTime readLocalDate10();
+    protected abstract LocalDate readLocalDate10();
 
-    protected abstract LocalDateTime readLocalDate11();
+    protected abstract LocalDate readLocalDate11();
 
     protected abstract ZonedDateTime readZonedDateTimeX(int len);
+
+    protected long millis(int year, int month, int dom, int hour, int minute, int second, int nanoOfSecond) {
+        final ZoneId zoneId = context.getZoneId();
+        if (year >= 1992 && (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES)) {
+            final int DAYS_PER_CYCLE = 146097;
+            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+
+            long y = year;
+            long m = month;
+
+            long epochDay;
+            {
+                long total = 0;
+                total += 365 * y;
+                total += (y + 3) / 4 - (y + 99) / 100 + (y + 399) / 400;
+                total += ((367 * m - 362) / 12);
+                total += dom - 1;
+                if (m > 2) {
+                    total--;
+                    boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+                    if (leapYear == false) {
+                        total--;
+                    }
+                }
+                epochDay = total - DAYS_0000_TO_1970;
+            }
+            long seconds = epochDay * 86400
+                    + hour * 3600
+                    + minute * 60
+                    + second
+                    - SHANGHAI_ZONE_OFFSET_TOTAL_SECONDS;
+
+            int nanos = nanoOfSecond;
+            return seconds * 1000L + nanos / 1000_000;
+        }
+
+        LocalDate localDate = LocalDate.of(year, month, dom);
+        LocalTime localTime = LocalTime.of(hour, minute, second, nanoOfSecond);
+        LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
+        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
+        long seconds = zdt.toEpochSecond();
+        int nanos = nanoOfSecond;
+        if (seconds < 0 && nanos > 0) {
+            return (seconds + 1) * 1000 + nanos / 1000_000 - 1000;
+        } else {
+            return seconds * 1000L + nanos / 1000_000;
+        }
+    }
 
     public void readNumber(ValueConsumer consumer, boolean quoted) {
         readNumber0();
@@ -1654,7 +1724,7 @@ public abstract class JSONReader
             throw new JSONException("syntax error : " + ch);
         }
 
-        for (;;) {
+        for (; ; ) {
             if (nextIfMatch(']')) {
                 break;
             }
@@ -1676,7 +1746,7 @@ public abstract class JSONReader
 
     public void readArray(List list, Type itemType) {
         if (nextIfMatch('[')) {
-            for (;;) {
+            for (; ; ) {
                 if (nextIfMatch(']')) {
                     break;
                 }
@@ -1872,16 +1942,42 @@ public abstract class JSONReader
                 return new BigDecimal(getBigInt(negative, mag));
             }
             case JSON_TYPE_DEC: {
-                int[] mag = mag0 == 0
-                        ? mag1 == 0
-                        ? mag2 == 0
-                        ? new int[]{mag3}
-                        : new int[]{mag2, mag3}
-                        : new int[]{mag1, mag2, mag3}
-                        : new int[]{mag0, mag1, mag2, mag3};
-                BigInteger bigInt = getBigInt(negative, mag);
-                int adjustedScale = scale - exponent;
-                BigDecimal decimal = new BigDecimal(bigInt, adjustedScale);
+                BigDecimal decimal = null;
+
+                if (exponent == 0 && mag0 == 0 && mag1 == 0) {
+                    if (mag2 == 0 && mag3 >= 0) {
+                        int unscaledVal = negative ? -mag3 : mag3;
+                        decimal = BigDecimal.valueOf(unscaledVal, scale);
+                    } else {
+                        long v3 = mag3 & LONG_MASK;
+                        long v2 = mag2 & LONG_MASK;
+
+                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                            long v23 = (v2 << 32) + (v3);
+                            long unscaledVal = negative ? -v23 : v23;
+                            decimal = BigDecimal.valueOf(unscaledVal, scale);
+                        }
+                    }
+                }
+
+                if (decimal == null) {
+                    int[] mag = mag0 == 0
+                            ? mag1 == 0
+                            ? mag2 == 0
+                            ? new int[]{mag3}
+                            : new int[]{mag2, mag3}
+                            : new int[]{mag1, mag2, mag3}
+                            : new int[]{mag0, mag1, mag2, mag3};
+                    BigInteger bigInt = getBigInt(negative, mag);
+                    decimal = new BigDecimal(bigInt, scale);
+                }
+
+                if (exponent != 0) {
+                    double doubleValue = Double.parseDouble(
+                            decimal + "E" + exponent);
+                    return BigDecimal.valueOf(doubleValue);
+                }
+
                 return decimal;
             }
             case JSON_TYPE_BIG_DEC: {
@@ -1920,7 +2016,7 @@ public abstract class JSONReader
         switch (valueType) {
             case JSON_TYPE_INT:
             case JSON_TYPE_INT64: {
-                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     int intVlaue;
                     if (negative) {
                         if (mag3 < 0) {
@@ -1959,30 +2055,139 @@ public abstract class JSONReader
                 return getBigInt(negative, mag);
             }
             case JSON_TYPE_INT16: {
-                if (mag1 == 0 && mag2 == 0 && mag3 >= 0) {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
                     int intValue = negative ? -mag3 : mag3;
                     return Short.valueOf((short) intValue);
                 }
                 throw new JSONException(info("shortValue overflow"));
             }
             case JSON_TYPE_INT8: {
-                if (mag1 == 0 && mag2 == 0 && mag3 >= 0) {
+                if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
                     int intValue = negative ? -mag3 : mag3;
                     return Byte.valueOf((byte) intValue);
                 }
                 throw new JSONException(info("shortValue overflow"));
             }
             case JSON_TYPE_DEC: {
-                int[] mag = mag0 == 0
-                        ? mag1 == 0
-                        ? mag2 == 0
-                        ? new int[]{mag3}
-                        : new int[]{mag2, mag3}
-                        : new int[]{mag1, mag2, mag3}
-                        : new int[]{mag0, mag1, mag2, mag3};
-                BigInteger bigInt = getBigInt(negative, mag);
-                BigDecimal decimal = new BigDecimal(bigInt, scale);
-                if (exponent != 0) { // TODO
+                BigDecimal decimal = null;
+
+                if (mag0 == 0 && mag1 == 0) {
+                    if (mag2 == 0 && mag3 >= 0) {
+                        int unscaledVal = negative ? -mag3 : mag3;
+
+                        if (exponent == 0) {
+                            if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
+                                switch (scale) {
+                                    case 1:
+                                    case 2:
+                                    case 3:
+                                    case 4:
+                                    case 5:
+                                    case 6:
+                                    case 7:
+                                    case 8:
+                                    case 9:
+                                    case 10:
+                                        return (float) (unscaledVal / SMALL_10_POW[scale]);
+                                    default:
+                                        break;
+                                }
+                            } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
+                                switch (scale) {
+                                    case 1:
+                                    case 2:
+                                    case 3:
+                                    case 4:
+                                    case 5:
+                                    case 6:
+                                    case 7:
+                                    case 8:
+                                    case 9:
+                                    case 10:
+                                    case 11:
+                                    case 12:
+                                    case 13:
+                                    case 14:
+                                    case 15:
+                                        return unscaledVal / SMALL_10_POW[scale];
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                        decimal = BigDecimal.valueOf(unscaledVal, scale);
+                    } else {
+                        long v3 = mag3 & LONG_MASK;
+                        long v2 = mag2 & LONG_MASK;
+
+                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                            long v23 = (v2 << 32) + (v3);
+                            long unscaledVal = negative ? -v23 : v23;
+
+                            if (exponent == 0) {
+                                if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
+                                    switch (scale) {
+                                        case 1:
+                                        case 2:
+                                        case 3:
+                                        case 4:
+                                        case 5:
+                                        case 6:
+                                        case 7:
+                                        case 8:
+                                        case 9:
+                                        case 10:
+                                            return (float) (unscaledVal / SMALL_10_POW[scale]);
+                                        default: {
+                                            boolean isNegative = unscaledVal < 0;
+                                            int len = isNegative ? IOUtils.stringSize(-unscaledVal) + 1 : IOUtils.stringSize(unscaledVal);
+                                            char[] chars = new char[len];
+                                            IOUtils.getChars(unscaledVal, len, chars);
+                                            return FloatingDecimal.floatValue(isNegative, scale, chars, len);
+                                        }
+                                    }
+                                } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
+                                    switch (scale) {
+                                        case 1:
+                                        case 2:
+                                        case 3:
+                                        case 4:
+                                        case 5:
+                                        case 6:
+                                        case 7:
+                                        case 8:
+                                        case 9:
+                                        case 10:
+                                            return unscaledVal / SMALL_10_POW[scale];
+                                        default: {
+                                            boolean isNegative = unscaledVal < 0;
+                                            int len = isNegative ? IOUtils.stringSize(-unscaledVal) + 1 : IOUtils.stringSize(unscaledVal);
+                                            char[] chars = new char[len];
+                                            IOUtils.getChars(unscaledVal, len, chars);
+                                            return FloatingDecimal.doubleValue(isNegative, scale, chars, len);
+                                        }
+                                    }
+                                }
+                            }
+                            decimal = BigDecimal.valueOf(unscaledVal, scale);
+                        }
+                    }
+                }
+
+                if (decimal == null) {
+                    int[] mag = mag0 == 0
+                            ? mag1 == 0
+                            ? mag2 == 0
+                            ? new int[]{mag3}
+                            : new int[]{mag2, mag3}
+                            : new int[]{mag1, mag2, mag3}
+                            : new int[]{mag0, mag1, mag2, mag3};
+                    BigInteger bigInt = getBigInt(negative, mag);
+                    int adjustedScale = scale - exponent;
+                    decimal = new BigDecimal(bigInt, adjustedScale);
+                }
+
+                if (exponent != 0) {
                     double doubleValue = Double.parseDouble(
                             decimal + "E" + exponent);
                     return Double.valueOf(doubleValue);
@@ -2053,8 +2258,7 @@ public abstract class JSONReader
     }
 
     @Override
-    public void close() {
-    }
+    public abstract void close();
 
     static BigInteger getBigInt(boolean negative, int[] mag) {
         int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
@@ -2314,7 +2518,7 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT && str.length() > 1024 * 1024) {
+        if (JDKUtils.JVM_VERSION == 8 && JDKUtils.UNSAFE_SUPPORT && str.length() > 1024 * 1024) {
             try {
                 byte coder = UnsafeUtils.getStringCoder(str);
                 if (coder == 0) {
@@ -2324,8 +2528,6 @@ public abstract class JSONReader
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
             }
-
-            return new JSONReaderStr(context, str, 0, str.length());
         }
 
         final int length = str.length();
@@ -2345,7 +2547,7 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT && str.length() > 1024 * 1024) {
+        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
             try {
                 byte coder = UnsafeUtils.getStringCoder(str);
                 if (coder == 0) {
@@ -2355,8 +2557,6 @@ public abstract class JSONReader
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
             }
-
-            return new JSONReaderStr(context, str, 0, str.length());
         }
 
         final int length = str.length();
@@ -2376,7 +2576,7 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT && length > 1024 * 1024) {
+        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
             try {
                 byte coder = UnsafeUtils.getStringCoder(str);
                 if (coder == 0) {
@@ -2386,8 +2586,6 @@ public abstract class JSONReader
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
             }
-
-            return new JSONReaderStr(context, str, 0, str.length());
         }
 
         char[] chars;
@@ -3074,7 +3272,9 @@ public abstract class JSONReader
             return null;
         }
 
-        return LocalDateTime.of(year, month, dom, hour, minute, second, nanos);
+        LocalDate date = LocalDate.of(year, month, dom);
+        LocalTime time = LocalTime.of(hour, minute, second, nanos);
+        return LocalDateTime.of(date, time);
     }
 
     protected ZoneId getZoneId(LocalDateTime ldt, String zoneIdStr) {

@@ -33,7 +33,7 @@ final class ObjectWriterImplLocalDateTime
 
         LocalDateTime dateTime = (LocalDateTime) object;
 
-        if (formatUnixTime || ctx.isDateFormatUnixTime()) {
+        if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
             long millis = dateTime.atZone(ctx.getZoneId())
                     .toInstant()
                     .toEpochMilli();
@@ -41,7 +41,7 @@ final class ObjectWriterImplLocalDateTime
             return;
         }
 
-        if (formatMillis || ctx.isDateFormatMillis()) {
+        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
             long millis = dateTime.atZone(ctx.getZoneId())
                     .toInstant()
                     .toEpochMilli();
@@ -49,7 +49,7 @@ final class ObjectWriterImplLocalDateTime
             return;
         }
 
-        if (formatISO8601 || ctx.isDateFormatISO8601()) {
+        if (formatISO8601 || (format == null && ctx.isDateFormatISO8601())) {
             int year = dateTime.getYear();
             int month = dateTime.getMonthValue();
             int dayOfMonth = dateTime.getDayOfMonth();

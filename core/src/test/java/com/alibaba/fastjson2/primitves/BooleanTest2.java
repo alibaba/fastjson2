@@ -56,8 +56,22 @@ public class BooleanTest2 {
     }
 
     @Test
+    public void test_jsonb_str_0_bytes() {
+        byte[] jsonbBooleans = {-90, 121, 5, 118, 48, 48, 48, 48, 124, 2, 48, 0, -91};
+        Boolean1 v1 = JSONB.parseObject(jsonbBooleans, Boolean1.class);
+        assertEquals(Boolean.FALSE, v1.getV0000());
+    }
+
+    @Test
     public void test_jsonb_str_1() {
         byte[] jsonbBooleans = JSONB.toBytes(Collections.singletonMap("v0000", "1"));
+        Boolean1 v1 = JSONB.parseObject(jsonbBooleans, Boolean1.class);
+        assertEquals(Boolean.TRUE, v1.getV0000());
+    }
+
+    @Test
+    public void test_jsonb_str_1_bytes() {
+        byte[] jsonbBooleans = {-90, 121, 5, 118, 48, 48, 48, 48, 124, 2, 49, 0, -91};
         Boolean1 v1 = JSONB.parseObject(jsonbBooleans, Boolean1.class);
         assertEquals(Boolean.TRUE, v1.getV0000());
     }
@@ -70,8 +84,22 @@ public class BooleanTest2 {
     }
 
     @Test
+    public void test_jsonb_str_N_bytes() {
+        byte[] jsonbBooleans = {-90, 121, 5, 118, 48, 48, 48, 48, 124, 2, 78, 0, -91};
+        Boolean1 v1 = JSONB.parseObject(jsonbBooleans, Boolean1.class);
+        assertEquals(Boolean.FALSE, v1.getV0000());
+    }
+
+    @Test
     public void test_jsonb_str_Y() {
         byte[] jsonbBooleans = JSONB.toBytes(Collections.singletonMap("v0000", "Y"));
+        Boolean1 v1 = JSONB.parseObject(jsonbBooleans, Boolean1.class);
+        assertEquals(Boolean.TRUE, v1.getV0000());
+    }
+
+    @Test
+    public void test_jsonb_str_Y_bytes() {
+        byte[] jsonbBooleans = {-90, 121, 5, 118, 48, 48, 48, 48, 124, 2, 89, 0, -91};
         Boolean1 v1 = JSONB.parseObject(jsonbBooleans, Boolean1.class);
         assertEquals(Boolean.TRUE, v1.getV0000());
     }
@@ -91,10 +119,17 @@ public class BooleanTest2 {
     }
 
     @Test
-    public void test_jsonb_str_true() {
-        byte[] jsonbBooleans = JSONB.toBytes(Collections.singletonMap("v0000", "true"));
+    public void test_jsonb_str_FALSE_1() {
+        byte[] jsonbBooleans = JSONB.toBytes(Collections.singletonMap("v0000", "FALSE"));
         Boolean1 v1 = JSONB.parseObject(jsonbBooleans, Boolean1.class);
-        assertEquals(Boolean.TRUE, v1.getV0000());
+        assertEquals(Boolean.FALSE, v1.getV0000());
+    }
+
+    @Test
+    public void test_jsonb_str_true() {
+        byte[] jsonbBooleans = {-90, 121, 5, 118, 48, 48, 48, 48, 121, 5, 70, 65, 76, 83, 69, -91};
+        Boolean1 v1 = JSONB.parseObject(jsonbBooleans, Boolean1.class);
+        assertEquals(Boolean.FALSE, v1.getV0000());
     }
 
     @Test
