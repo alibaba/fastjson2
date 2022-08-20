@@ -19,8 +19,7 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
-import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE;
-import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE2;
+import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 final class JSONReaderJSONB
@@ -960,11 +959,87 @@ final class JSONReaderJSONB
         if (strlen < 0) {
             hashCode = symbolTable.getHashCode(-strlen);
         } else {
-            hashCode = Fnv.MAGIC_HASH_CODE;
-            for (int i = 0; i < strlen; ++i) {
-                byte c = bytes[offset++];
-                hashCode ^= c;
-                hashCode *= Fnv.MAGIC_PRIME;
+            long nameValue = 0;
+            switch (strlen) {
+                case 1:
+                    nameValue = bytes[offset];
+                    break;
+                case 2:
+                    nameValue = (bytes[offset] << 8)
+                            + (bytes[offset + 1] & 0xFF);
+                    break;
+                case 3:
+                    nameValue = (bytes[offset] << 16)
+                            + ((bytes[offset + 1] & 0xFF) << 8)
+                            + (bytes[offset + 2] & 0xFF);
+                    break;
+                case 4:
+                    nameValue = (bytes[offset] << 24)
+                            + ((bytes[offset + 1] & 0xFF) << 16)
+                            + ((bytes[offset + 2] & 0xFF) << 8)
+                            + (bytes[offset + 3] & 0xFF);
+                    break;
+                case 5:
+                    nameValue = (((long) bytes[offset]) << 32)
+                            + (((long) bytes[offset + 1] & 0xFFL) << 24)
+                            + (((long) bytes[offset + 2] & 0xFFL) << 16)
+                            + (((long) bytes[offset + 3] & 0xFFL) << 8)
+                            + (bytes[offset + 4] & 0xFFL);
+                    break;
+                case 6:
+                    nameValue = (((long) bytes[offset]) << 40)
+                            + (((long) bytes[offset + 1] & 0xFFL) << 32)
+                            + (((long) bytes[offset + 2] & 0xFFL) << 24)
+                            + (((long) bytes[offset + 3] & 0xFFL) << 16)
+                            + (((long) bytes[offset + 4] & 0xFFL) << 8)
+                            + (((long) bytes[offset + 5] & 0xFFL) & 0xFFL);
+                    break;
+                case 7:
+                    nameValue = (((long) bytes[offset]) << 48)
+                            + (((long) bytes[offset + 1] & 0xFFL) << 40)
+                            + (((long) bytes[offset + 2] & 0xFFL) << 32)
+                            + (((long) bytes[offset + 3] & 0xFFL) << 24)
+                            + (((long) bytes[offset + 4] & 0xFFL) << 16)
+                            + (((long) bytes[offset + 5] & 0xFFL) << 8)
+                            + (((long) bytes[offset + 6] & 0xFFL) & 0xFFL);
+                    break;
+                case 8:
+                    nameValue = (((long) bytes[offset]) << 56)
+                            + (((long) bytes[offset + 1] & 0xFFL) << 48)
+                            + (((long) bytes[offset + 2] & 0xFFL) << 40)
+                            + (((long) bytes[offset + 3] & 0xFFL) << 32)
+                            + (((long) bytes[offset + 4] & 0xFFL) << 24)
+                            + (((long) bytes[offset + 5] & 0xFFL) << 16)
+                            + (((long) bytes[offset + 6] & 0xFFL) << 8)
+                            + (((long) bytes[offset + 7] & 0xFFL) & 0xFFL);
+                    break;
+                default:
+                    break;
+            }
+
+            NameHash64Cache nameCache = null;
+            long cachedHashCode = 0;
+            if (nameValue != 0) {
+                nameCache = NAME_HASH_64_CACHE2[((int) nameValue) & (NAME_HASH_64_CACHE2.length - 1)];
+                if (nameCache != null && nameCache.nameValue == nameValue) {
+                    cachedHashCode = nameCache.hashCode64;
+                }
+            }
+
+            if (cachedHashCode != 0) {
+                offset += strlen;
+                hashCode = cachedHashCode;
+            } else {
+                hashCode = Fnv.MAGIC_HASH_CODE;
+                for (int i = 0; i < strlen; ++i) {
+                    byte c = bytes[offset++];
+                    hashCode ^= c;
+                    hashCode *= Fnv.MAGIC_PRIME;
+                }
+
+                if (nameValue != 0 && nameCache == null) {
+                    NAME_HASH_64_CACHE2[((int) nameValue) & (NAME_HASH_64_CACHE2.length - 1)] = new NameHash64Cache(nameValue, hashCode);
+                }
             }
         }
 
