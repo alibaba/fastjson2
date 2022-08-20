@@ -27,7 +27,7 @@
 
 ## 1.3 测试代码以及运行方式
 * 代码路径
-https://github.com/alibaba/fastjson2/tree/2.0.11/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay
+https://github.com/alibaba/fastjson2/tree/2.0.12/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay
 
 * 运行方式测试代码方式
 ```shell
