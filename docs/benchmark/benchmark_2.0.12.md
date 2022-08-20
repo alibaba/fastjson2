@@ -1,3 +1,45 @@
+# 1. 测试环境
+## 1.1 服务器环境
+测试的服务器基于阿里云最新代ECS，包括x64架构的Intel和AMD处理器，ARM架构的AltraMax和阿里云平头哥的倚天处理器。
+* ecs.c7.xlarge
+这个是阿里云当前代标准型ECS，处理器型号 Intel Xeon(Ice Lake) Platinum 8369B，4核，8G内存
+  ![](ecs.c7.xlarge.png)
+
+
+* ecs.c7a.xlarge
+  这个是阿里云当前代标准型ECS，处理器型号 AMD EPYC™ Milan 7T83，4核，8G内存
+  ![](ecs.c7a.xlarge.png)
+* 
+* ecs.c6r.xlarge
+  这个是阿里云上售卖ARM处理器ECS，处理器型号 Ampere Altra / AltraMax，4核，8G内存
+![](ecs.c6r.xlarge.png)
+
+* ecs.g8m.xlarge
+  这个是阿里云上售卖ARM处理器，处理器型号 Yitian 710，4核，16G内存。这个是阿里云平头哥的倚天710处理器，需要联系客服才能购买。
+  ![](ecs.g8m.xlarge.png)
+
+## 1.2 JDK版本
+基于Oracle最新版本的Linux x64/aarch64的JDK版本，下载地址 https://www.oracle.com/java/technologies/
+* oracle-jdk1.8.0_341
+* oracle-jdk-11.0.16
+* oracle-jdk-17.0.4
+* oracle-jdk-jdk-18.0.2
+
+## 1.3 测试代码以及运行方式
+* 代码路径
+https://github.com/alibaba/fastjson2/tree/2.0.11/benchmark/src/main/java/com/alibaba/fastjson2/benchmark/eishay
+
+* 运行方式测试代码方式
+```shell
+git clone https://github.com/alibaba/fastjson2
+cd fastjson2
+git checkout 2.0.12
+mvn clean install -Dmaven.test.skip
+~/Install/jdk-1.8.0_341/bin/java -cp ~/git/fastjson2/benchmark/target/fastjson2-benchmarks.jar com.alibaba.fastjson2.benchmark.eishay.Eishay
+~/Install/jdk-11.0.16/bin/java -cp ~/git/fastjson2/benchmark/target/fastjson2-benchmarks.jar com.alibaba.fastjson2.benchmark.eishay.Eishay
+~/Install/jdk-17.0.4/bin/java -cp ~/git/fastjson2/benchmark/target/fastjson2-benchmarks.jar com.alibaba.fastjson2.benchmark.eishay.Eishay
+~/Install/jdk-18.0.2/bin/java -cp ~/git/fastjson2/benchmark/target/fastjson2-benchmarks.jar com.alibaba.fastjson2.benchmark.eishay.Eishay
+```
 
 ## EishayParseString
 这个是最常用的场景，将JSON格式字符串反序列化为Java对象，这个场景在fastjson中的代码如下：
