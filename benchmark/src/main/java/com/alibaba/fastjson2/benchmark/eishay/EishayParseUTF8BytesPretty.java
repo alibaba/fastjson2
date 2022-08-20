@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -14,11 +15,13 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 public class EishayParseUTF8BytesPretty {
     static byte[] utf8Bytes;
-    static ObjectMapper mapper = new ObjectMapper();
+    static final ObjectMapper mapper = new ObjectMapper();
+    static final Gson gson = new Gson();
 
     static {
         try {
@@ -44,22 +47,13 @@ public class EishayParseUTF8BytesPretty {
         bh.consume(mapper.readValue(utf8Bytes, MediaContent.class));
     }
 
-    //    @Test
-    public void fastjson2_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
-        }
-    }
-
-    public static void fastjson2_perf() {
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
-            JSON.parseObject(utf8Bytes, MediaContent.class);
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("millis : " + millis);
-        // zulu17.32.13 :
-        // zulu8.58.0.13 : 808 801
+    @Benchmark
+    public void gson(Blackhole bh) throws Exception {
+        bh.consume(gson
+                .fromJson(
+                        new String(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.UTF_8),
+                        HashMap.class)
+        );
     }
 
     public static void main(String[] args) throws RunnerException {
