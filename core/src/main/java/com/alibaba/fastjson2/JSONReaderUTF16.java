@@ -2954,6 +2954,7 @@ final class JSONReaderUTF16
                 int i = 0;
 
                 // vector optimize
+                boolean quoted = false;
                 while (offset + 8 <= end) {
                     char c0 = chars[offset];
                     char c1 = chars[offset + 1];
@@ -2967,6 +2968,7 @@ final class JSONReaderUTF16
                         break;
                     }
                     if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote) {
+                        quoted = true;
                         break;
                     }
                     offset += 8;
@@ -2974,19 +2976,21 @@ final class JSONReaderUTF16
                 }
 
                 // vector optimize
-                while (offset + 4 <= end) {
-                    char c0 = chars[offset];
-                    char c1 = chars[offset + 1];
-                    char c2 = chars[offset + 2];
-                    char c3 = chars[offset + 3];
-                    if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\') {
-                        break;
+                if (!quoted) {
+                    while (offset + 4 <= end) {
+                        char c0 = chars[offset];
+                        char c1 = chars[offset + 1];
+                        char c2 = chars[offset + 2];
+                        char c3 = chars[offset + 3];
+                        if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\') {
+                            break;
+                        }
+                        if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
+                            break;
+                        }
+                        offset += 4;
+                        i += 4;
                     }
-                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
-                        break;
-                    }
-                    offset += 4;
-                    i += 4;
                 }
 
                 for (; ; ++i) {

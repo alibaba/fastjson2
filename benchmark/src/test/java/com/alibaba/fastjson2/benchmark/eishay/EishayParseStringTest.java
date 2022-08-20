@@ -4,6 +4,7 @@ import org.openjdk.jmh.infra.Blackhole;
 
 public class EishayParseStringTest {
     static final Blackhole BH = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
+    static final EishayParseString benchmark = new EishayParseString();
 
     public static void fastjson2_test() {
         for (int i = 0; i < 10; i++) {
@@ -12,16 +13,15 @@ public class EishayParseStringTest {
     }
 
     public static void fastjson2() {
-        EishayParseString benchmark = new EishayParseString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.fastjson2(BH);
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("fastjson2 millis : " + millis);
-        // zulu8.62.0.19 : 666 578
-        // zulu11.52.13 : 821 546 521 494
-        // zulu17.32.13 : 601 552 532
+        // zulu8.62.0.19 : 666 578 554
+        // zulu11.52.13 : 821 546 521 494 492
+        // zulu17.32.13 : 601 552 532 516 511
         // zulu18.28.13 : 598 555 534 527
         // zulu19.0.47 :
         // corretto-8 :
@@ -41,7 +41,6 @@ public class EishayParseStringTest {
     }
 
     public static void fastjson1() throws Exception {
-        EishayParseString benchmark = new EishayParseString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.fastjson1(BH);
@@ -68,7 +67,6 @@ public class EishayParseStringTest {
     }
 
     public static void jackson() throws Exception {
-        EishayParseString benchmark = new EishayParseString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.jackson(BH);
@@ -95,7 +93,6 @@ public class EishayParseStringTest {
     }
 
     public static void wastjson() throws Exception {
-        EishayParseString benchmark = new EishayParseString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.wastjson(BH);
@@ -122,7 +119,6 @@ public class EishayParseStringTest {
     }
 
     public static void gson() throws Exception {
-        EishayParseString benchmark = new EishayParseString();
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.gson(BH);
