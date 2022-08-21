@@ -2,6 +2,9 @@ package com.alibaba.fastjson2.util;
 
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FnvTest {
@@ -48,5 +51,16 @@ public class FnvTest {
                 Fnv.hashCode64LCase("-A"),
                 Fnv.hashCode64LCase("a-")
         );
+    }
+
+    @Test
+    public void test2() {
+        char[] chars = new char[1];
+        for (char c0 = 1; c0 <= 0xFF; ++c0) {
+            chars[0] = c0;
+            String str = new String(chars);
+            byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+            System.out.println(((int) c0) + "\t" + Arrays.toString(bytes));
+        }
     }
 }

@@ -527,12 +527,17 @@ class JSONReaderUTF8
                         c = char1(c);
                         break;
                 }
-                if (c < 0 || c > 0x7F) {
+                if (c > 0xFF) {
                     nameAscii = false;
                 }
+            } else if (c == -61 || c == -62) {
+                byte c1 = bytes[++offset];
+                c = (char) (((c & 0x1F) << 6)
+                        | (c1 & 0x3F));
+                nameAscii = false;
             }
 
-            if (c > 0x7F || c < 0 || i >= 8 || (i == 0 && c == 0)) {
+            if (c > 0xFF || c < 0 || i >= 8 || (i == 0 && c == 0)) {
                 nameValue = 0;
                 offset = this.nameBegin;
                 break;
@@ -715,9 +720,13 @@ class JSONReaderUTF8
                         c = char1(c);
                         break;
                 }
+            } else if (c == -61 || c == -62) {
+                byte c1 = bytes[++offset];
+                c = (char) (((c & 0x1F) << 6)
+                        | (c1 & 0x3F));
             }
 
-            if (c > 0x7F || c < 0 || i >= 8 || (i == 0 && c == 0)) {
+            if (c > 0xFF || c < 0 || i >= 8 || (i == 0 && c == 0)) {
                 nameValue = 0;
                 offset = this.nameBegin;
                 break;
@@ -887,87 +896,90 @@ class JSONReaderUTF8
     public long getNameHashCodeLCase() {
         long hashCode = Fnv.MAGIC_HASH_CODE;
         int offset = nameBegin;
-        if (nameAscii) {
-            long nameValue = 0;
-            for (int i = 0; offset < end; offset++) {
-                int c = bytes[offset];
 
-                if (c == '\\') {
-                    c = bytes[++offset];
-                    switch (c) {
-                        case 'u': {
-                            int c1 = bytes[++offset];
-                            int c2 = bytes[++offset];
-                            int c3 = bytes[++offset];
-                            int c4 = bytes[++offset];
-                            c = char4(c1, c2, c3, c4);
-                            break;
-                        }
-                        case 'x': {
-                            int c1 = bytes[++offset];
-                            int c2 = bytes[++offset];
-                            c = char2(c1, c2);
-                            break;
-                        }
-                        case '\\':
-                        case '"':
-                        default:
-                            c = char1(c);
-                            break;
+        long nameValue = 0;
+        for (int i = 0; offset < end; offset++) {
+            int c = bytes[offset];
+
+            if (c == '\\') {
+                c = bytes[++offset];
+                switch (c) {
+                    case 'u': {
+                        int c1 = bytes[++offset];
+                        int c2 = bytes[++offset];
+                        int c3 = bytes[++offset];
+                        int c4 = bytes[++offset];
+                        c = char4(c1, c2, c3, c4);
+                        break;
                     }
-                } else if (c == '"') {
-                    break;
+                    case 'x': {
+                        int c1 = bytes[++offset];
+                        int c2 = bytes[++offset];
+                        c = char2(c1, c2);
+                        break;
+                    }
+                    case '\\':
+                    case '"':
+                    default:
+                        c = char1(c);
+                        break;
                 }
+            } else if (c == -61 || c == -62) {
+                byte c1 = bytes[++offset];
+                c = (char) (((c & 0x1F) << 6)
+                        | (c1 & 0x3F));
+            } else if (c == '"') {
+                break;
+            }
 
-                if (i >= 8 || (i == 0 && c == 0)) {
-                    nameValue = 0;
-                    offset = this.nameBegin;
-                    break;
+            if (i >= 8 || c > 0xFF || c < 0 || (i == 0 && c == 0)) {
+                nameValue = 0;
+                offset = this.nameBegin;
+                break;
+            }
+
+            if (c == '_' || c == '-') {
+                byte c1 = bytes[offset + 1];
+                if (c1 != '"' && c1 != '\'' && c1 != c) {
+                    continue;
+                }
+            }
+
+            if (c >= 'A' && c <= 'Z') {
+                c = (char) (c + 32);
+            }
+
+            if (i == 0) {
+                nameValue = (byte) c;
+            } else {
+                nameValue <<= 8;
+                nameValue += c;
+            }
+            ++i;
+        }
+
+        if (nameValue != 0) {
+            return nameValue;
+        }
+
+        if (nameAscii && !nameEscape) {
+            for (int i = nameBegin; i < nameEnd; ++i) {
+                char c = (char) bytes[i];
+                if (c >= 'A' && c <= 'Z') {
+                    c = (char) (c + 32);
                 }
 
                 if (c == '_' || c == '-') {
-                    byte c1 = bytes[offset + 1];
+                    byte c1 = bytes[i + 1];
                     if (c1 != '"' && c1 != '\'' && c1 != c) {
                         continue;
                     }
                 }
 
-                if (c >= 'A' && c <= 'Z') {
-                    c = (char) (c + 32);
-                }
-
-                if (i == 0) {
-                    nameValue = (byte) c;
-                } else {
-                    nameValue <<= 8;
-                    nameValue += c;
-                }
-                ++i;
+                hashCode ^= c;
+                hashCode *= Fnv.MAGIC_PRIME;
             }
-
-            if (nameValue != 0) {
-                return nameValue;
-            }
-
-            if (!nameEscape) {
-                for (int i = nameBegin; i < nameEnd; ++i) {
-                    char c = (char) bytes[i];
-                    if (c >= 'A' && c <= 'Z') {
-                        c = (char) (c + 32);
-                    }
-
-                    if (c == '_' || c == '-') {
-                        byte c1 = bytes[i + 1];
-                        if (c1 != '"' && c1 != '\'' && c1 != c) {
-                            continue;
-                        }
-                    }
-
-                    hashCode ^= c;
-                    hashCode *= Fnv.MAGIC_PRIME;
-                }
-                return hashCode;
-            }
+            return hashCode;
         }
 
         for (; ; ) {

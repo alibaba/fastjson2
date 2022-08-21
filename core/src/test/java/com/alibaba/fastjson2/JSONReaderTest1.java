@@ -1048,7 +1048,10 @@ public class JSONReaderTest1 {
     public void test_getNameHashCodeLCase() {
         for (JSONReader jsonReader : TestUtils.createJSONReaders("\"A中国\":")) {
             assertEquals(Fnv.hashCode64("A中国"), jsonReader.readFieldNameHashCode());
-            assertEquals(Fnv.hashCode64("a中国"), jsonReader.getNameHashCodeLCase());
+            assertEquals(
+                    Fnv.hashCode64("a中国"),
+                    jsonReader.getNameHashCodeLCase()
+            );
             assertEquals("A中国", jsonReader.getFieldName());
         }
 
@@ -1574,7 +1577,10 @@ public class JSONReaderTest1 {
             byte[] bytes = str.getBytes();
             JSONReaderASCII jsonReader = new JSONReaderASCII(JSONFactory.createReadContext(), str, bytes, 0, bytes.length);
             assertTrue(jsonReader.nextIfObjectStart());
-            assertEquals(Fnv.hashCode64(name), jsonReader.readFieldNameHashCode());
+            assertEquals(
+                    Fnv.hashCode64(name),
+                    jsonReader.readFieldNameHashCode()
+            );
             assertEquals(name, jsonReader.getFieldName());
         }
     }
