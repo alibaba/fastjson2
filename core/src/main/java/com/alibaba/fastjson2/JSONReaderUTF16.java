@@ -908,86 +908,102 @@ final class JSONReaderUTF16
             char c7 = chars[offset + 7];
             char c8 = chars[offset + 8];
 
-            if (c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\' && c6 != '\\' && c7 != '\\'
+            if (c0 == quote) {
+                nameValue = 0;
+            } else if (c1 == quote && c0 != 0 && c0 != '\\' && c0 <= 0xFF) {
+                nameValue = (byte) c0;
+                this.nameLength = 1;
+                this.nameEnd = offset + 1;
+                offset += 2;
+            } else if (c2 == quote && c0 != 0
+                    && c0 != '\\' && c1 != '\\'
+                    && c0 <= 0xFF && c1 <= 0xFF
+            ) {
+                nameValue = (((byte) c0) << 8)
+                        + c1;
+                this.nameLength = 2;
+                this.nameEnd = offset + 2;
+                offset += 3;
+            } else if (c3 == quote && c0 != 0
+                    && c0 != '\\' && c1 != '\\' && c2 != '\\'
+                    && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF) {
+                nameValue
+                        = (((byte) c0) << 16)
+                        + (c1 << 8)
+                        + c2;
+                this.nameLength = 3;
+                this.nameEnd = offset + 3;
+                offset += 4;
+            } else if (c4 == quote && c0 != 0
+                    && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\'
+                    && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF
+            ) {
+                nameValue
+                        = (((byte) c0) << 24)
+                        + (c1 << 16)
+                        + (c2 << 8)
+                        + c3;
+                this.nameLength = 4;
+                this.nameEnd = offset + 4;
+                offset += 5;
+            } else if (c5 == quote && c0 != 0
+                    && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\'
+                    && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF
+            ) {
+                nameValue
+                        = (((long) ((byte) c0)) << 32)
+                        + (((long) c1) << 24)
+                        + (((long) c2) << 16)
+                        + (((long) c3) << 8)
+                        + (long) c4;
+                this.nameLength = 5;
+                this.nameEnd = offset + 5;
+                offset += 6;
+            } else if (c6 == quote && c0 != 0
+                    && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\'
+                    && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF
+            ) {
+                nameValue
+                        = (((long) ((byte) c0)) << 40)
+                        + (((long) c1) << 32)
+                        + (((long) c2) << 24)
+                        + (((long) c3) << 16)
+                        + (((long) c4) << 8)
+                        + (long) c5;
+                this.nameLength = 6;
+                this.nameEnd = offset + 6;
+                offset += 7;
+            } else if (c7 == quote && c0 != 0
+                    && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\' && c6 != '\\'
+                    && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF && c6 <= 0xFF
+            ) {
+                nameValue
+                        = (((long) ((byte) c0)) << 48)
+                        + (((long) c1) << 40)
+                        + (((long) c2) << 32)
+                        + (((long) c3) << 24)
+                        + (((long) c4) << 16)
+                        + (((long) c5) << 8)
+                        + (long) c6;
+                this.nameLength = 7;
+                this.nameEnd = offset + 7;
+                offset += 8;
+            } else if (c8 == quote && c0 != 0
+                    && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\' && c6 != '\\' && c7 != '\\'
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF && c6 <= 0xFF && c7 <= 0xFF
             ) {
-                if (c0 == quote) {
-                    nameValue = 0;
-                } else if (c1 == quote && c0 != 0) {
-                    nameValue = (byte) c0;
-                    this.nameLength = 1;
-                    this.nameEnd = offset + 1;
-                    offset += 2;
-                } else if (c2 == quote && c0 != 0) {
-                    nameValue = (((byte) c0) << 8)
-                            + c1;
-                    this.nameLength = 2;
-                    this.nameEnd = offset + 2;
-                    offset += 3;
-                } else if (c3 == quote && c0 != 0) {
-                    nameValue
-                            = (((byte) c0) << 16)
-                            + (c1 << 8)
-                            + c2;
-                    this.nameLength = 3;
-                    this.nameEnd = offset + 3;
-                    offset += 4;
-                } else if (c4 == quote && c0 != 0) {
-                    nameValue
-                            = (((byte) c0) << 24)
-                            + (c1 << 16)
-                            + (c2 << 8)
-                            + c3;
-                    this.nameLength = 4;
-                    this.nameEnd = offset + 4;
-                    offset += 5;
-                } else if (c5 == quote && c0 != 0) {
-                    nameValue
-                            = (((long) ((byte) c0)) << 32)
-                            + (((long) c1) << 24)
-                            + (((long) c2) << 16)
-                            + (((long) c3) << 8)
-                            + (long) c4;
-                    this.nameLength = 5;
-                    this.nameEnd = offset + 5;
-                    offset += 6;
-                } else if (c6 == quote && c0 != 0) {
-                    nameValue
-                            = (((long) ((byte) c0)) << 40)
-                            + (((long) c1) << 32)
-                            + (((long) c2) << 24)
-                            + (((long) c3) << 16)
-                            + (((long) c4) << 8)
-                            + (long) c5;
-                    this.nameLength = 6;
-                    this.nameEnd = offset + 6;
-                    offset += 7;
-                } else if (c7 == quote && c0 != 0) {
-                    nameValue
-                            = (((long) ((byte) c0)) << 48)
-                            + (((long) c1) << 40)
-                            + (((long) c2) << 32)
-                            + (((long) c3) << 24)
-                            + (((long) c4) << 16)
-                            + (((long) c5) << 8)
-                            + (long) c6;
-                    this.nameLength = 7;
-                    this.nameEnd = offset + 7;
-                    offset += 8;
-                } else if (c8 == quote && c0 != 0) {
-                    nameValue
-                            = (((long) ((byte) c0)) << 56)
-                            + (((long) c1) << 48)
-                            + (((long) c2) << 40)
-                            + (((long) c3) << 32)
-                            + (((long) c4) << 24)
-                            + (((long) c5) << 16)
-                            + (((long) c6) << 8)
-                            + (long) c7;
-                    this.nameLength = 8;
-                    this.nameEnd = offset + 8;
-                    offset += 9;
-                }
+                nameValue
+                        = (((long) ((byte) c0)) << 56)
+                        + (((long) c1) << 48)
+                        + (((long) c2) << 40)
+                        + (((long) c3) << 32)
+                        + (((long) c4) << 24)
+                        + (((long) c5) << 16)
+                        + (((long) c6) << 8)
+                        + (long) c7;
+                this.nameLength = 8;
+                this.nameEnd = offset + 8;
+                offset += 9;
             }
         }
 
