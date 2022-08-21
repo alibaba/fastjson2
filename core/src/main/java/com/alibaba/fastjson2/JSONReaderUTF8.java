@@ -489,24 +489,16 @@ class JSONReaderUTF8
 
         long nameValue = 0;
         if (offset + 9 < end) {
-            byte c0 = bytes[offset];
-            byte c1 = bytes[offset + 1];
-            byte c2 = bytes[offset + 2];
-            byte c3 = bytes[offset + 3];
-            byte c4 = bytes[offset + 4];
-            byte c5 = bytes[offset + 5];
-            byte c6 = bytes[offset + 6];
-            byte c7 = bytes[offset + 7];
-            byte c8 = bytes[offset + 8];
+            byte c0, c1, c2, c3, c4, c5, c6, c7;
 
-            if (c0 == quote) {
+            if ((c0 = bytes[offset]) == quote) {
                 nameValue = 0;
-            } else if (c1 == quote && c0 != '\\' && c0 > 0 && c0 <= 0xFF) {
+            } else if ((c1 = bytes[offset + 1]) == quote && c0 != '\\' && c0 > 0 && c0 <= 0xFF) {
                 nameValue = c0;
                 this.nameLength = 1;
                 this.nameEnd = offset + 1;
                 offset += 2;
-            } else if (c2 == quote
+            } else if ((c2 = bytes[offset + 2]) == quote
                     && c0 != '\\' && c1 != '\\'
                     && c0 <= 0xFF && c1 <= 0xFF
             ) {
@@ -515,7 +507,7 @@ class JSONReaderUTF8
                 this.nameLength = 2;
                 this.nameEnd = offset + 2;
                 offset += 3;
-            } else if (c3 == quote
+            } else if ((c3 = bytes[offset + 3]) == quote
                     && c0 != '\\' && c1 != '\\' && c2 != '\\'
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF
                     && c0 > 0 && c1 >= 0 && c2 >= 0
@@ -527,7 +519,7 @@ class JSONReaderUTF8
                 this.nameLength = 3;
                 this.nameEnd = offset + 3;
                 offset += 4;
-            } else if (c4 == quote
+            } else if ((c4 = bytes[offset + 4]) == quote
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\'
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF
                     && c0 > 0 && c1 >= 0 && c2 >= 0 && c3 >= 0
@@ -540,7 +532,7 @@ class JSONReaderUTF8
                 this.nameLength = 4;
                 this.nameEnd = offset + 4;
                 offset += 5;
-            } else if (c5 == quote
+            } else if ((c5 = bytes[offset + 5]) == quote
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\'
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF
                     && c0 > 0 && c1 >= 0 && c2 >= 0 && c3 >= 0 && c4 >= 0
@@ -554,7 +546,7 @@ class JSONReaderUTF8
                 this.nameLength = 5;
                 this.nameEnd = offset + 5;
                 offset += 6;
-            } else if (c6 == quote
+            } else if ((c6 = bytes[offset + 6]) == quote
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\'
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF
                     && c0 > 0 && c1 >= 0 && c2 >= 0 && c3 >= 0 && c4 >= 0 && c5 >= 0
@@ -569,7 +561,7 @@ class JSONReaderUTF8
                 this.nameLength = 6;
                 this.nameEnd = offset + 6;
                 offset += 7;
-            } else if (c7 == quote
+            } else if ((c7 = bytes[offset + 7]) == quote
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\' && c6 != '\\'
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF && c6 <= 0xFF
                     && c0 > 0 && c1 >= 0 && c2 >= 0 && c3 >= 0 && c4 >= 0 && c5 >= 0 && c6 >= 0
@@ -585,7 +577,7 @@ class JSONReaderUTF8
                 this.nameLength = 7;
                 this.nameEnd = offset + 7;
                 offset += 8;
-            } else if (c8 == quote
+            } else if (bytes[offset + 8] == quote
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\' && c6 != '\\' && c7 != '\\'
                     && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF && c6 <= 0xFF && c7 <= 0xFF
                     && c0 > 0 && c1 >= 0 && c2 >= 0 && c3 >= 0 && c4 >= 0 && c5 >= 0 && c6 >= 0 && c7 >= 0
