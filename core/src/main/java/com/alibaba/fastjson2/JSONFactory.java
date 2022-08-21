@@ -43,8 +43,6 @@ public final class JSONFactory {
         static volatile boolean STRING_CREATOR_ERROR;
     }
 
-    static final NameHash64Cache[] NAME_HASH_64_CACHE2 = new NameHash64Cache[8192];
-
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
 
@@ -65,16 +63,6 @@ public final class JSONFactory {
             this.name = name;
             this.value0 = value0;
             this.value1 = value1;
-        }
-    }
-
-    static final class NameHash64Cache {
-        final long nameValue;
-        final long hashCode64;
-
-        public NameHash64Cache(long nameValue, long hashCode64) {
-            this.nameValue = nameValue;
-            this.hashCode64 = hashCode64;
         }
     }
 
