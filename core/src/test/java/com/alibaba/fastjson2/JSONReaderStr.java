@@ -869,7 +869,7 @@ final class JSONReaderStr
                 break;
             }
 
-            if (c > 0x7F || i >= 8 || (i == 0 && c == 0)) {
+            if (c > 0xFF || i >= 8 || (i == 0 && c == 0)) {
                 nameValue = 0;
                 offset = this.nameBegin;
                 break;
