@@ -14,6 +14,7 @@ public class EishayWrite {
                 .include(EishayWrite.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
+                .warmupIterations(3)
                 .forks(1)
                 .build();
         new Runner(options).run();
