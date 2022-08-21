@@ -961,24 +961,126 @@ final class JSONReaderJSONB
         } else {
             long nameValue = 0;
             if (strlen <= 8) {
-                for (int i = 0, start = offset; i < strlen; offset++, i++) {
-                    byte c = bytes[offset];
-                    if (c < 0 || (c == 0 && bytes[start] == 0)) {
-                        nameValue = 0;
-                        offset = start;
+                byte b0, b1, b2, b3, b4, b5, b6, b7;
+                switch (strlen) {
+                    case 1:
+                        b0 = bytes[offset];
+                        if (b0 >= 0) {
+                            nameValue = b0;
+                        }
                         break;
-                    }
-
-                    if (i == 0) {
-                        nameValue = c;
-                    } else {
-                        nameValue <<= 8;
-                        nameValue += c;
-                    }
+                    case 2:
+                        b0 = bytes[offset];
+                        b1 = bytes[offset + 1];
+                        if (b0 >= 0 && b1 >= 0) {
+                            nameValue
+                                    = (b0 << 8)
+                                    + (b1);
+                        }
+                        break;
+                    case 3:
+                        b0 = bytes[offset];
+                        b1 = bytes[offset + 1];
+                        b2 = bytes[offset + 2];
+                        if (b0 >= 0 && b1 >= 0 && b2 >= 0) {
+                            nameValue
+                                    = (b0 << 16)
+                                    + (b1 << 8)
+                                    + (b2);
+                        }
+                        break;
+                    case 4:
+                        b0 = bytes[offset];
+                        b1 = bytes[offset + 1];
+                        b2 = bytes[offset + 2];
+                        b3 = bytes[offset + 3];
+                        if (b0 >= 0 && b1 >= 0 && b2 >= 0 && b3 >= 0) {
+                            nameValue
+                                    = (b0 << 24)
+                                    + (b1 << 16)
+                                    + (b2 << 8)
+                                    + (b3);
+                        }
+                        break;
+                    case 5:
+                        b0 = bytes[offset];
+                        b1 = bytes[offset + 1];
+                        b2 = bytes[offset + 2];
+                        b3 = bytes[offset + 3];
+                        b4 = bytes[offset + 4];
+                        if (b0 >= 0 && b1 >= 0 && b2 >= 0 && b3 >= 0 && b4 >= 0) {
+                            nameValue
+                                    = (((long) b0) << 32)
+                                    + (((long) b1) << 24)
+                                    + (((long) b2) << 16)
+                                    + (((long) b3) << 8)
+                                    + (b4);
+                        }
+                        break;
+                    case 6:
+                        b0 = bytes[offset];
+                        b1 = bytes[offset + 1];
+                        b2 = bytes[offset + 2];
+                        b3 = bytes[offset + 3];
+                        b4 = bytes[offset + 4];
+                        b5 = bytes[offset + 5];
+                        if (b0 >= 0 && b1 >= 0 && b2 >= 0 && b3 >= 0 && b4 >= 0 && b5 >= 0) {
+                            nameValue
+                                    = (((long) b0) << 40)
+                                    + (((long) b1) << 32)
+                                    + (((long) b2) << 24)
+                                    + (((long) b3) << 16)
+                                    + (((long) b4) << 8)
+                                    + (b5);
+                        }
+                        break;
+                    case 7:
+                        b0 = bytes[offset];
+                        b1 = bytes[offset + 1];
+                        b2 = bytes[offset + 2];
+                        b3 = bytes[offset + 3];
+                        b4 = bytes[offset + 4];
+                        b5 = bytes[offset + 5];
+                        b6 = bytes[offset + 6];
+                        if (b0 >= 0 && b1 >= 0 && b2 >= 0 && b3 >= 0 && b4 >= 0 && b5 >= 0 && b6 >= 0) {
+                            nameValue
+                                    = (((long) b0) << 48)
+                                    + (((long) b1) << 40)
+                                    + (((long) b2) << 32)
+                                    + (((long) b3) << 24)
+                                    + (((long) b4) << 16)
+                                    + (((long) b5) << 8)
+                                    + (b6);
+                        }
+                        break;
+                    case 8:
+                        b0 = bytes[offset];
+                        b1 = bytes[offset + 1];
+                        b2 = bytes[offset + 2];
+                        b3 = bytes[offset + 3];
+                        b4 = bytes[offset + 4];
+                        b5 = bytes[offset + 5];
+                        b6 = bytes[offset + 6];
+                        b7 = bytes[offset + 7];
+                        if (b0 >= 0 && b1 >= 0 && b2 >= 0 && b3 >= 0 && b4 >= 0 && b5 >= 0 && b6 >= 0 && b7 >= 0) {
+                            nameValue
+                                    = (((long) b0) << 56)
+                                    + (((long) b1) << 48)
+                                    + (((long) b2) << 40)
+                                    + (((long) b3) << 32)
+                                    + (((long) b4) << 24)
+                                    + (((long) b5) << 16)
+                                    + (((long) b6) << 8)
+                                    + (b7);
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
 
             if (nameValue != 0) {
+                offset += strlen;
                 hashCode = nameValue;
             } else {
                 hashCode = Fnv.MAGIC_HASH_CODE;
