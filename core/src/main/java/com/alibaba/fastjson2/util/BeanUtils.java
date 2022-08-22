@@ -5,8 +5,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.BeanInfo;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -16,7 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * @author Bob Lee
@@ -495,27 +493,7 @@ public abstract class BeanUtils {
         }
     }
 
-    public static Member getEnumValueField(Class clazz, ObjectReaderProvider provider) {
-        return getEnumValueField(
-                clazz, e -> (
-                        provider == null
-                        ? JSONFactory.getDefaultObjectReaderProvider()
-                        : provider
-                ).getMixIn(e)
-        );
-    }
-
-    public static Member getEnumValueField(Class clazz, ObjectWriterProvider provider) {
-        return getEnumValueField(
-                clazz, e -> (
-                        provider == null
-                        ? JSONFactory.getDefaultObjectWriterProvider()
-                        : provider
-                ).getMixIn(e)
-        );
-    }
-
-    static Member getEnumValueField(Class clazz, Function<Class, Class> mixinProvider) {
+    public static Member getEnumValueField(Class clazz, ObjectCodecProvider mixinProvider) {
         if (clazz == null) {
             return null;
         }
@@ -555,7 +533,7 @@ public abstract class BeanUtils {
 
                     Class mixIn;
                     if (mixinProvider != null) {
-                        mixIn = mixinProvider.apply(enumInterface);
+                        mixIn = mixinProvider.getMixIn(enumInterface);
                     } else {
                         mixIn = JSONFactory.getDefaultObjectWriterProvider().getMixIn(enumInterface);
                     }
