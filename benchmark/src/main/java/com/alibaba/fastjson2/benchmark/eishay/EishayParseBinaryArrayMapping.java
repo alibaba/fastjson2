@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
+import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
@@ -53,6 +54,11 @@ public class EishayParseBinaryArrayMapping {
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
+    }
+
+    @Benchmark
+    public void fastjson1UTF8Bytes(Blackhole bh) {
+        bh.consume(com.alibaba.fastjson.JSON.parseObject(fastjson2UTF8Bytes, MediaContent.class, Feature.SupportArrayToBean));
     }
 
     @Benchmark
