@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
+import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
@@ -25,7 +26,8 @@ import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
 import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
 
-public class ObjectReaderProvider {
+public class ObjectReaderProvider
+        implements ObjectCodecProvider {
     public static final boolean SAFE_MODE;
     static final String[] DENYS;
     static final String[] AUTO_TYPE_ACCEPT_LIST;

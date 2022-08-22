@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -16,7 +17,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class ObjectWriterProvider {
+public class ObjectWriterProvider
+        implements ObjectCodecProvider {
     final ConcurrentMap<Type, ObjectWriter> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectWriter> cacheFieldBased = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();

@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
@@ -1007,7 +1006,7 @@ public class ObjectWriterBaseModule
                 Member valueField = BeanUtils.getEnumValueField(clazz, provider);
                 if (valueField == null) {
                     Class mixInSource = provider.mixInCache.get(objectClass);
-                    Member mixedValueField = BeanUtils.getEnumValueField(mixInSource, JSONFactory.getDefaultObjectWriterProvider());
+                    Member mixedValueField = BeanUtils.getEnumValueField(mixInSource, provider);
                     if (mixedValueField instanceof Field) {
                         try {
                             valueField = clazz.getField(mixedValueField.getName());
