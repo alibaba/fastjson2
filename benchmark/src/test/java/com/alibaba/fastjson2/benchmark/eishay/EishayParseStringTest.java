@@ -19,19 +19,21 @@ public class EishayParseStringTest {
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("fastjson2 millis : " + millis);
-        // zulu8.62.0.19 : 666 578 554
-        // zulu11.52.13 : 821 546 521 494 492
-        // zulu17.32.13 : 601 552 532 516 511
-        // zulu18.28.13 : 598 555 534 527
-        // zulu19.0.47 :
-        // corretto-8 :
-        // corretto-11 :
-        // corretto-17 :
-        // corretto-18 :
+        // zulu8.62.0.19 : 666 578 554 571 560 554
+        // zulu11.52.13 : 821 546 521 494 492 502 485 492
+        // zulu17.32.13 : 601 552 532 516 511 530 517 511
+        // zulu18.28.13 : 598 555 534 527 512
+        // zulu19.0.75 : 515
+        // corretto-8 : 558
+        // corretto-11 : 516
+        // corretto-17 : 512 517
+        // corretto-18 : 510
         // oracle-jdk-17.0.4 : 562 536
         // oracle-jdk-18.0.2 : 552 530
         // ibm-aarch64_mac_11.0.15_10 : 1240
         // ibm-aarch64_mac_17.0.3_7 : 1311
+        // graalvm-ce-java17-22.2.0 : 711
+        // graalvm-ee-java17-22.2.0 : 589
     }
 
     public static void fastjson1_test() throws Exception {
