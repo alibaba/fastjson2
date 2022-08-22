@@ -40,6 +40,7 @@ public class ObjectWriterCreatorLambda
 
     @Override
     public <T> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
             Class<T> objectClass,
             String fieldName,
             int ordinal,
@@ -51,7 +52,7 @@ public class ObjectWriterCreatorLambda
     ) {
         int modifiers = objectClass.getModifiers();
         if (!Modifier.isPublic(modifiers) || isExternalClass(objectClass)) {
-            return super.createFieldWriter(objectClass, fieldName, ordinal, features, format, label, method, initObjectWriter);
+            return super.createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, label, method, initObjectWriter);
         }
 
         if (initObjectWriter != null) {
@@ -112,7 +113,7 @@ public class ObjectWriterCreatorLambda
 
         Function function = (Function) lambda;
 
-        return createFieldWriter(objectClass, fieldName, ordinal, features, format, label, returnType, returnClass, method, function);
+        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, label, returnType, returnClass, method, function);
     }
 
     private static Map<Class, LambdaInfo> fieldReaderMapping = new HashMap<>();

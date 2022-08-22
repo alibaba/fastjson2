@@ -108,6 +108,18 @@ public class ObjectWriterCreatorASM
             long features,
             List<ObjectWriterModule> modules
     ) {
+        ObjectWriterProvider provider;
+        {
+            ObjectWriterProvider p = null;
+            BeanInfo beanInfo = new BeanInfo();
+            for (ObjectWriterModule module : modules) {
+                if (p == null) {
+                    p = module.getProvider();
+                }
+            }
+            provider = p;
+        }
+
         int modifiers = objectClass.getModifiers();
         boolean externalClass = classLoader.isExternalClass(objectClass);
         boolean publicClass = Modifier.isPublic(modifiers);
@@ -266,6 +278,7 @@ public class ObjectWriterCreatorASM
                     }
 
                     FieldWriter fieldWriter = createFieldWriter(
+                            provider,
                             objectClass,
                             fieldName,
                             fieldInfo.ordinal,
@@ -366,17 +379,17 @@ public class ObjectWriterCreatorASM
                 new ObjectWriterAdapter(objectClass, null, null, features, fieldWriters)
         );
 
-        genMethodWriteJSONB(objectClass, fieldWriters, cw, classNameType, writerFeatures);
+        genMethodWriteJSONB(provider, objectClass, fieldWriters, cw, classNameType, writerFeatures);
 
         if ((writerFeatures & JSONWriter.Feature.BeanToArray.mask) != 0) {
-            genMethodWriteArrayMapping("write", objectClass, writerFeatures, fieldWriters, cw, classNameType);
+            genMethodWriteArrayMapping(provider, "write", objectClass, writerFeatures, fieldWriters, cw, classNameType);
         } else {
-            genMethodWrite(objectClass, fieldWriters, cw, classNameType, writerFeatures);
+            genMethodWrite(provider, objectClass, fieldWriters, cw, classNameType, writerFeatures);
         }
 
-        genMethodWriteArrayMappingJSONB(objectClass, writerFeatures, fieldWriters, cw, classNameType, writerFeatures);
+        genMethodWriteArrayMappingJSONB(provider, objectClass, writerFeatures, fieldWriters, cw, classNameType, writerFeatures);
 
-        genMethodWriteArrayMapping("writeArrayMapping", objectClass, writerFeatures, fieldWriters, cw, classNameType);
+        genMethodWriteArrayMapping(provider, "writeArrayMapping", objectClass, writerFeatures, fieldWriters, cw, classNameType);
 
         byte[] code = cw.toByteArray();
 
@@ -391,6 +404,7 @@ public class ObjectWriterCreatorASM
     }
 
     private void genMethodWrite(
+            ObjectWriterProvider provider,
             Class objectType,
             List<FieldWriter> fieldWriters,
             ClassWriter cw,
@@ -411,7 +425,7 @@ public class ObjectWriterCreatorASM
 
         Label json_ = new Label(), jsonb_ = new Label(), notSuper_ = new Label();
 
-        MethodWriterContext mwc = new MethodWriterContext(objectType, objectFeatures, classNameType, mw, 8, false);
+        MethodWriterContext mwc = new MethodWriterContext(provider, objectType, objectFeatures, classNameType, mw, 8, false);
         mwc.genVariantsMethodBefore();
 
         mwc.genIsEnabled(JSONWriter.Feature.IgnoreErrorGetter.mask, notSuper_);
@@ -546,6 +560,7 @@ public class ObjectWriterCreatorASM
     }
 
     private void genMethodWriteJSONB(
+            ObjectWriterProvider provider,
             Class objectType,
             List<FieldWriter> fieldWriters,
             ClassWriter cw,
@@ -559,7 +574,7 @@ public class ObjectWriterCreatorASM
         final int FIELD_TYPE = 4;
         final int FIELD_FEATURES = 5;
 
-        MethodWriterContext mwc = new MethodWriterContext(objectType, objectFeatures, classNameType, mw, 7, true);
+        MethodWriterContext mwc = new MethodWriterContext(provider, objectType, objectFeatures, classNameType, mw, 7, true);
         mwc.genVariantsMethodBefore();
 
         Label return_ = new Label();
@@ -616,6 +631,7 @@ public class ObjectWriterCreatorASM
     }
 
     private void genMethodWriteArrayMappingJSONB(
+            ObjectWriterProvider provider,
             Class objectType,
             long objectFeatures,
             List<FieldWriter> fieldWriters,
@@ -661,7 +677,7 @@ public class ObjectWriterCreatorASM
         }
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "startArray", "(I)V", false);
 
-        MethodWriterContext mwc = new MethodWriterContext(objectType, objectFeatures, classNameType, mw, 7, true);
+        MethodWriterContext mwc = new MethodWriterContext(provider, objectType, objectFeatures, classNameType, mw, 7, true);
 
         mwc.genVariantsMethodBefore();
 
@@ -1033,6 +1049,7 @@ public class ObjectWriterCreatorASM
     }
 
     private void genMethodWriteArrayMapping(
+            ObjectWriterProvider provider,
             String methodName,
             Class objectType,
             long objectFeatures,
@@ -1087,7 +1104,7 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "startArray", "()V", false);
 
-        MethodWriterContext mwc = new MethodWriterContext(objectType, objectFeatures, classNameType, mw, 7, false);
+        MethodWriterContext mwc = new MethodWriterContext(provider, objectType, objectFeatures, classNameType, mw, 7, false);
 
         for (int i = 0; i < fieldWriters.size(); i++) {
             if (i != 0) {
@@ -1446,7 +1463,7 @@ public class ObjectWriterCreatorASM
         } else if (fieldClass == String.class) {
             gwFieldValueString(mwc, fieldWriter, OBJECT, i);
         } else if (fieldClass.isEnum()
-                && BeanUtils.getEnumValueField(fieldClass) == null
+                && BeanUtils.getEnumValueField(fieldClass, mwc.provider) == null
                 && !(fieldWriter instanceof FieldWriterObject)
         ) {
             gwFieldValueEnum(mwc, fieldWriter, OBJECT, i);
@@ -2668,6 +2685,7 @@ public class ObjectWriterCreatorASM
 
     @Override
     public <T> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
             String fieldName,
             int ordinal,
             long features,
@@ -2798,7 +2816,8 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass.isEnum()) {
-            Member enumValueField = BeanUtils.getEnumValueField(fieldClass);
+            Member enumValueField = BeanUtils.getEnumValueField(fieldClass, provider);
+
             if (enumValueField == null) {
                 return new FIeldWriterEnumField(fieldName, ordinal, features, format, label, fieldClass, field);
             }
@@ -3021,6 +3040,7 @@ public class ObjectWriterCreatorASM
     }
 
     static class MethodWriterContext {
+        final ObjectWriterProvider provider;
         final Class objectClass;
         final long objectFeatures;
         final String classNameType;
@@ -3030,6 +3050,7 @@ public class ObjectWriterCreatorASM
         int maxVariant;
 
         public MethodWriterContext(
+                ObjectWriterProvider provider,
                 Class objectClass,
                 long objectFeatures,
                 String classNameType,
@@ -3037,6 +3058,7 @@ public class ObjectWriterCreatorASM
                 int maxVariant,
                 boolean jsonb
         ) {
+            this.provider = provider;
             this.objectClass = objectClass;
             this.objectFeatures = objectFeatures;
             this.classNameType = classNameType;

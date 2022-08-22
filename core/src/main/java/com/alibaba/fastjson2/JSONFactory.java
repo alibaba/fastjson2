@@ -365,6 +365,12 @@ public final class JSONFactory {
         return new JSONWriter.Context(defaultObjectWriterProvider);
     }
 
+    public static JSONWriter.Context createWriteContext(ObjectWriterProvider provider, JSONWriter.Feature... features) {
+        JSONWriter.Context context = new JSONWriter.Context(provider);
+        context.config(features);
+        return context;
+    }
+
     public static JSONWriter.Context createWriteContext(JSONWriter.Feature... features) {
         return new JSONWriter.Context(defaultObjectWriterProvider, features);
     }
@@ -372,6 +378,12 @@ public final class JSONFactory {
     public static JSONReader.Context createReadContext() {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         return new JSONReader.Context(provider);
+    }
+
+    public static JSONReader.Context createReadContext(ObjectReaderProvider provider, JSONReader.Feature... features) {
+        JSONReader.Context context = new JSONReader.Context(provider);
+        context.config(features);
+        return context;
     }
 
     public static JSONReader.Context createReadContext(SymbolTable symbolTable) {
