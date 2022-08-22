@@ -503,7 +503,6 @@ final class JSONWriterJSONB
                     // minCapacity is usually close to size, so this is a win:
                     bytes = Arrays.copyOf(bytes, newCapacity);
                 }
-                str.getBytes();
 
                 int strlen = value.length;
                 if (strlen <= STR_ASCII_FIX_LEN) {

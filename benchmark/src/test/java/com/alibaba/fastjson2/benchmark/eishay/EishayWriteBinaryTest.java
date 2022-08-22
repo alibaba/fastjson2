@@ -60,8 +60,8 @@ public class EishayWriteBinaryTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2JSONB_test();
-        ffastjson2JSONBArrayMapping_test();
+        fastjson2JSONB_test();
+//        ffastjson2JSONBArrayMapping_test();
 //        kryo_test();
     }
 }
