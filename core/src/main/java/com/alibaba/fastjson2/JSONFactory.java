@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
@@ -26,6 +27,8 @@ public final class JSONFactory {
     public static final String PROPERTY_AUTO_TYPE_ACCEPT = "fastjson2.autoTypeAccept";
     public static final String PROPERTY_AUTO_TYPE_HANDLER = "fastjson2.autoTypeHandler";
     public static final String PROPERTY_AUTO_TYPE_BEFORE_HANDLER = "fastjson2.autoTypeBeforeHandler";
+
+    public static final boolean MIXED_HASH_ALGORITHM;
 
     public static String getProperty(String key) {
         return DEFAULT_PROPERTIES.getProperty(key);
@@ -130,12 +133,41 @@ public final class JSONFactory {
         }
         DEFAULT_PROPERTIES = properties;
 
-        String property = System.getProperty("fastjson2.creator");
-        if (property != null) {
-            property = property.trim();
+        {
+            String property = System.getProperty("fastjson2.creator");
+            if (property != null) {
+                property = property.trim();
+            }
+
+            if (property == null || property.isEmpty()) {
+                property = properties.getProperty("fastjson2.creator");
+                if (property != null) {
+                    property = property.trim();
+                }
+            }
+
+            CREATOR = property == null ? "asm" : property;
         }
 
-        CREATOR = property == null ? "asm" : property;
+        {
+            String property = System.getProperty("fastjson2.hash-algorithm");
+            if (property != null) {
+                property = property.trim();
+            }
+
+            if (property == null || property.isEmpty()) {
+                property = properties.getProperty("fastjson2.hash-algorithm");
+                if (property != null) {
+                    property = property.trim();
+                }
+            }
+
+            if (property != null && "mixed".equals(property)) {
+                MIXED_HASH_ALGORITHM = true;
+            } else {
+                MIXED_HASH_ALGORITHM = JDKUtils.JVM_VERSION > 8;
+            }
+        }
     }
 
     private static final int CACHE_THRESHOLD = 1024 * 1024;

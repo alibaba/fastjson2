@@ -1,48 +1,52 @@
 package com.alibaba.fastjson2.util;
 
+import static com.alibaba.fastjson2.JSONFactory.MIXED_HASH_ALGORITHM;
+
 // fnv1a 64
 public class Fnv {
     public static final long MAGIC_HASH_CODE = 0xcbf29ce484222325L;
     public static final long MAGIC_PRIME = 0x100000001b3L;
 
     public static long hashCode64LCase(String name) {
-        boolean ascii = true;
-        long nameValue = 0;
+        if (MIXED_HASH_ALGORITHM) {
+            boolean ascii = true;
+            long nameValue = 0;
 
-        int scoreCount = 0;
-        for (int i = 0; i < name.length(); ++i) {
-            char ch = name.charAt(i);
-            if (ch > 0xFF || (i == 0 && ch == 0)) {
-                ascii = false;
-                break;
-            }
-
-            if (ch == '-' || ch == '_') {
-                scoreCount++;
-            }
-        }
-
-        if (ascii && (name.length() - scoreCount) <= 8) {
-            for (int i = 0, j = 0; i < name.length(); i++) {
+            int scoreCount = 0;
+            for (int i = 0; i < name.length(); ++i) {
                 char ch = name.charAt(i);
-                if (ch == '-' || ch == '_') {
-                    continue;
-                }
-                if (ch >= 'A' && ch <= 'Z') {
-                    ch = (char) (ch + 32);
+                if (ch > 0xFF || (i == 0 && ch == 0)) {
+                    ascii = false;
+                    break;
                 }
 
-                if (j == 0) {
-                    nameValue = (byte) ch;
-                } else {
-                    nameValue <<= 8;
-                    nameValue += ch;
+                if (ch == '-' || ch == '_') {
+                    scoreCount++;
                 }
-                j++;
             }
 
-            if (nameValue != 0) {
-                return nameValue;
+            if (ascii && (name.length() - scoreCount) <= 8) {
+                for (int i = 0, j = 0; i < name.length(); i++) {
+                    char ch = name.charAt(i);
+                    if (ch == '-' || ch == '_') {
+                        continue;
+                    }
+                    if (ch >= 'A' && ch <= 'Z') {
+                        ch = (char) (ch + 32);
+                    }
+
+                    if (j == 0) {
+                        nameValue = (byte) ch;
+                    } else {
+                        nameValue <<= 8;
+                        nameValue += ch;
+                    }
+                    j++;
+                }
+
+                if (nameValue != 0) {
+                    return nameValue;
+                }
             }
         }
 
@@ -64,7 +68,7 @@ public class Fnv {
     }
 
     public static long hashCode64(String name) {
-        if (name.length() <= 8) {
+        if (MIXED_HASH_ALGORITHM && name.length() <= 8) {
             boolean ascii = true;
             long nameValue = 0;
 
@@ -103,7 +107,7 @@ public class Fnv {
     }
 
     public static long hashCode64(byte... name) {
-        if (name.length > 0 && name.length <= 8 && name[0] != 0) {
+        if (MIXED_HASH_ALGORITHM && name.length > 0 && name.length <= 8 && name[0] != 0) {
             long nameValue = 0;
             switch (name.length) {
                 case 1:
