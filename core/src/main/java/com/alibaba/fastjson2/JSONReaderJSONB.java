@@ -960,7 +960,7 @@ final class JSONReaderJSONB
             hashCode = symbolTable.getHashCode(-strlen);
         } else {
             long nameValue = 0;
-            if (strlen <= 8) {
+            if (MIXED_HASH_ALGORITHM && strlen <= 8) {
                 switch (strlen) {
                     case 1:
                         nameValue = bytes[offset];
@@ -1211,7 +1211,7 @@ final class JSONReaderJSONB
             }
         } else {
             long nameValue = 0;
-            if (strlen <= 8) {
+            if (MIXED_HASH_ALGORITHM && strlen <= 8) {
                 for (int i = 0, start = offset; i < strlen; offset++, i++) {
                     byte c = bytes[offset];
                     if (c < 0 || (c == 0 && bytes[start] == 0)) {
@@ -1332,7 +1332,7 @@ final class JSONReaderJSONB
             if (bytes[offset] == (byte) 0xFE
                     && bytes[offset + 1] == (byte) 0xFF
             ) {
-                if (strlen <= 16) {
+                if (MIXED_HASH_ALGORITHM && strlen <= 16) {
                     long nameValue = 0;
                     for (int i = 2; i < strlen; i += 2) {
                         byte c0 = bytes[offset + i];
@@ -1384,7 +1384,7 @@ final class JSONReaderJSONB
                 }
             }
         } else if (strtype == BC_STR_UTF16BE) {
-            if (strlen <= 16) {
+            if (MIXED_HASH_ALGORITHM && strlen <= 16) {
                 long nameValue = 0;
                 for (int i = 0; i < strlen; i += 2) {
                     byte c0 = bytes[offset + i];
@@ -1418,7 +1418,7 @@ final class JSONReaderJSONB
                 hashCode *= Fnv.MAGIC_PRIME;
             }
         } else if (strtype == BC_STR_UTF16LE) {
-            if (strlen <= 16) {
+            if (MIXED_HASH_ALGORITHM && strlen <= 16) {
                 long nameValue = 0;
                 for (int i = 0; i < strlen; i += 2) {
                     byte c0 = bytes[offset + i];
@@ -1452,7 +1452,7 @@ final class JSONReaderJSONB
                 hashCode *= Fnv.MAGIC_PRIME;
             }
         } else {
-            if (strlen <= 8) {
+            if (MIXED_HASH_ALGORITHM && strlen <= 8) {
                 long nameValue = 0;
                 for (int i = 0, start = offset; i < strlen; offset++, i++) {
                     byte c = bytes[offset];
@@ -1488,39 +1488,41 @@ final class JSONReaderJSONB
 
     @Override
     public long getNameHashCodeLCase() {
-        long nameValue = 0;
         int offset = strBegin;
 
-        for (int i = 0; i < strlen; offset++) {
-            byte c = bytes[offset];
-            if (c < 0 || i >= 8 || (i == 0 && bytes[strBegin] == 0)) {
-                offset = strBegin;
-                nameValue = 0;
-                break;
-            }
-
-            if (c == '_' || c == '-') {
-                byte c1 = bytes[offset + 1];
-                if (c1 != c) {
-                    continue;
+        if (MIXED_HASH_ALGORITHM) {
+            long nameValue = 0;
+            for (int i = 0; i < strlen; offset++) {
+                byte c = bytes[offset];
+                if (c < 0 || i >= 8 || (i == 0 && bytes[strBegin] == 0)) {
+                    offset = strBegin;
+                    nameValue = 0;
+                    break;
                 }
+
+                if (c == '_' || c == '-') {
+                    byte c1 = bytes[offset + 1];
+                    if (c1 != c) {
+                        continue;
+                    }
+                }
+
+                if (c >= 'A' && c <= 'Z') {
+                    c += 32;
+                }
+
+                if (i == 0) {
+                    nameValue = c;
+                } else {
+                    nameValue <<= 8;
+                    nameValue += c;
+                }
+                i++;
             }
 
-            if (c >= 'A' && c <= 'Z') {
-                c += 32;
+            if (nameValue != 0) {
+                return nameValue;
             }
-
-            if (i == 0) {
-                nameValue = c;
-            } else {
-                nameValue <<= 8;
-                nameValue += c;
-            }
-            i++;
-        }
-
-        if (nameValue != 0) {
-            return nameValue;
         }
 
         long hashCode = Fnv.MAGIC_HASH_CODE;
