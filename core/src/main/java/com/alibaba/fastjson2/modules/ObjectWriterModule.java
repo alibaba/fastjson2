@@ -26,4 +26,8 @@ public interface ObjectWriterModule {
     default ObjectWriterAnnotationProcessor getAnnotationProcessor() {
         return null;
     }
+
+    default ObjectWriterProvider getProvider() {
+        return null;
+    }
 }

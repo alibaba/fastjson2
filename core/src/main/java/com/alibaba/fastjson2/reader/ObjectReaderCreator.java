@@ -1857,13 +1857,20 @@ public class ObjectReaderCreator {
             Arrays.sort(enumNameHashCodes);
         }
 
-        Member enumValueField = BeanUtils.getEnumValueField(objectClass);
+        ObjectReaderProvider provider = null;
+        for (ObjectReaderModule module : modules) {
+            ObjectReaderProvider moduleProvider = module.getProvider();
+            if (moduleProvider != null) {
+                provider = moduleProvider;
+            }
+        }
+
+        Member enumValueField = BeanUtils.getEnumValueField(objectClass, provider);
         if (enumValueField == null && modules.size() > 0) {
-            ObjectReaderProvider provider = modules.get(0).getProvider();
             if (provider != null) {
                 Class fieldClassMixInSource = provider.getMixIn(objectClass);
                 if (fieldClassMixInSource != null) {
-                    Member mixedValueField = BeanUtils.getEnumValueField(fieldClassMixInSource);
+                    Member mixedValueField = BeanUtils.getEnumValueField(fieldClassMixInSource, provider);
                     if (mixedValueField instanceof Field) {
                         try {
                             enumValueField = objectClass.getField(mixedValueField.getName());

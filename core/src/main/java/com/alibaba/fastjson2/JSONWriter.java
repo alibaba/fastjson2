@@ -409,6 +409,12 @@ public abstract class JSONWriter
         return new JSONWriterUTF16(writeContext);
     }
 
+    public static JSONWriter of(ObjectWriterProvider provider, Feature... features) {
+        Context context = new Context(provider);
+        context.config(features);
+        return of(context);
+    }
+
     public static JSONWriter of(Context writeContext) {
         JSONWriter jsonWriter;
         if (JDKUtils.JVM_VERSION == 8) {

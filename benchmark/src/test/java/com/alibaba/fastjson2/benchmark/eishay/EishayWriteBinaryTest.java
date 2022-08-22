@@ -19,7 +19,7 @@ public class EishayWriteBinaryTest {
         long millis = System.currentTimeMillis() - start;
         System.out.println("kryo millis : " + millis);
         // zulu8.58.0.13 : 395
-        // zulu11.52.13 :
+        // zulu11.52.13 : 203
         // zulu17.32.13 :
     }
 
