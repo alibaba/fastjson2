@@ -72,7 +72,7 @@
         <dependency>
             <groupId>io.github.wycst</groupId>
             <artifactId>wast</artifactId>
-            <version>0.0.5</version>
+            <version>0.0.6.1</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
