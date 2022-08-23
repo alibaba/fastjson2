@@ -3656,7 +3656,7 @@ class JSONReaderUTF8
                         byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
                         str = STRING_CREATOR_JDK11.apply(bytes);
                     }
-                } else if (JDKUtils.JVM_VERSION == 17 && JDKUtils.UNSAFE_ASCII_CREATOR != null) {
+                } else if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
                     byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
                     str = JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
                 } else {
