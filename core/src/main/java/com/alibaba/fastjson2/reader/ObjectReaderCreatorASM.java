@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.*;
 
+import static com.alibaba.fastjson2.internal.asm.Opcodes.PUTFIELD;
 import static com.alibaba.fastjson2.reader.ObjectReader.HASH_TYPE;
 
 public class ObjectReaderCreatorASM
@@ -707,7 +708,7 @@ public class ObjectReaderCreatorASM
                     break;
             }
             mw.visitInsn(Opcodes.AALOAD);
-            mw.visitFieldInsn(Opcodes.PUTFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
+            mw.visitFieldInsn(PUTFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
         }
     }
 
@@ -1665,7 +1666,7 @@ public class ObjectReaderCreatorASM
         String DESC_FIELD_CLASS = ASMUtils.desc(fieldClass);
 
         mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-        int fieldModifers = fieldBased ? field.getModifiers() : 0;
+        int fieldModifers = fieldBased || (method == null && field != null) ? field.getModifiers() : 0;
         if (fieldBased
                 && Modifier.isPublic(objectType.getModifiers())
                 && Modifier.isPublic(fieldModifers)
@@ -1977,7 +1978,7 @@ public class ObjectReaderCreatorASM
 //
 //                    mw.visitMethodInsn(Opcodes.INVOKEINTERFACE,  TYPE_FIELD_READE, "getItemType", "()Ljava/lang/reflect/Type;", true);
 //                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL,  TYPE_JSON_READER, "getObjectReader", METHOD_DESC_GET_OBJECT_READER, false);
-                    mw.visitFieldInsn(Opcodes.PUTFIELD, classNameType, ITEM_OBJECT_READER, DESC_OBJECT_READER);
+                    mw.visitFieldInsn(PUTFIELD, classNameType, ITEM_OBJECT_READER, DESC_OBJECT_READER);
 
                     mw.visitLabel(notNull_);
 
@@ -2096,7 +2097,7 @@ public class ObjectReaderCreatorASM
                 mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
                 mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                 mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_FIELD_READE, "getObjectReader", METHOD_DESC_GET_OBJECT_READER_1, true);
-                mw.visitFieldInsn(Opcodes.PUTFIELD, classNameType, FIELD_OBJECT_READER, DESC_OBJECT_READER);
+                mw.visitFieldInsn(PUTFIELD, classNameType, FIELD_OBJECT_READER, DESC_OBJECT_READER);
 
                 mw.visitLabel(notNull_);
                 mw.visitVarInsn(Opcodes.ALOAD, THIS);
@@ -2138,14 +2139,15 @@ public class ObjectReaderCreatorASM
                     "(" + DESC_FIELD_CLASS + ")V", false);
             // TODO BUILD METHOD
         } else if (field != null) {
-//            if (Modifier.isPublic(objectType.getModifiers())
-//                    && Modifier.isPublic(fieldModifers)
-//                    && !Modifier.isFinal(fieldModifers)
-//                    && !classLoader.isExternalClass(objectType)
-//            ) {
-//                mw.visitFieldInsn(PUTFIELD, TYPE_OBJECT, field.getName(), DESC_FIELD_CLASS);
-//            } else
-            {
+            if (Modifier.isPublic(objectType.getModifiers())
+                    && Modifier.isPublic(fieldModifers)
+                    && !Modifier.isFinal(fieldModifers)
+                    && ObjectWriterProvider.isPrimitiveOrEnum(fieldClass)
+                    && !classLoader.isExternalClass(objectType)
+                    && field.getDeclaringClass() == objectType
+            ) {
+                mw.visitFieldInsn(PUTFIELD, TYPE_OBJECT, field.getName(), DESC_FIELD_CLASS);
+            } else {
                 Integer FIELD_VALUE = variants.get(fieldClass);
                 if (FIELD_VALUE == null) {
                     variants.put(fieldClass, FIELD_VALUE = varIndex);

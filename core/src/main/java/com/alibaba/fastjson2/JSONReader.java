@@ -28,7 +28,9 @@ public abstract class JSONReader
     static final int MAX_EXP = 1023;
 
     static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
-    static final ZoneId SHANGHAI_ZONE_ID = "Asia/Shanghai".equals(DEFAULT_ZONE_ID.getId()) ? DEFAULT_ZONE_ID : ZoneId.of("Asia/Shanghai");
+    static final String SHANGHAI_ZONE_ID_NAME = "Asia/Shanghai";
+    static final long SHANGHAI_ZONE_ID_HASH = Fnv.hashCode64("Asia/Shanghai");
+    static final ZoneId SHANGHAI_ZONE_ID = SHANGHAI_ZONE_ID_NAME.equals(DEFAULT_ZONE_ID.getId()) ? DEFAULT_ZONE_ID : ZoneId.of(SHANGHAI_ZONE_ID_NAME);
     static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
     static final ZoneOffset SHANGHAI_ZONE_OFFSET = SHANGHAI_ZONE_RULES.getOffset(LocalDateTime.of(LocalDate.of(1992, 1, 1), LocalTime.MIN));
 

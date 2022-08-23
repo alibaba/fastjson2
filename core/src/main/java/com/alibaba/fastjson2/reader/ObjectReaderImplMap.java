@@ -275,8 +275,6 @@ public final class ObjectReaderImplMap
         }
 
         if (!emptyObject) {
-            boolean supportAutoType = jsonReader.isSupportAutoType(features);
-
             for (int i = 0; ; ++i) {
                 byte type = jsonReader.getType();
                 if (type == BC_OBJECT_END) {
