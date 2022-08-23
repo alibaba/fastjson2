@@ -1561,7 +1561,7 @@ final class JSONReaderUTF16
                 case 1:
                     c0 = chars[nameBegin];
                     if ((c0 & 0xFF) == c0) {
-                        nameValue0 = c0;
+                        nameValue0 = (byte) c0;
                     }
                     break;
                 case 2:
@@ -1569,7 +1569,7 @@ final class JSONReaderUTF16
                     c1 = chars[nameBegin + 1];
                     if ((c0 & 0xFF) == c0 && (c1 & 0xFF) == c1) {
                         nameValue0
-                                = (c0 << 8)
+                                = (((byte) c0) << 8)
                                 + c1;
                     }
                     break;
