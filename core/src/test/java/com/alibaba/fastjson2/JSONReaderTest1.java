@@ -1660,4 +1660,63 @@ public class JSONReaderTest1 {
             }
         }
     }
+
+    @Test
+    public void readName_1() {
+        char[] chars = "{\"0\":0}".toCharArray();
+        byte[] bytes = new byte[chars.length];
+        for (int i = 0; i < chars.length; i++) {
+            bytes[i] = (byte) chars[i];
+        }
+
+        for (char c = 128; c < 255; ++c) {
+            chars[2] = c;
+            bytes[2] = (byte) c;
+
+            JSONReader utf16Reader = JSONReader.of(chars);
+            assertTrue(utf16Reader.nextIfObjectStart());
+            String name0 = utf16Reader.readFieldName();
+
+            JSONReaderASCII asciiReader = new JSONReaderASCII(JSONFactory.createReadContext(), null, bytes, 0, bytes.length);
+            assertTrue(asciiReader.nextIfObjectStart());
+            String name1 = asciiReader.readFieldName();
+
+            assertEquals(name0, name1);
+        }
+    }
+
+    @Test
+    public void readName_2() {
+        char[] chars = "{\"00\":0}".toCharArray();
+        byte[] bytes = new byte[chars.length];
+        for (int i = 0; i < chars.length; i++) {
+            bytes[i] = (byte) chars[i];
+        }
+
+        for (char c0 = 128; c0 < 129; ++c0) {
+            chars[2] = c0;
+            bytes[2] = (byte) c0;
+
+            for (char c1 = 128; c1 < 255; ++c1) {
+                chars[3] = c1;
+                bytes[3] = (byte) c1;
+
+                JSONReader utf16Reader = JSONReader.of(chars);
+                assertTrue(utf16Reader.nextIfObjectStart());
+                String name0 = utf16Reader.readFieldName();
+
+                JSONReaderASCII asciiReader = new JSONReaderASCII(JSONFactory.createReadContext(), null, bytes, 0, bytes.length);
+                assertTrue(asciiReader.nextIfObjectStart());
+                String name1 = asciiReader.readFieldName();
+
+                assertEquals(name0, name1);
+
+                byte[] ut8Bytes = new String(chars).getBytes(StandardCharsets.UTF_8);
+                JSONReaderUTF8 utf8Reader = new JSONReaderUTF8(JSONFactory.createReadContext(), ut8Bytes, 0, ut8Bytes.length);
+                assertTrue(utf8Reader.nextIfObjectStart());
+                String name2 = utf8Reader.readFieldName();
+                assertEquals(name0, name2);
+            }
+        }
+    }
 }
