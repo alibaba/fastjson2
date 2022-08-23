@@ -2150,45 +2150,58 @@ final class JSONReaderJSONB
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
             }
 
-            if (JDKUtils.JVM_VERSION == 8 && strlen >= 0) {
-                char[] chars = new char[strlen];
-                for (int i = 0; i < strlen; ++i) {
-                    chars[i] = (char) bytes[offset + i];
-                }
-                offset += strlen;
-
-                if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
-                    try {
-                        STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                    } catch (Throwable e) {
-                        STRING_CREATOR_ERROR = true;
+            if (strlen >= 0) {
+                if (JDKUtils.JVM_VERSION == 8) {
+                    char[] chars = new char[strlen];
+                    for (int i = 0; i < strlen; ++i) {
+                        chars[i] = (char) bytes[offset + i];
                     }
-                }
+                    offset += strlen;
 
-                if (STRING_CREATOR_JDK8 == null) {
-                    str = new String(chars);
-                } else {
-                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                }
-
-                if ((context.features & Feature.TrimString.mask) != 0) {
-                    str = str.trim();
-                }
-
-                return str;
-            } else if (JDKUtils.JVM_VERSION == 11 && strlen >= 0) {
-                if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {
-                    try {
-                        STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
-                    } catch (Throwable e) {
-                        STRING_CREATOR_ERROR = true;
+                    if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                        try {
+                            STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                        } catch (Throwable e) {
+                            STRING_CREATOR_ERROR = true;
+                        }
                     }
-                }
 
-                if (STRING_CREATOR_JDK11 != null) {
+                    if (STRING_CREATOR_JDK8 == null) {
+                        str = new String(chars);
+                    } else {
+                        str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                    }
+
+                    if ((context.features & Feature.TrimString.mask) != 0) {
+                        str = str.trim();
+                    }
+
+                    return str;
+                } else if (JDKUtils.JVM_VERSION == 11) {
+                    if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {
+                        try {
+                            STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
+                        } catch (Throwable e) {
+                            STRING_CREATOR_ERROR = true;
+                        }
+                    }
+
+                    if (STRING_CREATOR_JDK11 != null) {
+                        byte[] chars = new byte[strlen];
+                        System.arraycopy(bytes, offset, chars, 0, strlen);
+                        str = STRING_CREATOR_JDK11.apply(chars);
+                        offset += strlen;
+
+                        if ((context.features & Feature.TrimString.mask) != 0) {
+                            str = str.trim();
+                        }
+
+                        return str;
+                    }
+                } else if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = STRING_CREATOR_JDK11.apply(chars);
+                    str = JDKUtils.UNSAFE_ASCII_CREATOR.apply(chars);
                     offset += strlen;
 
                     if ((context.features & Feature.TrimString.mask) != 0) {
@@ -2198,6 +2211,7 @@ final class JSONReaderJSONB
                     return str;
                 }
             }
+
             charset = StandardCharsets.US_ASCII;
         } else if (strtype == BC_STR_UTF8) {
             strlen = readLength();
@@ -3404,6 +3418,13 @@ final class JSONReaderJSONB
             }
             case BC_DECIMAL: {
                 int scale = readInt32Value();
+
+                if (bytes[offset] == BC_BIGINT_LONG) {
+                    offset++;
+                    long unscaledLongValue = readInt64Value();
+                    return BigDecimal.valueOf(unscaledLongValue, scale);
+                }
+
                 BigInteger unscaledValue = readBigInteger();
                 if (scale == 0) {
                     return new BigDecimal(unscaledValue);
@@ -3937,9 +3958,21 @@ final class JSONReaderJSONB
                 int second = bytes[offset++];
                 int nano = readInt32Value();
                 LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
-                String zoneId = readString();
-                return ZonedDateTime.of(ldt,
-                        ZoneId.of(zoneId));
+
+                ZoneId zoneId;
+                long zoneIdHash = readValueHashCode();
+                if (zoneIdHash == SHANGHAI_ZONE_ID_HASH) {
+                    zoneId = SHANGHAI_ZONE_ID;
+                } else {
+                    String zoneIdStr = getString();
+                    ZoneId contextZondId = context.getZoneId();
+                    if (contextZondId.getId().equals(zoneIdStr)) {
+                        zoneId = contextZondId;
+                    } else {
+                        zoneId = ZoneId.of(zoneIdStr);
+                    }
+                }
+                return ZonedDateTime.of(ldt, zoneId);
             default:
                 break;
         }
