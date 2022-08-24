@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.ParameterizedType;
@@ -16,6 +18,9 @@ final class ObjectWriterImplList
             INSTANCE = new ObjectWriterImplList(null, null, null, null, 0);
 
     static final Class CLASS_SUBLIST = new ArrayList().subList(0, 0).getClass();
+    static final String TYPE_NAME_ARRAY_LIST = TypeUtils.getTypeName(ArrayList.class);
+    static final byte[] TYPE_NAME_JSONB_ARRAY_LIST = JSONB.toBytes(TYPE_NAME_ARRAY_LIST);
+    static final long TYPE_NAME_HASH_ARRAY_LIST = Fnv.hashCode64(TYPE_NAME_ARRAY_LIST);
 
     final Class defineClass;
     final Type defineType;
@@ -105,11 +110,12 @@ final class ObjectWriterImplList
 
         Class<?> objectClass = object.getClass();
         if (jsonWriter.isWriteTypeInfo(object, fieldClass, features)) {
-            jsonWriter.writeTypeName(
-                    TypeUtils.getTypeName(
-                            objectClass == CLASS_SUBLIST ? ArrayList.class : objectClass
-                    )
-            );
+            if (objectClass == CLASS_SUBLIST || objectClass == ArrayList.class) {
+                jsonWriter.writeTypeName(TYPE_NAME_JSONB_ARRAY_LIST, TYPE_NAME_HASH_ARRAY_LIST);
+            } else {
+                String typeName = TypeUtils.getTypeName(objectClass);
+                jsonWriter.writeTypeName(typeName);
+            }
         }
 
         List list = (List) object;
