@@ -817,6 +817,60 @@ public interface JSON {
     }
 
     /**
+     * Parse JSON char array into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param chars    JSON char array to parse
+     * @param offset  the index of the first byte to parse
+     * @param length  the number of bytes to parse
+     * @param type     specify the {@link Type} to be converted
+     * @param features features to be enabled in parsing
+     * @since 2.0.13
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(char[] chars, int offset, int length, Type type, JSONReader.Feature... features) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars, offset, length)) {
+            reader.context.config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            T object = objectReader.readObject(reader, null, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse UTF8 encoded JSON byte array into a Java object
+     *
+     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param offset  the index of the first byte to parse
+     * @param length  the number of bytes to parse
+     * @param type     specify the {@link Type} to be converted
+     * @param features features to be enabled in parsing
+     * @since 2.0.13
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(byte[] bytes, int offset, int length, Type type, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(bytes, offset, length)) {
+            reader.context.config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            T object = objectReader.readObject(reader, null, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
      * Parse UTF8 encoded JSON byte array into a Java object
      *
      * @param bytes UTF8 encoded JSON byte array to parse

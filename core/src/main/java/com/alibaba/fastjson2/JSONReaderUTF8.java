@@ -477,7 +477,15 @@ class JSONReaderUTF8
             if (ch == '}' || isNull()) {
                 return -1;
             }
-            throw new JSONException(info("illegal character " + ch));
+
+            String errorMsg, preFieldName;
+            if (ch == '[' && nameBegin > 0 && (preFieldName = getFieldName()) != null) {
+                errorMsg = "illegal fieldName input " + ch + ", previous fieldName " + preFieldName;
+            } else {
+                errorMsg = "illegal fieldName input" + ch;
+            }
+
+            throw new JSONException(info(errorMsg));
         }
 
         final char quote = ch;
