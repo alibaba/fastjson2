@@ -9,7 +9,7 @@ import java.util.*;
 public class GenReport {
     @Test
     public void gen() throws Exception {
-        File file = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.13_raw04.md");
+        File file = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.13_raw05.md");
 
         Map<String, BenchmarkResult> benchResults = new LinkedHashMap<>();
 
