@@ -641,6 +641,33 @@ public abstract class BeanUtils {
 
             String methodName = method.getName();
 
+            // skip thrift isSetXXX
+            if (methodName.startsWith("isSet") && returnClass == boolean.class) {
+                boolean setterFound = false, unsetFound = false, getterFound = false;
+                String setterName = BeanUtils.getterName(methodName, null);
+                String getterName = "g" + setterName.substring(1);
+
+                String unsetName = "un" + setterName;
+                for (Method m : methods) {
+                    if (m.getName().equals(setterName)
+                            && m.getParameterCount() == 1
+                            && m.getReturnType() == void.class) {
+                        setterFound = true;
+                    } else if (m.getName().equals(getterName)
+                            && m.getParameterCount() == 0) {
+                        getterFound = true;
+                    } else if (m.getName().equals(unsetName)
+                            && m.getParameterCount() == 0
+                            && m.getReturnType() == void.class) {
+                        unsetFound = true;
+                    }
+                }
+
+                if (setterFound && unsetFound && getterFound && !method.isAnnotationPresent(JSONField.class)) {
+                    continue;
+                }
+            }
+
             if (record) {
                 boolean match = false;
                 for (String recordFieldName : recordFieldNames) {
