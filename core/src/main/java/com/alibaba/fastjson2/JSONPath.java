@@ -215,6 +215,11 @@ public abstract class JSONPath {
 
     public void arrayAdd(Object root, Object... values) {
         Object result = eval(root);
+        if (result == null) {
+            set(root, JSONArray.of(values));
+            return;
+        }
+
         if (result instanceof Collection) {
             Collection collection = (Collection) result;
             for (Object value : values) {
