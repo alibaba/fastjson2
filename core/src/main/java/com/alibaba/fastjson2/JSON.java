@@ -1076,7 +1076,7 @@ public interface JSON {
             byte[] utf8Bytes,
             Class<T> clazz,
             JSONReader.Context context) {
-        if (utf8Bytes == null) {
+        if (utf8Bytes == null || utf8Bytes.length == 0) {
             return null;
         }
 
