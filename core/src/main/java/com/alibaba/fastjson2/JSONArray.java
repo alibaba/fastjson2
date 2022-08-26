@@ -1397,4 +1397,15 @@ public class JSONArray
     public static JSONArray parseArray(String text, JSONReader.Feature... features) {
         return JSON.parseArray(text, features);
     }
+
+    /**
+     * Parse JSON {@link String} into {@link JSONArray}
+     *
+     * @param text the JSON {@link String} to be parsed
+     * @param features features to be enabled in parsing
+     * @since 2.0.13
+     */
+    public static JSONArray parse(String text, JSONReader.Feature... features) {
+        return JSON.parseArray(text, features);
+    }
 }
