@@ -1058,22 +1058,26 @@ public class ObjectReaderCreator {
 
         Map<String, FieldReader> fieldReaders = new LinkedHashMap<>();
 
+        final long beanFeatures = beanInfo.readerFeatures;
         final FieldInfo fieldInfo = new FieldInfo();
         final String[] orders = beanInfo.orders;
         if (fieldBased) {
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
                 fieldInfo.features |= JSONReader.Feature.FieldBased.mask;
+                fieldInfo.features |= beanFeatures;
                 createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, modules);
             });
         } else {
             BeanUtils.fields(objectClass, field -> {
                 fieldInfo.init();
+                fieldInfo.features |= beanFeatures;
                 createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, modules);
             });
 
             BeanUtils.setters(objectClass, method -> {
                 fieldInfo.init();
+                fieldInfo.features |= beanFeatures;
                 createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, modules);
             });
         }

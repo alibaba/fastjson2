@@ -473,6 +473,10 @@ public abstract class JSONReader
                 return null;
             }
 
+            if ((context.features & Feature.Base64StringAsByteArray.mask) != 0) {
+                return Base64.getDecoder().decode(str);
+            }
+
             throw new JSONException(info("not support input " + str));
         }
 
@@ -3173,7 +3177,11 @@ public abstract class JSONReader
         ErrorOnNotSupportAutoType(1 << 14),
         DuplicateKeyValueAsArray(1 << 15),
         AllowUnQuotedFieldNames(1 << 16),
-        NonStringKeyAsString(1 << 17);
+        NonStringKeyAsString(1 << 17),
+        /**
+         * @since 2.0.13
+         */
+        Base64StringAsByteArray(1 << 18);
 
         public final long mask;
 

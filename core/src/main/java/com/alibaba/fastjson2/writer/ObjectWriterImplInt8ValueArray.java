@@ -57,7 +57,9 @@ final class ObjectWriterImplInt8ValueArray
             }
         }
 
-        if ("base64".equals(format) || "gzip,base64".equals(format)) {
+        if ("base64".equals(format)
+                || "gzip,base64".equals(format)
+                || (jsonWriter.getFeatures(features) & JSONWriter.Feature.WriteByteArrayAsBase64.mask) != 0) {
             jsonWriter.writeBase64(array);
             return;
         }

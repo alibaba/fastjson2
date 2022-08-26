@@ -2841,11 +2841,11 @@ public class ObjectWriterCreatorASM
                 } catch (NoSuchMethodException ignored) {
                 }
             }
-
-            boolean base64 = fieldClass == byte[].class && "base64".equals(format);
-            if (!base64) {
-                return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, fieldType, fieldClass, field);
-            }
+//
+//            boolean base64 = fieldClass == byte[].class && "base64".equals(format);
+//            if (!base64) {
+//                return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, fieldType, fieldClass, field);
+//            }
         }
 
         return new FieldWriterObjectFieldUF(fieldName, ordinal, features, format, label, field.getGenericType(), fieldClass, field);
