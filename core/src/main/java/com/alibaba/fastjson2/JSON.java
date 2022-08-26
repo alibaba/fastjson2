@@ -48,7 +48,11 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(text)) {
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            return objectReader.readObject(reader, null, null, 0);
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
         }
     }
 
@@ -125,7 +129,34 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(bytes)) {
             reader.context.config(features);
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            return objectReader.readObject(reader, null, null, 0);
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON char array into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param chars the char array to be parsed
+     * @param features features to be enabled in parsing
+     * @return Object
+     */
+    static Object parse(char[] chars, JSONReader.Feature... features) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars)) {
+            reader.context.config(features);
+            ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
         }
     }
 
@@ -148,6 +179,9 @@ public interface JSON {
             reader.read(object, 0L);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -202,6 +236,9 @@ public interface JSON {
             reader.read(object, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -307,6 +344,37 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON char array into {@link JSONObject}
+     *
+     * @param chars JSON char array to parse
+     * @return JSONObject
+     */
+    static JSONObject parseObject(char[] chars) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+
+            JSONObject object = new JSONObject();
+            reader.read(object, 0L);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -403,6 +471,40 @@ public interface JSON {
             reader.read(object, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON char array into {@link JSONObject}
+     *
+     * @param chars JSON char array to parse
+     * @param offset the index of the first byte to parse
+     * @param length the number of chars to parse
+     * @param features features to be enabled in parsing
+     * @return JSONObject
+     */
+    static JSONObject parseObject(char[] chars, int offset, int length, JSONReader.Feature... features) {
+        if (chars == null || chars.length == 0 || length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars, offset, length)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+            reader.context.config(features);
+            JSONObject object = new JSONObject();
+            reader.read(object, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -678,6 +780,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -843,6 +948,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -869,6 +977,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -1528,6 +1639,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);
             }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return array;
         }
     }
@@ -1550,6 +1664,9 @@ public interface JSON {
             reader.read(array);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
             }
             return array;
         }
@@ -1600,6 +1717,9 @@ public interface JSON {
             reader.read(array);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
             }
             return array;
         }
