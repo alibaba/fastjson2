@@ -155,11 +155,12 @@ public class ObjectWriterCreator {
             long features,
             final List<ObjectWriterModule> modules
     ) {
-        ObjectWriterProvider provider = null;
+        final ObjectWriterProvider provider;
+        ObjectWriterProvider p = null;
         BeanInfo beanInfo = new BeanInfo();
         for (ObjectWriterModule module : modules) {
-            if (provider == null) {
-                provider = module.getProvider();
+            if (p == null) {
+                p = module.getProvider();
             }
 
             ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
@@ -168,6 +169,7 @@ public class ObjectWriterCreator {
             }
             annotationProcessor.getBeanInfo(beanInfo, objectClass);
         }
+        provider = p;
 
         if (beanInfo.serializer != null && ObjectWriter.class.isAssignableFrom(beanInfo.serializer)) {
             try {
@@ -296,7 +298,7 @@ public class ObjectWriterCreator {
 
                     FieldWriter fieldWriter
                             = createFieldWriter(
-                            null,
+                            provider,
                             objectClass,
                             fieldName,
                             fieldInfo.ordinal,
