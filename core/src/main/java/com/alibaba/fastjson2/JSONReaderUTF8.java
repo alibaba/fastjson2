@@ -1313,7 +1313,7 @@ class JSONReaderUTF8
         this.nameAscii = true;
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
-        for (int i = 0; ; ++i) {
+        for (int i = 0; offset < end; ++i) {
             int c = bytes[offset];
             if (c == '\\') {
                 nameEscape = true;
@@ -1387,6 +1387,10 @@ class JSONReaderUTF8
                         throw new JSONException("malformed input around byte " + offset);
                 }
             }
+        }
+
+        if (nameEnd < nameBegin) {
+            throw new JSONException("syntax error : " + offset);
         }
 
         int length = nameEnd - nameBegin;
@@ -1931,11 +1935,11 @@ class JSONReaderUTF8
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = (char) bytes[this.offset++];
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = (char) bytes[this.offset++];
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -2203,11 +2207,11 @@ class JSONReaderUTF8
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = (char) bytes[this.offset++];
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = (char) bytes[this.offset++];
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -2441,11 +2445,11 @@ class JSONReaderUTF8
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = (char) bytes[this.offset++];
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = (char) bytes[this.offset++];
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -2679,11 +2683,11 @@ class JSONReaderUTF8
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = (char) bytes[this.offset++];
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = (char) bytes[this.offset++];
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -3988,11 +3992,10 @@ class JSONReaderUTF8
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = (char) bytes[this.offset++];
-            // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = (char) bytes[this.offset++];
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -4384,7 +4387,11 @@ class JSONReaderUTF8
         }
         if (ch == ',') {
             this.comma = true;
-            ch = (char) bytes[offset++];
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 if (offset >= end) {

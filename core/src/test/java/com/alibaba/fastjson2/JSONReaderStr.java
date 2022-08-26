@@ -9,7 +9,7 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
-final class JSONReaderStr
+public final class JSONReaderStr
         extends JSONReader {
     protected final String str;
     protected final int length;
@@ -22,11 +22,15 @@ final class JSONReaderStr
 
     protected int referenceBegin;
 
-    JSONReaderStr(Context ctx, String str) {
+    public JSONReaderStr(String str) {
+        this(JSONFactory.createReadContext(), str, 0, str.length());
+    }
+
+    public JSONReaderStr(Context ctx, String str) {
         this(ctx, str, 0, str.length());
     }
 
-    JSONReaderStr(Context ctx, String str, int offset, int length) {
+    public JSONReaderStr(Context ctx, String str, int offset, int length) {
         super(ctx);
 
         this.str = str;
@@ -1586,6 +1590,10 @@ final class JSONReaderStr
                 }
             }
 
+            if (nameEnd < nameBegin) {
+                throw new JSONException("syntax error : " + offset);
+            }
+
             return this.str.substring(nameBegin, nameEnd);
         }
 
@@ -1896,11 +1904,11 @@ final class JSONReaderStr
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = str.charAt(this.offset++);
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -2158,11 +2166,11 @@ final class JSONReaderStr
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = str.charAt(this.offset++);
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -2396,11 +2404,11 @@ final class JSONReaderStr
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = str.charAt(offset++);
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = str.charAt(offset++);
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -2634,11 +2642,11 @@ final class JSONReaderStr
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = str.charAt(offset++);
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = str.charAt(offset++);
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -3432,11 +3440,11 @@ final class JSONReaderStr
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = str.charAt(this.offset++);
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -3629,9 +3637,14 @@ final class JSONReaderStr
                 ch = str.charAt(offset++);
             }
         }
+
         if (ch == ',') {
             this.comma = true;
-            ch = str.charAt(offset++);
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = str.charAt(offset++);
+            }
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 if (offset >= end) {

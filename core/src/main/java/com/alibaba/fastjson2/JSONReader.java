@@ -1552,6 +1552,10 @@ public abstract class JSONReader
 
             String name = readFieldName();
             if (name == null) {
+                if (ch == EOI) {
+                    throw new JSONException("input end");
+                }
+
                 name = readFieldNameUnquote();
                 nextIfMatch(':');
             }
@@ -1733,7 +1737,7 @@ public abstract class JSONReader
             Object item = read(itemType);
             list.add(item);
 
-            if (ch == '}') {
+            if (ch == '}' || ch == EOI) {
                 throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
             }
         }
@@ -1755,7 +1759,7 @@ public abstract class JSONReader
                 Object item = read(itemType);
                 list.add(item);
 
-                if (ch == '}') {
+                if (ch == '}' || ch == EOI) {
                     throw new JSONException(info());
                 }
             }

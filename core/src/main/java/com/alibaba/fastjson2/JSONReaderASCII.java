@@ -792,7 +792,7 @@ final class JSONReaderASCII
 
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
-        for (int i = 0; ; ++i) {
+        for (int i = 0; offset < end; ++i) {
             int c = bytes[offset];
             if (c == '\\') {
                 nameEscape = true;
@@ -829,6 +829,11 @@ final class JSONReaderASCII
                 }
 
                 offset++;
+                if (offset >= end) {
+                    this.ch = EOI;
+                    throw new JSONException("syntax error : " + offset);
+                }
+
                 c = bytes[offset];
 
                 while (c <= ' ' && ((1L << c) & SPACE) != 0) {
@@ -842,6 +847,10 @@ final class JSONReaderASCII
             }
 
             offset++;
+        }
+
+        if (nameEnd < nameBegin) {
+            throw new JSONException("syntax error : " + offset);
         }
 
         if (!nameEscape) {
