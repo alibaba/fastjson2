@@ -4,8 +4,12 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterCreator;
+import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.junit.jupiter.api.Test;
 
@@ -28,8 +32,8 @@ public class Issue703 {
         assertEquals("{\"int32\":10,\"int64\":100}", json);
 
         Bean tt = read(json, Bean.class);
-        System.out.println(tt.int32);
-        System.out.println(tt.int64);
+        assertEquals(t.int32, tt.int32);
+        assertEquals(t.int64, tt.int64);
     }
 
     public <T> T read(String json, Type type) {
@@ -44,6 +48,90 @@ public class Issue703 {
 
     public String write(Object value) {
         ObjectWriterProvider writers = new ObjectWriterProvider();
+        writers.mixIn(Misc.PersistentEnum.class, PersistentEnumMixin.class);
+        JSONWriter.Context context = new JSONWriter.Context(writers);
+        try (final JSONWriter writer = JSONWriter.of(context)) {
+            if (value == null) {
+                writer.writeNull();
+            } else {
+                context.config(WriteNonStringKeyAsString);
+                context.config(WriteNulls);
+                final Class<?> clazz = value.getClass();
+                ObjectWriter<?> v = writer.getObjectWriter(clazz, clazz);
+                v.write(writer, value, null, null, 0);
+            }
+            return writer.toString();
+        }
+    }
+
+    @Test
+    public void test1() {
+        Bean t = new Bean();
+        t.setInt32(Misc.IntEnum.CLOSE);
+        t.setInt64(Misc.LongEnum.HIGH);
+
+        String json = write1(t);
+        assertEquals("{\"int32\":10,\"int64\":100}", json);
+
+        Bean tt = read1(json, Bean.class);
+        assertEquals(t.int32, tt.int32);
+        assertEquals(t.int64, tt.int64);
+    }
+
+    public <T> T read1(String json, Type type) {
+        ObjectReaderProvider readers = new ObjectReaderProvider(ObjectReaderCreatorLambda.INSTANCE);
+        readers.mixIn(Misc.PersistentEnum.class, PersistentEnumMixin.class);
+        JSONReader.Context context = new JSONReader.Context(readers);
+        try (final JSONReader reader = JSONReader.of(context, json)) {
+            ObjectReader<T> v = reader.getObjectReader(type);
+            return v.readObject(reader, 0);
+        }
+    }
+
+    public String write1(Object value) {
+        ObjectWriterProvider writers = new ObjectWriterProvider(ObjectWriterCreatorLambda.INSTANCE);
+        writers.mixIn(Misc.PersistentEnum.class, PersistentEnumMixin.class);
+        JSONWriter.Context context = new JSONWriter.Context(writers);
+        try (final JSONWriter writer = JSONWriter.of(context)) {
+            if (value == null) {
+                writer.writeNull();
+            } else {
+                context.config(WriteNonStringKeyAsString);
+                context.config(WriteNulls);
+                final Class<?> clazz = value.getClass();
+                ObjectWriter<?> v = writer.getObjectWriter(clazz, clazz);
+                v.write(writer, value, null, null, 0);
+            }
+            return writer.toString();
+        }
+    }
+
+    @Test
+    public void test2() {
+        Bean t = new Bean();
+        t.setInt32(Misc.IntEnum.CLOSE);
+        t.setInt64(Misc.LongEnum.HIGH);
+
+        String json = write2(t);
+        assertEquals("{\"int32\":10,\"int64\":100}", json);
+
+        Bean tt = read2(json, Bean.class);
+        assertEquals(t.int32, tt.int32);
+        assertEquals(t.int64, tt.int64);
+    }
+
+    public <T> T read2(String json, Type type) {
+        ObjectReaderProvider readers = new ObjectReaderProvider(ObjectReaderCreator.INSTANCE);
+        readers.mixIn(Misc.PersistentEnum.class, PersistentEnumMixin.class);
+        JSONReader.Context context = new JSONReader.Context(readers);
+        try (final JSONReader reader = JSONReader.of(context, json)) {
+            ObjectReader<T> v = reader.getObjectReader(type);
+            return v.readObject(reader, 0);
+        }
+    }
+
+    public String write2(Object value) {
+        ObjectWriterProvider writers = new ObjectWriterProvider(ObjectWriterCreator.INSTANCE);
         writers.mixIn(Misc.PersistentEnum.class, PersistentEnumMixin.class);
         JSONWriter.Context context = new JSONWriter.Context(writers);
         try (final JSONWriter writer = JSONWriter.of(context)) {
