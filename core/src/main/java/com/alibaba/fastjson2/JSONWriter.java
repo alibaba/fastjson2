@@ -534,6 +534,12 @@ public abstract class JSONWriter
             writeArrayNull();
             return;
         }
+
+        if ((context.features & Feature.WriteByteArrayAsBase64.mask) != 0) {
+            writeBase64(bytes);
+            return;
+        }
+
         startArray();
         for (int i = 0; i < bytes.length; i++) {
             if (i != 0) {
@@ -1543,7 +1549,11 @@ public abstract class JSONWriter
          * if format uses escaping mechanisms (which is generally true for textual formats but not for binary formats).
          * Feature is disabled by default.
          */
-        EscapeNoneAscii(1 << 30);
+        EscapeNoneAscii(1 << 30),
+        /**
+         * @since 2.0.13
+         */
+        WriteByteArrayAsBase64(1L << 31);
 
         public final long mask;
 
