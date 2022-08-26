@@ -690,7 +690,7 @@ public abstract class BeanUtils {
                 if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 4) {
                     nameMatch = false;
                 }
-            } else if (returnClass == boolean.class) {
+            } else if (returnClass == boolean.class || returnClass == Boolean.class) {
                 nameMatch = methodNameLength > 2 && methodName.startsWith("is");
                 if (nameMatch) {
                     char firstChar = methodName.charAt(2);
