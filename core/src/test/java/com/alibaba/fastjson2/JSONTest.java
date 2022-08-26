@@ -831,18 +831,34 @@ public class JSONTest {
         assertNull(JSON.parseObject((char[]) null, 0, 0, User.class));
         assertNull(JSON.parseObject((char[]) null, 0, 0));
         assertNull(JSON.parseObject((char[]) null));
+        assertNull(JSON.parseObject("null".toCharArray()));
         assertNull(JSON.parseArray((char[]) null));
         assertNull(JSON.parseArray((char[]) null, User.class));
+        assertNull(JSON.parseObject("null".toCharArray(), 0, "null".length()));
 
         assertNull(JSON.parseObject((byte[]) null, 0, 0, User.class));
         assertNull(JSON.parseObject((byte[]) null, 0, 0));
         assertNull(JSON.parseObject((byte[]) null));
         assertNull(JSON.parseArray((byte[]) null));
         assertNull(JSON.parseArray((byte[]) null, User.class));
+        assertNull(JSON.parseArray((URL) null));
+        assertNull(JSON.parseObject((byte[]) null, User.class, JSONFactory.createReadContext()));
+        assertNull(JSON.parseObject(new byte[0], User.class, JSONFactory.createReadContext()));
+        assertNull(JSON.parseObject(new byte[0], 0, 0, StandardCharsets.UTF_8, User.class, JSONReader.Feature.IgnoreNoneSerializable));
+        assertNull(JSON.parseObject((byte[]) null, 0, 0, StandardCharsets.UTF_8, User.class, JSONReader.Feature.IgnoreNoneSerializable));
+
+        assertNull(JSON.parseObject(new ByteArrayInputStream("null".getBytes()), StandardCharsets.UTF_8));
+        assertNull(JSON.parseObject("null".getBytes(), JSONReader.Feature.IgnoreNoneSerializable));
+        assertNull(JSON.parseArray(new ByteArrayInputStream("null".getBytes()), JSONReader.Feature.IgnoreNoneSerializable));
+        assertNull(JSON.parseArray("", (Type) User.class, JSONReader.Feature.IgnoreNoneSerializable));
+        assertNull(JSON.parseArray((String) null, (Type) User.class, JSONReader.Feature.IgnoreNoneSerializable));
+        assertNull(JSON.parseArray((byte[]) null, 0, 0, StandardCharsets.UTF_8, User.class, JSONReader.Feature.IgnoreNoneSerializable));
 
         assertNull(JSON.parseObject(null, 0, 0, StandardCharsets.UTF_8));
+        assertNull(JSON.parseArray(null, 0, 0, StandardCharsets.UTF_8));
         assertNull(JSON.parseObject(null, 0, 0, StandardCharsets.UTF_8, User.class));
         assertNull(JSON.parseObject(new byte[0], 0, 0, StandardCharsets.UTF_8));
+        assertNull(JSON.parseArray(new byte[0], 0, 0, StandardCharsets.UTF_8));
         assertNull(JSON.parseObject(new byte[0], 0, 0, StandardCharsets.UTF_8, User.class));
 
         assertNull(JSON.parseObject((String) null, User.class));
@@ -1016,5 +1032,26 @@ public class JSONTest {
         assertThrows(JSONException.class, () -> JSON.config(JSONReader.Feature.SupportAutoType, true));
         JSON.config(JSONReader.Feature.SupportAutoType, false);
         assertFalse(JSON.isEnabled(JSONReader.Feature.SupportAutoType));
+    }
+
+    @Test
+    public void testFilter() {
+        HashMap map = JSON.parseObject("{}", HashMap.class, null, new Filter[0]);
+        assertNotNull(map);
+        assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void testFilter1() {
+        HashMap map = JSON.parseObject("{}", (Type) HashMap.class, (Filter) null);
+        assertNotNull(map);
+        assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void testFilter2() {
+        HashMap map = JSON.parseObject("{}".getBytes(StandardCharsets.UTF_8), (Type) HashMap.class, (Filter) null);
+        assertNotNull(map);
+        assertTrue(map.isEmpty());
     }
 }
