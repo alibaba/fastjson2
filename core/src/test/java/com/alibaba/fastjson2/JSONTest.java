@@ -832,8 +832,12 @@ public class JSONTest {
         assertNull(JSON.parseObject((char[]) null, 0, 0));
         assertNull(JSON.parseObject((char[]) null));
         assertNull(JSON.parseObject("null".toCharArray()));
+        assertNull(JSON.parseObject("null".toCharArray(), User.class));
+        assertNull(JSON.parseObject((char[]) null, User.class));
+        assertNull(JSON.parseObject(new char[0], User.class));
         assertNull(JSON.parseArray((char[]) null));
         assertNull(JSON.parseArray((char[]) null, User.class));
+        assertNull(JSON.parseArray(new char[0], User.class));
         assertNull(JSON.parseObject("null".toCharArray(), 0, "null".length()));
 
         assertNull(JSON.parseObject((byte[]) null, 0, 0, User.class));

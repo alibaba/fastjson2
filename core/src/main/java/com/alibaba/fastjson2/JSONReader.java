@@ -3347,4 +3347,8 @@ public abstract class JSONReader
         }
         return message + ", offset " + offset;
     }
+
+    static boolean isFirstIdentifier(char ch) {
+        return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_' || ch == '$' || (ch >= '0' && ch <= '9') || ch > 0x7F;
+    }
 }
