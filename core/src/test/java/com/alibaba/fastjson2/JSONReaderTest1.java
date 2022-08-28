@@ -1719,4 +1719,90 @@ public class JSONReaderTest1 {
             }
         }
     }
+
+    @Test
+    public void asciitest() {
+        char[] chars = new char[1024];
+        chars[0] = '"';
+        for (int i = 1; i < chars.length - 1; ++i) {
+            chars[i] = 'A';
+            chars[i + 1] = '"';
+            byte[] ascii = new byte[i + 2];
+            for (int j = 0; j < ascii.length; j++) {
+                ascii[j] = (byte) chars[j];
+            }
+            String str0 = new String(ascii, 1, ascii.length - 2, StandardCharsets.US_ASCII);
+            JSONReader jsonReader = JSONReader.of(ascii, 0, ascii.length, StandardCharsets.US_ASCII);
+            String str1 = jsonReader.readString();
+            assertEquals(str0, str1);
+            assertTrue(jsonReader.isEnd());
+        }
+    }
+
+    @Test
+    public void asciitest1() {
+        char[] chars = new char[2048];
+        chars[0] = '"';
+        for (int i = 1; i < chars.length - 2; i += 2) {
+            chars[i] = '\\';
+            chars[i + 1] = '\\';
+            chars[i + 2] = '"';
+            byte[] ascii = new byte[i + 3];
+            for (int j = 0; j < ascii.length; j++) {
+                ascii[j] = (byte) chars[j];
+            }
+
+            byte[] unescape = new byte[i / 2 + 1];
+            Arrays.fill(unescape, (byte) '\\');
+
+            String str0 = new String(unescape);
+            JSONReader jsonReader = JSONReader.of(ascii, 0, ascii.length, StandardCharsets.US_ASCII);
+            String str1 = jsonReader.readString();
+            assertEquals(str0, str1);
+            assertTrue(jsonReader.isEnd());
+        }
+    }
+
+    @Test
+    public void utf16test() {
+        char[] chars = new char[1024];
+        chars[0] = '"';
+        for (int i = 1; i < chars.length - 1; ++i) {
+            chars[i] = 'A';
+            chars[i + 1] = '"';
+            char[] utf16 = new char[i + 2];
+            for (int j = 0; j < utf16.length; j++) {
+                utf16[j] = chars[j];
+            }
+            String str0 = new String(utf16, 1, utf16.length - 2);
+            JSONReader jsonReader = JSONReader.of(utf16, 0, utf16.length);
+            String str1 = jsonReader.readString();
+            assertEquals(str0, str1);
+            assertTrue(jsonReader.isEnd());
+        }
+    }
+
+    @Test
+    public void utf16test1() {
+        char[] chars = new char[2048];
+        chars[0] = '"';
+        for (int i = 1; i < chars.length - 2; i += 2) {
+            chars[i] = '\\';
+            chars[i + 1] = '\\';
+            chars[i + 2] = '"';
+            char[] utf16 = new char[i + 3];
+            for (int j = 0; j < utf16.length; j++) {
+                utf16[j] = chars[j];
+            }
+
+            char[] unescape = new char[i / 2 + 1];
+            Arrays.fill(unescape, '\\');
+
+            String str0 = new String(unescape);
+            JSONReader jsonReader = JSONReader.of(utf16, 0, utf16.length);
+            String str1 = jsonReader.readString();
+            assertEquals(str0, str1);
+            assertTrue(jsonReader.isEnd());
+        }
+    }
 }

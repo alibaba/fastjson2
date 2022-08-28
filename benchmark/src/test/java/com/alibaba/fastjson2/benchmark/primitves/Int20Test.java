@@ -2,45 +2,34 @@ package com.alibaba.fastjson2.benchmark.primitves;
 
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
-public class String20Test {
-    static final String20 benchmark = new String20();
+public class Int20Test {
+    static final IntValue20 benchmark = new IntValue20();
 
     public static void fastjson2_test() {
         for (int i = 0; i < 10; i++) {
-            fastjson2();
+            fastjson2_perf();
         }
     }
 
-    public static void fastjson2() {
+    public static void fastjson2_perf() {
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.fastjson2(BH);
         }
         long millis = System.currentTimeMillis() - start;
-        System.out.println("String20-fastjson2 : " + millis);
-        // zulu8.62.0.19 : 598 566 548
-        // zulu11.52.13 : 475 440 431
-        // zulu17.32.13 :
-        // corretto-8 : 532
-    }
+        System.out.println("Int20Field-fastjson2 : " + millis);
 
-    public static void fastjson2_jsonb_test() {
-        for (int i = 0; i < 10; i++) {
-            fastjson2_jsonb();
-        }
-    }
-
-    public static void fastjson2_jsonb() {
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
-            benchmark.fastjson2_jsonb(BH);
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("String20-fastjson2_jsonb : " + millis);
-        // zulu8.62.0.19 : 312
-        // zulu11.52.13 : 258
-        // zulu17.32.13 : 357 260
+        // zulu8.62.0.19 : 445
+        // zulu11.52.13 : 427
+        // zulu17.32.13 : 433
+        // zulu18.28.13 :
+        // zulu19.0.47 :
         // corretto-8 :
+        // corretto-11 :
+        // corretto-17 :
+        // corretto-18 :
+        // oracle-jdk-17.0.4 :
+        // oracle-jdk-18.0.2 :
     }
 
     public static void jackson_test() throws Exception {
@@ -55,11 +44,18 @@ public class String20Test {
             benchmark.jackson(BH);
         }
         long millis = System.currentTimeMillis() - start;
-        System.out.println("String20-jackson : " + millis);
-        // zulu8.62.0.19 : 1088
-        // zulu11.52.13 :
-        // zulu17.32.13 :
-        // corretto-8 : 965
+        System.out.println("Int20Field-jackson : " + millis);
+        // zulu8.62.0.19 : 886
+        // zulu11.52.13 : 964
+        // zulu17.32.13 : 975
+        // zulu18.28.13 :
+        // zulu19.0.47 :
+        // corretto-8 :
+        // corretto-11 :
+        // corretto-17 :
+        // corretto-18 :
+        // oracle-jdk-17.0.4 :
+        // oracle-jdk-18.0.2 :
     }
 
     public static void wastjson_test() throws Exception {
@@ -74,16 +70,22 @@ public class String20Test {
             benchmark.wastjson(BH);
         }
         long millis = System.currentTimeMillis() - start;
-        System.out.println("String20-wastjson : " + millis);
-        // zulu8.62.0.19 : 524
-        // zulu11.52.13 : 343
-        // zulu17.32.13 :
+        System.out.println("Int20Field-wastjson : " + millis);
+        // zulu8.62.0.19 : 505
+        // zulu11.52.13 : 412
+        // zulu17.32.13 : 434
+        // zulu18.28.13 :
+        // zulu19.0.47 :
         // corretto-8 :
+        // corretto-11 :
+        // corretto-17 :
+        // corretto-18 :
+        // oracle-jdk-17.0.4 :
+        // oracle-jdk-18.0.2 :
     }
 
     public static void main(String[] args) throws Exception {
         fastjson2_test();
-//        fastjson2_jsonb_test();
 //        jackson_test();
 //        wastjson_test();
     }

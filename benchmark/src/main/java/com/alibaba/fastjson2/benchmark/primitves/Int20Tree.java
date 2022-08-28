@@ -36,6 +36,13 @@ public class Int20Tree {
     }
 
     @Benchmark
+    public void wastjson(Blackhole bh) {
+        bh.consume(
+                io.github.wycst.wast.json.JSON.parseObject(str, Map.class)
+        );
+    }
+
+    @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(
                 JSON.parseObject(str, Map.class)

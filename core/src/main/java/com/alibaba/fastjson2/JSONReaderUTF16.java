@@ -3384,77 +3384,73 @@ final class JSONReaderUTF16
             _for:
             {
                 int i = 0;
+                char c0 = 0, c1 = 0, c2 = 0, c3 = 0;
 
                 // vector optimize
                 boolean quoted = false;
-                while (offset + 8 <= end) {
-                    char c0 = chars[offset];
-                    char c1 = chars[offset + 1];
-                    char c2 = chars[offset + 2];
-                    char c3 = chars[offset + 3];
-                    char c4 = chars[offset + 4];
-                    char c5 = chars[offset + 5];
-                    char c6 = chars[offset + 6];
-                    char c7 = chars[offset + 7];
-                    if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\') {
+                int upperBound = offset + ((end - offset) & ~3);
+                while (offset < upperBound) {
+                    c0 = chars[offset];
+                    c1 = chars[offset + 1];
+                    c2 = chars[offset + 2];
+                    c3 = chars[offset + 3];
+                    if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\') {
                         break;
                     }
-                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote) {
+                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
                         quoted = true;
                         break;
                     }
-                    offset += 8;
-                    i += 8;
+                    offset += 4;
+                    i += 4;
                 }
 
-                // vector optimize
-                if (!quoted) {
-                    while (offset + 4 <= end) {
-                        char c0 = chars[offset];
-                        char c1 = chars[offset + 1];
-                        char c2 = chars[offset + 2];
-                        char c3 = chars[offset + 3];
-                        if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\') {
-                            break;
-                        }
-                        if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
-                            break;
-                        }
-                        offset += 4;
-                        i += 4;
+                if (quoted) {
+                    if (c0 == quote) {
+                        // skip
+                    } else if (c1 == quote) {
+                        offset++;
+                        i++;
+                    } else if (c2 == quote) {
+                        offset += 2;
+                        i += 2;
+                    } else if (c3 == quote) {
+                        offset += 3;
+                        i += 3;
                     }
-                }
+                    valueLength = i;
+                } else {
+                    for (; ; ++i) {
+                        if (offset >= end) {
+                            throw new JSONException(info("invalid escape character EOI"));
+                        }
+                        char c = chars[offset];
+                        if (c == '\\') {
+                            valueEscape = true;
+                            c = chars[++offset];
+                            switch (c) {
+                                case 'u': {
+                                    offset += 4;
+                                    break;
+                                }
+                                case 'x': {
+                                    offset += 2;
+                                    break;
+                                }
+                                default:
+                                    // skip
+                                    break;
+                            }
+                            offset++;
+                            continue;
+                        }
 
-                for (; ; ++i) {
-                    if (offset >= end) {
-                        throw new JSONException(info("invalid escape character EOI"));
-                    }
-                    char c = chars[offset];
-                    if (c == '\\') {
-                        valueEscape = true;
-                        c = chars[++offset];
-                        switch (c) {
-                            case 'u': {
-                                offset += 4;
-                                break;
-                            }
-                            case 'x': {
-                                offset += 2;
-                                break;
-                            }
-                            default:
-                                // skip
-                                break;
+                        if (c == quote) {
+                            valueLength = i;
+                            break _for;
                         }
                         offset++;
-                        continue;
                     }
-
-                    if (c == quote) {
-                        valueLength = i;
-                        break _for;
-                    }
-                    offset++;
                 }
             }
 
