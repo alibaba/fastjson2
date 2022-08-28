@@ -559,7 +559,7 @@ public class ObjectWriterBaseModule
             processAnnotations(fieldInfo, annotations);
 
             if (!objectClass.getName().startsWith("java.lang") && !BeanUtils.isRecord(objectClass)) {
-                String fieldName = BeanUtils.getterName(methodName, null);
+                String fieldName = BeanUtils.getterName(method, null);
 
                 char firstChar = fieldName.charAt(0);
                 final String fieldName0;
@@ -582,7 +582,7 @@ public class ObjectWriterBaseModule
             }
 
             if (beanInfo.kotlin && beanInfo.createParameterNames != null) {
-                String fieldName = BeanUtils.getterName(methodName, null);
+                String fieldName = BeanUtils.getterName(method, null);
                 for (int i = 0; i < beanInfo.createParameterNames.length; i++) {
                     if (fieldName.equals(beanInfo.createParameterNames[i])) {
                         Annotation[] parameterAnnotations = beanInfo.creatorConstructor.getParameterAnnotations()[i];

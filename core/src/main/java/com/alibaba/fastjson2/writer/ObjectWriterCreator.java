@@ -250,7 +250,7 @@ public class ObjectWriterCreator {
 
                     String fieldName;
                     if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
-                        fieldName = BeanUtils.getterName(method.getName(), beanInfo.namingStrategy);
+                        fieldName = BeanUtils.getterName(method, beanInfo.namingStrategy);
                     } else {
                         fieldName = fieldInfo.fieldName;
                     }
@@ -585,7 +585,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldName == null) {
-            fieldName = BeanUtils.getterName(method.getName(), null);
+            fieldName = BeanUtils.getterName(method, null);
         }
 
         if (fieldClass == boolean.class || fieldClass == Boolean.class) {

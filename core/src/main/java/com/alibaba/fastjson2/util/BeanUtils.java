@@ -811,6 +811,25 @@ public abstract class BeanUtils {
         return new String(chars);
     }
 
+    public static String getterName(Method method, String namingStrategy) {
+        String fieldName = getterName(method.getName(), namingStrategy);
+
+        if (fieldName.length() > 2
+                && fieldName.charAt(0) >= 'A' && fieldName.charAt(0) <= 'Z'
+                && fieldName.charAt(1) >= 'A' && fieldName.charAt(1) <= 'Z'
+        ) {
+            char[] chars = fieldName.toCharArray();
+            chars[0] = (char) (chars[0] + 32);
+            String fieldName1 = new String(chars);
+            Field field = BeanUtils.getDeclaredField(method.getDeclaringClass(), fieldName1);
+            if (field != null && Modifier.isPublic(field.getModifiers())) {
+                fieldName = field.getName();
+            }
+        }
+
+        return fieldName;
+    }
+
     public static String getterName(String methodName, String namingStrategy) {
         if (namingStrategy == null) {
             namingStrategy = "CamelCase";

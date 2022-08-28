@@ -228,7 +228,20 @@ public class ObjectWriterCreatorASM
                         if (record) {
                             fieldName = method.getName();
                         } else {
-                            fieldName = BeanUtils.getterName(method.getName(), beanInfo.namingStrategy);
+                            fieldName = BeanUtils.getterName(method, beanInfo.namingStrategy);
+
+                            if (fieldName.length() > 2
+                                    && fieldName.charAt(0) >= 'A' && fieldName.charAt(0) <= 'Z'
+                                    && fieldName.charAt(1) >= 'A' && fieldName.charAt(1) <= 'Z'
+                            ) {
+                                char[] chars = fieldName.toCharArray();
+                                chars[0] = (char) (chars[0] + 32);
+                                String fieldName1 = new String(chars);
+                                Field field = BeanUtils.getDeclaredField(objectClass, fieldName1);
+                                if (field != null && Modifier.isPublic(field.getModifiers())) {
+                                    fieldName = field.getName();
+                                }
+                            }
                         }
                     } else {
                         fieldName = fieldInfo.fieldName;
