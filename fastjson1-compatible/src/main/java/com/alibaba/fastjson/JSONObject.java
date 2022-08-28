@@ -1008,10 +1008,6 @@ public class JSONObject
         return TypeUtils.castToJavaBean(this, clazz, config);
     }
 
-    public String toJSONString() {
-        return com.alibaba.fastjson2.JSON.toJSONString(this, JSONWriter.Feature.ReferenceDetection);
-    }
-
     @Override
     public String toString() {
         return com.alibaba.fastjson2.JSON.toJSONString(this, JSONWriter.Feature.ReferenceDetection);
