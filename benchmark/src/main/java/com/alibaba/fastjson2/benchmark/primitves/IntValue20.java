@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.benchmark.primitves;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.benchmark.primitves.vo.Int20Field;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -15,15 +16,15 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-public class String20 {
-    static final Class OBJECT_CLASS = com.alibaba.fastjson2.benchmark.primitves.vo.String20.class;
+public class IntValue20 {
+    static final Class OBJECT_CLASS = Int20Field.class;
     static String str;
     static byte[] jsonbBytes;
     static ObjectMapper mapper = new ObjectMapper();
 
-    public String20() {
+    public IntValue20() {
         try {
-            InputStream is = String20.class.getClassLoader().getResourceAsStream("data/String20_compact.json");
+            InputStream is = IntValue20.class.getClassLoader().getResourceAsStream("data/Int20.json");
             str = IOUtils.toString(is, "UTF-8");
             jsonbBytes = JSONB.toBytes(
                     JSON.parseObject(str, OBJECT_CLASS)
@@ -70,7 +71,7 @@ public class String20 {
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(String20.class.getName())
+                .include(OBJECT_CLASS.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)

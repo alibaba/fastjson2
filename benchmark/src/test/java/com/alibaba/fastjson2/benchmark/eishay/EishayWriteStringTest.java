@@ -5,13 +5,13 @@ import static com.alibaba.fastjson2.benchmark.JMH.BH;
 public class EishayWriteStringTest {
     static final EishayWriteString benchmark = new EishayWriteString();
 
-    public static void fastjson2_perf_test() {
+    public static void fastjson2_test() {
         for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
+            fastjson2();
         }
     }
 
-    public static void fastjson2_perf() {
+    public static void fastjson2() {
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.fastjson2(BH);
@@ -23,13 +23,13 @@ public class EishayWriteStringTest {
         // zulu17.32.13 :
     }
 
-    public static void jackson_perf_test() throws Exception {
+    public static void jackson_test() throws Exception {
         for (int i = 0; i < 10; i++) {
-            jackson_perf();
+            jackson();
         }
     }
 
-    public static void jackson_perf() throws Exception {
+    public static void jackson() throws Exception {
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 1000; ++i) {
             benchmark.jackson(BH);
@@ -41,7 +41,7 @@ public class EishayWriteStringTest {
         // zulu17.32.13 :
     }
 
-    public static void wastjson_perf_test() throws Exception {
+    public static void wastjson_test() throws Exception {
         for (int i = 0; i < 10; i++) {
             wastjson();
         }
@@ -53,10 +53,10 @@ public class EishayWriteStringTest {
             benchmark.wastjson(BH);
         }
         long millis = System.currentTimeMillis() - start;
-        System.out.println("jackson millis : " + millis);
-        // zulu17.32.13 :
-        // zulu11.52.13 :
+        System.out.println("wastjson millis : " + millis);
         // zulu8.58.0.13 : 467
+        // zulu17.32.13 : 542
+        // zulu11.52.13 :
     }
 
     public static void gson_test() throws Exception {
@@ -78,8 +78,8 @@ public class EishayWriteStringTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2_perf_test();
-//        jackson_perf_test();
-//        wastjson_perf_test();
+//        fastjson2_test();
+//        jackson_test();
+        wastjson_test();
     }
 }
