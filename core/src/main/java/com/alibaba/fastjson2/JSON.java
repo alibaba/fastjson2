@@ -956,6 +956,30 @@ public interface JSON {
     }
 
     /**
+     * Parse JSON char array into a Java object
+     *
+     * @param chars JSON char array to parse
+     * @param clazz specify the Class to be converted
+     * @since 2.0.13
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(char[] chars, Class<T> clazz) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars)) {
+            ObjectReader<T> objectReader = reader.getObjectReader(clazz);
+
+            T object = objectReader.readObject(reader, null, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
      * Parse UTF8 encoded JSON byte array into a Java object
      *
      * @param bytes UTF8 encoded JSON byte array to parse

@@ -118,7 +118,7 @@ final class JSONReaderASCII
     @Override
     public long readFieldNameHashCode() {
         if (ch != '"' && ch != '\'') {
-            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
+            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
             }
             if (ch == '}' || isNull()) {
