@@ -3,14 +3,20 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 
-final class FieldReaderInt64ValueField<T>
+import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
+
+class FieldReaderInt64ValueField<T>
         extends FieldReaderObjectField<T> {
+    final long fieldOffset;
     FieldReaderInt64ValueField(String fieldName, Class fieldType, int ordinal, long features, String format, Long defaultValue, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
+        fieldOffset = JDKUtils.UNSAFE_SUPPORT ? UnsafeUtils.objectFieldOffset(field) : 0;
     }
 
     @Override
@@ -21,11 +27,20 @@ final class FieldReaderInt64ValueField<T>
             schema.assertValidate(fieldLong);
         }
 
-        try {
-            field.setLong(object, fieldLong);
-        } catch (Exception e) {
-            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
+        if (JDKUtils.UNSAFE_SUPPORT) {
+            UNSAFE.putLong(object, fieldOffset, fieldLong);
+        } else {
+            try {
+                field.setLong(object, fieldLong);
+            } catch (Exception e) {
+                throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
+            }
         }
+    }
+
+    @Override
+    public void readFieldValueJSONB(JSONReader jsonReader, T object) {
+        readFieldValue(jsonReader, object);
     }
 
     @Override
@@ -40,16 +55,20 @@ final class FieldReaderInt64ValueField<T>
 
     @Override
     public void accept(T object, Object value) {
-        long intValue = TypeUtils.toLongValue(value);
+        long longValue = TypeUtils.toLongValue(value);
 
         if (schema != null) {
-            schema.assertValidate(intValue);
+            schema.assertValidate(longValue);
         }
 
-        try {
-            field.setLong(object, intValue);
-        } catch (Exception e) {
-            throw new JSONException("set " + getFieldName() + " error", e);
+        if (JDKUtils.UNSAFE_SUPPORT) {
+            UNSAFE.putLong(object, fieldOffset, longValue);
+        } else {
+            try {
+                field.setLong(object, longValue);
+            } catch (Exception e) {
+                throw new JSONException("set " + getFieldName() + " error", e);
+            }
         }
     }
 }
