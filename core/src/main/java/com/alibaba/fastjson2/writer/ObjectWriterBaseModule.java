@@ -176,6 +176,10 @@ public class ObjectWriterBaseModule
                         beanInfo.locale = new Locale(parts[0], parts[1]);
                     }
                 }
+
+                if (!jsonType.alphabetic()) {
+                    beanInfo.alphabetic = false;
+                }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
                 BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> processJSONType1x(beanInfo, annotation, method));
@@ -720,6 +724,13 @@ public class ObjectWriterBaseModule
                     String typeKey = (String) result;
                     if (!typeKey.isEmpty()) {
                         beanInfo.typeKey = typeKey;
+                    }
+                    break;
+                }
+                case "alphabetic": {
+                    Boolean alphabetic = (Boolean) result;
+                    if (!alphabetic.booleanValue()) {
+                        beanInfo.alphabetic = false;
                     }
                     break;
                 }

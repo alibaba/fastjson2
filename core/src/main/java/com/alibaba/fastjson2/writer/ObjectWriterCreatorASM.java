@@ -159,7 +159,7 @@ public class ObjectWriterCreatorASM
 
         List<FieldWriter> fieldWriters;
         if (fieldBased && !record) {
-            Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
+            Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
             final FieldInfo fieldInfo = new FieldInfo();
             BeanUtils.declaredFields(objectClass, field -> {
                 if (Modifier.isTransient(field.getModifiers())) {
@@ -174,7 +174,7 @@ public class ObjectWriterCreatorASM
             });
             fieldWriters = new ArrayList<>(fieldWriterMap.values());
         } else {
-            Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
+            Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
             List<FieldWriter> fieldWriterList = new ArrayList<>();
             boolean fieldWritersCreated = false;
             for (ObjectWriterModule module : modules) {
@@ -300,7 +300,9 @@ public class ObjectWriterCreatorASM
         }
 
         handleIgnores(beanInfo, fieldWriters);
-        Collections.sort(fieldWriters);
+        if (beanInfo.alphabetic) {
+            Collections.sort(fieldWriters);
+        }
 
         boolean match = true;
         if (fieldWriters.size() >= 100 || Throwable.class.isAssignableFrom(objectClass)) {
@@ -2966,7 +2968,7 @@ public class ObjectWriterCreatorASM
             mw.visitInsn(Opcodes.ACONST_NULL);
             mw.visitInsn(Opcodes.ARETURN);
         } else {
-            Map<Integer, List<Long>> map = new TreeMap();
+            Map<Integer, List<Long>> map = new LinkedHashMap<>();
 
             for (int i = 0; i < objectReaderAdapter.hashCodes.length; i++) {
                 long hashCode64 = objectReaderAdapter.hashCodes[i];

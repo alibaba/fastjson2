@@ -326,7 +326,9 @@ public class ObjectWriterCreator {
 
         handleIgnores(beanInfo, fieldWriters);
 
-        Collections.sort(fieldWriters);
+        if (beanInfo.alphabetic) {
+            Collections.sort(fieldWriters);
+        }
 
         ObjectWriterAdapter writerAdapter = new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
 
