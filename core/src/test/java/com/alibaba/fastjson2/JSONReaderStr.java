@@ -8,6 +8,7 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
+import static java.time.ZoneOffset.UTC;
 
 public final class JSONReaderStr
         extends JSONReader {

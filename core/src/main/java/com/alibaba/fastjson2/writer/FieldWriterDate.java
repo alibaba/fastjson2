@@ -1,18 +1,13 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Type;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-
-import static java.time.temporal.ChronoField.SECOND_OF_DAY;
-import static java.time.temporal.ChronoField.YEAR;
 
 abstract class FieldWriterDate<T>
         extends FieldWriterImpl<T> {
@@ -32,7 +27,13 @@ abstract class FieldWriterDate<T>
 
     protected ObjectWriter dateWriter;
 
-    protected FieldWriterDate(String fieldName, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
+    protected FieldWriterDate(String fieldName,
+                              int ordinal,
+                              long features,
+                              String format,
+                              String label,
+                              Type fieldType,
+                              Class fieldClass) {
         super(fieldName, ordinal, features, format, label, fieldType, fieldClass);
 
         boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false, formatyyyyMMddhhmmss19 = false;
@@ -130,13 +131,16 @@ abstract class FieldWriterDate<T>
                 ? this.format
                 : ctx.getDateFormat();
         if (dateFormat == null) {
-            Instant instant = Instant.ofEpochMilli(timeMillis);
-            long epochSecond = instant.getEpochSecond();
-            ZoneOffset offset = zoneId
-                    .getRules()
-                    .getOffset(instant);
+            long epochSecond = Math.floorDiv(timeMillis, 1000L);
+            int offsetTotalSeconds;
+            if (zoneId == IOUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
+                offsetTotalSeconds = IOUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
+            } else {
+                Instant instant = Instant.ofEpochMilli(timeMillis);
+                offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
+            }
 
-            long localSecond = epochSecond + offset.getTotalSeconds();
+            long localSecond = epochSecond + offsetTotalSeconds;
             long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
             int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
             int year, month, dayOfMonth;
@@ -171,7 +175,11 @@ abstract class FieldWriterDate<T>
                 yearEst += marchMonth0 / 10;
 
                 // check year now we are certain it is correct
-                year = YEAR.checkValidIntValue(yearEst);
+                if (yearEst < Year.MIN_VALUE || yearEst > Year.MAX_VALUE) {
+                    throw new DateTimeException("Invalid year " + yearEst);
+                }
+
+                year = (int) yearEst;
             }
 
             int hour, minute, second;
@@ -181,7 +189,9 @@ abstract class FieldWriterDate<T>
                 final int SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
 
                 long secondOfDay = secsOfDay;
-                SECOND_OF_DAY.checkValidValue(secondOfDay);
+                if (secondOfDay < 0 || secondOfDay > 86399) {
+                    throw new DateTimeException("Invalid secondOfDay " + secondOfDay);
+                }
                 int hours = (int) (secondOfDay / SECONDS_PER_HOUR);
                 secondOfDay -= hours * SECONDS_PER_HOUR;
                 int minutes = (int) (secondOfDay / SECONDS_PER_MINUTE);
@@ -192,8 +202,9 @@ abstract class FieldWriterDate<T>
                 second = (int) secondOfDay;
             }
 
-            int millis = instant.getNano() / 1000_000;
+            int millis = (int) Math.floorMod(timeMillis, 1000L);
             if (millis != 0) {
+                Instant instant = Instant.ofEpochMilli(timeMillis);
                 int offsetSeconds = ctx
                         .getZoneId()
                         .getRules()

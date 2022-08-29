@@ -15,6 +15,7 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
 import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
+import static java.time.ZoneOffset.UTC;
 
 final class JSONReaderUTF16
         extends JSONReader {
@@ -4301,7 +4302,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public int getStringLength() {
+    public final int getStringLength() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input : " + ch);
         }

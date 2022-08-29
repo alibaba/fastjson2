@@ -13,11 +13,16 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.zone.ZoneRules;
 import java.util.Date;
 import java.util.TimeZone;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Date1Test {
     private TimeZone defaultTimeZone;
@@ -327,10 +332,63 @@ public class Date1Test {
     @Test
     public void test_str_value() {
         for (int i = 0; i < dates.length; i++) {
-            Date id = dates[i];
-            String str = JSON.toJSONString(id);
-            Date id2 = JSON.parseObject(str, Date.class);
-            assertEquals(id, id2, str);
+            Date date0 = dates[i];
+            String str = JSON.toJSONString(date0);
+            Date date1 = JSON.parseObject(str, Date.class);
+            if (date0 == null) {
+                assertNull(date1);
+                continue;
+            }
+            assertEquals(date0.getTime(), date1.getTime(), str);
+        }
+    }
+
+    @Test
+    public void test_str_value_utc() {
+        ZoneId utc = ZoneOffset.UTC;
+        for (int i = 0; i < dates.length; i++) {
+            Date date0 = dates[i];
+            JSONWriter writer = JSONWriter.of();
+            writer.getContext().setZoneId(utc);
+            writer.writeAny(date0);
+            String str = writer.toString();
+
+            JSONReader reader = JSONReader.of(str);
+            reader.getContext().setZoneId(utc);
+            Date date1 = reader.read(Date.class);
+            if (date0 == null) {
+                assertNull(date1);
+                continue;
+            }
+            assertEquals(date0.getTime(), date1.getTime(), str);
+        }
+    }
+
+    @Test
+    public void test_str_value_zone() {
+        ZoneId[] zoneIds = {
+                ZoneId.of("Asia/Macau"),
+                ZoneOffset.UTC,
+                ZoneId.of("Asia/Kuching"),
+                ZoneId.of("Europe/London")
+        };
+        for (ZoneId zoneId : zoneIds) {
+            for (int i = 0; i < dates.length; i++) {
+                Date date0 = dates[i];
+                JSONWriter writer = JSONWriter.of();
+                writer.getContext().setZoneId(zoneId);
+                writer.writeAny(date0);
+                String str = writer.toString();
+
+                JSONReader reader = JSONReader.of(str);
+                reader.getContext().setZoneId(zoneId);
+                Date date1 = reader.read(Date.class);
+                if (date0 == null) {
+                    assertNull(date1);
+                    continue;
+                }
+                assertEquals(date0.getTime(), date1.getTime(), str);
+            }
         }
     }
 
@@ -482,5 +540,38 @@ public class Date1Test {
             Date1 v1 = jsonReader.read(Date1.class);
             assertEquals(vo.getDate(), v1.getDate());
         }
+    }
+
+    @Test
+    public void test1() throws Exception {
+        String str = "1899-01-01T08:00:00";
+        ZoneId zoneId = ZoneId.of("Asia/Shanghai");
+//        LocalDateTime ldt = LocalDateTime.parse(str);
+        LocalDateTime ldt = LocalDateTime.of(1899, 1, 1, 8, 0, 0);
+        ZoneRules zoneIdRules = zoneId.getRules();
+        ZoneOffset zoneOffset = zoneIdRules.getOffset(ldt);
+        int zoneOffsetTotalSeconds = zoneOffset.getTotalSeconds();
+        long epochMilli = ldt.atZone(zoneId).toInstant().toEpochMilli();
+
+        zoneIdRules.getOffset(Instant.ofEpochMilli(epochMilli));
+
+        TimeZone timeZone = TimeZone.getTimeZone("Asia/Shanghai");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        format.setTimeZone(timeZone);
+
+        TimeZone timeZone8 = TimeZone.getTimeZone("GMT+08:00");
+        SimpleDateFormat format8 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        format.setTimeZone(timeZone8);
+
+        Date date1 = format.parse(str);
+        Date date2 = format8.parse(str);
+
+        int rawOffset = timeZone.getRawOffset(); // 28800000  +8:00:00
+        int timeZoneOffset = timeZone.getOffset(date1.getTime()); // 28800000 +8:00:00
+        int zoneOffsetTotalMillis = zoneOffsetTotalSeconds * 1000; // 29143000 +8:05:43
+
+        Date date0 = new Date(epochMilli);
+        System.out.println(date1);
+        System.out.println(date2);
     }
 }

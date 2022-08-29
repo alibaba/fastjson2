@@ -7,33 +7,34 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ZonedDateTimeTest {
-    static ZoneId zoneId = ZoneId.of("UTC");
+    static ZoneId zoneId = ZoneOffset.UTC;
     static ZonedDateTime[] dateTimes = new ZonedDateTime[]{
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 0, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 10, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 100, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_0, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_00, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_000, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_000_0, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_000_00, ZoneId.of("UTC")),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 0, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 10, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 100, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_0, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_00, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_000, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_000_0, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1000_000_00, ZoneOffset.UTC),
 
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 9, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 99, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_9, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_99, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_999, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_9, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_99, ZoneId.of("UTC")),
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_999, ZoneId.of("UTC")),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 9, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 99, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_9, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_99, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_999, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_9, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_99, ZoneOffset.UTC),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_999, ZoneOffset.UTC),
 
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 0, ZoneId.of("Asia/Shanghai")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 1, ZoneId.of("Asia/Shanghai")),
@@ -55,7 +56,7 @@ public class ZonedDateTimeTest {
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_99, ZoneId.of("Asia/Shanghai")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 999_999_999, ZoneId.of("Asia/Shanghai")),
 
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 121_000_000, ZoneId.of("UTC")),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 121_000_000, ZoneOffset.UTC),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 140__000_000, ZoneId.of("UTC+8")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 200__000_000, ZoneId.of("UTC-8")),
 

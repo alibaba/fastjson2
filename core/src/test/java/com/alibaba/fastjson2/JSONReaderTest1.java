@@ -1532,21 +1532,21 @@ public class JSONReaderTest1 {
 
                         {
                             JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
-                            jsonReader.getContext().setZoneId(JSONReader.SHANGHAI_ZONE_ID);
+                            jsonReader.getContext().setZoneId(IOUtils.SHANGHAI_ZONE_ID);
                             long millis19 = jsonReader.readMillis19();
 
                             LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, JSONReader.SHANGHAI_ZONE_ID, null);
+                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, IOUtils.SHANGHAI_ZONE_ID, null);
                             assertEquals(zdt.toInstant().toEpochMilli(), millis19);
                         }
 
                         {
                             JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
-                            jsonReader.getContext().setZoneId(JSONReader.UTC);
+                            jsonReader.getContext().setZoneId(ZoneOffset.UTC);
                             long millis19 = jsonReader.readMillis19();
 
                             LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, JSONReader.UTC, null);
+                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, ZoneOffset.UTC, null);
                             assertEquals(zdt.toInstant().toEpochMilli(), millis19);
                         }
                     }
@@ -1808,7 +1808,7 @@ public class JSONReaderTest1 {
 
     @Test
     public void testMillis_shanghai() {
-        ZoneId zoneId = JSONReader.SHANGHAI_ZONE_ID;
+        ZoneId zoneId = IOUtils.SHANGHAI_ZONE_ID;
         int[] years = {
                 1992, 1991, 1990, 1989, 1988, 1987, 1986, 1985,
                 1950, 1949, 1948, 1947, 1946, 1945, 1944, 1943, 1942, 1941, 1941, 1940,
@@ -1831,13 +1831,7 @@ public class JSONReaderTest1 {
                 for (int dom : days) {
                     for (int hour : hours) {
                         for (int minute : minutes) {
-                            LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, 0, 0);
-                            long epochMilli = ldt.atZone(zoneId).toInstant().toEpochMilli();
-
-                            JSONReader jsonReader = JSONReader.of("123");
-                            jsonReader.context.setZoneId(zoneId);
-                            long millis = jsonReader.millis(year, month, dom, hour, minute, 0, 0);
-                            assertEquals(epochMilli, millis, ldt.toString());
+                            validate(zoneId, year, month, dom, hour, minute);
                         }
                     }
                 }
@@ -1847,40 +1841,53 @@ public class JSONReaderTest1 {
 
     @Test
     public void testMillis_utc() {
-        ZoneId zoneId = JSONReader.UTC;
-        int[] years = {
-                1992, 1991, 1990, 1989, 1988, 1987, 1986, 1985,
-                1950, 1949, 1948, 1947, 1946, 1945, 1944, 1943, 1942, 1941, 1941, 1940,
-                1939, 1938, 1937, 1920, 1919, 1902, 1901, 1900, 1899
+        ZoneId[] zoneIds = {
+                ZoneId.of("Asia/Macau"),
+                ZoneOffset.UTC,
+                ZoneId.of("Asia/Kuching"),
+                ZoneId.of("Europe/London")
         };
-        int[] months = {12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
-        int[] days = {
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                21, 22, 23, 24, 25, 26, 27, 28
-        };
-        int[] hours = {
-                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                21, 22, 23
-        };
-        int[] minutes = {0, 1, 59};
-        for (int year : years) {
-            for (int month : months) {
-                for (int dom : days) {
-                    for (int hour : hours) {
-                        for (int minute : minutes) {
-                            LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, 0, 0);
-                            long epochMilli = ldt.atZone(zoneId).toInstant().toEpochMilli();
 
-                            JSONReader jsonReader = JSONReader.of("123");
-                            jsonReader.context.setZoneId(zoneId);
-                            long millis = jsonReader.millis(year, month, dom, hour, minute, 0, 0);
-                            assertEquals(epochMilli, millis, ldt.toString());
+        for (ZoneId zoneId : zoneIds) {
+            int[] years = {
+                    1992, 1991, 1990, 1989, 1988, 1987, 1986, 1985,
+                    1950, 1949, 1948, 1947, 1946, 1945, 1944, 1943, 1942, 1941, 1941, 1940,
+                    1939, 1938, 1937, 1920, 1919, 1902, 1901, 1900, 1899
+            };
+            int[] months = {12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+            int[] days = {
+                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                    11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                    21, 22, 23, 24, 25, 26, 27, 28
+            };
+            int[] hours = {
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                    11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                    21, 22, 23
+            };
+
+            int[] minutes = {0, 1, 59};
+            for (int year : years) {
+                for (int month : months) {
+                    for (int dom : days) {
+                        for (int hour : hours) {
+                            for (int minute : minutes) {
+                                validate(zoneId, year, month, dom, hour, minute);
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    private static void validate(ZoneId zoneId, int year, int month, int dom, int hour, int minute) {
+        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, 0, 0);
+        long epochMilli = ldt.atZone(zoneId).toInstant().toEpochMilli();
+
+        JSONReader jsonReader = JSONReader.of("123");
+        jsonReader.context.setZoneId(zoneId);
+        long millis = jsonReader.millis(year, month, dom, hour, minute, 0, 0);
+        assertEquals(epochMilli, millis, ldt.toString());
     }
 }
