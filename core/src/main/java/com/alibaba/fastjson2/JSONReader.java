@@ -34,7 +34,10 @@ public abstract class JSONReader
     static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
     static final ZoneOffset SHANGHAI_ZONE_OFFSET = SHANGHAI_ZONE_RULES.getOffset(LocalDateTime.of(LocalDate.of(1992, 1, 1), LocalTime.MIN));
 
-    static final int SHANGHAI_ZONE_OFFSET_TOTAL_SECONDS = SHANGHAI_ZONE_OFFSET.getTotalSeconds();
+    static final int OFFSET_0543_TOTAL_SECONDS = 29143;
+    static final int OFFSET_0800_TOTAL_SECONDS = 28800;
+    static final int OFFSET_0900_TOTAL_SECONDS = 32400;
+
     static final ZoneId UTC = ZoneId.of("UTC");
     static final long LONG_MASK = 0XFFFFFFFFL;
 
@@ -1245,39 +1248,107 @@ public abstract class JSONReader
 
     protected abstract ZonedDateTime readZonedDateTimeX(int len);
 
-    protected long millis(int year, int month, int dom, int hour, int minute, int second, int nanoOfSecond) {
+    protected long millis(int year, final int month, int dom, int hour, int minute, int second, int nanoOfSecond) {
         final ZoneId zoneId = context.getZoneId();
-        if (year >= 1992 && (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES)) {
-            final int DAYS_PER_CYCLE = 146097;
-            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+        if (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES) {
+            long MILLIS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
+            long MILLIS_1991_04_14_03 = 671598000; // utcMillis(1991, 4, 14, 3, 0, 0);
+            long MILLIS_1990_09_16_02 = 653450400; // utcMillis(1990, 9, 16, 2, 0, 0);
+            long MILLIS_1990_04_15_03 = 640148400; // utcMillis(1990, 4, 15, 3, 0, 0);
+            long MILLIS_1989_09_17_02 = 622000800; // utcMillis(1989, 9, 17, 2, 0, 0);
+            long MILLIS_1989_04_16_03 = 608698800; // utcMillis(1989, 4, 16, 3, 0, 0);
+            long MILLIS_1988_09_11_02 = 589946400; // utcMillis(1988, 9, 11, 2, 0, 0);
+            long MILLIS_1988_04_17_03 = 577249200; // utcMillis(1988, 4, 17, 3, 0, 0);
+            long MILLIS_1987_09_13_02 = 558496800; // utcMillis(1987, 9, 13, 2, 0, 0);
+            long MILLIS_1987_04_12_03 = 545194800; // utcMillis(1987, 4, 12, 3, 0, 0);
+            long MILLIS_1986_09_14_02 = 527047200; // utcMillis(1986, 9, 14, 2, 0, 0);
+            long MILLIS_1986_05_04_03 = 515559600; // utcMillis(1986, 5, 4, 3, 0, 0);
+            long MILLIS_1949_05_28_00 = -649987200; // utcMillis(1949, 5, 28, 0, 0, 0);
+            long MILLIS_1949_05_01_01 = -652316400; // utcMillis(1949, 5, 1, 1, 0, 0);
+            long MILLIS_1948_10_01_00 = -670636800; // utcMillis(1948, 10, 1, 0, 0, 0);
+            long MILLIS_1948_05_01_01 = -683852400; // utcMillis(1948, 5, 1, 1, 0, 0);
+            long MILLIS_1947_11_01_00 = -699580800; // utcMillis(1947, 11, 1, 0, 0, 0);
+            long MILLIS_1947_04_15_01 = -716857200; // utcMillis(1947, 4, 15, 1, 0, 0);
+            long MILLIS_1946_10_01_00 = -733795200; // utcMillis(1946, 10, 1, 0, 0, 0);
+            long MILLIS_1946_05_15_01 = -745801200; // utcMillis(1946, 5, 15, 1, 0, 0);
+            long MILLIS_1945_09_02_00 = -767836800; // utcMillis(1945, 9, 2, 0, 0, 0);
+            long MILLIS_1942_01_31_01 = -881017200; // utcMillis(1942, 1, 31, 1, 0, 0);
+            long MILLIS_1941_11_02_00 = -888796800; // utcMillis(1941, 11, 2, 0, 0, 0);
+            long MILLIS_1941_03_15_01 = -908838000; // utcMillis(1941, 3, 15, 1, 0, 0);
+            long MILLIS_1940_10_13_00 = -922060800; // utcMillis(1940, 10, 13, 0, 0, 0);
+            long MILLIS_1940_06_01_01 = -933634800L; //utcMillis(1940, 6, 1, 1, 0, 0);
+            long MILLIS_1919_10_01_00 = -1585872000L; // utcMillis(1919, 10, 1, 0, 0, 0);
+            long MILLIS_1919_04_13_01 = -1600642800L; // utcMillis(1919, 4, 13, 1, 0, 0);
+            long MILLIS_1901_01_01_00 = -2177452800L; // utcMillis(1901, 1, 1, 0, 0, 0);
 
-            long y = year;
-            long m = month;
+            long seconds = utcMillis(year, month, dom, hour, minute, second);
 
-            long epochDay;
-            {
-                long total = 0;
-                total += 365 * y;
-                total += (y + 3) / 4 - (y + 99) / 100 + (y + 399) / 400;
-                total += ((367 * m - 362) / 12);
-                total += dom - 1;
-                if (m > 2) {
-                    total--;
-                    boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-                    if (leapYear == false) {
-                        total--;
-                    }
-                }
-                epochDay = total - DAYS_0000_TO_1970;
+            int zoneOffsetTotalSeconds;
+            if (seconds >= MILLIS_1991_09_15_02) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1991_04_14_03) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1990_09_16_02) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1990_04_15_03) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1989_09_17_02) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1989_04_16_03) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1988_09_11_02) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1988_04_17_03) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1987_09_13_02) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1987_04_12_03) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1986_09_14_02) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1986_05_04_03) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1949_05_28_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1949_05_01_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1948_10_01_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1948_05_01_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1947_11_01_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1947_04_15_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1946_10_01_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1946_05_15_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1945_09_02_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1942_01_31_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1941_11_02_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1941_03_15_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1940_10_13_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1940_06_01_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1919_10_01_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1919_04_13_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= MILLIS_1901_01_01_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else {
+                zoneOffsetTotalSeconds = OFFSET_0543_TOTAL_SECONDS;
             }
-            long seconds = epochDay * 86400
-                    + hour * 3600
-                    + minute * 60
-                    + second
-                    - SHANGHAI_ZONE_OFFSET_TOTAL_SECONDS;
 
-            int nanos = nanoOfSecond;
-            return seconds * 1000L + nanos / 1000_000;
+            seconds -= zoneOffsetTotalSeconds;
+
+            return seconds * 1000L + nanoOfSecond / 1000_000;
         }
 
         LocalDate localDate = LocalDate.of(year, month, dom);
@@ -1291,6 +1362,30 @@ public abstract class JSONReader
         } else {
             return seconds * 1000L + nanos / 1000_000;
         }
+    }
+
+    static long utcMillis(int year, int month, int dom, int hour, int minute, int second) {
+        final int DAYS_PER_CYCLE = 146097;
+        final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+
+        long total = (365 * year)
+                + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
+                + ((367 * month - 362) / 12)
+                + (dom - 1);
+
+        if (month > 2) {
+            total--;
+            boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+            if (leapYear == false) {
+                total--;
+            }
+        }
+
+        long epochDay = total - DAYS_0000_TO_1970;
+        return epochDay * 86400
+                + hour * 3600
+                + minute * 60
+                + second;
     }
 
     public void readNumber(ValueConsumer consumer, boolean quoted) {
