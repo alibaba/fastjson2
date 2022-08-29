@@ -4948,7 +4948,7 @@ class JSONReaderUTF8
             zoneId = timeZone.toZoneId();
         } else {
             if (first == 'Z') {
-                zoneId = UTC;
+                zoneId = ZoneOffset.UTC;
             } else {
                 String zoneIdStr;
                 if (first == '+' || first == '-') {

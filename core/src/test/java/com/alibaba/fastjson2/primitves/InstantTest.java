@@ -8,15 +8,16 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class InstantTest {
-    static ZoneId zoneId = ZoneId.of("UTC");
+    static ZoneId zoneId = ZoneOffset.UTC;
     static ZonedDateTime[] dateTimes = new ZonedDateTime[]{
-            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 121_000_000, ZoneId.of("UTC")),
+            ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 121_000_000, ZoneOffset.UTC),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 140__000_000, ZoneId.of("UTC+8")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 200__000_000, ZoneId.of("UTC-8")),
             ZonedDateTime.of(2021, 10, 20, 16, 22, 15, 0, ZoneId.of("Asia/Shanghai"))

@@ -20,6 +20,7 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.IOUtils.SHANGHAI_ZONE_ID;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 final class JSONReaderJSONB
@@ -3931,23 +3932,23 @@ final class JSONReaderJSONB
                 long second = readInt64Value();
                 int nano = readInt32Value();
                 Instant instant = Instant.ofEpochSecond(second, nano);
-                return ZonedDateTime.ofInstant(instant, UTC);
+                return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
             }
             case BC_TIMESTAMP_MINUTES: {
                 long second = readInt32Value() * 60;
                 Instant instant = Instant.ofEpochSecond(second);
-                return ZonedDateTime.ofInstant(instant, UTC);
+                return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
             }
             case BC_TIMESTAMP_SECONDS: {
                 long second = readInt32Value();
                 Instant instant = Instant.ofEpochSecond(second);
-                return ZonedDateTime.ofInstant(instant, UTC);
+                return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
             }
             case BC_INT64:
             case BC_TIMESTAMP_MILLIS: {
                 long millis = readInt64Value();
                 Instant instant = Instant.ofEpochMilli(millis);
-                return ZonedDateTime.ofInstant(instant, UTC);
+                return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
             }
             case BC_TIMESTAMP_WITH_TIMEZONE:
                 int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);

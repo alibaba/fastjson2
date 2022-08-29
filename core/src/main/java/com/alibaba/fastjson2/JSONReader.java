@@ -16,27 +16,17 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.zone.ZoneRules;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.IOUtils.*;
 
 public abstract class JSONReader
         implements Closeable {
     static final int MAX_EXP = 1023;
-
-    static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
-    static final String SHANGHAI_ZONE_ID_NAME = "Asia/Shanghai";
     static final long SHANGHAI_ZONE_ID_HASH = Fnv.hashCode64("Asia/Shanghai");
-    static final ZoneId SHANGHAI_ZONE_ID = SHANGHAI_ZONE_ID_NAME.equals(DEFAULT_ZONE_ID.getId()) ? DEFAULT_ZONE_ID : ZoneId.of(SHANGHAI_ZONE_ID_NAME);
-    static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
-    static final int OFFSET_0800_TOTAL_SECONDS = 28800;
-
-    static final ZoneId UTC = ZoneId.of("UTC");
-    static final ZoneRules UTC_ZONE_RULES = UTC.getRules();
-
     static final long LONG_MASK = 0XFFFFFFFFL;
 
     static final byte JSON_TYPE_INT = 1;
@@ -1350,7 +1340,7 @@ public abstract class JSONReader
             seconds -= zoneOffsetTotalSeconds;
 
             return seconds * 1000L + nanoOfSecond / 1000_000;
-        } else if (zoneId == UTC || zoneId.getRules() == UTC_ZONE_RULES) {
+        } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
             long seconds = utcSeconds(year, month, dom, hour, minute, second);
             return seconds * 1000L + nanoOfSecond / 1000_000;
         }
@@ -1366,30 +1356,6 @@ public abstract class JSONReader
         } else {
             return seconds * 1000L + nanos / 1000_000;
         }
-    }
-
-    static long utcSeconds(int year, int month, int dom, int hour, int minute, int second) {
-        final int DAYS_PER_CYCLE = 146097;
-        final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
-
-        long total = (365 * year)
-                + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
-                + ((367 * month - 362) / 12)
-                + (dom - 1);
-
-        if (month > 2) {
-            total--;
-            boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-            if (leapYear == false) {
-                total--;
-            }
-        }
-
-        long epochDay = total - DAYS_0000_TO_1970;
-        return epochDay * 86400
-                + hour * 3600
-                + minute * 60
-                + second;
     }
 
     public void readNumber(ValueConsumer consumer, boolean quoted) {
@@ -3423,7 +3389,7 @@ public abstract class JSONReader
         int p0, p1;
         if (zoneIdStr != null) {
             if ("000".equals(zoneIdStr)) {
-                zoneId = UTC;
+                zoneId = ZoneOffset.UTC;
             } else if ((p0 = zoneIdStr.indexOf('[')) > 0 && (p1 = zoneIdStr.indexOf(']', p0)) > 0) {
                 String str = zoneIdStr.substring(p0 + 1, p1);
                 zoneId = ZoneId.of(str);
