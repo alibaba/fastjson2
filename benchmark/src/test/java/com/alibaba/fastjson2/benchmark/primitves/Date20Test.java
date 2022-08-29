@@ -141,8 +141,8 @@ public class Date20Test {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2_perf_test();
-        fastjson2_jsonb_test();
+        fastjson2_perf_test();
+//        fastjson2_jsonb_test();
 //        fastjson2_millis_perf_test();
 //        fastjson1_perf_test();
 //        wastjson_test();
