@@ -1100,6 +1100,14 @@ public class ObjectReaderCreator {
                 fieldInfo.features |= beanFeatures;
                 createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, modules);
             });
+
+            if (objectClass.isInterface()) {
+                BeanUtils.getters(objectClass, method -> {
+                    fieldInfo.init();
+                    fieldInfo.features |= beanFeatures;
+                    createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, modules);
+                });
+            }
         }
 
         FieldReader[] fieldReaderArray = new FieldReader[fieldReaders.size()];
@@ -1369,7 +1377,9 @@ public class ObjectReaderCreator {
                 return new FieldReaderMapMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, features, format, jsonSchema, method);
             }
 
-            return null;
+            if (!objectClass.isInterface()) {
+                return null;
+            }
         }
 
         Type fieldTypeResolved = null;
