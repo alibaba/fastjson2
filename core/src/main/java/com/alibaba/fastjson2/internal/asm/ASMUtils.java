@@ -139,20 +139,23 @@ public class ASMUtils {
         final Class<?> declaringClass;
         final String name;
 
+        int paramCount;
         if (methodOrCtor instanceof Method) {
             Method method = (Method) methodOrCtor;
             types = method.getParameterTypes();
             name = method.getName();
             declaringClass = method.getDeclaringClass();
+            paramCount = method.getParameterCount();
         } else {
             Constructor<?> constructor = (Constructor<?>) methodOrCtor;
             types = constructor.getParameterTypes();
             declaringClass = constructor.getDeclaringClass();
             name = "<init>";
+            paramCount = constructor.getParameterCount();
         }
 
         if (types.length == 0) {
-            return new String[0];
+            return new String[paramCount];
         }
 
         ClassLoader classLoader = declaringClass.getClassLoader();
@@ -165,7 +168,7 @@ public class ASMUtils {
         InputStream is = classLoader.getResourceAsStream(resourceName);
 
         if (is == null) {
-            return new String[0];
+            return new String[paramCount];
         }
 
         try {
@@ -175,7 +178,7 @@ public class ASMUtils {
 
             return visitor.getParameterNamesForMethod();
         } catch (IOException e) {
-            return new String[0];
+            return new String[paramCount];
         } finally {
             IOUtils.close(is);
         }
