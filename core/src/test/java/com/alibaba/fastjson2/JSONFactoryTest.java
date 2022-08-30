@@ -2,7 +2,7 @@ package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONFactoryTest {
     @Test
@@ -20,5 +20,13 @@ public class JSONFactoryTest {
     @Test
     public void test() {
         new JSONFactory.Utils();
+    }
+
+    @Test
+    public void test1() {
+        JSONFactory.setUseJacksonAnnotation(false);
+        assertFalse(JSONFactory.isUseJacksonAnnotation());
+        JSONFactory.setUseJacksonAnnotation(true);
+        assertTrue(JSONFactory.isUseJacksonAnnotation());
     }
 }

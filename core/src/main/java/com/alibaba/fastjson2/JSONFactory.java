@@ -30,6 +30,8 @@ public final class JSONFactory {
 
     public static final boolean MIXED_HASH_ALGORITHM;
 
+    protected static boolean useJacksonAnnotation = true;
+
     public static String getProperty(String key) {
         return DEFAULT_PROPERTIES.getProperty(key);
     }
@@ -168,6 +170,30 @@ public final class JSONFactory {
                 MIXED_HASH_ALGORITHM = JDKUtils.JVM_VERSION > 8;
             }
         }
+
+        {
+            String property = System.getProperty("fastjson2.useJacksonAnnotation");
+            if (property != null) {
+                property = property.trim();
+            }
+
+            if (property == null || property.isEmpty()) {
+                property = properties.getProperty("fastjson2.useJacksonAnnotation");
+                if (property != null) {
+                    property = property.trim();
+                }
+            }
+
+            useJacksonAnnotation = property == null || !property.equals("false");
+        }
+    }
+
+    public static boolean isUseJacksonAnnotation() {
+        return useJacksonAnnotation;
+    }
+
+    public static void setUseJacksonAnnotation(boolean useJacksonAnnotation) {
+        JSONFactory.useJacksonAnnotation = useJacksonAnnotation;
     }
 
     private static final int CACHE_THRESHOLD = 1024 * 1024;

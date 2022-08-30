@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
@@ -65,21 +66,30 @@ public class ObjectWriterBaseModule
                     continue;
                 }
 
+                boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 switch (annotationType.getName()) {
                     case "com.alibaba.fastjson.annotation.JSONType":
                         jsonType1x = annotation;
                         break;
                     case "com.fasterxml.jackson.annotation.JsonIgnoreProperties":
-                        processJacksonJsonIgnoreProperties(beanInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonIgnoreProperties(beanInfo, annotation);
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonPropertyOrder":
-                        processJacksonJsonPropertyOrder(beanInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonPropertyOrder(beanInfo, annotation);
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonTypeInfo":
-                        processJacksonJsonTypeInfo(beanInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonTypeInfo(beanInfo, annotation);
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonTypeName":
-                        processJacksonJsonTypeName(beanInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonTypeName(beanInfo, annotation);
+                        }
                         break;
                     case "kotlin.Metadata":
                         beanInfo.kotlin = true;
@@ -229,24 +239,35 @@ public class ObjectWriterBaseModule
                     jsonField = (JSONField) annotation;
                 }
                 String annotationTypeName = annotationType.getName();
+                boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
-                        fieldInfo.ignore = true;
+                        if (useJacksonAnnotation) {
+                            fieldInfo.ignore = true;
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnyGetter":
-                        fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonValue":
-                        fieldInfo.features |= FieldInfo.VALUE_MASK;
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.VALUE_MASK;
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonRawValue":
-                        fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
+                        }
                         break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
                     case "com.fasterxml.jackson.annotation.JsonProperty":
-                        processJacksonJsonProperty(fieldInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonProperty(fieldInfo, annotation);
+                        }
                         break;
                     default:
                         break;
@@ -601,13 +622,18 @@ public class ObjectWriterBaseModule
                     continue;
                 }
 
+                boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 String annotationTypeName = annotationType.getName();
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
-                        fieldInfo.ignore = true;
+                        if (useJacksonAnnotation) {
+                            fieldInfo.ignore = true;
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnyGetter":
-                        fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        }
                         break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
@@ -616,14 +642,20 @@ public class ObjectWriterBaseModule
                         fieldInfo.isTransient = true;
                         break;
                     case "com.fasterxml.jackson.annotation.JsonProperty": {
-                        processJacksonJsonProperty(fieldInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonProperty(fieldInfo, annotation);
+                        }
                         break;
                     }
                     case "com.fasterxml.jackson.annotation.JsonValue":
-                        fieldInfo.features |= FieldInfo.VALUE_MASK;
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.VALUE_MASK;
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonRawValue":
-                        fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
+                        }
                         break;
                     default:
                         break;
@@ -684,7 +716,7 @@ public class ObjectWriterBaseModule
         /**
          * load {@link JSONField} format params into FieldInfo
          *
-         * @param fieldInfo       Java Field Info
+         * @param fieldInfo Java Field Info
          * @param jsonFieldFormat {@link JSONField} format params
          */
         private void loadJsonFieldFormat(FieldInfo fieldInfo, String jsonFieldFormat) {
@@ -1264,12 +1296,20 @@ public class ObjectWriterBaseModule
     abstract static class PrimitiveImpl<T>
             implements ObjectWriter<T> {
         @Override
-        public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        public void writeArrayMappingJSONB(JSONWriter jsonWriter,
+                                           Object object,
+                                           Object fieldName,
+                                           Type fieldType,
+                                           long features) {
             writeJSONB(jsonWriter, object, null, null, 0);
         }
 
         @Override
-        public void writeArrayMapping(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        public void writeArrayMapping(JSONWriter jsonWriter,
+                                      Object object,
+                                      Object fieldName,
+                                      Type fieldType,
+                                      long features) {
             write(jsonWriter, object, null, null, 0);
         }
     }
