@@ -420,4 +420,42 @@ public class JSONReaderTest {
             );
         }
     }
+
+    @Test
+    public void test_0() {
+        char ch = 'a';
+        String str = "{\"" + ch + "\":\"" + ch + "\" }";
+        byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
+
+        String fieldName = new String(new char[]{ch});
+        String value = fieldName;
+        long hash = Fnv.hashCode64(fieldName);
+        {
+            JSONReader reader = JSONReader.of(str);
+            reader.nextIfMatch('{');
+            assertEquals(hash, reader.readFieldNameHashCode());
+            assertEquals(hash, reader.getNameHashCodeLCase());
+            assertEquals(fieldName, reader.getFieldName());
+            assertEquals(hash, reader.readValueHashCode());
+            assertEquals(value, reader.getString());
+        }
+        {
+            JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.US_ASCII);
+            reader.nextIfMatch('{');
+            assertEquals(hash, reader.readFieldNameHashCode());
+            assertEquals(hash, reader.getNameHashCodeLCase());
+            assertEquals(fieldName, reader.getFieldName());
+            assertEquals(hash, reader.readValueHashCode());
+            assertEquals(value, reader.getString());
+        }
+        {
+            JSONReader reader = JSONReader.of(strBytes);
+            reader.nextIfMatch('{');
+            assertEquals(hash, reader.readFieldNameHashCode());
+            assertEquals(hash, reader.getNameHashCodeLCase());
+            assertEquals(fieldName, reader.getFieldName());
+            assertEquals(hash, reader.readValueHashCode());
+            assertEquals(value, reader.getString());
+        }
+    }
 }

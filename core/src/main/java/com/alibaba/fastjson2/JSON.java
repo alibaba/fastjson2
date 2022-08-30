@@ -33,7 +33,7 @@ public interface JSON {
     /**
      * FASTJSON2 version name
      */
-    String VERSION = "2.0.12";
+    String VERSION = "2.0.13";
 
     /**
      * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject}
@@ -48,14 +48,18 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(text)) {
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            return objectReader.readObject(reader, null, null, 0);
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
         }
     }
 
     /**
      * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param text     the JSON {@link String} to be parsed
+     * @param text the JSON {@link String} to be parsed
      * @param features features to be enabled in parsing
      * @return Object
      */
@@ -74,9 +78,9 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param offset   the index of the first byte to parse
-     * @param length   the number of bytes to parse
+     * @param text the JSON {@link String} to be parsed
+     * @param offset the index of the first byte to parse
+     * @param length the number of bytes to parse
      * @param features features to be enabled in parsing
      * @return Object
      */
@@ -95,7 +99,7 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param text     the JSON {@link String} to be parsed
+     * @param text the JSON {@link String} to be parsed
      * @param context specify the context use by JSONReader
      * @return Object
      */
@@ -113,7 +117,7 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param bytes     the UTF8 Bytes to be parsed
+     * @param bytes the UTF8 Bytes to be parsed
      * @param features features to be enabled in parsing
      * @return Object
      */
@@ -125,7 +129,34 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(bytes)) {
             reader.context.config(features);
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            return objectReader.readObject(reader, null, null, 0);
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON char array into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param chars the char array to be parsed
+     * @param features features to be enabled in parsing
+     * @return Object
+     */
+    static Object parse(char[] chars, JSONReader.Feature... features) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars)) {
+            reader.context.config(features);
+            ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
         }
     }
 
@@ -149,6 +180,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -156,7 +190,7 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONObject}
      *
-     * @param text     the JSON {@link String} to be parsed
+     * @param text the JSON {@link String} to be parsed
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
@@ -182,9 +216,9 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONObject}
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param offset   the index of the first byte to parse
-     * @param length   the number of bytes to parse
+     * @param text the JSON {@link String} to be parsed
+     * @param offset the index of the first byte to parse
+     * @param length the number of bytes to parse
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
@@ -203,6 +237,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -210,7 +247,7 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONObject}
      *
-     * @param text     the JSON {@link String} to be parsed
+     * @param text the JSON {@link String} to be parsed
      * @param context specify the context use by JSONReader
      * @return JSONObject
      */
@@ -235,7 +272,7 @@ public interface JSON {
     /**
      * Parse Reader into into {@link JSONObject}
      *
-     * @param input    the JSON {@link InputStream} to be parsed
+     * @param input the JSON {@link InputStream} to be parsed
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
@@ -262,7 +299,7 @@ public interface JSON {
     /**
      * Parse UTF8 inputStream into into {@link JSONObject}
      *
-     * @param input    the JSON {@link InputStream} to be parsed
+     * @param input the JSON {@link InputStream} to be parsed
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
@@ -306,6 +343,37 @@ public interface JSON {
             reader.read(object, 0L);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON char array into {@link JSONObject}
+     *
+     * @param chars JSON char array to parse
+     * @return JSONObject
+     */
+    static JSONObject parseObject(char[] chars) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+
+            JSONObject object = new JSONObject();
+            reader.read(object, 0L);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -357,7 +425,7 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into {@link JSONObject}
      *
-     * @param bytes    UTF8 encoded JSON byte array to parse
+     * @param bytes UTF8 encoded JSON byte array to parse
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
@@ -383,9 +451,9 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into {@link JSONObject}
      *
-     * @param bytes    UTF8 encoded JSON byte array to parse
-     * @param offset   the index of the first byte to parse
-     * @param length   the number of bytes to parse
+     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param offset the index of the first byte to parse
+     * @param length the number of bytes to parse
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
@@ -404,6 +472,40 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON char array into {@link JSONObject}
+     *
+     * @param chars JSON char array to parse
+     * @param offset the index of the first byte to parse
+     * @param length the number of chars to parse
+     * @param features features to be enabled in parsing
+     * @return JSONObject
+     */
+    static JSONObject parseObject(char[] chars, int offset, int length, JSONReader.Feature... features) {
+        if (chars == null || chars.length == 0 || length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars, offset, length)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+            reader.context.config(features);
+            JSONObject object = new JSONObject();
+            reader.read(object, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -411,14 +513,18 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into {@link JSONObject}
      *
-     * @param bytes    UTF8 encoded JSON byte array to parse
-     * @param offset   the index of the first byte to parse
-     * @param length   the number of bytes to parse
-     * @param charset  specify {@link Charset} to parse
+     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param offset the index of the first byte to parse
+     * @param length the number of bytes to parse
+     * @param charset specify {@link Charset} to parse
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
-    static JSONObject parseObject(byte[] bytes, int offset, int length, Charset charset, JSONReader.Feature... features) {
+    static JSONObject parseObject(byte[] bytes,
+                                  int offset,
+                                  int length,
+                                  Charset charset,
+                                  JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0 || length == 0) {
             return null;
         }
@@ -440,7 +546,7 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into Java Object
      *
-     * @param text  the JSON {@link String} to be parsed
+     * @param text the JSON {@link String} to be parsed
      * @param clazz specify the Class to be converted
      * @return Class
      */
@@ -467,9 +573,9 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into Java Object
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param clazz    specify the Class to be converted
-     * @param filter   specify filter to be enabled
+     * @param text the JSON {@link String} to be parsed
+     * @param clazz specify the Class to be converted
+     * @param filter specify filter to be enabled
      * @param features features to be enabled in parsing
      * @return Class
      */
@@ -505,10 +611,10 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into Java Object
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param type     specify the {@link Type} to be converted
-     * @param format   the specified date format
-     * @param filters  specify filters to be enabled
+     * @param text the JSON {@link String} to be parsed
+     * @param type specify the {@link Type} to be converted
+     * @param format the specified date format
+     * @param filters specify filters to be enabled
      * @param features features to be enabled in parsing
      * @return Class
      */
@@ -568,7 +674,7 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into Java Object
      *
-     * @param text          the JSON {@link String} to be parsed
+     * @param text the JSON {@link String} to be parsed
      * @param typeReference specify the {@link TypeReference} to be converted
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -595,9 +701,9 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into Java Object
      *
-     * @param text          the JSON {@link String} to be parsed
+     * @param text the JSON {@link String} to be parsed
      * @param typeReference specify the {@link TypeReference} to be converted
-     * @param filter   specify filters to be enabled
+     * @param filter specify filters to be enabled
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> T parseObject(String text, TypeReference typeReference, Filter filter, JSONReader.Feature... features) {
@@ -623,8 +729,8 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param clazz    specify the Class to be converted
+     * @param text the JSON {@link String} to be parsed
+     * @param clazz specify the Class to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -651,10 +757,10 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param offset   the index of the first byte to parse
-     * @param length   the number of bytes to parse
-     * @param clazz    specify the Class to be converted
+     * @param text the JSON {@link String} to be parsed
+     * @param offset the index of the first byte to parse
+     * @param length the number of bytes to parse
+     * @param clazz specify the Class to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -674,6 +780,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -681,8 +790,8 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param clazz    specify the Class to be converted
+     * @param text the JSON {@link String} to be parsed
+     * @param clazz specify the Class to be converted
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, JSONReader.Context context) {
@@ -706,9 +815,9 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param clazz    specify the Class to be converted
-     * @param format   the specified date format
+     * @param text the JSON {@link String} to be parsed
+     * @param clazz specify the Class to be converted
+     * @param format the specified date format
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -738,8 +847,8 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param type     specify the {@link Type} to be converted
+     * @param text the JSON {@link String} to be parsed
+     * @param type specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -763,9 +872,9 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param type     specify the {@link Type} to be converted
-     * @param filter   specify filters to be enabled
+     * @param text the JSON {@link String} to be parsed
+     * @param type specify the {@link Type} to be converted
+     * @param filter specify filters to be enabled
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -789,9 +898,9 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param type     specify the {@link Type} to be converted
-     * @param format   the specified date format
+     * @param text the JSON {@link String} to be parsed
+     * @param type specify the {@link Type} to be converted
+     * @param format the specified date format
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -817,10 +926,94 @@ public interface JSON {
     }
 
     /**
+     * Parse JSON char array into a Java object with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param chars JSON char array to parse
+     * @param offset the index of the first byte to parse
+     * @param length the number of bytes to parse
+     * @param type specify the {@link Type} to be converted
+     * @param features features to be enabled in parsing
+     * @since 2.0.13
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(char[] chars, int offset, int length, Type type, JSONReader.Feature... features) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars, offset, length)) {
+            reader.context.config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            T object = objectReader.readObject(reader, null, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON char array into a Java object
+     *
+     * @param chars JSON char array to parse
+     * @param clazz specify the Class to be converted
+     * @since 2.0.13
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(char[] chars, Class<T> clazz) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars)) {
+            ObjectReader<T> objectReader = reader.getObjectReader(clazz);
+
+            T object = objectReader.readObject(reader, null, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
+    }
+
+    /**
      * Parse UTF8 encoded JSON byte array into a Java object
      *
      * @param bytes UTF8 encoded JSON byte array to parse
-     * @param type  specify the {@link Type} to be converted
+     * @param offset the index of the first byte to parse
+     * @param length the number of bytes to parse
+     * @param type specify the {@link Type} to be converted
+     * @param features features to be enabled in parsing
+     * @since 2.0.13
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(byte[] bytes, int offset, int length, Type type, JSONReader.Feature... features) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(bytes, offset, length)) {
+            reader.context.config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            T object = objectReader.readObject(reader, null, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse UTF8 encoded JSON byte array into a Java object
+     *
+     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param type specify the {@link Type} to be converted
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type) {
@@ -864,8 +1057,8 @@ public interface JSON {
      * Parse UTF8 encoded JSON byte array into a Java object
      *
      * @param utf8Bytes UTF8 encoded JSON byte array to parse
-     * @param clazz    specify the Class to be converted
-     * @param filter   specify filter to be enabled
+     * @param clazz specify the Class to be converted
+     * @param filter specify filter to be enabled
      * @param features features to be enabled in parsing
      * @return Class
      */
@@ -898,7 +1091,7 @@ public interface JSON {
      * Parse UTF8 encoded JSON byte array into a Java object
      *
      * @param utf8Bytes UTF8 encoded JSON byte array to parse
-     * @param clazz    specify the Class to be converted
+     * @param clazz specify the Class to be converted
      * @param context specify the context use by JSONReader
      * @return Class
      */
@@ -907,7 +1100,7 @@ public interface JSON {
             byte[] utf8Bytes,
             Class<T> clazz,
             JSONReader.Context context) {
-        if (utf8Bytes == null) {
+        if (utf8Bytes == null || utf8Bytes.length == 0) {
             return null;
         }
 
@@ -927,9 +1120,9 @@ public interface JSON {
      * Parse UTF8 encoded JSON byte array into a Java object
      *
      * @param utf8Bytes UTF8 encoded JSON byte array to parse
-     * @param type     specify the {@link Type} to be converted
-     * @param format   the specified date format
-     * @param filters   specify filters to be enabled
+     * @param type specify the {@link Type} to be converted
+     * @param format the specified date format
+     * @param filters specify filters to be enabled
      * @param features features to be enabled in parsing
      * @return Class
      */
@@ -963,8 +1156,8 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param bytes    UTF8 encoded JSON byte array to parse
-     * @param clazz    specify the Class to be converted
+     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param clazz specify the Class to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -987,8 +1180,8 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param bytes    UTF8 encoded JSON byte array to parse
-     * @param type     specify the {@link Type} to be converted
+     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param type specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -1011,9 +1204,9 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param bytes    UTF8 encoded JSON byte array to parse
-     * @param type     specify the {@link Type} to be converted
-     * @param filter   specify filters to be enabled
+     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param type specify the {@link Type} to be converted
+     * @param filter specify filters to be enabled
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -1036,9 +1229,9 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param bytes    UTF8 encoded JSON byte array to parse
-     * @param type     specify the {@link Type} to be converted
-     * @param format   the specified date format
+     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param type specify the {@link Type} to be converted
+     * @param format the specified date format
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -1067,8 +1260,8 @@ public interface JSON {
     /**
      * Parse Reader into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param input    the JSON {@link InputStream} to be parsed
-     * @param type     specify the {@link Type} to be converted
+     * @param input the JSON {@link InputStream} to be parsed
+     * @param type specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -1096,8 +1289,8 @@ public interface JSON {
     /**
      * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param input    the JSON {@link InputStream} to be parsed
-     * @param type     specify the {@link Type} to be converted
+     * @param input the JSON {@link InputStream} to be parsed
+     * @param type specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -1125,8 +1318,8 @@ public interface JSON {
     /**
      * Parse UTF8 URL Resource into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param url      the JSON {@link URL} to be parsed
-     * @param type     specify the {@link Type} to be converted
+     * @param url the JSON {@link URL} to be parsed
+     * @param type specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
      * @since 2.0.4
@@ -1167,7 +1360,7 @@ public interface JSON {
     /**
      * Parse UTF8 URL Resource into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param url      the JSON {@link URL} to be parsed
+     * @param url the JSON {@link URL} to be parsed
      * @param function specify the {@link Function} to be converted
      * @param features features to be enabled in parsing
      * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
@@ -1192,9 +1385,9 @@ public interface JSON {
     /**
      * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param input    the JSON {@link InputStream} to be parsed
-     * @param type     specify the {@link Type} to be converted
-     * @param format   the specified date format
+     * @param input the JSON {@link InputStream} to be parsed
+     * @param type specify the {@link Type} to be converted
+     * @param format the specified date format
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -1218,9 +1411,9 @@ public interface JSON {
     /**
      * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
      *
-     * @param input    the JSON {@link InputStream} to be parsed
-     * @param charset  inputStream charset
-     * @param type     specify the {@link Type} to be converted
+     * @param input the JSON {@link InputStream} to be parsed
+     * @param charset inputStream charset
+     * @param type specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -1239,11 +1432,11 @@ public interface JSON {
     /**
      * Parses the JSON byte array of the specified {@link Charset} into a Java Object
      *
-     * @param bytes   JSON byte array to parse
-     * @param offset  the index of the first byte to parse
-     * @param length  the number of bytes to parse
+     * @param bytes JSON byte array to parse
+     * @param offset the index of the first byte to parse
+     * @param length the number of bytes to parse
      * @param charset specify {@link Charset} to parse
-     * @param type    specify the {@link Type} to be converted
+     * @param type specify the {@link Type} to be converted
      * @throws IndexOutOfBoundsException If the offset and the length arguments index characters outside the bounds of the bytes array
      */
     @SuppressWarnings("unchecked")
@@ -1265,16 +1458,21 @@ public interface JSON {
     /**
      * Parses the JSON byte array of the specified {@link Charset} into a Java Object
      *
-     * @param bytes   JSON byte array to parse
-     * @param offset  the index of the first byte to parse
-     * @param length  the number of bytes to parse
+     * @param bytes JSON byte array to parse
+     * @param offset the index of the first byte to parse
+     * @param length the number of bytes to parse
      * @param charset specify {@link Charset} to parse
-     * @param type    specify the {@link Class} to be converted
+     * @param type specify the {@link Class} to be converted
      * @param features features to be enabled in parsing
      * @throws IndexOutOfBoundsException If the offset and the length arguments index characters outside the bounds of the bytes array
      */
     @SuppressWarnings("unchecked")
-    static <T> T parseObject(byte[] bytes, int offset, int length, Charset charset, Class<T> type, JSONReader.Feature... features) {
+    static <T> T parseObject(byte[] bytes,
+                             int offset,
+                             int length,
+                             Charset charset,
+                             Class<T> type,
+                             JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
@@ -1293,8 +1491,8 @@ public interface JSON {
     /**
      * Parse {@link InputStream} into a Java object with specified {@link JSONReader.Feature}s enabled and consume it
      *
-     * @param input    the JSON {@link InputStream} to be parsed
-     * @param type     specify the {@link Type} to be converted
+     * @param input the JSON {@link InputStream} to be parsed
+     * @param type specify the {@link Type} to be converted
      * @param consumer the consumer of the parsing result object
      * @param features features to be enabled in parsing
      * @throws JSONException If the first byte cannot be read for any reason other than end of file, or if the input stream has been closed, or if some other I/O error occurs
@@ -1308,17 +1506,22 @@ public interface JSON {
     /**
      * Parse {@link InputStream} into a Java object with specified {@link JSONReader.Feature}s enabled and consume it
      *
-     * @param input     the JSON {@link InputStream} to be parsed
-     * @param charset   specify {@link Charset} to parse
+     * @param input the JSON {@link InputStream} to be parsed
+     * @param charset specify {@link Charset} to parse
      * @param delimiter specify the delimiter
-     * @param type      specify the {@link Type} to be converted
-     * @param consumer  the consumer of the parsing result object
-     * @param features  features to be enabled in parsing
+     * @param type specify the {@link Type} to be converted
+     * @param consumer the consumer of the parsing result object
+     * @param features features to be enabled in parsing
      * @throws JSONException If the first byte cannot be read for any reason other than end of file, or if the input stream has been closed, or if some other I/O error occurs
      * @since 2.0.2
      */
     @SuppressWarnings("unchecked")
-    static <T> void parseObject(InputStream input, Charset charset, char delimiter, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
+    static <T> void parseObject(InputStream input,
+                                Charset charset,
+                                char delimiter,
+                                Type type,
+                                Consumer<T> consumer,
+                                JSONReader.Feature... features) {
         int cachedIndex = JSONFactory.cacheIndex();
         byte[] bytes = JSONFactory.allocateByteArray(cachedIndex);
 
@@ -1380,10 +1583,10 @@ public interface JSON {
     /**
      * Parse {@link Reader} into a Java object with specified {@link JSONReader.Feature}s enabled and consume it
      *
-     * @param input     the JSON {@link Reader} to be parsed
+     * @param input the JSON {@link Reader} to be parsed
      * @param delimiter specify the delimiter
-     * @param type      specify the {@link Type} to be converted
-     * @param consumer  the consumer of the parsing result object
+     * @param type specify the {@link Type} to be converted
+     * @param consumer the consumer of the parsing result object
      * @throws JSONException If the first byte cannot be read for any reason other than end of file, or if the input stream has been closed, or if some other I/O error occurs
      * @since 2.0.2
      */
@@ -1460,6 +1663,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);
             }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return array;
         }
     }
@@ -1483,6 +1689,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);
             }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return array;
         }
     }
@@ -1490,7 +1699,60 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONArray}
      *
-     * @param text     the JSON {@link String} to be parsed
+     * @param bytes the JSON {@link String} to be parsed
+     * @param offset the index of the first byte to validate
+     * @param length the number of bytes to validate
+     * @param charset specify {@link Charset} to validate
+     * @since 2.0.13
+     */
+    static JSONArray parseArray(byte[] bytes, int offset, int length, Charset charset) {
+        if (bytes == null || bytes.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(bytes, offset, length, charset)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+            JSONArray array = new JSONArray();
+            reader.read(array);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(array);
+            }
+            return array;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link JSONArray}
+     *
+     * @param chars the JSON {@link String} to be parsed
+     */
+    static JSONArray parseArray(char[] chars) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+            JSONArray array = new JSONArray();
+            reader.read(array);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(array);
+            }
+            if (!reader.isEnd()) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return array;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link JSONArray}
+     *
+     * @param text the JSON {@link String} to be parsed
      * @param features features to be enabled in parsing
      */
     static JSONArray parseArray(String text, JSONReader.Feature... features) {
@@ -1515,7 +1777,7 @@ public interface JSON {
     /**
      * Parse JSON {@link InputStream} into {@link JSONArray}
      *
-     * @param url      the JSON {@link URL} to be parsed
+     * @param url the JSON {@link URL} to be parsed
      * @param features features to be enabled in parsing
      */
     static JSONArray parseArray(URL url, JSONReader.Feature... features) {
@@ -1533,7 +1795,7 @@ public interface JSON {
     /**
      * Parse JSON {@link InputStream} into {@link JSONArray}
      *
-     * @param in       the JSON {@link InputStream} to be parsed
+     * @param in the JSON {@link InputStream} to be parsed
      * @param features features to be enabled in parsing
      */
     static JSONArray parseArray(InputStream in, JSONReader.Feature... features) {
@@ -1554,8 +1816,8 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link List}
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param type     specify the {@link Type} to be converted
+     * @param text the JSON {@link String} to be parsed
+     * @param type specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -1577,8 +1839,8 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link List}
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param type     specify the {@link Class} to be converted
+     * @param text the JSON {@link String} to be parsed
+     * @param type specify the {@link Class} to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -1600,8 +1862,32 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link List}
      *
-     * @param text     the JSON {@link String} to be parsed
-     * @param types    specify some {@link Type}s to be converted
+     * @param chars the JSON {@link String} to be parsed
+     * @param type specify the {@link Class} to be converted
+     * @param features features to be enabled in parsing
+     * @since 2.0.13
+     */
+    @SuppressWarnings("unchecked")
+    static <T> List<T> parseArray(char[] chars, Class<T> type, JSONReader.Feature... features) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars)) {
+            reader.context.config(features);
+            List<T> list = reader.readArray(type);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            return list;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link List}
+     *
+     * @param text the JSON {@link String} to be parsed
+     * @param types specify some {@link Type}s to be converted
      * @param features features to be enabled in parsing
      */
     static <T> List<T> parseArray(String text, Type[] types, JSONReader.Feature... features) {
@@ -1635,8 +1921,8 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into {@link List} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param bytes    UTF8 encoded JSON byte array to parse
-     * @param type     specify the {@link Type} to be converted
+     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param type specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -1658,8 +1944,8 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into {@link List} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param bytes    UTF8 encoded JSON byte array to parse
-     * @param type     specify the {@link Class} to be converted
+     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param type specify the {@link Class} to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
@@ -1681,15 +1967,20 @@ public interface JSON {
     /**
      * Parse UTF8 encoded JSON byte array into {@link List} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param bytes    UTF8 encoded JSON byte array to parse
-     * @param offset  the index of the first byte to validate
-     * @param length  the number of bytes to validate
+     * @param bytes UTF8 encoded JSON byte array to parse
+     * @param offset the index of the first byte to validate
+     * @param length the number of bytes to validate
      * @param charset specify {@link Charset} to validate
-     * @param type     specify the {@link Class} to be converted
+     * @param type specify the {@link Class} to be converted
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
-    static <T> List<T> parseArray(byte[] bytes, int offset, int length, Charset charset, Class<T> type, JSONReader.Feature... features) {
+    static <T> List<T> parseArray(byte[] bytes,
+                                  int offset,
+                                  int length,
+                                  Charset charset,
+                                  Class<T> type,
+                                  JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
@@ -1727,7 +2018,7 @@ public interface JSON {
     /**
      * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param object   Java Object to be serialized into JSON {@link String}
+     * @param object Java Object to be serialized into JSON {@link String}
      * @param features features to be enabled in serialization
      */
     static String toJSONString(Object object, JSONWriter.Feature... features) {
@@ -1763,8 +2054,8 @@ public interface JSON {
     /**
      * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param object   Java Object to be serialized into JSON {@link String}
-     * @param filter   specify a filter to use in serialization
+     * @param object Java Object to be serialized into JSON {@link String}
+     * @param filter specify a filter to use in serialization
      * @param features features to be enabled in serialization
      */
     static String toJSONString(Object object, Filter filter, JSONWriter.Feature... features) {
@@ -1788,8 +2079,8 @@ public interface JSON {
     /**
      * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param object   Java Object to be serialized into JSON {@link String}
-     * @param filters  specifies the filter to use in serialization
+     * @param object Java Object to be serialized into JSON {@link String}
+     * @param filters specifies the filter to use in serialization
      * @param features features to be enabled in serialization
      */
     static String toJSONString(Object object, Filter[] filters, JSONWriter.Feature... features) {
@@ -1813,8 +2104,8 @@ public interface JSON {
     /**
      * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param object   Java Object to be serialized into JSON {@link String}
-     * @param format   the specified date format
+     * @param object Java Object to be serialized into JSON {@link String}
+     * @param format the specified date format
      * @param features features to be enabled in serialization
      */
     static String toJSONString(Object object, String format, JSONWriter.Feature... features) {
@@ -1838,9 +2129,9 @@ public interface JSON {
     /**
      * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param object   Java Object to be serialized into JSON {@link String}
-     * @param format   the specified date format
-     * @param filters  specifies the filter to use in serialization
+     * @param object Java Object to be serialized into JSON {@link String}
+     * @param format the specified date format
+     * @param filters specifies the filter to use in serialization
      * @param features features to be enabled in serialization
      */
     static String toJSONString(Object object, String format, Filter[] filters, JSONWriter.Feature... features) {
@@ -1885,7 +2176,7 @@ public interface JSON {
     /**
      * Serialize Java Object to JSON byte array
      *
-     * @param object  Java Object to be serialized into JSON byte array
+     * @param object Java Object to be serialized into JSON byte array
      * @param filters specifies the filter to use in serialization
      */
     static byte[] toJSONBytes(Object object, Filter... filters) {
@@ -1908,7 +2199,7 @@ public interface JSON {
     /**
      * Serialize Java Object to JSON byte array with specified {@link JSONReader.Feature}s enabled
      *
-     * @param object   Java Object to be serialized into JSON byte array
+     * @param object Java Object to be serialized into JSON byte array
      * @param features features to be enabled in serialization
      */
     static byte[] toJSONBytes(Object object, JSONWriter.Feature... features) {
@@ -1929,8 +2220,8 @@ public interface JSON {
     /**
      * Serialize Java Object to JSON byte array with specified {@link JSONReader.Feature}s enabled
      *
-     * @param object   Java Object to be serialized into JSON byte array
-     * @param filters  specifies the filter to use in serialization
+     * @param object Java Object to be serialized into JSON byte array
+     * @param filters specifies the filter to use in serialization
      * @param features features to be enabled in serialization
      */
     static byte[] toJSONBytes(Object object, Filter[] filters, JSONWriter.Feature... features) {
@@ -1954,9 +2245,9 @@ public interface JSON {
     /**
      * Serialize Java Object to JSON byte array with specified {@link JSONReader.Feature}s enabled
      *
-     * @param object   Java Object to be serialized into JSON byte array
-     * @param format   the specified date format
-     * @param filters  specifies the filter to use in serialization
+     * @param object Java Object to be serialized into JSON byte array
+     * @param format the specified date format
+     * @param filters specifies the filter to use in serialization
      * @param features features to be enabled in serialization
      */
     static byte[] toJSONBytes(Object object, String format, Filter[] filters, JSONWriter.Feature... features) {
@@ -1983,8 +2274,8 @@ public interface JSON {
     /**
      * Serialize Java Object to JSON and write to {@link OutputStream} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param out      {@link OutputStream} to be written
-     * @param object   Java Object to be serialized into JSON
+     * @param out {@link OutputStream} to be written
+     * @param object Java Object to be serialized into JSON
      * @param features features to be enabled in serialization
      * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
      */
@@ -2009,9 +2300,9 @@ public interface JSON {
     /**
      * Serialize Java Object to JSON and write to {@link OutputStream} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param out      {@link OutputStream} to be written
-     * @param object   Java Object to be serialized into JSON
-     * @param filters  specifies the filter to use in serialization
+     * @param out {@link OutputStream} to be written
+     * @param object Java Object to be serialized into JSON
+     * @param filters specifies the filter to use in serialization
      * @param features features to be enabled in serialization
      * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
      */
@@ -2039,14 +2330,18 @@ public interface JSON {
     /**
      * Serialize Java Object to JSON and write to {@link OutputStream} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param out      {@link OutputStream} to be written
-     * @param object   Java Object to be serialized into JSON
-     * @param format   the specified date format
-     * @param filters  specifies the filter to use in serialization
+     * @param out {@link OutputStream} to be written
+     * @param object Java Object to be serialized into JSON
+     * @param format the specified date format
+     * @param filters specifies the filter to use in serialization
      * @param features features to be enabled in serialization
      * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
      */
-    static int writeTo(OutputStream out, Object object, String format, Filter[] filters, JSONWriter.Feature... features) {
+    static int writeTo(OutputStream out,
+                       Object object,
+                       String format,
+                       Filter[] filters,
+                       JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
             if (object == null) {
                 writer.writeNull();
@@ -2199,9 +2494,9 @@ public interface JSON {
     /**
      * Verify the byte array is JSON Object
      *
-     * @param bytes   the byte array to validate
-     * @param offset  the index of the first byte to validate
-     * @param length  the number of bytes to validate
+     * @param bytes the byte array to validate
+     * @param offset the index of the first byte to validate
+     * @param length the number of bytes to validate
      * @param charset specify {@link Charset} to validate
      * @return {@code true} or {@code false}
      */
@@ -2265,7 +2560,7 @@ public interface JSON {
     /**
      * Convert the Object to the target type
      *
-     * @param clazz  converted goal class
+     * @param clazz converted goal class
      * @param object Java Object to be converted
      * @since 2.0.4
      */
@@ -2285,7 +2580,7 @@ public interface JSON {
      * Convert the Object to the target type
      *
      * @param object Java Object to be converted
-     * @param clazz  converted goal class
+     * @param clazz converted goal class
      * @deprecated since 2.0.4, please use {@link #to(Class, Object)}
      */
     @Deprecated
@@ -2449,9 +2744,9 @@ public interface JSON {
 
     /**
      * use ObjectWriter and ObjectReader copy java object
+     *
      * @param object the object to be copy
      * @param features the specified features
-     *
      * @since 2.0.12
      */
     static <T> T copy(T object, JSONWriter.Feature... features) {

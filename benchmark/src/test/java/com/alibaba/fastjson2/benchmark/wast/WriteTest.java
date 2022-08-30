@@ -3,13 +3,13 @@ package com.alibaba.fastjson2.benchmark.wast;
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class WriteTest {
-    public static void fastjson2_perf_test() {
+    public static void fastjson2_test() {
         for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
+            fastjson2();
         }
     }
 
-    public static void fastjson2_perf() {
+    public static void fastjson2() {
         WriteCase benchmark = new WriteCase();
 
         long start = System.currentTimeMillis();
@@ -32,13 +32,13 @@ public class WriteTest {
         // oracle-jdk-18.0.2 :
     }
 
-    public static void wastjson_perf_test() {
+    public static void wastjson_test() {
         for (int i = 0; i < 10; i++) {
-            wastjson_perf();
+            wastjson();
         }
     }
 
-    public static void wastjson_perf() {
+    public static void wastjson() {
         WriteCase benchmark = new WriteCase();
 
         long start = System.currentTimeMillis();
@@ -62,8 +62,7 @@ public class WriteTest {
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2_perf_test();
-//        jackson_perf_test();
-//        wastjson_perf_test();
+        fastjson2_test();
+//        wastjson_test();
     }
 }

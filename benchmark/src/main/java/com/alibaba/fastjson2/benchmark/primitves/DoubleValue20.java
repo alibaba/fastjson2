@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.benchmark.primitves;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.benchmark.primitves.vo.DoubleValue20Field;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
@@ -17,12 +18,16 @@ import java.util.concurrent.TimeUnit;
 
 public class DoubleValue20 {
     static String str;
+    static byte[] jsonbBytes;
     static ObjectMapper mapper = new ObjectMapper();
 
     public DoubleValue20() {
         try {
             InputStream is = DoubleValue20.class.getClassLoader().getResourceAsStream("data/dec20.json");
             str = IOUtils.toString(is, "UTF-8");
+            jsonbBytes = JSONB.toBytes(
+                    JSON.parseObject(str, DoubleValue20Field.class)
+            );
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -39,6 +44,13 @@ public class DoubleValue20 {
     public void fastjson2(Blackhole bh) {
         bh.consume(
                 JSON.parseObject(str, DoubleValue20Field.class)
+        );
+    }
+
+    @Benchmark
+    public void fastjson2_jsonb(Blackhole bh) {
+        bh.consume(
+                JSONB.parseObject(jsonbBytes, DoubleValue20Field.class)
         );
     }
 

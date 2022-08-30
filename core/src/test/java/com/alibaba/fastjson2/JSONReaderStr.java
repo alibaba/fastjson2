@@ -6,11 +6,11 @@ import java.math.BigInteger;
 import java.time.*;
 import java.util.*;
 
-import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE;
-import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE2;
+import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
+import static java.time.ZoneOffset.UTC;
 
-final class JSONReaderStr
+public final class JSONReaderStr
         extends JSONReader {
     protected final String str;
     protected final int length;
@@ -23,11 +23,15 @@ final class JSONReaderStr
 
     protected int referenceBegin;
 
-    JSONReaderStr(Context ctx, String str) {
+    public JSONReaderStr(String str) {
+        this(JSONFactory.createReadContext(), str, 0, str.length());
+    }
+
+    public JSONReaderStr(Context ctx, String str) {
         this(ctx, str, 0, str.length());
     }
 
-    JSONReaderStr(Context ctx, String str, int offset, int length) {
+    public JSONReaderStr(Context ctx, String str, int offset, int length) {
         super(ctx);
 
         this.str = str;
@@ -311,30 +315,19 @@ final class JSONReaderStr
     public long readFieldNameHashCodeUnquote() {
         this.nameEscape = false;
         this.nameBegin = this.offset - 1;
-        long hashCode = Fnv.MAGIC_HASH_CODE;
+        char first = ch;
 
-        _for:
-        for (int i = 0; ; ++i) {
-            if (ch == '\\') {
-                nameEscape = true;
-                ch = str.charAt(offset++);
+        long nameValue = 0;
+        if (MIXED_HASH_ALGORITHM) {
+            _for:
+            for (int i = 0; offset <= end; ++i) {
                 switch (ch) {
-                    case 'u': {
-                        char c1 = str.charAt(offset++);
-                        char c2 = str.charAt(offset++);
-                        char c3 = str.charAt(offset++);
-                        char c4 = str.charAt(offset++);
-                        ch = char4(c1, c2, c3, c4);
-                        break;
-                    }
-                    case 'x': {
-                        char c1 = str.charAt(offset++);
-                        char c2 = str.charAt(offset++);
-                        ch = char2(c1, c2);
-                        break;
-                    }
-                    case '\\':
-                    case '"':
+                    case ' ':
+                    case '\n':
+                    case '\r':
+                    case '\t':
+                    case '\f':
+                    case '\b':
                     case '.':
                     case '-':
                     case '+':
@@ -343,65 +336,182 @@ final class JSONReaderStr
                     case '>':
                     case '<':
                     case '=':
-                    case '@':
+                    case '!':
+                    case '[':
+                    case ']':
+                    case '{':
+                    case '}':
+                    case '(':
+                    case ')':
+                    case ',':
                     case ':':
-                        break;
+                    case EOI:
+                        nameLength = i;
+                        if (ch == EOI) {
+                            this.nameEnd = offset;
+                        } else {
+                            this.nameEnd = offset - 1;
+                        }
+                        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                            next();
+                        }
+                        break _for;
                     default:
-                        ch = char1(ch);
+                        break;
+                }
+
+                if (ch == '\\') {
+                    nameEscape = true;
+                    ch = str.charAt(offset++);
+                    switch (ch) {
+                        case 'u': {
+                            char c1 = str.charAt(offset++);
+                            char c2 = str.charAt(offset++);
+                            char c3 = str.charAt(offset++);
+                            char c4 = str.charAt(offset++);
+                            ch = char4(c1, c2, c3, c4);
+                            break;
+                        }
+                        case 'x': {
+                            char c1 = str.charAt(offset++);
+                            char c2 = str.charAt(offset++);
+                            ch = char2(c1, c2);
+                            break;
+                        }
+                        case '\\':
+                        case '"':
+                        case '.':
+                        case '-':
+                        case '+':
+                        case '*':
+                        case '/':
+                        case '>':
+                        case '<':
+                        case '=':
+                        case '@':
+                        case ':':
+                            break;
+                        default:
+                            ch = char1(ch);
+                            break;
+                    }
+                }
+
+                if (ch > 0x7F || i >= 8 || (i == 0 && ch == 0)) {
+                    nameValue = 0;
+                    ch = first;
+                    offset = this.nameBegin + 1;
+                    break;
+                }
+
+                if (i == 0) {
+                    nameValue = (byte) ch;
+                } else {
+                    nameValue <<= 8;
+                    nameValue += ch;
+                }
+
+                ch = offset >= end
+                        ? EOI
+                        : str.charAt(offset++);
+            }
+        }
+
+        long hashCode;
+        if (nameValue != 0) {
+            hashCode = nameValue;
+        } else {
+            hashCode = Fnv.MAGIC_HASH_CODE;
+            _for:
+            for (int i = 0; ; ++i) {
+                if (ch == '\\') {
+                    nameEscape = true;
+                    ch = str.charAt(offset++);
+                    switch (ch) {
+                        case 'u': {
+                            char c1 = str.charAt(offset++);
+                            char c2 = str.charAt(offset++);
+                            char c3 = str.charAt(offset++);
+                            char c4 = str.charAt(offset++);
+                            ch = char4(c1, c2, c3, c4);
+                            break;
+                        }
+                        case 'x': {
+                            char c1 = str.charAt(offset++);
+                            char c2 = str.charAt(offset++);
+                            ch = char2(c1, c2);
+                            break;
+                        }
+                        case '\\':
+                        case '"':
+                        case '.':
+                        case '-':
+                        case '+':
+                        case '*':
+                        case '/':
+                        case '>':
+                        case '<':
+                        case '=':
+                        case '@':
+                        case ':':
+                            break;
+                        default:
+                            ch = char1(ch);
+                            break;
+                    }
+
+                    hashCode ^= ch;
+                    hashCode *= Fnv.MAGIC_PRIME;
+                    next();
+                    continue;
+                }
+
+                switch (ch) {
+                    case ' ':
+                    case '\n':
+                    case '\r':
+                    case '\t':
+                    case '\f':
+                    case '\b':
+                    case '.':
+                    case '-':
+                    case '+':
+                    case '*':
+                    case '/':
+                    case '>':
+                    case '<':
+                    case '=':
+                    case '!':
+                    case '[':
+                    case ']':
+                    case '{':
+                    case '}':
+                    case '(':
+                    case ')':
+                    case ',':
+                    case ':':
+                    case EOI:
+                        nameLength = i;
+                        if (ch == EOI) {
+                            this.nameEnd = offset;
+                        } else {
+                            this.nameEnd = offset - 1;
+                        }
+                        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                            next();
+                        }
+                        break _for;
+                    default:
                         break;
                 }
 
                 hashCode ^= ch;
                 hashCode *= Fnv.MAGIC_PRIME;
-                next();
-                continue;
+
+                ch = offset >= end
+                        ? EOI
+                        : str.charAt(offset++);
             }
-
-            switch (ch) {
-                case ' ':
-                case '\n':
-                case '\r':
-                case '\t':
-                case '\f':
-                case '\b':
-                case '.':
-                case '-':
-                case '+':
-                case '*':
-                case '/':
-                case '>':
-                case '<':
-                case '=':
-                case '!':
-                case '[':
-                case ']':
-                case '{':
-                case '}':
-                case '(':
-                case ')':
-                case ',':
-                case ':':
-                case EOI:
-                    nameLength = i;
-                    if (ch == EOI) {
-                        this.nameEnd = offset;
-                    } else {
-                        this.nameEnd = offset - 1;
-                    }
-                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                        next();
-                    }
-                    break _for;
-                default:
-                    break;
-            }
-
-            hashCode ^= ch;
-            hashCode *= Fnv.MAGIC_PRIME;
-
-            ch = offset >= end
-                    ? EOI
-                    : str.charAt(offset++);
         }
 
         if (ch == ':') {
@@ -427,13 +537,13 @@ final class JSONReaderStr
     @Override
     public long readFieldNameHashCode() {
         if (ch != '"' && ch != '\'') {
-            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0) {
+            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
             }
             if (ch == '}' || isNull()) {
                 return -1;
             }
-            throw new JSONException("illegal character " + ch);
+            throw new JSONException(info("illegal character " + ch));
         }
 
         final char quote = ch;
@@ -441,172 +551,367 @@ final class JSONReaderStr
         this.stringValue = null;
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
-        long hashCode = Fnv.MAGIC_HASH_CODE;
-        for (int i = 0; ; ++i) {
-            char c = str.charAt(offset);
-            if (c == '\\') {
-                nameEscape = true;
-                c = str.charAt(++offset);
-                switch (c) {
-                    case 'u': {
-                        char c1 = str.charAt(++offset);
-                        char c2 = str.charAt(++offset);
-                        char c3 = str.charAt(++offset);
-                        char c4 = str.charAt(++offset);
-                        c = char4(c1, c2, c3, c4);
+
+        long nameValue = 0;
+        if (MIXED_HASH_ALGORITHM) {
+            for (int i = 0; offset < end; offset++, i++) {
+                char c = str.charAt(offset);
+
+                if (c == quote) {
+                    if (i == 0) {
+                        offset = this.nameBegin;
                         break;
                     }
-                    case 'x': {
-                        char c1 = str.charAt(++offset);
-                        char c2 = str.charAt(++offset);
-                        c = char2(c1, c2);
-                        break;
-                    }
-                    case '\\':
-                    case '"':
-                    default:
-                        c = char1(c);
-                        break;
+
+                    this.nameLength = i;
+                    this.nameEnd = offset;
+                    offset++;
+                    break;
                 }
+
+                if (c == '\\') {
+                    nameEscape = true;
+                    c = str.charAt(++offset);
+                    switch (c) {
+                        case 'u': {
+                            char c1 = str.charAt(++offset);
+                            char c2 = str.charAt(++offset);
+                            char c3 = str.charAt(++offset);
+                            char c4 = str.charAt(++offset);
+                            c = char4(c1, c2, c3, c4);
+                            break;
+                        }
+                        case 'x': {
+                            char c1 = str.charAt(++offset);
+                            char c2 = str.charAt(++offset);
+                            c = char2(c1, c2);
+                            break;
+                        }
+                        case '\\':
+                        case '"':
+                        default:
+                            c = char1(c);
+                            break;
+                    }
+                }
+
+                if (c > 0x7F || i >= 8 || (i == 0 && c == 0)) {
+                    nameValue = 0;
+                    offset = this.nameBegin;
+                    break;
+                }
+
+                if (i == 0) {
+                    nameValue = (byte) c;
+                } else {
+                    nameValue <<= 8;
+                    nameValue += c;
+                }
+            }
+        }
+
+        long hashCode;
+        if (nameValue != 0) {
+            hashCode = nameValue;
+        } else {
+            hashCode = Fnv.MAGIC_HASH_CODE;
+            for (int i = 0; ; ++i) {
+                char c = str.charAt(offset);
+                if (c == '\\') {
+                    nameEscape = true;
+                    c = str.charAt(++offset);
+                    switch (c) {
+                        case 'u': {
+                            char c1 = str.charAt(++offset);
+                            char c2 = str.charAt(++offset);
+                            char c3 = str.charAt(++offset);
+                            char c4 = str.charAt(++offset);
+                            c = char4(c1, c2, c3, c4);
+                            break;
+                        }
+                        case 'x': {
+                            char c1 = str.charAt(++offset);
+                            char c2 = str.charAt(++offset);
+                            c = char2(c1, c2);
+                            break;
+                        }
+                        case '\\':
+                        case '"':
+                        default:
+                            c = char1(c);
+                            break;
+                    }
+                    offset++;
+                    hashCode ^= c;
+                    hashCode *= Fnv.MAGIC_PRIME;
+                    continue;
+                }
+
+                if (c == quote) {
+                    this.nameLength = i;
+                    this.nameEnd = offset;
+                    offset++;
+                    break;
+                }
+
                 offset++;
                 hashCode ^= c;
                 hashCode *= Fnv.MAGIC_PRIME;
-                continue;
             }
-
-            if (c == quote) {
-                this.nameLength = i;
-                this.nameEnd = offset;
-                offset++;
-                if (offset < end) {
-                    c = str.charAt(offset);
-
-                    while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-                        offset++;
-                        c = str.charAt(offset);
-                    }
-                } else {
-                    ch = EOI;
-                }
-                if (c != ':') {
-                    throw new JSONException(info("expect ':', but " + c));
-                }
-
-                offset++;
-                if (offset == end) {
-                    c = EOI;
-                } else {
-                    c = str.charAt(offset);
-                }
-
-                while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-                    offset++;
-                    c = str.charAt(offset);
-                }
-
-                this.offset = offset + 1;
-                this.ch = (char) c;
-                break;
-            }
-
-            offset++;
-            hashCode ^= c;
-            hashCode *= Fnv.MAGIC_PRIME;
         }
+
+        char c;
+        if (offset < end) {
+            c = str.charAt(offset);
+
+            while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+                offset++;
+                c = str.charAt(offset);
+            }
+        } else {
+            c = EOI;
+        }
+
+        if (c != ':') {
+            throw new JSONException(info("expect ':', but " + c));
+        }
+
+        offset++;
+        if (offset == end) {
+            c = EOI;
+        } else {
+            c = str.charAt(offset);
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = str.charAt(offset);
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
 
         return hashCode;
     }
 
     @Override
     public long readValueHashCode() {
-        if (ch != '"') {
+        if (ch != '"' && ch != '\'') {
             return -1;
         }
 
+        final char quote = ch;
+
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
-        long hashCode = Fnv.MAGIC_HASH_CODE;
-        for (int i = 0; ; ++i) {
-            char c = str.charAt(offset);
-            if (c == '\\') {
-                nameEscape = true;
-                c = str.charAt(++offset);
-                switch (c) {
-                    case 'u': {
-                        char c1 = str.charAt(++offset);
-                        char c2 = str.charAt(++offset);
-                        char c3 = str.charAt(++offset);
-                        char c4 = str.charAt(++offset);
-                        c = char4(c1, c2, c3, c4);
-                        break;
-                    }
-                    case 'x': {
-                        char c1 = str.charAt(++offset);
-                        char c2 = str.charAt(++offset);
-                        c = char2(c1, c2);
-                        break;
-                    }
-                    case '\\':
-                    case '"':
-                    default:
-                        c = char1(c);
-                        break;
+
+        long nameValue = 0;
+        if (MIXED_HASH_ALGORITHM) {
+            for (int i = 0; offset < end; offset++, i++) {
+                char c = str.charAt(offset);
+
+                if (c == quote) {
+                    this.nameLength = i;
+                    this.nameEnd = offset;
+                    offset++;
+                    break;
                 }
+
+                if (c == '\\') {
+                    nameEscape = true;
+                    c = str.charAt(++offset);
+                    switch (c) {
+                        case 'u': {
+                            char c1 = str.charAt(++offset);
+                            char c2 = str.charAt(++offset);
+                            char c3 = str.charAt(++offset);
+                            char c4 = str.charAt(++offset);
+                            c = char4(c1, c2, c3, c4);
+                            break;
+                        }
+                        case 'x': {
+                            char c1 = str.charAt(++offset);
+                            char c2 = str.charAt(++offset);
+                            c = char2(c1, c2);
+                            break;
+                        }
+                        case '\\':
+                        case '"':
+                        default:
+                            c = char1(c);
+                            break;
+                    }
+                }
+
+                if (c > 0x7F || i >= 8 || (i == 0 && c == 0)) {
+                    nameValue = 0;
+                    offset = this.nameBegin;
+                    break;
+                }
+
+                if (i == 0) {
+                    nameValue = (byte) c;
+                } else {
+                    nameValue <<= 8;
+                    nameValue += c;
+                }
+            }
+        }
+
+        long hashCode;
+        if (nameValue != 0) {
+            hashCode = nameValue;
+        } else {
+            hashCode = Fnv.MAGIC_HASH_CODE;
+            for (int i = 0; ; ++i) {
+                char c = str.charAt(offset);
+                if (c == '\\') {
+                    nameEscape = true;
+                    c = str.charAt(++offset);
+                    switch (c) {
+                        case 'u': {
+                            char c1 = str.charAt(++offset);
+                            char c2 = str.charAt(++offset);
+                            char c3 = str.charAt(++offset);
+                            char c4 = str.charAt(++offset);
+                            c = char4(c1, c2, c3, c4);
+                            break;
+                        }
+                        case 'x': {
+                            char c1 = str.charAt(++offset);
+                            char c2 = str.charAt(++offset);
+                            c = char2(c1, c2);
+                            break;
+                        }
+                        case '\\':
+                        case '"':
+                        default:
+                            c = char1(c);
+                            break;
+                    }
+                    offset++;
+                    hashCode ^= c;
+                    hashCode *= Fnv.MAGIC_PRIME;
+                    continue;
+                }
+
+                if (c == '"') {
+                    this.nameLength = i;
+                    this.nameEnd = offset;
+                    this.stringValue = null;
+                    offset++;
+                    break;
+                }
+
                 offset++;
                 hashCode ^= c;
                 hashCode *= Fnv.MAGIC_PRIME;
-                continue;
             }
-
-            if (c == '"') {
-                this.nameLength = i;
-                this.nameEnd = offset;
-                this.stringValue = null;
-                offset++;
-                if (offset == end) {
-                    c = EOI;
-                } else {
-                    c = str.charAt(offset);
-                }
-
-                while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-                    offset++;
-                    c = str.charAt(offset);
-                }
-
-                if (c == ',') {
-                    this.comma = true;
-                    offset++;
-                    if (offset == end) {
-                        c = EOI;
-                    } else {
-                        c = str.charAt(offset);
-                    }
-
-                    while (c <= ' ' && ((1L << c) & SPACE) != 0) {
-                        offset++;
-                        c = str.charAt(offset);
-                    }
-                }
-
-                this.offset = offset + 1;
-                this.ch = c;
-                break;
-            }
-
-            offset++;
-            hashCode ^= c;
-            hashCode *= Fnv.MAGIC_PRIME;
         }
+
+        char c;
+        if (offset == end) {
+            c = EOI;
+        } else {
+            c = str.charAt(offset);
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = str.charAt(offset);
+        }
+
+        if (c == ',') {
+            this.comma = true;
+            offset++;
+            if (offset == end) {
+                c = EOI;
+            } else {
+                c = str.charAt(offset);
+            }
+
+            while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+                offset++;
+                c = str.charAt(offset);
+            }
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
 
         return hashCode;
     }
 
     @Override
     public long getNameHashCodeLCase() {
-        long hashCode = Fnv.MAGIC_HASH_CODE;
         int offset = nameBegin;
-        for (; ; ) {
+
+        long hashCode = Fnv.MAGIC_HASH_CODE;
+
+        long nameValue = 0;
+        if (MIXED_HASH_ALGORITHM) {
+            for (int i = 0; offset < end; offset++) {
+                char c = str.charAt(offset);
+
+                if (c == '\\') {
+                    c = str.charAt(++offset);
+                    switch (c) {
+                        case 'u': {
+                            int c1 = str.charAt(++offset);
+                            int c2 = str.charAt(++offset);
+                            int c3 = str.charAt(++offset);
+                            int c4 = str.charAt(++offset);
+                            c = char4(c1, c2, c3, c4);
+                            break;
+                        }
+                        case 'x': {
+                            int c1 = str.charAt(++offset);
+                            int c2 = str.charAt(++offset);
+                            c = char2(c1, c2);
+                            break;
+                        }
+                        case '\\':
+                        case '"':
+                        default:
+                            c = char1(c);
+                            break;
+                    }
+                } else if (c == '"') {
+                    break;
+                }
+
+                if (c > 0xFF || i >= 8 || (i == 0 && c == 0)) {
+                    nameValue = 0;
+                    offset = this.nameBegin;
+                    break;
+                }
+
+                if (c == '_' || c == '-') {
+                    char c1 = str.charAt(offset + 1);
+                    if (c1 != '"' && c1 != '\'' && c1 != c) {
+                        continue;
+                    }
+                }
+
+                if (c >= 'A' && c <= 'Z') {
+                    c = (char) (c + 32);
+                }
+
+                if (i == 0) {
+                    nameValue = (byte) c;
+                } else {
+                    nameValue <<= 8;
+                    nameValue += c;
+                }
+                ++i;
+            }
+
+            if (nameValue != 0) {
+                return nameValue;
+            }
+        }
+
+        for (; offset < end; ) {
             char c = str.charAt(offset);
 
             if (c == '\\') {
@@ -1286,6 +1591,10 @@ final class JSONReaderStr
                 }
             }
 
+            if (nameEnd < nameBegin) {
+                throw new JSONException("syntax error : " + offset);
+            }
+
             return this.str.substring(nameBegin, nameEnd);
         }
 
@@ -1596,11 +1905,11 @@ final class JSONReaderStr
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = str.charAt(this.offset++);
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -1858,11 +2167,11 @@ final class JSONReaderStr
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = str.charAt(this.offset++);
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -2096,11 +2405,11 @@ final class JSONReaderStr
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = str.charAt(offset++);
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = str.charAt(offset++);
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -2334,11 +2643,11 @@ final class JSONReaderStr
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = str.charAt(offset++);
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = str.charAt(offset++);
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -3132,11 +3441,11 @@ final class JSONReaderStr
 
         if (ch == ',') {
             this.comma = true;
-            this.ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
+                this.ch = str.charAt(this.offset++);
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
@@ -3329,9 +3638,14 @@ final class JSONReaderStr
                 ch = str.charAt(offset++);
             }
         }
+
         if (ch == ',') {
             this.comma = true;
-            ch = str.charAt(offset++);
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = str.charAt(offset++);
+            }
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 if (offset >= end) {

@@ -3,13 +3,13 @@ package com.alibaba.fastjson2.benchmark.wast;
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class SimpleBeanTest {
-    public static void fastjson2_perf_test() {
+    public static void fastjson2_test() {
         for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
+            fastjson2();
         }
     }
 
-    public static void fastjson2_perf() {
+    public static void fastjson2() {
         SimpleBeanCase benchmark = new SimpleBeanCase();
 
         long start = System.currentTimeMillis();
@@ -20,7 +20,7 @@ public class SimpleBeanTest {
         System.out.println("SimpleBean-fastjson2 : " + millis);
 
         // zulu8.62.0.19 : 837 465 439 447
-        // zulu11.52.13 :
+        // zulu11.52.13 : 316
         // zulu17.32.13 :
         // zulu18.28.13 :
         // zulu19.0.47 :
@@ -32,13 +32,13 @@ public class SimpleBeanTest {
         // oracle-jdk-18.0.2 :
     }
 
-    public static void wastjson_perf_test() {
+    public static void wastjson_test() {
         for (int i = 0; i < 10; i++) {
-            wastjson_perf();
+            wastjson();
         }
     }
 
-    public static void wastjson_perf() {
+    public static void wastjson() {
         SimpleBeanCase benchmark = new SimpleBeanCase();
 
         long start = System.currentTimeMillis();
@@ -49,7 +49,7 @@ public class SimpleBeanTest {
         System.out.println("SimpleBean-wastjson : " + millis);
 
         // zulu8.62.0.19 : 483 290
-        // zulu11.52.13 :
+        // zulu11.52.13 : 277
         // zulu17.32.13 :
         // zulu18.28.13 :
         // zulu19.0.47 :
@@ -91,8 +91,8 @@ public class SimpleBeanTest {
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2_perf_test();
+//        fastjson2_test();
 //        jackson_test();
-//        wastjson_perf_test();
+        wastjson_test();
     }
 }

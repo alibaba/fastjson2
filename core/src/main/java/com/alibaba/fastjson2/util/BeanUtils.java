@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.BeanInfo;
-import com.alibaba.fastjson2.modules.ObjectReaderModule;
+import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -493,11 +493,7 @@ public abstract class BeanUtils {
         }
     }
 
-    public static Member getEnumValueField(Class clazz) {
-        return getEnumValueField(clazz, null);
-    }
-
-    public static Member getEnumValueField(Class clazz, List<ObjectReaderModule> modules) {
+    public static Member getEnumValueField(Class clazz, ObjectCodecProvider mixinProvider) {
         if (clazz == null) {
             return null;
         }
@@ -535,7 +531,13 @@ public abstract class BeanUtils {
                         }
                     });
 
-                    Class mixIn = JSONFactory.getDefaultObjectReaderProvider().getMixIn(enumInterface);
+                    Class mixIn;
+                    if (mixinProvider != null) {
+                        mixIn = mixinProvider.getMixIn(enumInterface);
+                    } else {
+                        mixIn = JSONFactory.getDefaultObjectWriterProvider().getMixIn(enumInterface);
+                    }
+
                     if (mixIn != null) {
                         getters(mixIn, e -> {
                             if (e.getName().equals(method.getName())) {
@@ -639,6 +641,33 @@ public abstract class BeanUtils {
 
             String methodName = method.getName();
 
+            // skip thrift isSetXXX
+            if (methodName.startsWith("isSet") && returnClass == boolean.class) {
+                boolean setterFound = false, unsetFound = false, getterFound = false;
+                String setterName = BeanUtils.getterName(methodName, null);
+                String getterName = "g" + setterName.substring(1);
+
+                String unsetName = "un" + setterName;
+                for (Method m : methods) {
+                    if (m.getName().equals(setterName)
+                            && m.getParameterCount() == 1
+                            && m.getReturnType() == void.class) {
+                        setterFound = true;
+                    } else if (m.getName().equals(getterName)
+                            && m.getParameterCount() == 0) {
+                        getterFound = true;
+                    } else if (m.getName().equals(unsetName)
+                            && m.getParameterCount() == 0
+                            && m.getReturnType() == void.class) {
+                        unsetFound = true;
+                    }
+                }
+
+                if (setterFound && unsetFound && getterFound && !method.isAnnotationPresent(JSONField.class)) {
+                    continue;
+                }
+            }
+
             if (record) {
                 boolean match = false;
                 for (String recordFieldName : recordFieldNames) {
@@ -661,7 +690,7 @@ public abstract class BeanUtils {
                 if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 4) {
                     nameMatch = false;
                 }
-            } else if (returnClass == boolean.class) {
+            } else if (returnClass == boolean.class || returnClass == Boolean.class) {
                 nameMatch = methodNameLength > 2 && methodName.startsWith("is");
                 if (nameMatch) {
                     char firstChar = methodName.charAt(2);
@@ -780,6 +809,25 @@ public abstract class BeanUtils {
             chars[0] = (char) (c0 + 32);
         }
         return new String(chars);
+    }
+
+    public static String getterName(Method method, String namingStrategy) {
+        String fieldName = getterName(method.getName(), namingStrategy);
+
+        if (fieldName.length() > 2
+                && fieldName.charAt(0) >= 'A' && fieldName.charAt(0) <= 'Z'
+                && fieldName.charAt(1) >= 'A' && fieldName.charAt(1) <= 'Z'
+        ) {
+            char[] chars = fieldName.toCharArray();
+            chars[0] = (char) (chars[0] + 32);
+            String fieldName1 = new String(chars);
+            Field field = BeanUtils.getDeclaredField(method.getDeclaringClass(), fieldName1);
+            if (field != null && Modifier.isPublic(field.getModifiers())) {
+                fieldName = field.getName();
+            }
+        }
+
+        return fieldName;
     }
 
     public static String getterName(String methodName, String namingStrategy) {

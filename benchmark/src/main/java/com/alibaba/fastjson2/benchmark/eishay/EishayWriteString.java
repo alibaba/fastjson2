@@ -68,6 +68,7 @@ public class EishayWriteString {
                 .mode(Mode.Throughput)
                 .warmupIterations(3)
                 .timeUnit(TimeUnit.MILLISECONDS)
+                .warmupIterations(3)
                 .forks(1)
                 .build();
         new Runner(options).run();

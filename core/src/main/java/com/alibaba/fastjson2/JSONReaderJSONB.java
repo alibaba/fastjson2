@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -18,8 +19,8 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
-import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE;
-import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE2;
+import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.IOUtils.SHANGHAI_ZONE_ID;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 final class JSONReaderJSONB
@@ -69,6 +70,39 @@ final class JSONReaderJSONB
         if (strtype == BC_STR_ASCII) {
             charset = StandardCharsets.US_ASCII;
         } else if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII_FIX_MAX) {
+            if (JDKUtils.JVM_VERSION == 8) {
+                char[] chars = new char[strlen];
+                for (int i = 0; i < strlen; ++i) {
+                    chars[i] = (char) bytes[strBegin + i];
+                }
+
+                if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                    try {
+                        STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                    } catch (Throwable e) {
+                        STRING_CREATOR_ERROR = true;
+                    }
+                }
+                if (STRING_CREATOR_JDK8 == null) {
+                    return new String(chars);
+                } else {
+                    return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                }
+            } else if (JDKUtils.JVM_VERSION == 11) {
+                if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {
+                    try {
+                        STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
+                    } catch (Throwable e) {
+                        STRING_CREATOR_ERROR = true;
+                    }
+                }
+
+                if (STRING_CREATOR_JDK11 != null) {
+                    byte[] chars = new byte[strlen];
+                    System.arraycopy(bytes, strBegin, chars, 0, strlen);
+                    return STRING_CREATOR_JDK11.apply(chars);
+                }
+            }
             charset = StandardCharsets.US_ASCII;
         } else if (strtype == BC_STR_UTF8) {
             charset = StandardCharsets.UTF_8;
@@ -325,6 +359,31 @@ final class JSONReaderJSONB
             }
             case BC_STR_UTF8: {
                 int strlen = readLength();
+
+                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
+                    if (valueBytes == null) {
+                        valueBytes = JSONFactory.allocateByteArray(cachedIndex);
+                    }
+
+                    int minCapacity = strlen << 1;
+                    if (valueBytes == null) {
+                        valueBytes = new byte[minCapacity];
+                    } else {
+                        if (minCapacity > valueBytes.length) {
+                            valueBytes = new byte[minCapacity];
+                        }
+                    }
+
+                    int utf16_len = IOUtils.decodeUTF8(bytes, offset, strlen, valueBytes);
+                    if (utf16_len != -1) {
+                        byte[] value = new byte[utf16_len];
+                        System.arraycopy(valueBytes, 0, value, 0, utf16_len);
+                        String str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(value);
+                        offset += strlen;
+                        return str;
+                    }
+                }
+
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
                 offset += strlen;
                 return str;
@@ -337,13 +396,31 @@ final class JSONReaderJSONB
             }
             case BC_STR_UTF16LE: {
                 int strlen = readLength();
-                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
+
+                String str;
+                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
+                    byte[] chars = new byte[strlen];
+                    System.arraycopy(bytes, offset, chars, 0, strlen);
+                    str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                } else {
+                    str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
+                }
+
                 offset += strlen;
                 return str;
             }
             case BC_STR_UTF16BE: {
                 int strlen = readLength();
-                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16BE);
+
+                String str;
+                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
+                    byte[] chars = new byte[strlen];
+                    System.arraycopy(bytes, offset, chars, 0, strlen);
+                    str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                } else {
+                    str = new String(bytes, offset, strlen, StandardCharsets.UTF_16BE);
+                }
+
                 offset += strlen;
                 return str;
             }
@@ -595,6 +672,52 @@ final class JSONReaderJSONB
                         return symbolTable.getName(-strlen);
                     }
 
+                    if (JDKUtils.JVM_VERSION == 8) {
+                        char[] chars = new char[strlen];
+                        for (int i = 0; i < strlen; ++i) {
+                            chars[i] = (char) bytes[offset + i];
+                        }
+                        offset += strlen;
+
+                        if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                            try {
+                                STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                            } catch (Throwable e) {
+                                STRING_CREATOR_ERROR = true;
+                            }
+                        }
+
+                        String str;
+                        if (STRING_CREATOR_JDK8 == null) {
+                            str = new String(chars);
+                        } else {
+                            str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                        }
+                        if ((context.features & Feature.TrimString.mask) != 0) {
+                            str = str.trim();
+                        }
+                        return str;
+                    } else if (JDKUtils.JVM_VERSION == 11) {
+                        if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {
+                            try {
+                                STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
+                            } catch (Throwable e) {
+                                STRING_CREATOR_ERROR = true;
+                            }
+                        }
+
+                        if (STRING_CREATOR_JDK11 != null) {
+                            byte[] chars = new byte[strlen];
+                            System.arraycopy(bytes, offset, chars, 0, strlen);
+                            offset += strlen;
+                            String str = STRING_CREATOR_JDK11.apply(chars);
+
+                            if ((context.features & Feature.TrimString.mask) != 0) {
+                                str = str.trim();
+                            }
+                            return str;
+                        }
+                    }
                     String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
                     offset += strlen;
 
@@ -837,11 +960,76 @@ final class JSONReaderJSONB
         if (strlen < 0) {
             hashCode = symbolTable.getHashCode(-strlen);
         } else {
-            hashCode = Fnv.MAGIC_HASH_CODE;
-            for (int i = 0; i < strlen; ++i) {
-                byte c = bytes[offset++];
-                hashCode ^= c;
-                hashCode *= Fnv.MAGIC_PRIME;
+            long nameValue = 0;
+            if (MIXED_HASH_ALGORITHM && strlen <= 8) {
+                switch (strlen) {
+                    case 1:
+                        nameValue = bytes[offset];
+                        break;
+                    case 2:
+                        nameValue = (bytes[offset] << 8)
+                                + (bytes[offset + 1] & 0xFF);
+                        break;
+                    case 3:
+                        nameValue = (bytes[offset] << 16)
+                                + ((bytes[offset + 1] & 0xFF) << 8)
+                                + (bytes[offset + 2] & 0xFF);
+                        break;
+                    case 4:
+                        nameValue = (bytes[offset] << 24)
+                                + ((bytes[offset + 1] & 0xFF) << 16)
+                                + ((bytes[offset + 2] & 0xFF) << 8)
+                                + (bytes[offset + 3] & 0xFF);
+                        break;
+                    case 5:
+                        nameValue = (((long) bytes[offset]) << 32)
+                                + (((long) bytes[offset + 1] & 0xFFL) << 24)
+                                + (((long) bytes[offset + 2] & 0xFFL) << 16)
+                                + (((long) bytes[offset + 3] & 0xFFL) << 8)
+                                + (bytes[offset + 4] & 0xFFL);
+                        break;
+                    case 6:
+                        nameValue = (((long) bytes[offset]) << 40)
+                                + (((long) bytes[offset + 1] & 0xFFL) << 32)
+                                + (((long) bytes[offset + 2] & 0xFFL) << 24)
+                                + (((long) bytes[offset + 3] & 0xFFL) << 16)
+                                + (((long) bytes[offset + 4] & 0xFFL) << 8)
+                                + (((long) bytes[offset + 5] & 0xFFL) & 0xFFL);
+                        break;
+                    case 7:
+                        nameValue = (((long) bytes[offset]) << 48)
+                                + (((long) bytes[offset + 1] & 0xFFL) << 40)
+                                + (((long) bytes[offset + 2] & 0xFFL) << 32)
+                                + (((long) bytes[offset + 3] & 0xFFL) << 24)
+                                + (((long) bytes[offset + 4] & 0xFFL) << 16)
+                                + (((long) bytes[offset + 5] & 0xFFL) << 8)
+                                + (((long) bytes[offset + 6] & 0xFFL) & 0xFFL);
+                        break;
+                    case 8:
+                        nameValue = (((long) bytes[offset]) << 56)
+                                + (((long) bytes[offset + 1] & 0xFFL) << 48)
+                                + (((long) bytes[offset + 2] & 0xFFL) << 40)
+                                + (((long) bytes[offset + 3] & 0xFFL) << 32)
+                                + (((long) bytes[offset + 4] & 0xFFL) << 24)
+                                + (((long) bytes[offset + 5] & 0xFFL) << 16)
+                                + (((long) bytes[offset + 6] & 0xFFL) << 8)
+                                + (((long) bytes[offset + 7] & 0xFFL) & 0xFFL);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (nameValue != 0) {
+                offset += strlen;
+                hashCode = nameValue;
+            } else {
+                hashCode = Fnv.MAGIC_HASH_CODE;
+                for (int i = 0; i < strlen; ++i) {
+                    byte c = bytes[offset++];
+                    hashCode ^= c;
+                    hashCode *= Fnv.MAGIC_PRIME;
+                }
             }
         }
 
@@ -1023,11 +1211,34 @@ final class JSONReaderJSONB
                 hashCode *= Fnv.MAGIC_PRIME;
             }
         } else {
-            hashCode = Fnv.MAGIC_HASH_CODE;
-            for (int i = 0; i < strlen; ++i) {
-                byte c = bytes[offset++];
-                hashCode ^= c;
-                hashCode *= Fnv.MAGIC_PRIME;
+            long nameValue = 0;
+            if (MIXED_HASH_ALGORITHM && strlen <= 8) {
+                for (int i = 0, start = offset; i < strlen; offset++, i++) {
+                    byte c = bytes[offset];
+                    if (c < 0 || (c == 0 && bytes[start] == 0)) {
+                        nameValue = 0;
+                        offset = start;
+                        break;
+                    }
+
+                    if (i == 0) {
+                        nameValue = c;
+                    } else {
+                        nameValue <<= 8;
+                        nameValue += c;
+                    }
+                }
+            }
+
+            if (nameValue != 0) {
+                hashCode = nameValue;
+            } else {
+                hashCode = Fnv.MAGIC_HASH_CODE;
+                for (int i = 0; i < strlen; ++i) {
+                    byte c = bytes[offset++];
+                    hashCode ^= c;
+                    hashCode *= Fnv.MAGIC_PRIME;
+                }
             }
         }
 
@@ -1045,13 +1256,6 @@ final class JSONReaderJSONB
         }
         long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
         symbols[symbol * 2 + 1] = strInfo;
-
-//        if (context.types == null) {
-//            context.types = new TIntLongHashMap();
-//            context.types.put(symbol, hashCode);
-//        } else {
-//            context.types.put(symbol, hashCode);
-//        }
 
         return hashCode;
     }
@@ -1129,6 +1333,31 @@ final class JSONReaderJSONB
             if (bytes[offset] == (byte) 0xFE
                     && bytes[offset + 1] == (byte) 0xFF
             ) {
+                if (MIXED_HASH_ALGORITHM && strlen <= 16) {
+                    long nameValue = 0;
+                    for (int i = 2; i < strlen; i += 2) {
+                        byte c0 = bytes[offset + i];
+                        byte c1 = bytes[offset + i + 1];
+                        char ch = (char) ((c1 & 0xff) | ((c0 & 0xff) << 8));
+
+                        if (ch > 0x7F || (i == 0 && ch == 0)) {
+                            nameValue = 0;
+                            break;
+                        }
+
+                        if (i == 0) {
+                            nameValue = ch;
+                        } else {
+                            nameValue <<= 8;
+                            nameValue += ch;
+                        }
+                    }
+
+                    if (nameValue != 0) {
+                        return nameValue;
+                    }
+                }
+
                 for (int i = 2; i < strlen; i += 2) {
                     byte c0 = bytes[offset + i];
                     byte c1 = bytes[offset + i + 1];
@@ -1156,6 +1385,31 @@ final class JSONReaderJSONB
                 }
             }
         } else if (strtype == BC_STR_UTF16BE) {
+            if (MIXED_HASH_ALGORITHM && strlen <= 16) {
+                long nameValue = 0;
+                for (int i = 0; i < strlen; i += 2) {
+                    byte c0 = bytes[offset + i];
+                    byte c1 = bytes[offset + i + 1];
+                    char ch = (char) ((c1 & 0xff) | ((c0 & 0xff) << 8));
+
+                    if (ch > 0x7F || (i == 0 && ch == 0)) {
+                        nameValue = 0;
+                        break;
+                    }
+
+                    if (i == 0) {
+                        nameValue = ch;
+                    } else {
+                        nameValue <<= 8;
+                        nameValue += ch;
+                    }
+                }
+
+                if (nameValue != 0) {
+                    return nameValue;
+                }
+            }
+
             hashCode = Fnv.MAGIC_HASH_CODE;
             for (int i = 0; i < strlen; i += 2) {
                 byte c0 = bytes[offset + i];
@@ -1165,6 +1419,31 @@ final class JSONReaderJSONB
                 hashCode *= Fnv.MAGIC_PRIME;
             }
         } else if (strtype == BC_STR_UTF16LE) {
+            if (MIXED_HASH_ALGORITHM && strlen <= 16) {
+                long nameValue = 0;
+                for (int i = 0; i < strlen; i += 2) {
+                    byte c0 = bytes[offset + i];
+                    byte c1 = bytes[offset + i + 1];
+                    char ch = (char) ((c0 & 0xff) | ((c1 & 0xff) << 8));
+
+                    if (ch > 0x7F || (i == 0 && ch == 0)) {
+                        nameValue = 0;
+                        break;
+                    }
+
+                    if (i == 0) {
+                        nameValue = ch;
+                    } else {
+                        nameValue <<= 8;
+                        nameValue += ch;
+                    }
+                }
+
+                if (nameValue != 0) {
+                    return nameValue;
+                }
+            }
+
             hashCode = Fnv.MAGIC_HASH_CODE;
             for (int i = 0; i < strlen; i += 2) {
                 byte c0 = bytes[offset + i];
@@ -1174,6 +1453,29 @@ final class JSONReaderJSONB
                 hashCode *= Fnv.MAGIC_PRIME;
             }
         } else {
+            if (MIXED_HASH_ALGORITHM && strlen <= 8) {
+                long nameValue = 0;
+                for (int i = 0, start = offset; i < strlen; offset++, i++) {
+                    byte c = bytes[offset];
+                    if (c < 0 || (c == 0 && bytes[start] == 0)) {
+                        nameValue = 0;
+                        offset = start;
+                        break;
+                    }
+
+                    if (i == 0) {
+                        nameValue = c;
+                    } else {
+                        nameValue <<= 8;
+                        nameValue += c;
+                    }
+                }
+
+                if (nameValue != 0) {
+                    return nameValue;
+                }
+            }
+
             hashCode = Fnv.MAGIC_HASH_CODE;
             for (int i = 0; i < strlen; ++i) {
                 byte c = bytes[offset++];
@@ -1188,6 +1490,42 @@ final class JSONReaderJSONB
     @Override
     public long getNameHashCodeLCase() {
         int offset = strBegin;
+
+        if (MIXED_HASH_ALGORITHM) {
+            long nameValue = 0;
+            for (int i = 0; i < strlen; offset++) {
+                byte c = bytes[offset];
+                if (c < 0 || i >= 8 || (i == 0 && bytes[strBegin] == 0)) {
+                    offset = strBegin;
+                    nameValue = 0;
+                    break;
+                }
+
+                if (c == '_' || c == '-') {
+                    byte c1 = bytes[offset + 1];
+                    if (c1 != c) {
+                        continue;
+                    }
+                }
+
+                if (c >= 'A' && c <= 'Z') {
+                    c += 32;
+                }
+
+                if (i == 0) {
+                    nameValue = c;
+                } else {
+                    nameValue <<= 8;
+                    nameValue += c;
+                }
+                i++;
+            }
+
+            if (nameValue != 0) {
+                return nameValue;
+            }
+        }
+
         long hashCode = Fnv.MAGIC_HASH_CODE;
         for (int i = 0; i < strlen; ++i) {
             byte c = bytes[offset++];
@@ -1195,7 +1533,7 @@ final class JSONReaderJSONB
                 c = (byte) (c + 32);
             }
 
-            if (c == '_') {
+            if (c == '_' || c == '-') {
                 continue;
             }
 
@@ -1414,189 +1752,189 @@ final class JSONReaderJSONB
                     case 2:
                         nameValue0
                                 = (bytes[offset] << 8)
-                                + (bytes[offset + 1]);
+                                + (bytes[offset + 1] & 0xFFL);
                         break;
                     case 3:
                         nameValue0
                                 = (bytes[offset] << 16)
-                                + (bytes[offset + 1] << 8)
-                                + (bytes[offset + 2]);
+                                + ((bytes[offset + 1] & 0xFFL) << 8)
+                                + (bytes[offset + 2] & 0xFFL);
                         break;
                     case 4:
                         nameValue0
                                 = (bytes[offset] << 24)
-                                + (bytes[offset + 1] << 16)
-                                + (bytes[offset + 2] << 8)
-                                + (bytes[offset + 3]);
+                                + ((bytes[offset + 1] & 0xFFL) << 16)
+                                + ((bytes[offset + 2] & 0xFFL) << 8)
+                                + (bytes[offset + 3] & 0xFFL);
                         break;
                     case 5:
                         nameValue0
                                 = (((long) bytes[offset]) << 32)
-                                + (((long) bytes[offset + 1]) << 24)
-                                + (((long) bytes[offset + 2]) << 16)
-                                + (((long) bytes[offset + 3]) << 8)
-                                + ((long) bytes[offset + 4]);
+                                + ((bytes[offset + 1] & 0xFFL) << 24)
+                                + ((bytes[offset + 2] & 0xFFL) << 16)
+                                + ((bytes[offset + 3] & 0xFFL) << 8)
+                                + (bytes[offset + 4] & 0xFFL);
                         break;
                     case 6:
                         nameValue0
                                 = (((long) bytes[offset]) << 40)
-                                + (((long) bytes[offset + 1]) << 32)
-                                + (((long) bytes[offset + 2]) << 24)
-                                + (((long) bytes[offset + 3]) << 16)
-                                + (((long) bytes[offset + 4]) << 8)
-                                + ((long) bytes[offset + 5]);
+                                + ((bytes[offset + 1] & 0xFFL) << 32)
+                                + ((bytes[offset + 2] & 0xFFL) << 24)
+                                + ((bytes[offset + 3] & 0xFFL) << 16)
+                                + ((bytes[offset + 4] & 0xFFL) << 8)
+                                + (bytes[offset + 5] & 0xFFL);
                         break;
                     case 7:
                         nameValue0
                                 = (((long) bytes[offset]) << 48)
-                                + (((long) bytes[offset + 1]) << 40)
-                                + (((long) bytes[offset + 2]) << 32)
-                                + (((long) bytes[offset + 3]) << 24)
-                                + (((long) bytes[offset + 4]) << 16)
-                                + (((long) bytes[offset + 5]) << 8)
-                                + ((long) bytes[offset + 6]);
+                                + ((bytes[offset + 1] & 0xFFL) << 40)
+                                + ((bytes[offset + 2] & 0xFFL) << 32)
+                                + ((bytes[offset + 3] & 0xFFL) << 24)
+                                + ((bytes[offset + 4] & 0xFFL) << 16)
+                                + ((bytes[offset + 5] & 0xFFL) << 8)
+                                + (bytes[offset + 6] & 0xFFL);
                         break;
                     case 8:
                         nameValue0
                                 = (((long) bytes[offset]) << 56)
-                                + (((long) bytes[offset + 1]) << 48)
-                                + (((long) bytes[offset + 2]) << 40)
-                                + (((long) bytes[offset + 3]) << 32)
-                                + (((long) bytes[offset + 4]) << 24)
-                                + (((long) bytes[offset + 5]) << 16)
-                                + (((long) bytes[offset + 6]) << 8)
-                                + ((long) bytes[offset + 7]);
+                                + ((bytes[offset + 1] & 0xFFL) << 48)
+                                + ((bytes[offset + 2] & 0xFFL) << 40)
+                                + ((bytes[offset + 3] & 0xFFL) << 32)
+                                + ((bytes[offset + 4] & 0xFFL) << 24)
+                                + ((bytes[offset + 5] & 0xFFL) << 16)
+                                + ((bytes[offset + 6] & 0xFFL) << 8)
+                                + (bytes[offset + 7] & 0xFFL);
                         break;
                     case 9:
                         nameValue0 = bytes[offset + 0];
                         nameValue1
                                 = (((long) bytes[offset] + 1) << 56)
-                                + (((long) bytes[offset + 2]) << 48)
-                                + (((long) bytes[offset + 3]) << 40)
-                                + (((long) bytes[offset + 4]) << 32)
-                                + (((long) bytes[offset + 5]) << 24)
-                                + (((long) bytes[offset + 6]) << 16)
-                                + (((long) bytes[offset + 7]) << 8)
-                                + ((long) bytes[offset + 8]);
+                                + ((bytes[offset + 2]) << 48)
+                                + ((bytes[offset + 3] & 0xFFL) << 40)
+                                + ((bytes[offset + 4] & 0xFFL) << 32)
+                                + ((bytes[offset + 5] & 0xFFL) << 24)
+                                + ((bytes[offset + 6] & 0xFFL) << 16)
+                                + ((bytes[offset + 7] & 0xFFL) << 8)
+                                + (bytes[offset + 8] & 0xFFL);
                         break;
                     case 10:
                         nameValue0
                                 = (bytes[offset] << 8)
-                                + (bytes[offset + 1]);
+                                + (bytes[offset + 1] & 0xFFL);
                         nameValue1
                                 = (((long) bytes[offset + 2]) << 56)
-                                + (((long) bytes[offset + 3]) << 48)
-                                + (((long) bytes[offset + 4]) << 40)
-                                + (((long) bytes[offset + 5]) << 32)
-                                + (((long) bytes[offset + 6]) << 24)
-                                + (((long) bytes[offset + 7]) << 16)
-                                + (((long) bytes[offset + 8]) << 8)
-                                + ((long) bytes[offset + 9]);
+                                + ((bytes[offset + 3] & 0xFFL) << 48)
+                                + ((bytes[offset + 4] & 0xFFL) << 40)
+                                + ((bytes[offset + 5] & 0xFFL) << 32)
+                                + ((bytes[offset + 6] & 0xFFL) << 24)
+                                + ((bytes[offset + 7] & 0xFFL) << 16)
+                                + ((bytes[offset + 8] & 0xFFL) << 8)
+                                + (bytes[offset + 9] & 0xFFL);
                         break;
                     case 11:
                         nameValue0
                                 = (bytes[offset] << 16)
-                                + (bytes[offset + 1] << 8)
-                                + (bytes[offset + 2]);
+                                + ((bytes[offset + 1] & 0xFFL) << 8)
+                                + (bytes[offset + 2] & 0xFFL);
                         nameValue1
                                 = (((long) bytes[offset + 3]) << 56)
-                                + (((long) bytes[offset + 4]) << 48)
-                                + (((long) bytes[offset + 5]) << 40)
-                                + (((long) bytes[offset + 6]) << 32)
-                                + (((long) bytes[offset + 7]) << 24)
-                                + (((long) bytes[offset + 8]) << 16)
-                                + (((long) bytes[offset + 9]) << 8)
-                                + ((long) bytes[offset + 10]);
+                                + ((bytes[offset + 4] & 0xFFL) << 48)
+                                + ((bytes[offset + 5] & 0xFFL) << 40)
+                                + ((bytes[offset + 6] & 0xFFL) << 32)
+                                + ((bytes[offset + 7] & 0xFFL) << 24)
+                                + ((bytes[offset + 8] & 0xFFL) << 16)
+                                + ((bytes[offset + 9] & 0xFFL) << 8)
+                                + (bytes[offset + 10] & 0xFFL);
                         break;
                     case 12:
                         nameValue0
                                 = (bytes[offset] << 24)
-                                + (bytes[offset + 1] << 16)
-                                + (bytes[offset + 2] << 8)
-                                + (bytes[offset + 3]);
+                                + ((bytes[offset + 1] & 0xFFL) << 16)
+                                + ((bytes[offset + 2] & 0xFFL) << 8)
+                                + (bytes[offset + 3] & 0xFFL);
                         nameValue1
                                 = (((long) bytes[offset + 4]) << 56)
-                                + (((long) bytes[offset + 5]) << 48)
-                                + (((long) bytes[offset + 6]) << 40)
-                                + (((long) bytes[offset + 7]) << 32)
-                                + (((long) bytes[offset + 8]) << 24)
-                                + (((long) bytes[offset + 9]) << 16)
-                                + (((long) bytes[offset + 10]) << 8)
-                                + ((long) bytes[offset + 11]);
+                                + ((bytes[offset + 5] & 0xFFL) << 48)
+                                + ((bytes[offset + 6] & 0xFFL) << 40)
+                                + ((bytes[offset + 7] & 0xFFL) << 32)
+                                + ((bytes[offset + 8] & 0xFFL) << 24)
+                                + ((bytes[offset + 9] & 0xFFL) << 16)
+                                + ((bytes[offset + 10] & 0xFFL) << 8)
+                                + (bytes[offset + 11] & 0xFFL);
                         break;
                     case 13:
                         nameValue0
                                 = (((long) bytes[offset]) << 32)
-                                + (((long) bytes[offset + 1]) << 24)
-                                + (((long) bytes[offset + 2]) << 16)
-                                + (((long) bytes[offset + 3]) << 8)
-                                + ((long) bytes[offset + 4]);
+                                + ((bytes[offset + 1] & 0xFFL) << 24)
+                                + ((bytes[offset + 2] & 0xFFL) << 16)
+                                + ((bytes[offset + 3] & 0xFFL) << 8)
+                                + (bytes[offset + 4] & 0xFFL);
                         nameValue1
                                 = (((long) bytes[offset + 5]) << 56)
-                                + (((long) bytes[offset + 6]) << 48)
-                                + (((long) bytes[offset + 7]) << 40)
-                                + (((long) bytes[offset + 8]) << 32)
-                                + (((long) bytes[offset + 9]) << 24)
-                                + (((long) bytes[offset + 10]) << 16)
-                                + (((long) bytes[offset + 11]) << 8)
-                                + ((long) bytes[offset + 12]);
+                                + ((bytes[offset + 6] & 0xFFL) << 48)
+                                + ((bytes[offset + 7] & 0xFFL) << 40)
+                                + ((bytes[offset + 8] & 0xFFL) << 32)
+                                + ((bytes[offset + 9] & 0xFFL) << 24)
+                                + ((bytes[offset + 10] & 0xFFL) << 16)
+                                + ((bytes[offset + 11] & 0xFFL) << 8)
+                                + (bytes[offset + 12] & 0xFFL);
                         break;
                     case 14:
                         nameValue0
                                 = (((long) bytes[offset]) << 40)
-                                + (((long) bytes[offset + 1]) << 32)
-                                + (((long) bytes[offset + 2]) << 24)
-                                + (((long) bytes[offset + 3]) << 16)
-                                + (((long) bytes[offset + 4]) << 8)
-                                + ((long) bytes[offset + 5]);
+                                + ((bytes[offset + 1] & 0xFFL) << 32)
+                                + ((bytes[offset + 2] & 0xFFL) << 24)
+                                + ((bytes[offset + 3] & 0xFFL) << 16)
+                                + ((bytes[offset + 4] & 0xFFL) << 8)
+                                + (bytes[offset + 5] & 0xFFL);
                         nameValue1
                                 = (((long) bytes[offset + 6]) << 56)
-                                + (((long) bytes[offset + 7]) << 48)
-                                + (((long) bytes[offset + 8]) << 40)
-                                + (((long) bytes[offset + 9]) << 32)
-                                + (((long) bytes[offset + 10]) << 24)
-                                + (((long) bytes[offset + 11]) << 16)
-                                + (((long) bytes[offset + 12]) << 8)
-                                + ((long) bytes[offset + 13]);
+                                + ((bytes[offset + 7] & 0xFFL) << 48)
+                                + ((bytes[offset + 8] & 0xFFL) << 40)
+                                + ((bytes[offset + 9] & 0xFFL) << 32)
+                                + ((bytes[offset + 10] & 0xFFL) << 24)
+                                + ((bytes[offset + 11] & 0xFFL) << 16)
+                                + ((bytes[offset + 12] & 0xFFL) << 8)
+                                + (bytes[offset + 13] & 0xFFL);
                         break;
                     case 15:
                         nameValue0
                                 = (((long) bytes[offset]) << 48)
-                                + (((long) bytes[offset + 1]) << 40)
-                                + (((long) bytes[offset + 2]) << 32)
-                                + (((long) bytes[offset + 3]) << 24)
-                                + (((long) bytes[offset + 4]) << 16)
-                                + (((long) bytes[offset + 5]) << 8)
-                                + ((long) bytes[offset + 6]);
+                                + ((bytes[offset + 1] & 0xFFL) << 40)
+                                + ((bytes[offset + 2] & 0xFFL) << 32)
+                                + ((bytes[offset + 3] & 0xFFL) << 24)
+                                + ((bytes[offset + 4] & 0xFFL) << 16)
+                                + ((bytes[offset + 5] & 0xFFL) << 8)
+                                + (bytes[offset + 6] & 0xFFL);
                         nameValue1
                                 = (((long) bytes[offset + 7]) << 56)
-                                + (((long) bytes[offset + 8]) << 48)
-                                + (((long) bytes[offset + 9]) << 40)
-                                + (((long) bytes[offset + 10]) << 32)
-                                + (((long) bytes[offset + 11]) << 24)
-                                + (((long) bytes[offset + 12]) << 16)
-                                + (((long) bytes[offset + 13]) << 8)
-                                + ((long) bytes[offset + 14]);
+                                + ((bytes[offset + 8] & 0xFFL) << 48)
+                                + ((bytes[offset + 9] & 0xFFL) << 40)
+                                + ((bytes[offset + 10] & 0xFFL) << 32)
+                                + ((bytes[offset + 11] & 0xFFL) << 24)
+                                + ((bytes[offset + 12] & 0xFFL) << 16)
+                                + ((bytes[offset + 13] & 0xFFL) << 8)
+                                + (bytes[offset + 14] & 0xFFL);
                         break;
                     case 16:
                         nameValue0
                                 = (((long) bytes[offset]) << 56)
-                                + (((long) bytes[offset + 1]) << 48)
-                                + (((long) bytes[offset + 2]) << 40)
-                                + (((long) bytes[offset + 3]) << 32)
-                                + (((long) bytes[offset + 4]) << 24)
-                                + (((long) bytes[offset + 5]) << 16)
-                                + (((long) bytes[offset + 6]) << 8)
-                                + ((long) bytes[offset + 7]);
+                                + ((bytes[offset + 1]) << 48)
+                                + ((bytes[offset + 2] & 0xFFL) << 40)
+                                + ((bytes[offset + 3] & 0xFFL) << 32)
+                                + ((bytes[offset + 4] & 0xFFL) << 24)
+                                + ((bytes[offset + 5] & 0xFFL) << 16)
+                                + ((bytes[offset + 6] & 0xFFL) << 8)
+                                + (bytes[offset + 7] & 0xFFL);
                         nameValue1
                                 = (((long) bytes[offset + 8]) << 56)
-                                + (((long) bytes[offset + 9]) << 48)
-                                + (((long) bytes[offset + 10]) << 40)
-                                + (((long) bytes[offset + 11]) << 32)
-                                + (((long) bytes[offset + 12]) << 24)
-                                + (((long) bytes[offset + 13]) << 16)
-                                + (((long) bytes[offset + 14]) << 8)
-                                + ((long) bytes[offset + 15]);
+                                + ((bytes[offset + 9] & 0xFFL) << 48)
+                                + ((bytes[offset + 10] & 0xFFL) << 40)
+                                + ((bytes[offset + 11] & 0xFFL) << 32)
+                                + ((bytes[offset + 12] & 0xFFL) << 24)
+                                + ((bytes[offset + 13] & 0xFFL) << 16)
+                                + ((bytes[offset + 14] & 0xFFL) << 8)
+                                + (bytes[offset + 15] & 0xFFL);
                         break;
                     default:
                         break;
@@ -1608,7 +1946,24 @@ final class JSONReaderJSONB
                     int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
                     JSONFactory.NameCacheEntry2 entry = NAME_CACHE2[indexMask];
                     if (entry == null) {
-                        String name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                        if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                            try {
+                                STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                            } catch (Throwable e) {
+                                STRING_CREATOR_ERROR = true;
+                            }
+                        }
+                        String name;
+                        if (STRING_CREATOR_JDK8 != null) {
+                            char[] chars = new char[strlen];
+                            for (int i = 0; i < strlen; ++i) {
+                                chars[i] = (char) bytes[offset + i];
+                            }
+                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                        } else {
+                            name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                        }
+
                         NAME_CACHE2[indexMask] = new JSONFactory.NameCacheEntry2(name, nameValue0, nameValue1);
                         offset += strlen;
                         return name;
@@ -1620,7 +1975,24 @@ final class JSONReaderJSONB
                     int indexMask = ((int) nameValue0) & (NAME_CACHE.length - 1);
                     JSONFactory.NameCacheEntry entry = NAME_CACHE[indexMask];
                     if (entry == null) {
-                        String name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                        if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                            try {
+                                STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                            } catch (Throwable e) {
+                                STRING_CREATOR_ERROR = true;
+                            }
+                        }
+                        String name;
+                        if (STRING_CREATOR_JDK8 != null) {
+                            char[] chars = new char[strlen];
+                            for (int i = 0; i < strlen; ++i) {
+                                chars[i] = (char) bytes[offset + i];
+                            }
+                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                        } else {
+                            name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                        }
+
                         NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(name, nameValue0);
                         offset += strlen;
                         return name;
@@ -1631,10 +2003,70 @@ final class JSONReaderJSONB
                 }
             }
 
+            if (JDKUtils.JVM_VERSION == 8 && strlen >= 0) {
+                char[] chars = new char[strlen];
+                for (int i = 0; i < strlen; ++i) {
+                    chars[i] = (char) bytes[offset + i];
+                }
+                offset += strlen;
+
+                if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                    try {
+                        STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                    } catch (Throwable e) {
+                        STRING_CREATOR_ERROR = true;
+                    }
+                }
+
+                if (STRING_CREATOR_JDK8 == null) {
+                    str = new String(chars);
+                } else {
+                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                }
+            } else if (JDKUtils.JVM_VERSION == 11 && strlen >= 0) {
+                if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {
+                    try {
+                        STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
+                    } catch (Throwable e) {
+                        STRING_CREATOR_ERROR = true;
+                    }
+                }
+
+                if (STRING_CREATOR_JDK11 != null) {
+                    byte[] chars = new byte[strlen];
+                    System.arraycopy(bytes, offset, chars, 0, strlen);
+                    str = STRING_CREATOR_JDK11.apply(chars);
+                    offset += strlen;
+                }
+            }
             charset = StandardCharsets.US_ASCII;
         } else if (strtype == BC_STR_UTF8) {
             strlen = readLength();
             strBegin = offset;
+
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
+                if (valueBytes == null) {
+                    valueBytes = JSONFactory.allocateByteArray(cachedIndex);
+                }
+
+                int minCapacity = strlen << 1;
+                if (valueBytes == null) {
+                    valueBytes = new byte[minCapacity];
+                } else {
+                    if (minCapacity > valueBytes.length) {
+                        valueBytes = new byte[minCapacity];
+                    }
+                }
+
+                int utf16_len = IOUtils.decodeUTF8(bytes, offset, strlen, valueBytes);
+                if (utf16_len != -1) {
+                    byte[] value = new byte[utf16_len];
+                    System.arraycopy(valueBytes, 0, value, 0, utf16_len);
+                    str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(value);
+                    offset += strlen;
+                }
+            }
+
             charset = StandardCharsets.UTF_8;
         } else if (strtype == BC_STR_UTF16) {
             strlen = readLength();
@@ -1643,10 +2075,26 @@ final class JSONReaderJSONB
         } else if (strtype == BC_STR_UTF16LE) {
             strlen = readLength();
             strBegin = offset;
+
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
+                byte[] chars = new byte[strlen];
+                System.arraycopy(bytes, offset, chars, 0, strlen);
+                str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                offset += strlen;
+            }
+
             charset = StandardCharsets.UTF_16LE;
         } else if (strtype == BC_STR_UTF16BE) {
             strlen = readLength();
             strBegin = offset;
+
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
+                byte[] chars = new byte[strlen];
+                System.arraycopy(bytes, offset, chars, 0, strlen);
+                str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                offset += strlen;
+            }
+
             charset = StandardCharsets.UTF_16BE;
         }
 
@@ -1703,25 +2151,102 @@ final class JSONReaderJSONB
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
             }
 
-            if (JDKUtils.JVM_VERSION == 8 && strlen >= 0) {
-                char[] chars = new char[strlen];
-                for (int i = 0; i < strlen; ++i) {
-                    chars[i] = (char) bytes[offset + i];
+            if (strlen >= 0) {
+                if (JDKUtils.JVM_VERSION == 8) {
+                    char[] chars = new char[strlen];
+                    for (int i = 0; i < strlen; ++i) {
+                        chars[i] = (char) bytes[offset + i];
+                    }
+                    offset += strlen;
+
+                    if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                        try {
+                            STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                        } catch (Throwable e) {
+                            STRING_CREATOR_ERROR = true;
+                        }
+                    }
+
+                    if (STRING_CREATOR_JDK8 == null) {
+                        str = new String(chars);
+                    } else {
+                        str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                    }
+
+                    if ((context.features & Feature.TrimString.mask) != 0) {
+                        str = str.trim();
+                    }
+
+                    return str;
+                } else if (JDKUtils.JVM_VERSION == 11) {
+                    if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {
+                        try {
+                            STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
+                        } catch (Throwable e) {
+                            STRING_CREATOR_ERROR = true;
+                        }
+                    }
+
+                    if (STRING_CREATOR_JDK11 != null) {
+                        byte[] chars = new byte[strlen];
+                        System.arraycopy(bytes, offset, chars, 0, strlen);
+                        str = STRING_CREATOR_JDK11.apply(chars);
+                        offset += strlen;
+
+                        if ((context.features & Feature.TrimString.mask) != 0) {
+                            str = str.trim();
+                        }
+
+                        return str;
+                    }
+                } else if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
+                    byte[] chars = new byte[strlen];
+                    System.arraycopy(bytes, offset, chars, 0, strlen);
+                    str = JDKUtils.UNSAFE_ASCII_CREATOR.apply(chars);
+                    offset += strlen;
+
+                    if ((context.features & Feature.TrimString.mask) != 0) {
+                        str = str.trim();
+                    }
+
+                    return str;
                 }
-                offset += strlen;
-
-                str = new String(chars);
-
-                if ((context.features & Feature.TrimString.mask) != 0) {
-                    str = str.trim();
-                }
-
-                return str;
             }
+
             charset = StandardCharsets.US_ASCII;
         } else if (strtype == BC_STR_UTF8) {
             strlen = readLength();
             strBegin = offset;
+
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
+                if (valueBytes == null) {
+                    valueBytes = JSONFactory.allocateByteArray(cachedIndex);
+                }
+
+                int minCapacity = strlen << 1;
+                if (valueBytes == null) {
+                    valueBytes = new byte[minCapacity];
+                } else {
+                    if (minCapacity > valueBytes.length) {
+                        valueBytes = new byte[minCapacity];
+                    }
+                }
+
+                int utf16_len = IOUtils.decodeUTF8(bytes, offset, strlen, valueBytes);
+                if (utf16_len != -1) {
+                    byte[] value = new byte[utf16_len];
+                    System.arraycopy(valueBytes, 0, value, 0, utf16_len);
+                    str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(value);
+                    offset += strlen;
+
+                    if ((context.features & Feature.TrimString.mask) != 0) {
+                        str = str.trim();
+                    }
+
+                    return str;
+                }
+            }
+
             charset = StandardCharsets.UTF_8;
         } else if (strtype == BC_STR_UTF16) {
             strlen = readLength();
@@ -1735,10 +2260,36 @@ final class JSONReaderJSONB
                 return "";
             }
 
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
+                byte[] chars = new byte[strlen];
+                System.arraycopy(bytes, offset, chars, 0, strlen);
+                str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                offset += strlen;
+
+                if ((context.features & Feature.TrimString.mask) != 0) {
+                    str = str.trim();
+                }
+                return str;
+            }
+
             charset = StandardCharsets.UTF_16LE;
         } else if (strtype == BC_STR_UTF16BE) {
             strlen = readLength();
             strBegin = offset;
+
+            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
+                byte[] chars = new byte[strlen];
+                System.arraycopy(bytes, offset, chars, 0, strlen);
+                str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                offset += strlen;
+
+                if ((context.features & Feature.TrimString.mask) != 0) {
+                    str = str.trim();
+                }
+
+                return str;
+            }
+
             charset = StandardCharsets.UTF_16BE;
         } else if (strtype == BC_STR_GB18030) {
             strlen = readLength();
@@ -2074,7 +2625,7 @@ final class JSONReaderJSONB
             default:
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                    String str = readFixedAsciiString(strlen);
                     offset += strlen;
                     if (str.indexOf('.') == -1) {
                         return new BigInteger(str).longValue();
@@ -2225,7 +2776,7 @@ final class JSONReaderJSONB
             default:
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                    String str = readFixedAsciiString(strlen);
                     offset += strlen;
                     if (str.indexOf('.') == -1) {
                         return new BigInteger(str).intValue();
@@ -2274,6 +2825,32 @@ final class JSONReaderJSONB
             return null;
         }
         return value;
+    }
+
+    private String readFixedAsciiString(int strlen) {
+        String str;
+        if (JDKUtils.JVM_VERSION == 8) {
+            char[] chars = new char[strlen];
+            for (int i = 0; i < strlen; ++i) {
+                chars[i] = (char) bytes[offset + i];
+            }
+
+            if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
+                try {
+                    STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                } catch (Throwable e) {
+                    STRING_CREATOR_ERROR = true;
+                }
+            }
+            if (STRING_CREATOR_JDK8 == null) {
+                str = new String(chars);
+            } else {
+                str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+            }
+        } else {
+            str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+        }
+        return str;
     }
 
     @Override
@@ -2425,7 +3002,7 @@ final class JSONReaderJSONB
 
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                    String str = readFixedAsciiString(strlen);
                     offset += strlen;
                     if (str.indexOf('.') == -1) {
                         return new BigInteger(str).intValue();
@@ -2583,7 +3160,7 @@ final class JSONReaderJSONB
 
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                    String str = readFixedAsciiString(strlen);
                     offset += strlen;
                     if (str.indexOf('.') == -1) {
                         return new BigInteger(str).intValue();
@@ -2754,7 +3331,7 @@ final class JSONReaderJSONB
             default:
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                    String str = readFixedAsciiString(strlen);
                     offset += strlen;
                     return new BigDecimal(str);
                 }
@@ -2842,6 +3419,13 @@ final class JSONReaderJSONB
             }
             case BC_DECIMAL: {
                 int scale = readInt32Value();
+
+                if (bytes[offset] == BC_BIGINT_LONG) {
+                    offset++;
+                    long unscaledLongValue = readInt64Value();
+                    return BigDecimal.valueOf(unscaledLongValue, scale);
+                }
+
                 BigInteger unscaledValue = readBigInteger();
                 if (scale == 0) {
                     return new BigDecimal(unscaledValue);
@@ -2914,7 +3498,7 @@ final class JSONReaderJSONB
 
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                    String str = readFixedAsciiString(strlen);
                     offset += strlen;
                     return new BigDecimal(str);
                 }
@@ -3093,7 +3677,7 @@ final class JSONReaderJSONB
 
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
-                    String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                    String str = readFixedAsciiString(strlen);
                     offset += strlen;
                     return new BigInteger(str);
                 }
@@ -3348,23 +3932,23 @@ final class JSONReaderJSONB
                 long second = readInt64Value();
                 int nano = readInt32Value();
                 Instant instant = Instant.ofEpochSecond(second, nano);
-                return ZonedDateTime.ofInstant(instant, UTC);
+                return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
             }
             case BC_TIMESTAMP_MINUTES: {
                 long second = readInt32Value() * 60;
                 Instant instant = Instant.ofEpochSecond(second);
-                return ZonedDateTime.ofInstant(instant, UTC);
+                return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
             }
             case BC_TIMESTAMP_SECONDS: {
                 long second = readInt32Value();
                 Instant instant = Instant.ofEpochSecond(second);
-                return ZonedDateTime.ofInstant(instant, UTC);
+                return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
             }
             case BC_INT64:
             case BC_TIMESTAMP_MILLIS: {
                 long millis = readInt64Value();
                 Instant instant = Instant.ofEpochMilli(millis);
-                return ZonedDateTime.ofInstant(instant, UTC);
+                return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
             }
             case BC_TIMESTAMP_WITH_TIMEZONE:
                 int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
@@ -3375,9 +3959,21 @@ final class JSONReaderJSONB
                 int second = bytes[offset++];
                 int nano = readInt32Value();
                 LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
-                String zoneId = readString();
-                return ZonedDateTime.of(ldt,
-                        ZoneId.of(zoneId));
+
+                ZoneId zoneId;
+                long zoneIdHash = readValueHashCode();
+                if (zoneIdHash == SHANGHAI_ZONE_ID_HASH) {
+                    zoneId = SHANGHAI_ZONE_ID;
+                } else {
+                    String zoneIdStr = getString();
+                    ZoneId contextZondId = context.getZoneId();
+                    if (contextZondId.getId().equals(zoneIdStr)) {
+                        zoneId = contextZondId;
+                    } else {
+                        zoneId = ZoneId.of(zoneIdStr);
+                    }
+                }
+                return ZonedDateTime.of(ldt, zoneId);
             default:
                 break;
         }

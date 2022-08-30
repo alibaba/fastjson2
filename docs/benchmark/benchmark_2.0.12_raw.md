@@ -169,7 +169,7 @@ EishayWriteUTF8Bytes.gson                     thrpt    5   202.302 ?  0.210  ops
 EishayWriteUTF8Bytes.jackson                  thrpt    5   969.387 ?  3.753  ops/ms
 ```
 
-# ecs.c7.xlarge-oracle-jdk-jdk-18.0.2_x6
+# ecs.c7.xlarge-oracle-jdk-18.0.2_x6
 ```java
 Benchmark                                      Mode  Cnt     Score    Error   Units
 EishayParseBinary.fastjson2JSONB              thrpt    5  2208.152 ± 12.990  ops/ms
@@ -797,7 +797,7 @@ EishayWriteUTF8Bytes.gson                     thrpt    5   266.952 ?  15.429  op
 EishayWriteUTF8Bytes.jackson                  thrpt    5   634.515 ?   8.528  ops/ms
 ```
 
-# ecs.g8m.xlarge-oracle-jdk-jdk-17.0.4_aarch64
+# ecs.g8m.xlarge-oracle-jdk-17.0.4_aarch64
 ```java
 Benchmark                                      Mode  Cnt     Score     Error   Units
 EishayParseBinary.fastjson2JSONB              thrpt    5  1644.118 ?  16.873  ops/ms

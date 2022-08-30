@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
+import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
@@ -21,9 +22,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
+import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
 import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
 
-public class ObjectReaderProvider {
+public class ObjectReaderProvider
+        implements ObjectCodecProvider {
     public static final boolean SAFE_MODE;
     static final String[] DENYS;
     static final String[] AUTO_TYPE_ACCEPT_LIST;
@@ -535,18 +539,15 @@ public class ObjectReaderProvider {
         boolean autoTypeSupport = (features & JSONReader.Feature.SupportAutoType.mask) != 0;
         Class<?> clazz;
 
-        final long BASIC = 0xcbf29ce484222325L;
-        final long PRIME = 0x100000001b3L;
-
         if (autoTypeSupport) {
-            long hash = BASIC;
+            long hash = MAGIC_HASH_CODE;
             for (int i = 0; i < typeNameLength; ++i) {
                 char ch = typeName.charAt(i);
                 if (ch == '$') {
                     ch = '.';
                 }
                 hash ^= ch;
-                hash *= PRIME;
+                hash *= MAGIC_PRIME;
                 if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
                     clazz = loadClass(typeName);
                     if (clazz != null) {
@@ -565,14 +566,14 @@ public class ObjectReaderProvider {
         }
 
         if (!autoTypeSupport) {
-            long hash = BASIC;
+            long hash = MAGIC_HASH_CODE;
             for (int i = 0; i < typeNameLength; ++i) {
                 char ch = typeName.charAt(i);
                 if (ch == '$') {
                     ch = '.';
                 }
                 hash ^= ch;
-                hash *= PRIME;
+                hash *= MAGIC_PRIME;
 
                 if (Arrays.binarySearch(denyHashCodes, hash) >= 0) {
                     throw new JSONException("autoType is not support. " + typeName);

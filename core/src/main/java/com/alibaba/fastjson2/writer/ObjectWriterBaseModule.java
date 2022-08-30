@@ -37,6 +37,11 @@ public class ObjectWriterBaseModule
     }
 
     @Override
+    public ObjectWriterProvider getProvider() {
+        return provider;
+    }
+
+    @Override
     public ObjectWriterAnnotationProcessor getAnnotationProcessor() {
         return annotationProcessor;
     }
@@ -170,6 +175,10 @@ public class ObjectWriterBaseModule
                     if (parts.length == 2) {
                         beanInfo.locale = new Locale(parts[0], parts[1]);
                     }
+                }
+
+                if (!jsonType.alphabetic()) {
+                    beanInfo.alphabetic = false;
                 }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
@@ -550,7 +559,7 @@ public class ObjectWriterBaseModule
             processAnnotations(fieldInfo, annotations);
 
             if (!objectClass.getName().startsWith("java.lang") && !BeanUtils.isRecord(objectClass)) {
-                String fieldName = BeanUtils.getterName(methodName, null);
+                String fieldName = BeanUtils.getterName(method, null);
 
                 char firstChar = fieldName.charAt(0);
                 final String fieldName0;
@@ -573,7 +582,7 @@ public class ObjectWriterBaseModule
             }
 
             if (beanInfo.kotlin && beanInfo.createParameterNames != null) {
-                String fieldName = BeanUtils.getterName(methodName, null);
+                String fieldName = BeanUtils.getterName(method, null);
                 for (int i = 0; i < beanInfo.createParameterNames.length; i++) {
                     if (fieldName.equals(beanInfo.createParameterNames[i])) {
                         Annotation[] parameterAnnotations = beanInfo.creatorConstructor.getParameterAnnotations()[i];
@@ -715,6 +724,13 @@ public class ObjectWriterBaseModule
                     String typeKey = (String) result;
                     if (!typeKey.isEmpty()) {
                         beanInfo.typeKey = typeKey;
+                    }
+                    break;
+                }
+                case "alphabetic": {
+                    Boolean alphabetic = (Boolean) result;
+                    if (!alphabetic.booleanValue()) {
+                        beanInfo.alphabetic = false;
                     }
                     break;
                 }
@@ -998,10 +1014,10 @@ public class ObjectWriterBaseModule
             Class clazz = (Class) objectType;
 
             if (clazz.isEnum()) {
-                Member valueField = BeanUtils.getEnumValueField(clazz);
+                Member valueField = BeanUtils.getEnumValueField(clazz, provider);
                 if (valueField == null) {
                     Class mixInSource = provider.mixInCache.get(objectClass);
-                    Member mixedValueField = BeanUtils.getEnumValueField(mixInSource);
+                    Member mixedValueField = BeanUtils.getEnumValueField(mixInSource, provider);
                     if (mixedValueField instanceof Field) {
                         try {
                             valueField = clazz.getField(mixedValueField.getName());

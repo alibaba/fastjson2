@@ -162,7 +162,8 @@ public interface FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        if ("base64".equals(getFormat())) {
+        if ("base64".equals(getFormat())
+                || (jsonWriter.getFeatures(getFeatures()) & JSONWriter.Feature.WriteByteArrayAsBase64.mask) != 0) {
             jsonWriter.writeBase64(value);
         } else if ("gzip,base64".equals(getFormat())) {
             GZIPOutputStream gzipOut = null;

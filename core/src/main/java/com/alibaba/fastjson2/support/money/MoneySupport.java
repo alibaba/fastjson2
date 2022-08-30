@@ -72,7 +72,7 @@ public class MoneySupport {
             );
 
             FieldReader[] fieldReaders = {fieldReader0, fieldReader1};
-            return new ObjectReaderNoneDefaultConstrutor(null, null, null, 0, factoryFunction, null, paramNames, fieldReaders, null);
+            return new ObjectReaderNoneDefaultConstructor(null, null, null, 0, factoryFunction, null, paramNames, fieldReaders, null);
         } catch (NoSuchMethodException e) {
             throw new JSONException("createMonetaryAmountReader error", e);
         }

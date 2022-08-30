@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -57,6 +58,11 @@ class ObjectReaderImplInt8ValueArray
         }
 
         if (jsonReader.isString()) {
+            if ((jsonReader.features(features) & JSONReader.Feature.Base64StringAsByteArray.mask) != 0) {
+                String str = jsonReader.readString();
+                return Base64.getDecoder().decode(str);
+            }
+
             return jsonReader.readBinary();
         }
 

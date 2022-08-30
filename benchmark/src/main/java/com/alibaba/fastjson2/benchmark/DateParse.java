@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
+import com.alibaba.fastjson2.util.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -38,10 +39,9 @@ public class DateParse {
                             LocalDate.of(1992, 1, 1), LocalTime.MIN
                     )
             );
-    static final int SHANGHAI_ZONE_OFFSET_TOTAL_SECONDS = SHANGHAI_ZONE_OFFSET.getTotalSeconds();
 
     @Benchmark
-    public void simpleDateFormatParse(Blackhole bh) throws Exception {
+    public void simpleDateFormat(Blackhole bh) throws Exception {
         for (int i = 0; i < dates.length; i++) {
             String str = dates[i];
             SimpleDateFormat format = formatThreadLocal.get();
@@ -52,7 +52,7 @@ public class DateParse {
     }
 
     @Benchmark
-    public void dateTimeFormatterParse(Blackhole bh) throws Exception {
+    public void dateTimeFormatter(Blackhole bh) throws Exception {
         for (int i = 0; i < dates.length; i++) {
             String str = dates[i];
             LocalDateTime ldt = LocalDateTime.parse(str, formatter);
@@ -63,7 +63,7 @@ public class DateParse {
     }
 
     @Benchmark
-    public void dateTimeFormatterParse2(Blackhole bh) throws Exception {
+    public void localDateTimeParse(Blackhole bh) throws Exception {
         for (int i = 0; i < dates.length; i++) {
             String str = dates[i];
             LocalDateTime ldt = LocalDateTime.parse(str, formatter);
@@ -193,35 +193,10 @@ public class DateParse {
         }
 
         long millis;
-        if (year >= 1992 && DEFAULT_ZONE_ID == SHANGHAI_ZONE_ID) {
-            final int DAYS_PER_CYCLE = 146097;
-            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
-
-            long y = year;
-            long m = month;
-
-            long epochDay;
-            {
-                long total = 0;
-                total += 365 * y;
-                total += (y + 3) / 4 - (y + 99) / 100 + (y + 399) / 400;
-                total += ((367 * m - 362) / 12);
-                total += dom - 1;
-                if (m > 2) {
-                    total--;
-                    boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-                    if (leapYear == false) {
-                        total--;
-                    }
-                }
-                epochDay = total - DAYS_0000_TO_1970;
-            }
-            long seconds = epochDay * 86400
-                    + hour * 3600
-                    + minute * 60
-                    + second
-                    - SHANGHAI_ZONE_OFFSET_TOTAL_SECONDS;
-
+        if (DEFAULT_ZONE_ID == SHANGHAI_ZONE_ID || DEFAULT_ZONE_ID.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
+            long seconds = IOUtils.utcSeconds(year, month, dom, hour, minute, second);
+            int zoneOffsetTotalSeconds = IOUtils.getShanghaiZoneOffsetTotalSeconds(seconds);
+            seconds -= zoneOffsetTotalSeconds;
             millis = seconds * 1000L;
         } else {
             LocalDate localDate = LocalDate.of(year, month, dom);

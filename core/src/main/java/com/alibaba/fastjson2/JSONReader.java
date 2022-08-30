@@ -16,24 +16,17 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.zone.ZoneRules;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.IOUtils.*;
 
 public abstract class JSONReader
         implements Closeable {
     static final int MAX_EXP = 1023;
-
-    static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
-    static final ZoneId SHANGHAI_ZONE_ID = "Asia/Shanghai".equals(DEFAULT_ZONE_ID.getId()) ? DEFAULT_ZONE_ID : ZoneId.of("Asia/Shanghai");
-    static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
-    static final ZoneOffset SHANGHAI_ZONE_OFFSET = SHANGHAI_ZONE_RULES.getOffset(LocalDateTime.of(LocalDate.of(1992, 1, 1), LocalTime.MIN));
-
-    static final int SHANGHAI_ZONE_OFFSET_TOTAL_SECONDS = SHANGHAI_ZONE_OFFSET.getTotalSeconds();
-    static final ZoneId UTC = ZoneId.of("UTC");
+    static final long SHANGHAI_ZONE_ID_HASH = Fnv.hashCode64("Asia/Shanghai");
     static final long LONG_MASK = 0XFFFFFFFFL;
 
     static final byte JSON_TYPE_INT = 1;
@@ -469,6 +462,10 @@ public abstract class JSONReader
             String str = readString();
             if (str.isEmpty()) {
                 return null;
+            }
+
+            if ((context.features & Feature.Base64StringAsByteArray.mask) != 0) {
+                return Base64.getDecoder().decode(str);
             }
 
             throw new JSONException(info("not support input " + str));
@@ -1239,39 +1236,113 @@ public abstract class JSONReader
 
     protected abstract ZonedDateTime readZonedDateTimeX(int len);
 
-    protected long millis(int year, int month, int dom, int hour, int minute, int second, int nanoOfSecond) {
+    protected long millis(int year, final int month, int dom, int hour, int minute, int second, int nanoOfSecond) {
         final ZoneId zoneId = context.getZoneId();
-        if (year >= 1992 && (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES)) {
-            final int DAYS_PER_CYCLE = 146097;
-            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+        if (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES) {
+            long SECONDS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
+            long SECONDS_1991_04_14_03 = 671598000; // utcMillis(1991, 4, 14, 3, 0, 0);
+            long SECONDS_1990_09_16_02 = 653450400; // utcMillis(1990, 9, 16, 2, 0, 0);
+            long SECONDS_1990_04_15_03 = 640148400; // utcMillis(1990, 4, 15, 3, 0, 0);
+            long SECONDS_1989_09_17_02 = 622000800; // utcMillis(1989, 9, 17, 2, 0, 0);
+            long SECONDS_1989_04_16_03 = 608698800; // utcMillis(1989, 4, 16, 3, 0, 0);
+            long SECONDS_1988_09_11_02 = 589946400; // utcMillis(1988, 9, 11, 2, 0, 0);
+            long SECONDS_1988_04_17_03 = 577249200; // utcMillis(1988, 4, 17, 3, 0, 0);
+            long SECONDS_1987_09_13_02 = 558496800; // utcMillis(1987, 9, 13, 2, 0, 0);
+            long SECONDS_1987_04_12_03 = 545194800; // utcMillis(1987, 4, 12, 3, 0, 0);
+            long SECONDS_1986_09_14_02 = 527047200; // utcMillis(1986, 9, 14, 2, 0, 0);
+            long SECONDS_1986_05_04_03 = 515559600; // utcMillis(1986, 5, 4, 3, 0, 0);
+            long SECONDS_1949_05_28_00 = -649987200; // utcMillis(1949, 5, 28, 0, 0, 0);
+            long SECONDS_1949_05_01_01 = -652316400; // utcMillis(1949, 5, 1, 1, 0, 0);
+            long SECONDS_1948_10_01_00 = -670636800; // utcMillis(1948, 10, 1, 0, 0, 0);
+            long SECONDS_1948_05_01_01 = -683852400; // utcMillis(1948, 5, 1, 1, 0, 0);
+            long SECONDS_1947_11_01_00 = -699580800; // utcMillis(1947, 11, 1, 0, 0, 0);
+            long SECONDS_1947_04_15_01 = -716857200; // utcMillis(1947, 4, 15, 1, 0, 0);
+            long SECONDS_1946_10_01_00 = -733795200; // utcMillis(1946, 10, 1, 0, 0, 0);
+            long SECONDS_1946_05_15_01 = -745801200; // utcMillis(1946, 5, 15, 1, 0, 0);
+            long SECONDS_1945_09_02_00 = -767836800; // utcMillis(1945, 9, 2, 0, 0, 0);
+            long SECONDS_1942_01_31_01 = -881017200; // utcMillis(1942, 1, 31, 1, 0, 0);
+            long SECONDS_1941_11_02_00 = -888796800; // utcMillis(1941, 11, 2, 0, 0, 0);
+            long SECONDS_1941_03_15_01 = -908838000; // utcMillis(1941, 3, 15, 1, 0, 0);
+            long SECONDS_1940_10_13_00 = -922060800; // utcMillis(1940, 10, 13, 0, 0, 0);
+            long SECONDS_1940_06_01_01 = -933634800L; //utcMillis(1940, 6, 1, 1, 0, 0);
+            long SECONDS_1919_10_01_00 = -1585872000L; // utcMillis(1919, 10, 1, 0, 0, 0);
+            long SECONDS_1919_04_13_01 = -1600642800L; // utcMillis(1919, 4, 13, 1, 0, 0);
+            long SECONDS_1901_01_01_00 = -2177452800L; // utcMillis(1901, 1, 1, 0, 0, 0);
 
-            long y = year;
-            long m = month;
+            final int OFFSET_0900_TOTAL_SECONDS = 32400;
+            final int OFFSET_0543_TOTAL_SECONDS = 29143;
 
-            long epochDay;
-            {
-                long total = 0;
-                total += 365 * y;
-                total += (y + 3) / 4 - (y + 99) / 100 + (y + 399) / 400;
-                total += ((367 * m - 362) / 12);
-                total += dom - 1;
-                if (m > 2) {
-                    total--;
-                    boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-                    if (leapYear == false) {
-                        total--;
-                    }
-                }
-                epochDay = total - DAYS_0000_TO_1970;
+            long seconds = utcSeconds(year, month, dom, hour, minute, second);
+
+            int zoneOffsetTotalSeconds;
+            if (seconds >= SECONDS_1991_09_15_02) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1991_04_14_03) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1990_09_16_02) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1990_04_15_03) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1989_09_17_02) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1989_04_16_03) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1988_09_11_02) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1988_04_17_03) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1987_09_13_02) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1987_04_12_03) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1986_09_14_02) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1986_05_04_03) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1949_05_28_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1949_05_01_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1948_10_01_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1948_05_01_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1947_11_01_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1947_04_15_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1946_10_01_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1946_05_15_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1945_09_02_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1942_01_31_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1941_11_02_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1941_03_15_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1940_10_13_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1940_06_01_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1919_10_01_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1919_04_13_01) {
+                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
+            } else if (seconds >= SECONDS_1901_01_01_00) {
+                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            } else {
+                zoneOffsetTotalSeconds = OFFSET_0543_TOTAL_SECONDS;
             }
-            long seconds = epochDay * 86400
-                    + hour * 3600
-                    + minute * 60
-                    + second
-                    - SHANGHAI_ZONE_OFFSET_TOTAL_SECONDS;
 
-            int nanos = nanoOfSecond;
-            return seconds * 1000L + nanos / 1000_000;
+            seconds -= zoneOffsetTotalSeconds;
+
+            return seconds * 1000L + nanoOfSecond / 1000_000;
+        } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
+            long seconds = utcSeconds(year, month, dom, hour, minute, second);
+            return seconds * 1000L + nanoOfSecond / 1000_000;
         }
 
         LocalDate localDate = LocalDate.of(year, month, dom);
@@ -1550,6 +1621,10 @@ public abstract class JSONReader
 
             String name = readFieldName();
             if (name == null) {
+                if (ch == EOI) {
+                    throw new JSONException("input end");
+                }
+
                 name = readFieldNameUnquote();
                 nextIfMatch(':');
             }
@@ -1731,7 +1806,7 @@ public abstract class JSONReader
             Object item = read(itemType);
             list.add(item);
 
-            if (ch == '}') {
+            if (ch == '}' || ch == EOI) {
                 throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
             }
         }
@@ -1753,7 +1828,7 @@ public abstract class JSONReader
                 Object item = read(itemType);
                 list.add(item);
 
-                if (ch == '}') {
+                if (ch == '}' || ch == EOI) {
                     throw new JSONException(info());
                 }
             }
@@ -2545,6 +2620,33 @@ public abstract class JSONReader
         return new JSONReaderUTF16(context, str, chars, offset, length);
     }
 
+    public static JSONReader of(String str, int offset, int length, Context context) {
+        if (str == null) {
+            throw new NullPointerException();
+        }
+
+        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+            try {
+                byte coder = UnsafeUtils.getStringCoder(str);
+                if (coder == 0) {
+                    byte[] bytes = UnsafeUtils.getStringValue(str);
+                    return new JSONReaderASCII(context, str, bytes, offset, length);
+                }
+            } catch (Exception e) {
+                throw new JSONException("unsafe get String.coder error");
+            }
+        }
+
+        char[] chars;
+        if (JDKUtils.JVM_VERSION == 8) {
+            chars = JDKUtils.getCharArray(str);
+        } else {
+            chars = str.toCharArray();
+        }
+
+        return new JSONReaderUTF16(context, str, chars, offset, length);
+    }
+
     void bigInt(char[] chars, int off, int len) {
         int cursor = off, numDigits;
 
@@ -3087,7 +3189,11 @@ public abstract class JSONReader
         ErrorOnNotSupportAutoType(1 << 14),
         DuplicateKeyValueAsArray(1 << 15),
         AllowUnQuotedFieldNames(1 << 16),
-        NonStringKeyAsString(1 << 17);
+        NonStringKeyAsString(1 << 17),
+        /**
+         * @since 2.0.13
+         */
+        Base64StringAsByteArray(1 << 18);
 
         public final long mask;
 
@@ -3230,7 +3336,7 @@ public abstract class JSONReader
         int p0, p1;
         if (zoneIdStr != null) {
             if ("000".equals(zoneIdStr)) {
-                zoneId = UTC;
+                zoneId = ZoneOffset.UTC;
             } else if ((p0 = zoneIdStr.indexOf('[')) > 0 && (p1 = zoneIdStr.indexOf(']', p0)) > 0) {
                 String str = zoneIdStr.substring(p0 + 1, p1);
                 zoneId = ZoneId.of(str);
@@ -3252,5 +3358,9 @@ public abstract class JSONReader
             return "offset " + offset;
         }
         return message + ", offset " + offset;
+    }
+
+    static boolean isFirstIdentifier(char ch) {
+        return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_' || ch == '$' || (ch >= '0' && ch <= '9') || ch > 0x7F;
     }
 }

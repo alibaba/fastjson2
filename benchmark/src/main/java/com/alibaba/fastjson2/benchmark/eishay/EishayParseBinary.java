@@ -3,15 +3,9 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
-import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -21,18 +15,14 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class EishayParseBinary {
     static MediaContent mc;
     static byte[] fastjson2UTF8Bytes;
     static byte[] fastjson2JSONBBytes;
-    static byte[] fastjson2JSONBBytes_ArrayMapping;
     static byte[] hessianBytes;
     static byte[] javaSerializeBytes;
-    static Kryo kryo;
-    static byte[] kryoBytes;
 
     static {
         try {
@@ -43,7 +33,6 @@ public class EishayParseBinary {
 
             fastjson2UTF8Bytes = JSON.toJSONBytes(mc);
             fastjson2JSONBBytes = JSONB.toBytes(mc);
-            fastjson2JSONBBytes_ArrayMapping = JSONB.toBytes(mc, JSONWriter.Feature.BeanToArray);
 
             {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -59,18 +48,6 @@ public class EishayParseBinary {
                 objectOutputStream.flush();
                 javaSerializeBytes = byteArrayOutputStream.toByteArray();
             }
-
-            kryo = new Kryo();
-            kryo.register(MediaContent.class);
-            kryo.register(ArrayList.class);
-            kryo.register(Image.class);
-            kryo.register(Image.Size.class);
-            kryo.register(Media.class);
-            kryo.register(Media.Player.class);
-
-            Output output = new Output(1024, -1);
-            kryo.writeObject(output, mc);
-            kryoBytes = output.toBytes();
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -87,11 +64,6 @@ public class EishayParseBinary {
     }
 
     @Benchmark
-    public void fastjson2JSONBArrayMapping(Blackhole bh) {
-        bh.consume(JSONB.parseObject(fastjson2JSONBBytes_ArrayMapping, MediaContent.class, JSONReader.Feature.SupportArrayToBean));
-    }
-
-    @Benchmark
     public void javaSerialize(Blackhole bh) throws Exception {
         ByteArrayInputStream bytesIn = new ByteArrayInputStream(javaSerializeBytes);
         ObjectInputStream objectIn = new ObjectInputStream(bytesIn);
@@ -105,19 +77,12 @@ public class EishayParseBinary {
         bh.consume(hessian2Input.readObject());
     }
 
-    @Benchmark
-    public void kryo(Blackhole bh) throws Exception {
-        Input input = new Input(kryoBytes);
-        bh.consume(
-                kryo.readObject(input, MediaContent.class)
-        );
-    }
-
     public static void main(String[] args) throws Exception {
         Options options = new OptionsBuilder()
                 .include(EishayParseBinary.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
+                .warmupIterations(3)
                 .forks(1)
                 .build();
         new Runner(options).run();
