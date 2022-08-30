@@ -252,6 +252,7 @@ public class ObjectReaderBaseModule
                     && (beanInfo.readerFeatures & JSONReader.Feature.FieldBased.mask) == 0
                     && beanInfo.kotlin) {
                 BeanUtils.getKotlinConstructor(objectClass, beanInfo);
+                beanInfo.createParameterNames = BeanUtils.getKotlinConstructorParameters(objectClass);
             }
         }
 
