@@ -176,10 +176,7 @@ public class DateWrite {
             chars[17] = (char) (second / 10 + '0');
             chars[18] = (char) (second % 10 + '0');
 
-            if (JDK_STR_CREATOR == null) {
-                JDK_STR_CREATOR = JDKUtils.getStringCreatorJDK8();
-            }
-            return JDK_STR_CREATOR.apply(chars, Boolean.TRUE);
+            return new String(chars);
         } else {
             byte[] bytes = new byte[19];
 
@@ -203,16 +200,7 @@ public class DateWrite {
             bytes[17] = (byte) (second / 10 + '0');
             bytes[18] = (byte) (second % 10 + '0');
 
-            if (JDKUtils.JVM_VERSION <= 11) {
-                if (STR_CREATOR_JDK11 == null) {
-                    STR_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
-                }
-                return STR_CREATOR_JDK11.apply(bytes);
-            } else if (JDKUtils.JVM_VERSION >= 17) {
-                return JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
-            } else {
-                return new String(bytes, 0, bytes.length);
-            }
+            return new String(bytes, 0, bytes.length);
         }
     }
 
