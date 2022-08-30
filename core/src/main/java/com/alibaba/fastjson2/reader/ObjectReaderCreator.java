@@ -325,8 +325,12 @@ public class ObjectReaderCreator {
                     fieldName = parameter.getName();
                 }
             }
-            if (fieldName == null || fieldName.isEmpty() || fieldName.startsWith("arg")) {
+            if (fieldName == null || fieldName.isEmpty()) {
                 fieldName = paramNames[i];
+            } else if (fieldName.startsWith("arg")) {
+                if (paramNames != null && paramNames.length > i) {
+                    fieldName = paramNames[i];
+                }
             } else {
                 paramNames[i] = fieldName;
             }
