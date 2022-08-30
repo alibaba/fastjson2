@@ -38,7 +38,7 @@ public class ObjectReaderCreator {
             FieldReader[] setterFieldReaders
     ) {
         Function<Map<Long, Object>, T> function = createFunction(constructor, paramNames);
-        return new ObjectReaderNoneDefaultConstrutor(objectClass, null, null, 0, function, null, paramNames, paramFieldReaders, setterFieldReaders);
+        return new ObjectReaderNoneDefaultConstructor(objectClass, null, null, 0, function, null, paramNames, paramFieldReaders, setterFieldReaders);
     }
 
     public <T> ObjectReader<T> createObjectReaderNoneDefaultConstrutor(
@@ -46,13 +46,13 @@ public class ObjectReaderCreator {
             Function<Map<Long, Object>, T> creator,
             FieldReader... fieldReaders
     ) {
-        return new ObjectReaderNoneDefaultConstrutor(objectClass, null, null, 0, creator, null, null, fieldReaders, null);
+        return new ObjectReaderNoneDefaultConstructor(objectClass, null, null, 0, creator, null, null, fieldReaders, null);
     }
 
     public <T> ObjectReader<T> createObjectReaderFactoryMethod(Method factoryMethod, String... paramNames) {
         Function<Map<Long, Object>, Object> factoryFunction = createFactoryFunction(factoryMethod, paramNames);
         FieldReader[] fieldReaders = createFieldReaders(factoryMethod.getParameters(), paramNames);
-        return new ObjectReaderNoneDefaultConstrutor(null, null, null, 0, factoryFunction, null, paramNames, fieldReaders, null);
+        return new ObjectReaderNoneDefaultConstructor(null, null, null, 0, factoryFunction, null, paramNames, fieldReaders, null);
     }
 
     public FieldReader[] createFieldReaders(Parameter[] parameters, String... paramNames) {
@@ -426,7 +426,7 @@ public class ObjectReaderCreator {
         Arrays.sort(setterFieldReaders);
         Arrays.sort(fieldReaderArray);
 
-        return (ObjectReader<T>) new ObjectReaderNoneDefaultConstrutor(
+        return (ObjectReader<T>) new ObjectReaderNoneDefaultConstructor(
                 objectClass,
                 beanInfo.typeKey,
                 beanInfo.typeName,
@@ -757,7 +757,7 @@ public class ObjectReaderCreator {
 
                 Function<Map<Long, Object>, T> function = new ConstructorFunction(alternateConstructors, creatorConstructor, parameterNames);
                 FieldReader[] paramFieldReaders = createFieldReaders(creatorConstructor.getParameters(), parameterNames);
-                return new ObjectReaderNoneDefaultConstrutor(
+                return new ObjectReaderNoneDefaultConstructor(
                         objectClass,
                         beanInfo.typeKey,
                         beanInfo.typeName,
@@ -935,7 +935,20 @@ public class ObjectReaderCreator {
             if (methodName.startsWith("set")) {
                 fieldName = BeanUtils.setterName(methodName, namingStrategy);
             } else {
-                fieldName = BeanUtils.getterName(methodName, namingStrategy);
+                fieldName = BeanUtils.getterName(method, namingStrategy);
+            }
+
+            if (fieldName.length() > 2
+                    && fieldName.charAt(0) >= 'A' && fieldName.charAt(0) <= 'Z'
+                    && fieldName.charAt(1) >= 'A' && fieldName.charAt(1) <= 'Z'
+            ) {
+                char[] chars = fieldName.toCharArray();
+                chars[0] = (char) (chars[0] + 32);
+                String fieldName1 = new String(chars);
+                Field field = BeanUtils.getDeclaredField(objectClass, fieldName1);
+                if (field != null && Modifier.isPublic(field.getModifiers())) {
+                    fieldName = field.getName();
+                }
             }
         } else {
             fieldName = fieldInfo.fieldName;
@@ -1058,22 +1071,26 @@ public class ObjectReaderCreator {
 
         Map<String, FieldReader> fieldReaders = new LinkedHashMap<>();
 
+        final long beanFeatures = beanInfo.readerFeatures;
         final FieldInfo fieldInfo = new FieldInfo();
         final String[] orders = beanInfo.orders;
         if (fieldBased) {
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
                 fieldInfo.features |= JSONReader.Feature.FieldBased.mask;
+                fieldInfo.features |= beanFeatures;
                 createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, modules);
             });
         } else {
             BeanUtils.fields(objectClass, field -> {
                 fieldInfo.init();
+                fieldInfo.features |= beanFeatures;
                 createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, modules);
             });
 
             BeanUtils.setters(objectClass, method -> {
                 fieldInfo.init();
+                fieldInfo.features |= beanFeatures;
                 createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, modules);
             });
         }
@@ -1857,13 +1874,20 @@ public class ObjectReaderCreator {
             Arrays.sort(enumNameHashCodes);
         }
 
-        Member enumValueField = BeanUtils.getEnumValueField(objectClass);
+        ObjectReaderProvider provider = null;
+        for (ObjectReaderModule module : modules) {
+            ObjectReaderProvider moduleProvider = module.getProvider();
+            if (moduleProvider != null) {
+                provider = moduleProvider;
+            }
+        }
+
+        Member enumValueField = BeanUtils.getEnumValueField(objectClass, provider);
         if (enumValueField == null && modules.size() > 0) {
-            ObjectReaderProvider provider = modules.get(0).getProvider();
             if (provider != null) {
                 Class fieldClassMixInSource = provider.getMixIn(objectClass);
                 if (fieldClassMixInSource != null) {
-                    Member mixedValueField = BeanUtils.getEnumValueField(fieldClassMixInSource);
+                    Member mixedValueField = BeanUtils.getEnumValueField(fieldClassMixInSource, provider);
                     if (mixedValueField instanceof Field) {
                         try {
                             enumValueField = objectClass.getField(mixedValueField.getName());

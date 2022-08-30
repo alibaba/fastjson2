@@ -9,7 +9,7 @@ import java.util.*;
 public class GenReport {
     @Test
     public void gen() throws Exception {
-        File file = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.13_raw01.md");
+        File file = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.13_raw06.md");
 
         Map<String, BenchmarkResult> benchResults = new LinkedHashMap<>();
 
@@ -41,6 +41,18 @@ public class GenReport {
                     benchmarkResult.libraryResults.put("fastjson1", fastjson1);
                     benchmarkResult.libraryResults.put("jackson", jackson);
                     benchmarkResult.libraryResults.put("gson", gson);
+                } else {
+                    LibResult fastjson2JSONB = benchmarkResult.libraryResults.get("fastjson2JSONB");
+                    LibResult fastjson1UTF8Bytes = benchmarkResult.libraryResults.get("fastjson1UTF8Bytes");
+                    LibResult fastjson2UTF8Bytes = benchmarkResult.libraryResults.get("fastjson2UTF8Bytes");
+                    LibResult kryo = benchmarkResult.libraryResults.get("kryo");
+                    if (fastjson1UTF8Bytes != null && fastjson2UTF8Bytes != null && fastjson2JSONB != null && kryo != null) {
+                        benchmarkResult.libraryResults.clear();
+                        benchmarkResult.libraryResults.put("fastjson2JSONB", fastjson2JSONB);
+                        benchmarkResult.libraryResults.put("kryo", kryo);
+                        benchmarkResult.libraryResults.put("fastjson2UTF8Bytes", fastjson2UTF8Bytes);
+                        benchmarkResult.libraryResults.put("fastjson1UTF8Bytes", fastjson1UTF8Bytes);
+                    }
                 }
             }
 

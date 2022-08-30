@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import static com.alibaba.fastjson2.JSONFactory.MIXED_HASH_ALGORITHM;
+import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FnvTest {
@@ -15,20 +17,45 @@ public class FnvTest {
             chars[0] = c0;
 
             String str0 = new String(chars, 0, 1);
-            assertEquals((byte) c0, Fnv.hashCode64(str0));
-            assertEquals((byte) c0, Fnv.hashCode64(new byte[]{(byte) c0}));
+
+            long hash0;
+            if (MIXED_HASH_ALGORITHM) {
+                hash0 = (byte) c0;
+            } else {
+                long hash = Fnv.MAGIC_HASH_CODE;
+                hash ^= c0;
+                hash *= MAGIC_PRIME;
+                hash0 = hash;
+            }
+
+            assertEquals(hash0, Fnv.hashCode64(str0));
+            assertEquals(hash0, Fnv.hashCode64(new byte[]{(byte) c0}));
 
             for (char c1 = 1; c1 < 0x7F; ++c1) {
                 chars[1] = c1;
 
                 String str1 = new String(chars, 0, 2);
-                int expected = ((byte) c0 << 8) + c1;
+
+                long hash1;
+                if (MIXED_HASH_ALGORITHM) {
+                    hash1 = ((byte) c0 << 8) + c1;
+                } else {
+                    long hash = Fnv.MAGIC_HASH_CODE;
+
+                    hash ^= c0;
+                    hash *= MAGIC_PRIME;
+                    hash ^= c1;
+                    hash *= MAGIC_PRIME;
+
+                    hash1 = hash;
+                }
+
                 assertEquals(
-                        expected,
+                        hash1,
                         Fnv.hashCode64(str1)
                 );
                 assertEquals(
-                        expected,
+                        hash1,
                         Fnv.hashCode64(new byte[]{(byte) c0, (byte) c1})
                 );
             }

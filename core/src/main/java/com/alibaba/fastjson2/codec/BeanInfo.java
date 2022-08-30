@@ -38,4 +38,5 @@ public class BeanInfo {
     public String schema;
     public String format;
     public Locale locale;
+    public boolean alphabetic = true;
 }

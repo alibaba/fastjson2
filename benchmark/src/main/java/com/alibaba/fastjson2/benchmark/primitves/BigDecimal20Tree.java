@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.benchmark.primitves;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -17,12 +18,16 @@ import java.util.concurrent.TimeUnit;
 
 public class BigDecimal20Tree {
     static String str;
+    static byte[] jsonbBytes;
     static ObjectMapper mapper = new ObjectMapper();
 
     public BigDecimal20Tree() {
         try {
             InputStream is = BigDecimal20Tree.class.getClassLoader().getResourceAsStream("data/dec20.json");
             str = IOUtils.toString(is, "UTF-8");
+            jsonbBytes = JSONB.toBytes(
+                    JSON.parseObject(str, Map.class)
+            );
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -39,6 +44,13 @@ public class BigDecimal20Tree {
     public void fastjson2(Blackhole bh) {
         bh.consume(
                 JSON.parseObject(str, Map.class)
+        );
+    }
+
+    @Benchmark
+    public void fastjson2_jsonb(Blackhole bh) {
+        bh.consume(
+                JSONB.parseObject(jsonbBytes, Map.class)
         );
     }
 

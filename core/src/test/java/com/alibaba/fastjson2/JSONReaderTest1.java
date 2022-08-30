@@ -1490,7 +1490,7 @@ public class JSONReaderTest1 {
     public void config() {
         JSONReader jsonReader = JSONReader.of("");
         JSONReader.AutoTypeBeforeHandler filter = JSONReader.autoTypeFilter("com.abc");
-        jsonReader.getContext().config(new Filter[] {
+        jsonReader.getContext().config(new Filter[]{
                 filter
         });
         assertSame(filter, jsonReader.getContext().getContextAutoTypeBeforeHandler());
@@ -1532,21 +1532,21 @@ public class JSONReaderTest1 {
 
                         {
                             JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
-                            jsonReader.getContext().setZoneId(JSONReader.SHANGHAI_ZONE_ID);
+                            jsonReader.getContext().setZoneId(IOUtils.SHANGHAI_ZONE_ID);
                             long millis19 = jsonReader.readMillis19();
 
                             LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, JSONReader.SHANGHAI_ZONE_ID, null);
+                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, IOUtils.SHANGHAI_ZONE_ID, null);
                             assertEquals(zdt.toInstant().toEpochMilli(), millis19);
                         }
 
                         {
                             JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
-                            jsonReader.getContext().setZoneId(JSONReader.UTC);
+                            jsonReader.getContext().setZoneId(ZoneOffset.UTC);
                             long millis19 = jsonReader.readMillis19();
 
                             LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, JSONReader.UTC, null);
+                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, ZoneOffset.UTC, null);
                             assertEquals(zdt.toInstant().toEpochMilli(), millis19);
                         }
                     }
@@ -1557,7 +1557,7 @@ public class JSONReaderTest1 {
 
     @Test
     public void readNameHashCode() {
-        String[] names = new String[] {
+        String[] names = new String[]{
                 "",
                 "0",
                 "01",
@@ -1659,5 +1659,235 @@ public class JSONReaderTest1 {
                 }
             }
         }
+    }
+
+    @Test
+    public void readName_1() {
+        char[] chars = "{\"0\":0}".toCharArray();
+        byte[] bytes = new byte[chars.length];
+        for (int i = 0; i < chars.length; i++) {
+            bytes[i] = (byte) chars[i];
+        }
+
+        for (char c = 128; c < 255; ++c) {
+            chars[2] = c;
+            bytes[2] = (byte) c;
+
+            JSONReader utf16Reader = JSONReader.of(chars);
+            assertTrue(utf16Reader.nextIfObjectStart());
+            String name0 = utf16Reader.readFieldName();
+
+            JSONReaderASCII asciiReader = new JSONReaderASCII(JSONFactory.createReadContext(), null, bytes, 0, bytes.length);
+            assertTrue(asciiReader.nextIfObjectStart());
+            String name1 = asciiReader.readFieldName();
+
+            assertEquals(name0, name1);
+        }
+    }
+
+    @Test
+    public void readName_2() {
+        char[] chars = "{\"00\":0}".toCharArray();
+        byte[] bytes = new byte[chars.length];
+        for (int i = 0; i < chars.length; i++) {
+            bytes[i] = (byte) chars[i];
+        }
+
+        for (char c0 = 128; c0 < 129; ++c0) {
+            chars[2] = c0;
+            bytes[2] = (byte) c0;
+
+            for (char c1 = 128; c1 < 255; ++c1) {
+                chars[3] = c1;
+                bytes[3] = (byte) c1;
+
+                JSONReader utf16Reader = JSONReader.of(chars);
+                assertTrue(utf16Reader.nextIfObjectStart());
+                String name0 = utf16Reader.readFieldName();
+
+                JSONReaderASCII asciiReader = new JSONReaderASCII(JSONFactory.createReadContext(), null, bytes, 0, bytes.length);
+                assertTrue(asciiReader.nextIfObjectStart());
+                String name1 = asciiReader.readFieldName();
+
+                assertEquals(name0, name1);
+
+                byte[] ut8Bytes = new String(chars).getBytes(StandardCharsets.UTF_8);
+                JSONReaderUTF8 utf8Reader = new JSONReaderUTF8(JSONFactory.createReadContext(), ut8Bytes, 0, ut8Bytes.length);
+                assertTrue(utf8Reader.nextIfObjectStart());
+                String name2 = utf8Reader.readFieldName();
+                assertEquals(name0, name2);
+            }
+        }
+    }
+
+    @Test
+    public void asciitest() {
+        char[] chars = new char[1024];
+        chars[0] = '"';
+        for (int i = 1; i < chars.length - 1; ++i) {
+            chars[i] = 'A';
+            chars[i + 1] = '"';
+            byte[] ascii = new byte[i + 2];
+            for (int j = 0; j < ascii.length; j++) {
+                ascii[j] = (byte) chars[j];
+            }
+            String str0 = new String(ascii, 1, ascii.length - 2, StandardCharsets.US_ASCII);
+            JSONReader jsonReader = JSONReader.of(ascii, 0, ascii.length, StandardCharsets.US_ASCII);
+            String str1 = jsonReader.readString();
+            assertEquals(str0, str1);
+            assertTrue(jsonReader.isEnd());
+        }
+    }
+
+    @Test
+    public void asciitest1() {
+        char[] chars = new char[2048];
+        chars[0] = '"';
+        for (int i = 1; i < chars.length - 2; i += 2) {
+            chars[i] = '\\';
+            chars[i + 1] = '\\';
+            chars[i + 2] = '"';
+            byte[] ascii = new byte[i + 3];
+            for (int j = 0; j < ascii.length; j++) {
+                ascii[j] = (byte) chars[j];
+            }
+
+            byte[] unescape = new byte[i / 2 + 1];
+            Arrays.fill(unescape, (byte) '\\');
+
+            String str0 = new String(unescape);
+            JSONReader jsonReader = JSONReader.of(ascii, 0, ascii.length, StandardCharsets.US_ASCII);
+            String str1 = jsonReader.readString();
+            assertEquals(str0, str1);
+            assertTrue(jsonReader.isEnd());
+        }
+    }
+
+    @Test
+    public void utf16test() {
+        char[] chars = new char[1024];
+        chars[0] = '"';
+        for (int i = 1; i < chars.length - 1; ++i) {
+            chars[i] = 'A';
+            chars[i + 1] = '"';
+            char[] utf16 = new char[i + 2];
+            for (int j = 0; j < utf16.length; j++) {
+                utf16[j] = chars[j];
+            }
+            String str0 = new String(utf16, 1, utf16.length - 2);
+            JSONReader jsonReader = JSONReader.of(utf16, 0, utf16.length);
+            String str1 = jsonReader.readString();
+            assertEquals(str0, str1);
+            assertTrue(jsonReader.isEnd());
+        }
+    }
+
+    @Test
+    public void utf16test1() {
+        char[] chars = new char[2048];
+        chars[0] = '"';
+        for (int i = 1; i < chars.length - 2; i += 2) {
+            chars[i] = '\\';
+            chars[i + 1] = '\\';
+            chars[i + 2] = '"';
+            char[] utf16 = new char[i + 3];
+            for (int j = 0; j < utf16.length; j++) {
+                utf16[j] = chars[j];
+            }
+
+            char[] unescape = new char[i / 2 + 1];
+            Arrays.fill(unescape, '\\');
+
+            String str0 = new String(unescape);
+            JSONReader jsonReader = JSONReader.of(utf16, 0, utf16.length);
+            String str1 = jsonReader.readString();
+            assertEquals(str0, str1);
+            assertTrue(jsonReader.isEnd());
+        }
+    }
+
+    @Test
+    public void testMillis_shanghai() {
+        ZoneId zoneId = IOUtils.SHANGHAI_ZONE_ID;
+        int[] years = {
+                1992, 1991, 1990, 1989, 1988, 1987, 1986, 1985,
+                1950, 1949, 1948, 1947, 1946, 1945, 1944, 1943, 1942, 1941, 1941, 1940,
+                1939, 1938, 1937, 1920, 1919, 1902, 1901, 1900, 1899
+        };
+        int[] months = {12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+        int[] days = {
+                1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                21, 22, 23, 24, 25, 26, 27, 28
+        };
+        int[] hours = {
+                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                21, 22, 23
+        };
+        int[] minutes = {0, 1, 59};
+        for (int year : years) {
+            for (int month : months) {
+                for (int dom : days) {
+                    for (int hour : hours) {
+                        for (int minute : minutes) {
+                            validate(zoneId, year, month, dom, hour, minute);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testMillis_utc() {
+        ZoneId[] zoneIds = {
+                ZoneId.of("Asia/Macau"),
+                ZoneOffset.UTC,
+                ZoneId.of("Asia/Kuching"),
+                ZoneId.of("Europe/London")
+        };
+
+        for (ZoneId zoneId : zoneIds) {
+            int[] years = {
+                    1992, 1991, 1990, 1989, 1988, 1987, 1986, 1985,
+                    1950, 1949, 1948, 1947, 1946, 1945, 1944, 1943, 1942, 1941, 1941, 1940,
+                    1939, 1938, 1937, 1920, 1919, 1902, 1901, 1900, 1899
+            };
+            int[] months = {12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+            int[] days = {
+                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                    11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                    21, 22, 23, 24, 25, 26, 27, 28
+            };
+            int[] hours = {
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                    11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                    21, 22, 23
+            };
+
+            int[] minutes = {0, 1, 59};
+            for (int year : years) {
+                for (int month : months) {
+                    for (int dom : days) {
+                        for (int hour : hours) {
+                            for (int minute : minutes) {
+                                validate(zoneId, year, month, dom, hour, minute);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static void validate(ZoneId zoneId, int year, int month, int dom, int hour, int minute) {
+        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, 0, 0);
+        long epochMilli = ldt.atZone(zoneId).toInstant().toEpochMilli();
+
+        JSONReader jsonReader = JSONReader.of("123");
+        jsonReader.context.setZoneId(zoneId);
+        long millis = jsonReader.millis(year, month, dom, hour, minute, 0, 0);
+        assertEquals(epochMilli, millis, ldt.toString());
     }
 }

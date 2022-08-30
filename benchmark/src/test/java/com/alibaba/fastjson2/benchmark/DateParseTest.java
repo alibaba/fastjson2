@@ -15,7 +15,7 @@ public class DateParseTest {
     public static void dateTimeFormatterParse() throws Exception {
         long start = System.currentTimeMillis();
         for (int i = 0; i < COUNT; ++i) {
-            benchmark.dateTimeFormatterParse(BH);
+            benchmark.dateTimeFormatter(BH);
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("CartTree-fastjson2 : " + millis);
@@ -42,7 +42,7 @@ public class DateParseTest {
     public static void dateTimeFormatterParse2() throws Exception {
         long start = System.currentTimeMillis();
         for (int i = 0; i < COUNT; ++i) {
-            benchmark.dateTimeFormatterParse2(BH);
+            benchmark.localDateTimeParse(BH);
         }
         long millis = System.currentTimeMillis() - start;
         System.out.println("CartTree-fastjson2 : " + millis);

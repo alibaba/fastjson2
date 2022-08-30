@@ -13,14 +13,14 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_NULL;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
-public class ObjectReaderNoneDefaultConstrutor<T>
+public class ObjectReaderNoneDefaultConstructor<T>
         extends ObjectReaderAdapter<T> {
     final String[] paramNames;
     final FieldReader[] setterFieldReaders;
     private Function<Map<Long, Object>, T> creator;
     private List<Constructor> alternateConstructors;
 
-    public ObjectReaderNoneDefaultConstrutor(
+    public ObjectReaderNoneDefaultConstructor(
             Class objectClass,
             String typeKey,
             String typeName,

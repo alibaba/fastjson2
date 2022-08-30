@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.benchmark.primitves;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.benchmark.primitves.vo.Date20Field;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
@@ -17,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Date20 {
     static String str;
+    static byte[] jsonbBytes;
     static String str_millis;
     static ObjectMapper mapper = new ObjectMapper();
 
@@ -27,12 +29,17 @@ public class Date20 {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
         try {
             InputStream is = Date20.class.getClassLoader().getResourceAsStream("data/millis20.json");
             str_millis = IOUtils.toString(is, "UTF-8");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
+        jsonbBytes = JSONB.toBytes(
+                JSON.parseObject(str, Date20Field.class)
+        );
     }
 
     @Benchmark
@@ -53,6 +60,13 @@ public class Date20 {
     public void fastjson2(Blackhole bh) {
         bh.consume(
                 JSON.parseObject(str, Date20Field.class)
+        );
+    }
+
+    @Benchmark
+    public void fastjson2_jsonb(Blackhole bh) {
+        bh.consume(
+                JSONB.parseObject(jsonbBytes, Date20Field.class)
         );
     }
 

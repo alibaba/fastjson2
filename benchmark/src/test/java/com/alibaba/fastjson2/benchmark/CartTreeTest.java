@@ -3,15 +3,15 @@ package com.alibaba.fastjson2.benchmark;
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class CartTreeTest {
-    public static void fastjson2_perf_test() {
+    static final CartTree benchmark = new CartTree();
+
+    public static void fastjson2_test() {
         for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
+            fastjson2();
         }
     }
 
-    public static void fastjson2_perf() {
-        CartTree benchmark = new CartTree();
-
+    public static void fastjson2() {
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 10; ++i) {
             benchmark.fastjson2(BH);
@@ -32,15 +32,40 @@ public class CartTreeTest {
         // oracle-jdk-18.0.2 :
     }
 
-    public static void jackson_perf_test() throws Exception {
+    public static void fastjson2_jsonb_test() {
         for (int i = 0; i < 10; i++) {
-            jackson_perf();
+            fastjson2_jsonb();
         }
     }
 
-    public static void jackson_perf() throws Exception {
-        CartTree benchmark = new CartTree();
+    public static void fastjson2_jsonb() {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000 * 10; ++i) {
+            benchmark.fastjson2_jsonb(BH);
+        }
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("CartTree-fastjson2 : " + millis);
 
+        // zulu8.62.0.19 : 940
+        // zulu11.52.13 : 1112
+        // zulu17.32.13 : 1060
+        // zulu18.28.13 :
+        // zulu19.0.47 :
+        // corretto-8 :
+        // corretto-11 :
+        // corretto-17 :
+        // corretto-18 :
+        // oracle-jdk-17.0.4 :
+        // oracle-jdk-18.0.2 :
+    }
+
+    public static void jackson_test() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            jackson();
+        }
+    }
+
+    public static void jackson() throws Exception {
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000 * 10; ++i) {
             benchmark.jackson(BH);
@@ -59,9 +84,36 @@ public class CartTreeTest {
         // oracle-jdk-17.0.4 :
         // oracle-jdk-18.0.2 :
     }
+    public static void wastjson_test() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            wastjson();
+        }
+    }
+
+    public static void wastjson() throws Exception {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000 * 10; ++i) {
+            benchmark.wastjson(BH);
+        }
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("CartTree-wastjson : " + millis);
+        // zulu8.62.0.19 : 869
+        // zulu11.52.13 :
+        // zulu17.32.13 : 1139
+        // zulu18.28.13 :
+        // zulu19.0.47 :
+        // corretto-8 :
+        // corretto-11 :
+        // corretto-17 :
+        // corretto-18 :
+        // oracle-jdk-17.0.4 :
+        // oracle-jdk-18.0.2 :
+    }
 
     public static void main(String[] args) throws Exception {
-        fastjson2_perf_test();
+        fastjson2_test();
+//        fastjson2_jsonb_test();
 //        jackson_perf_test();
+//        wastjson_test();
     }
 }

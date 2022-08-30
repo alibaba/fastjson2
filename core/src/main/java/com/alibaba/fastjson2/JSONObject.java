@@ -1850,4 +1850,12 @@ public class JSONObject
     public static JSONObject parseObject(String text) {
         return JSON.parseObject(text);
     }
+
+    /**
+     * See {@link JSON#parse} for details
+     * @since 2.0.13
+     */
+    public static JSONObject parse(String text, JSONReader.Feature... features) {
+        return JSON.parseObject(text, features);
+    }
 }
