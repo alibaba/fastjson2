@@ -248,7 +248,9 @@ public class ObjectReaderBaseModule
                     getCreator(beanInfo, objectClass, constructor)
             );
 
-            if (beanInfo.creatorConstructor == null && beanInfo.kotlin) {
+            if (beanInfo.creatorConstructor == null
+                    && (beanInfo.readerFeatures & JSONReader.Feature.FieldBased.mask) == 0
+                    && beanInfo.kotlin) {
                 BeanUtils.getKotlinConstructor(objectClass, beanInfo);
             }
         }

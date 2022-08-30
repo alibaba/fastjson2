@@ -579,6 +579,9 @@ public class ObjectReaderCreator {
 
     public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, List<ObjectReaderModule> modules) {
         BeanInfo beanInfo = new BeanInfo();
+        if (fieldBased) {
+            beanInfo.readerFeatures |= JSONReader.Feature.FieldBased.mask;
+        }
 
         for (ObjectReaderModule module : modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
