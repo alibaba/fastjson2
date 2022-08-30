@@ -218,19 +218,26 @@ public class ObjectReaderBaseModule
             getBeanInfo(beanInfo, annotations);
 
             for (Annotation annotation : annotations) {
+                boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 Class<? extends Annotation> annotationType = annotation.annotationType();
                 switch (annotationType.getName()) {
                     case "com.alibaba.fastjson.annotation.JSONType":
                         getBeanInfo1x(beanInfo, annotation);
                         break;
                     case "com.fasterxml.jackson.annotation.JsonTypeInfo":
-                        processJacksonJsonTypeInfo(beanInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonTypeInfo(beanInfo, annotation);
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonTypeName":
-                        processJacksonJsonTypeName(beanInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonTypeName(beanInfo, annotation);
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonSubTypes":
-                        processJacksonJsonSubTypes(beanInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonSubTypes(beanInfo, annotation);
+                        }
                         break;
                     case "kotlin.Metadata":
                         beanInfo.kotlin = true;
@@ -655,22 +662,32 @@ public class ObjectReaderBaseModule
                 if (annotationType == JSONField.class) {
                     jsonField = (JSONField) annotation;
                 }
+
+                boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 String annotationTypeName = annotationType.getName();
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
-                        fieldInfo.ignore = true;
+                        if (useJacksonAnnotation) {
+                            fieldInfo.ignore = true;
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnySetter":
-                        fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        }
                         break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
                     case "com.fasterxml.jackson.annotation.JsonProperty":
-                        processJacksonJsonProperty(fieldInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonProperty(fieldInfo, annotation);
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAlias":
-                        processJacksonJsonAlias(fieldInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonAlias(fieldInfo, annotation);
+                        }
                         break;
                     case "com.taobao.api.internal.mapping.ApiField":
                         processTaobaoApiField(fieldInfo, annotation);
@@ -706,22 +723,32 @@ public class ObjectReaderBaseModule
                 if (annotationType == JSONField.class) {
                     jsonField = (JSONField) annotation;
                 }
+
+                boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 String annotationTypeName = annotationType.getName();
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
-                        fieldInfo.ignore = true;
+                        if (useJacksonAnnotation) {
+                            fieldInfo.ignore = true;
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnyGetter":
-                        fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        }
                         break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
                     case "com.fasterxml.jackson.annotation.JsonProperty":
-                        processJacksonJsonProperty(fieldInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonProperty(fieldInfo, annotation);
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAlias":
-                        processJacksonJsonAlias(fieldInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonAlias(fieldInfo, annotation);
+                        }
                         break;
                     case "com.taobao.api.internal.mapping.ApiField":
                         processTaobaoApiField(fieldInfo, annotation);
@@ -735,6 +762,10 @@ public class ObjectReaderBaseModule
         }
 
         private void processJacksonJsonProperty(FieldInfo fieldInfo, Annotation annotation) {
+            if (!JSONFactory.isUseJacksonAnnotation()) {
+                return;
+            }
+
             Class<? extends Annotation> annotationClass = annotation.getClass();
             BeanUtils.annotationMethods(annotationClass, m -> {
                 String name = m.getName();
@@ -1068,7 +1099,9 @@ public class ObjectReaderBaseModule
                     });
                     break;
                 case "com.fasterxml.jackson.annotation.JsonCreator":
-                    creatorMethod = true;
+                    if (JSONFactory.isUseJacksonAnnotation()) {
+                        creatorMethod = true;
+                    }
                     break;
                 default:
                     break;
