@@ -2022,28 +2022,27 @@ public interface JSON {
      * @param features features to be enabled in serialization
      */
     static String toJSONString(Object object, JSONWriter.Feature... features) {
-        return toJSONString(object, JSONFactory.defaultObjectWriterProvider, features);
+        JSONWriter.Context writeContext = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
+
+        return toJSONString(object, writeContext);
     }
 
     /**
      * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
      *
      * @param object Java Object to be serialized into JSON {@link String}
-     * @param writerProvider customized object writer provider
-     * @param features features to be enabled in serialization
+     * @param context specify the context use by JSONWriter
      */
-    static String toJSONString(Object object, ObjectWriterProvider writerProvider, JSONWriter.Feature... features) {
-        JSONWriter.Context writeContext = new JSONWriter.Context(writerProvider, features);
-
-        boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
+    static String toJSONString(Object object, JSONWriter.Context context) {
+        boolean pretty = (context.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
 
         JSONWriter jsonWriter;
         if (JDKUtils.JVM_VERSION == 8) {
-            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            jsonWriter = new JSONWriterUTF16JDK8(context);
         } else if ((defaultWriterFeatures & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+            jsonWriter = new JSONWriterUTF8JDK9(context);
         } else {
-            jsonWriter = new JSONWriterUTF16(writeContext);
+            jsonWriter = new JSONWriterUTF16(context);
         }
 
         try (JSONWriter writer = pretty ?
@@ -2054,8 +2053,8 @@ public interface JSON {
                 writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
 
-                boolean fieldBased = (writeContext.features & JSONWriter.Feature.FieldBased.mask) != 0;
-                ObjectWriter<?> objectWriter = writeContext.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
+                ObjectWriter<?> objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();
