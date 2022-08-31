@@ -4,10 +4,12 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
+import lombok.Data;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,5 +63,33 @@ public class Issue647 {
 
     public static class Item {
         public int id;
+    }
+
+    @Test
+    public void test2() {
+        String str = "{\"@type\":\"com.alibaba.fastjson2.issues.Issue647$TradeDTO\"," +
+                "\"storeCoupons\": {\n" +
+                "        \"@type\": \"java.util.HashMap\"\n" +
+                "    },\n" +
+                "    \"storeRemark\": [\n" +
+                "        {\n" +
+                "            \"remark\": \"\",\n" +
+                "            \"storeId\": \"1514499072599498753\"\n" +
+                "        }\n" +
+                "    ]" +
+                "}";
+        TradeDTO bean2 = (TradeDTO) JSON.parseObject(str, Object.class, JSONReader.Feature.SupportAutoType);
+        assertEquals("1514499072599498753", bean2.storeRemark.get(0).storeId);
+    }
+
+    public static class TradeDTO {
+        public Object storeCoupons;
+        public List<StoreRemarkDTO> storeRemark;
+    }
+
+    @Data
+    public static class StoreRemarkDTO {
+        private String storeId;
+        private String remark;
     }
 }
