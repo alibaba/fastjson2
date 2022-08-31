@@ -28,6 +28,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonJsonIgnore;
+
 public class ObjectReaderBaseModule
         implements ObjectReaderModule {
     final ObjectReaderProvider provider;
@@ -668,7 +670,7 @@ public class ObjectReaderBaseModule
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         if (useJacksonAnnotation) {
-                            fieldInfo.ignore = true;
+                            processJacksonJsonJsonIgnore(fieldInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnySetter":
@@ -729,7 +731,7 @@ public class ObjectReaderBaseModule
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         if (useJacksonAnnotation) {
-                            fieldInfo.ignore = true;
+                            processJacksonJsonJsonIgnore(fieldInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnyGetter":

@@ -25,6 +25,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
+import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonJsonIgnore;
+
 public class ObjectWriterBaseModule
         implements ObjectWriterModule {
     static ObjectWriterAdapter STACK_TRACE_ELEMENT_WRITER;
@@ -243,7 +245,7 @@ public class ObjectWriterBaseModule
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         if (useJacksonAnnotation) {
-                            fieldInfo.ignore = true;
+                            processJacksonJsonJsonIgnore(fieldInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnyGetter":
@@ -627,7 +629,7 @@ public class ObjectWriterBaseModule
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         if (useJacksonAnnotation) {
-                            fieldInfo.ignore = true;
+                            processJacksonJsonJsonIgnore(fieldInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnyGetter":
