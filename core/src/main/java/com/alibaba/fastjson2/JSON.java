@@ -2022,7 +2022,18 @@ public interface JSON {
      * @param features features to be enabled in serialization
      */
     static String toJSONString(Object object, JSONWriter.Feature... features) {
-        JSONWriter.Context writeContext = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
+        return toJSONString(object, JSONFactory.defaultObjectWriterProvider, features);
+    }
+
+    /**
+     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param object Java Object to be serialized into JSON {@link String}
+     * @param writerProvider customized object writer provider
+     * @param features features to be enabled in serialization
+     */
+    static String toJSONString(Object object, ObjectWriterProvider writerProvider, JSONWriter.Feature... features) {
+        JSONWriter.Context writeContext = new JSONWriter.Context(writerProvider, features);
 
         boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
 
