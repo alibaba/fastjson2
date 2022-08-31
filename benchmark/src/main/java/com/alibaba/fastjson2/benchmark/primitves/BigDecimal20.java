@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.benchmark.primitves.vo.BigDecimal20Field;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -20,6 +21,7 @@ public class BigDecimal20 {
     static String str;
     static byte[] jsonbBytes;
     static ObjectMapper mapper = new ObjectMapper();
+    static Gson gson = new Gson();
 
     public BigDecimal20() {
         try {
@@ -61,9 +63,24 @@ public class BigDecimal20 {
         );
     }
 
+    @Benchmark
+    public void gson(Blackhole bh) throws Exception {
+        bh.consume(
+                gson.fromJson(str, BigDecimal20Field.class)
+        );
+    }
+
+    @Benchmark
+    public void wastjson(Blackhole bh) throws Exception {
+        bh.consume(
+                io.github.wycst.wast.json.JSON.parseObject(str, BigDecimal20Field.class)
+        );
+    }
+
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(BigDecimal20.class.getName())
+                .exclude(BigDecimal20Tree.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)

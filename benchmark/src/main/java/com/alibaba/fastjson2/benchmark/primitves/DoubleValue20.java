@@ -20,13 +20,14 @@ public class DoubleValue20 {
     static String str;
     static byte[] jsonbBytes;
     static ObjectMapper mapper = new ObjectMapper();
+    static final Class<DoubleValue20Field> OBJECT_CLASS = DoubleValue20Field.class;
 
     public DoubleValue20() {
         try {
             InputStream is = DoubleValue20.class.getClassLoader().getResourceAsStream("data/dec20.json");
             str = IOUtils.toString(is, "UTF-8");
             jsonbBytes = JSONB.toBytes(
-                    JSON.parseObject(str, DoubleValue20Field.class)
+                    JSON.parseObject(str, OBJECT_CLASS)
             );
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -36,28 +37,35 @@ public class DoubleValue20 {
     @Benchmark
     public void fastjson1(Blackhole bh) {
         bh.consume(
-                com.alibaba.fastjson.JSON.parseObject(str, DoubleValue20Field.class)
+                com.alibaba.fastjson.JSON.parseObject(str, OBJECT_CLASS)
         );
     }
 
     @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(
-                JSON.parseObject(str, DoubleValue20Field.class)
+                JSON.parseObject(str, OBJECT_CLASS)
         );
     }
 
     @Benchmark
     public void fastjson2_jsonb(Blackhole bh) {
         bh.consume(
-                JSONB.parseObject(jsonbBytes, DoubleValue20Field.class)
+                JSONB.parseObject(jsonbBytes, OBJECT_CLASS)
         );
     }
 
     @Benchmark
     public void jackson(Blackhole bh) throws Exception {
         bh.consume(
-                mapper.readValue(str, DoubleValue20Field.class)
+                mapper.readValue(str, OBJECT_CLASS)
+        );
+    }
+
+    @Benchmark
+    public void wastjson(Blackhole bh) throws Exception {
+        bh.consume(
+                io.github.wycst.wast.json.JSON.parseObject(str, OBJECT_CLASS)
         );
     }
 
