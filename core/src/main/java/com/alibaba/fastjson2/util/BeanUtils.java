@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.BeanInfo;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 
 import java.io.Serializable;
@@ -1757,5 +1758,26 @@ public abstract class BeanUtils {
             throw new NullPointerException();
         }
         return obj;
+    }
+
+    public static void processJacksonJsonJsonIgnore(FieldInfo fieldInfo, Annotation annotation) {
+        fieldInfo.ignore = true;
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "value":
+                        boolean value = (Boolean) result;
+                        fieldInfo.ignore = value;
+                        break;
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
     }
 }
