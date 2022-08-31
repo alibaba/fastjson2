@@ -1611,7 +1611,7 @@ public abstract class JSONPath {
         @Override
         public boolean contains(Object root) {
             if (root instanceof Map) {
-                return ((Map) root).get(name) != null;
+                return ((Map) root).containsKey(name);
             }
 
             ObjectWriterProvider provider = getWriterContext().getProvider();
@@ -3487,7 +3487,7 @@ public abstract class JSONPath {
             }
 
             if (object instanceof Map) {
-                return ((Map<?, ?>) object).get(name) != null;
+                return ((Map<?, ?>) object).containsKey(name);
             }
 
             if (object instanceof Collection) {
