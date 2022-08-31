@@ -1163,6 +1163,26 @@ public class ObjectReaderBaseModule
                         }
                     });
                     break;
+                case "com.fasterxml.jackson.annotation.JsonCreator":
+                    if (JSONFactory.isUseJacksonAnnotation()) {
+                        creatorMethod = true;
+                        BeanUtils.annotationMethods(annotationType, m1 -> {
+                            try {
+                                switch (m1.getName()) {
+                                    case "parameterNames":
+                                        String[] createParameterNames = (String[]) m1.invoke(annotation);
+                                        if (createParameterNames.length != 0) {
+                                            beanInfo.createParameterNames = createParameterNames;
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            } catch (Throwable ignored) {
+                            }
+                        });
+                    }
+                    break;
                 default:
                     break;
             }
