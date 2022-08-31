@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
@@ -40,6 +41,24 @@ public abstract class ObjectReaderBean<T>
     @Override
     public Class<T> getObjectClass() {
         return objectClass;
+    }
+
+    protected T processObjectInputSingleItemArray(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        String message = "expect {, but [, class " + this.typeName;
+        if (fieldName != null) {
+            message += ", parent fieldName " + fieldName;
+        }
+        String info = jsonReader.info(message);
+
+        long featuresAll = jsonReader.features(features);
+        if ((featuresAll & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
+            Type itemType = fieldType == null ? this.objectClass : fieldType;
+            List list = jsonReader.readArray(itemType);
+            if (list.size() == 1) {
+                return (T) list.get(0);
+            }
+        }
+        throw new JSONException(info);
     }
 
     protected void processExtra(JSONReader jsonReader, Object object) {
@@ -144,8 +163,13 @@ public abstract class ObjectReaderBean<T>
             return null;
         }
 
-        if (jsonReader.isArray() && jsonReader.isSupportBeanArray(getFeatures() | features)) {
-            return readArrayMappingObject(jsonReader, fieldType, fieldName, features);
+        long featuresAll = jsonReader.features(this.getFeatures() | features);
+        if (jsonReader.isArray()) {
+            if ((featuresAll & JSONReader.Feature.SupportArrayToBean.mask) != 0) {
+                return readArrayMappingObject(jsonReader, fieldType, fieldName, features);
+            }
+
+            return processObjectInputSingleItemArray(jsonReader, fieldType, fieldName, featuresAll);
         }
 
         T object = null;

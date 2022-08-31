@@ -275,30 +275,34 @@ final class ObjectReader6<T>
             return null;
         }
 
-        if (jsonReader.isArray()
-                && jsonReader.isSupportBeanArray()) {
-            jsonReader.nextIfMatch('[');
-            T object = defaultCreator.get();
-            if (hasDefaultValue) {
-                initDefaultValue(object);
+        long featuresAll = jsonReader.features(this.features | features);
+        if (jsonReader.isArray()) {
+            if ((featuresAll & JSONReader.Feature.SupportArrayToBean.mask) != 0) {
+                jsonReader.nextIfMatch('[');
+                T object = defaultCreator.get();
+                if (hasDefaultValue) {
+                    initDefaultValue(object);
+                }
+
+                fieldReader0.readFieldValue(jsonReader, object);
+                fieldReader1.readFieldValue(jsonReader, object);
+                fieldReader2.readFieldValue(jsonReader, object);
+                fieldReader3.readFieldValue(jsonReader, object);
+                fieldReader4.readFieldValue(jsonReader, object);
+                fieldReader5.readFieldValue(jsonReader, object);
+                if (!jsonReader.nextIfMatch(']')) {
+                    throw new JSONException(jsonReader.info("array to bean end error"));
+                }
+
+                jsonReader.nextIfMatch(',');
+
+                if (buildFunction != null) {
+                    return (T) buildFunction.apply(object);
+                }
+                return (T) object;
             }
 
-            fieldReader0.readFieldValue(jsonReader, object);
-            fieldReader1.readFieldValue(jsonReader, object);
-            fieldReader2.readFieldValue(jsonReader, object);
-            fieldReader3.readFieldValue(jsonReader, object);
-            fieldReader4.readFieldValue(jsonReader, object);
-            fieldReader5.readFieldValue(jsonReader, object);
-            if (!jsonReader.nextIfMatch(']')) {
-                throw new JSONException(jsonReader.info("array to bean end error"));
-            }
-
-            jsonReader.nextIfMatch(',');
-
-            if (buildFunction != null) {
-                return (T) buildFunction.apply(object);
-            }
-            return (T) object;
+            return processObjectInputSingleItemArray(jsonReader, fieldType, fieldName, featuresAll);
         }
 
         jsonReader.nextIfMatch('{');
