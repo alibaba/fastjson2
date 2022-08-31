@@ -1256,7 +1256,7 @@ public class ObjectReaderCreatorASM
         mw.visitLabel(json_);
 
         // if (jsonReader.isArray() && jsonReader.isSupportBeanArray()) {
-        Label object_ = new Label();
+        Label object_ = new Label(), singleItemArray_ = new Label();
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isArray", "()Z", false);
         mw.visitJumpInsn(Opcodes.IFEQ, object_);
@@ -1265,7 +1265,7 @@ public class ObjectReaderCreatorASM
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isSupportBeanArray", "(J)Z", false);
-            mw.visitJumpInsn(Opcodes.IFEQ, object_);
+            mw.visitJumpInsn(Opcodes.IFEQ, singleItemArray_);
         }
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
@@ -1309,6 +1309,15 @@ public class ObjectReaderCreatorASM
         mw.visitInsn(Opcodes.POP);
 
         mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+        mw.visitInsn(Opcodes.ARETURN);
+
+        mw.visitLabel(singleItemArray_);
+        mw.visitVarInsn(Opcodes.ALOAD, THIS);
+        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+        mw.visitVarInsn(Opcodes.ALOAD, FIELD_TYPE);
+        mw.visitVarInsn(Opcodes.ALOAD, FIELD_NAME);
+        mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "processObjectInputSingleItemArray", METHOD_DESC_READ_OBJECT, false);
         mw.visitInsn(Opcodes.ARETURN);
 
         mw.visitLabel(object_);
