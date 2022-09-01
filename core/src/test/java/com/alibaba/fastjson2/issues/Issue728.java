@@ -43,4 +43,20 @@ public class Issue728 {
     public static class Bean1 {
         public JSONArray data;
     }
+
+    @Test
+    public void test2() {
+        String a = "{\"test\":\"123465\"}";
+        LinkedHashMap linkedHashMap = JSON.toJavaObject(a, LinkedHashMap.class);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("data", linkedHashMap);
+        Bean2 bean = jsonObject.toJavaObject(Bean2.class);
+        assertNotNull(bean.data);
+        Object test = bean.data.get("test");
+        assertEquals("123465", test);
+    }
+
+    public static class Bean2 {
+        public com.alibaba.fastjson.JSONObject data;
+    }
 }
