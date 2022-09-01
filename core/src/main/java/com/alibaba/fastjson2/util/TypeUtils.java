@@ -241,6 +241,11 @@ public class TypeUtils {
             }
         }
 
+        if (obj instanceof Collection) {
+            ObjectReader objectReader = provider.getObjectReader(targetClass);
+            return (T) objectReader.createInstance((Collection) obj);
+        }
+
         throw new JSONException("can not cast to " + targetClass.getName() + ", from " + obj.getClass());
     }
 

@@ -214,6 +214,10 @@ public final class ObjectReaderImplMap
             return map;
         }
 
+        if (mapType == JSONObject.class) {
+            return new JSONObject(map);
+        }
+
         return map;
     }
 

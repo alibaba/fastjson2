@@ -2583,7 +2583,6 @@ public interface JSON {
      * @param clazz converted goal class
      * @deprecated since 2.0.4, please use {@link #to(Class, Object)}
      */
-    @Deprecated
     static <T> T toJavaObject(Object object, Class<T> clazz) {
         return to(clazz, object);
     }
