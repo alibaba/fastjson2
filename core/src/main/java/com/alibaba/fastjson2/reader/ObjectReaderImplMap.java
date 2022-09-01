@@ -218,7 +218,14 @@ public final class ObjectReaderImplMap
             return new JSONObject(map);
         }
 
-        return map;
+        Map instance = (Map) this.createInstance(features);
+        instance.putAll(map);
+
+        if (builder != null) {
+            return builder.apply(instance);
+        }
+
+        return instance;
     }
 
     @Override
