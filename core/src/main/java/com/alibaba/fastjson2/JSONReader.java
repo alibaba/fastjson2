@@ -830,9 +830,13 @@ public abstract class JSONReader
                     return readLocalDateTime18();
                 case 19:
                     return readLocalDateTime19();
-                case 20:
-                    return readZonedDateTimeX(len)
-                            .toLocalDateTime();
+                case 20: {
+                    ZonedDateTime zdt = readZonedDateTimeX(len);
+                    if (zdt != null) {
+                        return zdt.toLocalDateTime();
+                    }
+                    break;
+                }
                 case 21:
                 case 22:
                 case 23:
