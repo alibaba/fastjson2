@@ -192,6 +192,10 @@ public class ObjectWriterBaseModule
                 if (!jsonType.alphabetic()) {
                     beanInfo.alphabetic = false;
                 }
+
+                if (jsonType.writeEnumAsJavaBean()) {
+                    beanInfo.writeEnumAsJavaBean = true;
+                }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
                 BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> processJSONType1x(beanInfo, annotation, method));
@@ -1065,7 +1069,11 @@ public class ObjectWriterBaseModule
                     }
                 }
 
-                return new ObjectWriterImplEnum(null, clazz, valueField, 0);
+                BeanInfo beanInfo = new BeanInfo();
+                getAnnotationProcessor().getBeanInfo(beanInfo, clazz);
+                if (!beanInfo.writeEnumAsJavaBean) {
+                    return new ObjectWriterImplEnum(null, clazz, valueField, 0);
+                }
             }
 
             if (TimeUnit.class.isAssignableFrom(clazz)) {
