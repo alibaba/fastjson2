@@ -75,7 +75,7 @@ public class JDKUtilsTest {
             byte[] bytes = new byte[]{y0, y1, y2, y3, m0, m1, d0, d1};
 
             if (JDKUtils.JVM_VERSION == 17 && JDKUtils.UNSAFE_SUPPORT) {
-                return JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
+                return (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
             }
 
             if (JDKUtils.JVM_VERSION <= 11) {

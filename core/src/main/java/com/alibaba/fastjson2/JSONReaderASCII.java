@@ -728,7 +728,7 @@ final class JSONReaderASCII
 
             if (chars != null) {
                 if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                    return JDKUtils.UNSAFE_ASCII_CREATOR.apply(chars);
+                    return (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(chars);
                 }
 
                 return new String(chars, 0, chars.length, StandardCharsets.US_ASCII);
@@ -1372,7 +1372,7 @@ final class JSONReaderASCII
                     }
                 } else if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_ASCII_CREATOR != null) {
                     byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                    str = JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
+                    str = (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
                 } else {
                     str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
                 }

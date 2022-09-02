@@ -216,7 +216,7 @@ public class JSONBDump {
                 if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                    str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 } else {
                     str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
                 }
@@ -232,7 +232,7 @@ public class JSONBDump {
                 if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                    str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 } else {
                     str = new String(bytes, offset, strlen, StandardCharsets.UTF_16BE);
                 }
@@ -874,7 +874,7 @@ public class JSONBDump {
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
-                String str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                String str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 offset += strlen;
                 return str;
             }
@@ -887,7 +887,7 @@ public class JSONBDump {
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
-                String str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                String str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 offset += strlen;
                 return str;
             }
