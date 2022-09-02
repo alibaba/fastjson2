@@ -751,11 +751,34 @@ final class JSONReaderUTF16
                     break;
                 }
 
-                if (i == 0) {
-                    nameValue = (byte) ch;
-                } else {
-                    nameValue <<= 8;
-                    nameValue += ch;
+                byte c = (byte) ch;
+                switch (i) {
+                    case 0:
+                        nameValue = c;
+                        break;
+                    case 1:
+                        nameValue = (c << 8) + (nameValue & 0xFFL);
+                        break;
+                    case 2:
+                        nameValue = (c << 16) + (nameValue & 0xFFFFL);
+                        break;
+                    case 3:
+                        nameValue = (c << 24) + (nameValue & 0xFFFFFFL);
+                        break;
+                    case 4:
+                        nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                        break;
+                    case 5:
+                        nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                        break;
+                    case 6:
+                        nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                        break;
+                    case 7:
+                        nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                        break;
+                    default:
+                        break;
                 }
 
                 ch = offset >= end
@@ -931,8 +954,8 @@ final class JSONReaderUTF16
                         && c0 != '\\' && c1 != '\\'
                         && c0 <= 0xFF && c1 <= 0xFF
                 ) {
-                    nameValue = (((byte) c0) << 8)
-                            + c1;
+                    nameValue = (((byte) c1) << 8)
+                            + c0;
                     this.nameLength = 2;
                     this.nameEnd = offset + 2;
                     offset += 3;
@@ -940,9 +963,9 @@ final class JSONReaderUTF16
                         && c0 != '\\' && c1 != '\\' && c2 != '\\'
                         && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF) {
                     nameValue
-                            = (((byte) c0) << 16)
+                            = (((byte) c2) << 16)
                             + (c1 << 8)
-                            + c2;
+                            + c0;
                     this.nameLength = 3;
                     this.nameEnd = offset + 3;
                     offset += 4;
@@ -951,10 +974,10 @@ final class JSONReaderUTF16
                         && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF
                 ) {
                     nameValue
-                            = (((byte) c0) << 24)
-                            + (c1 << 16)
-                            + (c2 << 8)
-                            + c3;
+                            = (((byte) c3) << 24)
+                            + (c2 << 16)
+                            + (c1 << 8)
+                            + c0;
                     this.nameLength = 4;
                     this.nameEnd = offset + 4;
                     offset += 5;
@@ -963,11 +986,11 @@ final class JSONReaderUTF16
                         && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF
                 ) {
                     nameValue
-                            = (((long) ((byte) c0)) << 32)
-                            + (((long) c1) << 24)
+                            = (((long) ((byte) c4)) << 32)
+                            + (((long) c3) << 24)
                             + (((long) c2) << 16)
-                            + (((long) c3) << 8)
-                            + (long) c4;
+                            + (((long) c1) << 8)
+                            + (long) c0;
                     this.nameLength = 5;
                     this.nameEnd = offset + 5;
                     offset += 6;
@@ -976,12 +999,12 @@ final class JSONReaderUTF16
                         && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF
                 ) {
                     nameValue
-                            = (((long) ((byte) c0)) << 40)
-                            + (((long) c1) << 32)
-                            + (((long) c2) << 24)
-                            + (((long) c3) << 16)
-                            + (((long) c4) << 8)
-                            + (long) c5;
+                            = (((long) ((byte) c5)) << 40)
+                            + (((long) c4) << 32)
+                            + (((long) c3) << 24)
+                            + (((long) c2) << 16)
+                            + (((long) c1) << 8)
+                            + (long) c0;
                     this.nameLength = 6;
                     this.nameEnd = offset + 6;
                     offset += 7;
@@ -990,13 +1013,13 @@ final class JSONReaderUTF16
                         && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF && c6 <= 0xFF
                 ) {
                     nameValue
-                            = (((long) ((byte) c0)) << 48)
-                            + (((long) c1) << 40)
-                            + (((long) c2) << 32)
+                            = (((long) ((byte) c6)) << 48)
+                            + (((long) c5) << 40)
+                            + (((long) c4) << 32)
                             + (((long) c3) << 24)
-                            + (((long) c4) << 16)
-                            + (((long) c5) << 8)
-                            + (long) c6;
+                            + (((long) c2) << 16)
+                            + (((long) c1) << 8)
+                            + (long) c0;
                     this.nameLength = 7;
                     this.nameEnd = offset + 7;
                     offset += 8;
@@ -1005,14 +1028,14 @@ final class JSONReaderUTF16
                         && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF && c6 <= 0xFF && c7 <= 0xFF
                 ) {
                     nameValue
-                            = (((long) ((byte) c0)) << 56)
-                            + (((long) c1) << 48)
-                            + (((long) c2) << 40)
-                            + (((long) c3) << 32)
-                            + (((long) c4) << 24)
-                            + (((long) c5) << 16)
-                            + (((long) c6) << 8)
-                            + (long) c7;
+                            = (((long) ((byte) c7)) << 56)
+                            + (((long) c6) << 48)
+                            + (((long) c5) << 40)
+                            + (((long) c4) << 32)
+                            + (((long) c3) << 24)
+                            + (((long) c2) << 16)
+                            + (((long) c1) << 8)
+                            + (long) c0;
                     this.nameLength = 8;
                     this.nameEnd = offset + 8;
                     offset += 9;
@@ -1068,11 +1091,33 @@ final class JSONReaderUTF16
                     break;
                 }
 
-                if (i == 0) {
-                    nameValue = (byte) c;
-                } else {
-                    nameValue <<= 8;
-                    nameValue += c;
+                switch (i) {
+                    case 0:
+                        nameValue = (byte) c;
+                        break;
+                    case 1:
+                        nameValue = (((byte) c) << 8) + (nameValue & 0xFFL);
+                        break;
+                    case 2:
+                        nameValue = (((byte) c) << 16) + (nameValue & 0xFFFFL);
+                        break;
+                    case 3:
+                        nameValue = (((byte) c) << 24) + (nameValue & 0xFFFFFFL);
+                        break;
+                    case 4:
+                        nameValue = (((long) (byte) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                        break;
+                    case 5:
+                        nameValue = (((long) (byte) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                        break;
+                    case 6:
+                        nameValue = (((long) (byte) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                        break;
+                    case 7:
+                        nameValue = (((long) (byte) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -1222,11 +1267,33 @@ final class JSONReaderUTF16
                     break;
                 }
 
-                if (i == 0) {
-                    nameValue = (byte) c;
-                } else {
-                    nameValue <<= 8;
-                    nameValue += c;
+                switch (i) {
+                    case 0:
+                        nameValue = (byte) c;
+                        break;
+                    case 1:
+                        nameValue = (((byte) c) << 8) + (nameValue & 0xFFL);
+                        break;
+                    case 2:
+                        nameValue = (((byte) c) << 16) + (nameValue & 0xFFFFL);
+                        break;
+                    case 3:
+                        nameValue = (((byte) c) << 24) + (nameValue & 0xFFFFFFL);
+                        break;
+                    case 4:
+                        nameValue = (((long) (byte) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                        break;
+                    case 5:
+                        nameValue = (((long) (byte) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                        break;
+                    case 6:
+                        nameValue = (((long) (byte) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                        break;
+                    case 7:
+                        nameValue = (((long) (byte) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -1368,11 +1435,33 @@ final class JSONReaderUTF16
                     c = (char) (c + 32);
                 }
 
-                if (i == 0) {
-                    nameValue = (byte) c;
-                } else {
-                    nameValue <<= 8;
-                    nameValue += c;
+                switch (i) {
+                    case 0:
+                        nameValue = (byte) c;
+                        break;
+                    case 1:
+                        nameValue = (((byte) c) << 8) + (nameValue & 0xFFL);
+                        break;
+                    case 2:
+                        nameValue = (((byte) c) << 16) + (nameValue & 0xFFFFL);
+                        break;
+                    case 3:
+                        nameValue = (((byte) c) << 24) + (nameValue & 0xFFFFFFL);
+                        break;
+                    case 4:
+                        nameValue = (((long) (byte) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                        break;
+                    case 5:
+                        nameValue = (((long) (byte) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                        break;
+                    case 6:
+                        nameValue = (((long) (byte) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                        break;
+                    case 7:
+                        nameValue = (((long) (byte) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                        break;
+                    default:
+                        break;
                 }
                 ++i;
             }
