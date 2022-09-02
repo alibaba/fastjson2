@@ -23,24 +23,24 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.IOUtils.SHANGHAI_ZONE_ID;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
-final class JSONReaderJSONB
+class JSONReaderJSONB
         extends JSONReader {
     static Charset GB18030;
 
-    private final byte[] bytes;
-    private final int length;
-    private final int end;
+    protected final byte[] bytes;
+    protected final int length;
+    protected final int end;
 
-    private byte type;
-    private int strlen;
-    private byte strtype;
-    private int strBegin;
+    protected byte type;
+    protected int strlen;
+    protected byte strtype;
+    protected int strBegin;
 
-    private byte[] valueBytes;
-    private final int cachedIndex = JSONFactory.cacheIndex();
+    protected byte[] valueBytes;
+    protected final int cachedIndex = JSONFactory.cacheIndex();
 
-    private final SymbolTable symbolTable;
-    private long[] symbols = new long[16];
+    protected final SymbolTable symbolTable;
+    protected long[] symbols = new long[16];
 
     JSONReaderJSONB(Context ctx, byte[] bytes, int off, int length) {
         super(ctx);
@@ -1206,53 +1206,53 @@ final class JSONReaderJSONB
                         nameValue = bytes[offset];
                         break;
                     case 2:
-                        nameValue = (bytes[offset] << 8)
-                                + (bytes[offset + 1] & 0xFF);
+                        nameValue = (bytes[offset + 1] << 8)
+                                + (bytes[offset] & 0xFF);
                         break;
                     case 3:
-                        nameValue = (bytes[offset] << 16)
+                        nameValue = (bytes[offset + 2] << 16)
                                 + ((bytes[offset + 1] & 0xFF) << 8)
-                                + (bytes[offset + 2] & 0xFF);
+                                + (bytes[offset] & 0xFF);
                         break;
                     case 4:
-                        nameValue = (bytes[offset] << 24)
-                                + ((bytes[offset + 1] & 0xFF) << 16)
-                                + ((bytes[offset + 2] & 0xFF) << 8)
-                                + (bytes[offset + 3] & 0xFF);
+                        nameValue = (bytes[offset + 3] << 24)
+                                + ((bytes[offset + 2] & 0xFF) << 16)
+                                + ((bytes[offset + 1] & 0xFF) << 8)
+                                + (bytes[offset] & 0xFF);
                         break;
                     case 5:
-                        nameValue = (((long) bytes[offset]) << 32)
-                                + (((long) bytes[offset + 1] & 0xFFL) << 24)
+                        nameValue = (((long) bytes[offset + 4]) << 32)
+                                + (((long) bytes[offset + 3] & 0xFFL) << 24)
                                 + (((long) bytes[offset + 2] & 0xFFL) << 16)
-                                + (((long) bytes[offset + 3] & 0xFFL) << 8)
-                                + (bytes[offset + 4] & 0xFFL);
+                                + (((long) bytes[offset + 1] & 0xFFL) << 8)
+                                + (bytes[offset] & 0xFFL);
                         break;
                     case 6:
-                        nameValue = (((long) bytes[offset]) << 40)
-                                + (((long) bytes[offset + 1] & 0xFFL) << 32)
-                                + (((long) bytes[offset + 2] & 0xFFL) << 24)
-                                + (((long) bytes[offset + 3] & 0xFFL) << 16)
-                                + (((long) bytes[offset + 4] & 0xFFL) << 8)
-                                + (((long) bytes[offset + 5] & 0xFFL) & 0xFFL);
+                        nameValue = (((long) bytes[offset + 5]) << 40)
+                                + (((long) bytes[offset + 4] & 0xFFL) << 32)
+                                + (((long) bytes[offset + 3] & 0xFFL) << 24)
+                                + (((long) bytes[offset + 2] & 0xFFL) << 16)
+                                + (((long) bytes[offset + 1] & 0xFFL) << 8)
+                                + (((long) bytes[offset] & 0xFFL) & 0xFFL);
                         break;
                     case 7:
-                        nameValue = (((long) bytes[offset]) << 48)
-                                + (((long) bytes[offset + 1] & 0xFFL) << 40)
-                                + (((long) bytes[offset + 2] & 0xFFL) << 32)
+                        nameValue = (((long) bytes[offset + 6]) << 48)
+                                + (((long) bytes[offset + 5] & 0xFFL) << 40)
+                                + (((long) bytes[offset + 4] & 0xFFL) << 32)
                                 + (((long) bytes[offset + 3] & 0xFFL) << 24)
-                                + (((long) bytes[offset + 4] & 0xFFL) << 16)
-                                + (((long) bytes[offset + 5] & 0xFFL) << 8)
-                                + (((long) bytes[offset + 6] & 0xFFL) & 0xFFL);
+                                + (((long) bytes[offset + 2] & 0xFFL) << 16)
+                                + (((long) bytes[offset + 1] & 0xFFL) << 8)
+                                + (((long) bytes[offset] & 0xFFL) & 0xFFL);
                         break;
                     case 8:
-                        nameValue = (((long) bytes[offset]) << 56)
-                                + (((long) bytes[offset + 1] & 0xFFL) << 48)
-                                + (((long) bytes[offset + 2] & 0xFFL) << 40)
-                                + (((long) bytes[offset + 3] & 0xFFL) << 32)
-                                + (((long) bytes[offset + 4] & 0xFFL) << 24)
-                                + (((long) bytes[offset + 5] & 0xFFL) << 16)
-                                + (((long) bytes[offset + 6] & 0xFFL) << 8)
-                                + (((long) bytes[offset + 7] & 0xFFL) & 0xFFL);
+                        nameValue = (((long) bytes[offset + 7]) << 56)
+                                + (((long) bytes[offset + 6] & 0xFFL) << 48)
+                                + (((long) bytes[offset + 5] & 0xFFL) << 40)
+                                + (((long) bytes[offset + 4] & 0xFFL) << 32)
+                                + (((long) bytes[offset + 3] & 0xFFL) << 24)
+                                + (((long) bytes[offset + 2] & 0xFFL) << 16)
+                                + (((long) bytes[offset + 1] & 0xFFL) << 8)
+                                + (((long) bytes[offset] & 0xFFL) & 0xFFL);
                         break;
                     default:
                         break;
@@ -1460,11 +1460,33 @@ final class JSONReaderJSONB
                         break;
                     }
 
-                    if (i == 0) {
-                        nameValue = c;
-                    } else {
-                        nameValue <<= 8;
-                        nameValue += c;
+                    switch (i) {
+                        case 0:
+                            nameValue = c;
+                            break;
+                        case 1:
+                            nameValue = ((c) << 8) + (nameValue & 0xFFL);
+                            break;
+                        case 2:
+                            nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
+                            break;
+                        case 3:
+                            nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
+                            break;
+                        case 4:
+                            nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                            break;
+                        case 5:
+                            nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                            break;
+                        case 6:
+                            nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                            break;
+                        case 7:
+                            nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                            break;
+                        default:
+                            break;
                     }
                 }
             }
@@ -1584,11 +1606,34 @@ final class JSONReaderJSONB
                             break;
                         }
 
-                        if (i == 0) {
-                            nameValue = ch;
-                        } else {
-                            nameValue <<= 8;
-                            nameValue += ch;
+                        byte c = (byte) ch;
+                        switch ((i - 2) >> 1) {
+                            case 0:
+                                nameValue = c;
+                                break;
+                            case 1:
+                                nameValue = ((c) << 8) + (nameValue & 0xFFL);
+                                break;
+                            case 2:
+                                nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
+                                break;
+                            case 3:
+                                nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
+                                break;
+                            case 4:
+                                nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                                break;
+                            case 5:
+                                nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                                break;
+                            case 6:
+                                nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                                break;
+                            case 7:
+                                nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                                break;
+                            default:
+                                break;
                         }
                     }
 
@@ -1636,11 +1681,34 @@ final class JSONReaderJSONB
                         break;
                     }
 
-                    if (i == 0) {
-                        nameValue = ch;
-                    } else {
-                        nameValue <<= 8;
-                        nameValue += ch;
+                    byte c = (byte) ch;
+                    switch (i >> 1) {
+                        case 0:
+                            nameValue = c;
+                            break;
+                        case 1:
+                            nameValue = ((c) << 8) + (nameValue & 0xFFL);
+                            break;
+                        case 2:
+                            nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
+                            break;
+                        case 3:
+                            nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
+                            break;
+                        case 4:
+                            nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                            break;
+                        case 5:
+                            nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                            break;
+                        case 6:
+                            nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                            break;
+                        case 7:
+                            nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                            break;
+                        default:
+                            break;
                     }
                 }
 
@@ -1670,11 +1738,34 @@ final class JSONReaderJSONB
                         break;
                     }
 
-                    if (i == 0) {
-                        nameValue = ch;
-                    } else {
-                        nameValue <<= 8;
-                        nameValue += ch;
+                    byte c = (byte) ch;
+                    switch (i >> 1) {
+                        case 0:
+                            nameValue = c;
+                            break;
+                        case 1:
+                            nameValue = ((c) << 8) + (nameValue & 0xFFL);
+                            break;
+                        case 2:
+                            nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
+                            break;
+                        case 3:
+                            nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
+                            break;
+                        case 4:
+                            nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                            break;
+                        case 5:
+                            nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                            break;
+                        case 6:
+                            nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                            break;
+                        case 7:
+                            nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                            break;
+                        default:
+                            break;
                     }
                 }
 
@@ -1702,11 +1793,33 @@ final class JSONReaderJSONB
                         break;
                     }
 
-                    if (i == 0) {
-                        nameValue = c;
-                    } else {
-                        nameValue <<= 8;
-                        nameValue += c;
+                    switch (i) {
+                        case 0:
+                            nameValue = c;
+                            break;
+                        case 1:
+                            nameValue = ((c) << 8) + (nameValue & 0xFFL);
+                            break;
+                        case 2:
+                            nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
+                            break;
+                        case 3:
+                            nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
+                            break;
+                        case 4:
+                            nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                            break;
+                        case 5:
+                            nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                            break;
+                        case 6:
+                            nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                            break;
+                        case 7:
+                            nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                            break;
+                        default:
+                            break;
                     }
                 }
 
@@ -1751,11 +1864,33 @@ final class JSONReaderJSONB
                     c += 32;
                 }
 
-                if (i == 0) {
-                    nameValue = c;
-                } else {
-                    nameValue <<= 8;
-                    nameValue += c;
+                switch (i) {
+                    case 0:
+                        nameValue = c;
+                        break;
+                    case 1:
+                        nameValue = ((c) << 8) + (nameValue & 0xFFL);
+                        break;
+                    case 2:
+                        nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
+                        break;
+                    case 3:
+                        nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
+                        break;
+                    case 4:
+                        nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                        break;
+                    case 5:
+                        nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                        break;
+                    case 6:
+                        nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                        break;
+                    case 7:
+                        nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                        break;
+                    default:
+                        break;
                 }
                 i++;
             }
@@ -2016,12 +2151,12 @@ final class JSONReaderJSONB
                         break;
                     case 6:
                         nameValue0
-                                = (((long) bytes[offset]) << 40)
-                                + ((bytes[offset + 1] & 0xFFL) << 32)
-                                + ((bytes[offset + 2] & 0xFFL) << 24)
-                                + ((bytes[offset + 3] & 0xFFL) << 16)
-                                + ((bytes[offset + 4] & 0xFFL) << 8)
-                                + (bytes[offset + 5] & 0xFFL);
+                                = (((long) bytes[offset] + 5) << 40)
+                                + ((bytes[offset + 4] & 0xFFL) << 32)
+                                + ((bytes[offset + 3] & 0xFFL) << 24)
+                                + ((bytes[offset + 2] & 0xFFL) << 16)
+                                + ((bytes[offset + 1] & 0xFFL) << 8)
+                                + (bytes[offset + 0] & 0xFFL);
                         break;
                     case 7:
                         nameValue0
@@ -2368,9 +2503,9 @@ final class JSONReaderJSONB
 
     // GraalVM not support
     // Android not support
-    private static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
-    private static Function<byte[], String> STRING_CREATOR_JDK11;
-    private static volatile boolean STRING_CREATOR_ERROR;
+    protected static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
+    protected static Function<byte[], String> STRING_CREATOR_JDK11;
+    protected static volatile boolean STRING_CREATOR_ERROR;
 
     @Override
     public String readString() {

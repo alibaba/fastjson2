@@ -38,7 +38,7 @@ public class FnvTest {
 
                 long hash1;
                 if (MIXED_HASH_ALGORITHM) {
-                    hash1 = ((byte) c0 << 8) + c1;
+                    hash1 = ((byte) c1 << 8) + c0;
                 } else {
                     long hash = Fnv.MAGIC_HASH_CODE;
 

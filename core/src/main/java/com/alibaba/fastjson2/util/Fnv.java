@@ -26,7 +26,7 @@ public class Fnv {
             }
 
             if (ascii && (name.length() - scoreCount) <= 8) {
-                for (int i = 0, j = 0; i < name.length(); i++) {
+                for (int i = name.length() - 1, j = 0; i >= 0; --i) {
                     char ch = name.charAt(i);
                     if (ch == '-' || ch == '_') {
                         continue;
@@ -81,9 +81,9 @@ public class Fnv {
             }
 
             if (ascii) {
-                for (int i = 0; i < name.length(); i++) {
+                for (int i = name.length() - 1; i >= 0; --i) {
                     char ch = name.charAt(i);
-                    if (i == 0) {
+                    if (i == name.length() - 1) {
                         nameValue = (byte) ch;
                     } else {
                         nameValue <<= 8;
@@ -115,59 +115,59 @@ public class Fnv {
                     break;
                 case 2:
                     nameValue
-                            = ((name[0]) << 8)
-                            + (name[1] & 0xFF);
+                            = ((name[1]) << 8)
+                            + (name[0] & 0xFF);
                     break;
                 case 3:
                     nameValue
-                            = ((name[0]) << 16)
+                            = ((name[2]) << 16)
                             + ((name[1] & 0xFF) << 8)
-                            + (name[2] & 0xFF);
+                            + (name[0] & 0xFF);
                     break;
                 case 4:
                     nameValue
-                            = (name[0] << 24)
-                            + ((name[1] & 0xFF) << 16)
-                            + ((name[2] & 0xFF) << 8)
-                            + (name[3] & 0xFF);
+                            = (name[3] << 24)
+                            + ((name[2] & 0xFF) << 16)
+                            + ((name[1] & 0xFF) << 8)
+                            + (name[0] & 0xFF);
                     break;
                 case 5:
                     nameValue
-                            = (((long) name[0]) << 32)
-                            + ((name[1] & 0xFFL) << 24)
+                            = (((long) name[4]) << 32)
+                            + ((name[3] & 0xFFL) << 24)
                             + ((name[2] & 0xFFL) << 16)
-                            + ((name[3] & 0xFFL) << 8)
-                            + (name[4] & 0xFFL);
+                            + ((name[0] & 0xFFL) << 8)
+                            + (name[0] & 0xFFL);
                     break;
                 case 6:
                     nameValue
-                            = (((long) name[0]) << 40)
-                            + ((name[1] & 0xFFL) << 32)
-                            + ((name[2] & 0xFFL) << 24)
-                            + ((name[3] & 0xFFL) << 16)
-                            + ((name[4] & 0xFFL) << 8)
-                            + (name[5] & 0xFFL);
+                            = (((long) name[5]) << 40)
+                            + ((name[4] & 0xFFL) << 32)
+                            + ((name[3] & 0xFFL) << 24)
+                            + ((name[2] & 0xFFL) << 16)
+                            + ((name[1] & 0xFFL) << 8)
+                            + (name[0] & 0xFFL);
                     break;
                 case 7:
                     nameValue
-                            = (((long) name[0]) << 48)
-                            + ((name[1] & 0xFFL) << 40)
-                            + ((name[2] & 0xFFL) << 32)
+                            = (((long) name[6]) << 48)
+                            + ((name[5] & 0xFFL) << 40)
+                            + ((name[4] & 0xFFL) << 32)
                             + ((name[3] & 0xFFL) << 24)
-                            + ((name[4] & 0xFFL) << 16)
-                            + ((name[5] & 0xFFL) << 8)
-                            + (name[6] & 0xFFL);
+                            + ((name[2] & 0xFFL) << 16)
+                            + ((name[1] & 0xFFL) << 8)
+                            + (name[0] & 0xFFL);
                     break;
                 case 8:
                     nameValue
-                            = (((long) name[0]) << 56)
-                            + ((name[1] & 0xFFL) << 48)
-                            + ((name[2] & 0xFFL) << 40)
-                            + ((name[3] & 0xFFL) << 32)
-                            + ((name[4] & 0xFFL) << 24)
-                            + ((name[5] & 0xFFL) << 16)
-                            + ((name[6] & 0xFFL) << 8)
-                            + (name[7] & 0xFFL);
+                            = (((long) name[7]) << 56)
+                            + ((name[6] & 0xFFL) << 48)
+                            + ((name[5] & 0xFFL) << 40)
+                            + ((name[4] & 0xFFL) << 32)
+                            + ((name[3] & 0xFFL) << 24)
+                            + ((name[2] & 0xFFL) << 16)
+                            + ((name[1] & 0xFFL) << 8)
+                            + (name[0] & 0xFFL);
                     break;
                 default:
                     break;
