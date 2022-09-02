@@ -830,49 +830,51 @@ public final class JSONReaderStr
             hashCode = nameValue;
         } else {
             hashCode = Fnv.MAGIC_HASH_CODE;
-            for (int i = 0; ; ++i) {
-                char c = str.charAt(offset);
-                if (c == '\\') {
-                    nameEscape = true;
-                    c = str.charAt(++offset);
-                    switch (c) {
-                        case 'u': {
-                            char c1 = str.charAt(++offset);
-                            char c2 = str.charAt(++offset);
-                            char c3 = str.charAt(++offset);
-                            char c4 = str.charAt(++offset);
-                            c = char4(c1, c2, c3, c4);
-                            break;
+            if (nameLength > 0) {
+                for (int i = 0; ; ++i) {
+                    char c = str.charAt(offset);
+                    if (c == '\\') {
+                        nameEscape = true;
+                        c = str.charAt(++offset);
+                        switch (c) {
+                            case 'u': {
+                                char c1 = str.charAt(++offset);
+                                char c2 = str.charAt(++offset);
+                                char c3 = str.charAt(++offset);
+                                char c4 = str.charAt(++offset);
+                                c = char4(c1, c2, c3, c4);
+                                break;
+                            }
+                            case 'x': {
+                                char c1 = str.charAt(++offset);
+                                char c2 = str.charAt(++offset);
+                                c = char2(c1, c2);
+                                break;
+                            }
+                            case '\\':
+                            case '"':
+                            default:
+                                c = char1(c);
+                                break;
                         }
-                        case 'x': {
-                            char c1 = str.charAt(++offset);
-                            char c2 = str.charAt(++offset);
-                            c = char2(c1, c2);
-                            break;
-                        }
-                        case '\\':
-                        case '"':
-                        default:
-                            c = char1(c);
-                            break;
+                        offset++;
+                        hashCode ^= c;
+                        hashCode *= Fnv.MAGIC_PRIME;
+                        continue;
                     }
+
+                    if (c == quote) {
+                        this.nameLength = i;
+                        this.nameEnd = offset;
+                        this.stringValue = null;
+                        offset++;
+                        break;
+                    }
+
                     offset++;
                     hashCode ^= c;
                     hashCode *= Fnv.MAGIC_PRIME;
-                    continue;
                 }
-
-                if (c == '"') {
-                    this.nameLength = i;
-                    this.nameEnd = offset;
-                    this.stringValue = null;
-                    offset++;
-                    break;
-                }
-
-                offset++;
-                hashCode ^= c;
-                hashCode *= Fnv.MAGIC_PRIME;
             }
         }
 

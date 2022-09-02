@@ -462,7 +462,7 @@ public class JSONReaderTest {
 
     @Test
     public void test_readValueHashCode() {
-        for (int i = 1; i <= 20; i++) {
+        for (int i = 0; i <= 20; i++) {
             char[] chars = new char[i];
             Arrays.fill(chars, 'A');
             String item = new String(chars);
@@ -484,6 +484,14 @@ public class JSONReaderTest {
                 assertEquals(item, jsonReader.getFieldName());
                 assertEquals(itemHash, jsonReader.readValueHashCode());
             }
+
+            byte[] jsonbBytes = JSONObject.of(item, item).toJSONBBytes();
+            JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
+            assertTrue(jsonReader.nextIfObjectStart());
+            assertEquals(itemHash, jsonReader.readFieldNameHashCode());
+            assertEquals(itemHashL, jsonReader.getNameHashCodeLCase());
+            assertEquals(item, jsonReader.getFieldName());
+            assertEquals(itemHash, jsonReader.readValueHashCode());
         }
     }
 }
