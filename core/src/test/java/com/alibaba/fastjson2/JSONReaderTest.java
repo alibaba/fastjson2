@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -456,6 +457,33 @@ public class JSONReaderTest {
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
+        }
+    }
+
+    @Test
+    public void test_readValueHashCode() {
+        for (int i = 1; i <= 20; i++) {
+            char[] chars = new char[i];
+            Arrays.fill(chars, 'A');
+            String item = new String(chars);
+
+            StringBuffer buf = new StringBuffer();
+            buf.append("{\"");
+            buf.append(item);
+            buf.append("\":\"");
+            buf.append(item);
+            buf.append("\"}");
+
+            long itemHash = Fnv.hashCode64(item);
+            long itemHashL = Fnv.hashCode64LCase(item);
+            String str = buf.toString();
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str)) {
+                assertTrue(jsonReader.nextIfObjectStart());
+                assertEquals(itemHash, jsonReader.readFieldNameHashCode());
+                assertEquals(itemHashL, jsonReader.getNameHashCodeLCase());
+                assertEquals(item, jsonReader.getFieldName());
+                assertEquals(itemHash, jsonReader.readValueHashCode());
+            }
         }
     }
 }
