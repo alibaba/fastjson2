@@ -4970,7 +4970,7 @@ public abstract class JSONPath {
 
             String str;
             if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                str = JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
+                str = (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
             } else {
                 str = new String(bytes, StandardCharsets.US_ASCII);
             }

@@ -1881,7 +1881,7 @@ public abstract class JSONWriter
                         bytes = new byte[off];
                         System.arraycopy(buf, 0, bytes, 0, off);
                     }
-                    return fullPath = JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
+                    return fullPath = (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
                 }
 
                 if (JDKUtils.JVM_VERSION == 8) {

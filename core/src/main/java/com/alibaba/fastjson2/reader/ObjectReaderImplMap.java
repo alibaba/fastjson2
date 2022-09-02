@@ -336,6 +336,10 @@ public final class ObjectReaderImplMap
                         value = null;
                         jsonReader.addResolveTask(map, fieldName, JSONPath.of(reference));
                     }
+                } else if (type == BC_OBJECT) {
+                    value = jsonReader.readObject();
+                } else if (type >= BC_ARRAY_FIX_MIN && type <= BC_ARRAY) {
+                    value = jsonReader.readArray();
                 } else {
                     value = jsonReader.readAny();
                 }

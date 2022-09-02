@@ -230,17 +230,20 @@ final class JSONReaderJSONB
             return null;
         }
 
-        if (type == BC_TYPED_ANY) {
-            ObjectReader objectReader = checkAutoType(Map.class, 0, 0);
-            return (Map) objectReader.readObject(this, null, null, 0);
-        }
-
         if (type >= BC_OBJECT) {
             Map map;
             if ((context.features & Feature.UseNativeObject.mask) != 0) {
-                map = new HashMap();
+                if (JDKUtils.JVM_VERSION == 8 && bytes[offset] != BC_OBJECT_END) {
+                    map = new HashMap(10);
+                } else {
+                    map = new HashMap();
+                }
             } else {
-                map = new JSONObject();
+                if (JDKUtils.JVM_VERSION == 8 && bytes[offset] != BC_OBJECT_END) {
+                    map = new JSONObject(10);
+                } else {
+                    map = new JSONObject();
+                }
             }
 
             for (int i = 0; ; ++i) {
@@ -252,7 +255,7 @@ final class JSONReaderJSONB
 
                 String name = readFieldName();
 
-                if (isReference()) {
+                if (offset < bytes.length && bytes[offset] == BC_REFERENCE) {
                     String reference = readReference();
                     if ("..".equals(reference)) {
                         map.put(name, map);
@@ -262,11 +265,123 @@ final class JSONReaderJSONB
                     continue;
                 }
 
-                Object value = readAny();
+                byte valueType = bytes[offset];
+                Object value;
+                if (valueType >= BC_STR_ASCII_FIX_MIN && valueType <= BC_STR_GB18030) {
+                    value = readString();
+                } else if (valueType >= BC_INT32_NUM_MIN && valueType <= BC_INT32_NUM_MAX) {
+                    offset++;
+                    value = (int) valueType;
+                } else if (valueType == BC_TRUE) {
+                    offset++;
+                    value = Boolean.TRUE;
+                } else if (valueType == BC_FALSE) {
+                    offset++;
+                    value = Boolean.FALSE;
+                } else if (valueType == BC_OBJECT) {
+                    value = readObject();
+                } else if (valueType == BC_INT64) {
+                    offset++;
+                    long int64Value =
+                            ((bytes[offset + 7] & 0xFFL)) +
+                                    ((bytes[offset + 6] & 0xFFL) << 8) +
+                                    ((bytes[offset + 5] & 0xFFL) << 16) +
+                                    ((bytes[offset + 4] & 0xFFL) << 24) +
+                                    ((bytes[offset + 3] & 0xFFL) << 32) +
+                                    ((bytes[offset + 2] & 0xFFL) << 40) +
+                                    ((bytes[offset + 1] & 0xFFL) << 48) +
+                                    ((long) (bytes[offset]) << 56);
+                    offset += 8;
+                    value = int64Value;
+                } else if (valueType >= BC_ARRAY_FIX_MIN && valueType <= BC_ARRAY) {
+                    offset++;
+                    int len;
+                    if (valueType == BC_ARRAY) {
+                        byte itemType = bytes[offset];
+                        if (itemType >= BC_INT32_NUM_MIN && itemType <= BC_INT32_NUM_MAX) {
+                            offset++;
+                            len = itemType;
+                        } else {
+                            len = readLength();
+                        }
+                    } else {
+                        len = valueType - BC_ARRAY_FIX_MIN;
+                    }
+
+                    if (len == 0) {
+                        if ((context.features & Feature.UseNativeObject.mask) != 0) {
+                            value = new ArrayList<>();
+                        } else {
+                            if (context.arraySupplier != null) {
+                                value = context.arraySupplier.get();
+                            } else {
+                                value = new JSONArray();
+                            }
+                        }
+                    } else {
+                        List list;
+                        if ((context.features & Feature.UseNativeObject.mask) != 0) {
+                            list = new ArrayList(len);
+                        } else {
+                            list = new JSONArray(len);
+                        }
+
+                        for (int j = 0; j < len; ++j) {
+                            if (isReference()) {
+                                String reference = readReference();
+                                if ("..".equals(reference)) {
+                                    list.add(list);
+                                } else {
+                                    list.add(null);
+                                    addResolveTask(list, j, JSONPath.of(reference));
+                                }
+                                continue;
+                            }
+
+                            byte itemType = bytes[offset];
+                            Object item;
+                            if (itemType >= BC_STR_ASCII_FIX_MIN && itemType <= BC_STR_GB18030) {
+                                item = readString();
+                            } else if (itemType == BC_OBJECT) {
+                                item = readObject();
+                            } else {
+                                item = readAny();
+                            }
+                            list.add(item);
+                        }
+                        value = list;
+                    }
+                } else if (valueType >= BC_INT32_BYTE_MIN && valueType <= BC_INT32_BYTE_MAX) {
+                    offset++;
+                    value = ((valueType - BC_INT32_BYTE_ZERO) << 8)
+                            + (bytes[offset++] & 0xFF);
+                } else if (valueType >= BC_INT32_SHORT_MIN && valueType <= BC_INT32_SHORT_MAX) {
+                    offset++;
+                    int int32Value = ((valueType - BC_INT32_SHORT_ZERO) << 16)
+                            + ((bytes[offset++] & 0xFF) << 8)
+                            + (bytes[offset++] & 0xFF);
+                    value = new Integer(int32Value);
+                } else if (valueType == BC_INT32) {
+                    offset++;
+                    int int32Value =
+                            ((bytes[offset + 3] & 0xFF)) +
+                                    ((bytes[offset + 2] & 0xFF) << 8) +
+                                    ((bytes[offset + 1] & 0xFF) << 16) +
+                                    ((bytes[offset]) << 24);
+                    offset += 4;
+                    value = new Integer(int32Value);
+                } else {
+                    value = readAny();
+                }
                 map.put(name, value);
             }
 
             return map;
+        }
+
+        if (type == BC_TYPED_ANY) {
+            ObjectReader objectReader = checkAutoType(Map.class, 0, 0);
+            return (Map) objectReader.readObject(this, null, null, 0);
         }
 
         throw new JSONException("object not support input " + error(type));
@@ -378,7 +493,7 @@ final class JSONReaderJSONB
                     if (utf16_len != -1) {
                         byte[] value = new byte[utf16_len];
                         System.arraycopy(valueBytes, 0, value, 0, utf16_len);
-                        String str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(value);
+                        String str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(value);
                         offset += strlen;
                         return str;
                     }
@@ -401,7 +516,7 @@ final class JSONReaderJSONB
                 if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                    str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 } else {
                     str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
                 }
@@ -416,7 +531,7 @@ final class JSONReaderJSONB
                 if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                    str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 } else {
                     str = new String(bytes, offset, strlen, StandardCharsets.UTF_16BE);
                 }
@@ -532,7 +647,7 @@ final class JSONReaderJSONB
                     }
 
                     Object name;
-                    if (i == 0 && type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_GB18030) {
+                    if (supportAutoType && i == 0 && type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_GB18030) {
                         long hash = readFieldNameHashCode();
 
                         if (hash == ObjectReader.HASH_TYPE && supportAutoType) {
@@ -578,7 +693,24 @@ final class JSONReaderJSONB
                         continue;
                     }
 
-                    Object value = readAny();
+                    byte valueType = bytes[offset];
+                    Object value;
+                    if (valueType >= BC_STR_ASCII_FIX_MIN && valueType <= BC_STR_GB18030) {
+                        value = readString();
+                    } else if (valueType >= BC_INT32_NUM_MIN && valueType <= BC_INT32_NUM_MAX) {
+                        offset++;
+                        value = (int) valueType;
+                    } else if (valueType == BC_TRUE) {
+                        offset++;
+                        value = Boolean.TRUE;
+                    } else if (valueType == BC_FALSE) {
+                        offset++;
+                        value = Boolean.FALSE;
+                    } else if (valueType == BC_OBJECT) {
+                        value = readObject();
+                    } else {
+                        value = readAny();
+                    }
                     map.put(name, value);
                 }
 
@@ -741,7 +873,114 @@ final class JSONReaderJSONB
         int entryCnt = startArray();
         JSONArray array = new JSONArray(entryCnt);
         for (int i = 0; i < entryCnt; i++) {
-            array.add(readAny());
+            byte valueType = bytes[offset];
+            Object value;
+            if (valueType >= BC_STR_ASCII_FIX_MIN && valueType <= BC_STR_GB18030) {
+                value = readString();
+            } else if (valueType >= BC_INT32_NUM_MIN && valueType <= BC_INT32_NUM_MAX) {
+                offset++;
+                value = (int) valueType;
+            } else if (valueType == BC_TRUE) {
+                offset++;
+                value = Boolean.TRUE;
+            } else if (valueType == BC_FALSE) {
+                offset++;
+                value = Boolean.FALSE;
+            } else if (valueType == BC_OBJECT) {
+                value = readObject();
+            } else if (valueType == BC_INT64) {
+                offset++;
+                long int64Value =
+                        ((bytes[offset + 7] & 0xFFL)) +
+                                ((bytes[offset + 6] & 0xFFL) << 8) +
+                                ((bytes[offset + 5] & 0xFFL) << 16) +
+                                ((bytes[offset + 4] & 0xFFL) << 24) +
+                                ((bytes[offset + 3] & 0xFFL) << 32) +
+                                ((bytes[offset + 2] & 0xFFL) << 40) +
+                                ((bytes[offset + 1] & 0xFFL) << 48) +
+                                ((long) (bytes[offset]) << 56);
+                offset += 8;
+                value = int64Value;
+            } else if (valueType >= BC_ARRAY_FIX_MIN && valueType <= BC_ARRAY) {
+                offset++;
+                int len = valueType == BC_ARRAY
+                        ? readLength()
+                        : valueType - BC_ARRAY_FIX_MIN;
+
+                if (len == 0) {
+                    if ((context.features & Feature.UseNativeObject.mask) != 0) {
+                        value = new ArrayList<>();
+                    } else {
+                        if (context.arraySupplier != null) {
+                            value = context.arraySupplier.get();
+                        } else {
+                            value = new JSONArray();
+                        }
+                    }
+                } else {
+                    List list;
+                    if ((context.features & Feature.UseNativeObject.mask) != 0) {
+                        list = new ArrayList(len);
+                    } else {
+                        list = new JSONArray(len);
+                    }
+
+                    for (int j = 0; j < len; ++j) {
+                        if (isReference()) {
+                            String reference = readReference();
+                            if ("..".equals(reference)) {
+                                list.add(list);
+                            } else {
+                                list.add(null);
+                                addResolveTask(list, j, JSONPath.of(reference));
+                            }
+                            continue;
+                        }
+
+                        byte itemType = bytes[offset];
+                        Object item;
+                        if (itemType >= BC_STR_ASCII_FIX_MIN && itemType <= BC_STR_GB18030) {
+                            item = readString();
+                        } else if (itemType == BC_OBJECT) {
+                            item = readObject();
+                        } else {
+                            item = readAny();
+                        }
+                        list.add(item);
+                    }
+                    value = list;
+                }
+            } else if (valueType >= BC_INT32_BYTE_MIN && valueType <= BC_INT32_BYTE_MAX) {
+                offset++;
+                value = ((valueType - BC_INT32_BYTE_ZERO) << 8)
+                        + (bytes[offset++] & 0xFF);
+            } else if (valueType >= BC_INT32_SHORT_MIN && valueType <= BC_INT32_SHORT_MAX) {
+                offset++;
+                int int32Value = ((valueType - BC_INT32_SHORT_ZERO) << 16)
+                        + ((bytes[offset++] & 0xFF) << 8)
+                        + (bytes[offset++] & 0xFF);
+                value = new Integer(int32Value);
+            } else if (valueType == BC_INT32) {
+                offset++;
+                int int32Value =
+                        ((bytes[offset + 3] & 0xFF)) +
+                                ((bytes[offset + 2] & 0xFF) << 8) +
+                                ((bytes[offset + 1] & 0xFF) << 16) +
+                                ((bytes[offset]) << 24);
+                offset += 4;
+                value = new Integer(int32Value);
+            } else if (valueType == BC_REFERENCE) {
+                String reference = readReference();
+                if ("..".equals(reference)) {
+                    value = array;
+                } else {
+                    addResolveTask(array, i, JSONPath.of(reference));
+                    continue;
+                }
+            } else {
+                value = readAny();
+            }
+            array.add(value);
         }
         return array;
     }
@@ -2062,7 +2301,7 @@ final class JSONReaderJSONB
                 if (utf16_len != -1) {
                     byte[] value = new byte[utf16_len];
                     System.arraycopy(valueBytes, 0, value, 0, utf16_len);
-                    str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(value);
+                    str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(value);
                     offset += strlen;
                 }
             }
@@ -2079,7 +2318,7 @@ final class JSONReaderJSONB
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
-                str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 offset += strlen;
             }
 
@@ -2091,7 +2330,7 @@ final class JSONReaderJSONB
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
-                str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 offset += strlen;
             }
 
@@ -2145,7 +2384,17 @@ final class JSONReaderJSONB
         String str;
         if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
             if (strtype == BC_STR_ASCII) {
-                strlen = readLength();
+                byte strType = bytes[offset];
+                if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
+                    offset++;
+                    strlen = strType;
+                } else if (strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX) {
+                    offset++;
+                    strlen = ((strType - BC_INT32_BYTE_ZERO) << 8)
+                            + (bytes[offset++] & 0xFF);
+                } else {
+                    strlen = readLength();
+                }
                 strBegin = offset;
             } else {
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
@@ -2202,7 +2451,7 @@ final class JSONReaderJSONB
                 } else if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = JDKUtils.UNSAFE_ASCII_CREATOR.apply(chars);
+                    str = (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(chars);
                     offset += strlen;
 
                     if ((context.features & Feature.TrimString.mask) != 0) {
@@ -2215,7 +2464,17 @@ final class JSONReaderJSONB
 
             charset = StandardCharsets.US_ASCII;
         } else if (strtype == BC_STR_UTF8) {
-            strlen = readLength();
+            byte strType = bytes[offset];
+            if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
+                offset++;
+                strlen = strType;
+            } else if (strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX) {
+                offset++;
+                strlen = ((strType - BC_INT32_BYTE_ZERO) << 8)
+                        + (bytes[offset++] & 0xFF);
+            } else {
+                strlen = readLength();
+            }
             strBegin = offset;
 
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
@@ -2236,7 +2495,7 @@ final class JSONReaderJSONB
                 if (utf16_len != -1) {
                     byte[] value = new byte[utf16_len];
                     System.arraycopy(valueBytes, 0, value, 0, utf16_len);
-                    str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(value);
+                    str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(value);
                     offset += strlen;
 
                     if ((context.features & Feature.TrimString.mask) != 0) {
@@ -2253,7 +2512,17 @@ final class JSONReaderJSONB
             strBegin = offset;
             charset = StandardCharsets.UTF_16;
         } else if (strtype == BC_STR_UTF16LE) {
-            strlen = readLength();
+            byte strType = bytes[offset];
+            if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
+                offset++;
+                strlen = strType;
+            } else if (strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX) {
+                offset++;
+                strlen = ((strType - BC_INT32_BYTE_ZERO) << 8)
+                        + (bytes[offset++] & 0xFF);
+            } else {
+                strlen = readLength();
+            }
             strBegin = offset;
 
             if (strlen == 0) {
@@ -2263,7 +2532,7 @@ final class JSONReaderJSONB
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
-                str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 offset += strlen;
 
                 if ((context.features & Feature.TrimString.mask) != 0) {
@@ -2280,7 +2549,7 @@ final class JSONReaderJSONB
             if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
                 byte[] chars = new byte[strlen];
                 System.arraycopy(bytes, offset, chars, 0, strlen);
-                str = JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
+                str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
                 offset += strlen;
 
                 if ((context.features & Feature.TrimString.mask) != 0) {
@@ -2440,7 +2709,18 @@ final class JSONReaderJSONB
             return symbolTable.getName(-strlen);
         }
 
-        str = new String(bytes, offset, strlen, charset);
+        char[] chars = null;
+        if (JDKUtils.JVM_VERSION == 8 && strtype == BC_STR_UTF8 && strlen < 8192) {
+            final int cachedIndex = JSONFactory.cacheIndex();
+            chars = allocateCharArray(cachedIndex);
+        }
+        if (chars != null) {
+            int len = IOUtils.decodeUTF8(bytes, offset, strlen, chars);
+            str = new String(chars, 0, len);
+            releaseCharArray(cachedIndex, chars);
+        } else {
+            str = new String(bytes, offset, strlen, charset);
+        }
         offset += strlen;
 
         if ((context.features & Feature.TrimString.mask) != 0) {

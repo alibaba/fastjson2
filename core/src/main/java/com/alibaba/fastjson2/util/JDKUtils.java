@@ -24,11 +24,11 @@ public class JDKUtils {
 
     // GraalVM not support
     // Android not support
-    public static final Function<byte[], String> UNSAFE_UTF16_CREATOR;
+    public static final Function<Object, Object> UNSAFE_UTF16_CREATOR;
 
     // GraalVM not support
     // Android not support
-    public static final Function<byte[], String> UNSAFE_ASCII_CREATOR;
+    public static final Function<Object, Object> UNSAFE_ASCII_CREATOR;
 
     static {
         boolean openj9 = false;
@@ -101,12 +101,12 @@ public class JDKUtils {
 
         BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
 
-        Function<byte[], String> utf16Creator = null, asciiCreator = null;
+        Function<Object, Object> utf16Creator = null, asciiCreator = null;
         if (unsafeSupport) {
             try {
-                utf16Creator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorUTF16()).get();
+                utf16Creator = ((Supplier<Function<Object, Object>>) () -> UnsafeUtils.getStringCreatorUTF16()).get();
                 if (!openj9) {
-                    asciiCreator = ((Supplier<Function<byte[], String>>) () -> UnsafeUtils.getStringCreatorASCII()).get();
+                    asciiCreator = ((Supplier<Function<Object, Object>>) () -> UnsafeUtils.getStringCreatorASCII()).get();
                 }
             } catch (Throwable ignored) {
             }

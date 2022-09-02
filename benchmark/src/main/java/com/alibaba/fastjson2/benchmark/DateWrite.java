@@ -209,7 +209,7 @@ public class DateWrite {
                 }
                 return STR_CREATOR_JDK11.apply(bytes);
             } else if (JDKUtils.JVM_VERSION >= 17) {
-                return JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
+                return (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
             } else {
                 return new String(bytes, 0, bytes.length);
             }
