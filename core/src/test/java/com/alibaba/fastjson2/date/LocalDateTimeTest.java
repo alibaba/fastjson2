@@ -55,6 +55,13 @@ public class LocalDateTimeTest {
         assertEquals(str, JSON.toJSONString(student, "yyyy-MM-dd HH:mm:ss"));
     }
 
+    @Test
+    public void test2_1() {
+        String str = "{\"birthday\":\"2022-05-03 15:26\"}";
+        Student2 student = JSON.parseObject(str, Student2.class);
+        assertEquals("{\"birthday\":\"2022-05-03 15:26:00\"}", JSON.toJSONString(student));
+    }
+
     public static class Student2 {
         public LocalDateTime birthday;
     }
