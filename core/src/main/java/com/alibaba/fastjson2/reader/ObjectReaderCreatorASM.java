@@ -1867,7 +1867,7 @@ public class ObjectReaderCreatorASM
                     mw.visitTypeInsn(Opcodes.NEW, LIST_TYPE);
                     mw.visitInsn(Opcodes.DUP);
                     if (initCapacity) {
-                        mw.visitLdcInsn(10);
+                        mw.visitVarInsn(Opcodes.ILOAD, ITEM_CNT);
                         mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "(I)V", false);
                     } else {
                         mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
