@@ -1866,7 +1866,12 @@ public class ObjectReaderCreatorASM
 
                     mw.visitTypeInsn(Opcodes.NEW, LIST_TYPE);
                     mw.visitInsn(Opcodes.DUP);
-                    mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
+                    if (initCapacity) {
+                        mw.visitLdcInsn(10);
+                        mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "(I)V", false);
+                    } else {
+                        mw.visitMethodInsn(Opcodes.INVOKESPECIAL, LIST_TYPE, "<init>", "()V", false);
+                    }
                     mw.visitVarInsn(Opcodes.ASTORE, LIST);
                 } else {
                     Label match_ = new Label(), skipValue_ = new Label(), loadNull_ = new Label();
