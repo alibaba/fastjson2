@@ -6,10 +6,7 @@ import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Reader;
+import java.io.*;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -65,6 +62,12 @@ public abstract class JSONWriter
 
     public boolean isIgnoreNoneSerializable() {
         return (context.features & Feature.IgnoreNoneSerializable.mask) != 0;
+    }
+
+    public boolean isIgnoreNoneSerializable(Object object) {
+        return (context.features & Feature.IgnoreNoneSerializable.mask) != 0
+                && object != null
+                && !Serializable.class.isAssignableFrom(object.getClass());
     }
 
     public SymbolTable getSymbolTable() {
