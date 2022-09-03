@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
@@ -107,6 +108,29 @@ public abstract class JSONWriter
         }
 
         this.path = new Path(this.path, name);
+
+        if (refs == null) {
+            refs = new IdentityHashMap(8);
+        }
+
+        Path previous = refs.get(object);
+        if (previous == null) {
+            refs.put(object, this.path);
+            return null;
+        }
+        return previous.toString();
+    }
+
+    public String setPath(String name, FieldWriter fieldWriter, Object object) {
+        if ((context.features & Feature.ReferenceDetection.mask) == 0) {
+            return null;
+        }
+
+        if (this.path == Path.ROOT) {
+            this.path = fieldWriter.getRootParentPath();
+        } else {
+            this.path = new Path(this.path, name);
+        }
 
         if (refs == null) {
             refs = new IdentityHashMap(8);

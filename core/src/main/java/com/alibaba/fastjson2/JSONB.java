@@ -383,24 +383,31 @@ public interface JSONB {
                              JSONReader.Feature... features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider, symbolTable);
-        JSONReader reader = new JSONReaderJSONB(
+
+        try (JSONReader reader = JDKUtils.UNSAFE_SUPPORT
+                ? new JSONReaderJSONBUF(
                 ctx,
                 jsonbBytes,
                 0,
-                jsonbBytes.length);
+                jsonbBytes.length)
+                : new JSONReaderJSONB(
+                ctx,
+                jsonbBytes,
+                0,
+                jsonbBytes.length)) {
+            for (JSONReader.Feature feature : features) {
+                ctx.features |= feature.mask;
+            }
 
-        for (JSONReader.Feature feature : features) {
-            ctx.features |= feature.mask;
+            boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
+            ObjectReader objectReader = provider.getObjectReader(objectType, fieldBased);
+
+            T object = (T) objectReader.readJSONBObject(reader, null, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
         }
-
-        boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
-        ObjectReader objectReader = provider.getObjectReader(objectType, fieldBased);
-
-        T object = (T) objectReader.readJSONBObject(reader, null, null, 0);
-        if (reader.resolveTasks != null) {
-            reader.handleResolveTasks(object);
-        }
-        return object;
     }
 
     static <T> T parseObject(
@@ -500,7 +507,13 @@ public interface JSONB {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);
 
-        try (JSONReader jsonReader = new JSONReaderJSONB(
+        try (JSONReader jsonReader = JDKUtils.UNSAFE_SUPPORT
+                ? new JSONReaderJSONBUF(
+                ctx,
+                jsonbBytes,
+                0,
+                jsonbBytes.length)
+                : new JSONReaderJSONB(
                 ctx,
                 jsonbBytes,
                 0,

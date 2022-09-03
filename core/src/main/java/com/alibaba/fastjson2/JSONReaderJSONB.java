@@ -40,7 +40,7 @@ class JSONReaderJSONB
     protected final int cachedIndex = JSONFactory.cacheIndex();
 
     protected final SymbolTable symbolTable;
-    protected long[] symbols = new long[16];
+    protected long[] symbols = new long[32];
 
     JSONReaderJSONB(Context ctx, byte[] bytes, int off, int length) {
         super(ctx);
@@ -151,7 +151,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean isArray() {
+    public final boolean isArray() {
         if (offset >= bytes.length) {
             return false;
         }
@@ -161,7 +161,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean isObject() {
+    public final boolean isObject() {
         return offset < end && bytes[offset] == BC_OBJECT;
     }
 
@@ -192,7 +192,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean nextIfObjectEnd() {
+    public final boolean nextIfObjectEnd() {
         if (bytes[offset] != BC_OBJECT_END) {
             return false;
         }
@@ -201,7 +201,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean nextIfEmptyString() {
+    public final boolean nextIfEmptyString() {
         if (bytes[offset] != BC_STR_ASCII_FIX_MIN) {
             return false;
         }
@@ -1147,7 +1147,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public void next() {
+    public final void next() {
         offset++;
     }
 
@@ -1233,7 +1233,7 @@ class JSONReaderJSONB
                                 + (((long) bytes[offset + 3] & 0xFFL) << 24)
                                 + (((long) bytes[offset + 2] & 0xFFL) << 16)
                                 + (((long) bytes[offset + 1] & 0xFFL) << 8)
-                                + (((long) bytes[offset] & 0xFFL) & 0xFFL);
+                                + (bytes[offset] & 0xFFL);
                         break;
                     case 7:
                         nameValue = (((long) bytes[offset + 6]) << 48)
@@ -1242,7 +1242,7 @@ class JSONReaderJSONB
                                 + (((long) bytes[offset + 3] & 0xFFL) << 24)
                                 + (((long) bytes[offset + 2] & 0xFFL) << 16)
                                 + (((long) bytes[offset + 1] & 0xFFL) << 8)
-                                + (((long) bytes[offset] & 0xFFL) & 0xFFL);
+                                + (bytes[offset] & 0xFFL);
                         break;
                     case 8:
                         nameValue = (((long) bytes[offset + 7]) << 56)
@@ -1252,7 +1252,7 @@ class JSONReaderJSONB
                                 + (((long) bytes[offset + 3] & 0xFFL) << 24)
                                 + (((long) bytes[offset + 2] & 0xFFL) << 16)
                                 + (((long) bytes[offset + 1] & 0xFFL) << 8)
-                                + (((long) bytes[offset] & 0xFFL) & 0xFFL);
+                                + (bytes[offset] & 0xFFL);
                         break;
                     default:
                         break;
@@ -1344,7 +1344,18 @@ class JSONReaderJSONB
         strtype = bytes[offset];
 
         if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
-            int typeIndex = readInt32Value();
+            int typeIndex;
+            if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
+                offset++;
+                typeIndex = strtype;
+            } else if (strtype >= BC_INT32_BYTE_MIN && strtype <= BC_INT32_BYTE_MAX) {
+                offset++;
+                return ((strtype - BC_INT32_BYTE_ZERO) << 8)
+                        + (bytes[offset++] & 0xFF);
+            } else {
+                typeIndex = readInt32Value();
+            }
+
             long refTypeHash;
             if (typeIndex < 0) {
                 strlen = strtype;
@@ -3242,7 +3253,7 @@ class JSONReaderJSONB
         return value;
     }
 
-    private String readFixedAsciiString(int strlen) {
+    protected final String readFixedAsciiString(int strlen) {
         String str;
         if (JDKUtils.JVM_VERSION == 8) {
             char[] chars = new char[strlen];
@@ -5740,7 +5751,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public void close() {
+    public final void close() {
         if (valueBytes != null) {
             JSONFactory.releaseByteArray(cachedIndex, valueBytes);
         }

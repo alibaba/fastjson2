@@ -74,7 +74,7 @@ public final class ObjectReaderImplEnum
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         byte type = jsonReader.getType();
-        if (jsonReader.getType() == BC_TYPED_ANY) {
+        if (type == BC_TYPED_ANY) {
             ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(enumClass, 0L, features);
             if (autoTypeObjectReader != null) {
                 if (autoTypeObjectReader != this) {
@@ -88,7 +88,14 @@ public final class ObjectReaderImplEnum
         Enum fieldValue;
         boolean isInt = (type >= BC_INT32_NUM_MIN && type <= BC_INT32);
         if (isInt) {
-            int ordinal = jsonReader.readInt32Value();
+            int ordinal;
+            if (type <= BC_INT32_NUM_MAX) {
+                ordinal = type;
+                jsonReader.next();
+            } else {
+                ordinal = jsonReader.readInt32Value();
+            }
+
             fieldValue = getEnumByOrdinal(ordinal);
         } else {
             fieldValue = getEnumByHashCode(

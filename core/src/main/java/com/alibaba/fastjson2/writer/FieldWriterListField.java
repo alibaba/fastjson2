@@ -65,7 +65,7 @@ final class FieldWriterListField<T>
             }
         }
 
-        String refPath = jsonWriter.setPath(name, value);
+        String refPath = jsonWriter.setPath(name, this, value);
         if (refPath != null) {
             writeFieldName(jsonWriter);
             jsonWriter.writeReference(refPath);

@@ -434,7 +434,7 @@ final class JSONWriterJSONB
         }
         symbols.put(hash, symbol = symbolIndex++);
 
-        int minCapacity = off + 1 + typeName.length;
+        int minCapacity = off + 2 + typeName.length;
         if (minCapacity - bytes.length > 0) {
             int oldCapacity = bytes.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
@@ -452,7 +452,11 @@ final class JSONWriterJSONB
         this.bytes[off++] = BC_TYPED_ANY;
         System.arraycopy(typeName, 0, this.bytes, off, typeName.length);
         off += typeName.length;
-        writeInt32(symbol);
+        if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+            bytes[off++] = (byte) symbol;
+        } else {
+            writeInt32(symbol);
+        }
 
         return false;
     }
@@ -507,6 +511,10 @@ final class JSONWriterJSONB
                 int strlen = value.length;
                 if (strlen <= STR_ASCII_FIX_LEN) {
                     bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+                } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
+                    bytes[off++] = BC_STR_ASCII;
+                    bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
+                    bytes[off++] = (byte) (strlen);
                 } else {
                     bytes[off++] = BC_STR_ASCII;
                     writeInt32(strlen);
@@ -627,6 +635,10 @@ final class JSONWriterJSONB
         if (ascii) {
             if (strlen <= STR_ASCII_FIX_LEN) {
                 bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
+                bytes[off++] = BC_STR_ASCII;
+                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
+                bytes[off++] = (byte) (strlen);
             } else {
                 bytes[off++] = BC_STR_ASCII;
                 writeInt32(strlen);
@@ -1468,8 +1480,8 @@ final class JSONWriterJSONB
         }
 
         if (symbol != -1) {
-            if (off == this.bytes.length) {
-                int minCapacity = off + 1;
+            int minCapacity = this.off + 2;
+            if (minCapacity - this.bytes.length > 0) {
                 int oldCapacity = this.bytes.length;
                 int newCapacity = oldCapacity + (oldCapacity >> 1);
                 if (newCapacity - minCapacity < 0) {
@@ -1483,7 +1495,11 @@ final class JSONWriterJSONB
                 this.bytes = Arrays.copyOf(this.bytes, newCapacity);
             }
             this.bytes[off++] = BC_SYMBOL;
-            writeInt32(symbol);
+            if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+                bytes[off++] = (byte) symbol;
+            } else {
+                writeInt32(symbol);
+            }
             return;
         }
 
@@ -1513,7 +1529,7 @@ final class JSONWriterJSONB
         }
         symbols.put(nameHash, symbol = symbolIndex++);
 
-        int minCapacity = this.off + 1 + name.length;
+        int minCapacity = this.off + 2 + name.length;
         if (minCapacity - this.bytes.length > 0) {
             int oldCapacity = this.bytes.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
@@ -1530,7 +1546,12 @@ final class JSONWriterJSONB
         this.bytes[off++] = BC_SYMBOL;
         System.arraycopy(name, 0, this.bytes, off, name.length);
         off += name.length;
-        writeInt32(symbol);
+
+        if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+            bytes[off++] = (byte) symbol;
+        } else {
+            writeInt32(symbol);
+        }
     }
 
     @Override
