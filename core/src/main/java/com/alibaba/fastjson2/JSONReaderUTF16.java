@@ -1671,8 +1671,8 @@ final class JSONReaderUTF16
                     c1 = chars[nameBegin + 1];
                     if ((c0 & 0xFF) == c0 && (c1 & 0xFF) == c1) {
                         nameValue0
-                                = (((byte) c0) << 8)
-                                + c1;
+                                = (((byte) c1) << 8)
+                                + c0;
                     }
                     break;
                 case 3:
@@ -1683,9 +1683,9 @@ final class JSONReaderUTF16
                             && (c1 & 0xFF) == c1
                             && (c2 & 0xFF) == c2) {
                         nameValue0
-                                = (c0 << 16)
+                                = (c2 << 16)
                                 + (c1 << 8)
-                                + c2;
+                                + c0;
                     }
                     break;
                 case 4:
@@ -1698,10 +1698,10 @@ final class JSONReaderUTF16
                             && (c2 & 0xFF) == c2
                             && (c3 & 0xFF) == c3) {
                         nameValue0
-                                = (c0 << 24)
-                                + (c1 << 16)
-                                + (c2 << 8)
-                                + c3;
+                                = (c3 << 24)
+                                + (c2 << 16)
+                                + (c1 << 8)
+                                + c0;
                     }
                     break;
                 case 5:
@@ -1716,11 +1716,11 @@ final class JSONReaderUTF16
                             && (c3 & 0xFF) == c3
                             && (c4 & 0xFF) == c4) {
                         nameValue0
-                                = (((long) c0) << 32)
-                                + (((long) c1) << 24)
+                                = (((long) c4) << 32)
+                                + (((long) c3) << 24)
                                 + (((long) c2) << 16)
-                                + (((long) c3) << 8)
-                                + ((long) c4);
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                     }
                     break;
                 case 6:
@@ -1737,12 +1737,12 @@ final class JSONReaderUTF16
                             && (c4 & 0xFF) == c4
                             && (c5 & 0xFF) == c5) {
                         nameValue0
-                                = (((long) c0) << 40)
-                                + (((long) c1) << 32)
-                                + (((long) c2) << 24)
-                                + (((long) c3) << 16)
-                                + (((long) c4) << 8)
-                                + ((long) c5);
+                                = (((long) c5) << 40)
+                                + (((long) c4) << 32)
+                                + (((long) c3) << 24)
+                                + (((long) c2) << 16)
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                     }
                     break;
                 case 7:
@@ -1761,13 +1761,13 @@ final class JSONReaderUTF16
                             && (c5 & 0xFF) == c5
                             && (c6 & 0xFF) == c6) {
                         nameValue0
-                                = (((long) c0) << 48)
-                                + (((long) c1) << 40)
-                                + (((long) c2) << 32)
+                                = (((long) c6) << 48)
+                                + (((long) c5) << 40)
+                                + (((long) c4) << 32)
                                 + (((long) c3) << 24)
-                                + (((long) c4) << 16)
-                                + (((long) c5) << 8)
-                                + ((long) c6);
+                                + (((long) c2) << 16)
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                     }
                     break;
                 case 8:
@@ -1788,14 +1788,14 @@ final class JSONReaderUTF16
                             && (c6 & 0xFF) == c6
                             && (c7 & 0xFF) == c7) {
                         nameValue0
-                                = (((long) c0) << 56)
-                                + (((long) c1) << 48)
-                                + (((long) c2) << 40)
-                                + (((long) c3) << 32)
-                                + (((long) c4) << 24)
-                                + (((long) c5) << 16)
-                                + (((long) c6) << 8)
-                                + ((long) c7);
+                                = (((long) c7) << 56)
+                                + (((long) c6) << 48)
+                                + (((long) c5) << 40)
+                                + (((long) c4) << 32)
+                                + (((long) c3) << 24)
+                                + (((long) c2) << 16)
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                     }
                     break;
                 case 9:
@@ -1819,14 +1819,14 @@ final class JSONReaderUTF16
                             && (c8 & 0xFF) == c8) {
                         nameValue0 = c0;
                         nameValue1
-                                = (((long) c1) << 56)
-                                + (((long) c2) << 48)
-                                + (((long) c3) << 40)
-                                + (((long) c4) << 32)
-                                + (((long) c5) << 24)
-                                + (((long) c6) << 16)
-                                + (((long) c7) << 8)
-                                + ((long) c8);
+                                = (((long) c8) << 56)
+                                + (((long) c7) << 48)
+                                + (((long) c6) << 40)
+                                + (((long) c5) << 32)
+                                + (((long) c4) << 24)
+                                + (((long) c3) << 16)
+                                + (((long) c2) << 8)
+                                + ((long) c1);
                     }
                     break;
                 case 10:
@@ -1850,17 +1850,17 @@ final class JSONReaderUTF16
                             && (c7 & 0xFF) == c7
                             && (c8 & 0xFF) == c8
                             && (c9 & 0xFF) == c9) {
-                        nameValue0 = c0 << 8
-                                + c1;
+                        nameValue0 = c1 << 8
+                                + c0;
                         nameValue1
-                                = (((long) c2) << 56)
-                                + (((long) c3) << 48)
-                                + (((long) c4) << 40)
-                                + (((long) c5) << 32)
-                                + (((long) c6) << 24)
-                                + (((long) c7) << 16)
-                                + (((long) c8) << 8)
-                                + ((long) c9);
+                                = (((long) c9) << 56)
+                                + (((long) c8) << 48)
+                                + (((long) c7) << 40)
+                                + (((long) c6) << 32)
+                                + (((long) c5) << 24)
+                                + (((long) c4) << 16)
+                                + (((long) c3) << 8)
+                                + ((long) c2);
                     }
                     break;
                 case 11:
@@ -1887,18 +1887,18 @@ final class JSONReaderUTF16
                             && (c9 & 0xFF) == c9
                             && (c10 & 0xFF) == c10) {
                         nameValue0
-                                = c0 << 16
+                                = c2 << 16
                                 + (c1 << 8)
-                                + c2;
+                                + c0;
                         nameValue1
-                                = (((long) c3) << 56)
-                                + (((long) c4) << 48)
-                                + (((long) c5) << 40)
-                                + (((long) c6) << 32)
-                                + (((long) c7) << 24)
-                                + (((long) c8) << 16)
-                                + (((long) c9) << 8)
-                                + ((long) c10);
+                                = (((long) c10) << 56)
+                                + (((long) c9) << 48)
+                                + (((long) c8) << 40)
+                                + (((long) c7) << 32)
+                                + (((long) c6) << 24)
+                                + (((long) c5) << 16)
+                                + (((long) c4) << 8)
+                                + ((long) c3);
                     }
                     break;
                 case 12:
@@ -1927,19 +1927,19 @@ final class JSONReaderUTF16
                             && (c10 & 0xFF) == c10
                             && (c11 & 0xFF) == c11) {
                         nameValue0
-                                = c0 << 24
-                                + (c1 << 16)
-                                + (c2 << 8)
-                                + c3;
+                                = c3 << 24
+                                + (c2 << 16)
+                                + (c1 << 8)
+                                + c0;
                         nameValue1
-                                = (((long) c4) << 56)
-                                + (((long) c5) << 48)
-                                + (((long) c6) << 40)
-                                + (((long) c7) << 32)
-                                + (((long) c8) << 24)
-                                + (((long) c9) << 16)
-                                + (((long) c10) << 8)
-                                + ((long) c11);
+                                = (((long) c11) << 56)
+                                + (((long) c10) << 48)
+                                + (((long) c9) << 40)
+                                + (((long) c8) << 32)
+                                + (((long) c7) << 24)
+                                + (((long) c6) << 16)
+                                + (((long) c5) << 8)
+                                + ((long) c4);
                     }
                     break;
                 case 13:
@@ -1970,20 +1970,20 @@ final class JSONReaderUTF16
                             && (c11 & 0xFF) == c11
                             && (c12 & 0xFF) == c12) {
                         nameValue0
-                                = (((long) c0) << 32)
-                                + (((long) c1) << 24)
+                                = (((long) c4) << 32)
+                                + (((long) c3) << 24)
                                 + (((long) c2) << 16)
-                                + (((long) c3) << 8)
-                                + ((long) c4);
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                         nameValue1
-                                = (((long) c5) << 56)
-                                + (((long) c6) << 48)
-                                + (((long) c7) << 40)
-                                + (((long) c8) << 32)
-                                + (((long) c9) << 24)
-                                + (((long) c10) << 16)
-                                + (((long) c11) << 8)
-                                + ((long) c12);
+                                = (((long) c12) << 56)
+                                + (((long) c11) << 48)
+                                + (((long) c10) << 40)
+                                + (((long) c9) << 32)
+                                + (((long) c8) << 24)
+                                + (((long) c7) << 16)
+                                + (((long) c6) << 8)
+                                + ((long) c5);
                     }
                     break;
                 case 14:
@@ -2016,21 +2016,21 @@ final class JSONReaderUTF16
                             && (c12 & 0xFF) == c12
                             && (c13 & 0xFF) == c13) {
                         nameValue0
-                                = (((long) c0) << 40)
-                                + (((long) c1) << 32)
-                                + (((long) c2) << 24)
-                                + (((long) c3) << 16)
-                                + (((long) c4) << 8)
-                                + ((long) c5);
+                                = (((long) c5) << 40)
+                                + (((long) c4) << 32)
+                                + (((long) c3) << 24)
+                                + (((long) c2) << 16)
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                         nameValue1
-                                = (((long) c6) << 56)
-                                + (((long) c7) << 48)
-                                + (((long) c8) << 40)
-                                + (((long) c9) << 32)
-                                + (((long) c10) << 24)
-                                + (((long) c11) << 16)
-                                + (((long) c12) << 8)
-                                + ((long) c13);
+                                = (((long) c13) << 56)
+                                + (((long) c12) << 48)
+                                + (((long) c11) << 40)
+                                + (((long) c10) << 32)
+                                + (((long) c9) << 24)
+                                + (((long) c8) << 16)
+                                + (((long) c7) << 8)
+                                + ((long) c6);
                     }
                     break;
                 case 15:
@@ -2065,22 +2065,22 @@ final class JSONReaderUTF16
                             && (c13 & 0xFF) == c13
                             && (c14 & 0xFF) == c14) {
                         nameValue0
-                                = (((long) c0) << 48)
-                                + (((long) c1) << 40)
-                                + (((long) c2) << 32)
+                                = (((long) c6) << 48)
+                                + (((long) c5) << 40)
+                                + (((long) c4) << 32)
                                 + (((long) c3) << 24)
-                                + (((long) c4) << 16)
-                                + (((long) c5) << 8)
-                                + ((long) c6);
+                                + (((long) c2) << 16)
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                         nameValue1
-                                = (((long) c7) << 56)
-                                + (((long) c8) << 48)
-                                + (((long) c9) << 40)
-                                + (((long) c10) << 32)
-                                + (((long) c11) << 24)
-                                + (((long) c12) << 16)
-                                + (((long) c13) << 8)
-                                + ((long) c14);
+                                = (((long) c14) << 56)
+                                + (((long) c13) << 48)
+                                + (((long) c12) << 40)
+                                + (((long) c11) << 32)
+                                + (((long) c10) << 24)
+                                + (((long) c9) << 16)
+                                + (((long) c8) << 8)
+                                + ((long) c7);
                     }
                     break;
                 case 16:
@@ -2117,23 +2117,23 @@ final class JSONReaderUTF16
                             && (c14 & 0xFF) == c14
                             && (c15 & 0xFF) == c15) {
                         nameValue0
-                                = (((long) c0) << 56)
-                                + (((long) c1) << 48)
-                                + (((long) c2) << 40)
-                                + (((long) c3) << 32)
-                                + (((long) c4) << 24)
-                                + (((long) c5) << 16)
-                                + (((long) c6) << 8)
-                                + ((long) c7);
+                                = (((long) c7) << 56)
+                                + (((long) c6) << 48)
+                                + (((long) c5) << 40)
+                                + (((long) c4) << 32)
+                                + (((long) c3) << 24)
+                                + (((long) c2) << 16)
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                         nameValue1
-                                = (((long) c8) << 56)
-                                + (((long) c9) << 48)
-                                + (((long) c10) << 40)
-                                + (((long) c11) << 32)
-                                + (((long) c12) << 24)
-                                + (((long) c13) << 16)
-                                + (((long) c14) << 8)
-                                + ((long) c15);
+                                = (((long) c15) << 56)
+                                + (((long) c14) << 48)
+                                + (((long) c13) << 40)
+                                + (((long) c12) << 32)
+                                + (((long) c11) << 24)
+                                + (((long) c10) << 16)
+                                + (((long) c9) << 8)
+                                + ((long) c8);
                     }
                     break;
                 default:

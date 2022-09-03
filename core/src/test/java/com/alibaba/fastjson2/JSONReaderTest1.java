@@ -1098,7 +1098,10 @@ public class JSONReaderTest1 {
     @Test
     public void test_readValueHashCode() {
         for (JSONReader jsonReader : TestUtils.createJSONReaders("\"A中国\"")) {
-            assertEquals(Fnv.hashCode64("A中国"), jsonReader.readValueHashCode());
+            assertEquals(
+                    Fnv.hashCode64("A中国"),
+                    jsonReader.readValueHashCode()
+            );
             assertEquals("A中国", jsonReader.getString());
             assertFalse(jsonReader.comma);
         }

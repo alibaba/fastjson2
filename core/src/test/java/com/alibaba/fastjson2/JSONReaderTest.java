@@ -462,7 +462,7 @@ public class JSONReaderTest {
 
     @Test
     public void test_readValueHashCode() {
-        for (int i = 0; i <= 20; i++) {
+        for (int i = 1; i <= 20; i++) {
             char[] chars = new char[i];
             Arrays.fill(chars, 'A');
             String item = new String(chars);
