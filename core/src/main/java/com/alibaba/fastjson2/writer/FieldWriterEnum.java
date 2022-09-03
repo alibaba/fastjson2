@@ -57,7 +57,7 @@ abstract class FieldWriterEnum
 
         if (usingOrdinal) {
             writeFieldName(jsonWriter);
-            jsonWriter.writeInt32(e.ordinal());
+            jsonWriter.writeInt32(ordinal);
             return;
         }
 

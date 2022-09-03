@@ -40,6 +40,8 @@ public interface FieldWriter<T>
 
     Type getFieldType();
 
+    JSONWriter.Path getRootParentPath();
+
     default Type getItemType() {
         return null;
     }

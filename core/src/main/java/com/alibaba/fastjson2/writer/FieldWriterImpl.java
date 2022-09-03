@@ -23,6 +23,7 @@ abstract class FieldWriterImpl<T>
     final Type fieldType;
     final Class fieldClass;
     final boolean fieldClassSerializable;
+    JSONWriter.Path rootParentPath;
 
     FieldWriterImpl(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
         this.name = name;
@@ -148,6 +149,13 @@ abstract class FieldWriterImpl<T>
 
         jsonWriter.writeName(name);
         jsonWriter.writeColon();
+    }
+
+    public JSONWriter.Path getRootParentPath() {
+        if (rootParentPath == null) {
+            rootParentPath = new JSONWriter.Path(JSONWriter.Path.ROOT, name);
+        }
+        return rootParentPath;
     }
 
     @Override

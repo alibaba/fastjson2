@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 
@@ -8,8 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE;
-import static com.alibaba.fastjson2.JSONFactory.NAME_CACHE2;
+import static com.alibaba.fastjson2.JSONB.typeName;
+import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
 
 final class JSONReaderJSONBUF
@@ -157,13 +158,6 @@ final class JSONReaderJSONBUF
                     int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
                     JSONFactory.NameCacheEntry2 entry = NAME_CACHE2[indexMask];
                     if (entry == null) {
-                        if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
-                            try {
-                                STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                            } catch (Throwable e) {
-                                STRING_CREATOR_ERROR = true;
-                            }
-                        }
                         String name;
                         if (STRING_CREATOR_JDK8 != null) {
                             char[] chars = new char[strlen];
@@ -186,13 +180,6 @@ final class JSONReaderJSONBUF
                     int indexMask = ((int) nameValue0) & (NAME_CACHE.length - 1);
                     JSONFactory.NameCacheEntry entry = NAME_CACHE[indexMask];
                     if (entry == null) {
-                        if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
-                            try {
-                                STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                            } catch (Throwable e) {
-                                STRING_CREATOR_ERROR = true;
-                            }
-                        }
                         String name;
                         if (STRING_CREATOR_JDK8 != null) {
                             char[] chars = new char[strlen];
@@ -221,28 +208,12 @@ final class JSONReaderJSONBUF
                 }
                 offset += strlen;
 
-                if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
-                    try {
-                        STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                    } catch (Throwable e) {
-                        STRING_CREATOR_ERROR = true;
-                    }
-                }
-
                 if (STRING_CREATOR_JDK8 == null) {
                     str = new String(chars);
                 } else {
                     str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                 }
             } else if (JDKUtils.JVM_VERSION == 11 && strlen >= 0) {
-                if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {
-                    try {
-                        STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
-                    } catch (Throwable e) {
-                        STRING_CREATOR_ERROR = true;
-                    }
-                }
-
                 if (STRING_CREATOR_JDK11 != null) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
@@ -331,5 +302,126 @@ final class JSONReaderJSONBUF
         }
 
         return str;
+    }
+
+    @Override
+    public long readFieldNameHashCode() {
+        strtype = bytes[offset++];
+        boolean typeSymbol = strtype == BC_SYMBOL;
+        if (typeSymbol) {
+            strtype = bytes[offset];
+            if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
+                int symbol;
+                if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
+                    offset++;
+                    symbol = strtype;
+                } else {
+                    symbol = readInt32Value();
+                }
+
+                if (symbol < 0) {
+                    return symbolTable.getHashCode(-symbol);
+                }
+                int index = symbol * 2;
+                return symbols[index];
+            }
+            offset++;
+        }
+
+        strBegin = offset;
+        if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII_FIX_MAX) {
+            strlen = strtype - BC_STR_ASCII_FIX_MIN;
+        } else if (strtype == BC_STR_ASCII || strtype == BC_STR_UTF8) {
+            strlen = readLength();
+            strBegin = offset;
+        } else {
+            StringBuffer message = new StringBuffer()
+                    .append("fieldName not support input type ")
+                    .append(typeName(strtype));
+            if (strtype == BC_REFERENCE) {
+                message.append(" ")
+                        .append(readString());
+            }
+
+            message.append(", offset ")
+                    .append(offset);
+            throw new JSONException(message.toString());
+        }
+
+        long hashCode;
+        if (strlen < 0) {
+            hashCode = symbolTable.getHashCode(-strlen);
+        } else {
+            long nameValue = 0;
+            if (MIXED_HASH_ALGORITHM && strlen <= 8 && offset + strlen < bytes.length) {
+                switch (strlen) {
+                    case 1:
+                        nameValue = bytes[offset];
+                        break;
+                    case 2:
+                        nameValue = UNSAFE.getShort(bytes, BASE + offset) & 0xFFFFL;
+                        break;
+                    case 3:
+                        nameValue = (bytes[offset + 2] << 16)
+                                + (UNSAFE.getShort(bytes, BASE + offset) & 0xFFFFL);
+                        break;
+                    case 4:
+                        nameValue = UNSAFE.getInt(bytes, BASE + offset);
+                        break;
+                    case 5:
+                        nameValue = (((long) bytes[offset + 4]) << 32)
+                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
+                        break;
+                    case 6:
+                        nameValue = ((long) UNSAFE.getShort(bytes, BASE + offset + 4) << 32)
+                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
+                        break;
+                    case 7:
+                        nameValue = (((long) bytes[offset + 6]) << 48)
+                                + (((long) bytes[offset + 5] & 0xFFL) << 40)
+                                + (((long) bytes[offset + 4] & 0xFFL) << 32)
+                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
+                        break;
+                    case 8:
+                        nameValue = UNSAFE.getLong(bytes, BASE + offset);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (nameValue != 0) {
+                offset += strlen;
+                hashCode = nameValue;
+            } else {
+                hashCode = Fnv.MAGIC_HASH_CODE;
+                for (int i = 0; i < strlen; ++i) {
+                    byte c = bytes[offset++];
+                    hashCode ^= c;
+                    hashCode *= Fnv.MAGIC_PRIME;
+                }
+            }
+        }
+
+        if (typeSymbol) {
+            int symbol;
+            if ((type = bytes[offset]) >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+                symbol = type;
+                offset++;
+            } else {
+                symbol = readInt32Value();
+            }
+
+            long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
+
+            int minCapacity = symbol * 2 + 2;
+            if (symbols.length < minCapacity) {
+                symbols = Arrays.copyOf(symbols, minCapacity + 16);
+            }
+            symbols[symbol * 2] = hashCode;
+            symbols[symbol * 2 + 1] = strInfo;
+        }
+
+        return hashCode;
     }
 }
