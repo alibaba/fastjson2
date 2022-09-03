@@ -2125,29 +2125,29 @@ class JSONReaderJSONB
                         break;
                     case 2:
                         nameValue0
-                                = (bytes[offset] << 8)
-                                + (bytes[offset + 1] & 0xFFL);
+                                = (bytes[offset + 1] << 8)
+                                + (bytes[offset] & 0xFFL);
                         break;
                     case 3:
                         nameValue0
-                                = (bytes[offset] << 16)
+                                = (bytes[offset + 2] << 16)
                                 + ((bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset + 2] & 0xFFL);
+                                + (bytes[offset] & 0xFFL);
                         break;
                     case 4:
                         nameValue0
-                                = (bytes[offset] << 24)
-                                + ((bytes[offset + 1] & 0xFFL) << 16)
-                                + ((bytes[offset + 2] & 0xFFL) << 8)
-                                + (bytes[offset + 3] & 0xFFL);
+                                = (bytes[offset + 3] << 24)
+                                + ((bytes[offset + 2] & 0xFFL) << 16)
+                                + ((bytes[offset + 1] & 0xFFL) << 8)
+                                + (bytes[offset] & 0xFFL);
                         break;
                     case 5:
                         nameValue0
-                                = (((long) bytes[offset]) << 32)
-                                + ((bytes[offset + 1] & 0xFFL) << 24)
+                                = (((long) bytes[offset + 4]) << 32)
+                                + ((bytes[offset + 3] & 0xFFL) << 24)
                                 + ((bytes[offset + 2] & 0xFFL) << 16)
-                                + ((bytes[offset + 3] & 0xFFL) << 8)
-                                + (bytes[offset + 4] & 0xFFL);
+                                + ((bytes[offset + 1] & 0xFFL) << 8)
+                                + (bytes[offset] & 0xFFL);
                         break;
                     case 6:
                         nameValue0
@@ -2160,155 +2160,155 @@ class JSONReaderJSONB
                         break;
                     case 7:
                         nameValue0
-                                = (((long) bytes[offset]) << 48)
-                                + ((bytes[offset + 1] & 0xFFL) << 40)
-                                + ((bytes[offset + 2] & 0xFFL) << 32)
-                                + ((bytes[offset + 3] & 0xFFL) << 24)
-                                + ((bytes[offset + 4] & 0xFFL) << 16)
-                                + ((bytes[offset + 5] & 0xFFL) << 8)
-                                + (bytes[offset + 6] & 0xFFL);
+                                = (((long) bytes[offset + 6]) << 48)
+                                + ((bytes[offset + 5] & 0xFFL) << 40)
+                                + ((bytes[offset + 4] & 0xFFL) << 32)
+                                + ((bytes[offset + 4] & 0xFFL) << 24)
+                                + ((bytes[offset + 3] & 0xFFL) << 16)
+                                + ((bytes[offset + 2] & 0xFFL) << 8)
+                                + (bytes[offset] & 0xFFL);
                         break;
                     case 8:
                         nameValue0
-                                = (((long) bytes[offset]) << 56)
-                                + ((bytes[offset + 1] & 0xFFL) << 48)
-                                + ((bytes[offset + 2] & 0xFFL) << 40)
-                                + ((bytes[offset + 3] & 0xFFL) << 32)
-                                + ((bytes[offset + 4] & 0xFFL) << 24)
-                                + ((bytes[offset + 5] & 0xFFL) << 16)
-                                + ((bytes[offset + 6] & 0xFFL) << 8)
-                                + (bytes[offset + 7] & 0xFFL);
+                                = (((long) bytes[offset + 7]) << 56)
+                                + ((bytes[offset + 6] & 0xFFL) << 48)
+                                + ((bytes[offset + 5] & 0xFFL) << 40)
+                                + ((bytes[offset + 4] & 0xFFL) << 32)
+                                + ((bytes[offset + 3] & 0xFFL) << 24)
+                                + ((bytes[offset + 2] & 0xFFL) << 16)
+                                + ((bytes[offset + 1] & 0xFFL) << 8)
+                                + (bytes[offset] & 0xFFL);
                         break;
                     case 9:
                         nameValue0 = bytes[offset + 0];
                         nameValue1
-                                = (((long) bytes[offset] + 1) << 56)
-                                + ((bytes[offset + 2]) << 48)
-                                + ((bytes[offset + 3] & 0xFFL) << 40)
-                                + ((bytes[offset + 4] & 0xFFL) << 32)
-                                + ((bytes[offset + 5] & 0xFFL) << 24)
-                                + ((bytes[offset + 6] & 0xFFL) << 16)
-                                + ((bytes[offset + 7] & 0xFFL) << 8)
-                                + (bytes[offset + 8] & 0xFFL);
+                                = (((long) bytes[offset + 8]) << 56)
+                                + ((bytes[offset + 7]) << 48)
+                                + ((bytes[offset + 6] & 0xFFL) << 40)
+                                + ((bytes[offset + 5] & 0xFFL) << 32)
+                                + ((bytes[offset + 4] & 0xFFL) << 24)
+                                + ((bytes[offset + 3] & 0xFFL) << 16)
+                                + ((bytes[offset + 2] & 0xFFL) << 8)
+                                + (bytes[offset + 1] & 0xFFL);
                         break;
                     case 10:
                         nameValue0
-                                = (bytes[offset] << 8)
-                                + (bytes[offset + 1] & 0xFFL);
+                                = (bytes[offset + 1] << 8)
+                                + (bytes[offset] & 0xFFL);
                         nameValue1
-                                = (((long) bytes[offset + 2]) << 56)
-                                + ((bytes[offset + 3] & 0xFFL) << 48)
-                                + ((bytes[offset + 4] & 0xFFL) << 40)
-                                + ((bytes[offset + 5] & 0xFFL) << 32)
-                                + ((bytes[offset + 6] & 0xFFL) << 24)
-                                + ((bytes[offset + 7] & 0xFFL) << 16)
-                                + ((bytes[offset + 8] & 0xFFL) << 8)
-                                + (bytes[offset + 9] & 0xFFL);
+                                = (((long) bytes[offset + 9]) << 56)
+                                + ((bytes[offset + 8] & 0xFFL) << 48)
+                                + ((bytes[offset + 7] & 0xFFL) << 40)
+                                + ((bytes[offset + 6] & 0xFFL) << 32)
+                                + ((bytes[offset + 5] & 0xFFL) << 24)
+                                + ((bytes[offset + 4] & 0xFFL) << 16)
+                                + ((bytes[offset + 3] & 0xFFL) << 8)
+                                + (bytes[offset + 2] & 0xFFL);
                         break;
                     case 11:
                         nameValue0
-                                = (bytes[offset] << 16)
+                                = (bytes[offset + 2] << 16)
                                 + ((bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset + 2] & 0xFFL);
+                                + (bytes[offset] & 0xFFL);
                         nameValue1
-                                = (((long) bytes[offset + 3]) << 56)
-                                + ((bytes[offset + 4] & 0xFFL) << 48)
-                                + ((bytes[offset + 5] & 0xFFL) << 40)
-                                + ((bytes[offset + 6] & 0xFFL) << 32)
-                                + ((bytes[offset + 7] & 0xFFL) << 24)
-                                + ((bytes[offset + 8] & 0xFFL) << 16)
-                                + ((bytes[offset + 9] & 0xFFL) << 8)
-                                + (bytes[offset + 10] & 0xFFL);
+                                = (((long) bytes[offset + 10]) << 56)
+                                + ((bytes[offset + 9] & 0xFFL) << 48)
+                                + ((bytes[offset + 8] & 0xFFL) << 40)
+                                + ((bytes[offset + 7] & 0xFFL) << 32)
+                                + ((bytes[offset + 6] & 0xFFL) << 24)
+                                + ((bytes[offset + 5] & 0xFFL) << 16)
+                                + ((bytes[offset + 4] & 0xFFL) << 8)
+                                + (bytes[offset + 3] & 0xFFL);
                         break;
                     case 12:
                         nameValue0
-                                = (bytes[offset] << 24)
-                                + ((bytes[offset + 1] & 0xFFL) << 16)
-                                + ((bytes[offset + 2] & 0xFFL) << 8)
-                                + (bytes[offset + 3] & 0xFFL);
+                                = (bytes[offset + 3] << 24)
+                                + ((bytes[offset + 2] & 0xFFL) << 16)
+                                + ((bytes[offset + 1] & 0xFFL) << 8)
+                                + (bytes[offset] & 0xFFL);
                         nameValue1
-                                = (((long) bytes[offset + 4]) << 56)
-                                + ((bytes[offset + 5] & 0xFFL) << 48)
-                                + ((bytes[offset + 6] & 0xFFL) << 40)
-                                + ((bytes[offset + 7] & 0xFFL) << 32)
-                                + ((bytes[offset + 8] & 0xFFL) << 24)
-                                + ((bytes[offset + 9] & 0xFFL) << 16)
-                                + ((bytes[offset + 10] & 0xFFL) << 8)
-                                + (bytes[offset + 11] & 0xFFL);
+                                = (((long) bytes[offset + 11]) << 56)
+                                + ((bytes[offset + 10] & 0xFFL) << 48)
+                                + ((bytes[offset + 9] & 0xFFL) << 40)
+                                + ((bytes[offset + 8] & 0xFFL) << 32)
+                                + ((bytes[offset + 7] & 0xFFL) << 24)
+                                + ((bytes[offset + 6] & 0xFFL) << 16)
+                                + ((bytes[offset + 5] & 0xFFL) << 8)
+                                + (bytes[offset + 4] & 0xFFL);
                         break;
                     case 13:
                         nameValue0
-                                = (((long) bytes[offset]) << 32)
-                                + ((bytes[offset + 1] & 0xFFL) << 24)
+                                = (((long) bytes[offset + 4]) << 32)
+                                + ((bytes[offset + 3] & 0xFFL) << 24)
                                 + ((bytes[offset + 2] & 0xFFL) << 16)
-                                + ((bytes[offset + 3] & 0xFFL) << 8)
-                                + (bytes[offset + 4] & 0xFFL);
+                                + ((bytes[offset + 1] & 0xFFL) << 8)
+                                + (bytes[offset] & 0xFFL);
                         nameValue1
-                                = (((long) bytes[offset + 5]) << 56)
-                                + ((bytes[offset + 6] & 0xFFL) << 48)
-                                + ((bytes[offset + 7] & 0xFFL) << 40)
-                                + ((bytes[offset + 8] & 0xFFL) << 32)
-                                + ((bytes[offset + 9] & 0xFFL) << 24)
-                                + ((bytes[offset + 10] & 0xFFL) << 16)
-                                + ((bytes[offset + 11] & 0xFFL) << 8)
-                                + (bytes[offset + 12] & 0xFFL);
+                                = (((long) bytes[offset + 12]) << 56)
+                                + ((bytes[offset + 11] & 0xFFL) << 48)
+                                + ((bytes[offset + 10] & 0xFFL) << 40)
+                                + ((bytes[offset + 9] & 0xFFL) << 32)
+                                + ((bytes[offset + 8] & 0xFFL) << 24)
+                                + ((bytes[offset + 7] & 0xFFL) << 16)
+                                + ((bytes[offset + 6] & 0xFFL) << 8)
+                                + (bytes[offset + 5] & 0xFFL);
                         break;
                     case 14:
                         nameValue0
-                                = (((long) bytes[offset]) << 40)
-                                + ((bytes[offset + 1] & 0xFFL) << 32)
-                                + ((bytes[offset + 2] & 0xFFL) << 24)
-                                + ((bytes[offset + 3] & 0xFFL) << 16)
-                                + ((bytes[offset + 4] & 0xFFL) << 8)
-                                + (bytes[offset + 5] & 0xFFL);
+                                = (((long) bytes[offset + 5]) << 40)
+                                + ((bytes[offset + 4] & 0xFFL) << 32)
+                                + ((bytes[offset + 3] & 0xFFL) << 24)
+                                + ((bytes[offset + 2] & 0xFFL) << 16)
+                                + ((bytes[offset + 1] & 0xFFL) << 8)
+                                + (bytes[offset] & 0xFFL);
                         nameValue1
-                                = (((long) bytes[offset + 6]) << 56)
-                                + ((bytes[offset + 7] & 0xFFL) << 48)
-                                + ((bytes[offset + 8] & 0xFFL) << 40)
-                                + ((bytes[offset + 9] & 0xFFL) << 32)
-                                + ((bytes[offset + 10] & 0xFFL) << 24)
-                                + ((bytes[offset + 11] & 0xFFL) << 16)
-                                + ((bytes[offset + 12] & 0xFFL) << 8)
-                                + (bytes[offset + 13] & 0xFFL);
+                                = (((long) bytes[offset + 13]) << 56)
+                                + ((bytes[offset + 12] & 0xFFL) << 48)
+                                + ((bytes[offset + 11] & 0xFFL) << 40)
+                                + ((bytes[offset + 10] & 0xFFL) << 32)
+                                + ((bytes[offset + 9] & 0xFFL) << 24)
+                                + ((bytes[offset + 8] & 0xFFL) << 16)
+                                + ((bytes[offset + 7] & 0xFFL) << 8)
+                                + (bytes[offset + 6] & 0xFFL);
                         break;
                     case 15:
                         nameValue0
-                                = (((long) bytes[offset]) << 48)
-                                + ((bytes[offset + 1] & 0xFFL) << 40)
-                                + ((bytes[offset + 2] & 0xFFL) << 32)
+                                = (((long) bytes[offset + 6]) << 48)
+                                + ((bytes[offset + 5] & 0xFFL) << 40)
+                                + ((bytes[offset + 4] & 0xFFL) << 32)
                                 + ((bytes[offset + 3] & 0xFFL) << 24)
-                                + ((bytes[offset + 4] & 0xFFL) << 16)
-                                + ((bytes[offset + 5] & 0xFFL) << 8)
-                                + (bytes[offset + 6] & 0xFFL);
+                                + ((bytes[offset + 2] & 0xFFL) << 16)
+                                + ((bytes[offset + 1] & 0xFFL) << 8)
+                                + (bytes[offset] & 0xFFL);
                         nameValue1
-                                = (((long) bytes[offset + 7]) << 56)
-                                + ((bytes[offset + 8] & 0xFFL) << 48)
-                                + ((bytes[offset + 9] & 0xFFL) << 40)
-                                + ((bytes[offset + 10] & 0xFFL) << 32)
-                                + ((bytes[offset + 11] & 0xFFL) << 24)
-                                + ((bytes[offset + 12] & 0xFFL) << 16)
-                                + ((bytes[offset + 13] & 0xFFL) << 8)
-                                + (bytes[offset + 14] & 0xFFL);
+                                = (((long) bytes[offset + 14]) << 56)
+                                + ((bytes[offset + 13] & 0xFFL) << 48)
+                                + ((bytes[offset + 12] & 0xFFL) << 40)
+                                + ((bytes[offset + 11] & 0xFFL) << 32)
+                                + ((bytes[offset + 10] & 0xFFL) << 24)
+                                + ((bytes[offset + 9] & 0xFFL) << 16)
+                                + ((bytes[offset + 8] & 0xFFL) << 8)
+                                + (bytes[offset + 7] & 0xFFL);
                         break;
                     case 16:
                         nameValue0
-                                = (((long) bytes[offset]) << 56)
-                                + ((bytes[offset + 1]) << 48)
-                                + ((bytes[offset + 2] & 0xFFL) << 40)
-                                + ((bytes[offset + 3] & 0xFFL) << 32)
-                                + ((bytes[offset + 4] & 0xFFL) << 24)
-                                + ((bytes[offset + 5] & 0xFFL) << 16)
-                                + ((bytes[offset + 6] & 0xFFL) << 8)
-                                + (bytes[offset + 7] & 0xFFL);
+                                = (((long) bytes[offset + 7]) << 56)
+                                + ((bytes[offset + 6]) << 48)
+                                + ((bytes[offset + 5] & 0xFFL) << 40)
+                                + ((bytes[offset + 4] & 0xFFL) << 32)
+                                + ((bytes[offset + 3] & 0xFFL) << 24)
+                                + ((bytes[offset + 2] & 0xFFL) << 16)
+                                + ((bytes[offset + 1] & 0xFFL) << 8)
+                                + (bytes[offset] & 0xFFL);
                         nameValue1
-                                = (((long) bytes[offset + 8]) << 56)
-                                + ((bytes[offset + 9] & 0xFFL) << 48)
-                                + ((bytes[offset + 10] & 0xFFL) << 40)
-                                + ((bytes[offset + 11] & 0xFFL) << 32)
-                                + ((bytes[offset + 12] & 0xFFL) << 24)
-                                + ((bytes[offset + 13] & 0xFFL) << 16)
-                                + ((bytes[offset + 14] & 0xFFL) << 8)
-                                + (bytes[offset + 15] & 0xFFL);
+                                = (((long) bytes[offset + 15]) << 56)
+                                + ((bytes[offset + 14] & 0xFFL) << 48)
+                                + ((bytes[offset + 13] & 0xFFL) << 40)
+                                + ((bytes[offset + 12] & 0xFFL) << 32)
+                                + ((bytes[offset + 11] & 0xFFL) << 24)
+                                + ((bytes[offset + 10] & 0xFFL) << 16)
+                                + ((bytes[offset + 9] & 0xFFL) << 8)
+                                + (bytes[offset + 8] & 0xFFL);
                         break;
                     default:
                         break;

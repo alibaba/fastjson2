@@ -314,7 +314,13 @@ public interface JSONB {
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);
-        try (JSONReader jsonReader = new JSONReaderJSONB(
+        try (JSONReader jsonReader = JDKUtils.UNSAFE_SUPPORT
+                ? new JSONReaderJSONBUF(
+                ctx,
+                jsonbBytes,
+                0,
+                jsonbBytes.length)
+                : new JSONReaderJSONB(
                 ctx,
                 jsonbBytes,
                 0,

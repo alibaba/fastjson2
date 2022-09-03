@@ -37,9 +37,9 @@ public class CartTreeTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("CartTree-fastjson2 : " + millis);
 
-            // zulu8.62.0.19 : 940 833 775
+            // zulu8.62.0.19 : 940 833 775 737
             // zulu11.52.13 : 1112 1008 1003 979
-            // zulu17.32.13 : 1060 731
+            // zulu17.32.13 : 1060 731 687
             // zulu18.28.13 :
             // zulu19.0.47 :
             // corretto-8 :
@@ -104,8 +104,8 @@ public class CartTreeTest {
 
     public static void main(String[] args) throws Exception {
 //        fastjson2();
-//        fastjson2_jsonb();
+        fastjson2_jsonb();
 //        jackson_perf_test();
-        wastjson_test();
+//        wastjson_test();
     }
 }
