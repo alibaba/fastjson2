@@ -60,7 +60,7 @@ public class GenReport {
 
             LibResult firLib = benchmarkResult.libraryResults.values().iterator().next();
             Set<String> jdks = firLib.scores.keySet();
-            System.out.print("| \t ");
+            System.out.print("| aliyun ecs spec | jdk version ");
             for (LibResult libResult : benchmarkResult.libraryResults.values()) {
                 System.out.print("\t|\t");
                 System.out.print(libResult.library);
@@ -68,7 +68,7 @@ public class GenReport {
             System.out.print(" |");
             System.out.println();
 
-            System.out.print("|");
+            System.out.print("|-----|");
             for (LibResult libResult : benchmarkResult.libraryResults.values()) {
                 System.out.print("-----|-----");
             }
@@ -79,7 +79,18 @@ public class GenReport {
                 double firstScore = benchmarkResult.libraryResults.values().iterator().next().scores.get(jdk);
 
                 System.out.print("| ");
-                System.out.print(jdk);
+
+                int p = jdk.indexOf('-');
+                if (p == -1) {
+                    System.out.print(jdk);
+                    System.out.print(" | ");
+                } else {
+                    String ecs = jdk.substring(0, p);
+                    System.out.print(ecs);
+                    System.out.print(" | ");
+                    System.out.print(jdk.substring(p + 1));
+                }
+
                 int i = 0;
                 for (LibResult libResult : benchmarkResult.libraryResults.values()) {
                     double score = libResult.scores.get(jdk);

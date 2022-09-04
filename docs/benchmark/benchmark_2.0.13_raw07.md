@@ -202,7 +202,7 @@ EishayWriteUTF8Bytes.gson                         thrpt    5   200.384 ?  0.205 
 EishayWriteUTF8Bytes.jackson                      thrpt    5   940.202 ?  1.421  ops/ms
 ```
 
-# ecs.c7.xlarge-oracle-jdk-18.0.2_x6
+# ecs.c7.xlarge-oracle-jdk-18.0.2_x64
 ```java
 Benchmark                                          Mode  Cnt     Score    Error   Units
 EishayParseBinary.fastjson2JSONB                  thrpt    5  2770.329 ± 17.231  ops/ms
