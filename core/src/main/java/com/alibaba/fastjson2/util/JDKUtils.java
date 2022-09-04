@@ -17,6 +17,7 @@ public class JDKUtils {
     static final Class<?> CLASS_SQL_ROW_SET;
     public static final boolean HAS_SQL;
 
+    // Android not support
     public static final Class CLASS_TRANSIENT;
     public static final boolean BIG_ENDIAN;
 
