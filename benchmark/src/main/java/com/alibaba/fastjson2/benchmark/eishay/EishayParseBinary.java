@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
@@ -31,6 +32,8 @@ public class EishayParseBinary {
     static byte[] javaSerializeBytes;
     static Kryo kryo;
     static byte[] kryoBytes;
+
+    static JSONReader.Context context = JSONFactory.createReadContext();
 
     static {
         try {
@@ -75,12 +78,16 @@ public class EishayParseBinary {
 
     @Benchmark
     public void fastjson2UTF8Bytes(Blackhole bh) {
-        bh.consume(JSON.parseObject(fastjson2UTF8Bytes, MediaContent.class));
+        bh.consume(
+                JSON.parseObject(fastjson2UTF8Bytes, MediaContent.class)
+        );
     }
 
     @Benchmark
     public void fastjson2JSONB(Blackhole bh) {
-        bh.consume(JSONB.parseObject(fastjson2JSONBBytes, MediaContent.class));
+        bh.consume(
+                JSONB.parseObject(fastjson2JSONBBytes, MediaContent.class)
+        );
     }
 
     @Benchmark
