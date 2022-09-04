@@ -71,7 +71,6 @@ class FieldReaderObjectField<T>
             return;
         }
 
-        int offset = jsonReader.getOffset();
         try {
             Object value;
             if (jsonReader.nextIfNull()) {

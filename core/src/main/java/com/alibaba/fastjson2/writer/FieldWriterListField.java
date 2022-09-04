@@ -73,7 +73,11 @@ final class FieldWriterListField<T>
             return true;
         }
 
-        writeList(jsonWriter, true, value);
+        if (itemType == String.class) {
+            writeListStr(jsonWriter, true, value);
+        } else {
+            writeList(jsonWriter, true, value);
+        }
         jsonWriter.popPath(value);
         return true;
     }

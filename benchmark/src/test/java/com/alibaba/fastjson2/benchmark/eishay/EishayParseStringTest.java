@@ -34,6 +34,10 @@ public class EishayParseStringTest {
         // ibm-aarch64_mac_17.0.3_7 : 1311
         // graalvm-ce-java17-22.2.0 : 711
         // graalvm-ee-java17-22.2.0 : 589
+
+        // reflect-zulu8.62.0.19 661 646 553
+        // reflect-zulu11.52.13 : 726 644
+        // reflect-zulu17.32.13 : 738 645
     }
 
     public static void fastjson1_test() throws Exception {

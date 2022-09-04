@@ -19,6 +19,8 @@ public class EishayParseBinaryAutoTypeTest {
             // zulu8.58.0.13 : 394
             // zulu11.52.13 :
             // zulu17.32.13 : 324 319
+
+            // reflect-zulu17.32.13 : 406
         }
     }
 
@@ -42,8 +44,8 @@ public class EishayParseBinaryAutoTypeTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2JSONB();
-        fastjson2JSONB_symbols();
+        fastjson2JSONB();
+//        fastjson2JSONB_symbols();
 //        kryo_test();
     }
 }

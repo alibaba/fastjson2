@@ -92,14 +92,17 @@ class FieldReaderListField<T>
                 }
             }
 
+            int entryCnt = jsonReader.startArray();
+
             Collection list;
             if (autoTypeReader != null) {
                 list = (Collection) autoTypeReader.createInstance(context.getFeatures() | features);
+            } else if (this.fieldObjectReader.getClass() == ObjectReaderImplList.class && ((ObjectReaderImplList) fieldObjectReader).instanceType == ArrayList.class) {
+                list = new ArrayList(entryCnt);
             } else {
                 list = (Collection) this.fieldObjectReader.createInstance(context.getFeatures() | features);
             }
 
-            int entryCnt = jsonReader.startArray();
             ObjectReader itemObjectReader
                     = getItemObjectReader(
                     context);
