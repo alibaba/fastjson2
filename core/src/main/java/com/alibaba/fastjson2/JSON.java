@@ -2029,7 +2029,7 @@ public interface JSON {
         JSONWriter jsonWriter;
         if (JDKUtils.JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
-        } else if ((defaultWriterFeatures & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
+        } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
             jsonWriter = new JSONWriterUTF8JDK9(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF16(writeContext);
