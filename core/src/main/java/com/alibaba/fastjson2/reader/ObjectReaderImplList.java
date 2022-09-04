@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.GuavaSupport;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.ParameterizedType;
@@ -131,6 +132,10 @@ public final class ObjectReaderImplList
             return new ObjectReaderImplList(type, (Class) type, (Class) type, Object.class, null);
         }
 
+        if (itemType == String.class && builder == null) {
+            return new ObjectReaderImplListStr(listClass, instanceClass);
+        }
+
         return new ObjectReaderImplList(type, listClass, instanceClass, itemType, builder);
     }
 
@@ -208,7 +213,7 @@ public final class ObjectReaderImplList
     @Override
     public Object createInstance(long features) {
         if (instanceType == ArrayList.class) {
-            return new ArrayList();
+            return JDKUtils.JVM_VERSION == 8 ? new ArrayList(10) : new ArrayList();
         }
 
         if (instanceType == LinkedList.class) {
@@ -334,9 +339,9 @@ public final class ObjectReaderImplList
 
         Collection list;
         if (listType == ArrayList.class) {
-            list = new ArrayList();
+            list = entryCnt > 0 ? new ArrayList(entryCnt) : new ArrayList();
         } else if (listType == JSONArray.class) {
-            list = new JSONArray();
+            list = entryCnt > 0 ? new JSONArray(entryCnt) : new JSONArray();
         } else if (listType == HashSet.class) {
             list = new HashSet();
         } else if (listType == LinkedHashSet.class) {
@@ -453,14 +458,12 @@ public final class ObjectReaderImplList
             }
 
             Object item;
-            if (itemObjectReader != null) {
+            if (itemType == String.class) {
+                item = jsonReader.readString();
+            } else if (itemObjectReader != null) {
                 item = itemObjectReader.readObject(jsonReader, itemType, i, 0);
             } else {
-                if (itemType == String.class) {
-                    item = jsonReader.readString();
-                } else {
-                    throw new JSONException(jsonReader.info("TODO : " + itemType));
-                }
+                throw new JSONException(jsonReader.info("TODO : " + itemType));
             }
 
             list.add(item);

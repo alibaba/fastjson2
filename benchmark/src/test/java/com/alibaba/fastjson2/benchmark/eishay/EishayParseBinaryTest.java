@@ -17,8 +17,12 @@ public class EishayParseBinaryTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayParseBinary-fastjson2JSONB millis : " + millis);
             // zulu8.58.0.13 : 305
-            // zulu11.52.13 :
-            // zulu17.32.13 :
+            // zulu11.52.13 : 249
+            // zulu17.32.13 : 245
+
+            // reflect-zulu8.58.0.13 : 389 386
+            // reflect-zulu11.52.13 : 336
+            // reflect-zulu11.52.13 : 325
         }
     }
 

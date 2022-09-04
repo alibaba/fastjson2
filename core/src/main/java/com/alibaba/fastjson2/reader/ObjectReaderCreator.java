@@ -1136,13 +1136,7 @@ public class ObjectReaderCreator {
             throw new JSONException("get constructor error, class " + objectClass.getName(), e);
         }
 
-        return () -> {
-            try {
-                return constructor.newInstance();
-            } catch (Throwable e) {
-                throw new JSONException("create instance error", e);
-            }
-        };
+        return new ConstructorSupplier(constructor);
     }
 
     public <T, R> Function<T, R> createBuildFunction(Method builderMethod) {
