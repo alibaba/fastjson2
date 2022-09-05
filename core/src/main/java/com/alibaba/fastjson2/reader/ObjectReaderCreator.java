@@ -1259,7 +1259,7 @@ public class ObjectReaderCreator {
                     fieldType,
                     fieldClass,
                     ordinal,
-                    features,
+                    features | FieldInfo.READ_USING_MASK,
                     format,
                     locale,
                     defaultValue,
@@ -1495,8 +1495,7 @@ public class ObjectReaderCreator {
         }
 
         if (initReader != null) {
-            features |= FieldInfo.READ_USING_MASK;
-            FieldReaderObjectField fieldReader = new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
+            FieldReaderObjectField fieldReader = new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features | FieldInfo.READ_USING_MASK, format, defaultValue, jsonSchema, field);
             fieldReader.fieldObjectReader = initReader;
             return fieldReader;
         }
