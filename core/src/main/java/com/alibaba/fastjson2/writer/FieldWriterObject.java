@@ -74,7 +74,19 @@ abstract class FieldWriterObject<T>
                 return formattedWriter;
             }
         } else {
-            if (initValueClass == valueClass) {
+            boolean typeMatch = initValueClass == valueClass;
+            if (!typeMatch && initValueClass.isPrimitive()) {
+                typeMatch = (initValueClass == int.class && valueClass == Integer.class)
+                        || (initValueClass == long.class && valueClass == Long.class)
+                        || (initValueClass == boolean.class && valueClass == Boolean.class)
+                        || (initValueClass == short.class && valueClass == Short.class)
+                        || (initValueClass == byte.class && valueClass == Byte.class)
+                        || (initValueClass == float.class && valueClass == Float.class)
+                        || (initValueClass == double.class && valueClass == Double.class)
+                        || (initValueClass == char.class && valueClass == Character.class);
+            }
+
+            if (typeMatch) {
                 ObjectWriter objectWriter;
                 if (initObjectWriter == null) {
                     if (Map.class.isAssignableFrom(valueClass)) {
