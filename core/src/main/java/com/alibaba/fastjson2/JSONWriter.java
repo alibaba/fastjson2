@@ -194,7 +194,8 @@ public abstract class JSONWriter
                 || context.afterFilter != null
                 || context.labelFilter != null
                 || context.contextValueFilter != null
-                || context.contextNameFilter != null;
+                || context.contextNameFilter != null
+                || (context.features & JSONWriter.Feature.IgnoreNonFieldGetter.mask) != 0;
     }
 
     public boolean isWriteNulls() {
@@ -1580,7 +1581,12 @@ public abstract class JSONWriter
         /**
          * @since 2.0.13
          */
-        WriteByteArrayAsBase64(1L << 31);
+        WriteByteArrayAsBase64(1L << 31),
+
+        /**
+         * @since 2.0.13
+         */
+        IgnoreNonFieldGetter(1L << 32);
 
         public final long mask;
 
