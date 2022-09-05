@@ -20,4 +20,17 @@ public class ContextAutoTypeBeforeHandlerTest {
 
     public static class Bean {
     }
+
+    @Test
+    public void test0() {
+        ContextAutoTypeBeforeHandler filter = new ContextAutoTypeBeforeHandler(
+                new String[]{
+                        "int",
+                        "java.lang.String"
+                }
+        );
+
+        assertEquals(int.class, filter.apply("int", null, 0));
+        assertEquals(String.class, filter.apply("java.lang.String", null, 0));
+    }
 }

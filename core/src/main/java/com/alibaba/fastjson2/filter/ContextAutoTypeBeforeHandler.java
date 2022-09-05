@@ -1,12 +1,13 @@
 package com.alibaba.fastjson2.filter;
 
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.util.Fnv;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
+import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
 import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
 
 public class ContextAutoTypeBeforeHandler
@@ -25,7 +26,13 @@ public class ContextAutoTypeBeforeHandler
                 continue;
             }
 
-            long hashCode = Fnv.hashCode64(name);
+            long hashCode = MAGIC_HASH_CODE;
+            for (int j = 0; j < name.length(); ++j) {
+                char ch = name.charAt(j);
+                hashCode ^= ch;
+                hashCode *= MAGIC_PRIME;
+            }
+
             array[index++] = hashCode;
         }
 
@@ -38,14 +45,14 @@ public class ContextAutoTypeBeforeHandler
 
     @Override
     public Class<?> apply(String typeName, Class<?> expectClass, long features) {
-        long hash = Fnv.MAGIC_HASH_CODE;
+        long hash = MAGIC_HASH_CODE;
         for (int i = 0, typeNameLength = typeName.length(); i < typeNameLength; ++i) {
             char ch = typeName.charAt(i);
             if (ch == '$') {
                 ch = '.';
             }
             hash ^= ch;
-            hash *= Fnv.MAGIC_PRIME;
+            hash *= MAGIC_PRIME;
 
             if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
                 Class clazz = classCache.get(typeName);
