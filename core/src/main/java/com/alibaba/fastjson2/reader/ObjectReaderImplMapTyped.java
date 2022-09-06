@@ -252,13 +252,24 @@ class ObjectReaderImplMapTyped
         }
 
         for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfMatch('}') || jsonReader.isEnd()) {
                 break;
             }
 
             Object name;
-            if (keyType == String.class) {
+            if (jsonReader.nextIfNull()) {
+                if (!jsonReader.nextIfMatch(':')) {
+                    throw new JSONException(jsonReader.info("illegal json"));
+                }
+                name = null;
+            } else if (keyType == String.class) {
                 name = jsonReader.readFieldName();
+                if (name == null) {
+                    name = jsonReader.readString();
+                    if (!jsonReader.nextIfMatch(':')) {
+                        throw new JSONException(jsonReader.info("illegal json"));
+                    }
+                }
             } else {
                 name = jsonReader.read(keyType);
                 if (i == 0
