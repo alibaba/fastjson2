@@ -569,16 +569,31 @@ final class JSONWriterJSONB
                             System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
                         }
                         bytes[off++] = strtype;
-                        writeInt32(utf8len);
+
+                        if (utf8len <= BC_INT32_NUM_MAX) {
+                            bytes[off++] = (byte) utf8len;
+                        } else if (utf8len <= INT32_BYTE_MAX) {
+                            bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (utf8len >> 8));
+                            bytes[off++] = (byte) utf8len;
+                        } else {
+                            writeInt32(utf8len);
+                        }
                         off += utf8len;
                         return;
                     }
                 }
 
                 if (utf16) {
-                    ensureCapacity(off + 5 + value.length);
+                    ensureCapacity(off + 6 + value.length);
                     bytes[off++] = JDKUtils.BIG_ENDIAN ? BC_STR_UTF16BE : BC_STR_UTF16LE;
-                    writeInt32(value.length);
+                    if (value.length <= BC_INT32_NUM_MAX) {
+                        bytes[off++] = (byte) value.length;
+                    } else if (value.length <= INT32_BYTE_MAX) {
+                        bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (value.length >> 8));
+                        bytes[off++] = (byte) value.length;
+                    } else {
+                        writeInt32(value.length);
+                    }
                     System.arraycopy(value, 0, bytes, off, value.length);
                     off += value.length;
                     return;
