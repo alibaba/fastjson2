@@ -92,6 +92,10 @@ public abstract class JSONReader
 
     public abstract boolean isNull();
 
+    public boolean hasComma() {
+        return comma;
+    }
+
     public abstract Date readNullOrNewDate();
 
     public abstract boolean nextIfNull();
@@ -1684,8 +1688,7 @@ public abstract class JSONReader
             object.put(name, val);
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -1815,8 +1818,7 @@ public abstract class JSONReader
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -1837,8 +1839,7 @@ public abstract class JSONReader
                 }
             }
 
-            if (ch == ',') {
-                this.comma = true;
+            if (comma = (ch == ',')) {
                 next();
             }
             return;
@@ -1869,8 +1870,7 @@ public abstract class JSONReader
             list.add(item);
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
     }
@@ -1969,8 +1969,7 @@ public abstract class JSONReader
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
