@@ -33,7 +33,7 @@ public class Issue647 {
             error = e;
         }
         assertNotNull(error);
-        assertTrue(error.getMessage().contains("fieldName item"));
+        assertTrue(error.getMessage().contains("item"));
 
         error = null;
         try {
@@ -43,7 +43,7 @@ public class Issue647 {
             error = e;
         }
         assertNotNull(error);
-        assertTrue(error.getMessage().contains("fieldName item"));
+        assertTrue(error.getMessage().contains("item"));
 
         error = null;
         try {
@@ -54,7 +54,7 @@ public class Issue647 {
             error = e;
         }
         assertNotNull(error);
-        assertTrue(error.getMessage().contains("fieldName item"));
+        assertTrue(error.getMessage().contains("item"));
     }
 
     public static class Bean {
