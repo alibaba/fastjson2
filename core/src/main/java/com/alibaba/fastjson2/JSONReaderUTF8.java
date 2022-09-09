@@ -3196,6 +3196,7 @@ class JSONReaderUTF8
 
     @Override
     public void skipValue() {
+        comma = false;
         switch (ch) {
             case '[': {
                 next();
@@ -3227,7 +3228,7 @@ class JSONReaderUTF8
             }
             case '"': {
                 skipString();
-                return;
+                break;
             }
             case '-':
             case '+':

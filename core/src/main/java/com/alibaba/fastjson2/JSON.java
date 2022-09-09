@@ -2366,7 +2366,7 @@ public interface JSON {
     }
 
     /**
-     * Verify the {@link String} is JSON Object
+     * Verify the {@link String} is JSON
      *
      * @param text the {@link String} to validate
      * @return {@code true} or {@code false}
@@ -2377,6 +2377,25 @@ public interface JSON {
         }
 
         try (JSONReader jsonReader = JSONReader.of(text)) {
+            jsonReader.skipValue();
+            return jsonReader.isEnd();
+        } catch (JSONException error) {
+            return false;
+        }
+    }
+
+    /**
+     * Verify the char array is JSON
+     *
+     * @param chars the {@link String} to validate
+     * @return {@code true} or {@code false}
+     */
+    static boolean isValid(char[] chars) {
+        if (chars == null || chars.length == 0) {
+            return false;
+        }
+
+        try (JSONReader jsonReader = JSONReader.of(chars)) {
             jsonReader.skipValue();
             return jsonReader.isEnd();
         } catch (JSONException error) {
