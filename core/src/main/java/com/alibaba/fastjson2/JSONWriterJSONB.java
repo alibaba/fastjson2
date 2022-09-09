@@ -673,7 +673,14 @@ final class JSONWriterJSONB
                 System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
             }
             bytes[off++] = BC_STR_UTF8;
-            writeInt32(utf8len);
+            if (utf8len >= BC_INT32_NUM_MIN && utf8len <= BC_INT32_NUM_MAX) {
+                bytes[off++] = (byte) utf8len;
+            } else if (utf8len >= INT32_BYTE_MIN && utf8len <= INT32_BYTE_MAX) {
+                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (utf8len >> 8));
+                bytes[off++] = (byte) (utf8len);
+            } else {
+                writeInt32(utf8len);
+            }
             off += utf8len;
         }
     }
