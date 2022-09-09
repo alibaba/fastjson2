@@ -200,6 +200,11 @@ abstract class FieldWriterList<T>
         }
 
         if (jsonWriter.isJSONB()) {
+            if (jsonWriter.isWriteTypeInfo(list, fieldClass)) {
+                jsonWriter.writeTypeName(
+                        TypeUtils.getTypeName(list.getClass()));
+            }
+
             final int listSize = list.size();
             jsonWriter.startArray(listSize);
             for (int i = 0, size = listSize; i < size; i++) {
