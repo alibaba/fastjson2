@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.io.Serializable;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
 abstract class FieldWriterImpl<T>
@@ -22,6 +23,7 @@ abstract class FieldWriterImpl<T>
     final Type fieldType;
     final Class fieldClass;
     final boolean fieldClassSerializable;
+    JSONWriter.Path rootParentPath;
 
     FieldWriterImpl(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
         this.name = name;
@@ -32,7 +34,7 @@ abstract class FieldWriterImpl<T>
         this.features = features;
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
-        this.fieldClassSerializable = fieldClass != null && Serializable.class.isAssignableFrom(fieldClass);
+        this.fieldClassSerializable = fieldClass != null && (Serializable.class.isAssignableFrom(fieldClass) || !Modifier.isFinal(fieldClass.getModifiers()));
 
         int nameLength = name.length();
         int utflen = nameLength + 3;
@@ -147,6 +149,13 @@ abstract class FieldWriterImpl<T>
 
         jsonWriter.writeName(name);
         jsonWriter.writeColon();
+    }
+
+    public JSONWriter.Path getRootParentPath() {
+        if (rootParentPath == null) {
+            rootParentPath = new JSONWriter.Path(JSONWriter.Path.ROOT, name);
+        }
+        return rootParentPath;
     }
 
     @Override

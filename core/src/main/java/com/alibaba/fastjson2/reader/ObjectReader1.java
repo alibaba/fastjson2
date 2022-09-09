@@ -203,22 +203,26 @@ final class ObjectReader1<T>
             return null;
         }
 
-        if (jsonReader.isArray()
-                && jsonReader.isSupportBeanArray(features | getFeatures())) {
-            jsonReader.nextIfMatch('[');
-            Object object = defaultCreator.get();
+        long featuresAll = jsonReader.features(this.features | features);
+        if (jsonReader.isArray()) {
+            if ((featuresAll & JSONReader.Feature.SupportArrayToBean.mask) != 0) {
+                jsonReader.next();
+                Object object = defaultCreator.get();
 
-            fieldReader.readFieldValue(jsonReader, object);
-            if (!jsonReader.nextIfMatch(']')) {
-                throw new JSONException(jsonReader.info("array to bean end error, " + jsonReader.current()));
+                fieldReader.readFieldValue(jsonReader, object);
+                if (!jsonReader.nextIfMatch(']')) {
+                    throw new JSONException(jsonReader.info("array to bean end error, " + jsonReader.current()));
+                }
+
+                jsonReader.nextIfMatch(',');
+
+                if (buildFunction != null) {
+                    return (T) buildFunction.apply(object);
+                }
+                return (T) object;
             }
 
-            jsonReader.nextIfMatch(',');
-
-            if (buildFunction != null) {
-                return (T) buildFunction.apply(object);
-            }
-            return (T) object;
+            return processObjectInputSingleItemArray(jsonReader, fieldType, fieldName, featuresAll);
         }
 
         jsonReader.nextIfMatch('{');

@@ -96,6 +96,8 @@ final class FieldReaderListStrMethod<T>
             accept(object, list);
             jsonReader.nextIfMatch(',');
             value = list;
+        } else if (jsonReader.nextIfNull()) {
+            value = null;
         } else {
             throw new JSONException(jsonReader.info("json format error"));
         }

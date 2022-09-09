@@ -957,6 +957,9 @@ public class JSON {
             case WriteNonStringKeyAsString:
                 context.config(JSONWriter.Feature.WriteNonStringKeyAsString);
                 break;
+            case IgnoreNonFieldGetter:
+                context.config(JSONWriter.Feature.IgnoreNonFieldGetter);
+                break;
             default:
                 break;
         }

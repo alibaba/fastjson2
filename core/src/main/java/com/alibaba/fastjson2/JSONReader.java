@@ -92,6 +92,10 @@ public abstract class JSONReader
 
     public abstract boolean isNull();
 
+    public boolean hasComma() {
+        return comma;
+    }
+
     public abstract Date readNullOrNewDate();
 
     public abstract boolean nextIfNull();
@@ -830,9 +834,13 @@ public abstract class JSONReader
                     return readLocalDateTime18();
                 case 19:
                     return readLocalDateTime19();
-                case 20:
-                    return readZonedDateTimeX(len)
-                            .toLocalDateTime();
+                case 20: {
+                    ZonedDateTime zdt = readZonedDateTimeX(len);
+                    if (zdt != null) {
+                        return zdt.toLocalDateTime();
+                    }
+                    break;
+                }
                 case 21:
                 case 22:
                 case 23:
@@ -1680,8 +1688,7 @@ public abstract class JSONReader
             object.put(name, val);
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -1811,8 +1818,7 @@ public abstract class JSONReader
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -1833,8 +1839,7 @@ public abstract class JSONReader
                 }
             }
 
-            if (ch == ',') {
-                this.comma = true;
+            if (comma = (ch == ',')) {
                 next();
             }
             return;
@@ -1865,8 +1870,7 @@ public abstract class JSONReader
             list.add(item);
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
     }
@@ -1965,8 +1969,7 @@ public abstract class JSONReader
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -2552,7 +2555,7 @@ public abstract class JSONReader
             return new JSONReaderUTF16(ctx, bytes, offset, length);
         }
 
-        if (charset == StandardCharsets.US_ASCII) {
+        if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
             return new JSONReaderASCII(ctx, null, bytes, offset, length);
         }
 

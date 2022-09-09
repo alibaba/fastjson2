@@ -10,7 +10,6 @@ public class JDKUtils {
     static final Class<?> CLASS_SQL_ROW_SET;
     public static final boolean HAS_SQL;
 
-    public static final Class CLASS_TRANSIENT;
     public static final boolean BIG_ENDIAN;
 
     public static final boolean UNSAFE_SUPPORT;
@@ -38,13 +37,6 @@ public class JDKUtils {
         CLASS_SQL_DATASOURCE = dataSourceClass;
         CLASS_SQL_ROW_SET = rowSetClass;
         HAS_SQL = hasJavaSql;
-
-        Class transientClass = null;
-        try {
-            transientClass = Class.forName("java.beans.Transient");
-        } catch (Throwable ignored) {
-        }
-        CLASS_TRANSIENT = transientClass;
 
         JVM_VERSION = jvmVersion;
 

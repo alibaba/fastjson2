@@ -10,7 +10,7 @@
 ```java
 ```
 
-# ecs.c7.xlarge-oracle-jdk-18.0.2_x6
+# ecs.c7.xlarge-oracle-jdk-18.0.2_x64
 ```java
 ```
 

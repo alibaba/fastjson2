@@ -1100,6 +1100,14 @@ public class ObjectReaderCreator {
                 fieldInfo.features |= beanFeatures;
                 createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, modules);
             });
+
+            if (objectClass.isInterface()) {
+                BeanUtils.getters(objectClass, method -> {
+                    fieldInfo.init();
+                    fieldInfo.features |= beanFeatures;
+                    createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, modules);
+                });
+            }
         }
 
         FieldReader[] fieldReaderArray = new FieldReader[fieldReaders.size()];
@@ -1128,13 +1136,7 @@ public class ObjectReaderCreator {
             throw new JSONException("get constructor error, class " + objectClass.getName(), e);
         }
 
-        return () -> {
-            try {
-                return constructor.newInstance();
-            } catch (Throwable e) {
-                throw new JSONException("create instance error", e);
-            }
-        };
+        return new ConstructorSupplier(constructor);
     }
 
     public <T, R> Function<T, R> createBuildFunction(Method builderMethod) {
@@ -1257,7 +1259,7 @@ public class ObjectReaderCreator {
                     fieldType,
                     fieldClass,
                     ordinal,
-                    features,
+                    features | FieldInfo.READ_USING_MASK,
                     format,
                     locale,
                     defaultValue,
@@ -1369,7 +1371,9 @@ public class ObjectReaderCreator {
                 return new FieldReaderMapMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, features, format, jsonSchema, method);
             }
 
-            return null;
+            if (!objectClass.isInterface()) {
+                return null;
+            }
         }
 
         Type fieldTypeResolved = null;
@@ -1491,8 +1495,7 @@ public class ObjectReaderCreator {
         }
 
         if (initReader != null) {
-            features |= FieldInfo.READ_USING_MASK;
-            FieldReaderObjectField fieldReader = new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
+            FieldReaderObjectField fieldReader = new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features | FieldInfo.READ_USING_MASK, format, defaultValue, jsonSchema, field);
             fieldReader.fieldObjectReader = initReader;
             return fieldReader;
         }

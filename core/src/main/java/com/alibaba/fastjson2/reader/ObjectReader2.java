@@ -208,74 +208,79 @@ public class ObjectReader2<T>
             return null;
         }
 
+        long featuresAll = jsonReader.features(this.features | features);
         T object;
-        if (jsonReader.isArray()
-                && jsonReader.isSupportBeanArray(this.features | features)) {
-            jsonReader.next();
-            object = defaultCreator.get();
-            if (hasDefaultValue) {
-                initDefaultValue(object);
-            }
-
-            first.readFieldValue(jsonReader, object);
-            second.readFieldValue(jsonReader, object);
-            if (jsonReader.current() != ']') {
-                throw new JSONException(jsonReader.info("array to bean end error"));
-            }
-            jsonReader.next();
-        } else {
-            jsonReader.nextIfMatch('{');
-            object = defaultCreator.get();
-            if (hasDefaultValue) {
-                initDefaultValue(object);
-            }
-
-            for (int i = 0; ; ++i) {
-                if (jsonReader.nextIfMatch('}')) {
-                    break;
+        if (jsonReader.isArray()) {
+            if ((featuresAll & JSONReader.Feature.SupportArrayToBean.mask) != 0) {
+                jsonReader.next();
+                object = defaultCreator.get();
+                if (hasDefaultValue) {
+                    initDefaultValue(object);
                 }
 
-                long hashCode = jsonReader.readFieldNameHashCode();
+                first.readFieldValue(jsonReader, object);
+                second.readFieldValue(jsonReader, object);
+                if (jsonReader.current() != ']') {
+                    throw new JSONException(jsonReader.info("array to bean end error"));
+                }
+                jsonReader.next();
+                return object;
+            }
 
-                if (i == 0 && hashCode == HASH_TYPE) {
-                    long typeHash = jsonReader.readTypeHashCode();
-                    JSONReader.Context context = jsonReader.getContext();
-                    ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+            return processObjectInputSingleItemArray(jsonReader, fieldType, fieldName, featuresAll);
+        }
+
+        jsonReader.nextIfMatch('{');
+        object = defaultCreator.get();
+        if (hasDefaultValue) {
+            initDefaultValue(object);
+        }
+
+        for (int i = 0; ; ++i) {
+            if (jsonReader.nextIfMatch('}')) {
+                break;
+            }
+
+            long hashCode = jsonReader.readFieldNameHashCode();
+
+            if (i == 0 && hashCode == HASH_TYPE) {
+                long typeHash = jsonReader.readTypeHashCode();
+                JSONReader.Context context = jsonReader.getContext();
+                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+                if (autoTypeObjectReader == null) {
+                    String typeName = jsonReader.getString();
+                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
+
                     if (autoTypeObjectReader == null) {
-                        String typeName = jsonReader.getString();
-                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
-
-                        if (autoTypeObjectReader == null) {
-                            continue;
-                        }
-                    }
-
-                    if (autoTypeObjectReader != this) {
-                        object = (T) autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, features);
-                        break;
-                    } else {
                         continue;
                     }
                 }
 
-                if (hashCode == firstHashCode) {
-                    first.readFieldValue(jsonReader, object);
-                } else if (hashCode == secondHashCode) {
-                    second.readFieldValue(jsonReader, object);
+                if (autoTypeObjectReader != this) {
+                    object = (T) autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, features);
+                    break;
                 } else {
-                    if (jsonReader.isSupportSmartMatch(features | this.features)) {
-                        long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
-                        if (nameHashCodeLCase == firstHashCodeLCase) {
-                            first.readFieldValue(jsonReader, object);
-                            continue;
-                        } else if (nameHashCodeLCase == secondHashCodeLCase) {
-                            second.readFieldValue(jsonReader, object);
-                            continue;
-                        }
-                    }
-
-                    processExtra(jsonReader, object);
+                    continue;
                 }
+            }
+
+            if (hashCode == firstHashCode) {
+                first.readFieldValue(jsonReader, object);
+            } else if (hashCode == secondHashCode) {
+                second.readFieldValue(jsonReader, object);
+            } else {
+                if (jsonReader.isSupportSmartMatch(features | this.features)) {
+                    long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
+                    if (nameHashCodeLCase == firstHashCodeLCase) {
+                        first.readFieldValue(jsonReader, object);
+                        continue;
+                    } else if (nameHashCodeLCase == secondHashCodeLCase) {
+                        second.readFieldValue(jsonReader, object);
+                        continue;
+                    }
+                }
+
+                processExtra(jsonReader, object);
             }
         }
 

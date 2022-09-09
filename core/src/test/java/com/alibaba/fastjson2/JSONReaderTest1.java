@@ -221,15 +221,17 @@ public class JSONReaderTest1 {
 
     @Test
     public void testReadFieldNameHashCode() {
-        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\u0000\\u0001\\u0002\":")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\\u0000\\u0001\\u0002\":")) {
             assertEquals(Fnv.hashCode64("\0\1\2"), jsonReader.readFieldNameHashCode());
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders("'abc':123")) {
             assertEquals(Fnv.hashCode64("abc"), jsonReader.readFieldNameHashCode());
+            assertEquals("abc", jsonReader.getFieldName());
             assertEquals("abc", jsonReader.getString());
         }
-        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\x00\\x01\\x02\":")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\\x00\\x01\\x02\":")) {
             assertEquals(Fnv.hashCode64("\0\1\2"), jsonReader.readFieldNameHashCode());
+            assertEquals("\0\1\2", jsonReader.getFieldName());
             assertEquals("\0\1\2", jsonReader.getString());
         }
     }
@@ -1096,7 +1098,10 @@ public class JSONReaderTest1 {
     @Test
     public void test_readValueHashCode() {
         for (JSONReader jsonReader : TestUtils.createJSONReaders("\"A中国\"")) {
-            assertEquals(Fnv.hashCode64("A中国"), jsonReader.readValueHashCode());
+            assertEquals(
+                    Fnv.hashCode64("A中国"),
+                    jsonReader.readValueHashCode()
+            );
             assertEquals("A中国", jsonReader.getString());
             assertFalse(jsonReader.comma);
         }
@@ -1113,7 +1118,10 @@ public class JSONReaderTest1 {
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\\\\\\\"\"}")) {
-            assertEquals(Fnv.hashCode64("\\\""), jsonReader.readValueHashCode());
+            assertEquals(
+                    Fnv.hashCode64("\\\""),
+                    jsonReader.readValueHashCode()
+            );
             assertEquals("\\\"", jsonReader.getString());
             assertFalse(jsonReader.comma);
         }

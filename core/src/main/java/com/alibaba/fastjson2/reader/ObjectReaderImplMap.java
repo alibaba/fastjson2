@@ -214,7 +214,18 @@ public final class ObjectReaderImplMap
             return map;
         }
 
-        return map;
+        if (mapType == JSONObject.class) {
+            return new JSONObject(map);
+        }
+
+        Map instance = (Map) this.createInstance(features);
+        instance.putAll(map);
+
+        if (builder != null) {
+            return builder.apply(instance);
+        }
+
+        return instance;
     }
 
     @Override
@@ -325,6 +336,10 @@ public final class ObjectReaderImplMap
                         value = null;
                         jsonReader.addResolveTask(map, fieldName, JSONPath.of(reference));
                     }
+                } else if (type == BC_OBJECT) {
+                    value = jsonReader.readObject();
+                } else if (type >= BC_ARRAY_FIX_MIN && type <= BC_ARRAY) {
+                    value = jsonReader.readArray();
                 } else {
                     value = jsonReader.readAny();
                 }

@@ -303,8 +303,12 @@ public class JSONBDump {
                 jsonWriter.writeColon();
                 if (typeName == null) {
                     if (symbol < 0) {
-                        String name = symbolTable.getName(-symbol);
-                        jsonWriter.writeString(name + "#" + symbol);
+                        if (raw) {
+                            jsonWriter.writeString("#" + symbol);
+                        } else {
+                            String name = symbolTable.getName(-symbol);
+                            jsonWriter.writeString(name);
+                        }
                     } else {
                         jsonWriter.writeString("#" + symbol);
                     }

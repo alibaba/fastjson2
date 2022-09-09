@@ -62,7 +62,17 @@ final class FieldWriterStringField<T>
             value = value.trim();
         }
 
-        writeString(jsonWriter, value);
+        writeFieldName(jsonWriter);
+
+        if (symbol && jsonWriter.isJSONB()) {
+            jsonWriter.writeSymbol(value);
+        } else {
+            if (raw) {
+                jsonWriter.writeRaw(value);
+            } else {
+                jsonWriter.writeString(value);
+            }
+        }
         return true;
     }
 

@@ -572,8 +572,15 @@ public abstract class JSONPath {
         final Operator operator;
         final long value;
 
-        public NameIntOpSegment(String name, long nameHashCode, Function expr, Operator operator, long value) {
-            super(name, nameHashCode, expr);
+        public NameIntOpSegment(
+                String name,
+                long nameHashCode,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
+                Function expr,
+                Operator operator,
+                long value) {
+            super(name, nameHashCode, fieldName2, fieldNameNameHash2, expr);
             this.operator = operator;
             this.value = value;
         }
@@ -860,8 +867,15 @@ public abstract class JSONPath {
         private final long[] values;
         private final boolean not;
 
-        public NameIntInSegment(String fieldName, long fieldNameNameHash, Function expr, long[] values, boolean not) {
-            super(fieldName, fieldNameNameHash, expr);
+        public NameIntInSegment(
+                String fieldName,
+                long fieldNameNameHash,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
+                Function expr,
+                long[] values,
+                boolean not) {
+            super(fieldName, fieldNameNameHash, fieldName2, fieldNameNameHash2, expr);
             this.values = values;
             this.not = not;
         }
@@ -1039,17 +1053,25 @@ public abstract class JSONPath {
             extends FilterSegment {
         final String fieldName;
         final long fieldNameNameHash;
+
+        final String[] fieldName2;
+        final long[] fieldNameNameHash2;
+
         final Function function;
 
         public NameFilter(String fieldName, long fieldNameNameHash) {
             this.fieldName = fieldName;
             this.fieldNameNameHash = fieldNameNameHash;
+            this.fieldName2 = null;
+            this.fieldNameNameHash2 = null;
             this.function = null;
         }
 
-        public NameFilter(String fieldName, long fieldNameNameHash, Function function) {
+        public NameFilter(String fieldName, long fieldNameNameHash, String[] fieldName2, long[] fieldNameNameHash2, Function function) {
             this.fieldName = fieldName;
             this.fieldNameNameHash = fieldNameNameHash;
+            this.fieldName2 = fieldName2;
+            this.fieldNameNameHash2 = fieldNameNameHash2;
             this.function = function;
         }
 
@@ -1149,10 +1171,36 @@ public abstract class JSONPath {
                 return false;
             }
 
+            JSONWriter.Context writerContext = context.path.getWriterContext();
+
             if (object instanceof Map) {
                 Object fieldValue = fieldName == null ? object : ((Map<?, ?>) object).get(fieldName);
                 if (fieldValue == null) {
                     return false;
+                }
+
+                if (fieldName2 != null) {
+                    for (int i = 0; i < fieldName2.length; i++) {
+                        String name = fieldName2[i];
+                        if (fieldValue instanceof Map) {
+                            fieldValue = ((Map) fieldValue).get(name);
+                        } else {
+                            ObjectWriter objectWriter2 = writerContext.getObjectWriter(fieldValue.getClass());
+                            if (objectWriter2 instanceof ObjectWriterAdapter) {
+                                FieldWriter fieldWriter2 = objectWriter2.getFieldWriter(fieldNameNameHash2[i]);
+                                if (fieldWriter2 == null) {
+                                    return false;
+                                }
+                                fieldValue = fieldWriter2.getFieldValue(fieldValue);
+                            } else {
+                                return false;
+                            }
+                        }
+
+                        if (fieldValue == null) {
+                            return false;
+                        }
+                    }
                 }
 
                 if (function != null) {
@@ -1162,10 +1210,38 @@ public abstract class JSONPath {
                 return apply(fieldValue);
             }
 
-            ObjectWriter objectWriter = context.path.getWriterContext().getObjectWriter(object.getClass());
+            ObjectWriter objectWriter = writerContext.getObjectWriter(object.getClass());
             if (objectWriter instanceof ObjectWriterAdapter) {
                 FieldWriter fieldWriter = objectWriter.getFieldWriter(fieldNameNameHash);
                 Object fieldValue = fieldWriter.getFieldValue(object);
+
+                if (fieldValue == null) {
+                    return false;
+                }
+
+                if (fieldName2 != null) {
+                    for (int i = 0; i < fieldName2.length; i++) {
+                        String name = fieldName2[i];
+                        if (fieldValue instanceof Map) {
+                            fieldValue = ((Map) fieldValue).get(name);
+                        } else {
+                            ObjectWriter objectWriter2 = writerContext.getObjectWriter(fieldValue.getClass());
+                            if (objectWriter2 instanceof ObjectWriterAdapter) {
+                                FieldWriter fieldWriter2 = objectWriter2.getFieldWriter(fieldNameNameHash2[i]);
+                                if (fieldWriter2 == null) {
+                                    return false;
+                                }
+                                fieldValue = fieldWriter2.getFieldValue(fieldValue);
+                            } else {
+                                return false;
+                            }
+                        }
+
+                        if (fieldValue == null) {
+                            return false;
+                        }
+                    }
+                }
 
                 if (function != null) {
                     fieldValue = function.apply(fieldValue);
@@ -1195,11 +1271,13 @@ public abstract class JSONPath {
         public NameStringOpSegment(
                 String fieldName,
                 long fieldNameNameHash,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
                 Function expr,
                 Operator operator,
                 String value
         ) {
-            super(fieldName, fieldNameNameHash, expr);
+            super(fieldName, fieldNameNameHash, fieldName2, fieldNameNameHash2, expr);
             this.operator = operator;
             this.value = value;
         }
@@ -1236,8 +1314,16 @@ public abstract class JSONPath {
         final Operator operator;
         final JSONArray array;
 
-        public NameArrayOpSegment(String fieldName, long fieldNameNameHash, Function function, Operator operator, JSONArray array) {
-            super(fieldName, fieldNameNameHash, function);
+        public NameArrayOpSegment(
+                String fieldName,
+                long fieldNameNameHash,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
+                Function function,
+                Operator operator,
+                JSONArray array
+        ) {
+            super(fieldName, fieldNameNameHash, fieldName2, fieldNameNameHash2, function);
             this.operator = operator;
             this.array = array;
         }
@@ -1258,8 +1344,15 @@ public abstract class JSONPath {
         final Operator operator;
         final JSONObject object;
 
-        public NameObjectOpSegment(String fieldName, long fieldNameNameHash, Function function, Operator operator, JSONObject object) {
-            super(fieldName, fieldNameNameHash, function);
+        public NameObjectOpSegment(
+                String fieldName,
+                long fieldNameNameHash,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
+                Function function,
+                Operator operator,
+                JSONObject object) {
+            super(fieldName, fieldNameNameHash, fieldName2, fieldNameNameHash2, function);
             this.operator = operator;
             this.object = object;
         }
@@ -1610,7 +1703,7 @@ public abstract class JSONPath {
         @Override
         public boolean contains(Object root) {
             if (root instanceof Map) {
-                return ((Map) root).get(name) != null;
+                return ((Map) root).containsKey(name);
             }
 
             ObjectWriterProvider provider = getWriterContext().getProvider();
@@ -3486,7 +3579,7 @@ public abstract class JSONPath {
             }
 
             if (object instanceof Map) {
-                return ((Map<?, ?>) object).get(name) != null;
+                return ((Map<?, ?>) object).containsKey(name);
             }
 
             if (object instanceof Collection) {
@@ -4966,6 +5059,7 @@ public abstract class JSONPath {
             bytes[0] = '[';
             IOUtils.getChars(index, bytes.length - 1, bytes);
             bytes[bytes.length - 1] = ']';
+
             return new String(bytes, StandardCharsets.US_ASCII);
         }
     }
@@ -6329,7 +6423,7 @@ public abstract class JSONPath {
                     if (jsonReader.isNumber()) {
                         Number number = jsonReader.readNumber();
                         if (number instanceof Integer || number instanceof Long) {
-                            segment = new NameIntOpSegment(null, 0, null, operator, number.longValue());
+                            segment = new NameIntOpSegment(null, 0, null, null, null, operator, number.longValue());
                         }
                     } else if (jsonReader.isString()) {
                         String string = jsonReader.readString();
@@ -6392,6 +6486,24 @@ public abstract class JSONPath {
                     }
                 }
 
+                long[] hashCode2 = null;
+                String[] fieldName2 = null;
+                while (jsonReader.ch == '.') {
+                    jsonReader.next();
+                    long hash = jsonReader.readFieldNameHashCodeUnquote();
+                    String str = jsonReader.getFieldName();
+
+                    if (hashCode2 == null) {
+                        hashCode2 = new long[] {hash};
+                        fieldName2 = new String[] {str};
+                    } else {
+                        hashCode2 = Arrays.copyOf(hashCode2, hashCode2.length + 1);
+                        hashCode2[hashCode2.length - 1] = hash;
+                        fieldName2 = Arrays.copyOf(fieldName2, fieldName2.length + 1);
+                        fieldName2[fieldName2.length - 1] = str;
+                    }
+                }
+
                 Operator operator = parseOperator(jsonReader);
 
                 switch (operator) {
@@ -6444,7 +6556,7 @@ public abstract class JSONPath {
                             for (int i = 0; i < list.size(); i++) {
                                 values[i] = list.get(i).longValue();
                             }
-                            segment = new NameIntInSegment(fieldName, hashCode, function, values, operator == Operator.NOT_IN);
+                            segment = new NameIntInSegment(fieldName, hashCode, fieldName2, hashCode2, function, values, operator == Operator.NOT_IN);
                         } else {
                             throw new JSONException(jsonReader.info("jsonpath syntax error"));
                         }
@@ -6501,7 +6613,7 @@ public abstract class JSONPath {
                     case '9': {
                         Number number = jsonReader.readNumber();
                         if (number instanceof Integer || number instanceof Long) {
-                            segment = new NameIntOpSegment(fieldName, hashCode, function, operator, number.longValue());
+                            segment = new NameIntOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, number.longValue());
                         } else if (number instanceof BigDecimal) {
                             segment = new NameDecimalOpSegment(fieldName, hashCode, operator, (BigDecimal) number);
                         } else {
@@ -6566,14 +6678,14 @@ public abstract class JSONPath {
                                     operator == Operator.NOT_LIKE
                             );
                         } else {
-                            segment = new NameStringOpSegment(fieldName, hashCode, function, operator, strVal);
+                            segment = new NameStringOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, strVal);
                         }
                         break;
                     }
                     case 't': {
                         String ident = jsonReader.readFieldNameUnquote();
                         if ("true".equalsIgnoreCase(ident)) {
-                            segment = new NameIntOpSegment(fieldName, hashCode, function, operator, 1);
+                            segment = new NameIntOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, 1);
                             break;
                         }
                         break;
@@ -6581,19 +6693,19 @@ public abstract class JSONPath {
                     case 'f': {
                         String ident = jsonReader.readFieldNameUnquote();
                         if ("false".equalsIgnoreCase(ident)) {
-                            segment = new NameIntOpSegment(fieldName, hashCode, function, operator, 0);
+                            segment = new NameIntOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, 0);
                             break;
                         }
                         break;
                     }
                     case '[': {
                         JSONArray array = jsonReader.read(JSONArray.class);
-                        segment = new NameArrayOpSegment(fieldName, hashCode, function, operator, array);
+                        segment = new NameArrayOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, array);
                         break;
                     }
                     case '{': {
                         JSONObject object = jsonReader.read(JSONObject.class);
-                        segment = new NameObjectOpSegment(fieldName, hashCode, function, operator, object);
+                        segment = new NameObjectOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, object);
                         break;
                     }
                     default:

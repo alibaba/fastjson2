@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.BeanInfo;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 
 import java.io.Serializable;
@@ -382,7 +383,9 @@ public abstract class BeanUtils {
 
                     switch (annotationType.getName()) {
                         case "com.fasterxml.jackson.annotation.JsonAnySetter":
-                            unwrapped = true;
+                            if (JSONFactory.isUseJacksonAnnotation()) {
+                                unwrapped = true;
+                            }
                             break;
                         default:
                             break;
@@ -577,8 +580,9 @@ public abstract class BeanUtils {
             switch (annotationType.getName()) {
                 case "com.alibaba.fastjson.annotation.JSONField":
                 case "com.alibaba.fastjson2.annotation.JSONField":
-                case "com.fasterxml.jackson.annotation.JsonValue":
                     return true;
+                case "com.fasterxml.jackson.annotation.JsonValue":
+                    return JSONFactory.isUseJacksonAnnotation();
                 default:
                     break;
             }
@@ -708,10 +712,14 @@ public abstract class BeanUtils {
                     switch (annotationTypeName) {
                         case "com.alibaba.fastjson.annotation.JSONField":
                         case "com.alibaba.fastjson.annotation2.JSONField":
+                            nameMatch = true;
+                            break;
                         case "com.fasterxml.jackson.annotation.JsonValue":
                         case "com.fasterxml.jackson.annotation.JsonRawValue":
                         case "com.fasterxml.jackson.annotation.JsonProperty":
-                            nameMatch = true;
+                            if (JSONFactory.isUseJacksonAnnotation()) {
+                                nameMatch = true;
+                            }
                             break;
                         default:
                             break;
@@ -1750,5 +1758,26 @@ public abstract class BeanUtils {
             throw new NullPointerException();
         }
         return obj;
+    }
+
+    public static void processJacksonJsonJsonIgnore(FieldInfo fieldInfo, Annotation annotation) {
+        fieldInfo.ignore = true;
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "value":
+                        boolean value = (Boolean) result;
+                        fieldInfo.ignore = value;
+                        break;
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
     }
 }

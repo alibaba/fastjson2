@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -456,6 +457,367 @@ public class JSONReaderTest {
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
+        }
+    }
+
+    @Test
+    public void test_readValueHashCode() {
+        for (int i = 1; i <= 20; i++) {
+            char[] chars = new char[i];
+            Arrays.fill(chars, 'A');
+            String item = new String(chars);
+
+            StringBuffer buf = new StringBuffer();
+            buf.append("{\"");
+            buf.append(item);
+            buf.append("\":\"");
+            buf.append(item);
+            buf.append("\"}");
+
+            long itemHash = Fnv.hashCode64(item);
+            long itemHashL = Fnv.hashCode64LCase(item);
+            String str = buf.toString();
+            for (JSONReader jsonReader : TestUtils.createJSONReaders4(str)) {
+                assertTrue(jsonReader.nextIfObjectStart());
+                assertEquals(itemHash, jsonReader.readFieldNameHashCode());
+                assertEquals(itemHashL, jsonReader.getNameHashCodeLCase());
+                assertEquals(item, jsonReader.getFieldName());
+                assertEquals(itemHash, jsonReader.readValueHashCode());
+            }
+
+            byte[] jsonbBytes = JSONObject.of(item, item).toJSONBBytes();
+            JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
+            assertTrue(jsonReader.nextIfObjectStart());
+            assertEquals(itemHash, jsonReader.readFieldNameHashCode());
+            assertEquals(itemHashL, jsonReader.getNameHashCodeLCase());
+            assertEquals(item, jsonReader.getFieldName());
+            assertEquals(itemHash, jsonReader.readValueHashCode());
+        }
+    }
+
+    @Test
+    public void readString_hasComma() {
+        String str0 = "\"abc\",";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str0)) {
+            jsonReader.readString();
+            assertTrue(jsonReader.hasComma());
+        }
+
+        String str1 = "\"abc\"";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str1)) {
+            jsonReader.readString();
+            assertFalse(jsonReader.hasComma());
+        }
+
+        String str2 = "\"abc\",\"abc\"";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str2)) {
+            jsonReader.readString();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readString();
+            assertFalse(jsonReader.hasComma());
+        }
+
+        String str3 = "\"abc\",\"abc\"}";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str3)) {
+            jsonReader.readString();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readString();
+            assertFalse(jsonReader.hasComma());
+        }
+
+        String str4 = "\"abc\",\"abc\"]";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str4)) {
+            jsonReader.readString();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readString();
+            assertFalse(jsonReader.hasComma());
+        }
+    }
+
+    @Test
+    public void skipValue_hasComma() {
+        String str0 = "\"abc\",";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str0)) {
+            jsonReader.skipValue();
+            assertTrue(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str1 = "\"abc\"";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str1)) {
+            jsonReader.skipValue();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str2 = "\"abc\",\"abc\"";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str2)) {
+            jsonReader.skipValue();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.skipValue();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str3 = "\"abc\",\"abc\"}";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str3)) {
+            jsonReader.skipValue();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.skipValue();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str4 = "\"abc\",\"abc\"]";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str4)) {
+            jsonReader.skipValue();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.skipValue();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+    }
+
+    @Test
+    public void readInt64Value_hasComma() {
+        String str0 = "123,";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str0)) {
+            jsonReader.readInt64Value();
+            assertTrue(jsonReader.hasComma());
+        }
+
+        String str1 = "123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str1)) {
+            jsonReader.readInt64Value();
+            assertFalse(jsonReader.hasComma());
+        }
+
+        String str2 = "123,123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str2)) {
+            jsonReader.readInt64Value();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readInt64Value();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str3 = "123,123]";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str3)) {
+            jsonReader.readInt64Value();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readInt64Value();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+    }
+
+    @Test
+    public void readInt64_hasComma() {
+        String str0 = "123,";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str0)) {
+            jsonReader.readInt64();
+            assertTrue(jsonReader.hasComma());
+        }
+
+        String str1 = "123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str1)) {
+            jsonReader.readInt64();
+            assertFalse(jsonReader.hasComma());
+        }
+
+        String str2 = "123,123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str2)) {
+            jsonReader.readInt64();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readInt64();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str3 = "123,123]";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str3)) {
+            jsonReader.readInt64();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readInt64();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+    }
+
+    @Test
+    public void readInt32Value_hasComma() {
+        String str0 = "123,";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str0)) {
+            jsonReader.readInt32Value();
+            assertTrue(jsonReader.hasComma());
+        }
+
+        String str1 = "123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str1)) {
+            jsonReader.readInt32Value();
+            assertFalse(jsonReader.hasComma());
+        }
+
+        String str2 = "123,123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str2)) {
+            jsonReader.readInt32Value();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readInt32Value();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str3 = "123,123]";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str3)) {
+            jsonReader.readInt32Value();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readInt32Value();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+    }
+
+    @Test
+    public void readInt32_hasComma() {
+        String str0 = "123,";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str0)) {
+            jsonReader.readInt32();
+            assertTrue(jsonReader.hasComma());
+        }
+
+        String str1 = "123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str1)) {
+            jsonReader.readInt32();
+            assertFalse(jsonReader.hasComma());
+        }
+
+        String str2 = "123,123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str2)) {
+            jsonReader.readInt32();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readInt32();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str3 = "123,123]";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str3)) {
+            jsonReader.readInt32();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readInt32();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+    }
+
+    @Test
+    public void readDoubleValue_hasComma() {
+        String str0 = "123,";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str0)) {
+            jsonReader.readDoubleValue();
+            assertTrue(jsonReader.hasComma());
+        }
+
+        String str1 = "123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str1)) {
+            jsonReader.readDoubleValue();
+            assertFalse(jsonReader.hasComma());
+        }
+
+        String str2 = "123,123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str2)) {
+            jsonReader.readDoubleValue();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readDoubleValue();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str3 = "123,123]";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str3)) {
+            jsonReader.readDoubleValue();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readDoubleValue();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+    }
+
+    @Test
+    public void readDouble_hasComma() {
+        String str0 = "123,";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str0)) {
+            jsonReader.readDouble();
+            assertTrue(jsonReader.hasComma());
+        }
+
+        String str1 = "123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str1)) {
+            jsonReader.readDouble();
+            assertFalse(jsonReader.hasComma());
+        }
+
+        String str2 = "123,123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str2)) {
+            jsonReader.readDouble();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readDouble();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str3 = "123,123]";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str3)) {
+            jsonReader.readDouble();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readDouble();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+    }
+
+    @Test
+    public void readFloatValue_hasComma() {
+        String str0 = "123,";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str0)) {
+            jsonReader.readFloatValue();
+            assertTrue(jsonReader.hasComma());
+        }
+
+        String str1 = "123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str1)) {
+            jsonReader.readFloatValue();
+            assertFalse(jsonReader.hasComma());
+        }
+
+        String str2 = "123,123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str2)) {
+            jsonReader.readFloatValue();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readFloatValue();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str3 = "123,123]";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str3)) {
+            jsonReader.readFloatValue();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readFloatValue();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+    }
+
+    @Test
+    public void readFloat_hasComma() {
+        String str0 = "123,";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str0)) {
+            jsonReader.readFloat();
+            assertTrue(jsonReader.hasComma());
+        }
+
+        String str1 = "123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str1)) {
+            jsonReader.readFloat();
+            assertFalse(jsonReader.hasComma());
+        }
+
+        String str2 = "123,123";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str2)) {
+            jsonReader.readFloat();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readFloat();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
+        }
+
+        String str3 = "123,123]";
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4(str3)) {
+            jsonReader.readFloat();
+            assertTrue(jsonReader.hasComma());
+            jsonReader.readFloat();
+            assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
         }
     }
 }

@@ -28,6 +28,7 @@ abstract class FieldReaderImplDate<T>
     final boolean formatMillis;
     final boolean formatHasDay;
     final boolean formatHasHour;
+    final boolean yyyyMMddhhmmss19;
 
     public FieldReaderImplDate(
             String fieldName,
@@ -41,6 +42,7 @@ abstract class FieldReaderImplDate<T>
             JSONSchema schema) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
         this.useSimpleFormatter = "yyyyMMddHHmmssSSSZ".equals(format);
+        this.yyyyMMddhhmmss19 = "yyyy-MM-dd HH:mm:ss".equals(format);
 
         boolean formatUnixTime = false, formatISO8601 = false, formatMillis = false, hasDay = false, hasHour = false;
         if (format != null) {
@@ -96,7 +98,9 @@ abstract class FieldReaderImplDate<T>
             fieldValue = new Date(millis);
         } else {
             long millis;
-            if (format != null) {
+            if (yyyyMMddhhmmss19) {
+                millis = jsonReader.readMillis19();
+            } else if (format != null) {
                 String str = jsonReader.readString();
                 if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
                     millis = Long.parseLong(str);

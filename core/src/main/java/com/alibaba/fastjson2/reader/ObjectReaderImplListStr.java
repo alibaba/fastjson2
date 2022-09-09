@@ -78,18 +78,18 @@ public final class ObjectReaderImplListStr
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        Class listType = this.listType;
+        Class instanceType = this.instanceType;
 
         if (jsonReader.nextIfNull()) {
             return null;
         }
 
-        ObjectReader objectReader = jsonReader.checkAutoType(listType, 0, features);
+        ObjectReader objectReader = jsonReader.checkAutoType(this.listType, 0, features);
         if (objectReader != null) {
-            listType = objectReader.getObjectClass();
+            instanceType = objectReader.getObjectClass();
         }
 
-        if (listType == CLASS_ARRAYS_LIST) {
+        if (instanceType == CLASS_ARRAYS_LIST) {
             int entryCnt = jsonReader.startArray();
             String[] array = new String[entryCnt];
             for (int i = 0; i < entryCnt; ++i) {
@@ -98,44 +98,45 @@ public final class ObjectReaderImplListStr
             return Arrays.asList(array);
         }
 
+        int entryCnt = jsonReader.startArray();
+
         Function builder = null;
         Collection list;
-        if (listType == ArrayList.class) {
-            list = new ArrayList();
-        } else if (listType == JSONArray.class) {
-            list = new JSONArray();
-        } else if (listType == CLASS_UNMODIFIABLE_COLLECTION) {
+        if (instanceType == ArrayList.class) {
+            list = entryCnt > 0 ? new ArrayList(entryCnt) : new ArrayList();
+        } else if (instanceType == JSONArray.class) {
+            list = entryCnt > 0 ? new JSONArray(entryCnt) : new JSONArray();
+        } else if (instanceType == CLASS_UNMODIFIABLE_COLLECTION) {
             list = new ArrayList();
             builder = (Function<Collection, Collection>) Collections::unmodifiableCollection;
-        } else if (listType == CLASS_UNMODIFIABLE_LIST) {
+        } else if (instanceType == CLASS_UNMODIFIABLE_LIST) {
             list = new ArrayList();
             builder = (Function<List, List>) Collections::unmodifiableList;
-        } else if (listType == CLASS_UNMODIFIABLE_SET) {
+        } else if (instanceType == CLASS_UNMODIFIABLE_SET) {
             list = new LinkedHashSet();
             builder = (Function<Set, Set>) Collections::unmodifiableSet;
-        } else if (listType == CLASS_UNMODIFIABLE_SORTED_SET) {
+        } else if (instanceType == CLASS_UNMODIFIABLE_SORTED_SET) {
             list = new TreeSet();
             builder = (Function<SortedSet, SortedSet>) Collections::unmodifiableSortedSet;
-        } else if (listType == CLASS_UNMODIFIABLE_NAVIGABLE_SET) {
+        } else if (instanceType == CLASS_UNMODIFIABLE_NAVIGABLE_SET) {
             list = new TreeSet();
             builder = (Function<NavigableSet, NavigableSet>) Collections::unmodifiableNavigableSet;
-        } else if (listType == CLASS_SINGLETON) {
+        } else if (instanceType == CLASS_SINGLETON) {
             list = new ArrayList();
             builder = (Function<Collection, Collection>) ((Collection collection) -> Collections.singleton(collection.iterator().next()));
-        } else if (listType == CLASS_SINGLETON_LIST) {
+        } else if (instanceType == CLASS_SINGLETON_LIST) {
             list = new ArrayList();
             builder = (Function<Collection, Collection>) ((Collection collection) -> Collections.singletonList(collection.iterator().next()));
-        } else if (listType != null && listType != this.listType) {
+        } else if (instanceType != null && instanceType != this.listType) {
             try {
-                list = (Collection) listType.newInstance();
+                list = (Collection) instanceType.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                throw new JSONException(jsonReader.info("create instance error " + listType), e);
+                throw new JSONException(jsonReader.info("create instance error " + instanceType), e);
             }
         } else {
             list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
         }
 
-        int entryCnt = jsonReader.startArray();
         for (int i = 0; i < entryCnt; ++i) {
             list.add(jsonReader.readString());
         }

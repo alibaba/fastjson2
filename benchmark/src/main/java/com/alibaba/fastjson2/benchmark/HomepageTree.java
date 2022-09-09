@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.benchmark;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONWriter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -17,12 +19,18 @@ import java.util.concurrent.TimeUnit;
 
 public class HomepageTree {
     static String str;
+    static byte[] jsonbBytes;
     static ObjectMapper mapper = new ObjectMapper();
 
     public HomepageTree() {
         try {
             InputStream is = HomepageTree.class.getClassLoader().getResourceAsStream("data/homepage.json");
             str = IOUtils.toString(is, "UTF-8");
+
+            jsonbBytes = JSONB.toBytes(
+                    JSON.parseObject(str, Map.class),
+                    JSONWriter.Feature.WriteNameAsSymbol
+            );
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -43,9 +51,23 @@ public class HomepageTree {
     }
 
     @Benchmark
+    public void fastjson2_jsonb(Blackhole bh) {
+        bh.consume(
+                JSONB.parseObject(jsonbBytes, Map.class)
+        );
+    }
+
+    @Benchmark
     public void jackson(Blackhole bh) throws Exception {
         bh.consume(
                 mapper.readValue(str, Map.class)
+        );
+    }
+
+    @Benchmark
+    public void wastjson(Blackhole bh) {
+        bh.consume(
+                io.github.wycst.wast.json.JSON.parseObject(str, Map.class)
         );
     }
 

@@ -65,7 +65,7 @@ final class FieldWriterListField<T>
             }
         }
 
-        String refPath = jsonWriter.setPath(name, value);
+        String refPath = jsonWriter.setPath(name, this, value);
         if (refPath != null) {
             writeFieldName(jsonWriter);
             jsonWriter.writeReference(refPath);
@@ -73,7 +73,11 @@ final class FieldWriterListField<T>
             return true;
         }
 
-        writeList(jsonWriter, true, value);
+        if (itemType == String.class) {
+            writeListStr(jsonWriter, true, value);
+        } else {
+            writeList(jsonWriter, true, value);
+        }
         jsonWriter.popPath(value);
         return true;
     }

@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
@@ -368,6 +369,7 @@ public class ObjectWriterAdapter<T>
         }
 
         JSONWriter.Context context = jsonWriter.getContext();
+        boolean ignoreNonFieldGetter = ((context.getFeatures() | features) & JSONWriter.Feature.IgnoreNonFieldGetter.mask) != 0;
 
         BeforeFilter beforeFilter = context.getBeforeFilter();
         if (beforeFilter != null) {
@@ -385,6 +387,11 @@ public class ObjectWriterAdapter<T>
         List<FieldWriter> fieldWriters = getFieldWriters();
         for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
             FieldWriter fieldWriter = fieldWriters.get(i);
+
+            Field field = fieldWriter.getField();
+            if (ignoreNonFieldGetter && fieldWriter.getMethod() != null && field == null) {
+                continue;
+            }
 
             // pre property filter
             final String fieldWriterFieldName = fieldWriter.getFieldName();
@@ -425,7 +432,7 @@ public class ObjectWriterAdapter<T>
                 beanContext = new BeanContext(
                         objectType,
                         fieldWriter.getMethod(),
-                        fieldWriter.getField(),
+                        field,
                         fieldWriter.getFieldName(),
                         fieldWriter.getLabel(),
                         fieldWriter.getFieldClass(),
@@ -453,7 +460,7 @@ public class ObjectWriterAdapter<T>
                     beanContext = new BeanContext(
                             objectType,
                             fieldWriter.getMethod(),
-                            fieldWriter.getField(),
+                            field,
                             fieldWriter.getFieldName(),
                             fieldWriter.getLabel(),
                             fieldWriter.getFieldClass(),

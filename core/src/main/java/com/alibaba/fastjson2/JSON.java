@@ -2029,7 +2029,7 @@ public interface JSON {
         JSONWriter jsonWriter;
         if (JDKUtils.JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
-        } else if ((defaultWriterFeatures & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
+        } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
             jsonWriter = new JSONWriterUTF8JDK9(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF16(writeContext);
@@ -2366,7 +2366,7 @@ public interface JSON {
     }
 
     /**
-     * Verify the {@link String} is JSON Object
+     * Verify the {@link String} is JSON
      *
      * @param text the {@link String} to validate
      * @return {@code true} or {@code false}
@@ -2377,6 +2377,25 @@ public interface JSON {
         }
 
         try (JSONReader jsonReader = JSONReader.of(text)) {
+            jsonReader.skipValue();
+            return jsonReader.isEnd();
+        } catch (JSONException error) {
+            return false;
+        }
+    }
+
+    /**
+     * Verify the char array is JSON
+     *
+     * @param chars the {@link String} to validate
+     * @return {@code true} or {@code false}
+     */
+    static boolean isValid(char[] chars) {
+        if (chars == null || chars.length == 0) {
+            return false;
+        }
+
+        try (JSONReader jsonReader = JSONReader.of(chars)) {
             jsonReader.skipValue();
             return jsonReader.isEnd();
         } catch (JSONException error) {
@@ -2583,7 +2602,6 @@ public interface JSON {
      * @param clazz converted goal class
      * @deprecated since 2.0.4, please use {@link #to(Class, Object)}
      */
-    @Deprecated
     static <T> T toJavaObject(Object object, Class<T> clazz) {
         return to(clazz, object);
     }
