@@ -2555,7 +2555,7 @@ public abstract class JSONReader
             return new JSONReaderUTF16(ctx, bytes, offset, length);
         }
 
-        if (charset == StandardCharsets.US_ASCII) {
+        if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
             return new JSONReaderASCII(ctx, null, bytes, offset, length);
         }
 
