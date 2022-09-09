@@ -23,6 +23,14 @@ public class Issue3521 {
         );
 
         assertFalse(
+                JSON.isValid(bytes, 0, bytes.length, StandardCharsets.US_ASCII)
+        );
+
+        assertFalse(
+                JSON.isValid(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1)
+        );
+
+        assertFalse(
                 JSON.isValid(str)
         );
     }
