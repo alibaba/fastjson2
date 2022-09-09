@@ -191,6 +191,7 @@ public class ObjectWriterAdapter<T>
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         long featuresAll = features | this.features | jsonWriter.getFeatures();
+
         if (!serializable) {
             if ((featuresAll & JSONWriter.Feature.ErrorOnNoneSerializable.mask) != 0) {
                 errorOnNoneSerializable();
@@ -201,6 +202,11 @@ public class ObjectWriterAdapter<T>
                 jsonWriter.writeNull();
                 return;
             }
+        }
+
+        if ((featuresAll & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
+            writeWithFilter(jsonWriter, object, fieldName, fieldType, features);
+            return;
         }
 
         int size = fieldWriterArray.length;
@@ -362,10 +368,16 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public void writeWithFilter(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        jsonWriter.startObject();
-
-        if (jsonWriter.isWriteTypeInfo(object, features)) {
-            writeTypeInfo(jsonWriter);
+        if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
+            if (jsonWriter.isJSONB()) {
+                writeClassInfo(jsonWriter);
+                jsonWriter.startObject();
+            } else {
+                jsonWriter.startObject();
+                writeTypeInfo(jsonWriter);
+            }
+        } else {
+            jsonWriter.startObject();
         }
 
         JSONWriter.Context context = jsonWriter.getContext();

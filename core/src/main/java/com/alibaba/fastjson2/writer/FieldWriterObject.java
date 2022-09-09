@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.FieldInfo;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -119,7 +120,9 @@ abstract class FieldWriterObject<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
-        if (!fieldClassSerializable && (jsonWriter.getFeatures(features) & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
+        long features = this.features | jsonWriter.getFeatures();
+
+        if (!fieldClassSerializable && (features & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0) {
             return false;
         }
 
@@ -134,7 +137,6 @@ abstract class FieldWriterObject<T>
         }
 
         if (value == null) {
-            long features = this.features | jsonWriter.getFeatures();
             if ((features & JSONWriter.Feature.WriteNulls.mask) != 0
                     && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) == 0
             ) {
@@ -150,6 +152,10 @@ abstract class FieldWriterObject<T>
             } else {
                 return false;
             }
+        }
+
+        if ((features & JSONWriter.Feature.IgnoreNoneSerializable.mask) != 0 && !(value instanceof Serializable)) {
+            return false;
         }
 
         boolean refDetect = jsonWriter.isRefDetect(value);
@@ -187,7 +193,6 @@ abstract class FieldWriterObject<T>
                     String entryKey = entry.getKey().toString();
                     Object entryValue = entry.getValue();
                     if (entryValue == null) {
-                        long features = this.features | jsonWriter.getFeatures();
                         if ((features & JSONWriter.Feature.WriteNulls.mask) == 0) {
                             continue;
                         }
@@ -222,17 +227,17 @@ abstract class FieldWriterObject<T>
 
         writeFieldName(jsonWriter);
         boolean jsonb = jsonWriter.isJSONB();
-        if ((features & JSONWriter.Feature.BeanToArray.mask) != 0) {
+        if ((this.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
             if (jsonb) {
-                valueWriter.writeArrayMappingJSONB(jsonWriter, value, name, fieldType, features);
+                valueWriter.writeArrayMappingJSONB(jsonWriter, value, name, fieldType, this.features);
             } else {
-                valueWriter.writeArrayMapping(jsonWriter, value, name, fieldType, features);
+                valueWriter.writeArrayMapping(jsonWriter, value, name, fieldType, this.features);
             }
         } else {
             if (jsonb) {
-                valueWriter.writeJSONB(jsonWriter, value, name, fieldType, features);
+                valueWriter.writeJSONB(jsonWriter, value, name, fieldType, this.features);
             } else {
-                valueWriter.write(jsonWriter, value, name, fieldType, features);
+                valueWriter.write(jsonWriter, value, name, fieldType, this.features);
             }
         }
 
