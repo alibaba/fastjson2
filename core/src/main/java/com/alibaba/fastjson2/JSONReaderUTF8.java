@@ -103,9 +103,7 @@ class JSONReaderUTF8
         if (this.ch != e) {
             return false;
         }
-        if (ch == ',') {
-            this.comma = true;
-        }
+        comma = (ch == ',');
 
         if (offset >= end) {
             ch = EOI;
@@ -1060,8 +1058,7 @@ class JSONReaderUTF8
             c = bytes[offset];
         }
 
-        if (c == ',') {
-            this.comma = true;
+        if (comma = (c == ',')) {
             offset++;
             if (offset == end) {
                 c = EOI;
@@ -1889,8 +1886,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             this.ch = offset == end ? EOI : (char) bytes[this.offset++];
             // next inline
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -2023,8 +2019,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
@@ -2153,8 +2148,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (this.ch == ',') {
-            this.comma = true;
+        if (comma = (this.ch == ',')) {
             this.ch = offset == end ? EOI : (char) bytes[this.offset++];
             // next inline
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -2295,8 +2289,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
@@ -2533,8 +2526,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
@@ -2771,8 +2763,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (this.comma = ch == ',') {
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
@@ -2966,8 +2957,7 @@ class JSONReaderUTF8
             b = bytes[++offset];
         }
 
-        if (b == ',') {
-            this.comma = true;
+        if (comma = (b == ',')) {
             this.offset = offset + 1;
             next();
         } else {
@@ -3147,8 +3137,8 @@ class JSONReaderUTF8
             b = bytes[++offset];
         }
 
+        this.comma = b == ',';
         if (b == ',') {
-            this.comma = true;
             this.offset = offset + 1;
             next();
         } else {
@@ -3237,7 +3227,7 @@ class JSONReaderUTF8
             }
             case '"': {
                 skipString();
-                break;
+                return;
             }
             case '-':
             case '+':
@@ -3303,7 +3293,6 @@ class JSONReaderUTF8
 
         if (ch == ',') {
             comma = true;
-
             if (offset >= end) {
                 ch = EOI;
                 return;
@@ -3500,9 +3489,7 @@ class JSONReaderUTF8
             ch = bytes[offset++];
         }
 
-        if (ch == ',') {
-            comma = true;
-
+        if (comma = (ch == ',')) {
             if (offset >= end) {
                 this.ch = EOI;
                 return;
@@ -3775,6 +3762,7 @@ class JSONReaderUTF8
             if (offset + 1 == end) {
                 this.offset = end;
                 this.ch = EOI;
+                this.comma = false;
                 return str;
             }
 
@@ -3783,8 +3771,7 @@ class JSONReaderUTF8
                 b = bytes[++offset];
             }
 
-            if (b == ',') {
-                this.comma = true;
+            if (comma = (b == ',')) {
                 this.offset = offset + 1;
                 next();
             } else {
@@ -4080,8 +4067,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
@@ -4248,8 +4234,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             this.ch = (char) bytes[this.offset++];
             // next inline
             if (this.offset >= end) {
@@ -4317,8 +4302,7 @@ class JSONReaderUTF8
                 ch = (char) bytes[offset++];
             }
         }
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             ch = offset == end ? EOI : (char) bytes[offset++];
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -4428,8 +4412,7 @@ class JSONReaderUTF8
                 ch = (char) bytes[offset++];
             }
         }
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             ch = offset == end ? EOI : (char) bytes[offset++];
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -4475,8 +4458,7 @@ class JSONReaderUTF8
                 ch = (char) bytes[offset++];
             }
         }
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -5060,8 +5042,7 @@ class JSONReaderUTF8
 
         offset += (len + 1);
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return zdt;
@@ -5145,8 +5126,7 @@ class JSONReaderUTF8
 
         offset += 9;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -5233,8 +5213,7 @@ class JSONReaderUTF8
 
         offset += 10;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -5348,8 +5327,7 @@ class JSONReaderUTF8
 
         offset += 11;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -5431,8 +5409,7 @@ class JSONReaderUTF8
 
         offset += 11;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -5590,8 +5567,7 @@ class JSONReaderUTF8
 
         offset += 18;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -5639,8 +5615,7 @@ class JSONReaderUTF8
 
         offset += 6;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -5703,8 +5678,7 @@ class JSONReaderUTF8
 
         offset += 9;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -5784,8 +5758,7 @@ class JSONReaderUTF8
 
         offset += 12;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -5864,8 +5837,7 @@ class JSONReaderUTF8
 
         offset += 11;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -5946,8 +5918,7 @@ class JSONReaderUTF8
 
         offset += 13;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -6053,8 +6024,7 @@ class JSONReaderUTF8
 
         offset += 19;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -6224,8 +6194,7 @@ class JSONReaderUTF8
 
         offset += 17;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -6421,8 +6390,7 @@ class JSONReaderUTF8
 
         offset += 19;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -6586,8 +6554,7 @@ class JSONReaderUTF8
 
         offset += 20;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -6762,8 +6729,7 @@ class JSONReaderUTF8
 
         offset += 20;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -6909,8 +6875,7 @@ class JSONReaderUTF8
 
         offset += (len + 1);
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -6953,8 +6918,7 @@ class JSONReaderUTF8
                     }
                 }
 
-                if (ch == ',') {
-                    this.comma = true;
+                if (comma = (ch == ',')) {
                     next();
                 }
                 return new UUID(
@@ -6991,8 +6955,7 @@ class JSONReaderUTF8
                         }
                     }
 
-                    if (ch == ',') {
-                        this.comma = true;
+                    if (comma = (ch == ',')) {
                         next();
                     }
 
@@ -7037,9 +7000,8 @@ class JSONReaderUTF8
             b = (char) bytes[++offset];
         }
 
-        if (b == ',') {
+        if (comma = (b == ',')) {
             this.offset = offset + 1;
-            comma = true;
 
             // inline next
             ch = (char) bytes[this.offset++];
@@ -7077,8 +7039,7 @@ class JSONReaderUTF8
             ch = (char) bytes[offset];
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             ch = (char) bytes[offset++];
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -7379,8 +7340,7 @@ class JSONReaderUTF8
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             this.ch = (char) bytes[this.offset++];
             // next inline
             if (this.offset >= end) {

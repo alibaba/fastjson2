@@ -43,9 +43,7 @@ final class JSONReaderASCII
         if (this.ch != ch) {
             return false;
         }
-        if (ch == ',') {
-            this.comma = true;
-        }
+        comma = ch == ',';
 
         if (offset >= end) {
             this.ch = EOI;
@@ -84,8 +82,7 @@ final class JSONReaderASCII
             this.ch = (char) bytes[offset];
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             offset++;
             if (offset >= end) {
                 ch = EOI;
@@ -559,8 +556,7 @@ final class JSONReaderASCII
             c = bytes[offset];
         }
 
-        if (c == ',') {
-            this.comma = true;
+        if (comma = (c == ',')) {
             offset++;
             if (offset == end) {
                 c = EOI;
@@ -1279,8 +1275,7 @@ final class JSONReaderASCII
             b = bytes[++offset];
         }
 
-        if (b == ',') {
-            this.comma = true;
+        if (comma = (b == ',')) {
             this.offset = offset + 1;
             next();
         } else {
@@ -1447,6 +1442,7 @@ final class JSONReaderASCII
             if (offset + 1 == end) {
                 this.offset = end;
                 this.ch = EOI;
+                this.comma = false;
                 return str;
             }
 
@@ -1455,17 +1451,20 @@ final class JSONReaderASCII
                 b = bytes[++offset];
             }
 
-            if (b == ',') {
-                this.comma = true;
+            if (comma = (b == ',')) {
                 this.offset = offset + 1;
 
                 // inline next
-                ch = (char) bytes[this.offset++];
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    if (this.offset >= end) {
-                        ch = EOI;
-                    } else {
-                        ch = (char) bytes[this.offset++];
+                if (this.offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[this.offset++];
+                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                        if (this.offset >= end) {
+                            ch = EOI;
+                        } else {
+                            ch = (char) bytes[this.offset++];
+                        }
                     }
                 }
             } else {
