@@ -708,14 +708,36 @@ public class ObjectReaderBaseModule
                 fieldName = BeanUtils.getterName(methodName, null); // readOnlyProperty
             }
 
+            String fieldName2;
+            char c0, c1;
+            if (fieldName.length() > 1
+                    && (c0 = fieldName.charAt(0)) >= 'A' && c0 <= 'Z'
+                    && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z'
+                    && (jsonField == null || jsonField.name().isEmpty())) {
+                char[] chars = fieldName.toCharArray();
+                chars[0] = (char) (chars[0] + 32);
+                fieldName2 = new String(chars);
+            } else {
+                fieldName2 = null;
+            }
+
             BeanUtils.declaredFields(objectClass, field -> {
                 if (field.getName().equals(fieldName)) {
                     int modifiers = field.getModifiers();
                     if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
                     }
+                } else if (fieldName2 != null && field.getName().equals(fieldName2)) {
+                    int modifiers = field.getModifiers();
+                    if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
+                        getFieldInfo(fieldInfo, objectClass, field);
+                    }
                 }
             });
+
+            if (fieldName2 != null && fieldInfo.fieldName == null && fieldInfo.alternateNames == null) {
+                fieldInfo.alternateNames = new String[]{fieldName2};
+            }
         }
 
         private void processAnnotation(FieldInfo fieldInfo, Annotation[] annotations) {
