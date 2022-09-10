@@ -8,8 +8,8 @@ import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import java.nio.charset.StandardCharsets;
 
 public class TestUtils {
-    public static final boolean GRAALVM = false;
-    public static final boolean ANDROID = true;
+    public static final boolean GRAALVM = true;
+    public static final boolean ANDROID = false;
 
     public static ObjectReaderCreator[] readerCreators() {
         return new ObjectReaderCreator[]{
