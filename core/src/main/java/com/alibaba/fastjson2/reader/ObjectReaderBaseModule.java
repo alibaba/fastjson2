@@ -1392,6 +1392,16 @@ public class ObjectReaderBaseModule
             Class mixin = provider.mixInCache.get(type);
             if (mixin == null) {
                 mixin = TypeUtils.loadClass(internalMixin);
+                if (mixin == null) {
+                    switch (internalMixin) {
+                        case "org.springframework.security.jackson2.SimpleGrantedAuthorityMixin":
+                            mixin = TypeUtils.loadClass("com.alibaba.fastjson2.internal.mixin.spring.SimpleGrantedAuthorityMixin");
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
                 if (mixin != null) {
                     provider.mixInCache.putIfAbsent((Class) type, mixin);
                 }
