@@ -444,6 +444,10 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter of(Context writeContext) {
+        if (writeContext == null) {
+            writeContext = JSONFactory.createWriteContext();
+        }
+
         JSONWriter jsonWriter;
         if (JDKUtils.JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);

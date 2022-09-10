@@ -2016,6 +2016,27 @@ public interface JSON {
     }
 
     /**
+     * Serialize Java Object to JSON {@link String}
+     *
+     * @param object Java Object to be serialized into JSON {@link String}
+     * @param context
+     */
+    static String toJSONString(Object object, JSONWriter.Context context) {
+        try (JSONWriter writer = JSONWriter.of(context)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                Class<?> valueClass = object.getClass();
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+            return writer.toString();
+        } catch (NullPointerException | NumberFormatException e) {
+            throw new JSONException("JSON#toJSONString cannot serialize '" + object + "'", e);
+        }
+    }
+
+    /**
      * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
      *
      * @param object Java Object to be serialized into JSON {@link String}

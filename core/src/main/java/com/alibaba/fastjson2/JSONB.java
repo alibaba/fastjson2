@@ -815,6 +815,23 @@ public interface JSONB {
         }
     }
 
+    static byte[] toBytes(Object object, JSONWriter.Context context) {
+        if (context == null) {
+            context = JSONFactory.createWriteContext();
+        }
+
+        try (JSONWriter writer = new JSONWriterJSONB(context, null)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                Class<?> valueClass = object.getClass();
+                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                objectWriter.writeJSONB(writer, object, null, null, 0);
+            }
+            return writer.getBytes();
+        }
+    }
+
     static byte[] toBytes(Object object, SymbolTable symbolTable) {
         try (JSONWriter writer = new JSONWriterJSONB(
                 new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider),
