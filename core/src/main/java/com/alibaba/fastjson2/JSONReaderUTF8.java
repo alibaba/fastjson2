@@ -186,6 +186,36 @@ class JSONReaderUTF8
     }
 
     @Override
+    public boolean nextIfInfinity() {
+        if (ch == 'I'
+                && offset + 6 < end
+                && bytes[offset] == 'n'
+                && bytes[offset + 1] == 'f'
+                && bytes[offset + 2] == 'i'
+                && bytes[offset + 3] == 'n'
+                && bytes[offset + 4] == 'i'
+                && bytes[offset + 5] == 't'
+                && bytes[offset + 6] == 'y'
+        ) {
+            offset += 7;
+            if (offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = (char) bytes[offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset == end) {
+                        ch = EOI;
+                        break;
+                    }
+                    ch = (char) bytes[offset++];
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public void next() {
         if (offset >= end) {
             ch = EOI;
