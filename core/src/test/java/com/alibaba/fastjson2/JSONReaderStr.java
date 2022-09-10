@@ -291,6 +291,36 @@ public final class JSONReaderStr
     }
 
     @Override
+    public boolean nextIfInfinity() {
+        if (ch == 'I'
+                && offset + 1 < end
+                && str.charAt(offset) == 'n'
+                && str.charAt(offset + 1) == 'f'
+                && str.charAt(offset + 2) == 'i'
+                && str.charAt(offset + 3) == 'n'
+                && str.charAt(offset + 4) == 'i'
+                && str.charAt(offset + 5) == 't'
+                && str.charAt(offset + 6) == 'y'
+        ) {
+            offset += 7;
+            if (offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = str.charAt(offset++);
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset == end) {
+                        ch = EOI;
+                        break;
+                    }
+                    ch = str.charAt(offset++);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public void next() {
         if (offset >= end) {
             ch = EOI;

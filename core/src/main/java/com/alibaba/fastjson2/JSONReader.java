@@ -416,6 +416,10 @@ public abstract class JSONReader
 
     public abstract boolean nextIfSet();
 
+    public boolean nextIfInfinity() {
+        return false;
+    }
+
     public abstract String readPattern();
 
     public final int getOffset() {
@@ -1582,6 +1586,13 @@ public abstract class JSONReader
                         throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
                     }
                     break;
+                case 'I':
+                    if (nextIfInfinity()) {
+                        value = Double.POSITIVE_INFINITY;
+                    } else {
+                        throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
+                    }
+                    break;
                 default:
                     throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
             }
@@ -1682,6 +1693,13 @@ public abstract class JSONReader
                         skipLineComment();
                     }
                     continue for_;
+                case 'I':
+                    if (nextIfInfinity()) {
+                        val = Double.POSITIVE_INFINITY;
+                        break;
+                    } else {
+                        throw new JSONException(info("illegal input " + ch));
+                    }
                 default:
                     throw new JSONException(info("illegal input " + ch));
             }
