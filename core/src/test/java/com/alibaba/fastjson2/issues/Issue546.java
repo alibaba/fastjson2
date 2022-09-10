@@ -31,4 +31,22 @@ public class Issue546 {
         public String uId;
         public String cId;
     }
+
+    @Test
+    public void test2() {
+        assertEquals("abc", JSON.parseObject("{\"uId\":\"abc\"}", C.class).uId);
+        assertEquals("abc", JSON.parseObject("{\"UId\":\"abc\"}", C.class).uId);
+    }
+
+    public static class C {
+        private String uId;
+
+        public String getUId() {
+            return uId;
+        }
+
+        public void setUId(String uId) {
+            this.uId = uId;
+        }
+    }
 }
