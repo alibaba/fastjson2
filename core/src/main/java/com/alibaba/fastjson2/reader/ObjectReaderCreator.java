@@ -702,10 +702,18 @@ public class ObjectReaderCreator {
             int matchCount = 0;
             if (defaultConstructor != null) {
                 for (int i = 0; i < parameterNames.length; i++) {
+                    String parameterName = parameterNames[i];
+                    if (parameterName == null) {
+                        continue;
+                    }
+
                     for (int j = 0; j < fieldReaderArray.length; j++) {
-                        if (parameterNames[i].equals(fieldReaderArray[j].getFieldName())) {
-                            matchCount++;
-                            break;
+                        FieldReader fieldReader = fieldReaderArray[j];
+                        if (fieldReader != null) {
+                            if (parameterName.equals(fieldReader.getFieldName())) {
+                                matchCount++;
+                                break;
+                            }
                         }
                     }
                 }
