@@ -1,7 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Array;
@@ -12,13 +14,21 @@ import java.util.List;
 
 class ObjectReaderImplGenericArray
         implements ObjectReader {
+    final Type arrayType;
+    final Class arrayClass;
     final Type itemType;
     final Class<?> componentClass;
     ObjectReader itemObjectReader;
+    final String arrayClassName;
+    final long arrayClassNameHash;
 
     public ObjectReaderImplGenericArray(GenericArrayType genericType) {
+        this.arrayType = genericType;
+        this.arrayClass = TypeUtils.getClass(arrayType);
         this.itemType = genericType.getGenericComponentType();
         this.componentClass = TypeUtils.getMapping(itemType);
+        this.arrayClassName = "[" + TypeUtils.getTypeName(this.componentClass);
+        this.arrayClassNameHash = Fnv.hashCode64(arrayClassName);
     }
 
     @Override
@@ -33,6 +43,14 @@ class ObjectReaderImplGenericArray
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
+            long typeHash = jsonReader.readTypeHashCode();
+            if (typeHash != arrayClassNameHash) {
+                String typeName = jsonReader.getString();
+                throw new JSONException("not support input typeName " + typeName);
+            }
+        }
+
         int entryCnt = jsonReader.startArray();
 
         if (entryCnt > 0 && itemObjectReader == null) {

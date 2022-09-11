@@ -1227,6 +1227,13 @@ public class TypeUtils {
             }
         }
 
+        if (type instanceof GenericArrayType) {
+            GenericArrayType genericArrayType = (GenericArrayType) type;
+            Type componentType = genericArrayType.getGenericComponentType();
+            Class<?> componentClass = getClass(componentType);
+            return getArrayClass(componentClass);
+        }
+
         return Object.class;
     }
 

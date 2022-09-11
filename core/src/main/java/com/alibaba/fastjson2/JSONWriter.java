@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.*;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -262,6 +263,17 @@ public abstract class JSONWriter
         Class fieldClass = null;
         if (fieldType instanceof Class) {
             fieldClass = (Class) fieldType;
+        } else if (fieldType instanceof GenericArrayType) {
+            GenericArrayType genericArrayType = (GenericArrayType) fieldType;
+            Type componentType = genericArrayType.getGenericComponentType();
+            if (componentType instanceof ParameterizedType) {
+                componentType = ((ParameterizedType) componentType).getRawType();
+            }
+            if (objectClass.isArray()) {
+                if (objectClass.getComponentType().equals(componentType)) {
+                    return false;
+                }
+            }
         } else if (fieldType instanceof ParameterizedType) {
             Type rawType = ((ParameterizedType) fieldType).getRawType();
             if (rawType instanceof Class) {
