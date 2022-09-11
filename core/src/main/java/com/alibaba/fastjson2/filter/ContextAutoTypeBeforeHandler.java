@@ -43,6 +43,11 @@ public class ContextAutoTypeBeforeHandler
                 continue;
             }
 
+            Class mapping = TypeUtils.getMapping(name);
+            if (mapping != null) {
+                name = TypeUtils.getTypeName(mapping);
+            }
+
             long hashCode = MAGIC_HASH_CODE;
             for (int j = 0; j < name.length(); ++j) {
                 char ch = name.charAt(j);
@@ -118,6 +123,14 @@ public class ContextAutoTypeBeforeHandler
                     arrayType = origin;
                 }
                 return arrayType;
+            }
+        }
+
+        Class mapping = TypeUtils.getMapping(typeName);
+        if (mapping != null) {
+            String mappingTypeName = TypeUtils.getTypeName(mapping);
+            if (!typeName.equals(mappingTypeName)) {
+                return apply(mappingTypeName, expectClass, features);
             }
         }
 

@@ -60,4 +60,52 @@ public class Issue749 {
         );
         assertArrayEquals(split, (String[][]) o1);
     }
+
+    @Test
+    public void test3() {
+        JSONReader.AutoTypeBeforeHandler filter = JSONReader.autoTypeFilter(String.class.getName());
+
+        String s = "a.a.a.a";
+        String[][] split = new String[][]{s.split("\\.")};
+        byte[] bytes = JSONB.toBytes(split, JSONWriter.Feature.WriteClassName);
+        Object o = JSONB.parseObject(
+                bytes,
+                Object.class,
+                filter
+        );
+        System.out.println(o);
+        System.out.println(o instanceof String[][]);
+        assertArrayEquals(split, (String[][]) o);
+
+        Object o1 = JSONB.parseObject(
+                bytes,
+                String[][].class,
+                filter
+        );
+        assertArrayEquals(split, (String[][]) o1);
+    }
+
+    @Test
+    public void test4() {
+        ContextAutoTypeBeforeHandler filter = new ContextAutoTypeBeforeHandler(String.class.getTypeName());
+
+        String s = "a.a.a.a";
+        String[][] split = new String[][]{s.split("\\.")};
+        byte[] bytes = JSONB.toBytes(split, JSONWriter.Feature.WriteClassName);
+        Object o = JSONB.parseObject(
+                bytes,
+                Object.class,
+                filter
+        );
+        System.out.println(o);
+        System.out.println(o instanceof String[][]);
+        assertArrayEquals(split, (String[][]) o);
+
+        Object o1 = JSONB.parseObject(
+                bytes,
+                String[][].class,
+                filter
+        );
+        assertArrayEquals(split, (String[][]) o1);
+    }
 }
