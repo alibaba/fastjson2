@@ -3004,6 +3004,10 @@ public abstract class JSONReader
         return new ContextAutoTypeBeforeHandler(names);
     }
 
+    public static AutoTypeBeforeHandler autoTypeFilter(Class... types) {
+        return new ContextAutoTypeBeforeHandler(types);
+    }
+
     public static class Context {
         String dateFormat;
         boolean formatyyyyMMddhhmmss19;
