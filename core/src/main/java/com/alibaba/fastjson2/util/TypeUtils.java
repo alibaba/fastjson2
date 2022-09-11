@@ -1102,8 +1102,11 @@ public class TypeUtils {
                 return Integer.class;
             case "java.lang.Long":
                 return Long.class;
+            case "String":
             case "java.lang.String":
                 return String.class;
+            case "[String":
+                return String[].class;
             case "I":
             case "int":
                 return int.class;
@@ -1158,6 +1161,10 @@ public class TypeUtils {
                 break;
         }
 
+        if (className.charAt(0) == 'L' && className.charAt(className.length() - 1) == ';') {
+            className = className.substring(1, className.length() - 1);
+        }
+
         if (className.charAt(0) == '[' || className.endsWith("[]")) {
             String itemClassName = className.charAt(0) == '[' ? className.substring(1) : className.substring(0, className.length() - 2);
             Class itemClass = loadClass(itemClassName);
@@ -1186,6 +1193,10 @@ public class TypeUtils {
         }
 
         return null;
+    }
+
+    public static Class<?> getArrayClass(Class componentClass) {
+        return Array.newInstance(componentClass, 1).getClass();
     }
 
     public static Class<?> getClass(Type type) {

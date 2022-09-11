@@ -1,10 +1,13 @@
 package com.alibaba.fastjson2.filter;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
@@ -15,7 +18,21 @@ public class ContextAutoTypeBeforeHandler
     final long[] acceptHashCodes;
     final Map<String, Class> classCache = new ConcurrentHashMap<>(16, 0.75f, 1);
 
-    public ContextAutoTypeBeforeHandler(String[] acceptNames) {
+    public ContextAutoTypeBeforeHandler(Class... types) {
+        this(Arrays.asList(types));
+    }
+
+    public ContextAutoTypeBeforeHandler(Collection<Class> types) {
+        this(
+                types.stream()
+                        .map(
+                                e -> TypeUtils.getTypeName(e)
+                        ).collect(Collectors.toList())
+                        .toArray(new String[types.size()])
+        );
+    }
+
+    public ContextAutoTypeBeforeHandler(String... acceptNames) {
         long[] array = new long[acceptNames.length];
 
         int index = 0;
@@ -70,6 +87,34 @@ public class ContextAutoTypeBeforeHandler
                 if (clazz != null) {
                     return clazz;
                 }
+            }
+        }
+
+        if (typeName.length() > 0
+                && typeName.charAt(0) == '[') {
+            Class clazz = classCache.get(typeName);
+            if (clazz != null) {
+                return clazz;
+            }
+
+            String itemTypeName = typeName.substring(1);
+            Class itemExpectClass = null;
+            if (expectClass != null) {
+                itemExpectClass = expectClass.getComponentType();
+            }
+            Class itemType = apply(itemTypeName, itemExpectClass, features);
+            if (itemType != null) {
+                Class arrayType;
+                if (itemType == itemExpectClass) {
+                    arrayType = expectClass;
+                } else {
+                    arrayType = TypeUtils.getArrayClass(itemType);
+                }
+                Class origin = classCache.putIfAbsent(typeName, arrayType);
+                if (origin != null) {
+                    arrayType = origin;
+                }
+                return arrayType;
             }
         }
 
