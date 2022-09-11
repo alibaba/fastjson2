@@ -400,7 +400,7 @@ public class ObjectReaderCreatorASM
                     "(J)Ljava/lang/Object;"
             );
 
-            if (fieldBased && defaultConstructor == null) {
+            if (fieldBased && (defaultConstructor == null || !Modifier.isPublic(defaultConstructor.getModifiers()) || !Modifier.isPublic(objectClass.getModifiers()))) {
                 mw.visitFieldInsn(Opcodes.GETSTATIC, TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
                 mw.visitVarInsn(Opcodes.ALOAD, 0);
                 mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_OBJECT_READER_ADAPTER, "objectClass", "Ljava/lang/Class;");
