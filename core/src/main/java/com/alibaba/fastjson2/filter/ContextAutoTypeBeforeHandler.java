@@ -46,6 +46,9 @@ public class ContextAutoTypeBeforeHandler
             long hashCode = MAGIC_HASH_CODE;
             for (int j = 0; j < name.length(); ++j) {
                 char ch = name.charAt(j);
+                if (ch == '$') {
+                    ch = '.';
+                }
                 hashCode ^= ch;
                 hashCode *= MAGIC_PRIME;
             }
