@@ -38,16 +38,4 @@ public class WebMvcConfigurer
         converters.add(0, converter);
     }
 
-    /**
-     * @param registry
-     */
-    @Override
-    public void configureViewResolvers(ViewResolverRegistry registry) {
-        FastJsonJsonView fastJsonJsonView = new FastJsonJsonView();
-        //自定义配置...
-        //FastJsonConfig config = new FastJsonConfig();
-        //config.set...
-        //fastJsonJsonView.setFastJsonConfig(config);
-        registry.enableContentNegotiation(fastJsonJsonView);
-    }
 }
