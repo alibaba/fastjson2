@@ -14,6 +14,7 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
+import java.io.Serializable;
 import java.lang.reflect.*;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -766,6 +767,13 @@ public class ObjectReaderCreatorASM
 
         int varIndex = 16;
         Map<Object, Integer> variants = new HashMap<>();
+
+        if (!Serializable.class.isAssignableFrom(objectType)) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, "objectClass", "Ljava/lang/Class;");
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "errorOnNoneSerializable", "(Ljava/lang/Class;)V", false);
+        }
 
         {
             Label notNull_ = new Label();
@@ -2255,5 +2263,14 @@ public class ObjectReaderCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
         mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_FIELD_READE, "getFieldType", "()Ljava/lang/reflect/Type;", true);
+    }
+
+    void genIsEnabled(MethodWriter mw, int var, long features, Label elseLabel) {
+        mw.visitVarInsn(Opcodes.LLOAD, var);
+        mw.visitLdcInsn(features);
+        mw.visitInsn(Opcodes.LAND);
+        mw.visitInsn(Opcodes.LCONST_0);
+        mw.visitInsn(Opcodes.LCMP);
+        mw.visitJumpInsn(Opcodes.IFEQ, elseLabel);
     }
 }

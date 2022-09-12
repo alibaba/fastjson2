@@ -73,6 +73,10 @@ final class ObjectReaderSeeAlso<T>
 
     @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         if (jsonReader.isString()) {
             long valueHashCode = jsonReader.readValueHashCode();
 

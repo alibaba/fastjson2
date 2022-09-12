@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.util.*;
 
 import java.io.Closeable;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -106,6 +107,13 @@ public abstract class JSONReader
 
     public Context getContext() {
         return context;
+    }
+
+    public void errorOnNoneSerializable(Class objectClass) {
+        if ((context.features & Feature.ErrorOnNoneSerializable.mask) != 0
+                && !Serializable.class.isAssignableFrom(objectClass)) {
+            throw new JSONException("not support none-Serializable, class " + objectClass.getName());
+        }
     }
 
     public boolean isEnabled(Feature feature) {
@@ -3252,26 +3260,30 @@ public abstract class JSONReader
     public enum Feature {
         FieldBased(1),
         IgnoreNoneSerializable(1 << 1),
-        SupportArrayToBean(1 << 2),
-        InitStringFieldAsEmpty(1 << 3),
-        SupportAutoType(1 << 4),
-        SupportSmartMatch(1 << 5),
-        UseNativeObject(1 << 6),
-        SupportClassForName(1 << 7),
-        IgnoreSetNullValue(1 << 8),
-        UseDefaultConstructorAsPossible(1 << 9),
-        UseBigDecimalForFloats(1 << 10),
-        UseBigDecimalForDoubles(1 << 11),
-        ErrorOnEnumNotMatch(1 << 12),
-        TrimString(1 << 13),
-        ErrorOnNotSupportAutoType(1 << 14),
-        DuplicateKeyValueAsArray(1 << 15),
-        AllowUnQuotedFieldNames(1 << 16),
-        NonStringKeyAsString(1 << 17),
+        /**
+         * @since 2.0.14
+         */
+        ErrorOnNoneSerializable(1 << 2),
+        SupportArrayToBean(1 << 3),
+        InitStringFieldAsEmpty(1 << 4),
+        SupportAutoType(1 << 5),
+        SupportSmartMatch(1 << 6),
+        UseNativeObject(1 << 7),
+        SupportClassForName(1 << 8),
+        IgnoreSetNullValue(1 << 9),
+        UseDefaultConstructorAsPossible(1 << 10),
+        UseBigDecimalForFloats(1 << 11),
+        UseBigDecimalForDoubles(1 << 12),
+        ErrorOnEnumNotMatch(1 << 13),
+        TrimString(1 << 14),
+        ErrorOnNotSupportAutoType(1 << 15),
+        DuplicateKeyValueAsArray(1 << 16),
+        AllowUnQuotedFieldNames(1 << 17),
+        NonStringKeyAsString(1 << 18),
         /**
          * @since 2.0.13
          */
-        Base64StringAsByteArray(1 << 18);
+        Base64StringAsByteArray(1 << 19);
 
         public final long mask;
 

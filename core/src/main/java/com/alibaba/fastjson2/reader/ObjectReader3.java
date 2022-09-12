@@ -101,6 +101,10 @@ class ObjectReader3<T>
 
     @Override
     public T readArrayMappingJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         ObjectReader autoTypeReader = checkAutoType(jsonReader, this.objectClass, this.features | features);
         if (autoTypeReader != null && autoTypeReader != this && autoTypeReader.getObjectClass() != this.objectClass) {
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
@@ -122,6 +126,10 @@ class ObjectReader3<T>
 
     @Override
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         if (jsonReader.isArray()) {
             int entryCnt = jsonReader.startArray();
             Object object = defaultCreator.get();
@@ -219,6 +227,10 @@ class ObjectReader3<T>
 
     @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         if (jsonReader.isJSONB()) {
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
