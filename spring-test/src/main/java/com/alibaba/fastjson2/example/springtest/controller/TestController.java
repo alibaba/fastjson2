@@ -1,17 +1,18 @@
-package com.example.springtest.controller;
+package com.alibaba.fastjson2.example.springtest.controller;
 
 import cn.hutool.core.io.resource.ClassPathResource;
-import com.example.springtest.entity.User;
+import com.alibaba.fastjson2.example.springtest.entity.User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 /**
  * @author jiangqiang
- * @date 2022-09-11
+ * date 2022-09-11
  */
 @RestController
 public class TestController {

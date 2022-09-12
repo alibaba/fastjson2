@@ -1,4 +1,4 @@
-package com.example.springtest.config;
+package com.alibaba.fastjson2.example.springtest.config;
 
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -12,12 +12,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by jackiechan on 2018/2/5/下午4:11
  * 文本消息的处理器
  */
-public class ChatMessageHandler extends TextWebSocketHandler {
-
-    private static final Map<String, WebSocketSession> allClients;//用于缓存所有的用户和连接之间的关系
+public class ChatMessageHandler
+        extends TextWebSocketHandler {
+    //用于缓存所有的用户和连接之间的关系
+    private static final Map<String, WebSocketSession> allClients;
 
     static {
-        allClients = new ConcurrentHashMap();//初始化连接
+        //初始化连接
+        allClients = new ConcurrentHashMap();
     }
 
     /**
@@ -25,10 +27,7 @@ public class ChatMessageHandler extends TextWebSocketHandler {
      */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-
-
     }
-
 
     /**
      * 给某个用户发送消息
@@ -37,10 +36,14 @@ public class ChatMessageHandler extends TextWebSocketHandler {
      * @param message
      */
     public void sendMessageToUser(String userName, TextMessage message) {
-        WebSocketSession webSocketSession = allClients.get(userName);//根据接收方的名字找到对应的连接
-        if (webSocketSession != null && webSocketSession.isOpen()) {//如果没有离线,如果离线,请根据实际业务需求来处理,可能会需要保存离线消息
+        //根据接收方的名字找到对应的连接
+        WebSocketSession webSocketSession = allClients.get(userName);
+
+        //如果没有离线,如果离线,请根据实际业务需求来处理,可能会需要保存离线消息
+        if (webSocketSession != null && webSocketSession.isOpen()) {
             try {
-                webSocketSession.sendMessage(message);//发送消息
+                //发送消息
+                webSocketSession.sendMessage(message);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -53,9 +56,10 @@ public class ChatMessageHandler extends TextWebSocketHandler {
      * @param message
      */
     public void sendMessageToUsers(TextMessage message) {
-        for (Map.Entry<String, WebSocketSession> webSocketSessionEntry : allClients.entrySet()) {//获取所有的连接
-
-            WebSocketSession session = webSocketSessionEntry.getValue();//找到每个连接
+        //获取所有的连接
+        for (Map.Entry<String, WebSocketSession> webSocketSessionEntry : allClients.entrySet()) {
+            //找到每个连接
+            WebSocketSession session = webSocketSessionEntry.getValue();
             if (session != null && session.isOpen()) {
                 try {
                     session.sendMessage(message);
@@ -66,10 +70,8 @@ public class ChatMessageHandler extends TextWebSocketHandler {
         }
     }
 
-
     @Override
     public boolean supportsPartialMessages() {
         return false;
     }
-
 }

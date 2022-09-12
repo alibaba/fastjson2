@@ -1,4 +1,4 @@
-package com.example.springtest.config;
+package com.alibaba.fastjson2.example.springtest.config;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
@@ -20,7 +20,8 @@ import java.util.List;
  */
 @Configuration
 @EnableWebMvc
-public class WebMvcConfigurer implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer {
+public class WebMvcConfigurer
+        implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer {
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
@@ -49,5 +50,4 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
         //fastJsonJsonView.setFastJsonConfig(config);
         registry.enableContentNegotiation(fastJsonJsonView);
     }
-
 }
