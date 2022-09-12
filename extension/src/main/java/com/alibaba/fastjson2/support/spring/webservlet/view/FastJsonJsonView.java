@@ -11,7 +11,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -93,25 +92,18 @@ public class FastJsonJsonView
     }
 
     @Override
-    protected void renderMergedOutputModel(Map<String, Object> model, //
-                                           HttpServletRequest request, //
-                                           HttpServletResponse response) throws Exception {
+    protected void renderMergedOutputModel(
+            Map<String, Object> model,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws Exception {
         Object value = filterModel(model);
-
-        ByteArrayOutputStream outnew = new ByteArrayOutputStream();
-
-        int len = JSON.writeTo(outnew, value, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
-
+        ServletOutputStream out = response.getOutputStream();
+        int len = JSON.writeTo(out, value, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
         if (config.isWriteContentLength()) {
             // Write content length (determined via byte array).
             response.setContentLength(len);
         }
-
-        // Flush byte array to servlet output stream.
-        ServletOutputStream out = response.getOutputStream();
-        outnew.writeTo(out);
-        outnew.close();
-        out.flush();
     }
 
     @Override
