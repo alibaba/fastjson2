@@ -1,4 +1,4 @@
-package com.example.spring6test.config;
+package com.example.springtest.config;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
@@ -15,6 +15,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author jiangqiang
+ */
 @Configuration
 @EnableWebMvc
 public class WebMvcConfigurer implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer {
@@ -35,8 +38,6 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
     }
 
     /**
-     * todo 序列化SimpleGrantedAuthority
-     *
      * @param registry
      */
     @Override
