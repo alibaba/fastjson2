@@ -57,7 +57,7 @@
         <module>extension</module>
         <module>fastjson1-compatible</module>
         <module>kotlin</module>
-        <module>safemode-test</module>
+        <module>spring-test</module>
     </modules>
 
     <organization>
