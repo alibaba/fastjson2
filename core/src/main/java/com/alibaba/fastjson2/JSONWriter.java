@@ -1535,57 +1535,55 @@ public abstract class JSONWriter
     public enum Feature {
         FieldBased(1),
         IgnoreNoneSerializable(1 << 1),
-        BeanToArray(1 << 2),
-
-        WriteNulls(1 << 3),
-        WriteMapNullValue(1 << 3),
-
-        BrowserCompatible(1 << 4),
-        NullAsDefaultValue(1 << 5),
-        WriteBooleanAsNumber(1 << 6),
-        WriteNonStringValueAsString(1 << 7),
-        WriteClassName(1 << 8),
-        NotWriteRootClassName(1 << 9),
-        NotWriteHashMapArrayListClassName(1 << 10),
-        NotWriteDefaultValue(1 << 11),
-        WriteEnumsUsingName(1 << 12),
-        WriteEnumUsingToString(1 << 13),
-        IgnoreErrorGetter(1 << 14),
-        PrettyFormat(1 << 15),
-        ReferenceDetection(1 << 16),
-        WriteNameAsSymbol(1 << 17),
-        WriteBigDecimalAsPlain(1 << 18),
-        UseSingleQuotes(1 << 19),
-        MapSortField(1 << 20),
-        WriteNullListAsEmpty(1 << 21),
+        ErrorOnNoneSerializable(1 << 2),
+        BeanToArray(1 << 3),
+        WriteNulls(1 << 4),
+        WriteMapNullValue(1 << 4),
+        BrowserCompatible(1 << 5),
+        NullAsDefaultValue(1 << 6),
+        WriteBooleanAsNumber(1 << 7),
+        WriteNonStringValueAsString(1 << 8),
+        WriteClassName(1 << 9),
+        NotWriteRootClassName(1 << 10),
+        NotWriteHashMapArrayListClassName(1 << 11),
+        NotWriteDefaultValue(1 << 12),
+        WriteEnumsUsingName(1 << 13),
+        WriteEnumUsingToString(1 << 14),
+        IgnoreErrorGetter(1 << 15),
+        PrettyFormat(1 << 16),
+        ReferenceDetection(1 << 17),
+        WriteNameAsSymbol(1 << 18),
+        WriteBigDecimalAsPlain(1 << 19),
+        UseSingleQuotes(1 << 20),
+        MapSortField(1 << 21),
+        WriteNullListAsEmpty(1 << 22),
         /**
          * @since 1.1
          */
-        WriteNullStringAsEmpty(1 << 22),
+        WriteNullStringAsEmpty(1 << 23),
         /**
          * @since 1.1
          */
-        WriteNullNumberAsZero(1 << 23),
+        WriteNullNumberAsZero(1 << 24),
         /**
          * @since 1.1
          */
-        WriteNullBooleanAsFalse(1 << 24),
+        WriteNullBooleanAsFalse(1 << 25),
 
         /**
          * @since 2.0.7
          */
-        NotWriteEmptyArray(1 << 25),
-        WriteNonStringKeyAsString(1 << 26),
-        ErrorOnNoneSerializable(1 << 27),
+        NotWriteEmptyArray(1 << 26),
+        WriteNonStringKeyAsString(1 << 27),
         /**
          * @since 2.0.11
          */
-        WritePairAsJavaBean(1 << 28),
+        WritePairAsJavaBean(1L << 28),
 
         /**
          * @since 2.0.12
          */
-        OptimizedForAscii(1 << 29),
+        OptimizedForAscii(1L << 29),
 
         /**
          * @since 2.0.12
@@ -1593,7 +1591,7 @@ public abstract class JSONWriter
          * if format uses escaping mechanisms (which is generally true for textual formats but not for binary formats).
          * Feature is disabled by default.
          */
-        EscapeNoneAscii(1 << 30),
+        EscapeNoneAscii(1L << 30),
         /**
          * @since 2.0.13
          */

@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.Function;
@@ -21,6 +22,7 @@ public abstract class ObjectReaderBean<T>
     protected FieldReader extraFieldReader;
 
     protected boolean hasDefaultValue;
+    protected boolean serializable;
 
     protected final JSONSchema schema;
 
@@ -36,6 +38,7 @@ public abstract class ObjectReaderBean<T>
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
 
         this.schema = schema;
+        this.serializable = objectClass != null && Serializable.class.isAssignableFrom(objectClass);
     }
 
     @Override

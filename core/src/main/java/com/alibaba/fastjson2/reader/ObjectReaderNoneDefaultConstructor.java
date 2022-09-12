@@ -55,6 +55,10 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
     @Override
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         byte type = jsonReader.getType();
         if (type == BC_NULL) {
             jsonReader.next();
@@ -170,6 +174,10 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
     @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         if (jsonReader.isJSONB()) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
