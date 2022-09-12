@@ -111,7 +111,7 @@ class JSONReaderUTF8
         }
 
         int c = bytes[offset];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        while (c == '\0' || (c <= ' ' && ((1L << c) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
                 ch = EOI;
@@ -223,7 +223,7 @@ class JSONReaderUTF8
         }
 
         int c = bytes[offset];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        while (c == '\0' || (c <= ' ' && ((1L << c) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
                 ch = EOI;
