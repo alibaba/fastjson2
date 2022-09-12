@@ -1,4 +1,4 @@
-package com.example.spring6test;
+package com.example.springtest;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,10 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
 @SpringBootApplication
 @EnableWebSocket
-public class Spring6testApplication {
+public class SpringTestApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Spring6testApplication.class, args);
+        SpringApplication.run(SpringTestApplication.class, args);
     }
 
 }

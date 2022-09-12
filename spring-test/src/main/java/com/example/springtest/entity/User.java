@@ -1,4 +1,4 @@
-package com.example.spring6test.entity;
+package com.example.springtest.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

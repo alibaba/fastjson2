@@ -1,4 +1,4 @@
-package com.example.spring6test.config;
+package com.example.springtest.config;
 
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
