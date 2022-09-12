@@ -8,13 +8,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 @Component
-public class JsonViewResolver implements ErrorViewResolver {
-
+public class JsonViewResolver
+        implements ErrorViewResolver {
     @Override
     public ModelAndView resolveErrorView(HttpServletRequest request, HttpStatus status, Map<String, Object> model) {
         FastJsonJsonView fastJsonJsonView = new FastJsonJsonView();
@@ -28,5 +29,4 @@ public class JsonViewResolver implements ErrorViewResolver {
         fastJsonJsonView.setAttributesMap(map);
         return new ModelAndView(fastJsonJsonView);
     }
-
 }
