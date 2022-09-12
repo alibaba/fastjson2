@@ -1,4 +1,4 @@
-package com.example.springtest.entity;
+package com.alibaba.fastjson2.example.springtest.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author jiangqiang
- * @date 2022-09-11
+ * date 2022-09-11
  */
 @Data
 @AllArgsConstructor
