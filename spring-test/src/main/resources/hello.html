@@ -54,7 +54,7 @@
 
 </div>
 <script>
-    const ws = new WebSocket("ws://localhost:8080/websocket/t1")
+    const ws = new WebSocket("ws://localhost:8080/websocket/A")
 
     function doIt() {
         let value = document.getElementById("inputText").value;
@@ -62,7 +62,7 @@
     }
 
     ws.onmessage = function (evt) {
-        document.getElementById("outputText").value = evt.data;
+        document.getElementById("outputText").value = document.getElementById("outputText").value + "\n" + evt.data;
     };
 
     ws.onclose = function () {
