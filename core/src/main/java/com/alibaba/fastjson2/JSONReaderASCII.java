@@ -27,7 +27,7 @@ final class JSONReaderASCII
         }
 
         ch = (char) (bytes[offset] & 0xFF);
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
                 ch = EOI;
@@ -51,7 +51,7 @@ final class JSONReaderASCII
         }
 
         this.ch = (char) (bytes[offset] & 0xFF);
-        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+        while (this.ch == '\0' || (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
                 this.ch = EOI;
