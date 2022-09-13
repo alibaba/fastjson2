@@ -4,12 +4,9 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
@@ -17,6 +14,38 @@ import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
 
 public class ContextAutoTypeBeforeHandler
         implements JSONReader.AutoTypeBeforeHandler {
+    static final Class[] BASIC_TYPES = {
+            Object.class,
+            byte.class,
+            Byte.class,
+            short.class,
+            Short.class,
+            int.class,
+            Integer.class,
+            long.class,
+            Long.class,
+            float.class,
+            Float.class,
+            double.class,
+            Double.class,
+            boolean.class,
+            Boolean.class,
+            char.class,
+            Character.class,
+            String.class,
+            Set.class,
+            HashSet.class,
+            LinkedHashSet.class,
+            TreeSet.class,
+            Map.class,
+            HashMap.class,
+            TreeMap.class,
+            LinkedHashMap.class,
+            LinkedHashMap.class,
+            ConcurrentMap.class,
+            ConcurrentHashMap.class
+    };
+
     final long[] acceptHashCodes;
     final ConcurrentMap<Integer, ConcurrentHashMap<String, Class>> tclHashCaches = new ConcurrentHashMap<>();
     final Map<String, Class> classCache = new ConcurrentHashMap<>(16, 0.75f, 1);
@@ -26,22 +55,36 @@ public class ContextAutoTypeBeforeHandler
     }
 
     public ContextAutoTypeBeforeHandler(Collection<Class> types) {
-        this(
-                types.stream()
-                        .map(
-                                e -> TypeUtils.getTypeName(e)
-                        ).collect(Collectors.toList())
-                        .toArray(new String[types.size()])
-        );
+        this(names(types));
     }
 
     public ContextAutoTypeBeforeHandler(String... acceptNames) {
-        long[] array = new long[acceptNames.length];
+        this(false, acceptNames);
+    }
 
-        int index = 0;
-        for (int i = 0; i < acceptNames.length; i++) {
-            String name = acceptNames[i];
+    static String[] names(Collection<Class> types) {
+        Set<String> nameSet = new HashSet<>();
+        for (Class type : types) {
+            if (type == null) {
+                continue;
+            }
 
+            String name = TypeUtils.getTypeName(type);
+            nameSet.add(name);
+        }
+        return nameSet.toArray(new String[nameSet.size()]);
+    }
+
+    public ContextAutoTypeBeforeHandler(boolean includeBasic, String... acceptNames) {
+        Set<String> nameSet = new HashSet<>();
+        if (includeBasic) {
+            for (Class basicType : BASIC_TYPES) {
+                String name = TypeUtils.getTypeName(basicType);
+                nameSet.add(name);
+            }
+        }
+
+        for (String name : acceptNames) {
             if (name == null || name.isEmpty()) {
                 continue;
             }
@@ -50,7 +93,13 @@ public class ContextAutoTypeBeforeHandler
             if (mapping != null) {
                 name = TypeUtils.getTypeName(mapping);
             }
+            nameSet.add(name);
+        }
 
+        long[] array = new long[nameSet.size()];
+
+        int index = 0;
+        for (String name : nameSet) {
             long hashCode = MAGIC_HASH_CODE;
             for (int j = 0; j < name.length(); ++j) {
                 char ch = name.charAt(j);
@@ -73,6 +122,10 @@ public class ContextAutoTypeBeforeHandler
 
     @Override
     public Class<?> apply(String typeName, Class<?> expectClass, long features) {
+        if ("O".equals(typeName)) {
+            typeName = "Object";
+        }
+
         long hash = MAGIC_HASH_CODE;
         for (int i = 0, typeNameLength = typeName.length(); i < typeNameLength; ++i) {
             char ch = typeName.charAt(i);
