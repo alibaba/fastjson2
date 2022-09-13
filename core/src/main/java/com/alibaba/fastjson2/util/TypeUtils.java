@@ -11,10 +11,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -320,18 +317,25 @@ public class TypeUtils {
 
         NAME_MAPPINGS.put(HashMap.class, "M");
         TYPE_MAPPINGS.put("HashMap", HashMap.class);
+        TYPE_MAPPINGS.put("java.util.HashMap", HashMap.class);
 
         NAME_MAPPINGS.put(LinkedHashMap.class, "LM");
         TYPE_MAPPINGS.put("LinkedHashMap", LinkedHashMap.class);
+        TYPE_MAPPINGS.put("java.util.LinkedHashMap", LinkedHashMap.class);
 
         NAME_MAPPINGS.put(TreeMap.class, "TM");
         TYPE_MAPPINGS.put("TreeMap", TreeMap.class);
 
         NAME_MAPPINGS.put(ArrayList.class, "A");
         TYPE_MAPPINGS.put("ArrayList", ArrayList.class);
+        TYPE_MAPPINGS.put("java.util.ArrayList", ArrayList.class);
 
         NAME_MAPPINGS.put(LinkedList.class, "LA");
+        TYPE_MAPPINGS.put("LA", LinkedList.class);
         TYPE_MAPPINGS.put("LinkedList", LinkedList.class);
+        TYPE_MAPPINGS.put("java.util.LinkedList", LinkedList.class);
+        TYPE_MAPPINGS.put("java.util.concurrent.ConcurrentLinkedQueue", ConcurrentLinkedQueue.class);
+        TYPE_MAPPINGS.put("java.util.concurrent.ConcurrentLinkedDeque", ConcurrentLinkedDeque.class);
 
         //java.util.LinkedHashMap.class,
 
@@ -340,6 +344,7 @@ public class TypeUtils {
         NAME_MAPPINGS.put(LinkedHashSet.class, "LinkedHashSet");
         NAME_MAPPINGS.put(ConcurrentHashMap.class, "ConcurrentHashMap");
         NAME_MAPPINGS.put(ConcurrentLinkedQueue.class, "ConcurrentLinkedQueue");
+        NAME_MAPPINGS.put(ConcurrentLinkedDeque.class, "ConcurrentLinkedDeque");
         NAME_MAPPINGS.put(JSONObject.class, "JSONObject");
         NAME_MAPPINGS.put(JSONArray.class, "JSONArray");
         NAME_MAPPINGS.put(Currency.class, "Currency");
@@ -464,6 +469,7 @@ public class TypeUtils {
         NAME_MAPPINGS.put(new TreeMap().values().getClass(), "List");
         NAME_MAPPINGS.put(new ConcurrentHashMap().values().getClass(), "List");
         NAME_MAPPINGS.put(new ConcurrentSkipListMap().values().getClass(), "List");
+
         TYPE_MAPPINGS.put("List", ArrayList.class);
         TYPE_MAPPINGS.put("java.util.ImmutableCollections$Map1", HashMap.class);
         TYPE_MAPPINGS.put("java.util.ImmutableCollections$MapN", LinkedHashMap.class);
@@ -1102,20 +1108,48 @@ public class TypeUtils {
             case "List":
             case "java.util.List":
                 return List.class;
+            case "A":
+            case "ArrayList":
             case "java.util.ArrayList":
                 return ArrayList.class;
+            case "LA":
+            case "LinkedList":
+            case "java.util.LinkedList":
+                return LinkedList.class;
             case "Map":
             case "java.util.Map":
                 return Map.class;
+            case "M":
             case "HashMap":
             case "java.util.HashMap":
                 return HashMap.class;
+            case "LM":
+            case "LinkedHashMap":
+            case "java.util.LinkedHashMap":
+                return LinkedHashMap.class;
+            case "ConcurrentHashMap":
+                return ConcurrentHashMap.class;
+            case "ConcurrentLinkedQueue":
+                return ConcurrentLinkedQueue.class;
+            case "ConcurrentLinkedDeque":
+                return ConcurrentLinkedDeque.class;
+            case "JSONObject":
+                return JSONObject.class;
+            case "JO1":
+                className = "com.alibaba.fastjson.JSONObject";
+                break;
             case "Set":
             case "java.util.Set":
                 return Set.class;
             case "HashSet":
             case "java.util.HashSet":
                 return HashSet.class;
+            case "LinkedHashSet":
+            case "java.util.LinkedHashSet":
+                return LinkedHashSet.class;
+            case "TreeSet":
+            case "java.util.TreeSet":
+                return TreeSet.class;
             case "java.lang.Class":
                 return Class.class;
             case "java.lang.Integer":
@@ -1177,6 +1211,12 @@ public class TypeUtils {
                 return boolean[].class;
             case "[O":
                 return Object[].class;
+            case "UUID":
+                return UUID.class;
+            case "Date":
+                return Date.class;
+            case "Calendar":
+                return Calendar.class;
             case "java.io.IOException":
                 return java.io.IOException.class;
             case "java.util.Collections$UnmodifiableRandomAccessList":
@@ -1185,6 +1225,11 @@ public class TypeUtils {
                 return CLASS_SINGLE_SET;
             default:
                 break;
+        }
+
+        Class mapping = TYPE_MAPPINGS.get(className);
+        if (mapping != null) {
+            return mapping;
         }
 
         if (className.charAt(0) == 'L' && className.charAt(className.length() - 1) == ';') {
