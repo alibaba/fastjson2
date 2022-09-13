@@ -16,7 +16,7 @@
     <properties>
         <java.version>8</java.version>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <spring.boot.version>2.7.1</spring.boot.version>
+        <spring.boot.version>2.7.3</spring.boot.version>
     </properties>
 
     <!-- 使用 aliyun 的 Maven 源，提升下载速度 -->
