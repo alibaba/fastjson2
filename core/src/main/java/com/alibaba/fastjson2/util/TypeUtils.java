@@ -311,6 +311,7 @@ public class TypeUtils {
         NAME_MAPPINGS.put(UUID[][].class, "[[UUID");
 
         NAME_MAPPINGS.put(Object.class, "Object");
+        NAME_MAPPINGS.put(Object[].class, "[O");
 
         NAME_MAPPINGS.put(HashMap.class, "M");
         TYPE_MAPPINGS.put("HashMap", HashMap.class);
@@ -417,6 +418,9 @@ public class TypeUtils {
 
         TYPE_MAPPINGS.put("JO10", JSONObject1O.class);
         TYPE_MAPPINGS.put("[O", Object[].class);
+        TYPE_MAPPINGS.put("[Ljava.lang.Object;", Object[].class);
+        TYPE_MAPPINGS.put("[java.lang.Object", Object[].class);
+        TYPE_MAPPINGS.put("[Object", Object[].class);
         TYPE_MAPPINGS.put("StackTraceElement", StackTraceElement.class);
         TYPE_MAPPINGS.put("[StackTraceElement", StackTraceElement[].class);
 
@@ -1074,6 +1078,8 @@ public class TypeUtils {
         }
 
         switch (className) {
+            case "O":
+            case "Object":
             case "java.lang.Object":
                 return Object.class;
             case "class java.util.Collections$EmptyMap":
@@ -1088,14 +1094,23 @@ public class TypeUtils {
                 return OptionalInt.class;
             case "java.util.OptionalLong":
                 return OptionalLong.class;
+            case "List":
             case "java.util.List":
                 return List.class;
             case "java.util.ArrayList":
                 return ArrayList.class;
+            case "Map":
             case "java.util.Map":
                 return Map.class;
+            case "HashMap":
             case "java.util.HashMap":
                 return HashMap.class;
+            case "Set":
+            case "java.util.Set":
+                return Set.class;
+            case "HashSet":
+            case "java.util.HashSet":
+                return HashSet.class;
             case "java.lang.Class":
                 return Class.class;
             case "java.lang.Integer":
@@ -1155,6 +1170,8 @@ public class TypeUtils {
             case "[Z":
             case "boolean[]":
                 return boolean[].class;
+            case "[O":
+                return Object[].class;
             case "java.io.IOException":
                 return java.io.IOException.class;
             default:
