@@ -4,13 +4,21 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
-import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
+import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 public class ContextAutoTypeBeforeHandler
         implements JSONReader.AutoTypeBeforeHandler {
@@ -28,22 +36,102 @@ public class ContextAutoTypeBeforeHandler
             Float.class,
             double.class,
             Double.class,
+
+            Number.class,
+            BigInteger.class,
+            BigDecimal.class,
+
+            AtomicInteger.class,
+            AtomicLong.class,
+            AtomicBoolean.class,
+            AtomicIntegerArray.class,
+            AtomicLongArray.class,
+            AtomicReference.class,
+
             boolean.class,
             Boolean.class,
             char.class,
             Character.class,
+
             String.class,
+            UUID.class,
+            Currency.class,
+            BitSet.class,
+            EnumSet.class,
+
+            Date.class,
+            Calendar.class,
+            LocalTime.class,
+            LocalDate.class,
+            LocalDateTime.class,
+            Instant.class,
+            SimpleDateFormat.class,
+            DateTimeFormatter.class,
+            TimeUnit.class,
+
             Set.class,
             HashSet.class,
             LinkedHashSet.class,
             TreeSet.class,
+            List.class,
+            ArrayList.class,
+            LinkedList.class,
+            ConcurrentLinkedQueue.class,
+            ConcurrentSkipListSet.class,
+            CopyOnWriteArrayList.class,
+
+            Collections.emptyList().getClass(),
+            Collections.emptyMap().getClass(),
+            CLASS_SINGLE_SET,
+            CLASS_UNMODIFIABLE_COLLECTION,
+            CLASS_UNMODIFIABLE_LIST,
+            CLASS_UNMODIFIABLE_SET,
+            CLASS_UNMODIFIABLE_SORTED_SET,
+            CLASS_UNMODIFIABLE_NAVIGABLE_SET,
+            Collections.unmodifiableMap(new HashMap<>()).getClass(),
+            Collections.unmodifiableNavigableMap(new TreeMap<>()).getClass(),
+            Collections.unmodifiableSortedMap(new TreeMap<>()).getClass(),
+
             Map.class,
             HashMap.class,
+            Hashtable.class,
             TreeMap.class,
             LinkedHashMap.class,
-            LinkedHashMap.class,
+            WeakHashMap.class,
+            IdentityHashMap.class,
             ConcurrentMap.class,
-            ConcurrentHashMap.class
+            ConcurrentHashMap.class,
+            ConcurrentSkipListMap.class,
+
+            Exception.class,
+            IllegalAccessError.class,
+            IllegalAccessException.class,
+            IllegalArgumentException.class,
+            IllegalMonitorStateException.class,
+            IllegalStateException.class,
+            IllegalThreadStateException.class,
+            IndexOutOfBoundsException.class,
+            InstantiationError.class,
+            InstantiationException.class,
+            InternalError.class,
+            InterruptedException.class,
+            LinkageError.class,
+            NegativeArraySizeException.class,
+            NoClassDefFoundError.class,
+            NoSuchFieldError.class,
+            NoSuchFieldException.class,
+            NoSuchMethodError.class,
+            NoSuchMethodException.class,
+            NullPointerException.class,
+            NumberFormatException.class,
+            OutOfMemoryError.class,
+            RuntimeException.class,
+            SecurityException.class,
+            StackOverflowError.class,
+            StringIndexOutOfBoundsException.class,
+            TypeNotPresentException.class,
+            VerifyError.class,
+            StackTraceElement.class,
     };
 
     final long[] acceptHashCodes;

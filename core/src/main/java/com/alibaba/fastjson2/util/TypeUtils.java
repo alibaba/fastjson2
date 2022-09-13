@@ -23,6 +23,11 @@ import java.util.function.Function;
 
 public class TypeUtils {
     public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
+    public static final Class CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(new ArrayList<>()).getClass();
+    public static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(new ArrayList<>()).getClass();
+    public static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(new HashSet<>()).getClass();
+    public static final Class CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass();
+    public static final Class CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
 
     static class Cache {
         volatile char[] chars;
@@ -1174,6 +1179,10 @@ public class TypeUtils {
                 return Object[].class;
             case "java.io.IOException":
                 return java.io.IOException.class;
+            case "java.util.Collections$UnmodifiableRandomAccessList":
+                return CLASS_UNMODIFIABLE_LIST;
+            case "java.util.Collections$SingletonSet":
+                return CLASS_SINGLE_SET;
             default:
                 break;
         }
