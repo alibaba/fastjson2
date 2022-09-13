@@ -3011,6 +3011,9 @@ public abstract class JSONReader
     public static AutoTypeBeforeHandler autoTypeFilter(String... names) {
         return new ContextAutoTypeBeforeHandler(names);
     }
+    public static AutoTypeBeforeHandler autoTypeFilter(boolean includeBasic, String... names) {
+        return new ContextAutoTypeBeforeHandler(includeBasic, names);
+    }
 
     public static AutoTypeBeforeHandler autoTypeFilter(Class... types) {
         return new ContextAutoTypeBeforeHandler(types);

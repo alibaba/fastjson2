@@ -161,15 +161,17 @@ public interface FieldReaderList<T, V>
             long typeHash = jsonReader.readTypeHashCode();
             long features = getFeatures();
 
+            JSONReader.Context context = jsonReader.getContext();
+
             boolean isSupportAutoType = jsonReader.isSupportAutoType(features);
-            if (!isSupportAutoType) {
+            if (!isSupportAutoType && context.getContextAutoTypeBeforeHandler() == null) {
                 throw new JSONException(jsonReader.info("autoType not support input " + jsonReader.getString()));
             }
 
-            ObjectReader autoTypeObjectReader = jsonReader.getContext().getObjectReaderAutoType(typeHash);
+            ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
             if (autoTypeObjectReader == null) {
                 String typeName = jsonReader.getString();
-                autoTypeObjectReader = jsonReader.getContext().getObjectReaderAutoType(typeName, getFieldClass(), features);
+                autoTypeObjectReader = context.getObjectReaderAutoType(typeName, getFieldClass(), features);
             }
 
             if (autoTypeObjectReader instanceof ObjectReaderImplList) {
