@@ -141,13 +141,27 @@ public final class ObjectReaderInterface<T>
 
             JSONReader.Context context = jsonReader.getContext();
             long features3, hash = jsonReader.readFieldNameHashCode();
+            JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
             if (i == 0
                     && hash == getTypeKeyHash()
-                    && ((((features3 = (features | getFeatures() | context.getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0) || context.getContextAutoTypeBeforeHandler() != null)
+                    && ((((features3 = (features | getFeatures() | context.getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0) || autoTypeFilter != null)
             ) {
-                long typeHash = jsonReader.readTypeHashCode();
+                ObjectReader reader = null;
 
-                ObjectReader reader = autoType(context, typeHash);
+                long typeHash = jsonReader.readTypeHashCode();
+                if (autoTypeFilter != null) {
+                    Class<?> filterClass = autoTypeFilter.apply(typeHash, objectClass, features3);
+                    if (filterClass == null) {
+                        filterClass = autoTypeFilter.apply(jsonReader.getString(), objectClass, features3);
+                        if (filterClass != null) {
+                            reader = context.getObjectReader(filterClass);
+                        }
+                    }
+                }
+
+                if (reader == null) {
+                    reader = autoType(context, typeHash);
+                }
 
                 String typeName = null;
                 if (reader == null) {

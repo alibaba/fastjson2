@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.filter;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.math.BigDecimal;
@@ -135,19 +136,28 @@ public class ContextAutoTypeBeforeHandler
     };
 
     final long[] acceptHashCodes;
-    final ConcurrentMap<Integer, ConcurrentHashMap<String, Class>> tclHashCaches = new ConcurrentHashMap<>();
-    final Map<String, Class> classCache = new ConcurrentHashMap<>(16, 0.75f, 1);
+    final ConcurrentMap<Integer, ConcurrentHashMap<Long, Class>> tclHashCaches = new ConcurrentHashMap<>();
+    final Map<Long, Class> classCache = new ConcurrentHashMap<>(16, 0.75f, 1);
 
     public ContextAutoTypeBeforeHandler(Class... types) {
-        this(Arrays.asList(types));
+        this(false, types);
     }
 
-    public ContextAutoTypeBeforeHandler(Collection<Class> types) {
-        this(names(types));
+    public ContextAutoTypeBeforeHandler(boolean includeBasic, Class... types) {
+        this(
+                includeBasic,
+                names(
+                        Arrays.asList(types)
+                )
+        );
     }
 
     public ContextAutoTypeBeforeHandler(String... acceptNames) {
         this(false, acceptNames);
+    }
+
+    public ContextAutoTypeBeforeHandler(boolean includeBasic) {
+        this(includeBasic, new String[0]);
     }
 
     static String[] names(Collection<Class> types) {
@@ -208,6 +218,19 @@ public class ContextAutoTypeBeforeHandler
         this.acceptHashCodes = array;
     }
 
+    public Class<?> apply(long typeNameHash, Class<?> expectClass, long features) {
+        ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+        if (tcl != null && tcl != JSON.class.getClassLoader()) {
+            int tclHash = System.identityHashCode(tcl);
+            ConcurrentHashMap<Long, Class> tclHashCache = tclHashCaches.get(tclHash);
+            if (tclHashCache != null) {
+                return tclHashCache.get(typeNameHash);
+            }
+        }
+
+        return classCache.get(typeNameHash);
+    }
+
     @Override
     public Class<?> apply(String typeName, Class<?> expectClass, long features) {
         if ("O".equals(typeName)) {
@@ -224,12 +247,13 @@ public class ContextAutoTypeBeforeHandler
             hash *= MAGIC_PRIME;
 
             if (Arrays.binarySearch(acceptHashCodes, hash) >= 0) {
-                Class clazz = getFromCache(typeName);
+                long typeNameHash = Fnv.hashCode64(typeName);
+                Class clazz = apply(typeNameHash, expectClass, features);
 
                 if (clazz == null) {
                     clazz = loadClass(typeName);
                     if (clazz != null) {
-                        Class origin = putCacheIfAbsent(typeName, clazz);
+                        Class origin = putCacheIfAbsent(typeNameHash, clazz);
                         if (origin != null) {
                             clazz = origin;
                         }
@@ -242,9 +266,11 @@ public class ContextAutoTypeBeforeHandler
             }
         }
 
+        long typeNameHash = Fnv.hashCode64(typeName);
+
         if (typeName.length() > 0
                 && typeName.charAt(0) == '[') {
-            Class clazz = getFromCache(typeName);
+            Class clazz = apply(typeNameHash, expectClass, features);
             if (clazz != null) {
                 return clazz;
             }
@@ -262,7 +288,7 @@ public class ContextAutoTypeBeforeHandler
                 } else {
                     arrayType = TypeUtils.getArrayClass(itemType);
                 }
-                Class origin = putCacheIfAbsent(typeName, arrayType);
+                Class origin = putCacheIfAbsent(typeNameHash, arrayType);
                 if (origin != null) {
                     arrayType = origin;
                 }
@@ -274,38 +300,29 @@ public class ContextAutoTypeBeforeHandler
         if (mapping != null) {
             String mappingTypeName = TypeUtils.getTypeName(mapping);
             if (!typeName.equals(mappingTypeName)) {
-                return apply(mappingTypeName, expectClass, features);
+                Class<?> mappingClass = apply(mappingTypeName, expectClass, features);
+                if (mappingClass != null) {
+                    putCacheIfAbsent(typeNameHash, mappingClass);
+                }
+                return mappingClass;
             }
         }
 
         return null;
     }
 
-    protected Class getFromCache(String typeName) {
+    private Class putCacheIfAbsent(long typeNameHash, Class type) {
         ClassLoader tcl = Thread.currentThread().getContextClassLoader();
         if (tcl != null && tcl != JSON.class.getClassLoader()) {
             int tclHash = System.identityHashCode(tcl);
-            ConcurrentHashMap<String, Class> tclHashCache = tclHashCaches.get(tclHash);
-            if (tclHashCache != null) {
-                return tclHashCache.get(typeName);
-            }
-        }
-
-        return classCache.get(typeName);
-    }
-
-    protected Class putCacheIfAbsent(String typeName, Class type) {
-        ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-        if (tcl != null && tcl != JSON.class.getClassLoader()) {
-            int tclHash = System.identityHashCode(tcl);
-            ConcurrentHashMap<String, Class> tclHashCache = tclHashCaches.get(tclHash);
+            ConcurrentHashMap<Long, Class> tclHashCache = tclHashCaches.get(tclHash);
             if (tclHashCache == null) {
                 tclHashCaches.putIfAbsent(tclHash, new ConcurrentHashMap<>());
                 tclHashCache = tclHashCaches.get(tclHash);
             }
 
-            return tclHashCache.putIfAbsent(typeName, type);
+            return tclHashCache.putIfAbsent(typeNameHash, type);
         }
-        return classCache.putIfAbsent(typeName, type);
+        return classCache.putIfAbsent(typeNameHash, type);
     }
 }

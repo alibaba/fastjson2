@@ -609,6 +609,20 @@ class JSONReaderJSONB
             case BC_TYPED_ANY: {
                 long typeHash = readTypeHashCode();
 
+                if (context.autoTypeBeforeHandler != null) {
+                    Class<?> filterClass = context.autoTypeBeforeHandler.apply(typeHash, null, context.features);
+
+                    if (filterClass == null) {
+                        String typeName = getString();
+                        filterClass = context.autoTypeBeforeHandler.apply(typeName, null, context.features);
+                    }
+
+                    if (filterClass != null) {
+                        ObjectReader autoTypeObjectReader = context.getObjectReader(filterClass);
+                        return autoTypeObjectReader.readJSONBObject(this, null, null, 0);
+                    }
+                }
+
                 boolean supportAutoType = (context.features & Feature.SupportAutoType.mask) != 0;
                 if (!supportAutoType) {
                     if (isObject()) {
@@ -1036,8 +1050,11 @@ class JSONReaderJSONB
             }
 
             if (context.autoTypeBeforeHandler != null) {
-                String typeName = getString();
-                Class<?> objectClass = context.autoTypeBeforeHandler.apply(typeName, expectClass, features);
+                Class<?> objectClass = context.autoTypeBeforeHandler.apply(typeHash, expectClass, features);
+                if (objectClass == null) {
+                    String typeName = getString();
+                    objectClass = context.autoTypeBeforeHandler.apply(typeName, expectClass, features);
+                }
                 if (objectClass != null) {
                     ObjectReader objectReader = context.getObjectReader(objectClass);
                     if (objectReader != null) {

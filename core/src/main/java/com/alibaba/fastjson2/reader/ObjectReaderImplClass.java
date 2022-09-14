@@ -31,17 +31,23 @@ final class ObjectReaderImplClass
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        String className = jsonReader.readString();
+        long classNameHash = jsonReader.readValueHashCode();
 
         JSONReader.Context context = jsonReader.getContext();
         JSONReader.AutoTypeBeforeHandler typeFilter = context.getContextAutoTypeBeforeHandler();
         if (typeFilter != null) {
-            Class<?> filterClass = typeFilter.apply(className, Class.class, features);
+            Class<?> filterClass = typeFilter.apply(classNameHash, Class.class, features);
+            if (filterClass == null) {
+                String className = jsonReader.getString();
+                filterClass = typeFilter.apply(className, Class.class, features);
+            }
+
             if (filterClass != null) {
                 return filterClass;
             }
         }
 
+        String className = jsonReader.getString();
         if (!context.isEnabled(JSONReader.Feature.SupportClassForName)) {
             throw new JSONException(jsonReader.info("not support ClassForName : " + className + ", you can config 'JSONReader.Feature.SupportClassForName'"));
         }
