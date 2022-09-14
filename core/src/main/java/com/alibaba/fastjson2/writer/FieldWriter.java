@@ -50,21 +50,13 @@ public interface FieldWriter<T>
         return null;
     }
 
-    default int ordinal() {
-        return -1;
-    }
+    int ordinal();
 
-    default Field getField() {
-        return null;
-    }
+    Field getField();
 
-    default String getLabel() {
-        return null;
-    }
+    String getLabel();
 
-    default Method getMethod() {
-        return null;
-    }
+    Method getMethod();
 
     default Member getFieldOrMethod() {
         Field field = getField();
@@ -74,9 +66,7 @@ public interface FieldWriter<T>
         return getMethod();
     }
 
-    default long getFeatures() {
-        return 0;
-    }
+    long getFeatures();
 
     default Object getFieldValue(T object) {
         throw new UnsupportedOperationException();
