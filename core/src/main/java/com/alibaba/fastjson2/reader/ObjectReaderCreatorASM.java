@@ -768,13 +768,6 @@ public class ObjectReaderCreatorASM
         int varIndex = 16;
         Map<Object, Integer> variants = new HashMap<>();
 
-        if (!Serializable.class.isAssignableFrom(objectType)) {
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, "objectClass", "Ljava/lang/Class;");
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "errorOnNoneSerializable", "(Ljava/lang/Class;)V", false);
-        }
-
         {
             Label notNull_ = new Label();
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
@@ -783,6 +776,13 @@ public class ObjectReaderCreatorASM
             mw.visitInsn(Opcodes.ACONST_NULL);
             mw.visitInsn(Opcodes.ARETURN);
             mw.visitLabel(notNull_);
+        }
+
+        if (!Serializable.class.isAssignableFrom(objectType)) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, "objectClass", "Ljava/lang/Class;");
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "errorOnNoneSerializable", "(Ljava/lang/Class;)V", false);
         }
 
         Label object_ = new Label();
