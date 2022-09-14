@@ -73,7 +73,7 @@ public abstract class ObjectReaderBean<T>
         extraFieldReader.processExtra(jsonReader, object);
     }
 
-    public ObjectReader checkAutoType(JSONReader jsonReader, Class listClass, long features) {
+    public ObjectReader checkAutoType(JSONReader jsonReader, Class expectClass, long features) {
         ObjectReader autoTypeObjectReader = null;
         if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();
@@ -82,7 +82,16 @@ public abstract class ObjectReaderBean<T>
 
             if (autoTypeObjectReader == null) {
                 String typeName = jsonReader.getString();
-                autoTypeObjectReader = context.getObjectReaderAutoType(typeName, listClass, features);
+
+                JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
+                if (autoTypeFilter != null) {
+                    Class<?> filterClass = autoTypeFilter.apply(typeName, expectClass, features);
+                    if (filterClass != null) {
+                        return context.getObjectReader(filterClass);
+                    }
+                }
+
+                autoTypeObjectReader = context.getObjectReaderAutoType(typeName, expectClass, features);
             }
 
             if (autoTypeObjectReader == null) {

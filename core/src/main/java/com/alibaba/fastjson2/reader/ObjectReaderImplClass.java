@@ -34,6 +34,14 @@ final class ObjectReaderImplClass
         String className = jsonReader.readString();
 
         JSONReader.Context context = jsonReader.getContext();
+        JSONReader.AutoTypeBeforeHandler typeFilter = context.getContextAutoTypeBeforeHandler();
+        if (typeFilter != null) {
+            Class<?> filterClass = typeFilter.apply(className, Class.class, features);
+            if (filterClass != null) {
+                return filterClass;
+            }
+        }
+
         if (!context.isEnabled(JSONReader.Feature.SupportClassForName)) {
             throw new JSONException(jsonReader.info("not support ClassForName : " + className + ", you can config 'JSONReader.Feature.SupportClassForName'"));
         }
