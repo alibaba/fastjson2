@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.IOUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 abstract class FieldWriterInt64<T>
@@ -11,8 +13,17 @@ abstract class FieldWriterInt64<T>
     volatile char[][] utf16ValueCache;
     final boolean browserCompatible;
 
-    FieldWriterInt64(String name, int ordinal, long features, String format, String label, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldClass, fieldClass);
+    FieldWriterInt64(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, fieldClass, fieldClass, field, method);
         browserCompatible = (features & JSONWriter.Feature.BrowserCompatible.mask) != 0;
     }
 

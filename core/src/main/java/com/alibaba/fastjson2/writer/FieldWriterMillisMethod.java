@@ -8,23 +8,16 @@ import java.lang.reflect.Method;
 
 final class FieldWriterMillisMethod<T>
         extends FieldWriterDate<T> {
-    final Method method;
-
-    FieldWriterMillisMethod(String fieldName,
+    FieldWriterMillisMethod(
+            String fieldName,
             int ordinal,
             long features,
             String dateTimeFormat,
             String label,
-            Method method,
-            Class fieldClass
+            Class fieldClass,
+            Method method
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, label, fieldClass, fieldClass);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, ordinal, features, dateTimeFormat, label, fieldClass, fieldClass, null, method);
     }
 
     @Override

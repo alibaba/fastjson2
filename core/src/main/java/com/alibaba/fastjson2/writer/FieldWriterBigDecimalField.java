@@ -8,16 +8,8 @@ import java.math.BigDecimal;
 
 final class FieldWriterBigDecimalField<T>
         extends FieldWriterImpl<T> {
-    final Field field;
-
     protected FieldWriterBigDecimalField(String name, int ordinal, long features, String format, String label, Field field) {
-        super(name, ordinal, features, format, label, BigDecimal.class, BigDecimal.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, features, format, label, BigDecimal.class, BigDecimal.class, field, null);
     }
 
     @Override

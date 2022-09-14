@@ -9,10 +9,8 @@ import java.lang.reflect.Method;
 
 final class FieldWriterStringMethod<T>
         extends FieldWriterImpl<T> {
-    final Method method;
     final boolean symbol;
     final boolean trim;
-
     final boolean raw;
 
     FieldWriterStringMethod(
@@ -23,16 +21,10 @@ final class FieldWriterStringMethod<T>
             long features,
             Method method
     ) {
-        super(fieldName, ordinal, features, format, label, String.class, String.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, String.class, String.class, null, method);
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);
         this.raw = (features & FieldInfo.RAW_VALUE_MASK) != 0;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

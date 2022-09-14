@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.IOUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -27,14 +29,18 @@ abstract class FieldWriterDate<T>
 
     protected ObjectWriter dateWriter;
 
-    protected FieldWriterDate(String fieldName,
-                              int ordinal,
-                              long features,
-                              String format,
-                              String label,
-                              Type fieldType,
-                              Class fieldClass) {
-        super(fieldName, ordinal, features, format, label, fieldType, fieldClass);
+    protected FieldWriterDate(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method);
 
         boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false, formatyyyyMMddhhmmss19 = false;
         if (format != null) {

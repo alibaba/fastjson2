@@ -7,18 +7,11 @@ import java.lang.reflect.Method;
 
 final class FieldWriterInt8ValFunc
         extends FieldWriterInt8 {
-    final Method method;
     final ToByteFunction function;
 
     protected FieldWriterInt8ValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToByteFunction function) {
-        super(fieldName, ordinal, features, format, label, byte.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, byte.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

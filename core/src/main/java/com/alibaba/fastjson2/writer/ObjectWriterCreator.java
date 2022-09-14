@@ -600,7 +600,7 @@ public class ObjectWriterCreator {
             if (format == null || format.isEmpty()) {
                 return new FieldWriterInt64Method(fieldName, ordinal, features, format, label, method, fieldClass);
             }
-            return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, method, fieldClass);
+            return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, fieldClass, method);
         }
 
         if (fieldClass == short.class || fieldClass == Short.class) {

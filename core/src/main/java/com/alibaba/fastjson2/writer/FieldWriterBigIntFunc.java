@@ -8,18 +8,11 @@ import java.util.function.Function;
 
 final class FieldWriterBigIntFunc<T>
         extends FieldWriterImpl<T> {
-    final Method method;
     final Function<T, BigInteger> function;
 
     FieldWriterBigIntFunc(String fieldName, int ordinal, long features, String format, String label, Method method, Function<T, BigInteger> function) {
-        super(fieldName, ordinal, features, format, label, BigInteger.class, BigInteger.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, BigInteger.class, BigInteger.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

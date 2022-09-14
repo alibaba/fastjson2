@@ -7,18 +7,11 @@ import java.lang.reflect.Method;
 
 final class FieldWriterInt16ValFunc
         extends FieldWriterInt16 {
-    final Method method;
     final ToShortFunction function;
 
     FieldWriterInt16ValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToShortFunction function) {
-        super(fieldName, ordinal, features, format, label, short.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, short.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

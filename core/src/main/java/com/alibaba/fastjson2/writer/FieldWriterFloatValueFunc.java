@@ -7,18 +7,11 @@ import java.lang.reflect.Method;
 
 final class FieldWriterFloatValueFunc
         extends FieldWriterImpl {
-    final Method method;
     final ToFloatFunction function;
 
     protected FieldWriterFloatValueFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToFloatFunction function) {
-        super(fieldName, ordinal, features, format, label, float.class, float.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, float.class, float.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

@@ -8,16 +8,8 @@ import java.lang.reflect.Method;
 
 final class FieldWriterEnumMethod
         extends FieldWriterEnum {
-    final Method method;
-
     protected FieldWriterEnumMethod(String name, int ordinal, long features, String format, String label, Class fieldType, Method method) {
-        super(name, ordinal, features, format, label, fieldType);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(name, ordinal, features, format, label, fieldType, null, method);
     }
 
     @Override

@@ -9,7 +9,6 @@ import java.lang.reflect.Type;
 
 final class FieldWriterObjectArrayField<T>
         extends FieldWriterImpl<T> {
-    final Field field;
     final Type itemType;
     final Class itemClass;
     ObjectWriter itemObjectWriter;
@@ -25,19 +24,13 @@ final class FieldWriterObjectArrayField<T>
             Class fieldClass,
             Field field
     ) {
-        super(fieldName, ordinal, features, format, label, fieldType, fieldClass);
-        this.field = field;
+        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null);
         this.itemType = itemType;
         if (itemType instanceof Class) {
             itemClass = (Class) itemType;
         } else {
             itemClass = TypeUtils.getMapping(itemType);
         }
-    }
-
-    @Override
-    public Field getField() {
-        return field;
     }
 
     @Override

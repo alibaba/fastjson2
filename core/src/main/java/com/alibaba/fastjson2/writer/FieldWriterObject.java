@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.FieldInfo;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -31,8 +33,18 @@ abstract class FieldWriterObject<T>
             "initObjectWriter"
     );
 
-    protected FieldWriterObject(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass);
+    protected FieldWriterObject(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
         this.unwrapped = (features & FieldInfo.UNWRAPPED_MASK) != 0;
 
         if (fieldClass == Currency.class) {

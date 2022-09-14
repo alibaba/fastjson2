@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.IOUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 abstract class FieldWriterInt16<T>
@@ -12,8 +14,17 @@ abstract class FieldWriterInt16<T>
     char[][] utf16ValueCache;
     volatile byte[][] jsonbValueCache;
 
-    FieldWriterInt16(String name, int ordinal, long features, String format, String label, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldClass, fieldClass);
+    FieldWriterInt16(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, fieldClass, fieldClass, field, method);
     }
 
     protected void writeInt16(JSONWriter jsonWriter, short value) {
