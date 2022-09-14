@@ -600,6 +600,7 @@ public class ObjectWriterBaseModule
                 BeanUtils.declaredFields(objectClass, field -> {
                     String name = field.getName();
                     if (name.equals(fieldName) || (fieldName0 != null && name.equals(fieldName0))) {
+                        fieldInfo.features |= FieldInfo.FIELD_MASK;
                         int modifiers = field.getModifiers();
                         if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                             getFieldInfo(beanInfo, fieldInfo, objectClass, field);

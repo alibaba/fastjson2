@@ -727,11 +727,13 @@ public class ObjectReaderBaseModule
                     if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
                     }
+                    fieldInfo.features |= FieldInfo.FIELD_MASK;
                 } else if (fieldName2 != null && field.getName().equals(fieldName2)) {
                     int modifiers = field.getModifiers();
                     if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
                     }
+                    fieldInfo.features |= FieldInfo.FIELD_MASK;
                 }
             });
 

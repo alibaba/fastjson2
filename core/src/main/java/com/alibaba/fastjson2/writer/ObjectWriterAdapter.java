@@ -401,7 +401,9 @@ public class ObjectWriterAdapter<T>
             FieldWriter fieldWriter = fieldWriters.get(i);
 
             Field field = fieldWriter.getField();
-            if (ignoreNonFieldGetter && fieldWriter.getMethod() != null && field == null) {
+            if (ignoreNonFieldGetter
+                    && fieldWriter.getMethod() != null
+                    && (fieldWriter.getFeatures() & FieldInfo.FIELD_MASK) == 0) {
                 continue;
             }
 
