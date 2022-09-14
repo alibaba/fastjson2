@@ -3005,6 +3005,10 @@ public abstract class JSONReader
 
     public interface AutoTypeBeforeHandler
             extends Filter {
+        default Class<?> apply(long typeNameHash, Class<?> expectClass, long features) {
+            return null;
+        }
+
         Class<?> apply(String typeName, Class<?> expectClass, long features);
     }
 
@@ -3017,6 +3021,10 @@ public abstract class JSONReader
 
     public static AutoTypeBeforeHandler autoTypeFilter(Class... types) {
         return new ContextAutoTypeBeforeHandler(types);
+    }
+
+    public static AutoTypeBeforeHandler autoTypeFilter(boolean includeBasic, Class... types) {
+        return new ContextAutoTypeBeforeHandler(includeBasic, types);
     }
 
     public static class Context {

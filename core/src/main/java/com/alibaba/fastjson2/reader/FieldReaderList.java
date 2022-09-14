@@ -160,24 +160,37 @@ public interface FieldReaderList<T, V>
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();
             long features = getFeatures();
+            Class fieldClass = getFieldClass();
 
             JSONReader.Context context = jsonReader.getContext();
+            JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
+            if (autoTypeFilter != null) {
+                Class<?> filterClass = autoTypeFilter.apply(typeHash, fieldClass, features);
+                if (filterClass == null) {
+                    String typeName = jsonReader.getString();
+                    filterClass = autoTypeFilter.apply(typeName, fieldClass, features);
+                }
+                if (filterClass != null) {
+                    return context.getObjectReader(fieldClass);
+                }
+            }
 
             boolean isSupportAutoType = jsonReader.isSupportAutoType(features);
-            if (!isSupportAutoType && context.getContextAutoTypeBeforeHandler() == null) {
+            if (!isSupportAutoType) {
                 throw new JSONException(jsonReader.info("autoType not support input " + jsonReader.getString()));
             }
 
             ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+
             if (autoTypeObjectReader == null) {
                 String typeName = jsonReader.getString();
-                autoTypeObjectReader = context.getObjectReaderAutoType(typeName, getFieldClass(), features);
+                autoTypeObjectReader = context.getObjectReaderAutoType(typeName, fieldClass, features);
             }
 
             if (autoTypeObjectReader instanceof ObjectReaderImplList) {
                 ObjectReaderImplList listReader = (ObjectReaderImplList) autoTypeObjectReader;
 
-                autoTypeObjectReader = new ObjectReaderImplList(getFieldType(), getFieldClass(), listReader.instanceType, getItemType(), listReader.builder);
+                autoTypeObjectReader = new ObjectReaderImplList(getFieldType(), fieldClass, listReader.instanceType, getItemType(), listReader.builder);
             }
 
             if (autoTypeObjectReader == null) {

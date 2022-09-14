@@ -24,6 +24,25 @@ public class EishayParseBinaryAutoTypeTest {
         }
     }
 
+    public static void fastjson2JSONB_autoTypeFilter() throws Exception {
+        System.out.println("EishayParseBinaryAutoType-fastjson2_jsonb_autoTypeFilter size " + benchmark.fastjson2JSONBBytes.length); // 409
+        System.out.println();
+
+        for (int j = 0; j < 10; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.fastjson2JSONB_autoTypeFilter(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("EishayParseBinaryAutoType-fastjson2_jsonb_autoTypeFilter millis : " + millis);
+            // zulu8.58.0.13 :
+            // zulu11.52.13 :
+            // zulu17.32.13 :
+
+            // reflect-zulu17.32.13 :
+        }
+    }
+
     public static void fastjson2JSONB_symbols() throws Exception {
         System.out.println("EishayParseBinaryAutoType-fastjson2JSONB_symbols size " + benchmark.fastjson2JSONBBytes_symbols.length); // 409
         System.out.println();
@@ -44,7 +63,8 @@ public class EishayParseBinaryAutoTypeTest {
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2JSONB();
+//        fastjson2JSONB();
+        fastjson2JSONB_autoTypeFilter();
 //        fastjson2JSONB_symbols();
 //        kryo_test();
     }
