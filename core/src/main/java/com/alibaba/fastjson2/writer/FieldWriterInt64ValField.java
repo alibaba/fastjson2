@@ -7,16 +7,8 @@ import java.lang.reflect.Field;
 
 final class FieldWriterInt64ValField<T>
         extends FieldWriterInt64<T> {
-    final Field field;
-
     FieldWriterInt64ValField(String name, int ordinal, long features, String format, String label, Field field) {
-        super(name, ordinal, features, format, label, long.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, features, format, label, long.class, field, null);
     }
 
     @Override

@@ -6,16 +6,8 @@ import java.lang.reflect.Field;
 
 final class FieldWriterInt32Field<T>
         extends FieldWriterInt32<T> {
-    final Field field;
-
     FieldWriterInt32Field(String name, int ordinal, long features, String format, String label, Field field) {
-        super(name, ordinal, features, format, label, Integer.class, Integer.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, features, format, label, Integer.class, Integer.class, field, null);
     }
 
     @Override

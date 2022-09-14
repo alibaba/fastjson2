@@ -9,8 +9,6 @@ import java.util.List;
 
 final class FieldWriterListField<T>
         extends FieldWriterList<T> {
-    final Field field;
-
     protected FieldWriterListField(
             String fieldName,
             Type itemType,
@@ -22,13 +20,7 @@ final class FieldWriterListField<T>
             Class fieldClass,
             Field field
     ) {
-        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, null);
     }
 
     @Override

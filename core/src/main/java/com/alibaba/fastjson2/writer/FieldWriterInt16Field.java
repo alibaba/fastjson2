@@ -6,16 +6,8 @@ import java.lang.reflect.Field;
 
 final class FieldWriterInt16Field<T>
         extends FieldWriterInt16<T> {
-    final Field field;
-
     FieldWriterInt16Field(String name, int ordinal, long features, String format, String label, Field field, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldClass);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, features, format, label, fieldClass, field, null);
     }
 
     @Override

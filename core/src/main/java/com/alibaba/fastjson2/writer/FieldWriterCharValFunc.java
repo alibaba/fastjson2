@@ -7,18 +7,11 @@ import java.lang.reflect.Method;
 
 final class FieldWriterCharValFunc
         extends FieldWriterImpl {
-    final Method method;
     final ToCharFunction function;
 
     FieldWriterCharValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToCharFunction function) {
-        super(fieldName, ordinal, features, format, label, char.class, char.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, char.class, char.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

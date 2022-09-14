@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
@@ -15,8 +17,19 @@ abstract class FieldWriterList<T>
     ObjectWriter listWriter;
     ObjectWriter itemObjectWriter;
 
-    FieldWriterList(String name, Type itemType, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass);
+    FieldWriterList(
+            String name,
+            Type itemType,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
 
         this.itemType = itemType == null ? Object.class : itemType;
         if (this.itemType instanceof Class) {

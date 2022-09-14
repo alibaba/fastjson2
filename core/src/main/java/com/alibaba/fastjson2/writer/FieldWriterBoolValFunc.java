@@ -5,18 +5,11 @@ import java.util.function.Predicate;
 
 final class FieldWriterBoolValFunc
         extends FieldWriterBoolVal {
-    final Method method;
     final Predicate function;
 
     protected FieldWriterBoolValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, Predicate function) {
-        super(fieldName, ordinal, features, format, label, Boolean.class, Boolean.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, Boolean.class, Boolean.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

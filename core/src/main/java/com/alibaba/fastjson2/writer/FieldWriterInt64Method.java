@@ -7,16 +7,8 @@ import java.lang.reflect.Method;
 
 final class FieldWriterInt64Method<T>
         extends FieldWriterInt64<T> {
-    final Method method;
-
     protected FieldWriterInt64Method(String fieldName, int ordinal, long features, String format, String label, Method method, Class fieldClass) {
-        super(fieldName, ordinal, features, format, label, fieldClass);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, ordinal, features, format, label, fieldClass, null, method);
     }
 
     @Override

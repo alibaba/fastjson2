@@ -10,8 +10,6 @@ import java.util.List;
 
 final class FieldWriterListMethod<T>
         extends FieldWriterList<T> {
-    final Method method;
-
     protected FieldWriterListMethod(
             String fieldName,
             Type itemType,
@@ -23,13 +21,7 @@ final class FieldWriterListMethod<T>
             Type fieldType,
             Class fieldClass
     ) {
-        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, null, method);
     }
 
     @Override

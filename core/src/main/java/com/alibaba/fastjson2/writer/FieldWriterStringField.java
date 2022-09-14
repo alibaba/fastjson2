@@ -8,7 +8,6 @@ import java.lang.reflect.Field;
 
 final class FieldWriterStringField<T>
         extends FieldWriterImpl<T> {
-    final Field field;
     final boolean symbol;
     final boolean trim;
     final boolean raw;
@@ -19,16 +18,10 @@ final class FieldWriterStringField<T>
             String format,
             String label,
             Field field) {
-        super(fieldName, ordinal, features, format, label, String.class, String.class);
-        this.field = field;
+        super(fieldName, ordinal, features, format, label, String.class, String.class, field, null);
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);
         this.raw = (features & FieldInfo.RAW_VALUE_MASK) != 0;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
     }
 
     @Override

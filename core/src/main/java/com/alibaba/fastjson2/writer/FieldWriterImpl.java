@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
@@ -25,7 +27,20 @@ abstract class FieldWriterImpl<T>
     final boolean fieldClassSerializable;
     JSONWriter.Path rootParentPath;
 
-    FieldWriterImpl(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
+    final Field field;
+    final Method method;
+
+    FieldWriterImpl(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
         this.name = name;
         this.ordinal = ordinal;
         this.format = format;
@@ -35,6 +50,8 @@ abstract class FieldWriterImpl<T>
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
         this.fieldClassSerializable = fieldClass != null && (Serializable.class.isAssignableFrom(fieldClass) || !Modifier.isFinal(fieldClass.getModifiers()));
+        this.field = field;
+        this.method = method;
 
         int nameLength = name.length();
         int utflen = nameLength + 3;
@@ -76,6 +93,16 @@ abstract class FieldWriterImpl<T>
         name.getChars(0, name.length(), nameWithColonUTF16, 1);
         nameWithColonUTF16[nameWithColonUTF16.length - 2] = '"';
         nameWithColonUTF16[nameWithColonUTF16.length - 1] = ':';
+    }
+
+    @Override
+    public Field getField() {
+        return field;
+    }
+
+    @Override
+    public Method getMethod() {
+        return method;
     }
 
     @Override

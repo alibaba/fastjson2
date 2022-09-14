@@ -9,7 +9,6 @@ import java.util.function.Function;
 
 final class FieldWriterListFunc<T>
         extends FieldWriterList<T> {
-    final Method method;
     final Function<T, List> function;
 
     FieldWriterListFunc(
@@ -24,14 +23,8 @@ final class FieldWriterListFunc<T>
             Type fieldType,
             Class fieldClass
     ) {
-        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass);
-        this.method = method;
+        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.SymbolTable;
 import com.alibaba.fastjson2.util.Fnv;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 abstract class FieldWriterEnum
@@ -16,8 +18,17 @@ abstract class FieldWriterEnum
     final Enum[] enumConstants;
     final long[] hashCodes;
 
-    protected FieldWriterEnum(String name, int ordinal, long features, String format, String label, Class<? extends Enum> enumType) {
-        super(name, ordinal, features, format, label, enumType, enumType);
+    protected FieldWriterEnum(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Class<? extends Enum> enumType,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, enumType, enumType, field, method);
 
         this.enumType = enumType;
         this.enumConstants = enumType.getEnumConstants();

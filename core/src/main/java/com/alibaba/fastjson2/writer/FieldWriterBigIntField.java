@@ -8,16 +8,8 @@ import java.math.BigInteger;
 
 final class FieldWriterBigIntField<T>
         extends FieldWriterImpl<T> {
-    final Field field;
-
     protected FieldWriterBigIntField(String name, int ordinal, long features, String format, String label, Field field) {
-        super(name, ordinal, features, format, label, BigInteger.class, BigInteger.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, features, format, label, BigInteger.class, BigInteger.class, field, null);
     }
 
     @Override

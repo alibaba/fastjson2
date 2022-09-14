@@ -9,8 +9,6 @@ import java.util.Date;
 
 final class FieldWriterDateMethod<T>
         extends FieldWriterDate<T> {
-    final Method method;
-
     protected FieldWriterDateMethod(
             String fieldName,
             int ordinal,
@@ -20,13 +18,7 @@ final class FieldWriterDateMethod<T>
             Class fieldClass,
             Method method
     ) {
-        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass, null, method);
     }
 
     @Override

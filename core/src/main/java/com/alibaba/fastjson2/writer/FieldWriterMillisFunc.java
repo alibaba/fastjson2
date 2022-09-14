@@ -7,7 +7,6 @@ import java.util.function.ToLongFunction;
 
 final class FieldWriterMillisFunc<T>
         extends FieldWriterDate<T> {
-    final Method method;
     final ToLongFunction function;
 
     FieldWriterMillisFunc(String fieldName,
@@ -18,14 +17,8 @@ final class FieldWriterMillisFunc<T>
             Method method,
             ToLongFunction function
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, label, long.class, long.class);
-        this.method = method;
+        super(fieldName, ordinal, features, dateTimeFormat, label, long.class, long.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

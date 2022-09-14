@@ -7,16 +7,8 @@ import java.lang.reflect.Field;
 
 final class FieldWriterDoubleValField<T>
         extends FieldWriterImpl<T> {
-    final Field field;
-
     FieldWriterDoubleValField(String name, int ordinal, String format, String label, Field field) {
-        super(name, ordinal, 0, format, label, double.class, double.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, 0, format, label, double.class, double.class, field, null);
     }
 
     @Override
