@@ -33,7 +33,7 @@ public class DateWriteClassNameTest {
         bean.date = date;
 
         String str = JSON.toJSONString(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.NotWriteRootClassName);
-        assertEquals("{\"date\":\"2011-12-18T00:23:07.429\"}", str);
+        assertEquals("{\"date\":\"2011-12-18 00:23:07.429\"}", str);
 
         Date date1 = (Date) JSON.parseObject(str, Bean.class).date;
         assertEquals(date.getTime(), date1.getTime());

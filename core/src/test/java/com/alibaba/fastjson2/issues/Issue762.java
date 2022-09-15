@@ -13,9 +13,9 @@ public class Issue762 {
     public void test() {
         TalkRecord taskRecord = new TalkRecord();
         taskRecord.setUpdateTime(new Date(1663269881438L));
-        assertEquals("{\"updateTime\":\"2022-09-16T03:24:41.438\"}", JSON.toJSONString(taskRecord));
-        assertEquals("\"2022-09-16T03:24:41.438+08:00\"", JSON.toJSONString(taskRecord.getUpdateTime()));
-        assertEquals("\"2022-09-16T03:24:41.438+08:00\"", JSON.toJSONString(taskRecord.getUpdateTime(), JSONWriter.Feature.OptimizedForAscii));
+        assertEquals("{\"updateTime\":\"2022-09-16 03:24:41.438\"}", JSON.toJSONString(taskRecord));
+        assertEquals("\"2022-09-16 03:24:41.438\"", JSON.toJSONString(taskRecord.getUpdateTime()));
+        assertEquals("\"2022-09-16 03:24:41.438\"", JSON.toJSONString(taskRecord.getUpdateTime(), JSONWriter.Feature.OptimizedForAscii));
     }
 
     public class TalkRecord {

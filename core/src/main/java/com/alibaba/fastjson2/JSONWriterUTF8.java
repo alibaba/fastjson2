@@ -1410,16 +1410,16 @@ class JSONWriterUTF8
 
         int yearSize = IOUtils.stringSize(year);
         int len = 8 + yearSize;
-        byte[] chars = new byte[len];
-        chars[0] = '"';
-        Arrays.fill(chars, 1, len - 1, (byte) '0');
-        IOUtils.getChars(year, yearSize + 1, chars);
-        chars[yearSize + 1] = '-';
-        IOUtils.getChars(month, yearSize + 4, chars);
-        chars[yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-        chars[len - 1] = '"';
-        writeRaw(chars);
+        ensureCapacity(off + len);
+        bytes[off] = (byte) quote;
+        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
+        IOUtils.getChars(year, off + yearSize + 1, bytes);
+        bytes[off + yearSize + 1] = '-';
+        IOUtils.getChars(month, off + yearSize + 4, bytes);
+        bytes[off + yearSize + 4] = '-';
+        IOUtils.getChars(dayOfMonth, off + yearSize + 7, bytes);
+        bytes[off + len - 1] = (byte) quote;
+        off += len;
     }
 
     @Override
@@ -1466,65 +1466,65 @@ class JSONWriterUTF8
             small = nano;
         }
 
-        byte[] chars = new byte[len];
-        chars[0] = '"';
-        Arrays.fill(chars, 1, len - 1, (byte) '0');
-        IOUtils.getChars(year, yearSize + 1, chars);
-        chars[yearSize + 1] = '-';
-        IOUtils.getChars(month, yearSize + 4, chars);
-        chars[yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-        chars[yearSize + 7] = ' ';
-        IOUtils.getChars(hour, yearSize + 10, chars);
-        chars[yearSize + 10] = ':';
-        IOUtils.getChars(minute, yearSize + 13, chars);
-        chars[yearSize + 13] = ':';
-        IOUtils.getChars(second, yearSize + 16, chars);
-        if (small != 0) {
-            chars[yearSize + 16] = '.';
-            IOUtils.getChars(small, len - 1, chars);
-        }
-        chars[len - 1] = '"';
+        ensureCapacity(off + len);
 
-        writeRaw(chars);
+        bytes[off] = (byte) quote;
+        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
+        IOUtils.getChars(year, off + yearSize + 1, bytes);
+        bytes[off + yearSize + 1] = '-';
+        IOUtils.getChars(month, off + yearSize + 4, bytes);
+        bytes[off + yearSize + 4] = '-';
+        IOUtils.getChars(dayOfMonth, off + yearSize + 7, bytes);
+        bytes[off + yearSize + 7] = ' ';
+        IOUtils.getChars(hour, off + yearSize + 10, bytes);
+        bytes[off + yearSize + 10] = ':';
+        IOUtils.getChars(minute, off + yearSize + 13, bytes);
+        bytes[off + yearSize + 13] = ':';
+        IOUtils.getChars(second, off + yearSize + 16, bytes);
+        if (small != 0) {
+            bytes[off + yearSize + 16] = '.';
+            IOUtils.getChars(small, off + len - 1, bytes);
+        }
+        bytes[off + len - 1] = (byte) quote;
+
+        off += len;
     }
 
     @Override
     public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
-        byte[] chars = new byte[12];
+        ensureCapacity(off + 12);
 
-        chars[0] = '"';
-        chars[1] = (byte) (year / 1000 + '0');
-        chars[2] = (byte) ((year / 100) % 10 + '0');
-        chars[3] = (byte) ((year / 10) % 10 + '0');
-        chars[4] = (byte) (year % 10 + '0');
-        chars[5] = '-';
-        chars[6] = (byte) (month / 10 + '0');
-        chars[7] = (byte) (month % 10 + '0');
-        chars[8] = '-';
-        chars[9] = (byte) (dayOfMonth / 10 + '0');
-        chars[10] = (byte) (dayOfMonth % 10 + '0');
-        chars[11] = '"';
-
-        writeRaw(chars);
+        bytes[off] = (byte) quote;
+        bytes[off + 1] = (byte) (year / 1000 + '0');
+        bytes[off + 2] = (byte) ((year / 100) % 10 + '0');
+        bytes[off + 3] = (byte) ((year / 10) % 10 + '0');
+        bytes[off + 4] = (byte) (year % 10 + '0');
+        bytes[off + 5] = '-';
+        bytes[off + 6] = (byte) (month / 10 + '0');
+        bytes[off + 7] = (byte) (month % 10 + '0');
+        bytes[off + 8] = '-';
+        bytes[off + 9] = (byte) (dayOfMonth / 10 + '0');
+        bytes[off + 10] = (byte) (dayOfMonth % 10 + '0');
+        bytes[off + 11] = (byte) quote;
+        off += 12;
     }
 
     @Override
     public void writeTimeHHMMSS8(int hour, int minute, int second) {
-        byte[] chars = new byte[10];
+        ensureCapacity(off + 10);
 
-        chars[0] = '"';
-        chars[1] = (byte) (hour / 10 + '0');
-        chars[2] = (byte) (hour % 10 + '0');
-        chars[3] = ':';
-        chars[4] = (byte) (minute / 10 + '0');
-        chars[5] = (byte) (minute % 10 + '0');
-        chars[6] = ':';
-        chars[7] = (byte) (second / 10 + '0');
-        chars[8] = (byte) (second % 10 + '0');
-        chars[9] = '"';
+        bytes[off] = (byte) quote;
+        bytes[off + 1] = (byte) (hour / 10 + '0');
+        bytes[off + 2] = (byte) (hour % 10 + '0');
+        bytes[off + 3] = ':';
+        bytes[off + 4] = (byte) (minute / 10 + '0');
+        bytes[off + 5] = (byte) (minute % 10 + '0');
+        bytes[off + 6] = ':';
+        bytes[off + 7] = (byte) (second / 10 + '0');
+        bytes[off + 8] = (byte) (second % 10 + '0');
+        bytes[off + 9] = (byte) quote;
 
-        writeRaw(chars);
+        off += 10;
     }
 
     @Override
@@ -1567,21 +1567,21 @@ class JSONWriterUTF8
             small = nano;
         }
 
-        byte[] chars = new byte[len];
-        chars[0] = '"';
-        Arrays.fill(chars, 1, chars.length - 1, (byte) '0');
-        IOUtils.getChars(hour, 3, chars);
-        chars[3] = ':';
-        IOUtils.getChars(minute, 6, chars);
-        chars[6] = ':';
-        IOUtils.getChars(second, 9, chars);
+        ensureCapacity(off + len);
+        bytes[off] = (byte) quote;
+        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
+        IOUtils.getChars(hour, off + 3, bytes);
+        bytes[off + 3] = ':';
+        IOUtils.getChars(minute, off + 6, bytes);
+        bytes[off + 6] = ':';
+        IOUtils.getChars(second, off + 9, bytes);
         if (small != 0) {
-            chars[9] = '.';
-            IOUtils.getChars(small, len - 1, chars);
+            bytes[off + 9] = '.';
+            IOUtils.getChars(small, off + len - 1, bytes);
         }
-        chars[len - 1] = '"';
+        bytes[off + len - 1] = (byte) quote;
 
-        writeRaw(chars);
+        off += len;
     }
 
     @Override
@@ -1645,34 +1645,33 @@ class JSONWriterUTF8
             small = nano;
         }
 
-        byte[] chars = new byte[len];
-        chars[0] = '"';
-        Arrays.fill(chars, 1, chars.length - 1, (byte) '0');
-        IOUtils.getChars(year, yearSize + 1, chars);
-        chars[yearSize + 1] = '-';
-        IOUtils.getChars(month, yearSize + 4, chars);
-        chars[yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-        chars[yearSize + 7] = 'T';
-        IOUtils.getChars(hour, yearSize + 10, chars);
-        chars[yearSize + 10] = ':';
-        IOUtils.getChars(minute, yearSize + 13, chars);
-        chars[yearSize + 13] = ':';
-        IOUtils.getChars(second, yearSize + 16, chars);
+        ensureCapacity(off + len);
+        bytes[off] = (byte) quote;
+        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
+        IOUtils.getChars(year, off + yearSize + 1, bytes);
+        bytes[off + yearSize + 1] = '-';
+        IOUtils.getChars(month, off + yearSize + 4, bytes);
+        bytes[off + yearSize + 4] = '-';
+        IOUtils.getChars(dayOfMonth, off + yearSize + 7, bytes);
+        bytes[off + yearSize + 7] = 'T';
+        IOUtils.getChars(hour, off + yearSize + 10, bytes);
+        bytes[off + yearSize + 10] = ':';
+        IOUtils.getChars(minute, off + yearSize + 13, bytes);
+        bytes[off + yearSize + 13] = ':';
+        IOUtils.getChars(second, off + yearSize + 16, bytes);
         if (small != 0) {
-            chars[yearSize + 16] = '.';
-            IOUtils.getChars(small, len - 1 - zoneSize, chars);
+            bytes[off + yearSize + 16] = '.';
+            IOUtils.getChars(small, off + len - 1 - zoneSize, bytes);
         }
         if (zoneSize == 1) {
-            chars[len - 2] = 'Z';
+            bytes[off + len - 2] = 'Z';
         } else {
-            chars[len - zoneSize - 1] = '[';
-            zoneId.getBytes(0, zoneId.length(), chars, len - zoneSize);
-            chars[len - 2] = ']';
+            bytes[off + len - zoneSize - 1] = '[';
+            zoneId.getBytes(0, zoneId.length(), bytes, off + len - zoneSize);
+            bytes[off + len - 2] = ']';
         }
-        chars[len - 1] = '"';
-
-        writeRaw(chars);
+        bytes[off + len - 1] = (byte) quote;
+        off += len;
     }
 
     @Override
@@ -1746,69 +1745,68 @@ class JSONWriterUTF8
         }
         int offset = offsetSeconds / 3600;
         int len = 21 + millislen + zonelen;
-        byte[] chars = new byte[len];
+        ensureCapacity(off + len);
 
-        chars[0] = '"';
-        chars[1] = (byte) (year / 1000 + '0');
-        chars[2] = (byte) ((year / 100) % 10 + '0');
-        chars[3] = (byte) ((year / 10) % 10 + '0');
-        chars[4] = (byte) (year % 10 + '0');
-        chars[5] = '-';
-        chars[6] = (byte) (month / 10 + '0');
-        chars[7] = (byte) (month % 10 + '0');
-        chars[8] = '-';
-        chars[9] = (byte) (dayOfMonth / 10 + '0');
-        chars[10] = (byte) (dayOfMonth % 10 + '0');
-        chars[11] = 'T';
-        chars[12] = (byte) (hour / 10 + '0');
-        chars[13] = (byte) (hour % 10 + '0');
-        chars[14] = ':';
-        chars[15] = (byte) (minute / 10 + '0');
-        chars[16] = (byte) (minute % 10 + '0');
-        chars[17] = ':';
-        chars[18] = (byte) (second / 10 + '0');
-        chars[19] = (byte) (second % 10 + '0');
+        bytes[off] = '"';
+        bytes[off + 1] = (byte) (year / 1000 + '0');
+        bytes[off + 2] = (byte) ((year / 100) % 10 + '0');
+        bytes[off + 3] = (byte) ((year / 10) % 10 + '0');
+        bytes[off + 4] = (byte) (year % 10 + '0');
+        bytes[off + 5] = '-';
+        bytes[off + 6] = (byte) (month / 10 + '0');
+        bytes[off + 7] = (byte) (month % 10 + '0');
+        bytes[off + 8] = '-';
+        bytes[off + 9] = (byte) (dayOfMonth / 10 + '0');
+        bytes[off + 10] = (byte) (dayOfMonth % 10 + '0');
+        bytes[off + 11] = timeZone ? (byte) 'T' : (byte) ' ';
+        bytes[off + 12] = (byte) (hour / 10 + '0');
+        bytes[off + 13] = (byte) (hour % 10 + '0');
+        bytes[off + 14] = ':';
+        bytes[off + 15] = (byte) (minute / 10 + '0');
+        bytes[off + 16] = (byte) (minute % 10 + '0');
+        bytes[off + 17] = ':';
+        bytes[off + 18] = (byte) (second / 10 + '0');
+        bytes[off + 19] = (byte) (second % 10 + '0');
         if (millislen > 0) {
-            chars[20] = '.';
-            Arrays.fill(chars, 21, 20 + millislen, (byte) '0');
+            bytes[off + 20] = '.';
+            Arrays.fill(bytes, off + 21, off + 20 + millislen, (byte) '0');
             if (millis < 10) {
-                IOUtils.getChars(millis, 20 + millislen, chars);
+                IOUtils.getChars(millis, off + 20 + millislen, bytes);
             } else {
                 if (millis % 100 == 0) {
-                    IOUtils.getChars(millis / 100, 20 + millislen, chars);
+                    IOUtils.getChars(millis / 100, off + 20 + millislen, bytes);
                 } else if (millis % 10 == 0) {
-                    IOUtils.getChars(millis / 10, 20 + millislen, chars);
+                    IOUtils.getChars(millis / 10, off + 20 + millislen, bytes);
                 } else {
-                    IOUtils.getChars(millis, 20 + millislen, chars);
+                    IOUtils.getChars(millis, off + 20 + millislen, bytes);
                 }
             }
         }
 
         if (timeZone) {
             if (offsetSeconds == 0) {
-                chars[20 + millislen] = 'Z';
+                bytes[off + 20 + millislen] = 'Z';
             } else {
                 int offsetAbs = Math.abs(offset);
 
                 if (offset >= 0) {
-                    chars[20 + millislen] = '+';
+                    bytes[off + 20 + millislen] = '+';
                 } else {
-                    chars[20 + millislen] = '-';
+                    bytes[off + 20 + millislen] = '-';
                 }
-                chars[20 + millislen + 1] = '0';
-                IOUtils.getChars(offsetAbs, 20 + millislen + 3, chars);
-                chars[20 + millislen + 3] = ':';
-                chars[20 + millislen + 4] = '0';
+                bytes[off + 20 + millislen + 1] = '0';
+                IOUtils.getChars(offsetAbs, off + 20 + millislen + 3, bytes);
+                bytes[off + 20 + millislen + 3] = ':';
+                bytes[off + 20 + millislen + 4] = '0';
                 int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
                 if (offsetMinutes < 0) {
                     offsetMinutes = -offsetMinutes;
                 }
-                IOUtils.getChars(offsetMinutes, 20 + millislen + zonelen, chars);
+                IOUtils.getChars(offsetMinutes, off + 20 + millislen + zonelen, bytes);
             }
         }
-        chars[chars.length - 1] = '"';
-
-        writeRaw(chars);
+        bytes[off + len - 1] = '"';
+        off += len;
     }
 
     @Override

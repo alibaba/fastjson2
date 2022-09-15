@@ -174,7 +174,7 @@ final class ObjectWriterImplDate
                     jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
                 }
             } else {
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, mos, offsetSeconds, true);
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, mos, offsetSeconds, formatISO8601);
             }
             return;
         }
