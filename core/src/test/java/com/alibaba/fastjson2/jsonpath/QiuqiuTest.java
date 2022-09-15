@@ -31,4 +31,30 @@ public class QiuqiuTest {
     public static class CsiLive {
         public int id;
     }
+
+    @Test
+    public void test1() {
+        Root1 csiObject = new Root1();
+        JSONPath.set(csiObject, "$.live.id", "123");
+        assertEquals("{\"live\":{\"id\":123}}", JSON.toJSONString(csiObject));
+    }
+
+    public static class Root1 {
+        public CsiLive live;
+    }
+
+    @Test
+    public void test2() {
+        Root2 csiObject = new Root2();
+        JSONPath.set(csiObject, "$.item.live.id", "123");
+        assertEquals("{\"item\":{\"live\":{\"id\":123}}}", JSON.toJSONString(csiObject));
+    }
+
+    public static class Root2 {
+        public Item item;
+    }
+
+    public static class Item {
+        public CsiLive live;
+    }
 }
