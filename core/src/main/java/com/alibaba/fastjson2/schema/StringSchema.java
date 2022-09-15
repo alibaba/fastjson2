@@ -110,13 +110,13 @@ final class StringSchema
 
             if (pattern != null) {
                 if (!pattern.matcher(str).find()) {
-                    return new ValidateResult(false, "pattern not match, expect %, but %s", patternFormat, str);
+                    return new ValidateResult(false, "pattern not match, expect %s, but %s", patternFormat, str);
                 }
             }
 
             if (formatValidator != null) {
                 if (!formatValidator.isValid(str)) {
-                    return new ValidateResult(false, "format not match, expect %, but %s", format, str);
+                    return new ValidateResult(false, "format not match, expect %s, but %s", format, str);
                 }
             }
 
