@@ -2484,6 +2484,19 @@ public abstract class JSONPath {
                     ((Map) root).put(((NameSegment) first).name, emptyValue);
                 } else if (root instanceof List && first instanceof IndexSegment) {
                     ((List) root).set(((IndexSegment) first).index, emptyValue);
+                } else if (root != null) {
+                    Class<?> parentObjectClass = root.getClass();
+                    JSONReader.Context readerContext = getReaderContext();
+                    ObjectReader<?> objectReader = readerContext.getObjectReader(parentObjectClass);
+                    if (first instanceof NameSegment) {
+                        FieldReader fieldReader = objectReader.getFieldReader(((NameSegment) first).nameHashCode);
+                        if (fieldReader != null) {
+                            ObjectReader fieldObjectReader = fieldReader.getObjectReader(readerContext);
+                            Object fieldValue = fieldObjectReader.createInstance();
+                            fieldReader.accept(root, fieldValue);
+                            context0.value = fieldValue;
+                        }
+                    }
                 }
             }
 
