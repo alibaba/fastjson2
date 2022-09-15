@@ -2179,7 +2179,7 @@ class JSONReaderJSONB
                         break;
                     case 6:
                         nameValue0
-                                = (((long) bytes[offset] + 5) << 40)
+                                = (((long) bytes[offset + 5]) << 40)
                                 + ((bytes[offset + 4] & 0xFFL) << 32)
                                 + ((bytes[offset + 3] & 0xFFL) << 24)
                                 + ((bytes[offset + 2] & 0xFFL) << 16)
