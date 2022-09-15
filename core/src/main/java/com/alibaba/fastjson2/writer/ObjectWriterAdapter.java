@@ -429,7 +429,16 @@ public class ObjectWriterAdapter<T>
                 continue;
             }
 
-            Object fieldValue = fieldWriter.getFieldValue(object);
+            Object fieldValue;
+            try {
+                fieldValue = fieldWriter.getFieldValue(object);
+            } catch (Throwable e) {
+                if ((context.getFeatures() & JSONWriter.Feature.IgnoreErrorGetter.mask) != 0) {
+                    continue;
+                }
+                throw e;
+            }
+
             if (fieldValue == null && !jsonWriter.isWriteNulls()) {
                 continue;
             }
