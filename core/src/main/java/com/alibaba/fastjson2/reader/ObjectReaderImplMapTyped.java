@@ -264,6 +264,26 @@ class ObjectReaderImplMapTyped
                 name = null;
             } else if (keyType == String.class) {
                 name = jsonReader.readFieldName();
+                if (i == 0
+                        && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                        && name.equals(getTypeKey())
+                ) {
+                    long typeHashCode = jsonReader.readTypeHashCode();
+                    ObjectReader objectReaderAutoType = context.getObjectReaderAutoType(typeHashCode);
+                    if (objectReaderAutoType == null) {
+                        String typeName = jsonReader.getString();
+                        objectReaderAutoType = context.getObjectReaderAutoType(typeName, mapType, features);
+                    }
+                    if (objectReaderAutoType != null) {
+                        if (objectReaderAutoType instanceof ObjectReaderImplMap) {
+                            if (!object.getClass().equals(((ObjectReaderImplMap) objectReaderAutoType).instanceType)) {
+                                object = (Map) objectReaderAutoType.createInstance(features);
+                            }
+                        }
+                    }
+                    continue;
+                }
+
                 if (name == null) {
                     name = jsonReader.readString();
                     if (!jsonReader.nextIfMatch(':')) {
