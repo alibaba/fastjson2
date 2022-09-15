@@ -8,6 +8,8 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 final class JSONWriterPretty
@@ -113,6 +115,16 @@ final class JSONWriterPretty
     @Override
     public void writeTimeHHMMSS8(int hour, int minute, int second) {
         jsonWriter.writeTimeHHMMSS8(hour, minute, second);
+    }
+
+    @Override
+    public void writeLocalTime(LocalTime time) {
+        jsonWriter.writeLocalTime(time);
+    }
+
+    @Override
+    public void writeZonedDateTime(ZonedDateTime dateTime) {
+        jsonWriter.writeZonedDateTime(dateTime);
     }
 
     @Override
