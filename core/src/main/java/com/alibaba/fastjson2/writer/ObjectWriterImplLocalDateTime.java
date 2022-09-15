@@ -58,7 +58,7 @@ final class ObjectWriterImplLocalDateTime
             int second = dateTime.getSecond();
             int nano = dateTime.getNano() / 1000_000;
             int offsetSeconds = ctx.getZoneId().getRules().getOffset(dateTime).getTotalSeconds();
-            jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds);
+            jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds, true);
             return;
         }
 

@@ -217,7 +217,7 @@ abstract class FieldWriterDate<T>
                         .getOffset(instant)
                         .getTotalSeconds();
                 writeFieldName(jsonWriter);
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds);
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, false);
                 return;
             }
 
@@ -324,7 +324,7 @@ abstract class FieldWriterDate<T>
                 int second = zdt.getSecond();
                 int millis = zdt.getNano() / 1000_000;
                 int offsetSeconds = zdt.getOffset().getTotalSeconds();
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds);
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, true);
                 return;
             }
 

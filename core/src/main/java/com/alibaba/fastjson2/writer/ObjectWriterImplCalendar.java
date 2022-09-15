@@ -65,7 +65,7 @@ final class ObjectWriterImplCalendar
             int minute = zdt.getMinute();
             int second = zdt.getSecond();
             int nano = zdt.getNano() / (1000 * 1000);
-            jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds);
+            jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds, true);
             return;
         }
 
@@ -82,7 +82,7 @@ final class ObjectWriterImplCalendar
             if (nano == 0) {
                 jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
             } else {
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano / 1000_000, offsetSeconds);
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano / 1000_000, offsetSeconds, false);
             }
         } else {
             DateTimeFormatter dateFormatter;

@@ -237,7 +237,7 @@ public class JdbcSupport {
                 int minute = zdt.getMinute();
                 int second = zdt.getSecond();
                 int nano = 0;
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds);
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds, true);
                 return;
             }
 
@@ -349,7 +349,7 @@ public class JdbcSupport {
                 int minute = zdt.getMinute();
                 int second = zdt.getSecond();
                 int nano = zdt.getNano() / 1000_000;
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds);
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds, true);
                 return;
             }
 
@@ -381,7 +381,7 @@ public class JdbcSupport {
                 if (nanos == 0) {
                     jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
                 } else if (nanos % 1000_000 == 0) {
-                    jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nanos / 1000_000, offsetSeconds);
+                    jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nanos / 1000_000, offsetSeconds, false);
                 } else {
                     jsonWriter.writeLocalDateTime(zdt.toLocalDateTime());
                 }

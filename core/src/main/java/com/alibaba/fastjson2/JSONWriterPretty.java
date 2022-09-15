@@ -99,8 +99,10 @@ final class JSONWriterPretty
             int minute,
             int second,
             int millis,
-            int offsetSeconds) {
-        jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds);
+            int offsetSeconds,
+            boolean timeZone
+    ) {
+        jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, timeZone);
     }
 
     @Override

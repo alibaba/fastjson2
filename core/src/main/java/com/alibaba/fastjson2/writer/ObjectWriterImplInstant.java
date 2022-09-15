@@ -62,7 +62,8 @@ final class ObjectWriterImplInstant
                     zdt.getMinute(),
                     zdt.getSecond(),
                     zdt.getNano() / 1000_000,
-                    zdt.getOffset().getTotalSeconds()
+                    zdt.getOffset().getTotalSeconds(),
+                    true
             );
             return;
         }
