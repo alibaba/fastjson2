@@ -1884,7 +1884,8 @@ final class JSONWriterJSONB
             int minute,
             int second,
             int millis,
-            int offsetSeconds
+            int offsetSeconds,
+            boolean timeZone
     ) {
         throw new JSONException("unsupported operation");
     }

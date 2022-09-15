@@ -59,7 +59,7 @@ public class JSONWriterJSONBTest {
         assertThrows(JSONException.class, () -> jsonWriter.writeRaw(""));
         assertThrows(JSONException.class, () -> jsonWriter.writeComma());
         assertThrows(JSONException.class, () -> jsonWriter.write0('A'));
-        assertThrows(JSONException.class, () -> jsonWriter.writeDateTimeISO8601(2001, 1, 1, 12, 13, 14, 0, 0));
+        assertThrows(JSONException.class, () -> jsonWriter.writeDateTimeISO8601(2001, 1, 1, 12, 13, 14, 0, 0, true));
         assertThrows(JSONException.class, () -> jsonWriter.writeDateYYYMMDD10(2001, 1, 1));
         assertThrows(JSONException.class, () -> jsonWriter.writeTimeHHMMSS8(12, 13, 14));
         assertThrows(JSONException.class, () -> jsonWriter.writeBase64(new byte[0]));

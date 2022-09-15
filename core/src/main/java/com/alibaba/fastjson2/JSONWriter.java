@@ -1158,7 +1158,8 @@ public abstract class JSONWriter
             int minute,
             int second,
             int millis,
-            int offsetSeconds
+            int offsetSeconds,
+            boolean timeZone
     );
 
     public abstract void writeDateYYYMMDD10(int year, int month, int dayOfMonth);

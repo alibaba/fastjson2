@@ -1451,7 +1451,8 @@ class JSONWriterUTF16
             int minute,
             int second,
             int millis,
-            int offsetSeconds
+            int offsetSeconds,
+            boolean timeZone
     ) {
         int millislen;
         if (millis == 0) {
@@ -1467,7 +1468,12 @@ class JSONWriterUTF16
                 millislen = 4;
             }
         }
-        int zonelen = offsetSeconds == 0 ? 1 : 6;
+        int zonelen;
+        if (timeZone) {
+            zonelen = offsetSeconds == 0 ? 1 : 6;
+        } else {
+            zonelen = 0;
+        }
         int offset = offsetSeconds / 3600;
         int len = 21 + millislen + zonelen;
         char[] chars = new char[len];
@@ -1507,25 +1513,27 @@ class JSONWriterUTF16
                 }
             }
         }
-        if (offsetSeconds == 0) {
-            chars[20 + millislen] = 'Z';
-        } else {
-            int offsetAbs = Math.abs(offset);
-
-            if (offset >= 0) {
-                chars[20 + millislen] = '+';
+        if (timeZone) {
+            if (offsetSeconds == 0) {
+                chars[20 + millislen] = 'Z';
             } else {
-                chars[20 + millislen] = '-';
+                int offsetAbs = Math.abs(offset);
+
+                if (offset >= 0) {
+                    chars[20 + millislen] = '+';
+                } else {
+                    chars[20 + millislen] = '-';
+                }
+                chars[20 + millislen + 1] = '0';
+                IOUtils.getChars(offsetAbs, 20 + millislen + 3, chars);
+                chars[20 + millislen + 3] = ':';
+                chars[20 + millislen + 4] = '0';
+                int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
+                if (offsetMinutes < 0) {
+                    offsetMinutes = -offsetMinutes;
+                }
+                IOUtils.getChars(offsetMinutes, 20 + millislen + zonelen, chars);
             }
-            chars[20 + millislen + 1] = '0';
-            IOUtils.getChars(offsetAbs, 20 + millislen + 3, chars);
-            chars[20 + millislen + 3] = ':';
-            chars[20 + millislen + 4] = '0';
-            int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
-            if (offsetMinutes < 0) {
-                offsetMinutes = -offsetMinutes;
-            }
-            IOUtils.getChars(offsetMinutes, 20 + millislen + zonelen, chars);
         }
         chars[chars.length - 1] = '"';
 

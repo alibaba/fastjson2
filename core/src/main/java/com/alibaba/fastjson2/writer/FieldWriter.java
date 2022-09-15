@@ -395,7 +395,7 @@ public interface FieldWriter<T>
                 int second = zdt.getSecond();
                 int milliSeconds = zdt.getNano() / 1000_000;
                 int offsetSeconds = zdt.getOffset().getTotalSeconds();
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, milliSeconds, offsetSeconds);
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, milliSeconds, offsetSeconds, true);
                 return;
             }
 
