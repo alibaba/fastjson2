@@ -90,7 +90,7 @@ final class JSONReaderJSONBUF
                         break;
                     case 6:
                         nameValue0
-                                = (((long) bytes[offset] + 5) << 40)
+                                = (((long) bytes[offset + 5]) << 40)
                                 + ((bytes[offset + 4] & 0xFFL) << 32)
                                 + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
                         break;
