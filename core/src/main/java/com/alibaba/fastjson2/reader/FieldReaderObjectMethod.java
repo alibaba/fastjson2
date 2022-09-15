@@ -89,6 +89,19 @@ class FieldReaderObjectMethod<T>
         return fieldObjectReader = jsonReader.getObjectReader(fieldType);
     }
 
+    public ObjectReader getObjectReader(JSONReader.Context context) {
+        if (fieldObjectReader != null) {
+            return fieldObjectReader;
+        }
+
+        ObjectReader formattedObjectReader = FieldReaderObject.createFormattedObjectReader(fieldType, fieldClass, format, null);
+        if (formattedObjectReader != null) {
+            return fieldObjectReader = formattedObjectReader;
+        }
+
+        return fieldObjectReader = context.getObjectReader(fieldType);
+    }
+
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         ObjectReader objectReader;

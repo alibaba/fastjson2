@@ -2738,7 +2738,26 @@ public abstract class JSONPath {
                     if (parentObject instanceof Map && segment instanceof NameSegment) {
                         ((Map) parentObject).put(((NameSegment) segment).name, emptyValue);
                     } else if (parentObject instanceof List && segment instanceof IndexSegment) {
-                        ((List) parentObject).set(((IndexSegment) segment).index, emptyValue);
+                        List list = (List) parentObject;
+                        int index = ((IndexSegment) segment).index;
+                        if (index == list.size()) {
+                            list.add(emptyValue);
+                        } else {
+                            list.set(index, emptyValue);
+                        }
+                    } else if (parentObject != null) {
+                        Class<?> parentObjectClass = parentObject.getClass();
+                        JSONReader.Context readerContext = getReaderContext();
+                        ObjectReader<?> objectReader = readerContext.getObjectReader(parentObjectClass);
+                        if (segment instanceof NameSegment) {
+                            FieldReader fieldReader = objectReader.getFieldReader(((NameSegment) segment).nameHashCode);
+                            if (fieldReader != null) {
+                                ObjectReader fieldObjectReader = fieldReader.getObjectReader(readerContext);
+                                Object fieldValue = fieldObjectReader.createInstance();
+                                fieldReader.accept(parentObject, fieldValue);
+                                context.value = fieldValue;
+                            }
+                        }
                     }
                 }
             }

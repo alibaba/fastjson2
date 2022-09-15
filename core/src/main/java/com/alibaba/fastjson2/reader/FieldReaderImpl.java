@@ -107,6 +107,28 @@ abstract class FieldReaderImpl<T>
         return reader = jsonReader.getObjectReader(fieldType);
     }
 
+    public ObjectReader getObjectReader(JSONReader.Context context) {
+        if (reader != null) {
+            return reader;
+        }
+
+        if (format != null && !format.isEmpty()) {
+            String typeName = fieldType.getTypeName();
+            switch (typeName) {
+                case "java.sql.Time":
+                    return reader = JdbcSupport.createTimeReader((Class) fieldType, format, locale);
+                case "java.sql.Timestamp":
+                    return reader = JdbcSupport.createTimestampReader((Class) fieldType, format, locale);
+                case "java.sql.Date":
+                    return JdbcSupport.createDateReader((Class) fieldType, format, locale);
+                default:
+                    break;
+            }
+        }
+
+        return reader = context.getObjectReader(fieldType);
+    }
+
     @Override
     public JSONSchema getSchema() {
         return schema;
