@@ -594,6 +594,10 @@ public class ObjectWriterBaseModule
                     char[] chars = fieldName.toCharArray();
                     chars[0] = (char) (firstChar + 32);
                     fieldName0 = new String(chars);
+                } else if (firstChar >= 'a' && firstChar <= 'z' && fieldName.length() > 2 && fieldName.charAt(1) == '_') {
+                    char[] chars = fieldName.toCharArray();
+                    chars[0] = (char) (firstChar - 32);
+                    fieldName0 = new String(chars);
                 } else {
                     fieldName0 = null;
                 }

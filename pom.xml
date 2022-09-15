@@ -600,7 +600,8 @@
                                 com/alibaba/fastjson/issue_2300/Issue*.java,
                                 com/alibaba/fastjson2/naming/*.java,
                                 com/alibaba/json/bvt/**/*.java,
-                                com/alibaba/fastjson2/issues/Issue485.java
+                                com/alibaba/fastjson2/issues/Issue485.java,
+                                com/alibaba/fastjson2/issues/Issue765.java
                             </excludes>
                         </configuration>
                     </execution>
