@@ -31,6 +31,10 @@ public interface FieldReader<T>
         return jsonReader.getObjectReader(getFieldType());
     }
 
+    default ObjectReader getObjectReader(JSONReader.Context context) {
+        return context.getObjectReader(getFieldType());
+    }
+
     default int ordinal() {
         return 0;
     }

@@ -50,6 +50,25 @@ class FieldReaderObjectField<T>
         return reader = jsonReader.getObjectReader(fieldType);
     }
 
+    public ObjectReader getObjectReader(JSONReader.Context context) {
+        if (reader != null) {
+            return reader;
+        }
+
+        ObjectReader formattedObjectReader = FieldReaderObject.createFormattedObjectReader(fieldType, fieldClass, format, null);
+        if (formattedObjectReader != null) {
+            return reader = formattedObjectReader;
+        }
+
+        if (Map.class.isAssignableFrom(fieldClass)) {
+            return reader = ObjectReaderImplMap.of(fieldType, fieldClass, features);
+        } else if (Collection.class.isAssignableFrom(fieldClass)) {
+            return reader = ObjectReaderImplList.of(fieldType, fieldClass, features);
+        }
+
+        return reader = context.getObjectReader(fieldType);
+    }
+
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         if (!fieldClassSerializable) {

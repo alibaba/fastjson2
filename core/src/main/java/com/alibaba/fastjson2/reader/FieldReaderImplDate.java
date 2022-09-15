@@ -156,6 +156,15 @@ abstract class FieldReaderImplDate<T>
         return dateReader;
     }
 
+    public ObjectReader getObjectReader(JSONReader.Context context) {
+        if (dateReader == null) {
+            dateReader = format == null
+                    ? ObjectReaderImplDate.INSTANCE
+                    : new ObjectReaderImplDate(format, locale);
+        }
+        return dateReader;
+    }
+
     public abstract void accept(T object, Date value);
 
     @Override
