@@ -19,7 +19,7 @@ public class LocalDateTime20Test {
         long millis = System.currentTimeMillis() - start;
         System.out.println("LocalDateTime20-fastjson2 : " + millis);
 
-        // zulu8.62.0.19 : 811
+        // zulu8.62.0.19 : 572
         // zulu11.52.13 :
         // zulu17.32.13 :
         // zulu18.28.13 :

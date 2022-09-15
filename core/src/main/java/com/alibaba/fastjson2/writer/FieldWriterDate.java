@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 abstract class FieldWriterDate<T>
@@ -220,92 +219,6 @@ abstract class FieldWriterDate<T>
                 jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, false);
                 return;
             }
-
-            if (jsonWriter.isUTF8()) {
-                byte[] bytes = CACHE_UTF8_UPDATER.getAndSet(this, null);
-                if (bytes == null) {
-                    bytes = Arrays.copyOfRange(nameWithColonUTF8, 0, nameWithColonUTF8.length + 21);
-                    int off = nameWithColonUTF8.length;
-                    bytes[off++] = '"';
-                    off += 4;
-                    bytes[off] = '-';
-                    off += 3;
-                    bytes[off] = '-';
-                    off += 3;
-                    bytes[off] = ' ';
-                    off += 3;
-                    bytes[off] = ':';
-                    off += 3;
-                    bytes[off] = ':';
-                    off += 3;
-                    bytes[off] = '"';
-                }
-                int off = nameWithColonUTF8.length + 1;
-                bytes[off] = (byte) (year / 1000 + '0');
-                bytes[off + 1] = (byte) ((year / 100) % 10 + '0');
-                bytes[off + 2] = (byte) ((year / 10) % 10 + '0');
-                bytes[off + 3] = (byte) (year % 10 + '0');
-                bytes[off + 5] = (byte) (month / 10 + '0');
-                bytes[off + 6] = (byte) (month % 10 + '0');
-                bytes[off + 8] = (byte) (dayOfMonth / 10 + '0');
-                bytes[off + 9] = (byte) (dayOfMonth % 10 + '0');
-                bytes[off + 11] = (byte) (hour / 10 + '0');
-                bytes[off + 12] = (byte) (hour % 10 + '0');
-                bytes[off + 14] = (byte) (minute / 10 + '0');
-                bytes[off + 15] = (byte) (minute % 10 + '0');
-                bytes[off + 17] = (byte) (second / 10 + '0');
-                bytes[off + 18] = (byte) (second % 10 + '0');
-
-                try {
-                    jsonWriter.writeNameRaw(bytes);
-                } finally {
-                    CACHE_UTF8_UPDATER.set(this, bytes);
-                }
-                return;
-            }
-            if (jsonWriter.isUTF16()) {
-                char[] chars = CACHE_UTF16_UPDATER.getAndSet(this, null);
-                if (chars == null) {
-                    chars = Arrays.copyOfRange(nameWithColonUTF16, 0, nameWithColonUTF16.length + 21);
-                    int off = nameWithColonUTF16.length;
-                    chars[off++] = '"';
-                    off += 4;
-                    chars[off] = '-';
-                    off += 3;
-                    chars[off] = '-';
-                    off += 3;
-                    chars[off] = ' ';
-                    off += 3;
-                    chars[off] = ':';
-                    off += 3;
-                    chars[off] = ':';
-                    off += 3;
-                    chars[off] = '"';
-                }
-                int off = nameWithColonUTF16.length + 1;
-                chars[off] = (char) (year / 1000 + '0');
-                chars[off + 1] = (char) ((year / 100) % 10 + '0');
-                chars[off + 2] = (char) ((year / 10) % 10 + '0');
-                chars[off + 3] = (char) (year % 10 + '0');
-                chars[off + 5] = (char) (month / 10 + '0');
-                chars[off + 6] = (char) (month % 10 + '0');
-                chars[off + 8] = (char) (dayOfMonth / 10 + '0');
-                chars[off + 9] = (char) (dayOfMonth % 10 + '0');
-                chars[off + 11] = (char) (hour / 10 + '0');
-                chars[off + 12] = (char) (hour % 10 + '0');
-                chars[off + 14] = (char) (minute / 10 + '0');
-                chars[off + 15] = (char) (minute % 10 + '0');
-                chars[off + 17] = (char) (second / 10 + '0');
-                chars[off + 18] = (char) (second % 10 + '0');
-
-                try {
-                    jsonWriter.writeNameRaw(chars);
-                } finally {
-                    CACHE_UTF16_UPDATER.set(this, chars);
-                }
-                return;
-            }
-
             writeFieldName(jsonWriter);
             jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
         } else {
