@@ -307,10 +307,6 @@ public class ObjectReaderAdapter<T>
 
     @Override
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (!serializable) {
-            jsonReader.errorOnNoneSerializable(objectClass);
-        }
-
         if (jsonReader.nextIfNull()) {
             return null;
         }
@@ -318,6 +314,10 @@ public class ObjectReaderAdapter<T>
         ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
         if (autoTypeReader != null && autoTypeReader.getObjectClass() != this.objectClass) {
             return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+        }
+
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
         }
 
         if (jsonReader.isArray()) {
