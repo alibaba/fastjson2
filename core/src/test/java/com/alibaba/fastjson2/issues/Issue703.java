@@ -5,11 +5,9 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.junit.jupiter.api.Test;
 
@@ -79,7 +77,7 @@ public class Issue703 {
     }
 
     public <T> T read1(String json, Type type) {
-        ObjectReaderProvider readers = new ObjectReaderProvider(ObjectReaderCreatorLambda.INSTANCE);
+        ObjectReaderProvider readers = new ObjectReaderProvider(ObjectReaderCreator.INSTANCE);
         readers.mixIn(Misc.PersistentEnum.class, PersistentEnumMixin.class);
         JSONReader.Context context = new JSONReader.Context(readers);
         try (final JSONReader reader = JSONReader.of(json, context)) {
@@ -89,7 +87,7 @@ public class Issue703 {
     }
 
     public String write1(Object value) {
-        ObjectWriterProvider writers = new ObjectWriterProvider(ObjectWriterCreatorLambda.INSTANCE);
+        ObjectWriterProvider writers = new ObjectWriterProvider(ObjectWriterCreator.INSTANCE);
         writers.mixIn(Misc.PersistentEnum.class, PersistentEnumMixin.class);
         JSONWriter.Context context = new JSONWriter.Context(writers);
         try (final JSONWriter writer = JSONWriter.of(context)) {

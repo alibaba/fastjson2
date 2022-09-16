@@ -14,8 +14,6 @@ import com.alibaba.fastjson2.filter.PropertyPreFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.support.AwtRederModule;
-import com.alibaba.fastjson2.support.AwtWriterModule;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
@@ -75,11 +73,9 @@ public class JSON {
 
     static {
         ObjectReaderProvider readerProvider = JSONFactory.getDefaultObjectReaderProvider();
-        readerProvider.register(AwtRederModule.INSTANCE);
         readerProvider.register(new Fastjson1xReaderModule(readerProvider));
 
         ObjectWriterProvider writerProvider = JSONFactory.getDefaultObjectWriterProvider();
-        writerProvider.register(AwtWriterModule.INSTANCE);
         writerProvider.register(new Fastjson1xWriterModule(writerProvider));
     }
 
