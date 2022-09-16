@@ -20,8 +20,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
 
 public abstract class JSONWriter
         implements Closeable {
@@ -1555,261 +1553,114 @@ public abstract class JSONWriter
                         buf[off++] = '.';
                     }
 
-                    if (JDKUtils.JVM_VERSION == 8) {
-                        char[] chars = JDKUtils.getCharArray(name);
-                        for (int j = 0; j < chars.length; j++) {
-                            char ch = chars[j];
-                            switch (ch) {
-                                case '/':
-                                case ':':
-                                case ';':
-                                case '`':
-                                case '.':
-                                case '~':
-                                case '!':
-                                case '@':
-                                case '#':
-                                case '%':
-                                case '^':
-                                case '&':
-                                case '*':
-                                case '[':
-                                case ']':
-                                case '<':
-                                case '>':
-                                case '?':
-                                case '(':
-                                case ')':
-                                case '-':
-                                case '+':
-                                case '=':
-                                case '\\':
-                                case '"':
-                                case '\'':
+                    for (int j = 0; j < name.length(); j++) {
+                        char ch = name.charAt(j);
+                        switch (ch) {
+                            case '/':
+                            case ':':
+                            case ';':
+                            case '`':
+                            case '.':
+                            case '~':
+                            case '!':
+                            case '@':
+                            case '#':
+                            case '%':
+                            case '^':
+                            case '&':
+                            case '*':
+                            case '[':
+                            case ']':
+                            case '<':
+                            case '>':
+                            case '?':
+                            case '(':
+                            case ')':
+                            case '-':
+                            case '+':
+                            case '=':
+                            case '\\':
+                            case '"':
+                            case '\'':
+                                if (off + 1 >= buf.length) {
+                                    int newCapacity = buf.length + (buf.length >> 1);
+                                    buf = Arrays.copyOf(buf, newCapacity);
+                                }
+                                buf[off++] = '\\';
+                                buf[off++] = (byte) ch;
+                                break;
+                            default:
+                                if ((ch >= 0x0001) && (ch <= 0x007F)) {
+                                    if (off == buf.length) {
+                                        int newCapacity = buf.length + (buf.length >> 1);
+                                        buf = Arrays.copyOf(buf, newCapacity);
+                                    }
+                                    buf[off++] = (byte) ch;
+                                } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
+                                    if (off + 2 >= buf.length) {
+                                        int newCapacity = buf.length + (buf.length >> 1);
+                                        buf = Arrays.copyOf(buf, newCapacity);
+                                    }
+
+                                    ascii = false;
+                                    final int uc;
+                                    if (ch >= '\uD800' && ch < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
+                                        if (name.length() - i < 2) {
+                                            uc = -1;
+                                        } else {
+                                            char d = name.charAt(i + 1);
+                                            // d >= '\uDC00' && d < ('\uDFFF' + 1)
+                                            if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
+                                                uc = ((ch << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
+                                            } else {
+//                            throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
+                                                buf[off++] = (byte) '?';
+                                                continue;
+                                            }
+                                        }
+                                    } else {
+                                        //
+                                        if (ch >= '\uDC00' && ch < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
+                                            buf[off++] = (byte) '?';
+                                            continue;
+//                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
+                                        } else {
+                                            uc = ch;
+                                        }
+                                    }
+
+                                    if (uc < 0) {
+                                        buf[off++] = (byte) '?';
+                                    } else {
+                                        buf[off++] = (byte) (0xf0 | ((uc >> 18)));
+                                        buf[off++] = (byte) (0x80 | ((uc >> 12) & 0x3f));
+                                        buf[off++] = (byte) (0x80 | ((uc >> 6) & 0x3f));
+                                        buf[off++] = (byte) (0x80 | (uc & 0x3f));
+                                        i++; // 2 chars
+                                    }
+                                } else if (ch > 0x07FF) {
+                                    if (off + 2 >= buf.length) {
+                                        int newCapacity = buf.length + (buf.length >> 1);
+                                        buf = Arrays.copyOf(buf, newCapacity);
+                                    }
+                                    ascii = false;
+
+                                    buf[off++] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
+                                    buf[off++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
+                                    buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+                                } else {
                                     if (off + 1 >= buf.length) {
                                         int newCapacity = buf.length + (buf.length >> 1);
                                         buf = Arrays.copyOf(buf, newCapacity);
                                     }
-                                    buf[off++] = '\\';
-                                    buf[off++] = (byte) ch;
-                                    break;
-                                default:
-                                    if ((ch >= 0x0001) && (ch <= 0x007F)) {
-                                        if (off == buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-                                        buf[off++] = (byte) ch;
-                                    } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
-                                        if (off + 2 >= buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
+                                    ascii = false;
 
-                                        ascii = false;
-                                        final int uc;
-                                        if (ch >= '\uD800' && ch < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
-                                            if (name.length() - i < 2) {
-                                                uc = -1;
-                                            } else {
-                                                char d = name.charAt(i + 1);
-                                                // d >= '\uDC00' && d < ('\uDFFF' + 1)
-                                                if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
-                                                    uc = ((ch << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
-                                                } else {
-//                            throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                                                    buf[off++] = (byte) '?';
-                                                    continue;
-                                                }
-                                            }
-                                        } else {
-                                            //
-                                            if (ch >= '\uDC00' && ch < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
-                                                buf[off++] = (byte) '?';
-                                                continue;
-//                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                                            } else {
-                                                uc = ch;
-                                            }
-                                        }
-
-                                        if (uc < 0) {
-                                            buf[off++] = (byte) '?';
-                                        } else {
-                                            buf[off++] = (byte) (0xf0 | ((uc >> 18)));
-                                            buf[off++] = (byte) (0x80 | ((uc >> 12) & 0x3f));
-                                            buf[off++] = (byte) (0x80 | ((uc >> 6) & 0x3f));
-                                            buf[off++] = (byte) (0x80 | (uc & 0x3f));
-                                            i++; // 2 chars
-                                        }
-                                    } else if (ch > 0x07FF) {
-                                        if (off + 2 >= buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-                                        ascii = false;
-
-                                        buf[off++] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
-                                    } else {
-                                        if (off + 1 >= buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-                                        ascii = false;
-
-                                        buf[off++] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
-                                    }
-                                    break;
-                            }
-                        }
-                    } else {
-                        for (int j = 0; j < name.length(); j++) {
-                            char ch = name.charAt(j);
-                            switch (ch) {
-                                case '/':
-                                case ':':
-                                case ';':
-                                case '`':
-                                case '.':
-                                case '~':
-                                case '!':
-                                case '@':
-                                case '#':
-                                case '%':
-                                case '^':
-                                case '&':
-                                case '*':
-                                case '[':
-                                case ']':
-                                case '<':
-                                case '>':
-                                case '?':
-                                case '(':
-                                case ')':
-                                case '-':
-                                case '+':
-                                case '=':
-                                case '\\':
-                                case '"':
-                                case '\'':
-                                    if (off + 1 >= buf.length) {
-                                        int newCapacity = buf.length + (buf.length >> 1);
-                                        buf = Arrays.copyOf(buf, newCapacity);
-                                    }
-                                    buf[off++] = '\\';
-                                    buf[off++] = (byte) ch;
-                                    break;
-                                default:
-                                    if ((ch >= 0x0001) && (ch <= 0x007F)) {
-                                        if (off == buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-                                        buf[off++] = (byte) ch;
-                                    } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
-                                        if (off + 2 >= buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-
-                                        ascii = false;
-                                        final int uc;
-                                        if (ch >= '\uD800' && ch < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
-                                            if (name.length() - i < 2) {
-                                                uc = -1;
-                                            } else {
-                                                char d = name.charAt(i + 1);
-                                                // d >= '\uDC00' && d < ('\uDFFF' + 1)
-                                                if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
-                                                    uc = ((ch << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
-                                                } else {
-//                            throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                                                    buf[off++] = (byte) '?';
-                                                    continue;
-                                                }
-                                            }
-                                        } else {
-                                            //
-                                            if (ch >= '\uDC00' && ch < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
-                                                buf[off++] = (byte) '?';
-                                                continue;
-//                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                                            } else {
-                                                uc = ch;
-                                            }
-                                        }
-
-                                        if (uc < 0) {
-                                            buf[off++] = (byte) '?';
-                                        } else {
-                                            buf[off++] = (byte) (0xf0 | ((uc >> 18)));
-                                            buf[off++] = (byte) (0x80 | ((uc >> 12) & 0x3f));
-                                            buf[off++] = (byte) (0x80 | ((uc >> 6) & 0x3f));
-                                            buf[off++] = (byte) (0x80 | (uc & 0x3f));
-                                            i++; // 2 chars
-                                        }
-                                    } else if (ch > 0x07FF) {
-                                        if (off + 2 >= buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-                                        ascii = false;
-
-                                        buf[off++] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
-                                    } else {
-                                        if (off + 1 >= buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-                                        ascii = false;
-
-                                        buf[off++] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
-                                    }
-                                    break;
-                            }
+                                    buf[off++] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
+                                    buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+                                }
+                                break;
                         }
                     }
-                }
-            }
-
-            if (ascii) {
-                if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                    byte[] bytes;
-                    if (off == buf.length) {
-                        bytes = buf;
-                    } else {
-                        bytes = new byte[off];
-                        System.arraycopy(buf, 0, bytes, 0, off);
-                    }
-                    return fullPath = (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
-                }
-
-                if (JDKUtils.JVM_VERSION == 8) {
-                    if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
-                        try {
-                            STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                        } catch (Throwable e) {
-                            STRING_CREATOR_ERROR = true;
-                        }
-                    }
-
-                    char[] chars = new char[off];
-                    for (int i = 0; i < off; i++) {
-                        chars[i] = (char) buf[i];
-                    }
-                    if (STRING_CREATOR_JDK8 == null) {
-                        fullPath = new String(chars);
-                    } else {
-                        fullPath = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                    }
-
-                    return fullPath;
                 }
             }
 

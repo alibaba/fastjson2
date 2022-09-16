@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -158,17 +156,7 @@ final class JSONReaderJSONBUF
                     int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
                     JSONFactory.NameCacheEntry2 entry = NAME_CACHE2[indexMask];
                     if (entry == null) {
-                        String name;
-                        if (STRING_CREATOR_JDK8 != null) {
-                            char[] chars = new char[strlen];
-                            for (int i = 0; i < strlen; ++i) {
-                                chars[i] = (char) bytes[offset + i];
-                            }
-                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                        } else {
-                            name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
-                        }
-
+                        String name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
                         NAME_CACHE2[indexMask] = new JSONFactory.NameCacheEntry2(name, nameValue0, nameValue1);
                         offset += strlen;
                         return name;
@@ -180,17 +168,7 @@ final class JSONReaderJSONBUF
                     int indexMask = ((int) nameValue0) & (NAME_CACHE.length - 1);
                     JSONFactory.NameCacheEntry entry = NAME_CACHE[indexMask];
                     if (entry == null) {
-                        String name;
-                        if (STRING_CREATOR_JDK8 != null) {
-                            char[] chars = new char[strlen];
-                            for (int i = 0; i < strlen; ++i) {
-                                chars[i] = (char) bytes[offset + i];
-                            }
-                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                        } else {
-                            name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
-                        }
-
+                        String name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
                         NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(name, nameValue0);
                         offset += strlen;
                         return name;
@@ -200,55 +178,10 @@ final class JSONReaderJSONBUF
                     }
                 }
             }
-
-            if (JDKUtils.JVM_VERSION == 8 && strlen >= 0) {
-                char[] chars = new char[strlen];
-                for (int i = 0; i < strlen; ++i) {
-                    chars[i] = (char) bytes[offset + i];
-                }
-                offset += strlen;
-
-                if (STRING_CREATOR_JDK8 == null) {
-                    str = new String(chars);
-                } else {
-                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                }
-            } else if (JDKUtils.JVM_VERSION == 11 && strlen >= 0) {
-                if (STRING_CREATOR_JDK11 != null) {
-                    byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = STRING_CREATOR_JDK11.apply(chars);
-                    offset += strlen;
-                }
-            }
             charset = StandardCharsets.US_ASCII;
         } else if (strtype == BC_STR_UTF8) {
             strlen = readLength();
             strBegin = offset;
-
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
-                if (valueBytes == null) {
-                    valueBytes = JSONFactory.allocateByteArray(cachedIndex);
-                }
-
-                int minCapacity = strlen << 1;
-                if (valueBytes == null) {
-                    valueBytes = new byte[minCapacity];
-                } else {
-                    if (minCapacity > valueBytes.length) {
-                        valueBytes = new byte[minCapacity];
-                    }
-                }
-
-                int utf16_len = IOUtils.decodeUTF8(bytes, offset, strlen, valueBytes);
-                if (utf16_len != -1) {
-                    byte[] value = new byte[utf16_len];
-                    System.arraycopy(valueBytes, 0, value, 0, utf16_len);
-                    str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(value);
-                    offset += strlen;
-                }
-            }
-
             charset = StandardCharsets.UTF_8;
         } else if (strtype == BC_STR_UTF16) {
             strlen = readLength();
@@ -257,26 +190,10 @@ final class JSONReaderJSONBUF
         } else if (strtype == BC_STR_UTF16LE) {
             strlen = readLength();
             strBegin = offset;
-
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
-                byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset, chars, 0, strlen);
-                str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
-                offset += strlen;
-            }
-
             charset = StandardCharsets.UTF_16LE;
         } else if (strtype == BC_STR_UTF16BE) {
             strlen = readLength();
             strBegin = offset;
-
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
-                byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset, chars, 0, strlen);
-                str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
-                offset += strlen;
-            }
-
             charset = StandardCharsets.UTF_16BE;
         }
 

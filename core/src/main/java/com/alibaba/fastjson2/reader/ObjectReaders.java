@@ -22,7 +22,7 @@ public class ObjectReaders {
     }
 
     public static <T> ObjectReader<T> of(Class<T> objectType) {
-        return ObjectReaderCreatorLambda.INSTANCE.createObjectReader(objectType);
+        return ObjectReaderCreator.INSTANCE.createObjectReader(objectType);
     }
 
     public static <T> ObjectReader<T> createObjectReader(

@@ -211,32 +211,14 @@ public class JSONBDump {
             }
             case BC_STR_UTF16LE: {
                 int strlen = readLength();
-
-                String str;
-                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
-                    byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
-                } else {
-                    str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
-                }
-
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
                 offset += strlen;
                 jsonWriter.writeString(str);
                 return;
             }
             case BC_STR_UTF16BE: {
                 int strlen = readLength();
-
-                String str;
-                if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
-                    byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
-                } else {
-                    str = new String(bytes, offset, strlen, StandardCharsets.UTF_16BE);
-                }
-
+                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16BE);
                 offset += strlen;
                 jsonWriter.writeString(str);
                 return;
@@ -874,28 +856,10 @@ public class JSONBDump {
         } else if (strtype == BC_STR_UTF16LE) {
             strlen = readLength();
             strBegin = offset;
-
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && !JDKUtils.BIG_ENDIAN) {
-                byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset, chars, 0, strlen);
-                String str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
-                offset += strlen;
-                return str;
-            }
-
             charset = StandardCharsets.UTF_16LE;
         } else if (strtype == BC_STR_UTF16BE) {
             strlen = readLength();
             strBegin = offset;
-
-            if (JDKUtils.UNSAFE_UTF16_CREATOR != null && JDKUtils.BIG_ENDIAN) {
-                byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset, chars, 0, strlen);
-                String str = (String) JDKUtils.UNSAFE_UTF16_CREATOR.apply(chars);
-                offset += strlen;
-                return str;
-            }
-
             charset = StandardCharsets.UTF_16BE;
         } else if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
             return Byte.toString(strtype);
