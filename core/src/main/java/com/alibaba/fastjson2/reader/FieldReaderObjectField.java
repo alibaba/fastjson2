@@ -133,6 +133,16 @@ class FieldReaderObjectField<T>
 
     @Override
     public void readFieldValueJSONB(JSONReader jsonReader, T object) {
+        if (!fieldClassSerializable) {
+            long contextFeatures = jsonReader.getContext().getFeatures();
+            if ((contextFeatures & JSONReader.Feature.IgnoreNoneSerializable.mask) != 0) {
+                jsonReader.skipValue();
+                return;
+            } else if ((contextFeatures & JSONReader.Feature.ErrorOnNoneSerializable.mask) != 0) {
+                throw new JSONException("not support none-Serializable");
+            }
+        }
+
         if (fieldObjectReader == null) {
             fieldObjectReader = jsonReader.getContext().getObjectReader(fieldType);
         }
