@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONSchemaValidException;
@@ -133,7 +134,7 @@ class FieldReaderObjectField<T>
 
     @Override
     public void readFieldValueJSONB(JSONReader jsonReader, T object) {
-        if (!fieldClassSerializable) {
+        if (!fieldClassSerializable && jsonReader.getType() != JSONB.Constants.BC_TYPED_ANY) {
             long contextFeatures = jsonReader.getContext().getFeatures();
             if ((contextFeatures & JSONReader.Feature.IgnoreNoneSerializable.mask) != 0) {
                 jsonReader.skipValue();
