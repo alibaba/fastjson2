@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.function.*;
 
 public class ObjectWriters {
-    static ObjectWriterCreator INSTANCE = ObjectWriterCreatorLambda.INSTANCE;
+    static ObjectWriterCreator INSTANCE = ObjectWriterCreator.INSTANCE;
 
     public static ObjectWriter ofReflect(Class objectType) {
         return ObjectWriterCreator.INSTANCE.createObjectWriter(objectType);

@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.RyuDouble;
 import com.alibaba.fastjson2.util.RyuFloat;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -298,7 +297,7 @@ class JSONWriterUTF8
             return;
         }
 
-        char[] chars = JDKUtils.getCharArray(str);
+        char[] chars = str.toCharArray();
 
         boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
 
@@ -968,7 +967,7 @@ class JSONWriterUTF8
 
     @Override
     public void writeRaw(String str) {
-        char[] chars = JDKUtils.getCharArray(str);
+        char[] chars = str.toCharArray();
         {
             int minCapacity = off
                     + chars.length * 3; // utf8 3 bytes
