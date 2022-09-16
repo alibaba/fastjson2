@@ -605,10 +605,6 @@ public class ObjectWriterBaseModule
                 fieldInfo.fieldClassMixIn = true;
             }
 
-            if (JDKUtils.CLASS_TRANSIENT != null && method.getAnnotation(JDKUtils.CLASS_TRANSIENT) != null) {
-                fieldInfo.ignore = true;
-            }
-
             Annotation[] annotations = method.getAnnotations();
             processAnnotations(fieldInfo, annotations);
 
