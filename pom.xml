@@ -33,7 +33,7 @@
 
         <fastjson1x.version>1.2.83</fastjson1x.version>
         <jackson.version>2.13.4</jackson.version>
-        <jetty.version>11.0.11</jetty.version>
+        <jetty.version>11.0.12</jetty.version>
         <jersey.version>2.37</jersey.version>
         <springframework.version>5.3.22</springframework.version>
 
