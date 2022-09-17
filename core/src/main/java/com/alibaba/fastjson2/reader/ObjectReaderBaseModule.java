@@ -708,7 +708,7 @@ public class ObjectReaderBaseModule
                 fieldName = BeanUtils.getterName(methodName, null); // readOnlyProperty
             }
 
-            String fieldName2;
+            String fieldName1, fieldName2;
             char c0, c1;
             if (fieldName.length() > 1
                     && (c0 = fieldName.charAt(0)) >= 'A' && c0 <= 'Z'
@@ -716,13 +716,23 @@ public class ObjectReaderBaseModule
                     && (jsonField == null || jsonField.name().isEmpty())) {
                 char[] chars = fieldName.toCharArray();
                 chars[0] = (char) (chars[0] + 32);
+                fieldName1 = new String(chars);
+
+                chars[1] = (char) (chars[1] + 32);
                 fieldName2 = new String(chars);
             } else {
+                fieldName1 = null;
                 fieldName2 = null;
             }
 
             BeanUtils.declaredFields(objectClass, field -> {
                 if (field.getName().equals(fieldName)) {
+                    int modifiers = field.getModifiers();
+                    if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
+                        getFieldInfo(fieldInfo, objectClass, field);
+                    }
+                    fieldInfo.features |= FieldInfo.FIELD_MASK;
+                } else if (fieldName1 != null && field.getName().equals(fieldName1)) {
                     int modifiers = field.getModifiers();
                     if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
@@ -737,8 +747,8 @@ public class ObjectReaderBaseModule
                 }
             });
 
-            if (fieldName2 != null && fieldInfo.fieldName == null && fieldInfo.alternateNames == null) {
-                fieldInfo.alternateNames = new String[]{fieldName2};
+            if (fieldName1 != null && fieldInfo.fieldName == null && fieldInfo.alternateNames == null) {
+                fieldInfo.alternateNames = new String[]{fieldName1, fieldName2};
             }
         }
 
