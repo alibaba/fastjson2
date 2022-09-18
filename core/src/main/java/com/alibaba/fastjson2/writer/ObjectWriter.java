@@ -121,7 +121,7 @@ public interface ObjectWriter<T> {
     }
 
     default boolean hasFilter(JSONWriter jsonWriter) {
-        return jsonWriter.hasFilter();
+        return jsonWriter.hasFilter(JSONWriter.Feature.IgnoreNonFieldGetter.mask);
     }
 
     default void write(JSONWriter jsonWriter, Object object) {
