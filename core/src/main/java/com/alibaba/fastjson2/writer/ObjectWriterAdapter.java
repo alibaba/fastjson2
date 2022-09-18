@@ -42,6 +42,7 @@ public class ObjectWriterAdapter<T>
 
     final boolean hasValueField;
     final boolean serializable;
+    final boolean containsNoneFieldGetter;
 
     public ObjectWriterAdapter(Class<T> objectType, List<FieldWriter> fieldWriters) {
         this(objectType, null, null, 0, fieldWriters);
@@ -75,12 +76,18 @@ public class ObjectWriterAdapter<T>
 
         this.hasValueField = fieldWriterArray.length == 1 && (fieldWriterArray[0].getFeatures() & FieldInfo.VALUE_MASK) != 0;
 
+        boolean containsNoneFieldGetter = false;
         long[] hashCodes = new long[fieldWriterArray.length];
         for (int i = 0; i < fieldWriterArray.length; i++) {
-            FieldWriter item = fieldWriterArray[i];
-            long hashCode = Fnv.hashCode64(item.getFieldName());
+            FieldWriter fieldWriter = fieldWriterArray[i];
+            long hashCode = Fnv.hashCode64(fieldWriter.getFieldName());
             hashCodes[i] = hashCode;
+
+            if (fieldWriter.getMethod() != null && (fieldWriter.getFeatures() & FieldInfo.FIELD_MASK) == 0) {
+                containsNoneFieldGetter = true;
+            }
         }
+        this.containsNoneFieldGetter = containsNoneFieldGetter;
 
         this.hashCodes = Arrays.copyOf(hashCodes, hashCodes.length);
         Arrays.sort(this.hashCodes);
@@ -119,12 +126,20 @@ public class ObjectWriterAdapter<T>
         this.typeName = typeName;
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
 
+        boolean containsNoneFieldGetter = false;
         long[] hashCodes = new long[fieldWriterArray.length];
         for (int i = 0; i < fieldWriterArray.length; i++) {
-            FieldWriter item = fieldWriterArray[i];
-            long hashCode = Fnv.hashCode64(item.getFieldName());
+            FieldWriter fieldWriter = fieldWriterArray[i];
+            long hashCode = Fnv.hashCode64(
+                    fieldWriter.getFieldName()
+            );
             hashCodes[i] = hashCode;
+
+            if (fieldWriter.getMethod() != null && (fieldWriter.getFeatures() & FieldInfo.FIELD_MASK) == 0) {
+                containsNoneFieldGetter = true;
+            }
         }
+        this.containsNoneFieldGetter = containsNoneFieldGetter;
 
         this.hashCodes = Arrays.copyOf(hashCodes, hashCodes.length);
         Arrays.sort(this.hashCodes);
@@ -154,7 +169,7 @@ public class ObjectWriterAdapter<T>
                 || propertyFilter != null
                 || nameFilter != null
                 || valueFilter != null
-                || jsonWriter.hasFilter();
+                || containsNoneFieldGetter ? jsonWriter.hasFilter(JSONWriter.Feature.IgnoreNonFieldGetter.mask) : jsonWriter.hasFilter();
     }
 
     public void setPropertyFilter(PropertyFilter propertyFilter) {

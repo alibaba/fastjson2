@@ -195,8 +195,20 @@ public abstract class JSONWriter
                 || context.afterFilter != null
                 || context.labelFilter != null
                 || context.contextValueFilter != null
+                || context.contextNameFilter != null;
+    }
+
+    public boolean hasFilter(long feature) {
+        return context.propertyPreFilter != null
+                || context.propertyFilter != null
+                || context.nameFilter != null
+                || context.valueFilter != null
+                || context.beforeFilter != null
+                || context.afterFilter != null
+                || context.labelFilter != null
+                || context.contextValueFilter != null
                 || context.contextNameFilter != null
-                || (context.features & JSONWriter.Feature.IgnoreNonFieldGetter.mask) != 0;
+                || (context.features & feature) != 0;
     }
 
     public boolean isWriteNulls() {
