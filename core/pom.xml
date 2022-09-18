@@ -202,8 +202,8 @@
                         <configuration>
                             <module>
                                 <moduleInfoSource>
-                                    module com.alibaba.fastjson2 {
-                                    requires static jdk.unsupported;
+                                    open module com.alibaba.fastjson2 {
+                                    requires transitive jdk.unsupported;
 
                                     exports com.alibaba.fastjson2;
                                     exports com.alibaba.fastjson2.annotation;
