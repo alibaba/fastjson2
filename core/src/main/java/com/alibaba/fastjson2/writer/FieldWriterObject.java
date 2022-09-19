@@ -72,7 +72,17 @@ abstract class FieldWriterObject<T>
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
-            ObjectWriter formattedWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
+            ObjectWriter formattedWriter = null;
+            if (format == null) {
+                JSONWriter.Context context = jsonWriter.getContext();
+                boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
+                formattedWriter = context.getProvider().getObjectWriterFromCache(valueClass, valueClass, fieldBased);
+            }
+
+            if (formattedWriter == null) {
+                formattedWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
+            }
+
             if (formattedWriter == null) {
                 boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
                 formattedWriter = jsonWriter.getObjectWriter(valueClass);
