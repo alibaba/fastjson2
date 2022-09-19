@@ -419,6 +419,51 @@ public class ObjectReaderProvider
         return modules.remove(module);
     }
 
+    public void cleanUp(Class objectClass) {
+        mixInCache.remove(objectClass);
+        cache.remove(objectClass);
+        cacheFieldBased.remove(objectClass);
+        for (ConcurrentHashMap<Long, ObjectReader> tlc : tclHashCaches.values()) {
+            for (Iterator<Map.Entry<Long, ObjectReader>> it = tlc.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<Long, ObjectReader> entry = it.next();
+                ObjectReader reader = entry.getValue();
+                if (reader.getObjectClass() == objectClass) {
+                    it.remove();
+                }
+            }
+        }
+    }
+
+    public void cleanUp(ClassLoader classLoader) {
+        for (Iterator<Map.Entry<Class, Class>> it = mixInCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Class> entry = it.next();
+            if (entry.getKey().getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Type, ObjectReader>> it = cache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Type, ObjectReader> entry = it.next();
+            Type keyType = entry.getKey();
+            Class<?> keyClass = TypeUtils.getClass(keyType);
+            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Type, ObjectReader>> it = cacheFieldBased.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Type, ObjectReader> entry = it.next();
+            Type keyType = entry.getKey();
+            Class<?> keyClass = TypeUtils.getClass(keyType);
+            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        int tclHash = System.identityHashCode(classLoader);
+        tclHashCaches.remove(tclHash);
+    }
+
     public ObjectReaderCreator getCreator() {
         ObjectReaderCreator contextCreator = JSONFactory.getContextReaderCreator();
         if (contextCreator != null) {
