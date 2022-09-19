@@ -10,10 +10,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -273,5 +270,38 @@ public class ObjectWriterProvider
     public static boolean isNotReferenceDetect(final Class<?> clazz) {
         return Arrays.binarySearch(NOT_REFERENCES_TYPE_HASH_CODES, System.identityHashCode(clazz)) >= 0
                 || ((clazz.getModifiers() & ENUM) != 0 && clazz.getSuperclass() == Enum.class);
+    }
+
+    public void cleanUp(Class objectClass) {
+        mixInCache.remove(objectClass);
+        cache.remove(objectClass);
+        cacheFieldBased.remove(objectClass);
+    }
+
+    public void cleanUp(ClassLoader classLoader) {
+        for (Iterator<Map.Entry<Class, Class>> it = mixInCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Class> entry = it.next();
+            if (entry.getKey().getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Type, ObjectWriter>> it = cache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Type, ObjectWriter> entry = it.next();
+            Type keyType = entry.getKey();
+            Class<?> keyClass = TypeUtils.getClass(keyType);
+            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Type, ObjectWriter>> it = cacheFieldBased.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Type, ObjectWriter> entry = it.next();
+            Type keyType = entry.getKey();
+            Class<?> keyClass = TypeUtils.getClass(keyType);
+            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
     }
 }
