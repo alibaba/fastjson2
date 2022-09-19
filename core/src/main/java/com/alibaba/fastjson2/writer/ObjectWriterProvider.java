@@ -74,6 +74,10 @@ public class ObjectWriterProvider
     }
 
     public ObjectWriter register(Type type, ObjectWriter objectWriter) {
+        if (objectWriter == null) {
+            return cache.remove(type);
+        }
+
         return cache.put(type, objectWriter);
     }
 
@@ -124,6 +128,12 @@ public class ObjectWriterProvider
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         return getObjectWriter(objectType, objectClass, false);
+    }
+
+    public ObjectWriter getObjectWriterFromCache(Type objectType, Class objectClass, boolean fieldBased) {
+        return fieldBased
+                ? cacheFieldBased.get(objectType)
+                : cache.get(objectType);
     }
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
