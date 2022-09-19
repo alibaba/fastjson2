@@ -9,18 +9,11 @@ import java.util.function.ObjLongConsumer;
 
 final class FieldReaderInt64ValueFunc<T>
         extends FieldReaderImpl<T> {
-    final Method method;
     final ObjLongConsumer<T> function;
 
     public FieldReaderInt64ValueFunc(String fieldName, int ordinal, Long defaultValue, JSONSchema schema, Method method, ObjLongConsumer<T> function) {
-        super(fieldName, long.class, long.class, ordinal, 0, null, null, defaultValue, schema);
-        this.method = method;
+        super(fieldName, long.class, long.class, ordinal, 0, null, null, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

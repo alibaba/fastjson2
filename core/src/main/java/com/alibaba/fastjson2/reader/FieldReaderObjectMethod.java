@@ -11,17 +11,10 @@ import java.util.Locale;
 class FieldReaderObjectMethod<T>
         extends FieldReaderImpl<T>
         implements FieldReaderObject<T, Object> {
-    final Method method;
     ObjectReader fieldObjectReader;
 
     FieldReaderObjectMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Object defaultValue, JSONSchema schema, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
     }
 
     @Override

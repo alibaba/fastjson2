@@ -11,16 +11,8 @@ import java.util.concurrent.atomic.AtomicLongArray;
 
 final class FieldReaderAtomicLongArrayReadOnly<T>
         extends FieldReaderImpl<T> {
-    final Method method;
-
     FieldReaderAtomicLongArrayReadOnly(String fieldName, Class fieldType, int ordinal, JSONSchema jsonSchema, Method method) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, jsonSchema);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, jsonSchema, method, null);
     }
 
     @Override

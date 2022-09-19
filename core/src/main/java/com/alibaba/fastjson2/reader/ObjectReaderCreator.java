@@ -668,6 +668,8 @@ public class ObjectReaderCreator {
 
         Constructor defaultConstructor = null;
 
+        Class<?> declaringClass = objectClass.getDeclaringClass();
+
         int index = -1;
         for (int i = 0; i < alternateConstructors.size(); i++) {
             Constructor constructor = alternateConstructors.get(i);
@@ -682,6 +684,12 @@ public class ObjectReaderCreator {
             } else if (constructor.getParameterCount() == 0) {
                 creatorConstructor = constructor;
                 index = i;
+            } else if (declaringClass != null
+                    && constructor.getParameterCount() == 1
+                    && declaringClass.equals(constructor.getParameterTypes()[0])) {
+                creatorConstructor = constructor;
+                index = i;
+                break;
             } else if (creatorConstructor.getParameterCount() < constructor.getParameterCount()) {
                 creatorConstructor = constructor;
                 index = i;

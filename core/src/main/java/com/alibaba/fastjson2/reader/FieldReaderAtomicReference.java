@@ -3,15 +3,24 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 
 public abstract class FieldReaderAtomicReference<T>
         extends FieldReaderImpl<T> {
     final Type referenceType;
 
-    public FieldReaderAtomicReference(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema);
+    public FieldReaderAtomicReference(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            JSONSchema schema,
+            Method method,
+            Field field
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, method, field);
 
         Type referenceType = null;
         if (fieldType instanceof ParameterizedType) {

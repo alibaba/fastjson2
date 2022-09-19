@@ -9,18 +9,11 @@ import java.lang.reflect.Method;
 
 final class FieldReaderBoolValFunc<T>
         extends FieldReaderImpl<T> {
-    final Method method;
     final ObjBoolConsumer<T> function;
 
     public FieldReaderBoolValFunc(String fieldName, int ordinal, JSONSchema schema, Method method, ObjBoolConsumer<T> function) {
-        super(fieldName, boolean.class, boolean.class, ordinal, 0, null, null, null, schema);
-        this.method = method;
+        super(fieldName, boolean.class, boolean.class, ordinal, 0, null, null, null, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

@@ -55,7 +55,7 @@ public class Issue367 {
         @Data
         @AllArgsConstructor
         @NoArgsConstructor
-        public static class SubDTO2 {
+        public class SubDTO2 {
             private String id;
             private String nickName;
             private ThiDTO thiDTO = new ThiDTO();

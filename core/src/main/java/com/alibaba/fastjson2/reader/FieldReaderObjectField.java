@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.BeanUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -13,22 +14,15 @@ import java.util.function.Function;
 
 class FieldReaderObjectField<T>
         extends FieldReaderImpl<T> {
-    protected final Field field;
     protected ObjectReader fieldObjectReader;
 
     FieldReaderObjectField(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType == null ? field.getType() : fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema);
-        this.field = field;
+        super(fieldName, fieldType == null ? field.getType() : fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, null, field);
     }
 
     @Override
     public ObjectReader getInitReader() {
         return fieldObjectReader;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
     }
 
     @Override
@@ -125,6 +119,10 @@ class FieldReaderObjectField<T>
                 value = fieldObjectReader.readObject(jsonReader, fieldType, fieldName, features);
             }
             accept(object, value);
+
+            if (noneStaticMemberClass) {
+                BeanUtils.setNoneStaticMemberClassParent(value, object);
+            }
         } catch (JSONSchemaValidException ex) {
             throw ex;
         } catch (Exception | IllegalAccessError ex) {

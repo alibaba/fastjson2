@@ -9,18 +9,11 @@ import java.util.function.ObjDoubleConsumer;
 
 final class FieldReaderDoubleValueFunc<T>
         extends FieldReaderImpl<T> {
-    final Method method;
     final ObjDoubleConsumer<T> function;
 
     public FieldReaderDoubleValueFunc(String fieldName, int ordinal, Double defaultValue, JSONSchema schema, Method method, ObjDoubleConsumer<T> function) {
-        super(fieldName, double.class, double.class, ordinal, 0, null, null, defaultValue, schema);
-        this.method = method;
+        super(fieldName, double.class, double.class, ordinal, 0, null, null, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

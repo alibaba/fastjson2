@@ -329,6 +329,18 @@ public abstract class BeanUtils {
             }
         }
 
+        Class declaringClass = objectClass.getDeclaringClass();
+        if (declaringClass != null) {
+            for (Constructor constructor : constructors) {
+                if (constructor.getParameterCount() == 1) {
+                    Class firstParamType = constructor.getParameterTypes()[0];
+                    if (declaringClass.equals(firstParamType)) {
+                        return constructor;
+                    }
+                }
+            }
+        }
+
         return null;
     }
 
@@ -1779,5 +1791,87 @@ public abstract class BeanUtils {
                 // ignored
             }
         });
+    }
+
+    public static boolean isNoneStaticMemberClass(Class objectClass, Class memberClass) {
+        if (memberClass == null) {
+            return false;
+        }
+
+        Class enclosingClass = memberClass.getEnclosingClass();
+        if (enclosingClass == null) {
+            return false;
+        }
+
+        if (objectClass != null && !objectClass.equals(enclosingClass)) {
+            return false;
+        }
+
+        Constructor[] constructors = constructorCache.get(memberClass);
+        if (constructors == null) {
+            constructors = memberClass.getDeclaredConstructors();
+            constructorCache.putIfAbsent(memberClass, constructors);
+        }
+
+        if (constructors.length == 0) {
+            return false;
+        }
+
+        Constructor firstConstructor = constructors[0];
+        if (firstConstructor.getParameterCount() == 0) {
+            return false;
+        }
+
+        Class[] parameterTypes = firstConstructor.getParameterTypes();
+        return enclosingClass.equals(parameterTypes[0]);
+    }
+
+    public static void setNoneStaticMemberClassParent(Object object, Object parent) {
+        Class objectClass = object.getClass();
+        Field[] fields = declaredFieldCache.get(objectClass);
+        if (fields == null) {
+            Field[] declaredFields = objectClass.getDeclaredFields();
+
+            boolean allMatch = true;
+            for (Field field : declaredFields) {
+                int modifiers = field.getModifiers();
+                if (Modifier.isStatic(modifiers)) {
+                    allMatch = false;
+                    break;
+                }
+            }
+
+            if (allMatch) {
+                fields = declaredFields;
+            } else {
+                List<Field> list = new ArrayList<>(declaredFields.length);
+                for (Field field : declaredFields) {
+                    int modifiers = field.getModifiers();
+                    if (Modifier.isStatic(modifiers)) {
+                        continue;
+                    }
+                    list.add(field);
+                }
+                fields = list.toArray(new Field[list.size()]);
+            }
+
+            fieldCache.putIfAbsent(objectClass, fields);
+        }
+
+        Field this0 = null;
+        for (Field field : fields) {
+            if ("this$0".equals(field.getName())) {
+                this0 = field;
+            }
+        }
+
+        if (this0 != null) {
+            this0.setAccessible(true);
+            try {
+                this0.set(object, parent);
+            } catch (IllegalAccessException e) {
+                throw new JSONException("setNoneStaticMemberClassParent error, class " + objectClass);
+            }
+        }
     }
 }

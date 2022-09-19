@@ -11,7 +11,6 @@ import java.util.function.BiConsumer;
 
 final class FieldReaderBigDecimalFunc<T, V>
         extends FieldReaderImpl<T> {
-    final Method method;
     final BiConsumer<T, V> function;
 
     public FieldReaderBigDecimalFunc(
@@ -24,14 +23,8 @@ final class FieldReaderBigDecimalFunc<T, V>
             JSONSchema schema,
             Method method,
             BiConsumer<T, V> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, null, defaultValue, schema);
-        this.method = method;
+        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, null, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

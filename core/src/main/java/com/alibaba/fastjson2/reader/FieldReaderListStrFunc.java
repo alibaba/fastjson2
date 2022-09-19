@@ -14,7 +14,6 @@ import java.util.function.BiConsumer;
 
 final class FieldReaderListStrFunc<T>
         extends FieldReaderImpl<T> {
-    final Method method;
     final BiConsumer<T, List> function;
     final long fieldClassHash;
 
@@ -29,8 +28,7 @@ final class FieldReaderListStrFunc<T>
             Object defaultValue,
             JSONSchema schema,
             Method method, BiConsumer<T, List> function) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
-        this.method = method;
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
         this.fieldClassHash = Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
     }
@@ -43,11 +41,6 @@ final class FieldReaderListStrFunc<T>
     @Override
     public ObjectReader getItemObjectReader(JSONReader.Context ctx) {
         return ObjectReaderImplString.INSTANCE;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
