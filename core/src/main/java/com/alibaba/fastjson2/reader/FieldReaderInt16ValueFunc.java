@@ -10,7 +10,6 @@ import java.util.Locale;
 
 final class FieldReaderInt16ValueFunc<T>
         extends FieldReaderImpl<T> {
-    final Method method;
     final ObjShortConsumer<T> function;
 
     public FieldReaderInt16ValueFunc(
@@ -24,14 +23,8 @@ final class FieldReaderInt16ValueFunc<T>
             Method method,
             ObjShortConsumer<T> function
     ) {
-        super(fieldName, short.class, short.class, ordinal, features, format, locale, defaultValue, schema);
-        this.method = method;
+        super(fieldName, short.class, short.class, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

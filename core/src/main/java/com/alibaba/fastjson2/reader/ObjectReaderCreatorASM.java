@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.*;
 
+import static com.alibaba.fastjson2.internal.asm.Opcodes.ALOAD;
 import static com.alibaba.fastjson2.internal.asm.Opcodes.PUTFIELD;
 import static com.alibaba.fastjson2.reader.ObjectReader.HASH_TYPE;
 
@@ -2141,6 +2142,22 @@ public class ObjectReaderCreatorASM
                         && !classLoader.isExternalClass(objectType))
                 ) {
                     mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS); // cast
+                }
+
+                if (fieldReader.isNoneStaticMemberClass()) {
+                    try {
+                        Field this0 = fieldClass.getDeclaredField("this$0");
+                        long fieldOffset = UnsafeUtils.objectFieldOffset(this0);
+
+                        mw.visitInsn(Opcodes.DUP);
+                        mw.visitFieldInsn(Opcodes.GETSTATIC, TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
+                        mw.visitInsn(Opcodes.SWAP);
+                        mw.visitLdcInsn(fieldOffset);
+                        mw.visitVarInsn(ALOAD, OBJECT);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "sun/misc/Unsafe", "putObject", "(Ljava/lang/Object;JLjava/lang/Object;)V", false);
+                    } catch (NoSuchFieldException e) {
+                        // ignored
+                    }
                 }
             }
 

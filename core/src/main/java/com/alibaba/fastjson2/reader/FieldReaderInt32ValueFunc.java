@@ -9,18 +9,11 @@ import java.util.function.ObjIntConsumer;
 
 final class FieldReaderInt32ValueFunc<T>
         extends FieldReaderImpl<T> {
-    final Method method;
     final ObjIntConsumer<T> function;
 
     public FieldReaderInt32ValueFunc(String fieldName, int ordinal, Integer defaultValue, JSONSchema schema, Method method, ObjIntConsumer<T> function) {
-        super(fieldName, int.class, int.class, ordinal, 0, null, null, defaultValue, schema);
-        this.method = method;
+        super(fieldName, int.class, int.class, ordinal, 0, null, null, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

@@ -25,7 +25,7 @@ class FieldReaderObjectParam<T>
             long features,
             String format,
             JSONSchema schema) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, null, null);
         this.paramName = paramName;
         this.paramNameHash = Fnv.hashCode64(paramName);
         this.parameter = parameter;

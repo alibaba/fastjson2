@@ -3,13 +3,13 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JdbcSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.Serializable;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.Collection;
 import java.util.Locale;
 
@@ -30,9 +30,13 @@ abstract class FieldReaderImpl<T>
     volatile JSONPath referenceCache;
 
     final Object defaultValue;
+    final boolean noneStaticMemberClass;
+
+    final Method method;
+    final Field field;
 
     public FieldReaderImpl(String fieldName, Type fieldType) {
-        this (fieldName, fieldType, TypeUtils.getClass(fieldType), 0, 0L, null, null, null, null);
+        this (fieldName, fieldType, TypeUtils.getClass(fieldType), 0, 0L, null, null, null, null, null, null);
     }
 
     public FieldReaderImpl(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue) {
@@ -48,6 +52,9 @@ abstract class FieldReaderImpl<T>
         this.locale = null;
         this.defaultValue = defaultValue;
         this.schema = null;
+        this.method = null;
+        this.field = null;
+        this.noneStaticMemberClass = BeanUtils.isNoneStaticMemberClass(null, fieldClass);
     }
 
     public FieldReaderImpl(
@@ -59,7 +66,10 @@ abstract class FieldReaderImpl<T>
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema) {
+            JSONSchema schema,
+            Method method,
+            Field field
+    ) {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
@@ -72,6 +82,31 @@ abstract class FieldReaderImpl<T>
         this.locale = locale;
         this.defaultValue = defaultValue;
         this.schema = schema;
+        this.method = method;
+        this.field = field;
+
+        Class declaringClass = null;
+        if (method != null) {
+            declaringClass = method.getDeclaringClass();
+        } else if (field != null) {
+            declaringClass = field.getDeclaringClass();
+        }
+
+        this.noneStaticMemberClass = BeanUtils.isNoneStaticMemberClass(declaringClass, fieldClass);
+    }
+
+    @Override
+    public final Method getMethod() {
+        return method;
+    }
+
+    @Override
+    public final Field getField() {
+        return field;
+    }
+
+    public boolean isNoneStaticMemberClass() {
+        return noneStaticMemberClass;
     }
 
     @Override

@@ -14,7 +14,6 @@ import java.util.function.BiConsumer;
 final class FieldReaderListFunc<T, V>
         extends FieldReaderImpl<T>
         implements FieldReaderList<T, Object> {
-    final Method method;
     final BiConsumer<T, V> function;
     final Type itemType;
     final Class itemClass;
@@ -33,8 +32,7 @@ final class FieldReaderListFunc<T, V>
             Method method,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, 0, format, locale, defaultValue, schema);
-        this.method = method;
+        super(fieldName, fieldType, fieldClass, ordinal, 0, format, locale, defaultValue, schema, method, null);
         this.function = function;
         if (fieldType instanceof ParameterizedType) {
             itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
@@ -43,11 +41,6 @@ final class FieldReaderListFunc<T, V>
         }
         this.itemClass = TypeUtils.getClass(itemType);
         this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

@@ -10,7 +10,6 @@ import java.util.function.BiConsumer;
 
 final class FieldReaderInt64Func<T, V>
         extends FieldReaderImpl<T> {
-    final Method method;
     final BiConsumer<T, V> function;
 
     public FieldReaderInt64Func(
@@ -24,14 +23,8 @@ final class FieldReaderInt64Func<T, V>
             Method method,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, locale, defaultValue, schema);
-        this.method = method;
+        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, locale, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

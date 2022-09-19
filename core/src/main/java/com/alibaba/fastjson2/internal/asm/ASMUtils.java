@@ -52,7 +52,7 @@ public class ASMUtils {
         typeMapping.put(long.class, "J");
         typeMapping.put(double.class, "D");
 
-        Class[] classes = new Class[] {
+        Class[] classes = new Class[]{
                 java.util.List.class,
                 java.util.Collection.class,
                 ObjectReader.class,
@@ -176,7 +176,17 @@ public class ASMUtils {
             TypeCollector visitor = new TypeCollector(name, types);
             reader.accept(visitor);
 
-            return visitor.getParameterNamesForMethod();
+            String[] params = visitor.getParameterNamesForMethod();
+            if (params != null && params.length == paramCount - 1) {
+                Class<?> dd = declaringClass.getDeclaringClass();
+                if (dd != null && dd.equals(types[0])) {
+                    String[] strings = new String[paramCount];
+                    strings[0] = "this$0";
+                    System.arraycopy(params, 0, strings, 1, params.length);
+                    params = strings;
+                }
+            }
+            return params;
         } catch (IOException e) {
             return new String[paramCount];
         } finally {

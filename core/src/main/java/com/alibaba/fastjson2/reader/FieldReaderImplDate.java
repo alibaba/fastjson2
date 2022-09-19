@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.IOUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,8 +41,11 @@ abstract class FieldReaderImplDate<T>
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
+            JSONSchema schema,
+            Method method,
+            Field field
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field);
         this.useSimpleFormatter = "yyyyMMddHHmmssSSSZ".equals(format);
         this.yyyyMMddhhmmss19 = "yyyy-MM-dd HH:mm:ss".equals(format);
 

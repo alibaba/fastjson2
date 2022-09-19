@@ -9,8 +9,6 @@ import java.util.Locale;
 
 final class FieldReaderDateField<T>
         extends FieldReaderImplDate<T> {
-    final Field field;
-
     FieldReaderDateField(
             String fieldName,
             Class fieldType,
@@ -22,13 +20,7 @@ final class FieldReaderDateField<T>
             JSONSchema schema,
             Field field
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(fieldName, fieldType, fieldType, ordinal, features, format, locale, defaultValue, schema, null, field);
     }
 
     @Override

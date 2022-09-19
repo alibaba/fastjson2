@@ -27,6 +27,10 @@ public interface FieldReader<T>
         return false;
     }
 
+    default boolean isNoneStaticMemberClass() {
+        return false;
+    }
+
     default ObjectReader getObjectReader(JSONReader jsonReader) {
         return jsonReader.getObjectReader(getFieldType());
     }

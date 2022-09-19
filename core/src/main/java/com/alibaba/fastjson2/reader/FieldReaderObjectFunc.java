@@ -12,7 +12,6 @@ import java.util.function.BiConsumer;
 final class FieldReaderObjectFunc<T, V>
         extends FieldReaderImpl<T>
         implements FieldReaderObject<T, V> {
-    final Method method;
     final BiConsumer<T, V> function;
     protected ObjectReader fieldObjectReader;
 
@@ -30,15 +29,9 @@ final class FieldReaderObjectFunc<T, V>
             BiConsumer<T, V> function,
             ObjectReader fieldObjectReader
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
-        this.method = method;
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
         this.fieldObjectReader = fieldObjectReader;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
