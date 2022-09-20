@@ -412,7 +412,7 @@
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-bom</artifactId>
                 <type>pom</type>
-                <version>2021.2.2</version>
+                <version>2021.2.3</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
