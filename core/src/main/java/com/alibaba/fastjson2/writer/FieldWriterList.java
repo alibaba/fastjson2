@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 abstract class FieldWriterList<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     final Type itemType;
     final Class itemClass;
     final boolean itemClassNotReferenceDetect;

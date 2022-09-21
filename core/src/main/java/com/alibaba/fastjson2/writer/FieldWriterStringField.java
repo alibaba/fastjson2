@@ -2,15 +2,11 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.codec.FieldInfo;
 
 import java.lang.reflect.Field;
 
 final class FieldWriterStringField<T>
-        extends FieldWriterImpl<T> {
-    final boolean symbol;
-    final boolean trim;
-    final boolean raw;
+        extends FieldWriter<T> {
     protected FieldWriterStringField(
             String fieldName,
             int ordinal,
@@ -19,9 +15,6 @@ final class FieldWriterStringField<T>
             String label,
             Field field) {
         super(fieldName, ordinal, features, format, label, String.class, String.class, field, null);
-        this.symbol = "symbol".equals(format);
-        this.trim = "trim".equals(format);
-        this.raw = (features & FieldInfo.RAW_VALUE_MASK) != 0;
     }
 
     @Override
@@ -67,25 +60,6 @@ final class FieldWriterStringField<T>
             }
         }
         return true;
-    }
-
-    @Override
-    public void writeString(JSONWriter jsonWriter, String value) {
-        writeFieldName(jsonWriter);
-
-        if (trim) {
-            value = value.trim();
-        }
-
-        if (symbol && jsonWriter.isJSONB()) {
-            jsonWriter.writeSymbol(value);
-        } else {
-            if (raw) {
-                jsonWriter.writeRaw(value);
-            } else {
-                jsonWriter.writeString(value);
-            }
-        }
     }
 
     @Override

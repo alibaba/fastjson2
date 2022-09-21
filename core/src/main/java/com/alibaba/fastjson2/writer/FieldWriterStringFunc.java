@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 import java.util.function.Function;
 
 final class FieldWriterStringFunc<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     Function<T, String> function;
     final boolean symbol;
     final boolean trim;

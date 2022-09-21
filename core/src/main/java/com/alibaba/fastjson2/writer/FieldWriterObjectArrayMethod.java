@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 final class FieldWriterObjectArrayMethod<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     final Type itemType;
     final Class itemClass;
     ObjectWriter itemObjectWriter;

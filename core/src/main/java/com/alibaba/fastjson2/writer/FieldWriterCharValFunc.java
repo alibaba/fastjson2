@@ -6,12 +6,17 @@ import com.alibaba.fastjson2.function.ToCharFunction;
 import java.lang.reflect.Method;
 
 final class FieldWriterCharValFunc
-        extends FieldWriterImpl {
+        extends FieldWriter {
     final ToCharFunction function;
 
     FieldWriterCharValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToCharFunction function) {
         super(fieldName, ordinal, features, format, label, char.class, char.class, null, method);
         this.function = function;
+    }
+
+    @Override
+    public Object getFieldValue(Object object) {
+        return function.applyAsChar(object);
     }
 
     @Override

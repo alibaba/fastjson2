@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Function;
 
 final class FieldWriterListStrFunc<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     final Function<T, List> function;
 
     protected FieldWriterListStrFunc(

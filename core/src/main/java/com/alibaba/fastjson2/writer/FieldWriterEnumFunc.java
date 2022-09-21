@@ -46,6 +46,11 @@ final class FieldWriterEnumFunc
     }
 
     @Override
+    public Object getFieldValue(Object object) {
+        return function.apply(object);
+    }
+
+    @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         Enum value = (Enum) function.apply(object);
         jsonWriter.writeEnum(value);

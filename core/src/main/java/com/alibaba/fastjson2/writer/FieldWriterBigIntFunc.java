@@ -7,7 +7,7 @@ import java.math.BigInteger;
 import java.util.function.Function;
 
 final class FieldWriterBigIntFunc<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     final Function<T, BigInteger> function;
 
     FieldWriterBigIntFunc(String fieldName, int ordinal, long features, String format, String label, Method method, Function<T, BigInteger> function) {

@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.function.ToFloatFunction;
 import java.lang.reflect.Method;
 
 final class FieldWriterFloatValueFunc
-        extends FieldWriterImpl {
+        extends FieldWriter {
     final ToFloatFunction function;
 
     protected FieldWriterFloatValueFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToFloatFunction function) {
