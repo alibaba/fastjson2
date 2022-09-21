@@ -8,7 +8,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Method;
 
 final class FieldReaderInt8ValueFunc<T>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     final ObjByteConsumer<T> function;
 
     public FieldReaderInt8ValueFunc(String fieldName, int ordinal, JSONSchema schema, Method method, ObjByteConsumer<T> function) {

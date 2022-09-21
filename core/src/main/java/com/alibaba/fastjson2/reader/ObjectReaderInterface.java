@@ -90,7 +90,7 @@ public final class ObjectReaderInterface<T>
                 jsonObject.put(jsonReader.getFieldName(), jsonReader.readAny());
             } else {
                 Object fieldValue = fieldReader.readFieldValue(jsonReader);
-                jsonObject.put(fieldReader.getFieldName(), fieldValue);
+                jsonObject.put(fieldReader.fieldName, fieldValue);
             }
         }
 
@@ -205,7 +205,7 @@ public final class ObjectReaderInterface<T>
                 jsonObject.put(jsonReader.getFieldName(), jsonReader.readAny());
             } else {
                 Object fieldValue = fieldReader.readFieldValue(jsonReader);
-                jsonObject.put(fieldReader.getFieldName(), fieldValue);
+                jsonObject.put(fieldReader.fieldName, fieldValue);
             }
         }
 

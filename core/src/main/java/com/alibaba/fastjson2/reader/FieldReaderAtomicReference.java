@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import java.lang.reflect.*;
 
 public abstract class FieldReaderAtomicReference<T>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     final Type referenceType;
 
     public FieldReaderAtomicReference(

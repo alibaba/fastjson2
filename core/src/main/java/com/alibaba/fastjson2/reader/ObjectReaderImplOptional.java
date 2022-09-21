@@ -57,7 +57,7 @@ class ObjectReaderImplOptional
             if (itemObjectReader == null) {
                 ObjectReader formattedObjectReader = null;
                 if (format != null) {
-                    formattedObjectReader = FieldReaderObject.createFormattedObjectReader(itemType, itemClass, format, locale);
+                    formattedObjectReader = FieldReader.createFormattedObjectReader(itemType, itemClass, format, locale);
                 }
                 if (formattedObjectReader == null) {
                     itemObjectReader = jsonReader.getObjectReader(itemType);
@@ -83,7 +83,7 @@ class ObjectReaderImplOptional
             if (itemObjectReader == null) {
                 ObjectReader formattedObjectReader = null;
                 if (format != null) {
-                    formattedObjectReader = FieldReaderObject.createFormattedObjectReader(itemType, itemClass, format, locale);
+                    formattedObjectReader = FieldReader.createFormattedObjectReader(itemType, itemClass, format, locale);
                 }
                 if (formattedObjectReader == null) {
                     itemObjectReader = jsonReader.getObjectReader(itemType);

@@ -78,7 +78,7 @@ public final class ObjectReaderImplMap
                 Type keyType = actualTypeArguments[0];
                 Type valueType = actualTypeArguments[1];
 
-                if (valueType == String.class && builder == null) {
+                if (keyType == String.class && valueType == String.class && builder == null) {
                     return new ObjectReaderImplMapString(mapType, instanceType, features);
                 }
 

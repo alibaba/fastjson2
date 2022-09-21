@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import java.util.Locale;
 
 final class FieldReaderInt16ValueFunc<T>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     final ObjShortConsumer<T> function;
 
     public FieldReaderInt16ValueFunc(

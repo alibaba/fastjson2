@@ -9,7 +9,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderBoolFunc<T, V>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     final BiConsumer<T, V> function;
 
     FieldReaderBoolFunc(String fieldName, Class<V> fieldClass, int ordinal, String format, Locale locale, Object defaultValue, JSONSchema schema, Method method, BiConsumer<T, V> function) {

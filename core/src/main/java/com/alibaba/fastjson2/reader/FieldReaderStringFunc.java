@@ -8,7 +8,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderStringFunc<T, V>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     final BiConsumer<T, V> function;
 
     final String format;

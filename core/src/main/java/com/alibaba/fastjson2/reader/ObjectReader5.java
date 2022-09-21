@@ -59,23 +59,17 @@ final class ObjectReader5<T>
         this.fieldReader3 = fieldReader3;
         this.fieldReader4 = fieldReader4;
 
-        String fieldName0 = fieldReader0.getFieldName();
-        String fieldName1 = fieldReader1.getFieldName();
-        String fieldName2 = fieldReader2.getFieldName();
-        String fieldName3 = fieldReader3.getFieldName();
-        String fieldName4 = fieldReader4.getFieldName();
+        this.hashCode0 = fieldReader0.fieldNameHash;
+        this.hashCode1 = fieldReader1.fieldNameHash;
+        this.hashCode2 = fieldReader2.fieldNameHash;
+        this.hashCode3 = fieldReader3.fieldNameHash;
+        this.hashCode4 = fieldReader4.fieldNameHash;
 
-        this.hashCode0 = Fnv.hashCode64(fieldName0);
-        this.hashCode1 = Fnv.hashCode64(fieldName1);
-        this.hashCode2 = Fnv.hashCode64(fieldName2);
-        this.hashCode3 = Fnv.hashCode64(fieldName3);
-        this.hashCode4 = Fnv.hashCode64(fieldName4);
-
-        this.hashCode0LCase = Fnv.hashCode64LCase(fieldName0);
-        this.hashCode1LCase = Fnv.hashCode64LCase(fieldName1);
-        this.hashCode2LCase = Fnv.hashCode64LCase(fieldName2);
-        this.hashCode3LCase = Fnv.hashCode64LCase(fieldName3);
-        this.hashCode4LCase = Fnv.hashCode64LCase(fieldName4);
+        this.hashCode0LCase = fieldReader0.fieldNameHashLCase;
+        this.hashCode1LCase = fieldReader1.fieldNameHashLCase;
+        this.hashCode2LCase = fieldReader2.fieldNameHashLCase;
+        this.hashCode3LCase = fieldReader3.fieldNameHashLCase;
+        this.hashCode4LCase = fieldReader4.fieldNameHashLCase;
 
         if (fieldReader0.isUnwrapped()) {
             extraFieldReader = fieldReader0;
@@ -93,11 +87,11 @@ final class ObjectReader5<T>
             extraFieldReader = fieldReader4;
         }
 
-        hasDefaultValue = fieldReader0.getDefaultValue() != null
-                || fieldReader1.getDefaultValue() != null
-                || fieldReader2.getDefaultValue() != null
-                || fieldReader3.getDefaultValue() != null
-                || fieldReader4.getDefaultValue() != null;
+        hasDefaultValue = fieldReader0.defaultValue != null
+                || fieldReader1.defaultValue != null
+                || fieldReader2.defaultValue != null
+                || fieldReader3.defaultValue != null
+                || fieldReader4.defaultValue != null;
     }
 
     @Override

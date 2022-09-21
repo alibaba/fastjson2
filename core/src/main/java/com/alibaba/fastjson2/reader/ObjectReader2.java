@@ -44,13 +44,11 @@ public class ObjectReader2<T>
         this.first = first;
         this.second = second;
 
-        String fieldName0 = first.getFieldName();
-        this.firstHashCode = Fnv.hashCode64(fieldName0);
-        this.firstHashCodeLCase = Fnv.hashCode64LCase(fieldName0);
+        this.firstHashCode = first.fieldNameHash;
+        this.firstHashCodeLCase = first.fieldNameHashLCase;
 
-        String fieldName1 = second.getFieldName();
-        this.secondHashCode = Fnv.hashCode64(fieldName1);
-        this.secondHashCodeLCase = Fnv.hashCode64LCase(fieldName1);
+        this.secondHashCode = second.fieldNameHash;
+        this.secondHashCodeLCase = second.fieldNameHashLCase;
 
         if (first.isUnwrapped()) {
             extraFieldReader = first;
@@ -59,7 +57,7 @@ public class ObjectReader2<T>
             extraFieldReader = second;
         }
 
-        hasDefaultValue = first.getDefaultValue() != null || second.getDefaultValue() != null;
+        hasDefaultValue = first.defaultValue != null || second.defaultValue != null;
     }
 
     @Override

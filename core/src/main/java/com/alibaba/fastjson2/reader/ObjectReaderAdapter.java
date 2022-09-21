@@ -68,15 +68,15 @@ public class ObjectReaderAdapter<T>
         long[] hashCodesLCase = new long[fieldReaders.length];
         for (int i = 0; i < fieldReaders.length; i++) {
             FieldReader fieldReader = fieldReaders[i];
-            String fieldName = fieldReader.getFieldName();
-            hashCodes[i] = Fnv.hashCode64(fieldName);
-            hashCodesLCase[i] = Fnv.hashCode64LCase(fieldName);
+            String fieldName = fieldReader.fieldName;
+            hashCodes[i] = fieldReader.fieldNameHash;
+            hashCodesLCase[i] = fieldReader.fieldNameHashLCase;
 
             if (fieldReader.isUnwrapped()) {
                 this.extraFieldReader = fieldReader;
             }
 
-            if (fieldReader.getDefaultValue() != null) {
+            if (fieldReader.defaultValue != null) {
                 this.hasDefaultValue = true;
             }
         }
@@ -216,7 +216,7 @@ public class ObjectReaderAdapter<T>
     @Override
     protected void initDefaultValue(T object) {
         for (FieldReader fieldReader : fieldReaders) {
-            Object defaultValue = fieldReader.getDefaultValue();
+            Object defaultValue = fieldReader.defaultValue;
             if (defaultValue != null) {
                 fieldReader.accept(object, defaultValue);
             }

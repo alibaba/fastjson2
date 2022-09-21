@@ -3,54 +3,108 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public interface FieldReaderList<T, V>
-        extends FieldReader<T> {
-    @Override
-    default Type getFieldType() {
-        return List.class;
+public class FieldReaderList<T, V>
+        extends FieldReaderObject<T> {
+    final long fieldClassHash;
+    final long itemClassHash;
+
+    public FieldReaderList(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            Type itemType,
+            Class itemClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            Field field,
+            BiConsumer function
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
+        this.itemType = itemType;
+        this.itemClass = itemClass;
+        this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
+        this.fieldClassHash = fieldClass == null ? 0 : Fnv.hashCode64(TypeUtils.getTypeName(fieldClass));
+
+        if (format != null) {
+            if (itemType == Date.class) {
+                itemReader = new ObjectReaderImplDate(format, locale);
+            }
+        }
     }
 
     @Override
-    default Class getFieldClass() {
-        return List.class;
+    public long getItemClassHash() {
+        return itemClassHash;
     }
 
-    @Override
-    Type getItemType();
-
-    default List<V> createList() {
+    public List<V> createList() {
         return new ArrayList<>();
     }
 
     @Override
-    default ObjectReader<V> getItemObjectReader(JSONReader.Context ctx) {
-        return ctx.getObjectReader(getItemType());
-    }
-
-    @Override
-    default void readFieldValue(JSONReader jsonReader, T object) {
+    public void readFieldValue(JSONReader jsonReader, T object) {
         JSONReader.Context context = jsonReader.getContext();
+        ObjectReader objectReader = getObjectReader(context);
+
+        Function builder = null;
+
+        if (initReader != null) {
+            builder = this.initReader.getBuildFunction();
+        } else {
+            if (objectReader instanceof ObjectReaderImplList) {
+                builder = objectReader.getBuildFunction();
+            }
+        }
+
         if (jsonReader.isJSONB()) {
+            Class fieldClass = this.fieldClass;
+            ObjectReader autoTypeReader = null;
+
+            if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
+                long typeHash = jsonReader.readTypeHashCode();
+                if (typeHash != this.fieldClassHash && jsonReader.isSupportAutoType(features)) {
+                    autoTypeReader = context.getObjectReaderAutoType(typeHash);
+                    if (autoTypeReader == null) {
+                        String typeName = jsonReader.getString();
+                        autoTypeReader = context.getObjectReaderAutoType(typeName, fieldClass, fieldClassHash);
+                    }
+
+                    builder = autoTypeReader.getBuildFunction();
+                }
+            }
+
             int entryCnt = jsonReader.startArray();
 
             Object[] array = new Object[entryCnt];
             ObjectReader itemObjectReader = getItemObjectReader(context);
             for (int i = 0; i < entryCnt; ++i) {
-                ObjectReader autoTypeReader = jsonReader.checkAutoType(getItemClass(), getItemClassHash(), getFeatures());
+                autoTypeReader = jsonReader.checkAutoType(getItemClass(), getItemClassHash(), features);
                 if (autoTypeReader != null) {
-                    array[i] = autoTypeReader.readJSONBObject(jsonReader, getFieldType(), getFieldName(), 0);
+                    array[i] = autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, 0);
                 } else {
-                    array[i] = itemObjectReader.readJSONBObject(jsonReader, getFieldType(), getFieldName(), 0);
+                    array[i] = itemObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, 0);
                 }
             }
-            List list = Arrays.asList(array);
+            Collection list = Arrays.asList(array);
+            if (builder != null) {
+                list = (Collection) builder.apply(list);
+            }
             accept(object, list);
             return;
         }
@@ -59,7 +113,7 @@ public interface FieldReaderList<T, V>
             JSONReader.Context ctx = context;
             ObjectReader itemObjectReader = getItemObjectReader(ctx);
 
-            List list = createList();
+            Collection list = createList();
             jsonReader.next();
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
@@ -74,14 +128,15 @@ public interface FieldReaderList<T, V>
                     continue;
                 }
             }
+            if (builder != null) {
+                list = (Collection) builder.apply(list);
+            }
             accept(object, list);
 
             jsonReader.nextIfMatch(',');
             return;
         }
 
-        ObjectReader objectReader = getObjectReader(jsonReader);
-        long features = getFeatures();
         Object value = jsonReader.isJSONB()
                 ? objectReader.readJSONBObject(jsonReader, null, null, features)
                 : objectReader.readObject(jsonReader, null, null, features);
@@ -89,7 +144,7 @@ public interface FieldReaderList<T, V>
     }
 
     @Override
-    default Object readFieldValue(JSONReader jsonReader) {
+    public Object readFieldValue(JSONReader jsonReader) {
         if (jsonReader.isJSONB()) {
             int entryCnt = jsonReader.startArray();
 
@@ -130,7 +185,6 @@ public interface FieldReaderList<T, V>
 
         if (jsonReader.isString()) {
             String str = jsonReader.readString();
-            Type itemType = getItemType();
             if (itemType instanceof Class
                     && Number.class.isAssignableFrom((Class<?>) itemType)
             ) {
@@ -156,12 +210,10 @@ public interface FieldReaderList<T, V>
     }
 
     @Override
-    default ObjectReader checkObjectAutoType(JSONReader jsonReader) {
+    public ObjectReader checkObjectAutoType(JSONReader jsonReader) {
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();
-            long features = getFeatures();
-            Class fieldClass = getFieldClass();
-
+            final long features = jsonReader.features(this.features);
             JSONReader.Context context = jsonReader.getContext();
             JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
             if (autoTypeFilter != null) {
@@ -190,7 +242,7 @@ public interface FieldReaderList<T, V>
             if (autoTypeObjectReader instanceof ObjectReaderImplList) {
                 ObjectReaderImplList listReader = (ObjectReaderImplList) autoTypeObjectReader;
 
-                autoTypeObjectReader = new ObjectReaderImplList(getFieldType(), fieldClass, listReader.instanceType, getItemType(), listReader.builder);
+                autoTypeObjectReader = new ObjectReaderImplList(fieldType, fieldClass, listReader.instanceType, itemType, listReader.builder);
             }
 
             if (autoTypeObjectReader == null) {

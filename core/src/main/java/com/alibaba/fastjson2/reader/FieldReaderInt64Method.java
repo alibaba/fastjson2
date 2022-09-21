@@ -10,9 +10,9 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 
 final class FieldReaderInt64Method<T>
-        extends FieldReaderObjectMethod<T> {
+        extends FieldReaderObject<T> {
     FieldReaderInt64Method(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Long defaultValue, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter, null, null);
     }
 
     @Override

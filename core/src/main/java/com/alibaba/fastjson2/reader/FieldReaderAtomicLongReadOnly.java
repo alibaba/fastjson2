@@ -8,8 +8,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicLong;
 
 final class FieldReaderAtomicLongReadOnly<T>
-        extends FieldReaderImpl<T>
-        implements FieldReaderReadOnly<T> {
+        extends FieldReader<T> {
     FieldReaderAtomicLongReadOnly(String fieldName, Class fieldType, int ordinal, JSONSchema schema, Method method) {
         super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, schema, method, null);
     }

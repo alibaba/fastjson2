@@ -15,8 +15,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class EishayTest {
     private String str;
     private MediaContent mc;
@@ -630,93 +628,6 @@ public class EishayTest {
             System.out.println("read_0_jsonb_symbol-asm millis : " + millis); // 432
             // JDK_11.13 :
             // JDK_17 :
-        }
-        System.out.println();
-    }
-
-    @Test
-    public void test_read_0_gen() throws Exception {
-        {
-            ObjectReaderProvider provider = JSONFactory
-                    .createReadContext()
-                    .getProvider();
-
-            ObjectReaderCreator creator = provider.getCreator();
-
-            {
-                FieldReader[] fieldReaders = creator.createFieldReaders(Media.class);
-                provider.register(Media.class, new Media_ObjectReader((fieldReaders)));
-            }
-            {
-                FieldReader[] fieldReaders = creator.createFieldReaders(Image.class);
-                provider.register(Image.class, new Image_ObjectReader((fieldReaders)));
-            }
-            {
-                FieldReader[] fieldReaders = creator.createFieldReaders(MediaContent.class);
-                provider.register(MediaContent.class, new MediaContent_ObjectReader((fieldReaders)));
-            }
-        }
-
-        for (int i = 0; i < 10; ++i) {
-            long start = System.currentTimeMillis();
-
-            for (int j = 0; j < 1000 * 1000; ++j) {
-                JSONReader jr = JSONReader.of(str);
-                jr.read(MediaContent.class);
-            }
-
-            long millis = System.currentTimeMillis() - start;
-            System.out.println("read_0-asm millis : " + millis); // 1084 943 919 880 875 855
-            // JDK_11.13 :
-            // JDK_17 : 931
-        }
-        System.out.println();
-    }
-
-    @Test
-    public void test_read_0_gen_jsonb() throws Exception {
-        {
-            ObjectReaderProvider provider = JSONFactory
-                    .createReadContext()
-                    .getProvider();
-
-            ObjectReaderCreator creator = provider.getCreator();
-
-            {
-                FieldReader[] fieldReaders = creator.createFieldReaders(Media.class);
-                provider.register(Media.class, new Media_ObjectReader((fieldReaders)));
-            }
-            {
-                FieldReader[] fieldReaders = creator.createFieldReaders(Image.class);
-                provider.register(Image.class, new Image_ObjectReader((fieldReaders)));
-            }
-            {
-                FieldReader[] fieldReaders = creator.createFieldReaders(MediaContent.class);
-                provider.register(MediaContent.class, new MediaContent_ObjectReader((fieldReaders)));
-            }
-        }
-
-        mc = JSONReader
-                .of(str)
-                .read(MediaContent.class);
-
-        JSONWriter writer = JSONWriter.ofJSONB();
-        writer.writeAny(mc);
-        byte[] jsonbBytes = writer.getBytes();
-
-        for (int i = 0; i < 10; ++i) {
-            long start = System.currentTimeMillis();
-
-            for (int j = 0; j < 1000 * 1000; ++j) {
-                JSONReader jr = JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length);
-                MediaContent mc1 = jr.read(MediaContent.class);
-                assertEquals(mc.getMedia().getFormat(), mc1.getMedia().getFormat());
-            }
-
-            long millis = System.currentTimeMillis() - start;
-            System.out.println("read_0-asm millis : " + millis); // 651 542
-            // JDK_11.13 :
-            // JDK_17 : 569 492 470
         }
         System.out.println();
     }
