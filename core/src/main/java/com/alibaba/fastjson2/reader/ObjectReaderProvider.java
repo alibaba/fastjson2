@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -419,7 +420,7 @@ public class ObjectReaderProvider
         return modules.remove(module);
     }
 
-    public void cleanUp(Class objectClass) {
+    public void cleanup(Class objectClass) {
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
         cacheFieldBased.remove(objectClass);
@@ -432,9 +433,10 @@ public class ObjectReaderProvider
                 }
             }
         }
+        BeanUtils.cleanupCache(objectClass);
     }
 
-    public void cleanUp(ClassLoader classLoader) {
+    public void cleanup(ClassLoader classLoader) {
         for (Iterator<Map.Entry<Class, Class>> it = mixInCache.entrySet().iterator(); it.hasNext();) {
             Map.Entry<Class, Class> entry = it.next();
             if (entry.getKey().getClassLoader() == classLoader) {
@@ -462,6 +464,8 @@ public class ObjectReaderProvider
 
         int tclHash = System.identityHashCode(classLoader);
         tclHashCaches.remove(tclHash);
+
+        BeanUtils.cleanupCache(classLoader);
     }
 
     public ObjectReaderCreator getCreator() {

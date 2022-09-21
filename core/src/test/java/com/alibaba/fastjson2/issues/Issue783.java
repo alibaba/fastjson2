@@ -22,7 +22,7 @@ public class Issue783 {
         ObjectWriter objectWriter = writerProvider.getObjectWriter(Bean.class);
         ObjectWriter objectWriter1 = writerProvider.getObjectWriter(Bean.class);
         assertSame(objectWriter, objectWriter1);
-        writerProvider.cleanUp(Bean.class);
+        writerProvider.cleanup(Bean.class);
         ObjectWriter objectWriter2 = writerProvider.getObjectWriter(Bean.class);
         assertNotSame(objectWriter, objectWriter2);
     }
@@ -34,7 +34,7 @@ public class Issue783 {
         ObjectReader objectReader1 = readerProvider.getObjectReader(Bean.class);
         assertSame(objectReader, objectReader1);
 
-        readerProvider.cleanUp(Bean.class);
+        readerProvider.cleanup(Bean.class);
         ObjectReader objectReader2 = readerProvider.getObjectReader(Bean.class);
         assertNotSame(objectReader, objectReader2);
     }
@@ -52,7 +52,7 @@ public class Issue783 {
         ObjectWriter objectWriter1 = writerProvider.getObjectWriter(objectClass);
         assertSame(objectWriter, objectWriter1);
 
-        writerProvider.cleanUp(classLoader);
+        writerProvider.cleanup(classLoader);
 
         ObjectWriter objectWriter2 = writerProvider.getObjectWriter(objectClass);
         assertNotSame(objectWriter, objectWriter2);
@@ -68,7 +68,7 @@ public class Issue783 {
         ObjectReader objectReader1 = readerProvider.getObjectReader(objectClass);
         assertSame(objectReader, objectReader1);
 
-        readerProvider.cleanUp(classLoader);
+        readerProvider.cleanup(classLoader);
         ObjectReader objectReader2 = readerProvider.getObjectReader(objectClass);
         assertNotSame(objectReader, objectReader2);
     }
