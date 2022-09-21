@@ -1874,4 +1874,58 @@ public abstract class BeanUtils {
             }
         }
     }
+
+    public static void cleanupCache(Class objectClass) {
+        if (objectClass == null) {
+            return;
+        }
+
+        fieldCache.remove(objectClass);
+        fieldMapCache.remove(objectClass);
+        declaredFieldCache.remove(objectClass);
+        methodCache.remove(objectClass);
+        constructorCache.remove(objectClass);
+    }
+
+    public static void cleanupCache(ClassLoader classLoader) {
+        for (Iterator<Map.Entry<Class, Field[]>> it = fieldCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Field[]> entry = it.next();
+            Class entryKey = entry.getKey();
+            if (entryKey.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Class, Map<String, Field>>> it = fieldMapCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Map<String, Field>> entry = it.next();
+            Class entryKey = entry.getKey();
+            if (entryKey.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Class, Field[]>> it = declaredFieldCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Field[]> entry = it.next();
+            Class entryKey = entry.getKey();
+            if (entryKey.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Class, Method[]>> it = methodCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Method[]> entry = it.next();
+            Class entryKey = entry.getKey();
+            if (entryKey.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Class, Constructor[]>> it = constructorCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Constructor[]> entry = it.next();
+            Class entryKey = entry.getKey();
+            if (entryKey.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+    }
 }

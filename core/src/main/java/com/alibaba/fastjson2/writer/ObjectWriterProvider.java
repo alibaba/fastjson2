@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -272,13 +273,15 @@ public class ObjectWriterProvider
                 || ((clazz.getModifiers() & ENUM) != 0 && clazz.getSuperclass() == Enum.class);
     }
 
-    public void cleanUp(Class objectClass) {
+    public void cleanup(Class objectClass) {
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
         cacheFieldBased.remove(objectClass);
+
+        BeanUtils.cleanupCache(objectClass);
     }
 
-    public void cleanUp(ClassLoader classLoader) {
+    public void cleanup(ClassLoader classLoader) {
         for (Iterator<Map.Entry<Class, Class>> it = mixInCache.entrySet().iterator(); it.hasNext();) {
             Map.Entry<Class, Class> entry = it.next();
             if (entry.getKey().getClassLoader() == classLoader) {
@@ -303,5 +306,7 @@ public class ObjectWriterProvider
                 it.remove();
             }
         }
+
+        BeanUtils.cleanupCache(classLoader);
     }
 }
