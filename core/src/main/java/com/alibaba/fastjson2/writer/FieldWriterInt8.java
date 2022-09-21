@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 abstract class FieldWriterInt8<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     final byte[][] utf8ValueCache = new byte[256][];
     final char[][] utf16ValueCache = new char[256][];
 

@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 abstract class FieldWriterEnum
-        extends FieldWriterImpl {
+        extends FieldWriter {
     volatile byte[][] valueNameCacheUTF8;
     volatile char[][] valueNameCacheUTF16;
 

@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 
 final class FieldWriterFloatValField<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     FieldWriterFloatValField(String name, int ordinal, String format, String label, Field field) {
         super(name, ordinal, 0, format, label, float.class, float.class, field, null);
     }

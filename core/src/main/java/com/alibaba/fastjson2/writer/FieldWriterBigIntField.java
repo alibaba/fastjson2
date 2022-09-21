@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 import java.math.BigInteger;
 
 final class FieldWriterBigIntField<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     protected FieldWriterBigIntField(String name, int ordinal, long features, String format, String label, Field field) {
         super(name, ordinal, features, format, label, BigInteger.class, BigInteger.class, field, null);
     }

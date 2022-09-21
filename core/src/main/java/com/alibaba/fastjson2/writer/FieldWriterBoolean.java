@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 abstract class FieldWriterBoolean
-        extends FieldWriterImpl {
+        extends FieldWriter {
     volatile byte[] utf8ValueTrue;
     volatile byte[] utf8ValueFalse;
     volatile char[] utf16ValueTrue;

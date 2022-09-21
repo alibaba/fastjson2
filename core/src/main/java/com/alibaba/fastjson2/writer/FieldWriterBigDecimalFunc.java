@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.function.Function;
 
 final class FieldWriterBigDecimalFunc<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     final Function<T, BigDecimal> function;
 
     protected FieldWriterBigDecimalFunc(

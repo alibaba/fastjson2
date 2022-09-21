@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import java.util.function.ToDoubleFunction;
 
 final class FieldWriterDoubleValueFunc
-        extends FieldWriterImpl {
+        extends FieldWriter {
     final ToDoubleFunction function;
 
     protected FieldWriterDoubleValueFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToDoubleFunction function) {

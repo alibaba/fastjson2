@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 abstract class FieldWriterObject<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     volatile Class initValueClass;
     volatile ObjectWriter initObjectWriter;
     final boolean unwrapped;

@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 abstract class FieldWriterInt16<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     byte[][] utf8ValueCache;
     char[][] utf16ValueCache;
     volatile byte[][] jsonbValueCache;

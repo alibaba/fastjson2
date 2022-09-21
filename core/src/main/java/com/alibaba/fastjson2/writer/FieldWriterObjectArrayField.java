@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
 final class FieldWriterObjectArrayField<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     final Type itemType;
     final Class itemClass;
     ObjectWriter itemObjectWriter;

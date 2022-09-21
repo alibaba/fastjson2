@@ -9,7 +9,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 abstract class FieldWriterInt32<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     volatile byte[][] utf8ValueCache;
     volatile char[][] utf16ValueCache;
     final boolean toString;

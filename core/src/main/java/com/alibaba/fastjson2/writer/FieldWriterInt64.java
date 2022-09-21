@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 abstract class FieldWriterInt64<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     volatile byte[][] utf8ValueCache;
     volatile char[][] utf16ValueCache;
     final boolean browserCompatible;
@@ -27,7 +27,6 @@ abstract class FieldWriterInt64<T>
         browserCompatible = (features & JSONWriter.Feature.BrowserCompatible.mask) != 0;
     }
 
-    @Override
     public void writeInt64(JSONWriter jsonWriter, long value) {
         boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 

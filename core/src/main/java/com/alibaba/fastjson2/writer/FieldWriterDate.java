@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 abstract class FieldWriterDate<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     volatile byte[] cacheFormat19UTF8;
     static AtomicReferenceFieldUpdater<FieldWriterDate, byte[]> CACHE_UTF8_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(FieldWriterDate.class, byte[].class, "cacheFormat19UTF8");
