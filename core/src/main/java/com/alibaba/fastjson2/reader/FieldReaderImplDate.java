@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.Locale;
 
 abstract class FieldReaderImplDate<T>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     DateTimeFormatter formatter;
 
     ObjectReader dateReader;

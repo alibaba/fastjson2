@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.util.function.ObjIntConsumer;
 
 final class FieldReaderInt32ValueFunc<T>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     final ObjIntConsumer<T> function;
 
     public FieldReaderInt32ValueFunc(String fieldName, int ordinal, Integer defaultValue, JSONSchema schema, Method method, ObjIntConsumer<T> function) {

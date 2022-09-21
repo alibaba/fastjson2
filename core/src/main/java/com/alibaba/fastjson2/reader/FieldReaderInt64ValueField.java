@@ -67,7 +67,7 @@ class FieldReaderInt64ValueField<T>
             try {
                 field.setLong(object, longValue);
             } catch (Exception e) {
-                throw new JSONException("set " + getFieldName() + " error", e);
+                throw new JSONException("set " + fieldName + " error", e);
             }
         }
     }

@@ -8,10 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 class FieldReaderAnySetter<T>
-        extends FieldReaderObjectMethod<T>
-        implements FieldReaderReadOnly<T> {
-    volatile ObjectReader itemReader;
-
+        extends FieldReaderObject<T> {
     FieldReaderAnySetter(
             Type fieldType,
             Class fieldClass,
@@ -20,7 +17,7 @@ class FieldReaderAnySetter<T>
             String format,
             JSONSchema schema,
             Method method) {
-        super("$$any$$", fieldType, fieldClass, ordinal, features, format, null, null, schema, method);
+        super("$$any$$", fieldType, fieldClass, ordinal, features, format, null, null, schema, method, null, null);
     }
 
     @Override
@@ -57,17 +54,17 @@ class FieldReaderAnySetter<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        if (fieldObjectReader == null) {
-            fieldObjectReader = jsonReader
+        if (initReader == null) {
+            initReader = jsonReader
                     .getContext()
                     .getObjectReader(fieldType);
         }
 
         Object value;
         if (jsonReader.isJSONB()) {
-            value = fieldObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+            value = initReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         } else {
-            value = fieldObjectReader.readObject(jsonReader, fieldType, fieldName, features);
+            value = initReader.readObject(jsonReader, fieldType, fieldName, features);
         }
 
         accept(object, value);

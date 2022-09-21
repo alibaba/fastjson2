@@ -9,9 +9,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 final class FieldReaderInt32ValueMethod<T>
-        extends FieldReaderObjectMethod<T> {
+        extends FieldReaderObject<T> {
     FieldReaderInt32ValueMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Integer defaultValue, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, setter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, setter, null, null);
     }
 
     @Override

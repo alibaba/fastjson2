@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderBigDecimalFunc<T, V>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     final BiConsumer<T, V> function;
 
     public FieldReaderBigDecimalFunc(
@@ -23,7 +23,7 @@ final class FieldReaderBigDecimalFunc<T, V>
             JSONSchema schema,
             Method method,
             BiConsumer<T, V> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, null, defaultValue, schema, method, null);
+        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, locale, defaultValue, schema, method, null);
         this.function = function;
     }
 
@@ -65,5 +65,10 @@ final class FieldReaderBigDecimalFunc<T, V>
         }
 
         function.accept(object, (V) fieldValue);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readBigDecimal();
     }
 }

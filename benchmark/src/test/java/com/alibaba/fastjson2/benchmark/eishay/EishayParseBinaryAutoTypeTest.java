@@ -63,8 +63,8 @@ public class EishayParseBinaryAutoTypeTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2JSONB();
-        fastjson2JSONB_autoTypeFilter();
+        fastjson2JSONB();
+//        fastjson2JSONB_autoTypeFilter();
 //        fastjson2JSONB_symbols();
 //        kryo_test();
     }

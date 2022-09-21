@@ -136,6 +136,10 @@ public final class ObjectReaderImplList
             return new ObjectReaderImplListStr(listClass, instanceClass);
         }
 
+        if (itemType == Long.class && builder == null) {
+            return new ObjectReaderImplListInt64(listClass, instanceClass);
+        }
+
         return new ObjectReaderImplList(type, listClass, instanceClass, itemType, builder);
     }
 

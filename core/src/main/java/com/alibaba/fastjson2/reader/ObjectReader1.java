@@ -38,14 +38,14 @@ final class ObjectReader1<T>
         this.defaultCreator = defaultCreator;
         this.buildFunction = buildFunction;
         this.fieldReader = fieldReader;
-        this.hashCode = Fnv.hashCode64(fieldReader.getFieldName());
-        this.hashCodeLCase = Fnv.hashCode64LCase(fieldReader.getFieldName());
+        this.hashCode = fieldReader.fieldNameHash;
+        this.hashCodeLCase = fieldReader.fieldNameHashLCase;
 
         if (fieldReader.isUnwrapped()) {
             extraFieldReader = fieldReader;
         }
 
-        hasDefaultValue = fieldReader.getDefaultValue() != null;
+        hasDefaultValue = fieldReader.defaultValue != null;
     }
 
     @Override

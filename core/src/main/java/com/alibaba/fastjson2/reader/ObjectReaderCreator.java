@@ -718,7 +718,7 @@ public class ObjectReaderCreator {
                     for (int j = 0; j < fieldReaderArray.length; j++) {
                         FieldReader fieldReader = fieldReaderArray[j];
                         if (fieldReader != null) {
-                            if (parameterName.equals(fieldReader.getFieldName())) {
+                            if (parameterName.equals(fieldReader.fieldName)) {
                                 matchCount++;
                                 break;
                             }
@@ -1270,7 +1270,7 @@ public class ObjectReaderCreator {
         }
 
         if (initReader != null) {
-            FieldReaderObjectMethod fieldReaderObjectMethod = new FieldReaderObjectMethod(
+            FieldReaderObject fieldReaderObjectMethod = new FieldReaderObject(
                     fieldName,
                     fieldType,
                     fieldClass,
@@ -1280,9 +1280,11 @@ public class ObjectReaderCreator {
                     locale,
                     defaultValue,
                     jsonSchema,
-                    method
+                    method,
+                    null,
+                    null
             );
-            fieldReaderObjectMethod.fieldObjectReader = initReader;
+            fieldReaderObjectMethod.initReader = initReader;
             return fieldReaderObjectMethod;
         }
 
@@ -1408,13 +1410,13 @@ public class ObjectReaderCreator {
                     Class itemClass = TypeUtils.getMapping(itemType);
 
                     if (itemClass == String.class) {
-                        return new FieldReaderListStrMethod(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, jsonSchema, method);
+                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClass, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, method, null, null);
                     }
 
-                    return new FieldReaderListMethod(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, itemType, method);
+                    return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, null, jsonSchema, method, null, null);
                 }
             }
-            return new FieldReaderListMethod(fieldName, fieldType, fieldClass, ordinal, features, format, jsonSchema, null, method);
+            return new FieldReaderList(fieldName, fieldType, fieldClass, Object.class, Object.class, ordinal, features, format, locale, null, jsonSchema, method, null, null);
         }
 
         if (fieldClass == Date.class) {
@@ -1425,7 +1427,7 @@ public class ObjectReaderCreator {
             features |= JSONReader.Feature.IgnoreSetNullValue.mask;
         }
 
-        return new FieldReaderObjectMethod(
+        return new FieldReaderObject(
                 fieldName,
                 fieldTypeResolved != null ? fieldTypeResolved : fieldType,
                 fieldClass,
@@ -1435,7 +1437,9 @@ public class ObjectReaderCreator {
                 locale,
                 defaultValue,
                 jsonSchema,
-                method
+                method,
+                null,
+                null
         );
     }
 
@@ -1512,7 +1516,7 @@ public class ObjectReaderCreator {
 
         if (initReader != null) {
             FieldReaderObjectField fieldReader = new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features | FieldInfo.READ_USING_MASK, format, defaultValue, jsonSchema, field);
-            fieldReader.fieldObjectReader = initReader;
+            fieldReader.initReader = initReader;
             return fieldReader;
         }
 
@@ -1615,17 +1619,17 @@ public class ObjectReaderCreator {
                     if (itemClass == String.class) {
                         if (finalField) {
                             if (JDKUtils.UNSAFE_SUPPORT && (features & JSONReader.Feature.FieldBased.mask) != 0) {
-                                return new FieldReaderListStrFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
+                                return new FieldReaderListFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, field);
                             }
 
                             return new FieldReaderCollectionFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
                         }
 
                         if (JDKUtils.UNSAFE_SUPPORT) {
-                            return new FieldReaderListStrFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
+                            return new FieldReaderListFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, field);
                         }
 
-                        return new FieldReaderListStrField(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
+                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, null, field, null);
                     }
 
                     if (JDKUtils.UNSAFE_SUPPORT) {
@@ -1634,6 +1638,7 @@ public class ObjectReaderCreator {
                                 fieldTypeResolved,
                                 fieldClassResolved,
                                 itemType,
+                                itemClass,
                                 ordinal,
                                 features,
                                 format,
@@ -1644,7 +1649,7 @@ public class ObjectReaderCreator {
                         );
                     }
 
-                    return new FieldReaderListField(fieldName, fieldTypeResolved, fieldClassResolved, itemType, ordinal, features, format, locale, (Collection) defaultValue, jsonSchema, field);
+                    return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, (Collection) defaultValue, jsonSchema, null, field, null);
                 }
             }
 
@@ -1658,6 +1663,7 @@ public class ObjectReaderCreator {
             if (itemType == null) {
                 itemType = Object.class;
             }
+            Class itemClass = TypeUtils.getClass(itemType);
 
             if (JDKUtils.UNSAFE_SUPPORT) {
                 return new FieldReaderListFieldUF(
@@ -1665,6 +1671,7 @@ public class ObjectReaderCreator {
                         fieldType,
                         fieldClass,
                         itemType,
+                        itemClass,
                         ordinal,
                         features,
                         format,
@@ -1674,18 +1681,22 @@ public class ObjectReaderCreator {
                         field
                 );
             }
-            return new FieldReaderListField(
+
+            return new FieldReaderList(
                     fieldName,
                     fieldType,
                     fieldClass,
                     itemType,
+                    itemClass,
                     ordinal,
                     features,
                     format,
                     locale,
                     (Collection) defaultValue,
                     jsonSchema,
-                    field
+                    null,
+                    field,
+                    null
             );
         }
 
@@ -1818,20 +1829,22 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == List.class || fieldClass == ArrayList.class) {
+            Type itemType = Object.class;
+            Class itemClass = Object.class;
             if (fieldTypeResolved instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) fieldTypeResolved;
                 Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
                 if (actualTypeArguments.length == 1) {
-                    Type itemType = actualTypeArguments[0];
-                    Class itemClass = TypeUtils.getMapping(itemType);
+                    itemType = actualTypeArguments[0];
+                    itemClass = TypeUtils.getMapping(itemType);
                     if (itemClass == String.class) {
-                        return new FieldReaderListStrFunc(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, null, defaultValue, schema, method, function);
+                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, null, defaultValue, schema, method, null, function);
                     }
                 }
             }
 
-            return new FieldReaderListFunc(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, format, null, defaultValue, schema, method, function);
+            return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, null, defaultValue, schema, method, null, function);
         }
 
         if (fieldTypeResolved != null) {

@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.util.function.ObjLongConsumer;
 
 final class FieldReaderInt64ValueFunc<T>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     final ObjLongConsumer<T> function;
 
     public FieldReaderInt64ValueFunc(String fieldName, int ordinal, Long defaultValue, JSONSchema schema, Method method, ObjLongConsumer<T> function) {

@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.util.function.ObjDoubleConsumer;
 
 final class FieldReaderDoubleValueFunc<T>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     final ObjDoubleConsumer<T> function;
 
     public FieldReaderDoubleValueFunc(String fieldName, int ordinal, Double defaultValue, JSONSchema schema, Method method, ObjDoubleConsumer<T> function) {
@@ -46,5 +46,10 @@ final class FieldReaderDoubleValueFunc<T>
         }
 
         function.accept(object, value);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readDoubleValue();
     }
 }

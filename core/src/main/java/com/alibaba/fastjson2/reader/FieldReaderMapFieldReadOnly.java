@@ -10,10 +10,7 @@ import java.util.Collections;
 import java.util.Map;
 
 class FieldReaderMapFieldReadOnly<T>
-        extends FieldReaderObjectField<T>
-        implements FieldReaderReadOnly<T> {
-    volatile ObjectReader itemReader;
-
+        extends FieldReaderObjectField<T> {
     FieldReaderMapFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, null, schema, field);
     }
@@ -85,17 +82,17 @@ class FieldReaderMapFieldReadOnly<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        if (fieldObjectReader == null) {
-            fieldObjectReader = jsonReader
+        if (initReader == null) {
+            initReader = jsonReader
                     .getContext()
                     .getObjectReader(fieldType);
         }
 
         Object value;
         if (jsonReader.isJSONB()) {
-            value = fieldObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+            value = initReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         } else {
-            value = fieldObjectReader.readObject(jsonReader, fieldType, fieldName, features);
+            value = initReader.readObject(jsonReader, fieldType, fieldName, features);
         }
 
         accept(object, value);

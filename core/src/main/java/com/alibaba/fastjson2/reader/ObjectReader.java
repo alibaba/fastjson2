@@ -84,14 +84,14 @@ public interface ObjectReader<T> {
             }
 
             Object fieldValue = entry.getValue();
-            Class fieldClass = fieldReader.getFieldClass();
-            Type fieldType = fieldReader.getFieldType();
+            Class fieldClass = fieldReader.fieldClass;
+            Type fieldType = fieldReader.fieldType;
 
             if (fieldValue != null) {
                 Class<?> valueClass = fieldValue.getClass();
 
-                if (valueClass != fieldClass) {
-                    Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+                if (valueClass != fieldReader.fieldClass) {
+                    Function typeConvert = provider.getTypeConvert(valueClass, fieldReader.fieldClass);
 
                     if (typeConvert != null) {
                         fieldValue = typeConvert.apply(fieldValue);
@@ -107,7 +107,7 @@ public interface ObjectReader<T> {
                     typedFieldValue = ((JSONObject) fieldValue).to(fieldType);
                 } else if (fieldValue instanceof JSONArray) {
                     typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
-                } else if (!fieldClass.isInstance(fieldValue) && fieldReader.getFormat() == null) {
+                } else if (!fieldClass.isInstance(fieldValue) && fieldReader.format == null) {
                     typedFieldValue = TypeUtils.cast(fieldValue, fieldClass);
                 } else {
                     String fieldValueJSONString = JSON.toJSONString(fieldValue);

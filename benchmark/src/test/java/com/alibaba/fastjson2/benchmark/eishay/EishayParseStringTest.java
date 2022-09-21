@@ -125,10 +125,10 @@ public class EishayParseStringTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2_test();
+        fastjson2();
 //        jackson_test();
 //        fastjson1_test();
 //        gson_test();
-        wastjson();
+//        wastjson();
     }
 }

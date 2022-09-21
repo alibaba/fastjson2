@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderBigIntegerFunc<T, V>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     final BiConsumer<T, V> function;
 
     public FieldReaderBigIntegerFunc(
@@ -67,5 +67,10 @@ final class FieldReaderBigIntegerFunc<T, V>
         }
 
         function.accept(object, (V) fieldValue);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readBigInteger();
     }
 }
