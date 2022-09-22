@@ -271,7 +271,6 @@ public abstract class FieldReader<T>
             return cmp;
         }
 
-
         Member thisMember = this.field != null ? this.field : this.method;
         Member otherMember = o.field != null ? o.field : o.method;
         if (thisMember != null && otherMember != null && thisMember.getClass() != otherMember.getClass()) {
