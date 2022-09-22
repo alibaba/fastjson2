@@ -678,18 +678,18 @@ public class ObjectReaderCreator {
                 defaultConstructor = constructor;
             }
 
-            if (creatorConstructor == null) {
-                creatorConstructor = constructor;
-                index = i;
-            } else if (constructor.getParameterCount() == 0) {
-                creatorConstructor = constructor;
-                index = i;
-            } else if (declaringClass != null
+            if (declaringClass != null
                     && constructor.getParameterCount() == 1
                     && declaringClass.equals(constructor.getParameterTypes()[0])) {
                 creatorConstructor = constructor;
                 index = i;
                 break;
+            } else if (creatorConstructor == null) {
+                creatorConstructor = constructor;
+                index = i;
+            } else if (constructor.getParameterCount() == 0) {
+                creatorConstructor = constructor;
+                index = i;
             } else if (creatorConstructor.getParameterCount() < constructor.getParameterCount()) {
                 creatorConstructor = constructor;
                 index = i;
