@@ -39,6 +39,9 @@ public final class JSONFactory {
     static long defaultReaderFeatures;
     static long defaultWriterFeatures;
 
+    static Supplier<Map> defaultObjectSupplier;
+    static Supplier<List> defaultArraySupplier;
+
     static final class Utils {
         // GraalVM not support
         // Android not support
@@ -386,6 +389,32 @@ public final class JSONFactory {
 
     static final ObjectReader<JSONArray> ARRAY_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONArray.class);
     static final ObjectReader<JSONObject> OBJECT_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
+
+    /**
+     *
+     * @param objectSupplier
+     * @since 2.0.15
+     */
+    public static void setDefaultObjectSupplier(Supplier<Map> objectSupplier) {
+        defaultObjectSupplier = objectSupplier;
+    }
+
+    /**
+     *
+     * @param arraySupplier
+     * @since 2.0.15
+     */
+    public static void setDefaultArraySupplier(Supplier<List> arraySupplier) {
+        defaultArraySupplier = arraySupplier;
+    }
+
+    public static Supplier<Map> getDefaultObjectSupplier() {
+        return defaultObjectSupplier;
+    }
+
+    public static Supplier<List> getDefaultArraySupplier() {
+        return defaultArraySupplier;
+    }
 
     public static JSONWriter.Context createWriteContext() {
         return new JSONWriter.Context(defaultObjectWriterProvider);
