@@ -104,7 +104,11 @@ abstract class FieldReaderImplDate<T>
         } else {
             long millis;
             if (yyyyMMddhhmmss19) {
-                millis = jsonReader.readMillis19();
+                if ((jsonReader.features(features) & JSONReader.Feature.SupportSmartMatch.mask) != 0 && jsonReader.isString()) {
+                    millis = jsonReader.readMillisFromString();
+                } else {
+                    millis = jsonReader.readMillis19();
+                }
             } else if (format != null) {
                 String str = jsonReader.readString();
                 if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
