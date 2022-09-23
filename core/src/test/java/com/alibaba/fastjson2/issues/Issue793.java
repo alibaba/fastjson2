@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class Issue793 {
     @Test
@@ -85,5 +87,48 @@ public class Issue793 {
                                 () -> new ArrayDeque()) // 指定arraySupplier为 ArrayDeque
                 ).getClass()
         );
+    }
+
+    @Test
+    public void test2() {
+        try {
+            JSONFactory.setDefaultObjectSupplier(
+                    () -> new TreeMap() // 全局指定objectSupplier为 TreeMap
+            );
+            assertEquals(
+                    TreeMap.class,
+                    JSON.parse("{}").getClass()
+            );
+
+            JSONFactory.setDefaultObjectSupplier(
+                    () -> new ConcurrentHashMap() // 全局指定objectSupplier为 ConcurrentHashMap
+            );
+            assertEquals(
+                    ConcurrentHashMap.class,
+                    JSON.parse("{}").getClass()
+            );
+
+            JSONFactory.setDefaultArraySupplier(
+                    () -> new LinkedList() // 全局指定arraySupplier为 LinkedList
+            );
+            assertEquals(
+                    LinkedList.class,
+                    JSON.parse("[]").getClass()
+            );
+
+            JSONFactory.setDefaultArraySupplier(
+                    () -> new CopyOnWriteArrayList() // 全局指定arraySupplier为 CopyOnWriteArrayList
+            );
+            assertEquals(
+                    CopyOnWriteArrayList.class,
+                    JSON.parse("[]").getClass()
+            );
+        } finally {
+            JSONFactory.setDefaultObjectSupplier(null);
+            JSONFactory.setDefaultArraySupplier(null);
+
+            assertNull(JSONFactory.getDefaultObjectSupplier());
+            assertNull(JSONFactory.getDefaultArraySupplier());
+        }
     }
 }
