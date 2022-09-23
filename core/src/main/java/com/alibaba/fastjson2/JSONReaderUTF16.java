@@ -5906,39 +5906,6 @@ final class JSONReaderUTF16
             S8 = c28;
             zoneIdBegin = 29;
             isTimeZone = c29 == '|';
-        } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
-                && len == 23) {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
-
-            S0 = c20;
-            S1 = c21;
-            S2 = c22;
-            S3 = '0';
-            S4 = '0';
-            S5 = '0';
-            S6 = '0';
-            S7 = '0';
-            S8 = '0';
-            zoneIdBegin = 23;
-            isTimeZone = false;
         } else {
             return null;
         }
