@@ -6148,7 +6148,8 @@ final class JSONReaderUTF16
 
     @Override
     public long readMillis19() {
-        if (ch != '"' && ch != '\'') {
+        char quote = ch;
+        if (quote != '"' && quote != '\'') {
             throw new JSONException("date only support string input");
         }
 
@@ -6313,7 +6314,11 @@ final class JSONReaderUTF16
             dom = 1;
         }
 
+        if (chars[offset + 19] != quote) {
+            throw new JSONException(info("illegal date input"));
+        }
         offset += 20;
+
         next();
         if (comma = (ch == ',')) {
             next();
