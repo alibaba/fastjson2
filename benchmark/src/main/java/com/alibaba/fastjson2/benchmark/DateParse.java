@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -194,7 +195,7 @@ public class DateParse {
 
         long millis;
         if (DEFAULT_ZONE_ID == SHANGHAI_ZONE_ID || DEFAULT_ZONE_ID.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
-            long seconds = IOUtils.utcSeconds(year, month, dom, hour, minute, second);
+            long seconds = DateUtils.utcSeconds(year, month, dom, hour, minute, second);
             int zoneOffsetTotalSeconds = IOUtils.getShanghaiZoneOffsetTotalSeconds(seconds);
             seconds -= zoneOffsetTotalSeconds;
             millis = seconds * 1000L;
