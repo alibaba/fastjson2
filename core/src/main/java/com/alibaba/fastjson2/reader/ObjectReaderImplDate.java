@@ -17,7 +17,7 @@ import java.util.Locale;
 public class ObjectReaderImplDate
         extends DateTimeCodec
         implements ObjectReader {
-    static final ObjectReaderImplDate INSTANCE = new ObjectReaderImplDate(null, null);
+    public static final ObjectReaderImplDate INSTANCE = new ObjectReaderImplDate(null, null);
 
     public static ObjectReaderImplDate of(String format, Locale locale) {
         if (format == null) {

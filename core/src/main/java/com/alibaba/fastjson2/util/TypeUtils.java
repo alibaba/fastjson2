@@ -1,10 +1,7 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
-import com.alibaba.fastjson2.reader.ObjectReaderImplInstant;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.reader.*;
 
 import java.lang.reflect.*;
 import java.math.BigDecimal;
@@ -17,6 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
+
+import static com.alibaba.fastjson2.util.IOUtils.*;
 
 public class TypeUtils {
     public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
@@ -101,19 +100,7 @@ public class TypeUtils {
         }
 
         if (obj instanceof String) {
-            String str = (String) obj;
-
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-
-            JSONReader jsonReader;
-            if (str.charAt(0) != '"') {
-                jsonReader = JSONReader.of('"' + str + '"');
-            } else {
-                jsonReader = JSONReader.of(str);
-            }
-            return jsonReader.read(Date.class);
+            return DateUtils.parseDate((String) obj);
         }
 
         if (obj instanceof Long) {
