@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,5 +29,9 @@ public class JSONFactoryTest {
         assertFalse(JSONFactory.isUseJacksonAnnotation());
         JSONFactory.setUseJacksonAnnotation(true);
         assertTrue(JSONFactory.isUseJacksonAnnotation());
+
+        ObjectWriterProvider provider = JSONFactory.getDefaultObjectWriterProvider();
+        JSONWriter.Context context = JSONFactory.createWriteContext(provider);
+        assertSame(provider, context.getProvider());
     }
 }
