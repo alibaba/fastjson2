@@ -133,7 +133,7 @@ public abstract class JSONPath {
                     || type == Boolean.class
                     || type == Character.class
                     || type == UUID.class
-                    || type.isEnum()
+                    || javaObject instanceof Enum
                     || javaObject instanceof Number
                     || javaObject instanceof Date;
 
