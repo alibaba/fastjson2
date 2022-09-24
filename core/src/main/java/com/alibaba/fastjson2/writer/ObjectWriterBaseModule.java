@@ -2,9 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.annotation.JSONType;
-import com.alibaba.fastjson2.annotation.JSONWritable;
+import com.alibaba.fastjson2.annotation.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.Filter;
@@ -65,8 +63,9 @@ public class ObjectWriterBaseModule
             Annotation[] annotations = objectClass.getAnnotations();
             for (Annotation annotation : annotations) {
                 Class annotationType = annotation.annotationType();
-                if (annotationType == JSONType.class) {
-                    jsonType = (JSONType) annotation;
+                JSONType foundJsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                if (Objects.nonNull(foundJsonType)) {
+                    jsonType = foundJsonType;
                     continue;
                 }
 
@@ -125,8 +124,9 @@ public class ObjectWriterBaseModule
                     Annotation[] mixInAnnotations = mixInSource.getAnnotations();
                     for (Annotation annotation : mixInAnnotations) {
                         Class<? extends Annotation> annotationType = annotation.annotationType();
-                        if (annotationType == JSONType.class) {
-                            jsonType = (JSONType) annotation;
+                        JSONType foundJsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                        if (Objects.nonNull(foundJsonType)) {
+                            jsonType = foundJsonType;
                             continue;
                         }
 
@@ -266,9 +266,11 @@ public class ObjectWriterBaseModule
             Annotation[] annotations = field.getAnnotations();
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                if (annotationType == JSONField.class) {
-                    jsonField = (JSONField) annotation;
+                JSONField foundJsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                if (Objects.nonNull(foundJsonField)) {
+                    jsonField = foundJsonField;
                 }
+
                 String annotationTypeName = annotationType.getName();
                 boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 switch (annotationTypeName) {
@@ -653,8 +655,9 @@ public class ObjectWriterBaseModule
         private void processAnnotations(FieldInfo fieldInfo, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                if (annotationType == JSONField.class) {
-                    loadFieldInfo(fieldInfo, (JSONField) annotation);
+                JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                if (Objects.nonNull(jsonField)) {
+                    loadFieldInfo(fieldInfo, jsonField);
                     continue;
                 }
 

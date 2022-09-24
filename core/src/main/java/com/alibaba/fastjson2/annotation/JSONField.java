@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  * the conversion process may not meet expectations. {@link JSONField} can not only solve this problem but also implement custom requirements.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 public @interface JSONField {
     /**
      * The order of the fields during
