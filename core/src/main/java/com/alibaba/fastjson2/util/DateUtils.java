@@ -7,12 +7,15 @@ import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.function.BiFunction;
 
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.IOUtils.OFFSET_0800_TOTAL_SECONDS;
 import static java.time.ZoneOffset.UTC;
 
 public class DateUtils {
+    static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
+
     public static Date parseDate(String str) {
         if (str == null) {
             return null;
@@ -2542,5 +2545,187 @@ public class DateUtils {
                 + hour * 3600
                 + minute * 60
                 + second;
+    }
+
+    public static String toString(Date date) {
+        return toString(date.getTime(), false, DEFAULT_ZONE_ID);
+    }
+
+    public static String toString(long timeMillis, boolean timeZone, ZoneId zoneId) {
+        final int SECONDS_PER_DAY = 60 * 60 * 24;
+
+        long epochSecond = Math.floorDiv(timeMillis, 1000L);
+        int offsetTotalSeconds;
+        if (zoneId == IOUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
+            offsetTotalSeconds = IOUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
+        } else {
+            Instant instant = Instant.ofEpochMilli(timeMillis);
+            offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
+        }
+
+        long localSecond = epochSecond + offsetTotalSeconds;
+        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+        int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+        int year, month, dayOfMonth;
+        {
+            final int DAYS_PER_CYCLE = 146097;
+            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+
+            long zeroDay = localEpochDay + DAYS_0000_TO_1970;
+            // find the march-based year
+            zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four year cycle
+            long adjust = 0;
+            if (zeroDay < 0) {
+                // adjust negative years to positive for calculation
+                long adjustCycles = (zeroDay + 1) / DAYS_PER_CYCLE - 1;
+                adjust = adjustCycles * 400;
+                zeroDay += -adjustCycles * DAYS_PER_CYCLE;
+            }
+            long yearEst = (400 * zeroDay + 591) / DAYS_PER_CYCLE;
+            long doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
+            if (doyEst < 0) {
+                // fix estimate
+                yearEst--;
+                doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
+            }
+            yearEst += adjust;  // reset any negative year
+            int marchDoy0 = (int) doyEst;
+
+            // convert march-based values back to january-based
+            int marchMonth0 = (marchDoy0 * 5 + 2) / 153;
+            month = (marchMonth0 + 2) % 12 + 1;
+            dayOfMonth = marchDoy0 - (marchMonth0 * 306 + 5) / 10 + 1;
+            yearEst += marchMonth0 / 10;
+
+            // check year now we are certain it is correct
+            if (yearEst < Year.MIN_VALUE || yearEst > Year.MAX_VALUE) {
+                throw new DateTimeException("Invalid year " + yearEst);
+            }
+
+            year = (int) yearEst;
+        }
+
+        int hour, minute, second;
+        {
+            final int MINUTES_PER_HOUR = 60;
+            final int SECONDS_PER_MINUTE = 60;
+            final int SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+
+            long secondOfDay = secsOfDay;
+            if (secondOfDay < 0 || secondOfDay > 86399) {
+                throw new DateTimeException("Invalid secondOfDay " + secondOfDay);
+            }
+            int hours = (int) (secondOfDay / SECONDS_PER_HOUR);
+            secondOfDay -= hours * SECONDS_PER_HOUR;
+            int minutes = (int) (secondOfDay / SECONDS_PER_MINUTE);
+            secondOfDay -= minutes * SECONDS_PER_MINUTE;
+
+            hour = hours;
+            minute = minutes;
+            second = (int) secondOfDay;
+        }
+
+        int millis = (int) Math.floorMod(timeMillis, 1000L);
+
+        int millislen;
+        if (millis == 0) {
+            millislen = 0;
+        } else if (millis < 10) {
+            millislen = 4;
+        } else {
+            if (millis % 100 == 0) {
+                millislen = 2;
+            } else if (millis % 10 == 0) {
+                millislen = 3;
+            } else {
+                millislen = 4;
+            }
+        }
+
+        int zonelen;
+        if (timeZone) {
+            zonelen = offsetTotalSeconds == 0 ? 1 : 6;
+        } else {
+            zonelen = 0;
+        }
+
+        int len = 19 + millislen + zonelen;
+        char[] chars = new char[len];
+        int off = 0;
+
+        chars[off + 0] = (char) (year / 1000 + '0');
+        chars[off + 1] = (char) ((year / 100) % 10 + '0');
+        chars[off + 2] = (char) ((year / 10) % 10 + '0');
+        chars[off + 3] = (char) (year % 10 + '0');
+        chars[off + 4] = '-';
+        chars[off + 5] = (char) (month / 10 + '0');
+        chars[off + 6] = (char) (month % 10 + '0');
+        chars[off + 7] = '-';
+        chars[off + 8] = (char) (dayOfMonth / 10 + '0');
+        chars[off + 9] = (char) (dayOfMonth % 10 + '0');
+        chars[off + 10] = ' ';
+        chars[off + 11] = (char) (hour / 10 + '0');
+        chars[off + 12] = (char) (hour % 10 + '0');
+        chars[off + 13] = ':';
+        chars[off + 14] = (char) (minute / 10 + '0');
+        chars[off + 15] = (char) (minute % 10 + '0');
+        chars[off + 16] = ':';
+        chars[off + 17] = (char) (second / 10 + '0');
+        chars[off + 18] = (char) (second % 10 + '0');
+        if (millislen > 0) {
+            chars[off + 19] = '.';
+            for (int i = 20; i < len; ++i) {
+                chars[i] = '0';
+            }
+            if (millis < 10) {
+                IOUtils.getChars(millis, off + 19 + millislen, chars);
+            } else {
+                if (millis % 100 == 0) {
+                    IOUtils.getChars(millis / 100, off + 19 + millislen, chars);
+                } else if (millis % 10 == 0) {
+                    IOUtils.getChars(millis / 10, off + 19 + millislen, chars);
+                } else {
+                    IOUtils.getChars(millis, off + 19 + millislen, chars);
+                }
+            }
+        }
+        if (timeZone) {
+            int timeZoneOffset = offsetTotalSeconds / 3600;
+            if (offsetTotalSeconds == 0) {
+                chars[off + 19 + millislen] = 'Z';
+            } else {
+                int offsetAbs = Math.abs(timeZoneOffset);
+
+                if (timeZoneOffset >= 0) {
+                    chars[off + 19 + millislen] = '+';
+                } else {
+                    chars[off + 19 + millislen] = '-';
+                }
+                chars[off + 19 + millislen + 1] = '0';
+                IOUtils.getChars(offsetAbs, off + 19 + millislen + 3, chars);
+                chars[off + 19 + millislen + 3] = ':';
+                chars[off + 19 + millislen + 4] = '0';
+                int offsetMinutes = (offsetTotalSeconds - timeZoneOffset * 3600) / 60;
+                if (offsetMinutes < 0) {
+                    offsetMinutes = -offsetMinutes;
+                }
+                IOUtils.getChars(offsetMinutes, off + 19 + millislen + zonelen, chars);
+            }
+        }
+
+        if (JDKUtils.JVM_VERSION == 8) {
+            if (STRING_CREATOR_JDK8 == null) {
+                try {
+                    STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            }
+            if (STRING_CREATOR_JDK8 != null) {
+                return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+            }
+        }
+
+        return new String(chars);
     }
 }
