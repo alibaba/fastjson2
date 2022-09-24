@@ -1543,8 +1543,8 @@ public class JSONObject
         Annotation[] annotations = method.getAnnotations();
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
-            if (annotationType == JSONField.class) {
-                JSONField jsonField = (JSONField) annotation;
+            JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+            if (Objects.nonNull(jsonField)) {
                 name = jsonField.name();
                 if (name.isEmpty()) {
                     name = null;

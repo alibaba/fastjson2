@@ -10,9 +10,7 @@ import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
@@ -369,8 +367,9 @@ public class ObjectReaderBaseModule
             JSONType jsonType = null;
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                if (annotationType == JSONType.class) {
-                    jsonType = (JSONType) annotation;
+                JSONType foundJsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                if (Objects.nonNull(foundJsonType)) {
+                    jsonType = foundJsonType;
                 }
 
                 if (annotationType == JSONReadable.class) {
@@ -560,7 +559,7 @@ public class ObjectReaderBaseModule
             if (builderClass != void.class && builderClass != Void.class) {
                 beanInfo.builder = builderClass;
 
-                JSONBuilder jsonBuilder = builderClass.getAnnotation(JSONBuilder.class);
+                JSONBuilder jsonBuilder = AnnotationUtils.findAnnotation(builderClass, JSONBuilder.class);
                 if (jsonBuilder != null) {
                     String buildMethodName = jsonBuilder.buildMethod();
                     beanInfo.buildMethod = BeanUtils.buildMethod(builderClass, buildMethodName);
@@ -670,8 +669,9 @@ public class ObjectReaderBaseModule
             Annotation[] annotations = method.getAnnotations();
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                if (annotationType == JSONField.class) {
-                    jsonField = (JSONField) annotation;
+                JSONField foundJsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                if (Objects.nonNull(foundJsonField)) {
+                    jsonField = foundJsonField;
                 }
 
                 boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
@@ -765,8 +765,9 @@ public class ObjectReaderBaseModule
             JSONField jsonField = null;
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                if (annotationType == JSONField.class) {
-                    jsonField = (JSONField) annotation;
+                JSONField foundJsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                if (Objects.nonNull(foundJsonField)) {
+                    jsonField = foundJsonField;
                 }
 
                 boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
@@ -1119,8 +1120,9 @@ public class ObjectReaderBaseModule
         JSONCreator jsonCreator = null;
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
-            if (annotationType == JSONCreator.class) {
-                jsonCreator = (JSONCreator) annotation;
+            JSONCreator foundJsonCreator = AnnotationUtils.findAnnotation(annotation, JSONCreator.class);
+            if (Objects.nonNull(foundJsonCreator)) {
+                jsonCreator = foundJsonCreator;
                 continue;
             }
 
@@ -1183,10 +1185,12 @@ public class ObjectReaderBaseModule
         JSONCreator jsonCreator = null;
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
-            if (annotationType == JSONCreator.class) {
-                jsonCreator = (JSONCreator) annotation;
+            JSONCreator foundJsonCreator = AnnotationUtils.findAnnotation(annotation, JSONCreator.class);
+            if (Objects.nonNull(foundJsonCreator)) {
+                jsonCreator = foundJsonCreator;
                 continue;
             }
+
             switch (annotationType.getName()) {
                 case "com.alibaba.fastjson.annotation.JSONCreator":
                     creatorMethod = true;

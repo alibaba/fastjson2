@@ -387,8 +387,9 @@ public abstract class BeanUtils {
                 boolean unwrapped = false;
                 for (Annotation annotation : annotations) {
                     Class<? extends Annotation> annotationType = annotation.annotationType();
-                    if (annotationType == JSONField.class) {
-                        if (((JSONField) annotation).unwrapped()) {
+                    JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                    if (Objects.nonNull(jsonField)) {
+                        if (jsonField.unwrapped()) {
                             unwrapped = true;
                             break;
                         }
@@ -681,7 +682,8 @@ public abstract class BeanUtils {
                     }
                 }
 
-                if (setterFound && unsetFound && getterFound && !method.isAnnotationPresent(JSONField.class)) {
+                if (setterFound && unsetFound && getterFound
+                        && !AnnotationUtils.hasAnnotation(method, JSONField.class)) {
                     continue;
                 }
             }
