@@ -429,12 +429,20 @@ final class JSONWriterJSONB
             }
         }
 
-        int symbol = -1;
+        boolean symbolExists = false;
+        int symbol;
         if (symbols != null) {
-            symbol = symbols.get(hash);
+            symbol = symbols.putIfAbsent(hash, symbolIndex);
+            if (symbol != symbolIndex) {
+                symbolExists = true;
+            } else {
+                symbolIndex++;
+            }
+        } else {
+            symbols = new TLongIntHashMap(hash, symbol = symbolIndex++);
         }
 
-        if (symbol != -1) {
+        if (symbolExists) {
             if (off == bytes.length) {
                 int minCapacity = off + 1;
                 int oldCapacity = bytes.length;
@@ -454,11 +462,6 @@ final class JSONWriterJSONB
             writeInt32(symbol);
             return false;
         }
-
-        if (symbols == null) {
-            symbols = new TLongIntHashMap();
-        }
-        symbols.put(hash, symbol = symbolIndex++);
 
         int minCapacity = off + 2 + typeName.length;
         if (minCapacity - bytes.length > 0) {
@@ -512,10 +515,10 @@ final class JSONWriterJSONB
 
         if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
             int coder = UnsafeUtils.getStringCoder(str);
-            byte[] value = UnsafeUtils.getStringValue(str);
 
             if (coder == 0) {
-                int minCapacity = value.length
+                int strlen = str.length();
+                int minCapacity = str.length()
                         + off
                         + 5 /*max str len*/
                         + 1;
@@ -534,7 +537,6 @@ final class JSONWriterJSONB
                     bytes = Arrays.copyOf(bytes, newCapacity);
                 }
 
-                int strlen = value.length;
                 if (strlen <= STR_ASCII_FIX_LEN) {
                     bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
                 } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
@@ -545,10 +547,11 @@ final class JSONWriterJSONB
                     bytes[off++] = BC_STR_ASCII;
                     writeInt32(strlen);
                 }
-                System.arraycopy(value, 0, bytes, off, strlen);
+                str.getBytes(0, strlen, bytes, off);
                 off += strlen;
                 return;
             } else {
+                byte[] value = UnsafeUtils.getStringValue(str);
                 int check_cnt = 128;
                 if (check_cnt > value.length) {
                     check_cnt = value.length;
@@ -1522,12 +1525,42 @@ final class JSONWriterJSONB
             }
         }
 
-        int symbol = -1;
-        if (symbols != null) {
-            symbol = symbols.get(nameHash);
+        if ((context.features & Feature.WriteNameAsSymbol.mask) == 0) {
+            int minCapacity = this.off + name.length;
+            if (minCapacity - this.bytes.length > 0) {
+                int oldCapacity = this.bytes.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
+                }
+                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    throw new OutOfMemoryError();
+                }
+
+                // minCapacity is usually close to size, so this is a win:
+                this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+            }
+
+            System.arraycopy(name, 0, this.bytes, off, name.length);
+            off += name.length;
+            return;
         }
 
-        if (symbol != -1) {
+        boolean symbolExists = false;
+        int symbol;
+        if (symbols != null) {
+            symbol = symbols.putIfAbsent(nameHash, symbolIndex);
+            if (symbol != symbolIndex) {
+                symbolExists = true;
+            } else {
+                symbolIndex++;
+            }
+        } else {
+            symbols = new TLongIntHashMap();
+            symbols.put(nameHash, symbol = symbolIndex++);
+        }
+
+        if (symbolExists) {
             int minCapacity = this.off + 2;
             if (minCapacity - this.bytes.length > 0) {
                 int oldCapacity = this.bytes.length;
@@ -1550,32 +1583,6 @@ final class JSONWriterJSONB
             }
             return;
         }
-
-        if ((context.features & Feature.WriteNameAsSymbol.mask) == 0) {
-            int minCapacity = this.off + name.length;
-            if (minCapacity - this.bytes.length > 0) {
-                int oldCapacity = this.bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                this.bytes = Arrays.copyOf(this.bytes, newCapacity);
-            }
-
-            System.arraycopy(name, 0, this.bytes, off, name.length);
-            off += name.length;
-            return;
-        }
-
-        if (symbols == null) {
-            symbols = new TLongIntHashMap();
-        }
-        symbols.put(nameHash, symbol = symbolIndex++);
 
         int minCapacity = this.off + 2 + name.length;
         if (minCapacity - this.bytes.length > 0) {

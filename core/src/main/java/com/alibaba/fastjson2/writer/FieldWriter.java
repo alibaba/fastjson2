@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
@@ -36,7 +33,7 @@ public abstract class FieldWriter<T>
     final Type fieldType;
     final Class fieldClass;
     final boolean fieldClassSerializable;
-    JSONWriter.Path rootParentPath;
+    final JSONWriter.Path rootParentPath;
 
     final Field field;
     final Method method;
@@ -44,6 +41,8 @@ public abstract class FieldWriter<T>
     final boolean symbol;
     final boolean trim;
     final boolean raw;
+
+    transient JSONWriter.Path path;
 
     FieldWriter(
             String name,
@@ -71,6 +70,7 @@ public abstract class FieldWriter<T>
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);
         this.raw = (features & FieldInfo.RAW_VALUE_MASK) != 0;
+        this.rootParentPath = new JSONWriter.Path(JSONWriter.Path.ROOT, name);
 
         int nameLength = name.length();
         int utflen = nameLength + 3;
@@ -201,11 +201,20 @@ public abstract class FieldWriter<T>
         jsonWriter.writeColon();
     }
 
-    public JSONWriter.Path getRootParentPath() {
-        if (rootParentPath == null) {
-            rootParentPath = new JSONWriter.Path(JSONWriter.Path.ROOT, name);
-        }
+    public final JSONWriter.Path getRootParentPath() {
         return rootParentPath;
+    }
+
+    public final JSONWriter.Path getPath(JSONWriter.Path parent) {
+        if (path == null) {
+            return path = new JSONWriter.Path(parent, name);
+        }
+
+        if (path.parent == parent) {
+            return path;
+        }
+
+        return new JSONWriter.Path(parent, name);
     }
 
     public Type getItemType() {
