@@ -264,7 +264,33 @@ final class JSONWriterJSONB
 
     @Override
     public void writeString(char[] chars, int off, int len, boolean quote) {
-        throw new JSONException("unsupported operation");
+        if (chars == null) {
+            writeNull();
+            return;
+        }
+
+        boolean ascii = true;
+        for (int i = 0; i < len; ++i) {
+            if (chars[i + off] > 0x007F) {
+                ascii = false;
+                break;
+            }
+        }
+
+        if (ascii) {
+            if (len <= STR_ASCII_FIX_LEN) {
+                bytes[this.off++] = (byte) (len + BC_STR_ASCII_FIX_MIN);
+            } else {
+                bytes[this.off++] = BC_STR_ASCII;
+                writeInt32(len);
+            }
+            for (int i = 0; i < len; ++i) {
+                bytes[this.off++] = (byte) chars[off + i];
+            }
+            return;
+        }
+
+        writeString(new String(chars, off, len));
     }
 
     @Override

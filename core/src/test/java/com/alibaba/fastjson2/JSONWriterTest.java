@@ -686,24 +686,102 @@ public class JSONWriterTest {
     }
 
     @Test
-    public void writeStringUTF8_3() {
-        char[] chars = new char[128];
-        for (int i = 0; i < 128; ++i) {
-            chars[i] = (char) i;
+    public void writeString_latin() {
+        int[] ranges = {
+                0x0000, 0x007F,
+                0x0080, 0x00FF,
+                0x0100, 0x017F,
+                0x0180, 0x024F,
+                0x0250, 0x02AF,
+                0x02B0, 0x02FF,
+                0x1D00, 0x1D7F,
+                0x1D80, 0x1DBF,
+                0x1E00, 0x1EFF,
+                0x2070, 0x209F,
+                0x2100, 0x214F,
+                0x2150, 0x218F,
+                0x2C60, 0x2C7F,
+                0xA720, 0xA7FF,
+                0xAB30, 0xAB6F,
+                0xFF00, 0xFFEF,
+                'A', 'Z',
+                'a', 'z',
+                '0', '9'
+        };
+
+        String[] strings = new String[1 + ranges.length / 2];
+
+        {
+            int size = 0, strIndex = 0;
+            for (int i = 0; i < ranges.length; i += 2) {
+                int start = ranges[i];
+                int end = ranges[i + 1];
+
+                size += (end - start) + 1;
+            }
+            char[] chars = new char[size];
+            int off = 0;
+            for (int i = 0; i < ranges.length; i += 2) {
+                int start = ranges[i];
+                int end = ranges[i + 1];
+
+                char[] rangeChars = new char[end - start + 1];
+                for (int j = start; j <= end; j++) {
+                    chars[off++] = (char) j;
+                    rangeChars[j - start] = (char) j;
+                }
+                strings[strIndex++] = new String(rangeChars);
+            }
+
+            strings[strIndex] = new String(chars);
         }
 
-        String str = new String(chars);
-        {
-            JSONWriter jsonWriter = JSONWriter.ofUTF8();
-            jsonWriter.writeString(str);
-            String json = jsonWriter.toString();
-            assertEquals(str, JSON.parse(json));
-        }
-        {
-            JSONWriter jsonWriter = JSONWriter.ofUTF8();
-            jsonWriter.writeString(chars, 0, chars.length, true);
-            String json = jsonWriter.toString();
-            assertEquals(str, JSON.parse(json));
+        for (String str : strings) {
+            char[] chars = str.toCharArray();
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeString(str);
+                String json = jsonWriter.toString();
+                assertEquals(str, JSON.parse(json));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF8();
+                jsonWriter.writeString(chars, 0, chars.length, true);
+                String json = jsonWriter.toString();
+                assertEquals(str, JSON.parse(json));
+            }
+
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeString(str);
+                String json = jsonWriter.toString();
+                assertEquals(str, JSON.parse(json));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofUTF16();
+                jsonWriter.writeString(chars, 0, chars.length, true);
+                String json = jsonWriter.toString();
+                assertEquals(str, JSON.parse(json));
+            }
+
+            {
+                JSONWriter jsonWriter = JSONWriter.ofJSONB();
+                jsonWriter.writeString(str);
+                byte[] jsonbBytes = jsonWriter.getBytes();
+                assertEquals(str, JSONB.parse(jsonbBytes));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofJSONB();
+                jsonWriter.writeString(chars, 0, chars.length, true);
+                byte[] jsonbBytes = jsonWriter.getBytes();
+                assertEquals(str, JSONB.parse(jsonbBytes));
+            }
+            {
+                JSONWriter jsonWriter = JSONWriter.ofJSONB();
+                jsonWriter.writeString(chars);
+                byte[] jsonbBytes = jsonWriter.getBytes();
+                assertEquals(str, JSONB.parse(jsonbBytes));
+            }
         }
     }
 }
