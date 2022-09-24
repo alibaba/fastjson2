@@ -42,8 +42,15 @@ public class EishayParseBinaryAutoType {
     static byte[] fastjson2JSONBBytes_symbols;
     static byte[] hessianBytes;
     static byte[] javaSerializeBytes;
+//    static byte[] furyBytes;
 
     static JSONReader.AutoTypeBeforeHandler autoTypeFilter = JSONReader.autoTypeFilter(true, Media.class, MediaContent.class, Image.class);
+//    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
+//            .withLanguage(io.fury.Language.JAVA)
+//            .withReferenceTracking(true)
+//            .disableSecureMode()
+//            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
+//            .buildThreadSafeFury();
 
     static {
         try {
@@ -88,9 +95,16 @@ public class EishayParseBinaryAutoType {
                 objectOutputStream.flush();
                 javaSerializeBytes = byteArrayOutputStream.toByteArray();
             }
+
+//            furyBytes = fury.serialize(mc);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
+    }
+
+    @Benchmark
+    public void fury(Blackhole bh) {
+//        bh.consume(fury.deserialize(furyBytes));
     }
 
     @Benchmark
