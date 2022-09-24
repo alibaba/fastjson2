@@ -2877,7 +2877,7 @@ public class ObjectWriterCreatorASM
         Class objectClass = mwc.objectClass;
         final String TYPE_OBJECT = ASMUtils.type(objectClass);
         Class fieldClass = fieldWriter.fieldClass;
-        Member member = fieldWriter.getFieldOrMethod();
+        Member member = fieldWriter.field != null ? fieldWriter.field : fieldWriter.method;
 
         if (member instanceof Method) {
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);

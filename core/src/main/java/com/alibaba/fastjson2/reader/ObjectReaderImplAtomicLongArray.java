@@ -11,12 +11,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 final class ObjectReaderImplAtomicLongArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplAtomicLongArray INSTANCE = new ObjectReaderImplAtomicLongArray();
 
-    @Override
-    public Class getObjectClass() {
-        return AtomicLongArray.class;
+    public ObjectReaderImplAtomicLongArray() {
+        super(AtomicLongArray.class);
     }
 
     @Override

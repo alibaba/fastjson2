@@ -22,7 +22,7 @@ public class ObjectWriterAdapter<T>
 
     static final String TYPE = "@type";
 
-    final Class objectType;
+    final Class objectClass;
     final List<FieldWriter> fieldWriters;
     protected final FieldWriter[] fieldWriterArray;
 
@@ -44,32 +44,32 @@ public class ObjectWriterAdapter<T>
     final boolean serializable;
     final boolean containsNoneFieldGetter;
 
-    public ObjectWriterAdapter(Class<T> objectType, List<FieldWriter> fieldWriters) {
-        this(objectType, null, null, 0, fieldWriters);
+    public ObjectWriterAdapter(Class<T> objectClass, List<FieldWriter> fieldWriters) {
+        this(objectClass, null, null, 0, fieldWriters);
     }
 
     public ObjectWriterAdapter(
-            Class<T> objectType,
+            Class<T> objectClass,
             String typeKey,
             String typeName,
             long features,
             List<FieldWriter> fieldWriters
     ) {
-        if (typeName == null && objectType != null) {
-            if (Enum.class.isAssignableFrom(objectType) && !objectType.isEnum()) {
-                typeName = objectType.getSuperclass().getName();
+        if (typeName == null && objectClass != null) {
+            if (Enum.class.isAssignableFrom(objectClass) && !objectClass.isEnum()) {
+                typeName = objectClass.getSuperclass().getName();
             } else {
-                typeName = TypeUtils.getTypeName(objectType);
+                typeName = TypeUtils.getTypeName(objectClass);
             }
         }
 
-        this.objectType = objectType;
+        this.objectClass = objectClass;
         this.typeKey = typeKey == null || typeKey.isEmpty() ? TYPE : typeKey;
         this.typeName = typeName;
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
         this.features = features;
         this.fieldWriters = fieldWriters;
-        this.serializable = java.io.Serializable.class.isAssignableFrom(objectType);
+        this.serializable = java.io.Serializable.class.isAssignableFrom(objectClass);
 
         this.fieldWriterArray = new FieldWriter[fieldWriters.size()];
         fieldWriters.toArray(fieldWriterArray);
@@ -105,22 +105,22 @@ public class ObjectWriterAdapter<T>
         return features;
     }
 
-    public ObjectWriterAdapter(Class<T> objectType, long features, FieldWriter... fieldWriters) {
-        this.objectType = objectType;
+    public ObjectWriterAdapter(Class<T> objectClass, long features, FieldWriter... fieldWriters) {
+        this.objectClass = objectClass;
         this.typeKey = TYPE;
         this.fieldWriters = Arrays.asList(fieldWriters);
         this.fieldWriterArray = fieldWriters;
         this.features = features;
         this.hasValueField = fieldWriterArray.length == 1
                 && (fieldWriterArray[0].features & FieldInfo.VALUE_MASK) != 0;
-        this.serializable = objectType == null || java.io.Serializable.class.isAssignableFrom(objectType);
+        this.serializable = objectClass == null || java.io.Serializable.class.isAssignableFrom(objectClass);
 
         String typeName = null;
-        if (objectType != null) {
-            if (Enum.class.isAssignableFrom(objectType) && !objectType.isEnum()) {
-                typeName = objectType.getSuperclass().getName();
+        if (objectClass != null) {
+            if (Enum.class.isAssignableFrom(objectClass) && !objectClass.isEnum()) {
+                typeName = objectClass.getSuperclass().getName();
             } else {
-                typeName = TypeUtils.getTypeName(objectType);
+                typeName = TypeUtils.getTypeName(objectClass);
             }
         }
         this.typeName = typeName;
@@ -194,7 +194,6 @@ public class ObjectWriterAdapter<T>
             writeClassInfo(jsonWriter);
         }
 
-        List<FieldWriter> fieldWriters = getFieldWriters();
         int size = fieldWriters.size();
         jsonWriter.startArray(size);
         for (int i = 0; i < size; ++i) {
@@ -411,7 +410,6 @@ public class ObjectWriterAdapter<T>
         PropertyFilter propertyFilter = context.getPropertyFilter();
         LabelFilter labelFilter = context.getLabelFilter();
 
-        List<FieldWriter> fieldWriters = getFieldWriters();
         for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
             FieldWriter fieldWriter = fieldWriters.get(i);
 
@@ -468,7 +466,7 @@ public class ObjectWriterAdapter<T>
 
             if (contextNameFilter != null) {
                 beanContext = new BeanContext(
-                        objectType,
+                        objectClass,
                         fieldWriter.method,
                         field,
                         fieldWriter.fieldName,
@@ -496,7 +494,7 @@ public class ObjectWriterAdapter<T>
             if (contextValueFilter != null) {
                 if (beanContext == null) {
                     beanContext = new BeanContext(
-                            objectType,
+                            objectClass,
                             fieldWriter.method,
                             field,
                             fieldWriter.fieldName,
@@ -586,10 +584,10 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public String toString() {
-        return objectType.getName();
+        return objectClass.getName();
     }
 
     protected void errorOnNoneSerializable() {
-        throw new JSONException("not support none serializable class " + objectType.getName());
+        throw new JSONException("not support none serializable class " + objectClass.getName());
     }
 }

@@ -1707,7 +1707,7 @@ public class ObjectReaderBaseModule
                 BeanInfo beanInfo = new BeanInfo();
                 annotationProcessor.getBeanInfo(beanInfo, objectClass);
                 if (beanInfo.seeAlso != null && beanInfo.seeAlso.length == 0) {
-                    return new InterfaceImpl(type);
+                    return new ObjectReaderInterfaceImpl(type);
                 }
             }
         }
@@ -1933,100 +1933,5 @@ public class ObjectReaderBaseModule
             return new ObjectReaderImplMapString(mapType, instanceType, 0);
         }
         return new ObjectReaderImplMapTyped(mapType, instanceType, keyType, valueType, 0, null);
-    }
-
-    abstract static class PrimitiveImpl<T>
-            implements ObjectReader<T> {
-        @Override
-        public T createInstance(long features) {
-            throw new JSONException("UnsupportedOperation");
-        }
-
-        @Override
-        public FieldReader getFieldReader(long hashCode) {
-            return null;
-        }
-
-        @Override
-        public abstract T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features);
-    }
-
-    static class InterfaceImpl
-            extends PrimitiveImpl {
-        final Type interfaceType;
-        final Class interfaceClass;
-
-        public InterfaceImpl(Type interfaceType) {
-            this.interfaceType = interfaceType;
-            this.interfaceClass = TypeUtils.getClass(interfaceType);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-            if (jsonReader.nextIfMatch('{')) {
-                long hash = jsonReader.readFieldNameHashCode();
-                JSONReader.Context context = jsonReader.getContext();
-
-                if (hash == HASH_TYPE && context.isEnabled(JSONReader.Feature.SupportAutoType)) {
-                    long typeHash = jsonReader.readTypeHashCode();
-                    ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
-                    if (autoTypeObjectReader == null) {
-                        String typeName = jsonReader.getString();
-                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, interfaceClass);
-
-                        if (autoTypeObjectReader == null) {
-                            throw new JSONException(jsonReader.info("auoType not support : " + typeName));
-                        }
-                    }
-
-                    return autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
-                }
-
-                return ObjectReaderImplMap.INSTANCE.readObject(jsonReader, fieldType, fieldName, 0);
-            }
-
-            Object value;
-            switch (jsonReader.current()) {
-                case '-':
-                case '+':
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                case '.':
-                    value = jsonReader.readNumber();
-                    break;
-                case '[':
-                    value = jsonReader.readArray();
-                    break;
-                case '"':
-                case '\'':
-                    value = jsonReader.readString();
-                    break;
-                case 't':
-                case 'f':
-                    value = jsonReader.readBoolValue();
-                    break;
-                case 'n':
-                    jsonReader.readNull();
-                    value = null;
-                    break;
-                default:
-                    throw new JSONException(jsonReader.info());
-            }
-
-            return value;
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-            return jsonReader.readAny();
-        }
     }
 }

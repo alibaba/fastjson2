@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ObjectReaderBaseModuleTest {
     @Test
     public void test() {
-        ObjectReaderBaseModule.PrimitiveImpl impl = new ObjectReaderBaseModule.PrimitiveImpl() {
+        ObjectReaderPrimitive impl = new ObjectReaderPrimitive(Object.class) {
             @Override
             public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
                 return null;

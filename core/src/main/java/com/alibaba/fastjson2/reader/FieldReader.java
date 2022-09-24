@@ -27,12 +27,13 @@ public abstract class FieldReader<T>
     public final Method method;
     public final Field field;
     public final Object defaultValue;
+    public final Locale locale;
+    public final JSONSchema schema;
 
     final boolean fieldClassSerializable;
     final long fieldNameHash;
     final long fieldNameHashLCase;
-    final Locale locale;
-    final JSONSchema schema;
+
     volatile ObjectReader reader;
 
     volatile JSONPath referenceCache;
@@ -162,10 +163,6 @@ public abstract class FieldReader<T>
         return reader = context.getObjectReader(fieldType);
     }
 
-    public JSONSchema getSchema() {
-        return schema;
-    }
-
     public Type getItemType() {
         return itemType;
     }
@@ -192,6 +189,10 @@ public abstract class FieldReader<T>
 
     @Override
     public String toString() {
+        Member member = this.method != null ? this.method : this.field;
+        if (member != null) {
+            return member.getName();
+        }
         return fieldName;
     }
 

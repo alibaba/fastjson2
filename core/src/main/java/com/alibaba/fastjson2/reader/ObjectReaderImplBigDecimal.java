@@ -9,13 +9,12 @@ import java.util.Map;
 import java.util.function.Function;
 
 final class ObjectReaderImplBigDecimal
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     private Function converter = new ToBigDecimal();
     static final ObjectReaderImplBigDecimal INSTANCE = new ObjectReaderImplBigDecimal();
 
-    @Override
-    public Class getObjectClass() {
-        return BigDecimal.class;
+    public ObjectReaderImplBigDecimal() {
+        super(BigDecimal.class);
     }
 
     @Override

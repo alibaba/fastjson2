@@ -6,14 +6,13 @@ import com.alibaba.fastjson2.util.Fnv;
 import java.lang.reflect.Type;
 
 public final class ObjectReaderImplShort
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplShort INSTANCE = new ObjectReaderImplShort();
 
     public static final long HASH_TYPE = Fnv.hashCode64("S");
 
-    @Override
-    public Class getObjectClass() {
-        return Short.class;
+    public ObjectReaderImplShort() {
+        super(Short.class);
     }
 
     @Override

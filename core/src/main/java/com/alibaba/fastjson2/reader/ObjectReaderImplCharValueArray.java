@@ -9,13 +9,12 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 final class ObjectReaderImplCharValueArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplCharValueArray INSTANCE = new ObjectReaderImplCharValueArray();
     static final long TYPE_HASH = Fnv.hashCode64("[C");
 
-    @Override
-    public Class getObjectClass() {
-        return char[].class;
+    ObjectReaderImplCharValueArray() {
+        super(char[].class);
     }
 
     @Override

@@ -6,12 +6,11 @@ import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicInteger;
 
 final class ObjectReaderImplAtomicInteger
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplAtomicInteger INSTANCE = new ObjectReaderImplAtomicInteger();
 
-    @Override
-    public Class getObjectClass() {
-        return AtomicInteger.class;
+    public ObjectReaderImplAtomicInteger() {
+        super(AtomicInteger.class);
     }
 
     @Override

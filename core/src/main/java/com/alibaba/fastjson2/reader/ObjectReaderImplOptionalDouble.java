@@ -6,12 +6,11 @@ import java.lang.reflect.Type;
 import java.util.OptionalDouble;
 
 class ObjectReaderImplOptionalDouble
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplOptionalDouble INSTANCE = new ObjectReaderImplOptionalDouble();
 
-    @Override
-    public Class getObjectClass() {
-        return OptionalDouble.class;
+    public ObjectReaderImplOptionalDouble() {
+        super(OptionalDouble.class);
     }
 
     @Override

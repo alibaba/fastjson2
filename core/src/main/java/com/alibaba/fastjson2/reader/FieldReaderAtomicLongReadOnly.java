@@ -48,9 +48,4 @@ final class FieldReaderAtomicLongReadOnly<T>
 
         return new AtomicLong(longValue);
     }
-
-    @Override
-    public String toString() {
-        return method.getName();
-    }
 }

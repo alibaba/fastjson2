@@ -13,8 +13,12 @@ import java.util.function.Supplier;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 public final class ObjectReaderImplObject
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     public static final ObjectReaderImplObject INSTANCE = new ObjectReaderImplObject();
+
+    public ObjectReaderImplObject() {
+        super(Object.class);
+    }
 
     @Override
     public Object createInstance(long features) {

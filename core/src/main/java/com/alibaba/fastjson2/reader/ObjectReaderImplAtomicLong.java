@@ -6,12 +6,11 @@ import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicLong;
 
 final class ObjectReaderImplAtomicLong
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplAtomicLong INSTANCE = new ObjectReaderImplAtomicLong();
 
-    @Override
-    public Class getObjectClass() {
-        return AtomicLong.class;
+    public ObjectReaderImplAtomicLong() {
+        super(AtomicLong.class);
     }
 
     @Override

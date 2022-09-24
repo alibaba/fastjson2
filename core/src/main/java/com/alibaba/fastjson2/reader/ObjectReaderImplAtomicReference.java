@@ -6,18 +6,14 @@ import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class ObjectReaderImplAtomicReference
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplAtomicReference INSTANCE = new ObjectReaderImplAtomicReference(Object.class);
 
     final Type referenceType;
 
     public ObjectReaderImplAtomicReference(Type referenceType) {
+        super(AtomicReference.class);
         this.referenceType = referenceType;
-    }
-
-    @Override
-    public Class getObjectClass() {
-        return AtomicReference.class;
     }
 
     @Override

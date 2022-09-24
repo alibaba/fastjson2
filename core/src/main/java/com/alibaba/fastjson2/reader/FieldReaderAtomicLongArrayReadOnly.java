@@ -78,9 +78,4 @@ final class FieldReaderAtomicLongArrayReadOnly<T>
         }
         return jsonReader.readArray(Long.class);
     }
-
-    @Override
-    public String toString() {
-        return method.getName();
-    }
 }

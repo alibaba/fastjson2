@@ -12,14 +12,14 @@ import java.util.Collection;
 import java.util.function.Function;
 
 class ObjectReaderImplDoubleValueArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplDoubleValueArray INSTANCE = new ObjectReaderImplDoubleValueArray();
     static final long TYPE_HASH = Fnv.hashCode64("[D");
 
-    @Override
-    public Class getObjectClass() {
-        return double[].class;
+    ObjectReaderImplDoubleValueArray() {
+        super(double[].class);
     }
+
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.readIfNull()) {

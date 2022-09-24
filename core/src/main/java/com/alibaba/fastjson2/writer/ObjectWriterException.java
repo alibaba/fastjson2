@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 public class ObjectWriterException
-        extends ObjectWriterAdapter {
+        extends ObjectWriterAdapter<Exception> {
     public ObjectWriterException(Class objectType, long features, List<FieldWriter> fieldWriters) {
         super(objectType, null, null, features, fieldWriters);
     }
@@ -15,7 +15,6 @@ public class ObjectWriterException
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         writeClassInfo(jsonWriter);
 
-        List<FieldWriter> fieldWriters = getFieldWriters();
         int size = fieldWriters.size();
         jsonWriter.startObject();
         for (int i = 0; i < size; ++i) {
@@ -36,8 +35,6 @@ public class ObjectWriterException
             writeWithFilter(jsonWriter, object);
             return;
         }
-
-        List<FieldWriter> fieldWriters = getFieldWriters();
 
         jsonWriter.startObject();
 
