@@ -2823,7 +2823,7 @@ public interface JSON {
 
             List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
             for (FieldWriter fieldWriter : fieldWriters) {
-                FieldReader fieldReader = objectReader.getFieldReader(fieldWriter.getFieldName());
+                FieldReader fieldReader = objectReader.getFieldReader(fieldWriter.fieldName);
                 if (fieldReader == null) {
                     continue;
                 }

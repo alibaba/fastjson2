@@ -19,7 +19,7 @@ public class FieldReaderBigIntegerFuncTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals(new BigInteger("123"), bean.value);
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
 
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
 

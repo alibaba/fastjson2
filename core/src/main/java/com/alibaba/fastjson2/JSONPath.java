@@ -1735,7 +1735,7 @@ public abstract class JSONPath {
 
             if (value != null) {
                 Class<?> valueClass = value.getClass();
-                Class fieldClass = fieldReader.getFieldClass();
+                Class fieldClass = fieldReader.fieldClass;
                 if (valueClass != fieldClass) {
                     java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
                     if (typeConvert != null) {
@@ -1778,7 +1778,7 @@ public abstract class JSONPath {
 
             if (value != null) {
                 Class<?> valueClass = value.getClass();
-                Class fieldClass = fieldReader.getFieldClass();
+                Class fieldClass = fieldReader.fieldClass;
                 if (valueClass != fieldClass) {
                     java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
                     if (typeConvert != null) {
@@ -3884,7 +3884,7 @@ public abstract class JSONPath {
 
             if (value != null) {
                 Class<?> valueClass = value.getClass();
-                Class fieldClass = fieldReader.getFieldClass();
+                Class fieldClass = fieldReader.fieldClass;
                 if (valueClass != fieldClass) {
                     java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
                     if (typeConvert != null) {

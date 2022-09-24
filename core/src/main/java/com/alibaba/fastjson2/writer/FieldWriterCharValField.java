@@ -16,7 +16,7 @@ final class FieldWriterCharValField<T>
         try {
             return field.getChar(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

@@ -197,7 +197,7 @@ final class ObjectReader1<T>
 
     @Override
     protected void initDefaultValue(T object) {
-        fieldReader.setDefault(object);
+        fieldReader.acceptDefaultValue(object);
     }
 
     @Override

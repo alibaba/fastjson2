@@ -26,7 +26,7 @@ final class FieldWriterMillisField<T>
         try {
             return field.getLong(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

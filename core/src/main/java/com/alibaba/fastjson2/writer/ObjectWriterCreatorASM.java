@@ -171,7 +171,7 @@ public class ObjectWriterCreatorASM
                 fieldInfo.init();
                 FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
-                    fieldWriterMap.put(fieldWriter.getFieldName(), fieldWriter);
+                    fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
                 }
             });
             fieldWriters = new ArrayList<>(fieldWriterMap.values());
@@ -188,11 +188,11 @@ public class ObjectWriterCreatorASM
 
             if (fieldWritersCreated) {
                 for (FieldWriter fieldWriter : fieldWriterList) {
-                    Method method = fieldWriter.getMethod();
+                    Method method = fieldWriter.method;
                     if (method == null) {
                         return super.createObjectWriter(objectClass, writerFeatures, modules);
                     }
-                    fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
+                    fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
                 }
             } else {
                 final FieldInfo fieldInfo = new FieldInfo();
@@ -206,7 +206,7 @@ public class ObjectWriterCreatorASM
                         fieldInfo.init();
                         FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
-                            fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
+                            fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
                         }
                     });
                 }
@@ -326,7 +326,7 @@ public class ObjectWriterCreatorASM
 
         if (!publicClass || externalClass) {
             for (FieldWriter fieldWriter : fieldWriters) {
-                if (fieldWriter.getMethod() != null) {
+                if (fieldWriter.method != null) {
                     match = false;
                     break;
                 }
@@ -335,8 +335,8 @@ public class ObjectWriterCreatorASM
 
         for (FieldWriter fieldWriter : fieldWriters) {
             if (fieldWriter.getInitWriter() != null
-                    || (fieldWriter.getFeatures() & FieldInfo.VALUE_MASK) != 0
-                    || (fieldWriter.getFeatures() & FieldInfo.RAW_VALUE_MASK) != 0
+                    || (fieldWriter.features & FieldInfo.VALUE_MASK) != 0
+                    || (fieldWriter.features & FieldInfo.RAW_VALUE_MASK) != 0
             ) {
                 match = false;
                 break;
@@ -720,8 +720,8 @@ public class ObjectWriterCreatorASM
             int i,
             boolean table
     ) {
-        long features = fieldWriter.getFeatures() | mwc.objectFeatures;
-        Class<?> fieldClass = fieldWriter.getFieldClass();
+        long features = fieldWriter.features | mwc.objectFeatures;
+        Class<?> fieldClass = fieldWriter.fieldClass;
 
         boolean beanToArray = (features & JSONWriter.Feature.BeanToArray.mask) != 0 || table;
 
@@ -763,8 +763,8 @@ public class ObjectWriterCreatorASM
             int i,
             boolean beanToArray
     ) {
-        Class<?> fieldClass = fieldWriter.getFieldClass();
-        String fieldName = fieldWriter.getFieldName();
+        Class<?> fieldClass = fieldWriter.fieldClass;
+        String fieldName = fieldWriter.fieldName;
 
         String classNameType = mwc.classNameType;
         MethodWriter mw = mwc.mw;
@@ -839,8 +839,8 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
         mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
         mw.visitLdcInsn(fieldName);
-        mwc.loadFieldType(i, fieldWriter.getFieldType());
-        mw.visitLdcInsn(fieldWriter.getFeatures());
+        mwc.loadFieldType(i, fieldWriter.fieldType);
+        mw.visitLdcInsn(fieldWriter.features);
         mw.visitMethodInsn(
                 Opcodes.INVOKEINTERFACE,
                 TYPE_OBJECT_WRITER,
@@ -864,9 +864,9 @@ public class ObjectWriterCreatorASM
             int OBJECT,
             int i
     ) {
-        Type fieldType = fieldWriter.getFieldType();
-        Class<?> fieldClass = fieldWriter.getFieldClass();
-        String fieldName = fieldWriter.getFieldName();
+        Type fieldType = fieldWriter.fieldType;
+        Class<?> fieldClass = fieldWriter.fieldClass;
+        String fieldName = fieldWriter.fieldName;
 
         String classNameType = mwc.classNameType;
         MethodWriter mw = mwc.mw;
@@ -986,7 +986,7 @@ public class ObjectWriterCreatorASM
 
     private void gwValue(MethodWriterContext mwc, FieldWriter fieldWriter, int OBJECT) {
         MethodWriter mw = mwc.mw;
-        Class fieldClass = fieldWriter.getFieldClass();
+        Class fieldClass = fieldWriter.fieldClass;
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
         genGetObject(mwc, fieldWriter, OBJECT);
@@ -1154,7 +1154,7 @@ public class ObjectWriterCreatorASM
             int i
     ) {
         Class objectType = mwc.objectClass;
-        Class<?> fieldClass = fieldWriter.getFieldClass();
+        Class<?> fieldClass = fieldWriter.fieldClass;
 
         final String TYPE_OBJECT = ASMUtils.type(objectType);
 
@@ -1194,8 +1194,8 @@ public class ObjectWriterCreatorASM
             FieldWriter fieldWriter,
             String TYPE_OBJECT
     ) {
-        Class<?> fieldClass = fieldWriter.getFieldClass();
-        String fieldName = fieldWriter.getFieldName();
+        Class<?> fieldClass = fieldWriter.fieldClass;
+        String fieldName = fieldWriter.fieldName;
 
         MethodWriter mw = mwc.mw;
         int FIELD_VALUE = mwc.var(fieldClass);
@@ -1270,9 +1270,9 @@ public class ObjectWriterCreatorASM
         // objectWriter.write(jw, ctx, value);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
         mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
-        mw.visitLdcInsn(fieldWriter.getFieldName());
-        mwc.loadFieldType(i, fieldWriter.getFieldType());
-        mw.visitLdcInsn(fieldWriter.getFeatures());
+        mw.visitLdcInsn(fieldWriter.fieldName);
+        mwc.loadFieldType(i, fieldWriter.fieldType);
+        mw.visitLdcInsn(fieldWriter.features);
         mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_WRITER, "write", METHOD_DESC_WRITE_OBJECT, true);
 
         if (refDetection) {
@@ -1285,8 +1285,8 @@ public class ObjectWriterCreatorASM
     }
 
     private void gwList(MethodWriterContext mwc, int OBJECT, int i, FieldWriter fieldWriter, String TYPE_OBJECT) {
-        Type fieldType = fieldWriter.getFieldType();
-        Class<?> fieldClass = fieldWriter.getFieldClass();
+        Type fieldType = fieldWriter.fieldType;
+        Class<?> fieldClass = fieldWriter.fieldClass;
         int LIST = mwc.var(fieldClass);
         MethodWriter mw = mwc.mw;
 
@@ -1413,7 +1413,7 @@ public class ObjectWriterCreatorASM
             mw.visitVarInsn(Opcodes.ILOAD, J);
             mw.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
             mwc.loadFieldType(i, fieldType);
-            mw.visitLdcInsn(fieldWriter.getFeatures());
+            mw.visitLdcInsn(fieldWriter.features);
             mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_WRITER, "write", METHOD_DESC_WRITE_OBJECT, true);
         }
 
@@ -1437,7 +1437,7 @@ public class ObjectWriterCreatorASM
     ) {
         MethodWriter mw = mwc.mw;
 
-        Class<?> fieldClass = fieldWriter.getFieldClass();
+        Class<?> fieldClass = fieldWriter.fieldClass;
 
         if (fieldClass == boolean.class) {
             gwFieldValueBooleanV(mwc, fieldWriter, OBJECT, i, false);
@@ -1502,7 +1502,7 @@ public class ObjectWriterCreatorASM
             int OBJECT,
             int i
     ) {
-        Class<?> fieldClass = fieldWriter.getFieldClass();
+        Class<?> fieldClass = fieldWriter.fieldClass;
 
         MethodWriter mw = mwc.mw;
 
@@ -1546,9 +1546,9 @@ public class ObjectWriterCreatorASM
             int OBJECT,
             int i
     ) {
-        Class<?> fieldClass = fieldWriter.getFieldClass();
-        Type fieldType = fieldWriter.getFieldType();
-        String fieldName = fieldWriter.getFieldName();
+        Class<?> fieldClass = fieldWriter.fieldClass;
+        Type fieldType = fieldWriter.fieldType;
+        String fieldName = fieldWriter.fieldName;
 
         boolean refDetection = !ObjectWriterProvider.isNotReferenceDetect(fieldClass);
         int FIELD_VALUE = mwc.var(fieldClass);
@@ -1558,7 +1558,7 @@ public class ObjectWriterCreatorASM
             REF_PATH = mwc.var("REF_PATH");
         }
 
-        long features = fieldWriter.getFeatures() | mwc.objectFeatures;
+        long features = fieldWriter.features | mwc.objectFeatures;
         MethodWriter mw = mwc.mw;
 
         Label null_ = new Label(), notNull_ = new Label();
@@ -1777,9 +1777,8 @@ public class ObjectWriterCreatorASM
             int OBJECT,
             int i
     ) {
-        Type fieldType = fieldWriter.getFieldType();
-        Class<?> fieldClass = fieldWriter.getFieldClass();
-        String fieldName = fieldWriter.getFieldName();
+        Type fieldType = fieldWriter.fieldType;
+        Class<?> fieldClass = fieldWriter.fieldClass;
         MethodWriter mw = mwc.mw;
 
         int LIST = mwc.var(fieldClass);
@@ -1896,7 +1895,7 @@ public class ObjectWriterCreatorASM
     ) {
         MethodWriter mw = mwc.mw;
         Class objectType = mwc.objectClass;
-        Class<?> fieldClass = fieldWriter.getFieldClass();
+        Class<?> fieldClass = fieldWriter.fieldClass;
 
         if (fieldClass == boolean.class) {
             gwFieldValueBooleanV(mwc, fieldWriter, OBJECT, i, true);
@@ -1960,7 +1959,7 @@ public class ObjectWriterCreatorASM
         boolean jsonb = mwc.jsonb;
         String classNameType = mwc.classNameType;
         MethodWriter mw = mwc.mw;
-        Class<?> fieldClass = fieldWriter.getFieldClass();
+        Class<?> fieldClass = fieldWriter.fieldClass;
 
         int FIELD_VALUE = mwc.var(fieldClass);
 
@@ -2019,7 +2018,7 @@ public class ObjectWriterCreatorASM
     ) {
         boolean jsonb = mwc.jsonb;
         MethodWriter mw = mwc.mw;
-        Class<?> fieldClass = fieldWriter.getFieldClass();
+        Class<?> fieldClass = fieldWriter.fieldClass;
         String classNameType = mwc.classNameType;
 
         int FIELD_VALUE = mwc.var(fieldClass);
@@ -2079,8 +2078,8 @@ public class ObjectWriterCreatorASM
             int i
     ) {
         MethodWriter mw = mwc.mw;
-        Class<?> fieldClass = fieldWriter.getFieldClass();
-        String fieldName = fieldWriter.getFieldName();
+        Class<?> fieldClass = fieldWriter.fieldClass;
+        String fieldName = fieldWriter.fieldName;
 
         boolean refDetection = !ObjectWriterProvider.isNotReferenceDetect(fieldClass);
 
@@ -2198,8 +2197,8 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
         mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
         mw.visitLdcInsn(fieldName);
-        mwc.loadFieldType(i, fieldWriter.getFieldType());
-        mw.visitLdcInsn(fieldWriter.getFeatures());
+        mwc.loadFieldType(i, fieldWriter.fieldType);
+        mw.visitLdcInsn(fieldWriter.features);
         mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_WRITER, "writeJSONB", METHOD_DESC_WRITE_OBJECT, true);
 
         if (refDetection) {
@@ -2226,13 +2225,8 @@ public class ObjectWriterCreatorASM
             int OBJECT,
             int i
     ) {
-        boolean jsonb = mwc.jsonb;
         MethodWriter mw = mwc.mw;
-        Type fieldType = fieldWriter.getFieldType();
-        Class<?> fieldClass = fieldWriter.getFieldClass();
-        Member member = fieldWriter.getFieldOrMethod();
-        String fieldName = fieldWriter.getFieldName();
-        String format = fieldWriter.getFormat();
+        Class<?> fieldClass = fieldWriter.fieldClass;
 
         Label null_ = new Label(), writeNull_ = new Label(), endIfNull_ = new Label();
 
@@ -2272,7 +2266,7 @@ public class ObjectWriterCreatorASM
 
     private void gwFieldValueArray(MethodWriterContext mwc, FieldWriter fieldWriter, int OBJECT, int i) {
         MethodWriter mw = mwc.mw;
-        Class fieldClass = fieldWriter.getFieldClass();
+        Class fieldClass = fieldWriter.fieldClass;
 
         String methodName, methodDesc;
         if (fieldClass == char[].class) {
@@ -2325,7 +2319,7 @@ public class ObjectWriterCreatorASM
             boolean jsonb
     ) {
         MethodWriter mw = mwc.mw;
-        Class<?> fieldClass = fieldWriter.getFieldClass();
+        Class<?> fieldClass = fieldWriter.fieldClass;
 
         int FIELD_VALUE = mwc.var(fieldClass);
 
@@ -2371,7 +2365,7 @@ public class ObjectWriterCreatorASM
             boolean jsonb
     ) {
         MethodWriter mw = mwc.mw;
-        String format = fieldWriter.getFormat();
+        String format = fieldWriter.format;
         String classNameType = mwc.classNameType;
 
         int FIELD_VALUE = mwc.var(long.class);
@@ -2423,7 +2417,7 @@ public class ObjectWriterCreatorASM
             boolean jsonb
     ) {
         MethodWriter mw = mwc.mw;
-        Class<?> fieldClass = fieldWriter.getFieldClass();
+        Class<?> fieldClass = fieldWriter.fieldClass;
 
         int FIELD_VALUE = mwc.var(fieldClass);
 
@@ -2469,7 +2463,7 @@ public class ObjectWriterCreatorASM
             boolean jsonb
     ) {
         MethodWriter mw = mwc.mw;
-        String format = fieldWriter.getFormat();
+        String format = fieldWriter.format;
         String classNameType = mwc.classNameType;
 
         int FIELD_VALUE = mwc.var(int.class);
@@ -2557,10 +2551,10 @@ public class ObjectWriterCreatorASM
             int i
     ) {
         boolean jsonb = mwc.jsonb;
-        long features = fieldWriter.getFeatures() | mwc.objectFeatures;
+        long features = fieldWriter.features | mwc.objectFeatures;
         MethodWriter mw = mwc.mw;
-        Class<?> fieldClass = fieldWriter.getFieldClass();
-        String format = fieldWriter.getFormat();
+        Class<?> fieldClass = fieldWriter.fieldClass;
+        String format = fieldWriter.format;
 
         int FIELD_VALUE = mwc.var(fieldClass);
 
@@ -2658,8 +2652,6 @@ public class ObjectWriterCreatorASM
         mw.visitMethodInsn(Opcodes.INVOKESPECIAL, TYPE_OBJECT_WRITER_ADAPTER, "<init>", "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;JLjava/util/List;)V", false);
 
         for (int i = 0; i < fieldWriters.size(); i++) {
-            Type fieldType = fieldWriters.get(i).getFieldType();
-
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitInsn(Opcodes.DUP);
 
@@ -2884,7 +2876,7 @@ public class ObjectWriterCreatorASM
         MethodWriter mw = mwc.mw;
         Class objectClass = mwc.objectClass;
         final String TYPE_OBJECT = ASMUtils.type(objectClass);
-        Class fieldClass = fieldWriter.getFieldClass();
+        Class fieldClass = fieldWriter.fieldClass;
         Member member = fieldWriter.getFieldOrMethod();
 
         if (member instanceof Method) {
@@ -2976,7 +2968,7 @@ public class ObjectWriterCreatorASM
         if (fieldWriters.size() <= 6) {
             for (int i = 0; i < fieldWriters.size(); ++i) {
                 Label next_ = new Label(), get_ = new Label();
-                String fieldName = fieldWriters.get(i).getFieldName();
+                String fieldName = fieldWriters.get(i).fieldName;
                 long hashCode64 = Fnv.hashCode64(fieldName);
 
                 mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE_64);
@@ -3181,7 +3173,7 @@ public class ObjectWriterCreatorASM
             }
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(fieldIndex), DESC_FIELD_WRITER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_WRITER, "getFieldType", "()Ljava/lang/reflect/Type;", false);
+            mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_FIELD_WRITER, "fieldType", "Ljava/lang/reflect/Type;");
         }
     }
 }

@@ -17,7 +17,7 @@ final class FieldWriterEnumMethod
         try {
             return method.invoke(object);
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw new JSONException("invoke getter method error, " + name, e);
+            throw new JSONException("invoke getter method error, " + fieldName, e);
         }
     }
 

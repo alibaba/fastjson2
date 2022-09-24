@@ -74,9 +74,9 @@ abstract class FieldWriterObjectFinal<T>
         ObjectWriter valueWriter = getObjectWriter(jsonWriter, fieldClass);
         writeFieldName(jsonWriter);
         if (jsonWriter.isJSONB()) {
-            valueWriter.writeJSONB(jsonWriter, value, name, fieldType, features);
+            valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldType, features);
         } else {
-            valueWriter.write(jsonWriter, value, name, fieldType, features);
+            valueWriter.write(jsonWriter, value, fieldName, fieldType, features);
         }
 
         return true;
@@ -99,7 +99,7 @@ abstract class FieldWriterObjectFinal<T>
                 return;
             }
 
-            String refPath = jsonWriter.setPath(name, value);
+            String refPath = jsonWriter.setPath(fieldName, value);
             if (refPath != null) {
                 jsonWriter.writeReference(refPath);
                 jsonWriter.popPath(value);
@@ -109,9 +109,9 @@ abstract class FieldWriterObjectFinal<T>
 
         ObjectWriter valueWriter = getObjectWriter(jsonWriter, fieldClass);
         if (jsonWriter.isJSONB()) {
-            valueWriter.writeJSONB(jsonWriter, value, name, fieldType, features);
+            valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldType, features);
         } else {
-            valueWriter.write(jsonWriter, value, name, fieldType, features);
+            valueWriter.write(jsonWriter, value, fieldName, fieldType, features);
         }
 
         if (refDetect) {

@@ -17,7 +17,7 @@ public class FieldReaderDateMethodTest {
         ObjectReader<Bean> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
 
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
 
         fieldReader.accept(bean, null);
         assertNull(bean.value);

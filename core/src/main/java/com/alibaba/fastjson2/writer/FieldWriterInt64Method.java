@@ -17,9 +17,9 @@ final class FieldWriterInt64Method<T>
             return method.invoke(object);
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
-            throw new JSONException("invoke getter method error, " + name, cause != null ? cause : e);
+            throw new JSONException("invoke getter method error, " + fieldName, cause != null ? cause : e);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("invoke getter method error, " + name, e);
+            throw new JSONException("invoke getter method error, " + fieldName, e);
         }
     }
 }

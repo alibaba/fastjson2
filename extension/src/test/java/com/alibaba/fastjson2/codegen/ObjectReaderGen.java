@@ -58,13 +58,13 @@ public class ObjectReaderGen {
         for (int i = 0; i < fieldReaderArray.length; i++) {
             FieldReader fieldReader = fieldReaderArray[i];
 
-            String fieldName = fieldReader.getFieldName();
+            String fieldName = fieldReader.fieldName;
             long hashCode64 = Fnv.hashCode64(fieldName);
             hashCodes[i] = hashCode64;
-            fieldTypes.put(hashCode64, fieldReader.getFieldType());
+            fieldTypes.put(hashCode64, fieldReader.fieldType);
 
-            Field field = fieldReader.getField();
-            Method method = fieldReader.getMethod();
+            Field field = fieldReader.field;
+            Method method = fieldReader.method;
             if (field != null) {
                 members.put(hashCode64, field);
             } else if (method != null) {
@@ -123,18 +123,18 @@ public class ObjectReaderGen {
         println();
         for (int i = 0; i < fieldReaderArray.length; i++) {
             FieldReader fieldReader = fieldReaderArray[i];
-            println("\tprivate FieldReader fieldReader" + i + "; // " + fieldReader.getFieldName());
+            println("\tprivate FieldReader fieldReader" + i + "; // " + fieldReader.fieldName);
         }
         for (int i = 0; i < fieldReaderArray.length; i++) {
             FieldReader fieldReader = fieldReaderArray[i];
             if (fieldReader instanceof FieldReaderObject) {
-                println("\tprivate ObjectReader fieldObjectReader" + i + "; // " + fieldReader.getFieldName());
+                println("\tprivate ObjectReader fieldObjectReader" + i + "; // " + fieldReader.fieldName);
             }
         }
         for (int i = 0; i < fieldReaderArray.length; i++) {
             FieldReader fieldReader = fieldReaderArray[i];
             if (fieldReader instanceof FieldReaderList) {
-                println("\tprivate ObjectReader fieldListItemReader" + i + "; // " + fieldReader.getFieldName() + ".item");
+                println("\tprivate ObjectReader fieldListItemReader" + i + "; // " + fieldReader.fieldName + ".item");
             }
         }
 
@@ -204,11 +204,11 @@ public class ObjectReaderGen {
 
         for (int i = 0; i < fieldReaderArray.length; i++) {
             FieldReader fieldReader = fieldReaderArray[i];
-            Type fieldType = fieldReader.getFieldType();
-            Class fieldClass = fieldReader.getFieldClass();
-            Member member = fieldReader.getMethod();
+            Type fieldType = fieldReader.fieldType;
+            Class fieldClass = fieldReader.fieldClass;
+            Member member = fieldReader.method;
             if (member == null) {
-                member = fieldReader.getField();
+                member = fieldReader.field;
             }
             readFieldValue(0, false, (short) i, fieldReader, member, fieldType, fieldClass);
         }
@@ -301,7 +301,7 @@ public class ObjectReaderGen {
                 short index = mapping[m];
 
                 FieldReader fieldReader = fieldReaderArray[index];
-                String fieldName = fieldReader.getFieldName();
+                String fieldName = fieldReader.fieldName;
                 long fieldNameHashCode64 = Fnv.hashCode64(fieldName);
                 if (fieldNameHashCode64 != hashCode64) {
                     throw new IllegalStateException();
@@ -454,7 +454,7 @@ public class ObjectReaderGen {
                             println(tabCnt, "\t\t\t\t\t\t.getObjectReader(" + className((Class) actualTypeArguments[0]) + ".class);");
                             println(tabCnt, "\t\t\t\t}");
                             println(tabCnt, "\t\t\t\t\tlist.add(");
-                            println(tabCnt, "\t\t\t\t\t\tfieldListItemReader" + index + ".readJSONBObject(jsonReader, " + fieldReader.getFeatures() + "));");
+                            println(tabCnt, "\t\t\t\t\t\tfieldListItemReader" + index + ".readJSONBObject(jsonReader, " + fieldReader.features + "));");
                             println();
                             println(tabCnt, "\t\t\t}");
 
@@ -479,7 +479,7 @@ public class ObjectReaderGen {
                             println(tabCnt, "\t\t\t\t\t\t}");
                             println();
                             println(tabCnt, "\t\t\t\t\t\tlist.add(");
-                            println(tabCnt, "\t\t\t\t\t\t\tfieldListItemReader" + index + ".readObject(jsonReader, " + fieldReader.getFeatures() + "));");
+                            println(tabCnt, "\t\t\t\t\t\t\tfieldListItemReader" + index + ".readObject(jsonReader, " + fieldReader.features + "));");
                             println();
                             println(tabCnt, "\t\t\t\t\t\tif (jsonReader.current() == ',') {");
                             println(tabCnt, "\t\t\t\t\t\t\tjsonReader.next();");
@@ -508,18 +508,18 @@ public class ObjectReaderGen {
         } else if (fieldReader instanceof FieldReaderObject) {
             println(tabCnt, "\t\t\tif (this.fieldObjectReader" + index + " == null) {");
             println(tabCnt, "\t\t\t\tthis.fieldObjectReader" + index + " = jsonReader.getContext()");
-            println(tabCnt, "\t\t\t\t\t.getObjectReader(" + className(fieldClass) + ".class); // " + fieldReader.getFieldName());
+            println(tabCnt, "\t\t\t\t\t.getObjectReader(" + className(fieldClass) + ".class); // " + fieldReader.fieldName);
             println(tabCnt, "\t\t\t}");
             // Media fieldValue = (Media) fieldObjectReader0.readObject(jsonReader);
             if (member instanceof Method) {
                 println(tabCnt, "\t\t\tobject." + member.getName() + "((" + className(fieldClass) + ")");
                 if (jsonb) {
-                    println(tabCnt, "\t\t\t\t\tfieldObjectReader" + index + ".readJSONBObject(jsonReader, " + fieldReader.getFeatures() + "));");
+                    println(tabCnt, "\t\t\t\t\tfieldObjectReader" + index + ".readJSONBObject(jsonReader, " + fieldReader.features + "));");
                 } else {
-                    println(tabCnt, "\t\t\t\t\tfieldObjectReader" + index + ".readObject(jsonReader, " + fieldReader.getFeatures() + "));");
+                    println(tabCnt, "\t\t\t\t\tfieldObjectReader" + index + ".readObject(jsonReader, " + fieldReader.features + "));");
                 }
             } else {
-                println(tabCnt, "\t\t\tthis.fieldReader" + index + ".accept(object, fieldObjectReader\" + index + \".readObject(jsonReader, " + fieldReader.getFeatures() + "));");
+                println(tabCnt, "\t\t\tthis.fieldReader" + index + ".accept(object, fieldObjectReader\" + index + \".readObject(jsonReader, " + fieldReader.features + "));");
             }
         } else {
             println(tabCnt, "\t\t\tthis.fieldReader" + index + ".readFieldValue(jsonReader, object);");
@@ -552,7 +552,7 @@ public class ObjectReaderGen {
                 short index = mapping[m];
 
                 FieldReader fieldReader = fieldReaderArray[index];
-                String fieldName = fieldReader.getFieldName();
+                String fieldName = fieldReader.fieldName;
                 long fieldNameHashCode64 = Fnv.hashCode64(fieldName);
                 if (fieldNameHashCode64 != hashCode64) {
                     throw new IllegalStateException();

@@ -61,8 +61,8 @@ public class ObjectReader2<T>
 
     @Override
     protected void initDefaultValue(T object) {
-        first.setDefault(object);
-        second.setDefault(object);
+        first.acceptDefaultValue(object);
+        second.acceptDefaultValue(object);
     }
 
     @Override
