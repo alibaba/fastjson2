@@ -6,6 +6,7 @@ import java.time.*;
 import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 
 import static com.alibaba.fastjson2.util.IOUtils.DEFAULT_ZONE_ID;
 import static com.alibaba.fastjson2.util.IOUtils.SHANGHAI_ZONE_ID;
@@ -1595,5 +1596,26 @@ public class DateUtilsTest {
         assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 03X04:05", 0, null));
         assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 03:04X05", 0, null));
         assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02T03:04:0A", 0, null));
+    }
+
+    @Test
+    public void date2String() {
+        Date date = new Date(1664010843321L);
+
+        assertEquals("2022-09-24 17:14:03.321", DateUtils.toString(date));
+        assertEquals("2022-09-24 17:14:03.321", DateUtils.toString(date.getTime(), false, SHANGHAI_ZONE_ID));
+        assertEquals("2022-09-24 17:14:03.321+08:00", DateUtils.toString(date.getTime(), true, SHANGHAI_ZONE_ID));
+        assertEquals("2022-09-24 09:14:03.321", DateUtils.toString(date.getTime(), false, UTC));
+        assertEquals("2022-09-24 09:14:03.321Z", DateUtils.toString(date.getTime(), true, UTC));
+
+        assertEquals("2022-09-24 16:14:03.321+07:00", DateUtils.toString(date.getTime(), true, ZoneId.of("GMT+7")));
+        assertEquals("2022-09-24 02:14:03.321-07:00", DateUtils.toString(date.getTime(), true, ZoneId.of("GMT-7")));
+        assertEquals("2022-09-24 17:29:03.321+08:15", DateUtils.toString(date.getTime(), true, ZoneId.of("GMT+08:15")));
+        assertEquals("2022-09-24 00:59:03.321-08:15", DateUtils.toString(date.getTime(), true, ZoneId.of("GMT-08:15")));
+    }
+
+    @Test
+    public void date2String1() {
+        assertEquals("2022-09-24 17:14:03.001", DateUtils.toString(new Date(1664010843001L)));
     }
 }
