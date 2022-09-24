@@ -167,7 +167,7 @@ public final class ObjectReaderInterface<T>
                 if (reader == null) {
                     typeName = jsonReader.getString();
                     reader = context.getObjectReaderAutoType(
-                            typeName, getObjectClass(), features3
+                            typeName, objectClass, features3
                     );
 
                     if (reader == null) {

@@ -239,7 +239,7 @@ abstract class FieldWriterObject<T>
 
             if (valueWriter instanceof ObjectWriterAdapter) {
                 ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) valueWriter;
-                List<FieldWriter> fieldWriters = writerAdapter.getFieldWriters();
+                List<FieldWriter> fieldWriters = writerAdapter.fieldWriters;
                 for (FieldWriter fieldWriter : fieldWriters) {
                     fieldWriter.write(jsonWriter, value);
                 }

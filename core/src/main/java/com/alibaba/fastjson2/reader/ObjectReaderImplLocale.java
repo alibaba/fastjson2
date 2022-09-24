@@ -6,12 +6,11 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 
 class ObjectReaderImplLocale
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplLocale INSTANCE = new ObjectReaderImplLocale();
 
-    @Override
-    public Class getObjectClass() {
-        return Locale.class;
+    ObjectReaderImplLocale() {
+        super(Locale.class);
     }
 
     @Override

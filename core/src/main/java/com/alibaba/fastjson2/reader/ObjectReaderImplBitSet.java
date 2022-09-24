@@ -9,14 +9,13 @@ import java.lang.reflect.Type;
 import java.util.BitSet;
 
 public final class ObjectReaderImplBitSet
-        extends ObjectReaderBaseModule.PrimitiveImpl<BitSet> {
+        extends ObjectReaderPrimitive<BitSet> {
     static final ObjectReaderImplBitSet INSTANCE = new ObjectReaderImplBitSet();
 
     public static final long HASH_TYPE = Fnv.hashCode64("BitSet");
 
-    @Override
-    public Class getObjectClass() {
-        return BitSet.class;
+    public ObjectReaderImplBitSet() {
+        super(BitSet.class);
     }
 
     @Override

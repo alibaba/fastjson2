@@ -6,12 +6,11 @@ import java.lang.reflect.Type;
 import java.util.UUID;
 
 class ObjectReaderImplUUID
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplUUID INSTANCE = new ObjectReaderImplUUID();
 
-    @Override
-    public Class getObjectClass() {
-        return UUID.class;
+    public ObjectReaderImplUUID() {
+        super(UUID.class);
     }
 
     @Override

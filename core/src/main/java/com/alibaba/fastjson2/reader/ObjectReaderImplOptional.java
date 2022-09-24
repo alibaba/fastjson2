@@ -9,7 +9,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 class ObjectReaderImplOptional
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplOptional INSTANCE = new ObjectReaderImplOptional(null, null, null);
 
     final String format;
@@ -28,6 +28,8 @@ class ObjectReaderImplOptional
     }
 
     public ObjectReaderImplOptional(Type type, String format, Locale locale) {
+        super(Optional.class);
+
         Type itemType = null;
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -41,11 +43,6 @@ class ObjectReaderImplOptional
         this.itemClass = TypeUtils.getClass(itemType);
         this.format = format;
         this.locale = locale;
-    }
-
-    @Override
-    public Class getObjectClass() {
-        return Optional.class;
     }
 
     @Override

@@ -12,13 +12,12 @@ import java.util.Collection;
 import java.util.function.Function;
 
 class ObjectReaderImplInt16ValueArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt16ValueArray INSTANCE = new ObjectReaderImplInt16ValueArray();
     static final long TYPE_HASH = Fnv.hashCode64("[S");
 
-    @Override
-    public Class getObjectClass() {
-        return short[].class;
+    ObjectReaderImplInt16ValueArray() {
+        super(short[].class);
     }
 
     @Override

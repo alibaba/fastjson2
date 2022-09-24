@@ -193,13 +193,6 @@ public abstract class FieldWriter<T>
         return fieldName;
     }
 
-    public Member getFieldOrMethod() {
-        if (field != null) {
-            return field;
-        }
-        return method;
-    }
-
     public abstract Object getFieldValue(T object);
 
     @Override
@@ -211,8 +204,8 @@ public abstract class FieldWriter<T>
 
         int nameCompare = thisName.compareTo(otherName);
 
-        Member thisMember = this.getFieldOrMethod();
-        Member otherMember = otherFieldWriter.getFieldOrMethod();
+        Member thisMember = this.field != null ? this.field : this.method;
+        Member otherMember = otherFieldWriter.field != null ? otherFieldWriter.field : otherFieldWriter.method;
 
         if (thisMember != null && otherMember != null && thisMember.getClass() != otherMember.getClass()) {
             Class otherDeclaringClass = otherMember.getDeclaringClass();

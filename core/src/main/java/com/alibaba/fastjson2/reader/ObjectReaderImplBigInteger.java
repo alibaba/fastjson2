@@ -6,12 +6,11 @@ import java.lang.reflect.Type;
 import java.math.BigInteger;
 
 final class ObjectReaderImplBigInteger
-        extends ObjectReaderBaseModule.PrimitiveImpl<BigInteger> {
+        extends ObjectReaderPrimitive<BigInteger> {
     static final ObjectReaderImplBigInteger INSTANCE = new ObjectReaderImplBigInteger();
 
-    @Override
-    public Class getObjectClass() {
-        return BigInteger.class;
+    public ObjectReaderImplBigInteger() {
+        super(BigInteger.class);
     }
 
     @Override

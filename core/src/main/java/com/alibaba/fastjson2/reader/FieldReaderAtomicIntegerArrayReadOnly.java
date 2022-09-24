@@ -79,9 +79,4 @@ final class FieldReaderAtomicIntegerArrayReadOnly<T>
         }
         return jsonReader.readArray(Integer.class);
     }
-
-    @Override
-    public String toString() {
-        return method.getName();
-    }
 }

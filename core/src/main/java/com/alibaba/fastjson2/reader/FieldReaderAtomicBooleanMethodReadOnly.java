@@ -45,9 +45,4 @@ final class FieldReaderAtomicBooleanMethodReadOnly<T>
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readBool();
     }
-
-    @Override
-    public String toString() {
-        return method.getName();
-    }
 }

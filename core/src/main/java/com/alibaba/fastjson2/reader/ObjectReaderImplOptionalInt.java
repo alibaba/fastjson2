@@ -6,12 +6,11 @@ import java.lang.reflect.Type;
 import java.util.OptionalInt;
 
 final class ObjectReaderImplOptionalInt
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplOptionalInt INSTANCE = new ObjectReaderImplOptionalInt();
 
-    @Override
-    public Class getObjectClass() {
-        return OptionalInt.class;
+    public ObjectReaderImplOptionalInt() {
+        super(OptionalInt.class);
     }
 
     @Override

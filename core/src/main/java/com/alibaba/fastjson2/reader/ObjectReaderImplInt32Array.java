@@ -10,12 +10,11 @@ import java.util.Collection;
 import java.util.function.Function;
 
 final class ObjectReaderImplInt32Array
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt32Array INSTANCE = new ObjectReaderImplInt32Array();
 
-    @Override
-    public Class getObjectClass() {
-        return Integer[].class;
+    ObjectReaderImplInt32Array() {
+        super(Integer[].class);
     }
 
     @Override

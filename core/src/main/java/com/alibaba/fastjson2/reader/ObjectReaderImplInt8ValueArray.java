@@ -11,18 +11,14 @@ import java.util.Collection;
 import java.util.function.Function;
 
 class ObjectReaderImplInt8ValueArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt8ValueArray INSTANCE = new ObjectReaderImplInt8ValueArray(null);
 
     final String format;
 
     ObjectReaderImplInt8ValueArray(String format) {
+        super(byte[].class);
         this.format = format;
-    }
-
-    @Override
-    public Class getObjectClass() {
-        return byte[].class;
     }
 
     @Override

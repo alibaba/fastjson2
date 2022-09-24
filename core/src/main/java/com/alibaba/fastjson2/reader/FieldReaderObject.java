@@ -275,13 +275,4 @@ public class FieldReaderObject<T>
 
         return object;
     }
-
-    @Override
-    public String toString() {
-        Member member = this.field != null ? this.field : this.method;
-        if (member != null) {
-            return member.getName();
-        }
-        return fieldName;
-    }
 }

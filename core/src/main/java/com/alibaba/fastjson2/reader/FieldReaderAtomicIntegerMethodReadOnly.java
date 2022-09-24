@@ -48,9 +48,4 @@ class FieldReaderAtomicIntegerMethodReadOnly<T>
 
         return new AtomicInteger(intValue);
     }
-
-    @Override
-    public String toString() {
-        return method.getName();
-    }
 }
