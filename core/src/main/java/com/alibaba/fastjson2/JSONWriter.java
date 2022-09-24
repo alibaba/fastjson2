@@ -1607,11 +1607,6 @@ public abstract class JSONWriter
                                         }
                                         buf[off++] = (byte) ch;
                                     } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
-                                        if (off + 2 >= buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-
                                         ascii = false;
                                         final int uc;
                                         if (ch >= '\uD800' && ch < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
@@ -1640,13 +1635,21 @@ public abstract class JSONWriter
                                         }
 
                                         if (uc < 0) {
+                                            if (off == buf.length) {
+                                                int newCapacity = buf.length + (buf.length >> 1);
+                                                buf = Arrays.copyOf(buf, newCapacity);
+                                            }
                                             buf[off++] = (byte) '?';
                                         } else {
+                                            if (off + 3 >= buf.length) {
+                                                int newCapacity = buf.length + (buf.length >> 1);
+                                                buf = Arrays.copyOf(buf, newCapacity);
+                                            }
                                             buf[off++] = (byte) (0xf0 | ((uc >> 18)));
                                             buf[off++] = (byte) (0x80 | ((uc >> 12) & 0x3f));
                                             buf[off++] = (byte) (0x80 | ((uc >> 6) & 0x3f));
                                             buf[off++] = (byte) (0x80 | (uc & 0x3f));
-                                            i++; // 2 chars
+                                            j++; // 2 chars
                                         }
                                     } else if (ch > 0x07FF) {
                                         if (off + 2 >= buf.length) {
@@ -1716,11 +1719,6 @@ public abstract class JSONWriter
                                         }
                                         buf[off++] = (byte) ch;
                                     } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
-                                        if (off + 2 >= buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-
                                         ascii = false;
                                         final int uc;
                                         if (ch >= '\uD800' && ch < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
@@ -1749,13 +1747,23 @@ public abstract class JSONWriter
                                         }
 
                                         if (uc < 0) {
+                                            if (off == buf.length) {
+                                                int newCapacity = buf.length + (buf.length >> 1);
+                                                buf = Arrays.copyOf(buf, newCapacity);
+                                            }
+
                                             buf[off++] = (byte) '?';
                                         } else {
+                                            if (off + 3 >= buf.length) {
+                                                int newCapacity = buf.length + (buf.length >> 1);
+                                                buf = Arrays.copyOf(buf, newCapacity);
+                                            }
+
                                             buf[off++] = (byte) (0xf0 | ((uc >> 18)));
                                             buf[off++] = (byte) (0x80 | ((uc >> 12) & 0x3f));
                                             buf[off++] = (byte) (0x80 | ((uc >> 6) & 0x3f));
                                             buf[off++] = (byte) (0x80 | (uc & 0x3f));
-                                            i++; // 2 chars
+                                            j++; // 2 chars
                                         }
                                     } else if (ch > 0x07FF) {
                                         if (off + 2 >= buf.length) {
