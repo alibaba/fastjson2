@@ -63,7 +63,7 @@ public class JSONPathCompilerReflect
             } else if (parent instanceof NameSegmentTyped) {
                 NameSegmentTyped nameSegmentTyped = (NameSegmentTyped) parent;
                 if (nameSegmentTyped.fieldReader != null) {
-                    objectReader = readerContext.getObjectReader(nameSegmentTyped.fieldReader.getFieldType());
+                    objectReader = readerContext.getObjectReader(nameSegmentTyped.fieldReader.fieldType);
                 }
             }
             if (objectReader != null) {
@@ -77,7 +77,7 @@ public class JSONPathCompilerReflect
             } else if (parent instanceof NameSegmentTyped) {
                 NameSegmentTyped nameSegmentTyped = (NameSegmentTyped) parent;
                 if (nameSegmentTyped.fieldWriter != null) {
-                    objectWriter = writerContext.getObjectWriter(nameSegmentTyped.fieldWriter.getFieldClass());
+                    objectWriter = writerContext.getObjectWriter(nameSegmentTyped.fieldWriter.fieldClass);
                 }
             }
 

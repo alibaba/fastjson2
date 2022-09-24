@@ -16,7 +16,7 @@ final class FieldWriterInt16ValField<T>
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
@@ -26,7 +26,7 @@ final class FieldWriterInt16ValField<T>
         try {
             value = field.getShort(o);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
 
         writeInt16(jsonWriter, value);
@@ -39,7 +39,7 @@ final class FieldWriterInt16ValField<T>
             short value = field.getShort(object);
             jsonWriter.writeInt32(value);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 }

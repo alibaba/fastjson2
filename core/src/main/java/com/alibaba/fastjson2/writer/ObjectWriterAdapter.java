@@ -74,16 +74,16 @@ public class ObjectWriterAdapter<T>
         this.fieldWriterArray = new FieldWriter[fieldWriters.size()];
         fieldWriters.toArray(fieldWriterArray);
 
-        this.hasValueField = fieldWriterArray.length == 1 && (fieldWriterArray[0].getFeatures() & FieldInfo.VALUE_MASK) != 0;
+        this.hasValueField = fieldWriterArray.length == 1 && (fieldWriterArray[0].features & FieldInfo.VALUE_MASK) != 0;
 
         boolean containsNoneFieldGetter = false;
         long[] hashCodes = new long[fieldWriterArray.length];
         for (int i = 0; i < fieldWriterArray.length; i++) {
             FieldWriter fieldWriter = fieldWriterArray[i];
-            long hashCode = Fnv.hashCode64(fieldWriter.getFieldName());
+            long hashCode = Fnv.hashCode64(fieldWriter.fieldName);
             hashCodes[i] = hashCode;
 
-            if (fieldWriter.getMethod() != null && (fieldWriter.getFeatures() & FieldInfo.FIELD_MASK) == 0) {
+            if (fieldWriter.method != null && (fieldWriter.features & FieldInfo.FIELD_MASK) == 0) {
                 containsNoneFieldGetter = true;
             }
         }
@@ -112,7 +112,7 @@ public class ObjectWriterAdapter<T>
         this.fieldWriterArray = fieldWriters;
         this.features = features;
         this.hasValueField = fieldWriterArray.length == 1
-                && (fieldWriterArray[0].getFeatures() & FieldInfo.VALUE_MASK) != 0;
+                && (fieldWriterArray[0].features & FieldInfo.VALUE_MASK) != 0;
         this.serializable = objectType == null || java.io.Serializable.class.isAssignableFrom(objectType);
 
         String typeName = null;
@@ -131,11 +131,11 @@ public class ObjectWriterAdapter<T>
         for (int i = 0; i < fieldWriterArray.length; i++) {
             FieldWriter fieldWriter = fieldWriterArray[i];
             long hashCode = Fnv.hashCode64(
-                    fieldWriter.getFieldName()
+                    fieldWriter.fieldName
             );
             hashCodes[i] = hashCode;
 
-            if (fieldWriter.getMethod() != null && (fieldWriter.getFeatures() & FieldInfo.FIELD_MASK) == 0) {
+            if (fieldWriter.method != null && (fieldWriter.features & FieldInfo.FIELD_MASK) == 0) {
                 containsNoneFieldGetter = true;
             }
         }
@@ -316,7 +316,7 @@ public class ObjectWriterAdapter<T>
         for (int i = 0; i < fieldWriters.size(); i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
             map.put(
-                    fieldWriter.getFieldName(),
+                    fieldWriter.fieldName,
                     fieldWriter.getFieldValue(object)
             );
         }
@@ -415,22 +415,22 @@ public class ObjectWriterAdapter<T>
         for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
             FieldWriter fieldWriter = fieldWriters.get(i);
 
-            Field field = fieldWriter.getField();
+            Field field = fieldWriter.field;
             if (ignoreNonFieldGetter
-                    && fieldWriter.getMethod() != null
-                    && (fieldWriter.getFeatures() & FieldInfo.FIELD_MASK) == 0) {
+                    && fieldWriter.method != null
+                    && (fieldWriter.features & FieldInfo.FIELD_MASK) == 0) {
                 continue;
             }
 
             // pre property filter
-            final String fieldWriterFieldName = fieldWriter.getFieldName();
+            final String fieldWriterFieldName = fieldWriter.fieldName;
             if (propertyPreFilter != null
                     && !propertyPreFilter.process(jsonWriter, object, fieldWriterFieldName)) {
                 continue;
             }
 
             if (labelFilter != null) {
-                String label = fieldWriter.getLabel();
+                String label = fieldWriter.label;
                 if (label != null && !label.isEmpty()) {
                     if (!labelFilter.apply(label)) {
                         continue;
@@ -469,14 +469,14 @@ public class ObjectWriterAdapter<T>
             if (contextNameFilter != null) {
                 beanContext = new BeanContext(
                         objectType,
-                        fieldWriter.getMethod(),
+                        fieldWriter.method,
                         field,
-                        fieldWriter.getFieldName(),
-                        fieldWriter.getLabel(),
-                        fieldWriter.getFieldClass(),
-                        fieldWriter.getFieldType(),
-                        fieldWriter.getFeatures(),
-                        fieldWriter.getFormat()
+                        fieldWriter.fieldName,
+                        fieldWriter.label,
+                        fieldWriter.fieldClass,
+                        fieldWriter.fieldType,
+                        fieldWriter.features,
+                        fieldWriter.format
                 );
                 filteredName = contextNameFilter.process(beanContext, object, filteredName, fieldValue);
             }
@@ -497,14 +497,14 @@ public class ObjectWriterAdapter<T>
                 if (beanContext == null) {
                     beanContext = new BeanContext(
                             objectType,
-                            fieldWriter.getMethod(),
+                            fieldWriter.method,
                             field,
-                            fieldWriter.getFieldName(),
-                            fieldWriter.getLabel(),
-                            fieldWriter.getFieldClass(),
-                            fieldWriter.getFieldType(),
-                            fieldWriter.getFeatures(),
-                            fieldWriter.getFormat()
+                            fieldWriter.fieldName,
+                            fieldWriter.label,
+                            fieldWriter.fieldClass,
+                            fieldWriter.fieldType,
+                            fieldWriter.features,
+                            fieldWriter.format
                     );
                 }
                 filteredValue = contextValueFilter.process(beanContext, object, filteredName, filteredValue);
@@ -536,7 +536,7 @@ public class ObjectWriterAdapter<T>
                     }
 
                     if (fieldValue == null) {
-                        ObjectWriter fieldValueWriter = fieldWriter.getObjectWriter(jsonWriter, fieldWriter.getFieldClass());
+                        ObjectWriter fieldValueWriter = fieldWriter.getObjectWriter(jsonWriter, fieldWriter.fieldClass);
                         fieldValueWriter.write(jsonWriter, null, fieldName, fieldType, features);
                     } else {
                         ObjectWriter fieldValueWriter = fieldWriter.getObjectWriter(jsonWriter, fieldValue.getClass());
@@ -560,7 +560,7 @@ public class ObjectWriterAdapter<T>
         for (FieldWriter fieldWriter : fieldWriters) {
             Object fieldValue = fieldWriter.getFieldValue(object);
 
-            long fieldFeatures = fieldWriter.getFeatures();
+            long fieldFeatures = fieldWriter.features;
             if ((fieldFeatures & FieldInfo.UNWRAPPED_MASK) != 0) {
                 if (fieldValue instanceof Map) {
                     jsonObject.putAll((Map) fieldValue);
@@ -569,16 +569,16 @@ public class ObjectWriterAdapter<T>
 
                 ObjectWriter fieldObjectWriter = fieldWriter.getInitWriter();
                 if (fieldObjectWriter == null) {
-                    fieldObjectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(fieldWriter.getFieldClass());
+                    fieldObjectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(fieldWriter.fieldClass);
                 }
                 List<FieldWriter> unwrappedFieldWriters = fieldObjectWriter.getFieldWriters();
                 for (FieldWriter unwrappedFieldWriter : unwrappedFieldWriters) {
                     Object unwrappedFieldValue = unwrappedFieldWriter.getFieldValue(fieldValue);
-                    jsonObject.put(unwrappedFieldWriter.getFieldName(), unwrappedFieldValue);
+                    jsonObject.put(unwrappedFieldWriter.fieldName, unwrappedFieldValue);
                 }
                 continue;
             }
-            jsonObject.put(fieldWriter.getFieldName(), fieldValue);
+            jsonObject.put(fieldWriter.fieldName, fieldValue);
         }
 
         return jsonObject;

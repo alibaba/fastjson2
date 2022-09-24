@@ -18,26 +18,25 @@ import java.util.*;
 
 public abstract class FieldReader<T>
         implements Comparable<FieldReader> {
-    final int ordinal;
-    final String fieldName;
-    final Class fieldClass;
+    public final int ordinal;
+    public final String fieldName;
+    public final Class fieldClass;
+    public final Type fieldType;
+    public final long features;
+    public final String format;
+    public final Method method;
+    public final Field field;
+    public final Object defaultValue;
+
     final boolean fieldClassSerializable;
-    final Type fieldType;
     final long fieldNameHash;
     final long fieldNameHashLCase;
-    final long features;
-    final String format;
     final Locale locale;
     final JSONSchema schema;
     volatile ObjectReader reader;
 
     volatile JSONPath referenceCache;
-
-    final Object defaultValue;
     final boolean noneStaticMemberClass;
-
-    final Method method;
-    final Field field;
 
     Type itemType;
     Class itemClass;
@@ -113,19 +112,7 @@ public abstract class FieldReader<T>
         this.noneStaticMemberClass = BeanUtils.isNoneStaticMemberClass(declaringClass, fieldClass);
     }
 
-    public final Method getMethod() {
-        return method;
-    }
-
-    public final Field getField() {
-        return field;
-    }
-
-    public final Object getDefaultValue() {
-        return defaultValue;
-    }
-
-    public void setDefault(T object) {
+    public void acceptDefaultValue(T object) {
         if (defaultValue != null) {
             accept(object, defaultValue);
         }
@@ -177,30 +164,6 @@ public abstract class FieldReader<T>
 
     public JSONSchema getSchema() {
         return schema;
-    }
-
-    public int ordinal() {
-        return ordinal;
-    }
-
-    public long getFeatures() {
-        return features;
-    }
-
-    public String getFormat() {
-        return format;
-    }
-
-    public Type getFieldType() {
-        return fieldType;
-    }
-
-    public Class getFieldClass() {
-        return fieldClass;
-    }
-
-    public final String getFieldName() {
-        return fieldName;
     }
 
     public Type getItemType() {

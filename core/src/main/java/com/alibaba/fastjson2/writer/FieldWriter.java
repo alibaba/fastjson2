@@ -20,23 +20,22 @@ import static java.time.temporal.ChronoField.YEAR;
 
 public abstract class FieldWriter<T>
         implements Comparable {
-    final String name;
-    final int ordinal;
-    final String format;
-    final String label;
+    public final String fieldName;
+    public final Type fieldType;
+    public final Class fieldClass;
+    public final long features;
+    public final int ordinal;
+    public final String format;
+    public final String label;
+    public final Field field;
+    public final Method method;
+
     final long hashCode;
     final byte[] nameWithColonUTF8;
     final char[] nameWithColonUTF16;
     byte[] nameJSONB;
-
-    final long features;
-    final Type fieldType;
-    final Class fieldClass;
     final boolean fieldClassSerializable;
     final JSONWriter.Path rootParentPath;
-
-    final Field field;
-    final Method method;
 
     final boolean symbol;
     final boolean trim;
@@ -55,7 +54,7 @@ public abstract class FieldWriter<T>
             Field field,
             Method method
     ) {
-        this.name = name;
+        this.fieldName = name;
         this.ordinal = ordinal;
         this.format = format;
         this.label = label;
@@ -114,20 +113,8 @@ public abstract class FieldWriter<T>
         nameWithColonUTF16[nameWithColonUTF16.length - 1] = ':';
     }
 
-    public Field getField() {
-        return field;
-    }
-
-    public Method getMethod() {
-        return method;
-    }
-
     public boolean isFieldClassSerializable() {
         return fieldClassSerializable;
-    }
-
-    public int ordinal() {
-        return ordinal;
     }
 
     public boolean isDateFormatMillis() {
@@ -138,20 +125,8 @@ public abstract class FieldWriter<T>
         return false;
     }
 
-    public String getFormat() {
-        return format;
-    }
-
     public void writeEnumJSONB(JSONWriter jsonWriter, Enum e) {
         throw new UnsupportedOperationException();
-    }
-
-    public String getFieldName() {
-        return name;
-    }
-
-    public String getLabel() {
-        return label;
     }
 
     public ObjectWriter getInitWriter() {
@@ -162,22 +137,10 @@ public abstract class FieldWriter<T>
         return false;
     }
 
-    public Class getFieldClass() {
-        return fieldClass;
-    }
-
-    public Type getFieldType() {
-        return fieldType;
-    }
-
-    public long getFeatures() {
-        return features;
-    }
-
     public final void writeFieldName(JSONWriter jsonWriter) {
         if (jsonWriter.isJSONB()) {
             if (nameJSONB == null) {
-                nameJSONB = JSONB.toBytes(name);
+                nameJSONB = JSONB.toBytes(fieldName);
             }
             jsonWriter.writeNameRaw(nameJSONB, hashCode);
             return;
@@ -197,7 +160,7 @@ public abstract class FieldWriter<T>
             }
         }
 
-        jsonWriter.writeName(name);
+        jsonWriter.writeName(fieldName);
         jsonWriter.writeColon();
     }
 
@@ -207,14 +170,14 @@ public abstract class FieldWriter<T>
 
     public final JSONWriter.Path getPath(JSONWriter.Path parent) {
         if (path == null) {
-            return path = new JSONWriter.Path(parent, name);
+            return path = new JSONWriter.Path(parent, fieldName);
         }
 
         if (path.parent == parent) {
             return path;
         }
 
-        return new JSONWriter.Path(parent, name);
+        return new JSONWriter.Path(parent, fieldName);
     }
 
     public Type getItemType() {
@@ -227,7 +190,7 @@ public abstract class FieldWriter<T>
 
     @Override
     public String toString() {
-        return name;
+        return fieldName;
     }
 
     public Member getFieldOrMethod() {
@@ -243,8 +206,8 @@ public abstract class FieldWriter<T>
     public int compareTo(Object o) {
         FieldWriter otherFieldWriter = (FieldWriter) o;
 
-        String thisName = this.getFieldName();
-        String otherName = otherFieldWriter.getFieldName();
+        String thisName = this.fieldName;
+        String otherName = otherFieldWriter.fieldName;
 
         int nameCompare = thisName.compareTo(otherName);
 
@@ -264,8 +227,8 @@ public abstract class FieldWriter<T>
         }
 
         if (nameCompare != 0) {
-            int thisOrdinal = this.ordinal();
-            int otherOrdinal = otherFieldWriter.ordinal();
+            int thisOrdinal = this.ordinal;
+            int otherOrdinal = otherFieldWriter.ordinal;
             if (thisOrdinal < otherOrdinal) {
                 return -1;
             }
@@ -286,8 +249,8 @@ public abstract class FieldWriter<T>
             return nameCompare;
         }
 
-        Class otherFieldClass = otherFieldWriter.getFieldClass();
-        Class thisFieldClass = this.getFieldClass();
+        Class otherFieldClass = otherFieldWriter.fieldClass;
+        Class thisFieldClass = this.fieldClass;
         if (thisFieldClass != otherFieldClass && thisFieldClass != null && otherFieldClass != null) {
             if (thisFieldClass.isAssignableFrom(otherFieldClass)) {
                 return 1;
@@ -317,10 +280,10 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        if ("base64".equals(getFormat())
-                || (jsonWriter.getFeatures(getFeatures()) & JSONWriter.Feature.WriteByteArrayAsBase64.mask) != 0) {
+        if ("base64".equals(format)
+                || (jsonWriter.getFeatures(this.features) & JSONWriter.Feature.WriteByteArrayAsBase64.mask) != 0) {
             jsonWriter.writeBase64(value);
-        } else if ("gzip,base64".equals(getFormat())) {
+        } else if ("gzip,base64".equals(format)) {
             GZIPOutputStream gzipOut = null;
             try {
                 ByteArrayOutputStream byteOut = new ByteArrayOutputStream();

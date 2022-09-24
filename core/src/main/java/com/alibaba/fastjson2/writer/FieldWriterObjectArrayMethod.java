@@ -39,7 +39,7 @@ final class FieldWriterObjectArrayMethod<T>
         try {
             return method.invoke(object);
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
@@ -98,7 +98,7 @@ final class FieldWriterObjectArrayMethod<T>
         boolean refDetect = jsonWriter.isRefDetect();
 
         if (refDetect) {
-            String path = jsonWriter.setPath(name, array);
+            String path = jsonWriter.setPath(fieldName, array);
             if (path != null) {
                 jsonWriter.writeReference(path);
                 return;

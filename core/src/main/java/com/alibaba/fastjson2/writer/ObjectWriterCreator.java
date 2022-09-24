@@ -205,7 +205,7 @@ public class ObjectWriterCreator {
                 fieldInfo.init();
                 FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
-                    fieldWriterMap.put(fieldWriter.getFieldName(), fieldWriter);
+                    fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
                 }
             });
             fieldWriters = new ArrayList<>(fieldWriterMap.values());
@@ -230,7 +230,7 @@ public class ObjectWriterCreator {
                     fieldInfo.init();
                     FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
                     if (fieldWriter != null) {
-                        fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
+                        fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
                     }
                 });
 
@@ -309,7 +309,7 @@ public class ObjectWriterCreator {
                             writeUsingWriter
                     );
 
-                    FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
+                    FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
 
                     if (origin != null && origin.compareTo(fieldWriter) > 0) {
                         fieldWriterMap.put(fieldName, fieldWriter);
@@ -368,7 +368,7 @@ public class ObjectWriterCreator {
             for (int i = fieldWriters.size() - 1; i >= 0; i--) {
                 FieldWriter fieldWriter = fieldWriters.get(i);
                 for (String ignore : beanInfo.ignores) {
-                    if (ignore.equals(fieldWriter.getFieldName())) {
+                    if (ignore.equals(fieldWriter.fieldName)) {
                         fieldWriters.remove(i);
                         break;
                     }

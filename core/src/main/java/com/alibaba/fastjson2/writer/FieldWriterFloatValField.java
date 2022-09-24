@@ -20,7 +20,7 @@ final class FieldWriterFloatValField<T>
         try {
             return field.getFloat(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

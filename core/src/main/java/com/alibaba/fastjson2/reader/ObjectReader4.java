@@ -85,10 +85,10 @@ final class ObjectReader4<T>
 
     @Override
     protected void initDefaultValue(T object) {
-        fieldReader0.setDefault(object);
-        fieldReader1.setDefault(object);
-        fieldReader2.setDefault(object);
-        fieldReader3.setDefault(object);
+        fieldReader0.acceptDefaultValue(object);
+        fieldReader1.acceptDefaultValue(object);
+        fieldReader2.acceptDefaultValue(object);
+        fieldReader3.acceptDefaultValue(object);
     }
 
     @Override

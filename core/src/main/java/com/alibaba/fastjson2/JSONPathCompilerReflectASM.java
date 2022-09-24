@@ -115,7 +115,7 @@ class JSONPathCompilerReflectASM
         }
 
         if (fieldReader != null) {
-            Class fieldClass = fieldReader.getFieldClass();
+            Class fieldClass = fieldReader.fieldClass;
             int OBJECT = 1, VALUE = 2;
 
             if (fieldClass == int.class) {
@@ -194,7 +194,7 @@ class JSONPathCompilerReflectASM
         }
 
         if (fieldWriter != null) {
-            Class fieldClass = fieldReader.getFieldClass();
+            Class fieldClass = fieldReader.fieldClass;
 
             int OBJECT = 1;
 
@@ -245,9 +245,9 @@ class JSONPathCompilerReflectASM
     }
 
     private void gwSetValue(MethodWriter mw, String TYPE_OBJECT, FieldReader fieldReader) {
-        Method method = fieldReader.getMethod();
-        Field field = fieldReader.getField();
-        Class fieldClass = fieldReader.getFieldClass();
+        Method method = fieldReader.method;
+        Field field = fieldReader.field;
+        Class fieldClass = fieldReader.fieldClass;
         String fieldClassDesc = ASMUtils.desc(fieldClass);
 
         if (method != null) {
@@ -263,9 +263,9 @@ class JSONPathCompilerReflectASM
     }
 
     private void gwGetValue(MethodWriter mw, String TYPE_OBJECT, FieldWriter fieldWriter) {
-        Method method = fieldWriter.getMethod();
-        Field field = fieldWriter.getField();
-        Class fieldClass = fieldWriter.getFieldClass();
+        Method method = fieldWriter.method;
+        Field field = fieldWriter.field;
+        Class fieldClass = fieldWriter.fieldClass;
         String fieldClassDesc = ASMUtils.desc(fieldClass);
 
         if (method != null) {

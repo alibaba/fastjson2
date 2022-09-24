@@ -85,19 +85,19 @@ public interface ObjectWriter<T> {
                     jsonWriter.writeComma();
                 }
                 FieldWriter fieldWriter = fieldWriters.get(i);
-                if (propertyPreFilter != null && !propertyPreFilter.process(jsonWriter, object, fieldWriter.getFieldName())) {
+                if (propertyPreFilter != null && !propertyPreFilter.process(jsonWriter, object, fieldWriter.fieldName)) {
                     jsonWriter.writeNull();
                     continue;
                 }
 
                 Object fieldValue = fieldWriter.getFieldValue(object);
-                if (propertyFilter != null && !propertyFilter.apply(object, fieldWriter.getFieldName(), fieldValue)) {
+                if (propertyFilter != null && !propertyFilter.apply(object, fieldWriter.fieldName, fieldValue)) {
                     jsonWriter.writeNull();
                     continue;
                 }
 
                 if (valueFilter != null) {
-                    Object processValue = valueFilter.apply(object, fieldWriter.getFieldName(), fieldValue);
+                    Object processValue = valueFilter.apply(object, fieldWriter.fieldName, fieldValue);
                     if (processValue == null) {
                         jsonWriter.writeNull();
                         continue;

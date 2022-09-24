@@ -28,7 +28,7 @@ final class FieldWriterListField<T>
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
@@ -86,7 +86,7 @@ final class FieldWriterListField<T>
         boolean refDetect = jsonWriter.isRefDetect();
 
         if (refDetect) {
-            String refPath = jsonWriter.setPath(name, value);
+            String refPath = jsonWriter.setPath(fieldName, value);
             if (refPath != null) {
                 jsonWriter.writeReference(refPath);
                 jsonWriter.popPath(value);

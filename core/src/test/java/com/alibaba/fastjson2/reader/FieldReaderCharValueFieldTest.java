@@ -16,7 +16,7 @@ public class FieldReaderCharValueFieldTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "A");
         assertEquals('A', bean.value);
-        assertNotNull(fieldReader.getField());
+        assertNotNull(fieldReader.field);
 
         fieldReader.accept(bean, 'B');
         assertEquals('B', bean.value);

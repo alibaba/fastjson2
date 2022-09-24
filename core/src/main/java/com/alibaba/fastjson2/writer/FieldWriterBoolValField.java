@@ -15,7 +15,7 @@ final class FieldWriterBoolValField
         try {
             return field.getBoolean(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

@@ -251,15 +251,15 @@ abstract class FieldWriterObject<T>
         boolean jsonb = jsonWriter.isJSONB();
         if ((this.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
             if (jsonb) {
-                valueWriter.writeArrayMappingJSONB(jsonWriter, value, name, fieldType, this.features);
+                valueWriter.writeArrayMappingJSONB(jsonWriter, value, fieldName, fieldType, this.features);
             } else {
-                valueWriter.writeArrayMapping(jsonWriter, value, name, fieldType, this.features);
+                valueWriter.writeArrayMapping(jsonWriter, value, fieldName, fieldType, this.features);
             }
         } else {
             if (jsonb) {
-                valueWriter.writeJSONB(jsonWriter, value, name, fieldType, this.features);
+                valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldType, this.features);
             } else {
-                valueWriter.write(jsonWriter, value, name, fieldType, this.features);
+                valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
             }
         }
 
@@ -302,7 +302,7 @@ abstract class FieldWriterObject<T>
                 return;
             }
 
-            String refPath = jsonWriter.setPath(name, value);
+            String refPath = jsonWriter.setPath(fieldName, value);
             if (refPath != null) {
                 jsonWriter.writeReference(refPath);
                 jsonWriter.popPath(value);
@@ -312,12 +312,12 @@ abstract class FieldWriterObject<T>
 
         if (jsonWriter.isJSONB()) {
             if (jsonWriter.isBeanToArray()) {
-                valueWriter.writeArrayMappingJSONB(jsonWriter, value, name, fieldClass, features);
+                valueWriter.writeArrayMappingJSONB(jsonWriter, value, fieldName, fieldClass, features);
             } else {
-                valueWriter.writeJSONB(jsonWriter, value, name, fieldClass, features);
+                valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldClass, features);
             }
         } else {
-            valueWriter.write(jsonWriter, value, name, fieldClass, features);
+            valueWriter.write(jsonWriter, value, fieldName, fieldClass, features);
         }
 
         if (refDetect) {

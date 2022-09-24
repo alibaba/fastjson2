@@ -16,7 +16,7 @@ public class FieldReaderBooleanFuncTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "true");
         assertEquals(true, bean.value);
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
 
         fieldReader.accept(bean, 0);
         assertEquals(false, bean.value);

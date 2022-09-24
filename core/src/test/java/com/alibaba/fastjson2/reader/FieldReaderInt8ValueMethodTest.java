@@ -14,7 +14,7 @@ public class FieldReaderInt8ValueMethodTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals(123, bean.value);
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
 
         fieldReader.accept(bean, (short) 101);
         assertEquals(101, bean.value);

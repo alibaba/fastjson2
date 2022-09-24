@@ -2279,7 +2279,7 @@ public class ObjectReaderCreatorASM
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "getFieldType", "()Ljava/lang/reflect/Type;", false);
+        mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_FIELD_READE, "fieldType", "Ljava/lang/reflect/Type;");
     }
 
     void genIsEnabled(MethodWriter mw, int var, long features, Label elseLabel) {

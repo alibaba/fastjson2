@@ -84,7 +84,7 @@ abstract class FieldWriterInt16<T>
 
                 if (bytes == null) {
                     if (nameJSONB == null) {
-                        nameJSONB = JSONB.toBytes(name);
+                        nameJSONB = JSONB.toBytes(fieldName);
                     }
                     byte[] valueBytes = JSONB.toBytes(value);
 
