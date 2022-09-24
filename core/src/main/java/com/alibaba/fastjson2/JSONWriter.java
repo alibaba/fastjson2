@@ -626,9 +626,7 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
-    public void writeChar(char ch) {
-        throw new JSONException("UnsupportedOperation");
-    }
+    public abstract void writeChar(char ch);
 
     public abstract void writeRaw(char ch);
 
@@ -842,7 +840,7 @@ public abstract class JSONWriter
     public void writeStringNull() {
         String raw;
         if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) != 0) {
-            raw = "";
+            raw = (this.context.features & Feature.UseSingleQuotes.mask) != 0 ? "''" : "\"\"";
         } else {
             raw = "null";
         }
@@ -1077,11 +1075,7 @@ public abstract class JSONWriter
 
         Class<?> valueClass = value.getClass();
         ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
-        if (isJSONB()) {
-            objectWriter.writeJSONB(this, value, null, null, 0);
-        } else {
-            objectWriter.write(this, value, null, null, 0);
-        }
+        objectWriter.write(this, value, null, null, 0);
     }
 
     public abstract void writeReference(String path);

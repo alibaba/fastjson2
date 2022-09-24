@@ -5,12 +5,14 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONWriterTest {
@@ -418,5 +420,132 @@ public class JSONWriterTest {
         JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
         jsonWriter.writeChar('a');
         assertArrayEquals(new byte[] {'"', 'a', '"'}, jsonWriter.getBytes());
+    }
+
+    @Test
+    public void isWriteMapTypeInfo() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        assertFalse(jsonWriter.isWriteMapTypeInfo(null, null, 0));
+
+        ConcurrentMap map = new ConcurrentHashMap();
+        assertFalse(jsonWriter.isWriteMapTypeInfo(map, Map.class, 0));
+        assertTrue(jsonWriter.isWriteMapTypeInfo(map, Map.class, WriteClassName.mask));
+
+        jsonWriter.setRootObject(map);
+        assertTrue(jsonWriter.isWriteMapTypeInfo(map, Map.class, WriteClassName.mask));
+        assertFalse(jsonWriter.isWriteMapTypeInfo(map, Map.class, WriteClassName.mask | NotWriteRootClassName.mask));
+
+        Map map1 = new HashMap();
+        jsonWriter.setRootObject(map1);
+
+        assertFalse(jsonWriter.isWriteMapTypeInfo(map1, Map.class, WriteClassName.mask | NotWriteHashMapArrayListClassName.mask));
+        assertFalse(jsonWriter.isWriteMapTypeInfo(map1, Map.class, WriteClassName.mask | NotWriteRootClassName.mask | NotWriteHashMapArrayListClassName.mask));
+    }
+
+    @Test
+    public void isWriteTypeInfo() {
+        Map map = new HashMap();
+        List list = new ArrayList();
+        TreeMap treeMap = new TreeMap<>();
+
+        Type mapType = new TypeReference<Map<String, Object>>(){}.getType();
+
+        {
+            JSONWriter jsonWriter = JSONWriter.of(WriteClassName);
+
+            assertTrue(jsonWriter.isWriteTypeInfo(map, 0));
+            assertFalse(jsonWriter.isWriteTypeInfo(map, NotWriteHashMapArrayListClassName.mask));
+            assertFalse(jsonWriter.isWriteTypeInfo(list, NotWriteHashMapArrayListClassName.mask));
+            assertTrue(jsonWriter.isWriteTypeInfo(treeMap, NotWriteHashMapArrayListClassName.mask));
+
+            jsonWriter.config(NotWriteHashMapArrayListClassName);
+            assertFalse(jsonWriter.isWriteTypeInfo(map));
+            assertFalse(jsonWriter.isWriteTypeInfo(list));
+            assertTrue(jsonWriter.isWriteTypeInfo(treeMap));
+
+            assertFalse(jsonWriter.isWriteTypeInfo(null, (Type) Map.class, 0));
+            assertFalse(jsonWriter.isWriteTypeInfo(map, (Type) Map.class, 0));
+            assertTrue(jsonWriter.isWriteTypeInfo(treeMap, (Type) Map.class, 0));
+            assertFalse(jsonWriter.isWriteTypeInfo(list, (Type) Map.class, 0));
+
+            assertFalse(jsonWriter.isWriteTypeInfo(null, Map.class));
+            assertFalse(jsonWriter.isWriteTypeInfo(map, Map.class));
+            assertTrue(jsonWriter.isWriteTypeInfo(treeMap, Map.class));
+            assertFalse(jsonWriter.isWriteTypeInfo(list, Map.class));
+
+            assertFalse(jsonWriter.isWriteTypeInfo(null, mapType));
+            assertFalse(jsonWriter.isWriteTypeInfo(map, mapType));
+            assertTrue(jsonWriter.isWriteTypeInfo(treeMap, mapType));
+            assertFalse(jsonWriter.isWriteTypeInfo(list, mapType));
+
+            assertFalse(jsonWriter.isWriteTypeInfo(null, Map.class, 0));
+            assertFalse(jsonWriter.isWriteTypeInfo(map, Map.class, 0));
+            assertTrue(jsonWriter.isWriteTypeInfo(treeMap, Map.class, 0));
+            assertFalse(jsonWriter.isWriteTypeInfo(list, Map.class, 0));
+        }
+    }
+
+    @Test
+    public void writeInt32() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        jsonWriter.writeInt32(null);
+        assertEquals("null", jsonWriter.toString());
+    }
+
+    @Test
+    public void writeStringNull() {
+        {
+            JSONWriter jsonWriter = JSONWriter.of(NullAsDefaultValue);
+            jsonWriter.writeStringNull();
+            assertEquals("\"\"", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.of(NullAsDefaultValue, UseSingleQuotes);
+            jsonWriter.writeStringNull();
+            assertEquals("''", jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void writeDecimal() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        jsonWriter.writeDecimal(null, 0);
+        assertEquals("null", jsonWriter.toString());
+    }
+
+    @Test
+    public void writeString() {
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.writeString("\\".toCharArray());
+            assertEquals("\"\\\\\"", jsonWriter.toString());
+        }
+
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.writeString("\"".toCharArray());
+            assertEquals("\"\\\"\"", jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void writeList() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        jsonWriter.write(JSONArray.of(1, 2, 3));
+        assertEquals("[1,2,3]", jsonWriter.toString());
+    }
+
+    @Test
+    public void writeAny() {
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        jsonWriter.writeAny(1);
+        byte[] bytes = jsonWriter.getBytes();
+        assertEquals(1, JSONB.parse(bytes));
+    }
+
+    @Test
+    public void pathEquals() {
+        assertFalse(JSONWriter.Path.ROOT.equals(null));
+        assertFalse(JSONWriter.Path.ROOT.equals(new Object()));
     }
 }
