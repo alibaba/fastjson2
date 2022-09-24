@@ -2005,6 +2005,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -2026,6 +2028,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -2186,6 +2190,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -2209,6 +2215,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);

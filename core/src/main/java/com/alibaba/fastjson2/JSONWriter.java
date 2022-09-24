@@ -122,7 +122,7 @@ public abstract class JSONWriter
         return previous.toString();
     }
 
-    public String setPath(String name, FieldWriter fieldWriter, Object object) {
+    public String setPath(FieldWriter fieldWriter, Object object) {
         if ((context.features & Feature.ReferenceDetection.mask) == 0) {
             return null;
         }
@@ -130,7 +130,7 @@ public abstract class JSONWriter
         if (this.path == Path.ROOT) {
             this.path = fieldWriter.getRootParentPath();
         } else {
-            this.path = new Path(this.path, name);
+            this.path = fieldWriter.getPath(path);
         }
 
         if (refs == null) {
@@ -150,16 +150,20 @@ public abstract class JSONWriter
             return null;
         }
 
-        if (this.path == Path.ROOT) {
-            if (index == 0) {
-                this.path = Path.ROOT_0;
-            } else if (index == 1) {
-                this.path = Path.ROOT_1;
+        if (index == 0) {
+            if (path.child0 != null) {
+                this.path = path.child0;
             } else {
-                this.path = new Path(Path.ROOT, index);
+                this.path = path.child0 = new Path(path, index);
+            }
+        } else if (index == 1) {
+            if (path.child1 != null) {
+                this.path = path.child1;
+            } else {
+                this.path = path.child1 = new Path(path, index);
             }
         } else {
-            this.path = new Path(this.path, index);
+            this.path = new Path(path, index);
         }
 
         if (refs == null) {
@@ -1476,13 +1480,14 @@ public abstract class JSONWriter
 
     public static final class Path {
         public static final Path ROOT = new Path(null, "$");
-        public static final Path ROOT_0 = new Path(ROOT, 0);
-        public static final Path ROOT_1 = new Path(ROOT, 1);
 
-        final Path parent;
+        public final Path parent;
         final String name;
         final int index;
         String fullPath;
+
+        Path child0;
+        Path child1;
 
         public Path(Path parent, String name) {
             this.parent = parent;

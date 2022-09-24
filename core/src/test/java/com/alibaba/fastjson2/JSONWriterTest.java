@@ -409,14 +409,6 @@ public class JSONWriterTest {
     }
 
     @Test
-    public void path() {
-        assertEquals(JSONWriter.Path.ROOT_0, JSONWriter.Path.ROOT_0);
-        assertEquals(JSONWriter.Path.ROOT_0.hashCode(), JSONWriter.Path.ROOT_0.hashCode());
-        assertNotEquals(JSONWriter.Path.ROOT_0, ROOT);
-        assertNotEquals(JSONWriter.Path.ROOT_0, JSONWriter.Path.ROOT_1);
-    }
-
-    @Test
     public void getBytes() {
         JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
         jsonWriter.writeChar('a');

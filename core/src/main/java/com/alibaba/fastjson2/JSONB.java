@@ -824,6 +824,8 @@ public interface JSONB {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.writeJSONB(writer, object, null, null, 0);
@@ -840,6 +842,8 @@ public interface JSONB {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.writeJSONB(writer, object, null, null, 0);
@@ -860,6 +864,8 @@ public interface JSONB {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
 
                 boolean fieldBased = (ctx.features & JSONWriter.Feature.FieldBased.mask) != 0;
@@ -888,6 +894,8 @@ public interface JSONB {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
 
                 boolean fieldBased = (ctx.features & JSONWriter.Feature.FieldBased.mask) != 0;
@@ -958,6 +966,8 @@ public interface JSONB {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.writeJSONB(writer, object, null, null, 0);

@@ -442,7 +442,8 @@ final class ObjectWriterImplMap
                 valueWriter = jsonWriter.getObjectWriter(valueType);
             }
 
-            if (refDetect && strKey != null && !ObjectWriterProvider.isPrimitiveOrEnum(value.getClass())) {
+            boolean valueRefDetect = refDetect && strKey != null && !ObjectWriterProvider.isPrimitiveOrEnum(value.getClass());
+            if (valueRefDetect) {
                 if (value == object) {
                     jsonWriter.writeReference("..");
                     continue;
@@ -458,7 +459,7 @@ final class ObjectWriterImplMap
 
             valueWriter.write(jsonWriter, value, key, this.valueType, this.features);
 
-            if (refDetect) {
+            if (valueRefDetect) {
                 jsonWriter.popPath(value);
             }
         }

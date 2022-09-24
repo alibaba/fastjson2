@@ -67,7 +67,7 @@ public class ObjectWriterCreatorASM
     static final String METHOD_DESC_HAS_FILTER = "(" + DESC_JSON_WRITER + ")Z";
     static final String METHOD_DESC_GET_CONTEXT = "()" + ASMUtils.desc(JSONWriter.Context.class);
     static final String METHOD_DESC_SET_PATH = "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/String;";
-    static final String METHOD_DESC_SET_PATH2 = "(Ljava/lang/String;" + DESC_FIELD_WRITER + "Ljava/lang/Object;)Ljava/lang/String;";
+    static final String METHOD_DESC_SET_PATH2 = "(" + DESC_FIELD_WRITER + "Ljava/lang/Object;)Ljava/lang/String;";
     static final String METHOD_DESC_SET_PATH_I = "(ILjava/lang/Object;)Ljava/lang/String;";
     static final String METHOD_DESC_WRITE_REFERENCE = "(Ljava/lang/String;)V";
     static final String METHOD_DESC_WRITE_CLASS_INFO = "(" + DESC_JSON_WRITER + ")V";
@@ -803,7 +803,6 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(refSetPath_);
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitLdcInsn(fieldName);
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
@@ -917,7 +916,6 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(refSetPath_);
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitLdcInsn(fieldName);
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, LIST);
@@ -1237,7 +1235,6 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(refSetPath_);
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitLdcInsn(fieldName);
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, mwc.classNameType, fieldWriter(i), DESC_FIELD_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
@@ -1623,7 +1620,6 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(refSetPath_);
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitLdcInsn(fieldName);
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, mwc.classNameType, fieldWriter(i), DESC_FIELD_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
@@ -1824,7 +1820,6 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(refSetPath_);
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitLdcInsn(fieldName);
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, mwc.classNameType, fieldWriter(i), DESC_FIELD_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, LIST);
@@ -2163,7 +2158,6 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(refSetPath_);
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitLdcInsn(fieldName);
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, mwc.classNameType, fieldWriter(i), DESC_FIELD_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);

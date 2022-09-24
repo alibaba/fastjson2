@@ -58,6 +58,25 @@ public class TLongIntHashMap {
         values = new int[capacity];
     }
 
+    public TLongIntHashMap(long key, int value) {
+        int capacity = 37;
+        maxSize = 18;
+
+        states = new byte[capacity];
+        set = new long[capacity];
+        values = new int[capacity];
+
+        int hash = ((int) (key ^ (key >>> 32))) & 0x7fffffff;
+        int index = hash % states.length;
+        consumeFreeSlot = true;
+        set[index] = key;
+        states[index] = FULL;
+
+        values[index] = value;
+
+        free = capacity - 1;
+    }
+
     public void put(long key, int value) {
 //        int index = insertKey( key );
         int index;
@@ -160,6 +179,116 @@ public class TLongIntHashMap {
                 free = capacity - size; // reset the free element count
             }
         }
+    }
+
+    public int putIfAbsent(long key, int value) {
+//        int index = insertKey( key );
+        int index;
+        {
+            int hash = ((int) (key ^ (key >>> 32))) & 0x7fffffff;
+            index = hash % states.length;
+            byte state = states[index];
+
+            consumeFreeSlot = false;
+
+            if (state == FREE) {
+                consumeFreeSlot = true;
+//                insertKeyAt(index, key);
+                set[index] = key;
+                states[index] = FULL;
+            } else if (state == FULL && set[index] == key) {
+                index = -index - 1;   // already stored
+            } else {
+                // already FULL or REMOVED, must probe
+//                index = insertKeyRehash(key, index, hash);
+                {
+                    // compute the double hash
+                    final int length = set.length;
+                    int probe = 1 + (hash % (length - 2));
+                    final int loopIndex = index;
+
+                    /**
+                     * Look until FREE slot or we start to loop
+                     */
+                    do {
+                        index -= probe;
+                        if (index < 0) {
+                            index += length;
+                        }
+                        state = states[index];
+
+                        // A FREE slot stops the search
+                        if (state == FREE) {
+                            consumeFreeSlot = true;
+                            set[index] = key;  // insert value
+                            states[index] = FULL;
+                            break;
+                        }
+
+                        if (state == FULL && set[index] == key) {
+                            index = -index - 1;
+                            break;
+                        }
+
+                        // Detect loop
+                    } while (index != loopIndex);
+                }
+            }
+        }
+
+        if (index < 0) {
+            return values[-index - 1];
+        }
+
+        boolean isNewMapping = true;
+        if (index < 0) {
+            index = -index - 1;
+            isNewMapping = false;
+        }
+        values[index] = value;
+
+        if (isNewMapping) {
+            if (consumeFreeSlot) {
+                free--;
+            }
+
+            // rehash whenever we exhaust the available space in the table
+            if (++size > maxSize || free == 0) {
+                // choose a new capacity suited to the new state of the table
+                // if we've grown beyond our maximum size, double capacity;
+                // if we've exhausted the free spots, rehash to the same capacity,
+                // which will free up any stale removed slots for reuse.
+                int capacity = states.length;
+                int newCapacity = size > maxSize ? PrimeFinder.nextPrime(capacity << 1) : capacity;
+//                rehash(newCapacity);
+                {
+                    int oldCapacity = set.length;
+
+                    long[] oldKeys = set;
+                    int[] oldVals = values;
+                    byte[] oldStates = states;
+
+                    set = new long[newCapacity];
+                    values = new int[newCapacity];
+                    states = new byte[newCapacity];
+
+                    for (int i = oldCapacity; i-- > 0; ) {
+                        if (oldStates[i] == FULL) {
+                            long o = oldKeys[i];
+                            index = insertKey(o);
+                            values[index] = oldVals[i];
+                        }
+                    }
+                }
+
+                capacity = states.length;
+                // computeMaxSize(capacity);
+                maxSize = Math.min(capacity - 1, (int) (capacity * 0.5f));
+                free = capacity - size; // reset the free element count
+            }
+        }
+
+        return value;
     }
 
     public int get(long key) {

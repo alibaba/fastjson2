@@ -39,10 +39,11 @@ public class EishayParseBinaryAutoType {
 
     static MediaContent mc;
     static byte[] fastjson2JSONBBytes;
+    static byte[] fastjson2JSONBBytes_arrayMapping;
     static byte[] fastjson2JSONBBytes_symbols;
     static byte[] hessianBytes;
     static byte[] javaSerializeBytes;
-//    static byte[] furyBytes;
+    static byte[] furyBytes;
 
     static JSONReader.AutoTypeBeforeHandler autoTypeFilter = JSONReader.autoTypeFilter(true, Media.class, MediaContent.class, Image.class);
 //    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
@@ -67,6 +68,17 @@ public class EishayParseBinaryAutoType {
                     JSONWriter.Feature.NotWriteDefaultValue,
                     JSONWriter.Feature.NotWriteHashMapArrayListClassName,
                     JSONWriter.Feature.WriteNameAsSymbol);
+
+            fastjson2JSONBBytes_arrayMapping = JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName,
+                    JSONWriter.Feature.IgnoreNoneSerializable,
+                    JSONWriter.Feature.FieldBased,
+                    JSONWriter.Feature.ReferenceDetection,
+                    JSONWriter.Feature.WriteNulls,
+                    JSONWriter.Feature.NotWriteDefaultValue,
+                    JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+                    JSONWriter.Feature.WriteNameAsSymbol,
+                    JSONWriter.Feature.BeanToArray
+            );
 
             fastjson2JSONBBytes_symbols = JSONB.toBytes(
                     mc,
@@ -102,7 +114,7 @@ public class EishayParseBinaryAutoType {
         }
     }
 
-    @Benchmark
+//    @Benchmark
     public void fury(Blackhole bh) {
 //        bh.consume(fury.deserialize(furyBytes));
     }
@@ -118,6 +130,22 @@ public class EishayParseBinaryAutoType {
                         JSONReader.Feature.UseDefaultConstructorAsPossible,
                         JSONReader.Feature.UseNativeObject,
                         JSONReader.Feature.FieldBased)
+        );
+    }
+
+    @Benchmark
+    public void fastjson2JSONBBytes_arrayMapping(Blackhole bh) {
+        bh.consume(
+                JSONB.parseObject(
+                        fastjson2JSONBBytes_arrayMapping,
+                        Object.class,
+                        JSONReader.Feature.SupportAutoType,
+                        JSONReader.Feature.IgnoreNoneSerializable,
+                        JSONReader.Feature.UseDefaultConstructorAsPossible,
+                        JSONReader.Feature.UseNativeObject,
+                        JSONReader.Feature.FieldBased,
+                        JSONReader.Feature.SupportArrayToBean
+                )
         );
     }
 

@@ -765,6 +765,8 @@ public class JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1037,6 +1039,7 @@ public class JSON {
             if (object == null) {
                 jsonWriter.writeNull();
             } else {
+                jsonWriter.setRootObject(object);
                 ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
                 objectWriter.write(jsonWriter, object, null, null, 0);
             }
@@ -1061,6 +1064,7 @@ public class JSON {
             if (object == null) {
                 jsonWriter.writeNull();
             } else {
+                jsonWriter.setRootObject(object);
                 ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
                 objectWriter.write(jsonWriter, object, null, null, 0);
             }
