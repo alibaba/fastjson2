@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.Path.ROOT;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONWriterTest {
@@ -411,7 +412,7 @@ public class JSONWriterTest {
     public void path() {
         assertEquals(JSONWriter.Path.ROOT_0, JSONWriter.Path.ROOT_0);
         assertEquals(JSONWriter.Path.ROOT_0.hashCode(), JSONWriter.Path.ROOT_0.hashCode());
-        assertNotEquals(JSONWriter.Path.ROOT_0, JSONWriter.Path.ROOT);
+        assertNotEquals(JSONWriter.Path.ROOT_0, ROOT);
         assertNotEquals(JSONWriter.Path.ROOT_0, JSONWriter.Path.ROOT_1);
     }
 
@@ -545,7 +546,63 @@ public class JSONWriterTest {
 
     @Test
     public void pathEquals() {
-        assertFalse(JSONWriter.Path.ROOT.equals(null));
-        assertFalse(JSONWriter.Path.ROOT.equals(new Object()));
+        assertFalse(ROOT.equals(null));
+        assertFalse(ROOT.equals(new Object()));
+    }
+
+    @Test
+    public void pathToString() {
+        assertEquals(
+                "$.A",
+                new JSONWriter.Path(ROOT, "A")
+                        .toString()
+        );
+        assertEquals(
+                "$.ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE",
+                new JSONWriter.Path(ROOT, "ABCDEABCDEABCDEABCDEABCDEABCDEABCDEABCDE")
+                        .toString()
+        );
+
+        assertEquals(
+                "$.中",
+                new JSONWriter.Path(ROOT, "中")
+                        .toString()
+        );
+        assertEquals(
+                "$.中中中中中中中中中中中中中中中中中中中中中中中中中",
+                new JSONWriter.Path(ROOT, "中中中中中中中中中中中中中中中中中中中中中中中中中")
+                        .toString()
+        );
+
+        assertEquals(
+                "$.\uD83D\uDE0B",
+                new JSONWriter.Path(ROOT, "\uD83D\uDE0B")
+                        .toString()
+        );
+        assertEquals(
+                "$.\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B",
+                new JSONWriter.Path(
+                        ROOT,
+                        "\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B\uD83D\uDE0B"
+                )
+                        .toString()
+        );
+
+        assertEquals(
+                "$.Ɛ",
+                new JSONWriter.Path(ROOT, "Ɛ")
+                        .toString()
+        );
+        assertEquals(
+                "$.ƐƐƐƐƐƐƐƐƐƐƐƐƐƐƐƐƐƐƐƐ",
+                new JSONWriter.Path(ROOT, "ƐƐƐƐƐƐƐƐƐƐƐƐƐƐƐƐƐƐƐƐ")
+                        .toString()
+        );
+
+        assertEquals(
+                "$.?",
+                new JSONWriter.Path(ROOT, "\uDC00")
+                        .toString()
+        );
     }
 }
