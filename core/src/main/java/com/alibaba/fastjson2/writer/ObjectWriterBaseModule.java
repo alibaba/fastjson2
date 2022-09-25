@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.annotation.JSONWritable;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.Filter;
@@ -25,6 +26,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
+import static com.alibaba.fastjson2.codec.FieldInfo.JSON_WRITABLE_ANNOTATED;
 import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonJsonIgnore;
 
 public class ObjectWriterBaseModule
@@ -65,6 +67,17 @@ public class ObjectWriterBaseModule
                 Class annotationType = annotation.annotationType();
                 if (annotationType == JSONType.class) {
                     jsonType = (JSONType) annotation;
+                    continue;
+                }
+
+                if (annotationType == JSONWritable.class) {
+                    beanInfo.writerFeatures |= JSON_WRITABLE_ANNOTATED;
+
+                    JSONWritable jsonWritable = (JSONWritable) annotation;
+                    String fieldName = jsonWritable.fieldName();
+                    if (!fieldName.isEmpty()) {
+                        beanInfo.objectWriterFieldName = fieldName;
+                    }
                     continue;
                 }
 
@@ -116,6 +129,18 @@ public class ObjectWriterBaseModule
                             jsonType = (JSONType) annotation;
                             continue;
                         }
+
+                        if (annotationType == JSONWritable.class) {
+                            beanInfo.writerFeatures |= JSON_WRITABLE_ANNOTATED;
+
+                            JSONWritable jsonWritable = (JSONWritable) annotation;
+                            String fieldName = jsonWritable.fieldName();
+                            if (!fieldName.isEmpty()) {
+                                beanInfo.objectWriterFieldName = fieldName;
+                            }
+                            continue;
+                        }
+
                         String annotationTypeName = annotationType.getName();
                         switch (annotationTypeName) {
                             case "com.alibaba.fastjson.annotation.JSONType":
@@ -1075,7 +1100,7 @@ public class ObjectWriterBaseModule
                 }
 
                 BeanInfo beanInfo = new BeanInfo();
-                getAnnotationProcessor().getBeanInfo(beanInfo, clazz);
+                annotationProcessor.getBeanInfo(beanInfo, clazz);
                 if (!beanInfo.writeEnumAsJavaBean) {
                     return new ObjectWriterImplEnum(null, clazz, valueField, 0);
                 }
@@ -1181,7 +1206,7 @@ public class ObjectWriterBaseModule
             BeanInfo beanInfo = new BeanInfo();
             Class mixIn = provider.getMixIn(clazz);
             if (mixIn != null) {
-                getAnnotationProcessor().getBeanInfo(beanInfo, mixIn);
+                annotationProcessor.getBeanInfo(beanInfo, mixIn);
             }
 
             if (Date.class.isAssignableFrom(clazz)) {

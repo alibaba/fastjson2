@@ -20,6 +20,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.alibaba.fastjson2.codec.FieldInfo.JSON_READABLE_ANNOTATED;
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
@@ -579,7 +580,56 @@ public class ObjectReaderCreator {
         );
     }
 
+    protected ObjectReader getAnnotatedObjectReader(ObjectReaderProvider provider, Class objectClass, BeanInfo beanInfo) {
+        if ((beanInfo.readerFeatures & JSON_READABLE_ANNOTATED) == 0) {
+            return null;
+        }
+
+        String fieldName = beanInfo.objectReaderFieldName;
+        if (fieldName == null) {
+            fieldName = "objectReader";
+        }
+        try {
+            Field field = null;
+            if (beanInfo.mixIn) {
+                Class mixinClass = provider.mixInCache.get(objectClass);
+                if (mixinClass != null) {
+                    try {
+                        field = mixinClass.getDeclaredField(fieldName);
+                    } catch (NoSuchFieldException | SecurityException igored) {
+                        // ignored
+                    }
+                }
+            }
+
+            if (field == null) {
+                field = objectClass.getDeclaredField(fieldName);
+            }
+
+            if (field != null
+                    && ObjectReader.class.isAssignableFrom(field.getType())
+                    && Modifier.isStatic(field.getModifiers())) {
+                field.setAccessible(true);
+                return (ObjectReader) field.get(null);
+            }
+        } catch (Throwable ignored) {
+            // ignored
+        }
+        return null;
+    }
+
     public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, List<ObjectReaderModule> modules) {
+        ObjectReaderProvider provider;
+        {
+            ObjectReaderProvider p = null;
+            for (ObjectReaderModule module : modules) {
+                if (p == null) {
+                    p = module.getProvider();
+                }
+            }
+            provider = p;
+        }
+
         BeanInfo beanInfo = new BeanInfo();
         if (fieldBased) {
             beanInfo.readerFeatures |= JSONReader.Feature.FieldBased.mask;
@@ -598,6 +648,11 @@ public class ObjectReaderCreator {
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new JSONException("create deserializer error", e);
             }
+        }
+
+        ObjectReader annotatedObjectReader = getAnnotatedObjectReader(provider, objectClass, beanInfo);
+        if (annotatedObjectReader != null) {
+            return annotatedObjectReader;
         }
 
         if (fieldBased) {
