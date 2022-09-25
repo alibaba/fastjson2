@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.JSONFactory.CACHE_SIZE;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterJSONB
@@ -35,7 +36,7 @@ final class JSONWriterJSONB
 
     JSONWriterJSONB(Context ctx, SymbolTable symbolTable) {
         super(ctx, StandardCharsets.UTF_8);
-        cachedIndex = JSONFactory.cacheIndex();
+        cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         bytes = JSONFactory.allocateByteArray(cachedIndex);
         this.symbolTable = symbolTable;
     }

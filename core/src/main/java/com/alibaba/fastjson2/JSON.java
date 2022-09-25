@@ -1522,7 +1522,7 @@ public interface JSON {
                                 Type type,
                                 Consumer<T> consumer,
                                 JSONReader.Feature... features) {
-        int cachedIndex = JSONFactory.cacheIndex();
+        int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         byte[] bytes = JSONFactory.allocateByteArray(cachedIndex);
 
         int offset = 0, start = 0, end;
@@ -1592,7 +1592,7 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> void parseObject(Reader input, char delimiter, Type type, Consumer<T> consumer) {
-        final int cachedIndex = JSONFactory.cacheIndex();
+        final int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         char[] chars = JSONFactory.allocateCharArray(cachedIndex);
 
         int offset = 0, start = 0, end;

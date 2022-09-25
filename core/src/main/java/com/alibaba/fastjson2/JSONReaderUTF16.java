@@ -233,7 +233,7 @@ final class JSONReaderUTF16
         super(ctx);
         this.input = input;
 
-        cacheIndex = JSONFactory.cacheIndex();
+        cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         char[] chars = JSONFactory.allocateCharArray(cacheIndex);
 
         if (chars == null) {
@@ -344,7 +344,7 @@ final class JSONReaderUTF16
     JSONReaderUTF16(Context ctx, InputStream input) {
         super(ctx);
         this.input = input;
-        final int cacheIndex = JSONFactory.cacheIndex();
+        final int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         byte[] bytes = JSONFactory.allocateByteArray(cacheIndex);
 
         char[] chars;

@@ -70,12 +70,9 @@ public class DynamicClassLoader
     }
 
     static {
-        DOMAIN = (java.security.ProtectionDomain) java.security.AccessController.doPrivileged(new PrivilegedAction<Object>() {
-            @Override
-            public Object run() {
-                return DynamicClassLoader.class.getProtectionDomain();
-            }
-        });
+        DOMAIN = (java.security.ProtectionDomain) java.security.AccessController.doPrivileged(
+                (PrivilegedAction<Object>) () -> DynamicClassLoader.class.getProtectionDomain()
+        );
     }
 
     private final ClassLoader parent;
