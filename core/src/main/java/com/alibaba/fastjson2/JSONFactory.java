@@ -12,12 +12,9 @@ import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class JSONFactory {
@@ -41,15 +38,6 @@ public final class JSONFactory {
 
     static Supplier<Map> defaultObjectSupplier;
     static Supplier<List> defaultArraySupplier;
-
-    static final class Utils {
-        // GraalVM not support
-        // Android not support
-        static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
-        static Function<byte[], String> STRING_CREATOR_JDK11;
-        static BiFunction<byte[], Charset, String> STRING_CREATOR_JDK17;
-        static volatile boolean STRING_CREATOR_ERROR;
-    }
 
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];

@@ -5,6 +5,9 @@ import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.util.Arrays;
 
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_CODER;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
+
 final class JSONWriterUTF8JDK9
         extends JSONWriterUTF8 {
     JSONWriterUTF8JDK9(Context ctx) {
@@ -28,8 +31,12 @@ final class JSONWriterUTF8JDK9
             return;
         }
 
-        int coder = UnsafeUtils.getStringCoder(str);
-        byte[] value = UnsafeUtils.getStringValue(str);
+        int coder = STRING_CODER != null
+                ? STRING_CODER.applyAsInt(str)
+                : UnsafeUtils.getStringCoder(str);
+        byte[] value = STRING_VALUE != null
+                ? STRING_VALUE.apply(str)
+                : UnsafeUtils.getStringValue(str);
 
         if (coder == 0) {
             boolean escape = false;

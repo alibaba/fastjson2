@@ -23,6 +23,8 @@ import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_CODER;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
 
 public abstract class JSONReader
         implements Closeable {
@@ -2502,9 +2504,13 @@ public abstract class JSONReader
 
         if (JDKUtils.JVM_VERSION == 8 && JDKUtils.UNSAFE_SUPPORT && str.length() > 1024 * 1024) {
             try {
-                byte coder = UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER != null
+                        ? STRING_CODER.applyAsInt(str)
+                        : UnsafeUtils.getStringCoder(str);
                 if (coder == 0) {
-                    byte[] bytes = UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE != null
+                            ? STRING_VALUE.apply(str)
+                            : UnsafeUtils.getStringValue(str);
                     return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                 }
             } catch (Exception e) {
@@ -2531,9 +2537,13 @@ public abstract class JSONReader
         Context context = JSONFactory.createReadContext();
         if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
             try {
-                byte coder = UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER != null
+                        ? STRING_CODER.applyAsInt(str)
+                        : UnsafeUtils.getStringCoder(str);
                 if (coder == 0) {
-                    byte[] bytes = UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE != null
+                            ? STRING_VALUE.apply(str)
+                            : UnsafeUtils.getStringValue(str);
                     return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                 }
             } catch (Exception e) {
@@ -2560,9 +2570,13 @@ public abstract class JSONReader
         Context context = JSONFactory.createReadContext();
         if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
             try {
-                byte coder = UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER != null
+                        ? STRING_CODER.applyAsInt(str)
+                        : UnsafeUtils.getStringCoder(str);
                 if (coder == 0) {
-                    byte[] bytes = UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE != null
+                            ? STRING_VALUE.apply(str)
+                            : UnsafeUtils.getStringValue(str);
                     return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
             } catch (Exception e) {
@@ -2587,9 +2601,13 @@ public abstract class JSONReader
 
         if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
             try {
-                byte coder = UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER != null
+                        ? STRING_CODER.applyAsInt(str)
+                        : UnsafeUtils.getStringCoder(str);
                 if (coder == 0) {
-                    byte[] bytes = UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE != null
+                            ? STRING_VALUE.apply(str)
+                            : UnsafeUtils.getStringValue(str);
                     return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
             } catch (Exception e) {

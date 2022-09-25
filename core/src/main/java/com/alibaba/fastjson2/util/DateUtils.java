@@ -7,15 +7,13 @@ import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.function.BiFunction;
 
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.IOUtils.OFFSET_0800_TOTAL_SECONDS;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK8;
 import static java.time.ZoneOffset.UTC;
 
 public class DateUtils {
-    static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
-
     public static Date parseDate(String str) {
         if (str == null) {
             return null;
@@ -2713,17 +2711,8 @@ public class DateUtils {
             }
         }
 
-        if (JDKUtils.JVM_VERSION == 8) {
-            if (STRING_CREATOR_JDK8 == null) {
-                try {
-                    STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-            }
-            if (STRING_CREATOR_JDK8 != null) {
-                return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-            }
+        if (STRING_CREATOR_JDK8 != null) {
+            return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
         }
 
         return new String(chars);

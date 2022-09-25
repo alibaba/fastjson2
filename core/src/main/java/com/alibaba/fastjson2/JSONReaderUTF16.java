@@ -13,9 +13,8 @@ import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
 import static com.alibaba.fastjson2.util.DateUtils.localDateTime;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK8;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 import static java.time.ZoneOffset.UTC;
 
@@ -3600,19 +3599,8 @@ final class JSONReaderUTF16
                     offset++;
                 }
 
-                if (JDKUtils.JVM_VERSION == 8) {
-                    if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
-                        try {
-                            STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                        } catch (Throwable e) {
-                            STRING_CREATOR_ERROR = true;
-                        }
-                    }
-                    if (STRING_CREATOR_JDK8 != null) {
-                        str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                    } else {
-                        str = new String(chars);
-                    }
+                if (STRING_CREATOR_JDK8 != null) {
+                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                 } else {
                     str = new String(chars);
                 }

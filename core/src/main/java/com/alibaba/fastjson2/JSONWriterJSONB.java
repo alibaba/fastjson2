@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterJSONB
         extends JSONWriter {
@@ -513,8 +514,13 @@ final class JSONWriterJSONB
             return;
         }
 
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
-            int coder = UnsafeUtils.getStringCoder(str);
+        if (JDKUtils.JVM_VERSION > 8 && (UNSAFE_SUPPORT || STRING_CODER != null)) {
+            int coder = STRING_CODER != null
+                    ? STRING_CODER.applyAsInt(str)
+                    : UnsafeUtils.getStringCoder(str);
+            byte[] value = STRING_VALUE != null
+                    ? STRING_VALUE.apply(str)
+                    : UnsafeUtils.getStringValue(str);
 
             if (coder == 0) {
                 int strlen = str.length();
@@ -547,11 +553,11 @@ final class JSONWriterJSONB
                     bytes[off++] = BC_STR_ASCII;
                     writeInt32(strlen);
                 }
-                str.getBytes(0, strlen, bytes, off);
+//                str.getBytes(0, strlen, bytes, off);
+                System.arraycopy(value, 0, bytes, off, value.length);
                 off += strlen;
                 return;
             } else {
-                byte[] value = UnsafeUtils.getStringValue(str);
                 int check_cnt = 128;
                 if (check_cnt > value.length) {
                     check_cnt = value.length;
