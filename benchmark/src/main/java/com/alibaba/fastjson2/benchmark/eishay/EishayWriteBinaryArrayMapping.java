@@ -27,6 +27,13 @@ public class EishayWriteBinaryArrayMapping {
     static MediaContent mc;
     static Kryo kryo;
     static Output output = new Output(1024, -1);
+//
+//    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
+//            .withLanguage(io.fury.Language.JAVA)
+//            .withReferenceTracking(true)
+//            .disableSecureMode()
+//            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
+//            .buildThreadSafeFury();
 
     static {
         try {
@@ -50,6 +57,12 @@ public class EishayWriteBinaryArrayMapping {
     @Benchmark
     public void fastjson1UTF8Bytes(Blackhole bh) {
         bh.consume(com.alibaba.fastjson.JSON.toJSONBytes(mc, SerializerFeature.BeanToArray));
+    }
+
+//    @Benchmark
+    public void fury(Blackhole bh) {
+//        byte[] bytes = fury.serialize(mc);
+//        bh.consume(bytes);
     }
 
     @Benchmark
