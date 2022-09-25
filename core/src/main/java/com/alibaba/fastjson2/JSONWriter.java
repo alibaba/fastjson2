@@ -20,8 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK8;
 
 public abstract class JSONWriter
         implements Closeable {
@@ -1809,26 +1808,12 @@ public abstract class JSONWriter
                     return fullPath = (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
                 }
 
-                if (JDKUtils.JVM_VERSION == 8) {
-                    if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
-                        try {
-                            STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                        } catch (Throwable e) {
-                            STRING_CREATOR_ERROR = true;
-                        }
-                    }
-
+                if (STRING_CREATOR_JDK8 != null) {
                     char[] chars = new char[off];
                     for (int i = 0; i < off; i++) {
                         chars[i] = (char) buf[i];
                     }
-                    if (STRING_CREATOR_JDK8 == null) {
-                        fullPath = new String(chars);
-                    } else {
-                        fullPath = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                    }
-
-                    return fullPath;
+                    return fullPath = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                 }
             }
 

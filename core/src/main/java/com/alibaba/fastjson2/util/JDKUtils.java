@@ -1,13 +1,16 @@
 package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.nio.ByteOrder;
+import java.util.List;
 import java.util.function.*;
 
 public class JDKUtils {
     public static final int JVM_VERSION;
+    public static final Byte LATIN1 = 0;
 
     static final Field FIELD_STRING_VALUE;
     static final long FIELD_STRING_VALUE_OFFSET;
@@ -26,10 +29,11 @@ public class JDKUtils {
     // GraalVM not support
     // Android not support
     public static final Function<Object, Object> UNSAFE_UTF16_CREATOR;
-
-    // GraalVM not support
-    // Android not support
     public static final Function<Object, Object> UNSAFE_ASCII_CREATOR;
+    public static final BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
+    public static final BiFunction<byte[], Byte, String> STRING_CREATOR_JDK11;
+    public static final ToIntFunction<String> STRING_CODER;
+    public static final Function<String, byte[]> STRING_VALUE;
 
     static {
         boolean openj9 = false;
@@ -110,10 +114,106 @@ public class JDKUtils {
                     asciiCreator = ((Supplier<Function<Object, Object>>) () -> UnsafeUtils.getStringCreatorASCII()).get();
                 }
             } catch (Throwable ignored) {
+                // ignored
             }
         }
         UNSAFE_UTF16_CREATOR = utf16Creator;
         UNSAFE_ASCII_CREATOR = asciiCreator;
+
+        BiFunction<char[], Boolean, String> stringCreatorJDK8 = null;
+        BiFunction<byte[], Byte, String> stringCreatorJDK11 = null;
+        ToIntFunction<String> stringCoder = null;
+        Function<String, byte[]> stringValue = null;
+
+        try {
+            if (JVM_VERSION == 8) {
+                MethodHandles.Lookup lookup = getLookup();
+                MethodHandles.Lookup caller = lookup.in(String.class);
+
+                MethodHandle handle = caller.findConstructor(
+                        String.class, MethodType.methodType(void.class, char[].class, boolean.class)
+                );
+
+                CallSite callSite = LambdaMetafactory.metafactory(
+                        caller,
+                        "apply",
+                        MethodType.methodType(BiFunction.class),
+                        handle.type().generic(),
+                        handle,
+                        handle.type()
+                );
+                stringCreatorJDK8 = (BiFunction<char[], Boolean, String>) callSite.getTarget().invokeExact();
+            }
+
+            boolean lookupLambda;
+            if (JVM_VERSION > 8 && JVM_VERSION < 16) {
+                lookupLambda = true;
+            } else {
+                List<String> inputArguments = ManagementFactory
+                        .getRuntimeMXBean()
+                        .getInputArguments();
+                lookupLambda = inputArguments.contains("--add-opens=java.base/java.lang.invoke=ALL-UNNAMED")
+                        || inputArguments.contains("--add-opens=java.base/java.lang.invoke=com.alibaba.fastjson2");
+            }
+
+            if (lookupLambda) {
+                MethodHandles.Lookup lookup = getLookup();
+                MethodHandles.Lookup caller = lookup.in(String.class);
+                MethodHandle handle = caller.findConstructor(
+                        String.class, MethodType.methodType(void.class, byte[].class, byte.class)
+                );
+                CallSite callSite = LambdaMetafactory.metafactory(
+                        caller,
+                        "apply",
+                        MethodType.methodType(BiFunction.class),
+                        handle.type().generic(),
+                        handle,
+                        MethodType.methodType(String.class, byte[].class, Byte.class)
+                );
+                stringCreatorJDK11 = (BiFunction<byte[], Byte, String>) callSite.getTarget().invokeExact();
+
+                MethodHandles.Lookup stringCaller = lookup.in(String.class);
+
+                MethodHandle coder = stringCaller.findSpecial(
+                        String.class,
+                        "coder",
+                        MethodType.methodType(byte.class),
+                        String.class
+                );
+                CallSite applyAsInt = LambdaMetafactory.metafactory(
+                        stringCaller,
+                        "applyAsInt",
+                        MethodType.methodType(ToIntFunction.class),
+                        MethodType.methodType(int.class, Object.class),
+                        coder,
+                        coder.type()
+                );
+                stringCoder = (ToIntFunction<String>) applyAsInt.getTarget().invokeExact();
+
+                MethodHandle value = stringCaller.findSpecial(
+                        String.class,
+                        "value",
+                        MethodType.methodType(byte[].class),
+                        String.class
+                );
+                CallSite apply = LambdaMetafactory.metafactory(
+                        stringCaller,
+                        "apply",
+                        MethodType.methodType(Function.class),
+                        value.type().generic(),
+                        value,
+                        value.type()
+                );
+                stringValue = (Function<String, byte[]>) apply.getTarget().invokeExact();
+            }
+        } catch (Throwable ignored) {
+            // ignored
+        }
+
+        STRING_CREATOR_JDK8 = stringCreatorJDK8;
+        STRING_CREATOR_JDK11 = stringCreatorJDK11;
+        STRING_CODER = stringCoder;
+        STRING_VALUE = stringValue;
     }
 
     public static boolean isSQLDataSourceOrRowSet(Class<?> type) {
@@ -134,58 +234,31 @@ public class JDKUtils {
 
         return str.toCharArray();
     }
+//
+//    public static BiFunction<byte[], java.nio.charset.Charset, String> getStringCreatorJDK17() throws Throwable {
+//        MethodHandles.Lookup lookup = getLookup();
+//
+//        MethodHandles.Lookup caller = lookup.in(String.class);
+//        MethodHandle handle = caller.findStatic(
+//                String.class, "newStringNoRepl1", MethodType.methodType(String.class, byte[].class, Charset.class)
+//        );
+//
+//        CallSite callSite = LambdaMetafactory.metafactory(
+//                caller,
+//                "apply",
+//                MethodType.methodType(BiFunction.class),
+//                handle.type().generic(),
+//                handle,
+//                handle.type()
+//        );
+//        return (BiFunction<byte[], java.nio.charset.Charset, String>) callSite.getTarget().invokeExact();
+//    }
 
-    public static BiFunction<char[], Boolean, String> getStringCreatorJDK8() throws Throwable {
-        // GraalVM not support
-        // Android not support
-        MethodHandles.Lookup lookup = getLookup();
-
-        MethodHandles.Lookup caller = lookup.in(String.class);
-
-        MethodHandle handle = caller.findConstructor(
-                String.class, MethodType.methodType(void.class, char[].class, boolean.class)
-        );
-
-        CallSite callSite = LambdaMetafactory.metafactory(
-                caller,
-                "apply",
-                MethodType.methodType(BiFunction.class),
-                handle.type().generic(),
-                handle,
-                handle.type()
-        );
-        return (BiFunction) callSite.getTarget().invokeExact();
-    }
-
-    public static Function<byte[], String> getStringCreatorJDK11() throws Throwable {
-        // GraalVM not support
-        // Android not support
-        MethodHandles.Lookup lookup = getLookup();
-
-        Class clazz = Class.forName("java.lang.StringCoding");
-        MethodHandles.Lookup caller = lookup.in(clazz);
-        MethodHandle handle = caller.findStatic(
-                clazz,
-                "newStringLatin1",
-                MethodType.methodType(String.class, byte[].class)
-        );
-
-        CallSite callSite = LambdaMetafactory.metafactory(
-                caller,
-                "apply",
-                MethodType.methodType(Function.class),
-                handle.type().generic(),
-                handle,
-                handle.type()
-        );
-        return (Function<byte[], String>) callSite.getTarget().invokeExact();
-    }
-
-    private static MethodHandles.Lookup getLookup() throws Exception {
+    static MethodHandles.Lookup getLookup() throws Exception {
         // GraalVM not support
         // Android not support
         MethodHandles.Lookup lookup;
-        if (JDKUtils.JVM_VERSION >= 17) {
+        if (JDKUtils.JVM_VERSION >= 15) {
             Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, Class.class, int.class);
             constructor.setAccessible(true);
             lookup = constructor.newInstance(

@@ -19,11 +19,6 @@ public class JSONFactoryTest {
     }
 
     @Test
-    public void test() {
-        new JSONFactory.Utils();
-    }
-
-    @Test
     public void test1() {
         JSONFactory.setUseJacksonAnnotation(false);
         assertFalse(JSONFactory.isUseJacksonAnnotation());

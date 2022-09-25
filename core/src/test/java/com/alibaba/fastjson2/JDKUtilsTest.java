@@ -4,12 +4,12 @@ import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
+import static com.alibaba.fastjson2.util.JDKUtils.LATIN1;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK11;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JDKUtilsTest {
@@ -18,7 +18,7 @@ public class JDKUtilsTest {
     @Test
     public void test_0() throws Throwable {
         if (JDKUtils.JVM_VERSION == 8) {
-            BiFunction<char[], Boolean, String> stringCreator = JDKUtils.getStringCreatorJDK8();
+            BiFunction<char[], Boolean, String> stringCreator = JDKUtils.STRING_CREATOR_JDK8;
 
             char[] chars = new char[]{'a', 'b', 'c'};
             String apply = stringCreator.apply(chars, Boolean.TRUE);
@@ -29,11 +29,9 @@ public class JDKUtilsTest {
     @Test
     public void test_11() throws Throwable {
         System.out.println("JVM_VERSION : " + JDKUtils.JVM_VERSION);
-        if (JDKUtils.JVM_VERSION == 11 && !OPEN_J9) {
-            Function<byte[], String> stringCreator = JDKUtils.getStringCreatorJDK11();
-
+        if (JDKUtils.JVM_VERSION == 11 && STRING_CREATOR_JDK11 != null) {
             byte[] bytes = new byte[]{'a', 'b', 'c'};
-            String apply = stringCreator.apply(bytes);
+            String apply = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
             assertEquals("abc", apply);
         }
     }
@@ -52,10 +50,6 @@ public class JDKUtilsTest {
             assertArrayEquals(str1.getBytes(StandardCharsets.UTF_8), value);
         }
     }
-
-    static BiFunction<byte[], Charset, String> stringCreatorJDK17;
-    static Function<byte[], String> stringCreatorJDK11;
-    static BiFunction<char[], Boolean, String> stringCreatorJDK8;
 
     public String formatYYYYMMDD(Calendar calendar) throws Throwable {
         int year = calendar.get(Calendar.YEAR);
@@ -78,11 +72,8 @@ public class JDKUtilsTest {
                 return (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
             }
 
-            if (JDKUtils.JVM_VERSION <= 11) {
-                if (stringCreatorJDK11 == null) {
-                    stringCreatorJDK11 = JDKUtils.getStringCreatorJDK11();
-                }
-                return stringCreatorJDK11.apply(bytes);
+            if (JDKUtils.JVM_VERSION <= 11 && STRING_CREATOR_JDK11 != null) {
+                return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
             }
 
             return new String(bytes, StandardCharsets.US_ASCII);
@@ -99,11 +90,8 @@ public class JDKUtilsTest {
                 (char) d1
         };
 
-        if (JDKUtils.JVM_VERSION == 8) {
-            if (stringCreatorJDK8 == null) {
-                stringCreatorJDK8 = JDKUtils.getStringCreatorJDK8();
-            }
-            return stringCreatorJDK8.apply(chars, true);
+        if (JDKUtils.STRING_CREATOR_JDK8 != null) {
+            return JDKUtils.STRING_CREATOR_JDK8.apply(chars, true);
         }
 
         return new String(chars);

@@ -11,6 +11,7 @@ import java.util.Arrays;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
 
 final class JSONReaderJSONBUF
@@ -213,13 +214,11 @@ final class JSONReaderJSONBUF
                 } else {
                     str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                 }
-            } else if (JDKUtils.JVM_VERSION == 11 && strlen >= 0) {
-                if (STRING_CREATOR_JDK11 != null) {
-                    byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = STRING_CREATOR_JDK11.apply(chars);
-                    offset += strlen;
-                }
+            } else if (STRING_CREATOR_JDK11 != null && strlen >= 0) {
+                byte[] chars = new byte[strlen];
+                System.arraycopy(bytes, offset, chars, 0, strlen);
+                str = STRING_CREATOR_JDK11.apply(chars, LATIN1);
+                offset += strlen;
             }
             charset = StandardCharsets.US_ASCII;
         } else if (strtype == BC_STR_UTF8) {
