@@ -34,7 +34,7 @@ class JSONReaderJSONB
     protected int strBegin;
 
     protected byte[] valueBytes;
-    protected final int cachedIndex = JSONFactory.cacheIndex();
+    protected final int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
 
     protected final SymbolTable symbolTable;
     protected long[] symbols = new long[32];
@@ -2749,7 +2749,7 @@ class JSONReaderJSONB
 
         char[] chars = null;
         if (JVM_VERSION == 8 && strtype == BC_STR_UTF8 && strlen < 8192) {
-            final int cachedIndex = JSONFactory.cacheIndex();
+            final int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
             chars = allocateCharArray(cachedIndex);
         }
         if (chars != null) {

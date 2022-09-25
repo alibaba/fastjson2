@@ -188,13 +188,10 @@ public final class JSONFactory {
         JSONFactory.useJacksonAnnotation = useJacksonAnnotation;
     }
 
+    static final int CACHE_SIZE = 4;
     private static final int CACHE_THRESHOLD = 1024 * 1024;
-    private static final byte[][] BYTE_ARRAY_CACHE = new byte[4][];
-    private static final char[][] CHAR_ARRAY_CACHE = new char[4][];
-
-    static int cacheIndex() {
-        return System.identityHashCode(Thread.currentThread()) & 3;
-    }
+    private static final byte[][] BYTE_ARRAY_CACHE = new byte[CACHE_SIZE][];
+    private static final char[][] CHAR_ARRAY_CACHE = new char[CACHE_SIZE][];
 
     static char[] allocateCharArray(int cacheIndex) {
         char[] chars;

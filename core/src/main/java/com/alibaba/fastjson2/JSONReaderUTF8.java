@@ -36,7 +36,7 @@ class JSONReaderUTF8
     JSONReaderUTF8(Context ctx, InputStream is) {
         super(ctx);
 
-        cacheIndex = JSONFactory.cacheIndex();
+        cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         byte[] bytes = JSONFactory.allocateByteArray(cacheIndex);
         if (bytes == null) {
             bytes = new byte[8192];

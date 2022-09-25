@@ -30,7 +30,7 @@ class JSONWriterUTF8
 
     JSONWriterUTF8(Context ctx) {
         super(ctx, StandardCharsets.UTF_8);
-        cachedIndex = JSONFactory.cacheIndex();
+        cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         bytes = JSONFactory.allocateByteArray(cachedIndex);
     }
 
