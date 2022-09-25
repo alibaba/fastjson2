@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.*;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonJsonIgnore;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderBaseModule
         implements ObjectReaderModule {
@@ -1914,7 +1915,7 @@ public class ObjectReaderBaseModule
             case "java.lang.RuntimeException":
             case "java.io.IOException":
             case "java.io.UncheckedIOException":
-                if (!JDKUtils.UNSAFE_SUPPORT) {
+                if (!UNSAFE_SUPPORT) {
                     return new ObjectReaderException((Class) type);
                 }
                 break;

@@ -1,12 +1,10 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.util.Arrays;
 
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CODER;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterUTF8JDK9
         extends JSONWriterUTF8 {
@@ -16,7 +14,7 @@ final class JSONWriterUTF8JDK9
 
     @Override
     public void writeString(String str) {
-        if (!JDKUtils.UNSAFE_SUPPORT || JDKUtils.JVM_VERSION == 8) {
+        if (!UNSAFE_SUPPORT || JVM_VERSION == 8) {
             super.writeString(str);
             return;
         }

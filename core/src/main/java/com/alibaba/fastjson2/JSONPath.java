@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.function.impl.ToDouble;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -27,6 +26,8 @@ import java.util.regex.Pattern;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 import static com.alibaba.fastjson2.JSONReader.EOI;
+import static com.alibaba.fastjson2.util.JDKUtils.LATIN1;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK11;
 
 public abstract class JSONPath {
     static final JSONReader.Context PARSE_CONTEXT = JSONFactory.createReadContext();
@@ -5094,8 +5095,8 @@ public abstract class JSONPath {
             bytes[bytes.length - 1] = ']';
 
             String str;
-            if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                str = (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
+            if (STRING_CREATOR_JDK11 != null) {
+                str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
             } else {
                 str = new String(bytes, StandardCharsets.US_ASCII);
             }

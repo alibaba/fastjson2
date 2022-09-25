@@ -3700,9 +3700,6 @@ class JSONReaderUTF8
                 } else if (STRING_CREATOR_JDK11 != null) {
                     byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
                     str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-                } else if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                    str = (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
                 } else {
                     str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
                 }

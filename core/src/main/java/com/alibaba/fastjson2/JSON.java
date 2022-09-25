@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderBean;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -28,6 +27,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 public interface JSON {
     /**
@@ -2052,7 +2052,7 @@ public interface JSON {
         boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
 
         JSONWriter jsonWriter;
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
             jsonWriter = new JSONWriterUTF8JDK9(writeContext);

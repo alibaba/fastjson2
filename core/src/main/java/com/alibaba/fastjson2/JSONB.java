@@ -15,6 +15,8 @@ import java.util.IdentityHashMap;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 /**
  * x92          # type_char int
@@ -314,7 +316,7 @@ public interface JSONB {
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);
-        try (JSONReader jsonReader = JDKUtils.UNSAFE_SUPPORT
+        try (JSONReader jsonReader = UNSAFE_SUPPORT
                 ? new JSONReaderJSONBUF(
                 ctx,
                 jsonbBytes,
@@ -384,7 +386,7 @@ public interface JSONB {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider, symbolTable);
 
-        try (JSONReader reader = JDKUtils.UNSAFE_SUPPORT
+        try (JSONReader reader = UNSAFE_SUPPORT
                 ? new JSONReaderJSONBUF(
                 ctx,
                 jsonbBytes,
@@ -507,7 +509,7 @@ public interface JSONB {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);
 
-        try (JSONReader jsonReader = JDKUtils.UNSAFE_SUPPORT
+        try (JSONReader jsonReader = UNSAFE_SUPPORT
                 ? new JSONReaderJSONBUF(
                 ctx,
                 jsonbBytes,
@@ -717,7 +719,7 @@ public interface JSONB {
             return new byte[]{BC_NULL};
         }
 
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             char[] chars = JDKUtils.getCharArray(str);
             int strlen = chars.length;
             if (strlen <= STR_ASCII_FIX_LEN) {
@@ -738,7 +740,7 @@ public interface JSONB {
                     return bytes;
                 }
             }
-        } else if (JDKUtils.UNSAFE_SUPPORT) {
+        } else if (UNSAFE_SUPPORT) {
             int coder = UnsafeUtils.getStringCoder(str);
             if (coder == 0) {
                 byte[] value = UnsafeUtils.getStringValue(str);

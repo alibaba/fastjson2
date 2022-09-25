@@ -23,8 +23,7 @@ import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CODER;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class JSONReader
         implements Closeable {
@@ -2502,7 +2501,7 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JDKUtils.JVM_VERSION == 8 && JDKUtils.UNSAFE_SUPPORT && str.length() > 1024 * 1024) {
+        if (JVM_VERSION == 8 && UNSAFE_SUPPORT && str.length() > 1024 * 1024) {
             try {
                 int coder = STRING_CODER != null
                         ? STRING_CODER.applyAsInt(str)
@@ -2520,7 +2519,7 @@ public abstract class JSONReader
 
         final int length = str.length();
         char[] chars;
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             chars = JDKUtils.getCharArray(str);
         } else {
             chars = str.toCharArray();
@@ -2535,7 +2534,7 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
             try {
                 int coder = STRING_CODER != null
                         ? STRING_CODER.applyAsInt(str)
@@ -2553,7 +2552,7 @@ public abstract class JSONReader
 
         final int length = str.length();
         char[] chars;
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             chars = JDKUtils.getCharArray(str);
         } else {
             chars = str.toCharArray();
@@ -2568,7 +2567,7 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
             try {
                 int coder = STRING_CODER != null
                         ? STRING_CODER.applyAsInt(str)
@@ -2585,7 +2584,7 @@ public abstract class JSONReader
         }
 
         char[] chars;
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             chars = JDKUtils.getCharArray(str);
         } else {
             chars = str.toCharArray();
@@ -2599,7 +2598,7 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
             try {
                 int coder = STRING_CODER != null
                         ? STRING_CODER.applyAsInt(str)
@@ -2616,7 +2615,7 @@ public abstract class JSONReader
         }
 
         char[] chars;
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             chars = JDKUtils.getCharArray(str);
         } else {
             chars = str.toCharArray();

@@ -725,7 +725,7 @@ final class JSONReaderASCII
             }
         }
 
-        if (JDKUtils.JVM_VERSION > 8) {
+        if (JDKUtils.STRING_CREATOR_JDK11 != null) {
             byte[] chars = new byte[nameLength];
 
             int offset = nameBegin;
@@ -785,11 +785,7 @@ final class JSONReaderASCII
             }
 
             if (chars != null) {
-                if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                    return (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(chars);
-                }
-
-                return new String(chars, 0, chars.length, StandardCharsets.US_ASCII);
+                return STRING_CREATOR_JDK11.apply(chars, LATIN1);
             }
         }
 
@@ -1387,9 +1383,6 @@ final class JSONReaderASCII
                 } else if (STRING_CREATOR_JDK11 != null) {
                     byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
                     str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-                } else if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                    str = (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
                 } else {
                     str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
                 }

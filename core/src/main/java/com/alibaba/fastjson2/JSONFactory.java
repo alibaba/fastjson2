@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
@@ -17,6 +16,8 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+
 public final class JSONFactory {
     public static final String CREATOR;
 
@@ -27,7 +28,7 @@ public final class JSONFactory {
 
     public static final boolean MIXED_HASH_ALGORITHM;
 
-    protected static boolean useJacksonAnnotation = true;
+    protected static boolean useJacksonAnnotation;
 
     public static String getProperty(String key) {
         return DEFAULT_PROPERTIES.getProperty(key);
@@ -158,7 +159,7 @@ public final class JSONFactory {
             if (property != null && "mixed".equals(property)) {
                 MIXED_HASH_ALGORITHM = true;
             } else {
-                MIXED_HASH_ALGORITHM = JDKUtils.JVM_VERSION > 8;
+                MIXED_HASH_ALGORITHM = JVM_VERSION > 8;
             }
         }
 

@@ -8,8 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.function.BiFunction;
 
-import static com.alibaba.fastjson2.util.JDKUtils.LATIN1;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK11;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JDKUtilsTest {
@@ -17,7 +16,7 @@ public class JDKUtilsTest {
 
     @Test
     public void test_0() throws Throwable {
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             BiFunction<char[], Boolean, String> stringCreator = JDKUtils.STRING_CREATOR_JDK8;
 
             char[] chars = new char[]{'a', 'b', 'c'};
@@ -28,8 +27,8 @@ public class JDKUtilsTest {
 
     @Test
     public void test_11() throws Throwable {
-        System.out.println("JVM_VERSION : " + JDKUtils.JVM_VERSION);
-        if (JDKUtils.JVM_VERSION == 11 && STRING_CREATOR_JDK11 != null) {
+        System.out.println("JVM_VERSION : " + JVM_VERSION);
+        if (JVM_VERSION == 11 && STRING_CREATOR_JDK11 != null) {
             byte[] bytes = new byte[]{'a', 'b', 'c'};
             String apply = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
             assertEquals("abc", apply);
@@ -41,7 +40,7 @@ public class JDKUtilsTest {
         assertEquals(1, UnsafeUtils.getStringCoder("中国"));
 
         String str1 = "abc";
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             assertEquals(1, UnsafeUtils.getStringCoder(str1));
         } else if (!OPEN_J9) {
             assertEquals(0, UnsafeUtils.getStringCoder(str1));
@@ -65,14 +64,10 @@ public class JDKUtilsTest {
         byte d0 = (byte) (dayOfMonth / 10 + '0');
         byte d1 = (byte) (dayOfMonth % 10 + '0');
 
-        if (JDKUtils.JVM_VERSION >= 9) {
+        if (JVM_VERSION >= 9) {
             byte[] bytes = new byte[]{y0, y1, y2, y3, m0, m1, d0, d1};
 
-            if (JDKUtils.JVM_VERSION == 17 && JDKUtils.UNSAFE_SUPPORT) {
-                return (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
-            }
-
-            if (JDKUtils.JVM_VERSION <= 11 && STRING_CREATOR_JDK11 != null) {
+            if (STRING_CREATOR_JDK11 != null) {
                 return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
             }
 

@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public final class ObjectReaderImplMap
         implements ObjectReader {
@@ -181,7 +182,7 @@ public final class ObjectReaderImplMap
             return Collections.emptyNavigableMap();
         }
 
-        if (JDKUtils.UNSAFE_SUPPORT) {
+        if (UNSAFE_SUPPORT) {
             String instanceTypeName = instanceType.getName();
             switch (instanceTypeName) {
                 case "com.ali.com.google.common.collect.EmptyImmutableBiMap":
@@ -380,7 +381,7 @@ public final class ObjectReaderImplMap
     }
 
     static Function createObjectSupplier(Class objectClass) {
-        if (JDKUtils.UNSAFE_SUPPORT) {
+        if (UNSAFE_SUPPORT) {
             if (UNSAFE_OBJECT_CREATOR != null) {
                 return UNSAFE_OBJECT_CREATOR;
             }
