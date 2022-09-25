@@ -13,6 +13,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
+
 final class ObjectWriterImplMap
         extends ObjectWriterBaseModule.PrimitiveImpl {
     static final byte[] TYPE_NAME_JSONObject1O = JSONB.toBytes("JO10");
@@ -66,7 +68,7 @@ final class ObjectWriterImplMap
             jsonObject1InnerMap = BeanUtils.getDeclaredField(objectClass, "map");
             if (jsonObject1InnerMap != null) {
                 jsonObject1InnerMap.setAccessible(true);
-                if (JDKUtils.UNSAFE_SUPPORT) {
+                if (UNSAFE_SUPPORT) {
                     jsonObject1InnerMapOffset = UnsafeUtils.objectFieldOffset(jsonObject1InnerMap);
                 }
             }

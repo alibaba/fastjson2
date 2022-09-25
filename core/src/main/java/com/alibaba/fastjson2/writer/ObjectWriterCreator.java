@@ -12,13 +12,14 @@ import com.alibaba.fastjson2.function.ToShortFunction;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.BeanUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.function.*;
+
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 public class ObjectWriterCreator {
     public static final ObjectWriterCreator INSTANCE = new ObjectWriterCreator();
@@ -187,7 +188,7 @@ public class ObjectWriterCreator {
             fieldBased = false;
         }
 
-        if (fieldBased && JDKUtils.JVM_VERSION >= 11
+        if (fieldBased && JVM_VERSION >= 11
                 && Throwable.class.isAssignableFrom(objectClass)) {
             fieldBased = false;
         }

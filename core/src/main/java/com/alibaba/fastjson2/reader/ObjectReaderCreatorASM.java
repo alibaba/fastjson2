@@ -27,6 +27,8 @@ import java.util.function.*;
 import static com.alibaba.fastjson2.internal.asm.Opcodes.ALOAD;
 import static com.alibaba.fastjson2.internal.asm.Opcodes.PUTFIELD;
 import static com.alibaba.fastjson2.reader.ObjectReader.HASH_TYPE;
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderCreatorASM
         extends ObjectReaderCreator {
@@ -203,7 +205,7 @@ public class ObjectReaderCreatorASM
         }
 
         if (externalClass || !publicClass) {
-            if (!fieldBased || !JDKUtils.UNSAFE_SUPPORT) {
+            if (!fieldBased || !UNSAFE_SUPPORT) {
                 return super.createObjectReader(objectClass, objectType, fieldBased, modules);
             }
         }
@@ -244,7 +246,7 @@ public class ObjectReaderCreatorASM
             return super.createObjectReader(objectClass, objectType, fieldBased, modules);
         }
 
-        if (fieldBased && JDKUtils.JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
+        if (fieldBased && JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
             return super.createObjectReader(objectClass, objectType, fieldBased, modules);
         }
 
@@ -254,7 +256,7 @@ public class ObjectReaderCreatorASM
         boolean match = true;
 
         if (!fieldBased) {
-            if (JDKUtils.JVM_VERSION >= 9 && objectClass == StackTraceElement.class) {
+            if (JVM_VERSION >= 9 && objectClass == StackTraceElement.class) {
                 try {
                     Constructor<StackTraceElement> constructor = StackTraceElement.class.getConstructor(String.class, String.class, String.class, String.class, String.class, String.class, int.class);
                     return createObjectReaderNoneDefaultConstrutor(constructor, "", "classLoaderName", "moduleName", "moduleVersion", "declaringClass", "methodName", "fileName", "lineNumber");
@@ -1835,7 +1837,7 @@ public class ObjectReaderCreatorASM
 
                 Label loadList_ = new Label(), listNotNull_ = new Label();
 
-                boolean initCapacity = JDKUtils.JVM_VERSION == 8 && "java/util/ArrayList".equals(LIST_TYPE);
+                boolean initCapacity = JVM_VERSION == 8 && "java/util/ArrayList".equals(LIST_TYPE);
 
                 if (jsonb) {
                     Label checkAutoTypeNull_ = new Label();

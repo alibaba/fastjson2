@@ -2649,7 +2649,7 @@ public class DateUtils {
         }
 
         int len = 19 + millislen + zonelen;
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (STRING_CREATOR_JDK8 != null) {
             char[] chars = new char[len];
             chars[0] = (char) (year / 1000 + '0');
             chars[1] = (char) ((year / 100) % 10 + '0');
@@ -2711,11 +2711,7 @@ public class DateUtils {
                 }
             }
 
-            if (STRING_CREATOR_JDK8 != null) {
-                return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-            }
-
-            return new String(chars);
+            return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
         }
 
         byte[] bytes = new byte[len];
@@ -2781,8 +2777,6 @@ public class DateUtils {
 
         if (STRING_CREATOR_JDK11 != null) {
             return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-        } else if (UNSAFE_ASCII_CREATOR != null) {
-            return (String) UNSAFE_ASCII_CREATOR.apply(bytes);
         }
 
         return new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);

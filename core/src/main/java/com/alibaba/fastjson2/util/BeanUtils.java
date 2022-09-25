@@ -17,6 +17,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.*;
 import java.util.function.Consumer;
 
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+
 /**
  * @author Bob Lee
  * @author Jesse Wilson
@@ -36,7 +38,7 @@ public abstract class BeanUtils {
     private static volatile Method RECORD_COMPONENT_GET_NAME;
 
     public static String[] getRecordFieldNames(Class<?> recordType) {
-        if (JDKUtils.JVM_VERSION < 14) {
+        if (JVM_VERSION < 14) {
             return new String[0];
         }
 
@@ -313,7 +315,7 @@ public abstract class BeanUtils {
     }
 
     public static Constructor getDefaultConstructor(Class objectClass) {
-        if (objectClass == StackTraceElement.class && JDKUtils.JVM_VERSION >= 9) {
+        if (objectClass == StackTraceElement.class && JVM_VERSION >= 9) {
             return null;
         }
 

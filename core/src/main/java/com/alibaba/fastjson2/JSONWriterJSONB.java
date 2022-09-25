@@ -514,7 +514,7 @@ final class JSONWriterJSONB
             return;
         }
 
-        if (JDKUtils.JVM_VERSION > 8 && (UNSAFE_SUPPORT || STRING_CODER != null)) {
+        if (JVM_VERSION > 8 && (UNSAFE_SUPPORT || STRING_CODER != null)) {
             int coder = STRING_CODER != null
                     ? STRING_CODER.applyAsInt(str)
                     : UnsafeUtils.getStringCoder(str);

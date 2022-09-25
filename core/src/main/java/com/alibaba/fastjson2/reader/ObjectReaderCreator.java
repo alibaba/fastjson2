@@ -9,7 +9,6 @@ import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.*;
@@ -20,6 +19,9 @@ import java.util.concurrent.atomic.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderCreator {
     public static final ObjectReaderCreator INSTANCE = new ObjectReaderCreator();
@@ -606,7 +608,7 @@ public class ObjectReaderCreator {
             return createEnumReader(objectClass, beanInfo.createMethod, modules);
         }
 
-        if (fieldBased && JDKUtils.JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
+        if (fieldBased && JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
             fieldBased = false;
             beanInfo.readerFeatures |= JSONReader.Feature.IgnoreSetNullValue.mask;
         }
@@ -727,7 +729,7 @@ public class ObjectReaderCreator {
                 }
             }
 
-            if (!(fieldBased && JDKUtils.UNSAFE_SUPPORT)
+            if (!(fieldBased && UNSAFE_SUPPORT)
                     && !(Throwable.class.isAssignableFrom(objectClass))
                     && defaultConstructor == null
                     && matchCount != parameterNames.length) {
@@ -1618,21 +1620,21 @@ public class ObjectReaderCreator {
                     Class itemClass = TypeUtils.getMapping(itemType);
                     if (itemClass == String.class) {
                         if (finalField) {
-                            if (JDKUtils.UNSAFE_SUPPORT && (features & JSONReader.Feature.FieldBased.mask) != 0) {
+                            if (UNSAFE_SUPPORT && (features & JSONReader.Feature.FieldBased.mask) != 0) {
                                 return new FieldReaderListFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, field);
                             }
 
                             return new FieldReaderCollectionFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
                         }
 
-                        if (JDKUtils.UNSAFE_SUPPORT) {
+                        if (UNSAFE_SUPPORT) {
                             return new FieldReaderListFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, field);
                         }
 
                         return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, null, field, null);
                     }
 
-                    if (JDKUtils.UNSAFE_SUPPORT) {
+                    if (UNSAFE_SUPPORT) {
                         return new FieldReaderListFieldUF(
                                 fieldName,
                                 fieldTypeResolved,
@@ -1665,7 +1667,7 @@ public class ObjectReaderCreator {
             }
             Class itemClass = TypeUtils.getClass(itemType);
 
-            if (JDKUtils.UNSAFE_SUPPORT) {
+            if (UNSAFE_SUPPORT) {
                 return new FieldReaderListFieldUF(
                         fieldName,
                         fieldType,
@@ -1706,7 +1708,7 @@ public class ObjectReaderCreator {
                 Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
                 if (actualTypeArguments.length == 2) {
-                    if (finalField && (!JDKUtils.UNSAFE_SUPPORT || (features & JSONReader.Feature.FieldBased.mask) == 0)) {
+                    if (finalField && (!UNSAFE_SUPPORT || (features & JSONReader.Feature.FieldBased.mask) == 0)) {
                         return new FieldReaderMapFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
                     }
                 }
@@ -1724,7 +1726,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClassResolved != null) {
-            if (JDKUtils.UNSAFE_SUPPORT) {
+            if (UNSAFE_SUPPORT) {
                 return new FieldReaderObjectFieldUF(
                         fieldName,
                         fieldTypeResolved,
@@ -1749,7 +1751,7 @@ public class ObjectReaderCreator {
             }
         }
 
-        if (JDKUtils.UNSAFE_SUPPORT) {
+        if (UNSAFE_SUPPORT) {
             return new FieldReaderObjectFieldUF(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
         }
         return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);

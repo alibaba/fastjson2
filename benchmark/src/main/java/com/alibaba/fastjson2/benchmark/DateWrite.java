@@ -200,8 +200,6 @@ public class DateWrite {
 
             if (STRING_CREATOR_JDK11 != null) {
                 return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-            } else if (JVM_VERSION >= 17) {
-                return (String) UNSAFE_ASCII_CREATOR.apply(bytes);
             } else {
                 return new String(bytes, 0, bytes.length);
             }

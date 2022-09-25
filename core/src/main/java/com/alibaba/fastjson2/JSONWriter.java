@@ -2,7 +2,6 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
@@ -20,7 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK8;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class JSONWriter
         implements Closeable {
@@ -453,7 +452,7 @@ public abstract class JSONWriter
 
     public static JSONWriter of() {
         Context writeContext = createWriteContext();
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             return new JSONWriterUTF16JDK8(writeContext);
         }
 
@@ -476,7 +475,7 @@ public abstract class JSONWriter
         }
 
         JSONWriter jsonWriter;
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
             jsonWriter = new JSONWriterUTF8JDK9(writeContext);
@@ -493,7 +492,7 @@ public abstract class JSONWriter
     public static JSONWriter of(Feature... features) {
         Context writeContext = JSONFactory.createWriteContext(features);
         JSONWriter jsonWriter;
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
             jsonWriter = new JSONWriterUTF8JDK9(writeContext);
@@ -511,7 +510,7 @@ public abstract class JSONWriter
 
     public static JSONWriter ofUTF16(Feature... features) {
         Context writeContext = JSONFactory.createWriteContext(features);
-        JSONWriter jsonWriter = JDKUtils.JVM_VERSION == 8
+        JSONWriter jsonWriter = JVM_VERSION == 8
                 ? new JSONWriterUTF16JDK8(writeContext)
                 : new JSONWriterUTF16(writeContext);
 
@@ -554,7 +553,7 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofUTF8() {
-        if (JDKUtils.JVM_VERSION >= 9) {
+        if (JVM_VERSION >= 9) {
             return new JSONWriterUTF8JDK9(
                     JSONFactory.createWriteContext());
         } else {
@@ -564,7 +563,7 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofUTF8(JSONWriter.Context context) {
-        if (JDKUtils.JVM_VERSION >= 9) {
+        if (JVM_VERSION >= 9) {
             return new JSONWriterUTF8JDK9(context);
         } else {
             return new JSONWriterUTF8(context);
@@ -575,7 +574,7 @@ public abstract class JSONWriter
         Context writeContext = createWriteContext(features);
 
         JSONWriter jsonWriter;
-        if (JDKUtils.JVM_VERSION >= 9) {
+        if (JVM_VERSION >= 9) {
             jsonWriter = new JSONWriterUTF8JDK9(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF8(writeContext);
@@ -1565,8 +1564,8 @@ public abstract class JSONWriter
                         buf[off++] = '.';
                     }
 
-                    if (JDKUtils.JVM_VERSION == 8) {
-                        char[] chars = JDKUtils.getCharArray(name);
+                    if (JVM_VERSION == 8) {
+                        char[] chars = getCharArray(name);
                         for (int j = 0; j < chars.length; j++) {
                             char ch = chars[j];
                             switch (ch) {
@@ -1797,7 +1796,7 @@ public abstract class JSONWriter
             }
 
             if (ascii) {
-                if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
+                if (STRING_CREATOR_JDK11 != null) {
                     byte[] bytes;
                     if (off == buf.length) {
                         bytes = buf;
@@ -1805,7 +1804,7 @@ public abstract class JSONWriter
                         bytes = new byte[off];
                         System.arraycopy(buf, 0, bytes, 0, off);
                     }
-                    return fullPath = (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
+                    return fullPath = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
                 }
 
                 if (STRING_CREATOR_JDK8 != null) {

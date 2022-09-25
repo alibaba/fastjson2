@@ -19,6 +19,9 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
+
 public class ObjectWriterCreatorASM
         extends ObjectWriterCreator {
     // GraalVM not support
@@ -127,7 +130,7 @@ public class ObjectWriterCreatorASM
         boolean publicClass = Modifier.isPublic(modifiers);
 
         if (!publicClass || externalClass) {
-            if (!JDKUtils.UNSAFE_SUPPORT) {
+            if (!UNSAFE_SUPPORT) {
                 return super.createObjectWriter(objectClass, features, modules);
             }
         }
@@ -153,7 +156,7 @@ public class ObjectWriterCreatorASM
         final boolean fieldBased = (writerFeatures & JSONWriter.Feature.FieldBased.mask) != 0
                 && !(objectClass.isInterface() || objectClass.isInterface());
 
-        if (fieldBased && JDKUtils.JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
+        if (fieldBased && JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
             return super.createObjectWriter(objectClass, features, modules);
         }
 
@@ -2770,7 +2773,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == int.class) {
-            if (JDKUtils.UNSAFE_SUPPORT) {
+            if (UNSAFE_SUPPORT) {
                 return new FieldWriterInt32ValUF<>(fieldName, ordinal, features, format, label, field);
             } else {
                 return new FieldWriterInt32Val(fieldName, ordinal, features, format, label, field);

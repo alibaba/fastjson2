@@ -11,6 +11,7 @@ import java.util.function.*;
 public class JDKUtils {
     public static final int JVM_VERSION;
     public static final Byte LATIN1 = 0;
+    public static final Byte UTF16 = 1;
 
     static final Field FIELD_STRING_VALUE;
     static final long FIELD_STRING_VALUE_OFFSET;
@@ -28,8 +29,6 @@ public class JDKUtils {
 
     // GraalVM not support
     // Android not support
-    public static final Function<Object, Object> UNSAFE_UTF16_CREATOR;
-    public static final Function<Object, Object> UNSAFE_ASCII_CREATOR;
     public static final BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
     public static final BiFunction<byte[], Byte, String> STRING_CREATOR_JDK11;
     public static final ToIntFunction<String> STRING_CODER;
@@ -105,20 +104,6 @@ public class JDKUtils {
         UNSAFE_SUPPORT = unsafeSupport;
 
         BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
-
-        Function<Object, Object> utf16Creator = null, asciiCreator = null;
-        if (unsafeSupport) {
-            try {
-                utf16Creator = ((Supplier<Function<Object, Object>>) () -> UnsafeUtils.getStringCreatorUTF16()).get();
-                if (!openj9) {
-                    asciiCreator = ((Supplier<Function<Object, Object>>) () -> UnsafeUtils.getStringCreatorASCII()).get();
-                }
-            } catch (Throwable ignored) {
-                // ignored
-            }
-        }
-        UNSAFE_UTF16_CREATOR = utf16Creator;
-        UNSAFE_ASCII_CREATOR = asciiCreator;
 
         BiFunction<char[], Boolean, String> stringCreatorJDK8 = null;
         BiFunction<byte[], Byte, String> stringCreatorJDK11 = null;
@@ -210,6 +195,16 @@ public class JDKUtils {
             // ignored
         }
 
+        if (stringCreatorJDK11 == null && unsafeSupport && !openj9) {
+            stringCreatorJDK11 = ((Supplier<BiFunction<byte[], Byte, String>>) () -> {
+                try {
+                    return (BiFunction<byte[], Byte, String>) new UnsafeUtils.UnsafeStringCreator();
+                } catch (Throwable e) {
+                    return null;
+                }
+            }).get();
+        }
+
         STRING_CREATOR_JDK8 = stringCreatorJDK8;
         STRING_CREATOR_JDK11 = stringCreatorJDK11;
         STRING_CODER = stringCoder;
@@ -258,7 +253,7 @@ public class JDKUtils {
         // GraalVM not support
         // Android not support
         MethodHandles.Lookup lookup;
-        if (JDKUtils.JVM_VERSION >= 15) {
+        if (JVM_VERSION >= 15) {
             Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, Class.class, int.class);
             constructor.setAccessible(true);
             lookup = constructor.newInstance(

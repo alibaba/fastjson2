@@ -37,6 +37,8 @@ public class ObjectReaderProvider
     static Consumer<Class> DEFAULT_AUTO_TYPE_HANDLER;
     static boolean DEFAULT_AUTO_TYPE_HANDLER_INIT_ERROR;
 
+    static Long hashCodeCache;
+
     static {
         {
             String property = System.getProperty(PROPERTY_DENY_PROPERTY);
@@ -533,7 +535,16 @@ public class ObjectReaderProvider
     }
 
     public ObjectReader getObjectReader(long hashCode) {
-        final Long hashCodeObj = hashCode;
+        final Long hashCodeObj;
+        if (hashCodeCache == null) {
+            hashCodeObj = hashCodeCache = new Long(hashCode);
+        } else {
+            if (hashCode == hashCodeCache.longValue()) {
+                hashCodeObj = hashCodeCache;
+            } else {
+                hashCodeObj = new Long(hashCode);
+            }
+        }
 
         ObjectReader objectReader = null;
         ClassLoader tcl = Thread.currentThread().getContextClassLoader();
