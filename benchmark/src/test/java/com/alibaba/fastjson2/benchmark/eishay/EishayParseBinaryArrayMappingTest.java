@@ -14,15 +14,34 @@ public class EishayParseBinaryArrayMappingTest {
                 benchmark.kryo(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("kryo millis : " + millis);
+            System.out.println("EishayParseBinaryArrayMapping-kryo millis : " + millis);
             // zulu8.58.0.13 : 457
             // zulu11.52.13 :
             // zulu17.32.13 :
         }
     }
 
+    public static void fury() throws Exception {
+        System.out.println("EishayParseBinaryArrayMapping-fury size " + benchmark.furyBytes.length); // 703
+        System.out.println();
+
+        for (int j = 0; j < 10; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.fury(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("EishayParseBinaryArrayMapping-fury millis : " + millis);
+            // zulu8.58.0.13 : 374
+            // zulu11.52.13 : 388
+            // zulu17.32.13 : 508
+            // zulu18.28.13 : 574
+            // zulu19.28.81 : 504
+        }
+    }
+
     public static void fastjson2JSONB() throws Exception {
-        System.out.println("fastjson2_jsonb size " + EishayParseBinaryArrayMapping.fastjson2JSONBBytes.length); // 348
+        System.out.println("EishayParseBinaryArrayMapping-fastjson2_jsonb size " + EishayParseBinaryArrayMapping.fastjson2JSONBBytes.length); // 348
         System.out.println();
 
         for (int j = 0; j < 10; j++) {
@@ -31,7 +50,7 @@ public class EishayParseBinaryArrayMappingTest {
                 benchmark.fastjson2JSONB(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("fastjson2_jsonb millis : " + millis);
+            System.out.println("EishayParseBinaryArrayMapping-fastjson2_jsonb millis : " + millis);
             // zulu8.58.0.13 : 193
             // zulu11.52.13 :
             // zulu17.32.13 : 166 148
@@ -41,5 +60,6 @@ public class EishayParseBinaryArrayMappingTest {
     public static void main(String[] args) throws Exception {
         fastjson2JSONB();
 //        kryo();
+//        fury();
     }
 }

@@ -5,25 +5,6 @@ import static com.alibaba.fastjson2.benchmark.JMH.BH;
 public class EishayParseBinaryAutoTypeTest {
     static final EishayParseBinaryAutoType benchmark = new EishayParseBinaryAutoType();
 
-    public static void fury() throws Exception {
-        System.out.println("EishayParseBinaryAutoType-fury size " + benchmark.furyBytes.length); // 703
-        System.out.println();
-
-        for (int j = 0; j < 10; j++) {
-            long start = System.currentTimeMillis();
-            for (int i = 0; i < 1000 * 1000; ++i) {
-                benchmark.fury(BH);
-            }
-            long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayParseBinaryAutoType-fury millis : " + millis);
-            // zulu8.58.0.13 : 374
-            // zulu11.52.13 : 388
-            // zulu17.32.13 : 508
-            // zulu18.28.13 : 574
-            // zulu19.28.81 : 504
-        }
-    }
-
     public static void fastjson2JSONB() throws Exception {
         System.out.println("EishayParseBinaryAutoType-fastjson2_jsonb size " + benchmark.fastjson2JSONBBytes.length); // 409
         System.out.println();
@@ -110,6 +91,5 @@ public class EishayParseBinaryAutoTypeTest {
 //        fastjson2JSONB_autoTypeFilter();
 //        fastjson2JSONB_symbols();
 //        kryo_test();
-//        fury();
     }
 }

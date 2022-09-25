@@ -34,12 +34,6 @@ public class EishayWriteBinaryAutoType {
             "persons",
             "player"
     );
-//    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
-//            .withLanguage(io.fury.Language.JAVA)
-//            .withReferenceTracking(true)
-//            .disableSecureMode()
-//            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
-//            .buildThreadSafeFury();
 
     static {
         try {
@@ -50,12 +44,6 @@ public class EishayWriteBinaryAutoType {
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
-    }
-
-//    @Benchmark
-    public void fury(Blackhole bh) {
-//        byte[] bytes = fury.serialize(mc);
-//        bh.consume(bytes);
     }
 
     @Benchmark
@@ -95,6 +83,7 @@ public class EishayWriteBinaryAutoType {
         );
     }
 
+    @Benchmark
     public void fastjson2JSONB_ArrayMapping(Blackhole bh) {
         bh.consume(
                 JSONB.toBytes(
