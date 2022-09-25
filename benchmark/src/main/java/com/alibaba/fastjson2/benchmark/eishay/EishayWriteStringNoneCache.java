@@ -1,8 +1,11 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
+import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
@@ -17,11 +20,8 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-public class EishayWriteString {
+public class EishayWriteStringNoneCache {
     static MediaContent mc;
-    static final ObjectMapper mapper = new ObjectMapper();
-    static final Gson gson = new Gson();
-
     static {
         try {
             InputStream is = EishayWriteString.class.getClassLoader().getResourceAsStream("data/eishay.json");
@@ -35,16 +35,19 @@ public class EishayWriteString {
 
     @Benchmark
     public void fastjson1(Blackhole bh) {
-        bh.consume(com.alibaba.fastjson.JSON.toJSONString(mc));
+        SerializeConfig config = new SerializeConfig();
+        bh.consume(com.alibaba.fastjson.JSON.toJSONString(mc, config));
     }
 
     @Benchmark
     public void fastjson2(Blackhole bh) {
-        bh.consume(JSON.toJSONString(mc));
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        bh.consume(JSON.toJSONString(mc, JSONFactory.createWriteContext(provider)));
     }
 
     @Benchmark
     public void jackson(Blackhole bh) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
         bh.consume(mapper.writeValueAsString(mc));
     }
 
@@ -57,6 +60,7 @@ public class EishayWriteString {
 
     @Benchmark
     public void gson(Blackhole bh) throws Exception {
+        Gson gson = new Gson();
         bh.consume(
                 gson.toJson(mc)
         );
@@ -64,8 +68,7 @@ public class EishayWriteString {
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(EishayWriteString.class.getName())
-                .exclude(EishayWriteStringNoneCache.class.getName())
+                .include(EishayWriteStringNoneCache.class.getName())
                 .mode(Mode.Throughput)
                 .warmupIterations(3)
                 .timeUnit(TimeUnit.MILLISECONDS)
