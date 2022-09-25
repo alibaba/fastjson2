@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.util;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
 
+import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
@@ -10,7 +11,7 @@ import java.util.TimeZone;
 
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.IOUtils.OFFSET_0800_TOTAL_SECONDS;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK8;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.time.ZoneOffset.UTC;
 
 public class DateUtils {
@@ -2648,73 +2649,142 @@ public class DateUtils {
         }
 
         int len = 19 + millislen + zonelen;
-        char[] chars = new char[len];
-        int off = 0;
+        if (JDKUtils.JVM_VERSION == 8) {
+            char[] chars = new char[len];
+            chars[0] = (char) (year / 1000 + '0');
+            chars[1] = (char) ((year / 100) % 10 + '0');
+            chars[2] = (char) ((year / 10) % 10 + '0');
+            chars[3] = (char) (year % 10 + '0');
+            chars[4] = '-';
+            chars[5] = (char) (month / 10 + '0');
+            chars[6] = (char) (month % 10 + '0');
+            chars[7] = '-';
+            chars[8] = (char) (dayOfMonth / 10 + '0');
+            chars[9] = (char) (dayOfMonth % 10 + '0');
+            chars[10] = ' ';
+            chars[11] = (char) (hour / 10 + '0');
+            chars[12] = (char) (hour % 10 + '0');
+            chars[13] = ':';
+            chars[14] = (char) (minute / 10 + '0');
+            chars[15] = (char) (minute % 10 + '0');
+            chars[16] = ':';
+            chars[17] = (char) (second / 10 + '0');
+            chars[18] = (char) (second % 10 + '0');
+            if (millislen > 0) {
+                chars[19] = '.';
+                for (int i = 20; i < len; ++i) {
+                    chars[i] = '0';
+                }
+                if (millis < 10) {
+                    IOUtils.getChars(millis, 19 + millislen, chars);
+                } else {
+                    if (millis % 100 == 0) {
+                        IOUtils.getChars(millis / 100, 19 + millislen, chars);
+                    } else if (millis % 10 == 0) {
+                        IOUtils.getChars(millis / 10, 19 + millislen, chars);
+                    } else {
+                        IOUtils.getChars(millis, 19 + millislen, chars);
+                    }
+                }
+            }
+            if (timeZone) {
+                int timeZoneOffset = offsetTotalSeconds / 3600;
+                if (offsetTotalSeconds == 0) {
+                    chars[19 + millislen] = 'Z';
+                } else {
+                    int offsetAbs = Math.abs(timeZoneOffset);
 
-        chars[off + 0] = (char) (year / 1000 + '0');
-        chars[off + 1] = (char) ((year / 100) % 10 + '0');
-        chars[off + 2] = (char) ((year / 10) % 10 + '0');
-        chars[off + 3] = (char) (year % 10 + '0');
-        chars[off + 4] = '-';
-        chars[off + 5] = (char) (month / 10 + '0');
-        chars[off + 6] = (char) (month % 10 + '0');
-        chars[off + 7] = '-';
-        chars[off + 8] = (char) (dayOfMonth / 10 + '0');
-        chars[off + 9] = (char) (dayOfMonth % 10 + '0');
-        chars[off + 10] = ' ';
-        chars[off + 11] = (char) (hour / 10 + '0');
-        chars[off + 12] = (char) (hour % 10 + '0');
-        chars[off + 13] = ':';
-        chars[off + 14] = (char) (minute / 10 + '0');
-        chars[off + 15] = (char) (minute % 10 + '0');
-        chars[off + 16] = ':';
-        chars[off + 17] = (char) (second / 10 + '0');
-        chars[off + 18] = (char) (second % 10 + '0');
+                    if (timeZoneOffset >= 0) {
+                        chars[19 + millislen] = '+';
+                    } else {
+                        chars[19 + millislen] = '-';
+                    }
+                    chars[19 + millislen + 1] = '0';
+                    IOUtils.getChars(offsetAbs, 19 + millislen + 3, chars);
+                    chars[19 + millislen + 3] = ':';
+                    chars[19 + millislen + 4] = '0';
+                    int offsetMinutes = (offsetTotalSeconds - timeZoneOffset * 3600) / 60;
+                    if (offsetMinutes < 0) {
+                        offsetMinutes = -offsetMinutes;
+                    }
+                    IOUtils.getChars(offsetMinutes, 19 + millislen + zonelen, chars);
+                }
+            }
+
+            if (STRING_CREATOR_JDK8 != null) {
+                return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+            }
+
+            return new String(chars);
+        }
+
+        byte[] bytes = new byte[len];
+        bytes[0] = (byte) (year / 1000 + '0');
+        bytes[1] = (byte) ((year / 100) % 10 + '0');
+        bytes[2] = (byte) ((year / 10) % 10 + '0');
+        bytes[3] = (byte) (year % 10 + '0');
+        bytes[4] = '-';
+        bytes[5] = (byte) (month / 10 + '0');
+        bytes[6] = (byte) (month % 10 + '0');
+        bytes[7] = '-';
+        bytes[8] = (byte) (dayOfMonth / 10 + '0');
+        bytes[9] = (byte) (dayOfMonth % 10 + '0');
+        bytes[10] = ' ';
+        bytes[11] = (byte) (hour / 10 + '0');
+        bytes[12] = (byte) (hour % 10 + '0');
+        bytes[13] = ':';
+        bytes[14] = (byte) (minute / 10 + '0');
+        bytes[15] = (byte) (minute % 10 + '0');
+        bytes[16] = ':';
+        bytes[17] = (byte) (second / 10 + '0');
+        bytes[18] = (byte) (second % 10 + '0');
         if (millislen > 0) {
-            chars[off + 19] = '.';
+            bytes[19] = '.';
             for (int i = 20; i < len; ++i) {
-                chars[i] = '0';
+                bytes[i] = '0';
             }
             if (millis < 10) {
-                IOUtils.getChars(millis, off + 19 + millislen, chars);
+                IOUtils.getChars(millis, 19 + millislen, bytes);
             } else {
                 if (millis % 100 == 0) {
-                    IOUtils.getChars(millis / 100, off + 19 + millislen, chars);
+                    IOUtils.getChars(millis / 100, 19 + millislen, bytes);
                 } else if (millis % 10 == 0) {
-                    IOUtils.getChars(millis / 10, off + 19 + millislen, chars);
+                    IOUtils.getChars(millis / 10, 19 + millislen, bytes);
                 } else {
-                    IOUtils.getChars(millis, off + 19 + millislen, chars);
+                    IOUtils.getChars(millis, 19 + millislen, bytes);
                 }
             }
         }
         if (timeZone) {
             int timeZoneOffset = offsetTotalSeconds / 3600;
             if (offsetTotalSeconds == 0) {
-                chars[off + 19 + millislen] = 'Z';
+                bytes[19 + millislen] = 'Z';
             } else {
                 int offsetAbs = Math.abs(timeZoneOffset);
 
                 if (timeZoneOffset >= 0) {
-                    chars[off + 19 + millislen] = '+';
+                    bytes[19 + millislen] = '+';
                 } else {
-                    chars[off + 19 + millislen] = '-';
+                    bytes[19 + millislen] = '-';
                 }
-                chars[off + 19 + millislen + 1] = '0';
-                IOUtils.getChars(offsetAbs, off + 19 + millislen + 3, chars);
-                chars[off + 19 + millislen + 3] = ':';
-                chars[off + 19 + millislen + 4] = '0';
+                bytes[19 + millislen + 1] = '0';
+                IOUtils.getChars(offsetAbs, 19 + millislen + 3, bytes);
+                bytes[19 + millislen + 3] = ':';
+                bytes[19 + millislen + 4] = '0';
                 int offsetMinutes = (offsetTotalSeconds - timeZoneOffset * 3600) / 60;
                 if (offsetMinutes < 0) {
                     offsetMinutes = -offsetMinutes;
                 }
-                IOUtils.getChars(offsetMinutes, off + 19 + millislen + zonelen, chars);
+                IOUtils.getChars(offsetMinutes, 19 + millislen + zonelen, bytes);
             }
         }
 
-        if (STRING_CREATOR_JDK8 != null) {
-            return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+        if (STRING_CREATOR_JDK11 != null) {
+            return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+        } else if (UNSAFE_ASCII_CREATOR != null) {
+            return (String) UNSAFE_ASCII_CREATOR.apply(bytes);
         }
 
-        return new String(chars);
+        return new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
     }
 }
