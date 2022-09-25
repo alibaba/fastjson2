@@ -116,7 +116,6 @@ public class ObjectWriterCreatorASM
         ObjectWriterProvider provider;
         {
             ObjectWriterProvider p = null;
-            BeanInfo beanInfo = new BeanInfo();
             for (ObjectWriterModule module : modules) {
                 if (p == null) {
                     p = module.getProvider();
@@ -150,6 +149,11 @@ public class ObjectWriterCreatorASM
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new JSONException("create serializer error", e);
             }
+        }
+
+        ObjectWriter annotatedObjectWriter = getAnnotatedObjectWriter(provider, objectClass, beanInfo);
+        if (annotatedObjectWriter != null) {
+            return annotatedObjectWriter;
         }
 
         long writerFeatures = features | beanInfo.writerFeatures;

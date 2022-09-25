@@ -39,4 +39,6 @@ public class BeanInfo {
     public String format;
     public Locale locale;
     public boolean alphabetic = true;
+    public String objectWriterFieldName;
+    public String objectReaderFieldName;
 }

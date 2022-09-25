@@ -1,10 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.annotation.JSONBuilder;
-import com.alibaba.fastjson2.annotation.JSONCreator;
-import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.annotation.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.impl.*;
@@ -206,6 +203,7 @@ public class ObjectReaderBaseModule
             }
 
             if (mixInSource != null && mixInSource != objectClass) {
+                beanInfo.mixIn = true;
                 getBeanInfo(beanInfo, mixInSource.getAnnotations());
 
                 BeanUtils.staticMethod(mixInSource,
@@ -374,6 +372,16 @@ public class ObjectReaderBaseModule
                 if (annotationType == JSONType.class) {
                     jsonType = (JSONType) annotation;
                 }
+
+                if (annotationType == JSONReadable.class) {
+                    beanInfo.readerFeatures |= FieldInfo.JSON_READABLE_ANNOTATED;
+                    JSONReadable jsonReadable = (JSONReadable) annotation;
+                    String fieldName = jsonReadable.fieldName();
+                    if (!fieldName.isEmpty()) {
+                        beanInfo.objectReaderFieldName = fieldName;
+                    }
+                }
+
                 String annotationTypeName = annotationType.getName();
                 switch (annotationTypeName) {
                     case "com.alibaba.fastjson2.annotation.JSONType":

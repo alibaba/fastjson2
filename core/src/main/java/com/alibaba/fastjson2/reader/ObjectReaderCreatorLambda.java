@@ -48,6 +48,17 @@ public class ObjectReaderCreatorLambda
 
     @Override
     public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, List<ObjectReaderModule> modules) {
+        ObjectReaderProvider provider;
+        {
+            ObjectReaderProvider p = null;
+            for (ObjectReaderModule module : modules) {
+                if (p == null) {
+                    p = module.getProvider();
+                }
+            }
+            provider = p;
+        }
+
         BeanInfo beanInfo = new BeanInfo();
         for (ObjectReaderModule module : modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
@@ -62,6 +73,11 @@ public class ObjectReaderCreatorLambda
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new JSONException("create deserializer error", e);
             }
+        }
+
+        ObjectReader annotatedObjectReader = getAnnotatedObjectReader(provider, objectClass, beanInfo);
+        if (annotatedObjectReader != null) {
+            return annotatedObjectReader;
         }
 
         if (Enum.class.isAssignableFrom(objectClass)) {

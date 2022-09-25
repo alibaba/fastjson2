@@ -19,7 +19,6 @@ import java.lang.reflect.*;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.*;
@@ -196,6 +195,17 @@ public class ObjectReaderCreatorASM
 
     @Override
     public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, List<ObjectReaderModule> modules) {
+        ObjectReaderProvider provider;
+        {
+            ObjectReaderProvider p = null;
+            for (ObjectReaderModule module : modules) {
+                if (p == null) {
+                    p = module.getProvider();
+                }
+            }
+            provider = p;
+        }
+
         boolean externalClass = classLoader.isExternalClass(objectClass);
         int objectClassModifiers = objectClass.getModifiers();
         boolean publicClass = Modifier.isPublic(objectClassModifiers);
@@ -224,6 +234,11 @@ public class ObjectReaderCreatorASM
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new JSONException("create deserializer error", e);
             }
+        }
+
+        ObjectReader annotatedObjectReader = getAnnotatedObjectReader(provider, objectClass, beanInfo);
+        if (annotatedObjectReader != null) {
+            return annotatedObjectReader;
         }
 
         if (fieldBased && (objectClass.isInterface() || objectClass.isInterface())) {
