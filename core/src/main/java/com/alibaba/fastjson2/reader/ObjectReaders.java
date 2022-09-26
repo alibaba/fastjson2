@@ -71,6 +71,13 @@ public class ObjectReaders {
         return new FieldReaderDoubleValueFunc<>(fieldName, 0, null, null, null, function);
     }
 
+    public static <T> FieldReader fieldReaderString(
+            String fieldName,
+            BiConsumer<T, String> function
+    ) {
+        return ObjectReaderCreator.INSTANCE.createFieldReader(fieldName, String.class, String.class, null, function);
+    }
+
     public static <T, V> FieldReader fieldReader(
             String fieldName,
             Class<V> fieldClass,
@@ -96,5 +103,14 @@ public class ObjectReaders {
             ObjectReader<V> itemObjectReader
     ) {
         return new FieldReaderListFuncImpl<>(listCreator, itemObjectReader, function, itemType, fieldName);
+    }
+
+    public static <T, V> FieldReader fieldReaderList(
+            String fieldName,
+            Type itemType,
+            Supplier<List<V>> listCreator,
+            BiConsumer<T, List<V>> function
+    ) {
+        return new FieldReaderListFuncImpl<>(listCreator, null, function, itemType, fieldName);
     }
 }

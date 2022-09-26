@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
+import static com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReader2<T>
@@ -91,11 +92,18 @@ public class ObjectReader2<T>
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        jsonReader.startArray();
         Object object = defaultCreator.get();
 
-        first.readFieldValue(jsonReader, object);
-        second.readFieldValue(jsonReader, object);
+        int entryCnt = jsonReader.startArray();
+        if (entryCnt > 0) {
+            first.readFieldValue(jsonReader, object);
+            if (entryCnt > 1) {
+                second.readFieldValue(jsonReader, object);
+                for (int i = 2; i < entryCnt; ++i) {
+                    jsonReader.skipValue();
+                }
+            }
+        }
 
         if (buildFunction != null) {
             return (T) buildFunction.apply(object);
@@ -116,18 +124,21 @@ public class ObjectReader2<T>
         }
 
         if (jsonReader.isArray()) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt != 2) {
-                throw new JSONException(jsonReader.info("not support input entryCount " + entryCnt));
-            }
-
             T object = defaultCreator.get();
             if (hasDefaultValue) {
                 initDefaultValue(object);
             }
 
-            first.readFieldValue(jsonReader, object);
-            second.readFieldValue(jsonReader, object);
+            int entryCnt = jsonReader.startArray();
+            if (entryCnt > 0) {
+                first.readFieldValue(jsonReader, object);
+                if (entryCnt > 1) {
+                    second.readFieldValue(jsonReader, object);
+                    for (int i = 2; i < entryCnt; ++i) {
+                        jsonReader.skipValue();
+                    }
+                }
+            }
 
             if (buildFunction != null) {
                 return (T) buildFunction.apply(object);
@@ -220,7 +231,7 @@ public class ObjectReader2<T>
         long featuresAll = jsonReader.features(this.features | features);
         T object;
         if (jsonReader.isArray()) {
-            if ((featuresAll & JSONReader.Feature.SupportArrayToBean.mask) != 0) {
+            if ((featuresAll & SupportArrayToBean.mask) != 0) {
                 jsonReader.next();
                 object = defaultCreator.get();
                 if (hasDefaultValue) {
