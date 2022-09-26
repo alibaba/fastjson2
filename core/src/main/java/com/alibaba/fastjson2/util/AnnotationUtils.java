@@ -30,7 +30,10 @@ public final class AnnotationUtils {
      * @return the searched annotation type
      */
     public static <A extends Annotation> A findAnnotation(AnnotatedElement element, Class<A> annotationType) {
-        Objects.requireNonNull(annotationType, "annotationType must not be null");
+        if (annotationType == null) {
+            throw new NullPointerException("annotationType must not be null");
+        }
+
         boolean inherited = annotationType.isAnnotationPresent(Inherited.class);
         return findAnnotation(element, annotationType, inherited, new HashSet<>());
     }
@@ -48,8 +51,12 @@ public final class AnnotationUtils {
      */
     @SuppressWarnings("unchecked")
     public static <A extends Annotation> A findAnnotation(Annotation annotation, Class<A> annotationType) {
-        Objects.requireNonNull(annotation, "annotation must not be null");
-        Objects.requireNonNull(annotationType, "annotationType must not be null");
+        if (annotation == null) {
+            throw new NullPointerException("annotation must not be null");
+        }
+        if (annotationType == null) {
+            throw new NullPointerException("annotationType must not be null");
+        }
 
         Class<? extends Annotation> annotationTypeClass = annotation.annotationType();
         if (annotationTypeClass == annotationType) {
@@ -77,20 +84,24 @@ public final class AnnotationUtils {
      * @param <A> the annotation type
      * @return the searched annotation
      */
-    private static <A extends Annotation> A findAnnotation(AnnotatedElement element,
-            Class<A> annotationType, boolean inherited, Set<Annotation> visited) {
-        if (Objects.isNull(element) || Objects.isNull(annotationType)) {
+    private static <A extends Annotation> A findAnnotation(
+            AnnotatedElement element,
+            Class<A> annotationType,
+            boolean inherited,
+            Set<Annotation> visited
+    ) {
+        if (element == null || annotationType == null) {
             return null;
         }
 
         A annotation = element.getDeclaredAnnotation(annotationType);
-        if (Objects.nonNull(annotation)) {
+        if (annotation != null) {
             return annotation;
         }
 
         Annotation[] declaredAnnotations = element.getDeclaredAnnotations();
         A directMetaAnnotation = findMetaAnnotation(annotationType, declaredAnnotations, inherited, visited);
-        if (Objects.nonNull(directMetaAnnotation)) {
+        if (directMetaAnnotation != null) {
             return directMetaAnnotation;
         }
 
@@ -100,7 +111,7 @@ public final class AnnotationUtils {
             for (Class<?> ifc : clazz.getInterfaces()) {
                 if (ifc != Annotation.class) {
                     A annotationOnInterface = findAnnotation(ifc, annotationType, inherited, visited);
-                    if (Objects.nonNull(annotationOnInterface)) {
+                    if (annotationOnInterface != null) {
                         return annotationOnInterface;
                     }
                 }
@@ -108,9 +119,9 @@ public final class AnnotationUtils {
 
             if (inherited) {
                 Class<?> superclass = clazz.getSuperclass();
-                if (Objects.nonNull(superclass) && superclass != Object.class) {
+                if (superclass != null && superclass != Object.class) {
                     A annotationOnSuperclass = findAnnotation(superclass, annotationType, inherited, visited);
-                    if (Objects.nonNull(annotationOnSuperclass)) {
+                    if (annotationOnSuperclass != null) {
                         return annotationOnSuperclass;
                     }
                 }
@@ -130,14 +141,19 @@ public final class AnnotationUtils {
      * @param <A> the annotation type
      * @return the searched annotation
      */
-    private static <A extends Annotation> A findMetaAnnotation(Class<A> annotationType,
-            Annotation[] candidates, boolean inherited, Set<Annotation> visited) {
+    private static <A extends Annotation> A findMetaAnnotation(
+            Class<A> annotationType,
+            Annotation[] candidates,
+            boolean inherited,
+            Set<Annotation> visited
+    ) {
         for (Annotation candidateAnnotation : candidates) {
             Class<? extends Annotation> candidateAnnotationType = candidateAnnotation.annotationType();
-            boolean isInJavaLangAnnotationPackage = candidateAnnotationType.getName().startsWith("java.lang.annotation");
+            String name = candidateAnnotationType.getName();
+            boolean isInJavaLangAnnotationPackage = name.startsWith("java.lang.annotation") || name.startsWith("kotlin.");
             if (!isInJavaLangAnnotationPackage && visited.add(candidateAnnotation)) {
                 A metaAnnotation = findAnnotation(candidateAnnotationType, annotationType, inherited, visited);
-                if (Objects.nonNull(metaAnnotation)) {
+                if (metaAnnotation != null) {
                     return metaAnnotation;
                 }
             }

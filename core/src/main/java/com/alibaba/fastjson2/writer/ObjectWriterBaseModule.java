@@ -63,9 +63,8 @@ public class ObjectWriterBaseModule
             Annotation[] annotations = objectClass.getAnnotations();
             for (Annotation annotation : annotations) {
                 Class annotationType = annotation.annotationType();
-                JSONType foundJsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
-                if (Objects.nonNull(foundJsonType)) {
-                    jsonType = foundJsonType;
+                jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                if (jsonType == annotation) {
                     continue;
                 }
 
@@ -124,9 +123,8 @@ public class ObjectWriterBaseModule
                     Annotation[] mixInAnnotations = mixInSource.getAnnotations();
                     for (Annotation annotation : mixInAnnotations) {
                         Class<? extends Annotation> annotationType = annotation.annotationType();
-                        JSONType foundJsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
-                        if (Objects.nonNull(foundJsonType)) {
-                            jsonType = foundJsonType;
+                        jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                        if (jsonType == annotation) {
                             continue;
                         }
 
@@ -266,9 +264,11 @@ public class ObjectWriterBaseModule
             Annotation[] annotations = field.getAnnotations();
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                JSONField foundJsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
-                if (Objects.nonNull(foundJsonField)) {
-                    jsonField = foundJsonField;
+                if (jsonField == null) {
+                    jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                    if (jsonField == annotation) {
+                        continue;
+                    }
                 }
 
                 String annotationTypeName = annotationType.getName();
