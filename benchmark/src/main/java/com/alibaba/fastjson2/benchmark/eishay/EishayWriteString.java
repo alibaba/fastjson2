@@ -1,8 +1,15 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.benchmark.eishay.mixin.ImageMixin;
+import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaContentMixin;
+import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaMixin;
+import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
+import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
@@ -22,12 +29,17 @@ public class EishayWriteString {
     static final ObjectMapper mapper = new ObjectMapper();
     static final Gson gson = new Gson();
 
+    static ObjectWriterProvider provider = new ObjectWriterProvider();
     static {
         try {
             InputStream is = EishayWriteString.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
+
+            provider.mixIn(MediaContent.class, MediaContentMixin.class);
+            provider.mixIn(Media.class, MediaMixin.class);
+            provider.mixIn(Image.class, ImageMixin.class);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -41,6 +53,12 @@ public class EishayWriteString {
     @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(JSON.toJSONString(mc));
+    }
+
+    public void fastjson2Mixin(Blackhole bh) {
+        bh.consume(
+                JSON.toJSONString(mc, JSONFactory.createWriteContext(provider))
+        );
     }
 
     @Benchmark

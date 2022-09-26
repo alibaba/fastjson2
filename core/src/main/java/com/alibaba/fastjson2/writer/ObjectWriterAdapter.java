@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+
 public class ObjectWriterAdapter<T>
         implements ObjectWriter<T> {
     PropertyPreFilter propertyPreFilter;
@@ -43,6 +45,7 @@ public class ObjectWriterAdapter<T>
     final boolean hasValueField;
     final boolean serializable;
     final boolean containsNoneFieldGetter;
+    final boolean googleCollection;
 
     public ObjectWriterAdapter(Class<T> objectClass, List<FieldWriter> fieldWriters) {
         this(objectClass, null, null, 0, fieldWriters);
@@ -70,6 +73,9 @@ public class ObjectWriterAdapter<T>
         this.features = features;
         this.fieldWriters = fieldWriters;
         this.serializable = java.io.Serializable.class.isAssignableFrom(objectClass);
+        this.googleCollection =
+                "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
+                || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
 
         this.fieldWriterArray = new FieldWriter[fieldWriters.size()];
         fieldWriters.toArray(fieldWriterArray);
@@ -126,6 +132,10 @@ public class ObjectWriterAdapter<T>
         this.typeName = typeName;
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
 
+        this.googleCollection =
+                "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
+                        || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
+
         boolean containsNoneFieldGetter = false;
         long[] hashCodes = new long[fieldWriterArray.length];
         for (int i = 0; i < fieldWriterArray.length; i++) {
@@ -164,12 +174,12 @@ public class ObjectWriterAdapter<T>
     }
 
     @Override
-    public boolean hasFilter(JSONWriter jsonWriter) {
+    public final boolean hasFilter(JSONWriter jsonWriter) {
         return propertyPreFilter != null
                 || propertyFilter != null
                 || nameFilter != null
                 || valueFilter != null
-                || containsNoneFieldGetter ? jsonWriter.hasFilter(JSONWriter.Feature.IgnoreNonFieldGetter.mask) : jsonWriter.hasFilter();
+                || containsNoneFieldGetter ? jsonWriter.hasFilter(IgnoreNonFieldGetter.mask) : jsonWriter.hasFilter();
     }
 
     public void setPropertyFilter(PropertyFilter propertyFilter) {
@@ -250,8 +260,11 @@ public class ObjectWriterAdapter<T>
             return;
         }
 
+        long featuresAll = features | this.features | jsonWriter.getFeatures();
+        boolean beanToArray = (featuresAll & BeanToArray.mask) != 0;
+
         if (jsonWriter.isJSONB()) {
-            if (jsonWriter.isBeanToArray()) {
+            if (beanToArray) {
                 writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
                 return;
             }
@@ -260,22 +273,14 @@ public class ObjectWriterAdapter<T>
             return;
         }
 
-        if (typeName != null) {
-            switch (typeName) {
-                case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
-                case "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet": {
-                    Collection collection = (Collection) object;
-                    ObjectWriterImplCollection.INSTANCE.write(jsonWriter, collection, fieldName, fieldType, features);
-                    return;
-                }
-                default:
-                    break;
-            }
+        if (googleCollection) {
+            Collection collection = (Collection) object;
+            ObjectWriterImplCollection.INSTANCE.write(jsonWriter, collection, fieldName, fieldType, features);
+            return;
         }
 
-        long featuresAll = features | this.features | jsonWriter.getFeatures();
-        if ((featuresAll & JSONWriter.Feature.BeanToArray.mask) != 0) {
-            writeArrayMapping(jsonWriter, object, fieldName, fieldType, features | this.features);
+        if (beanToArray) {
+            writeArrayMapping(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
 
@@ -292,13 +297,13 @@ public class ObjectWriterAdapter<T>
         }
 
         if (hasFilter(jsonWriter)) {
-            writeWithFilter(jsonWriter, object, fieldName, fieldType, 0);
+            writeWithFilter(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
 
         jsonWriter.startObject();
 
-        if (((features | this.features) & JSONWriter.Feature.WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
+        if (((features | this.features) & WriteClassName.mask) != 0 || jsonWriter.isWriteTypeInfo(object, features)) {
             writeTypeInfo(jsonWriter);
         }
 
@@ -395,7 +400,7 @@ public class ObjectWriterAdapter<T>
         }
 
         JSONWriter.Context context = jsonWriter.getContext();
-        boolean ignoreNonFieldGetter = ((context.getFeatures() | features) & JSONWriter.Feature.IgnoreNonFieldGetter.mask) != 0;
+        boolean ignoreNonFieldGetter = ((context.getFeatures() | features) & IgnoreNonFieldGetter.mask) != 0;
 
         BeforeFilter beforeFilter = context.getBeforeFilter();
         if (beforeFilter != null) {

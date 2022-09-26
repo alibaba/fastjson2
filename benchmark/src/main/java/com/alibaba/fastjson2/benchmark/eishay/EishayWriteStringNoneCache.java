@@ -4,6 +4,11 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.benchmark.eishay.mixin.ImageMixin;
+import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaContentMixin;
+import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaMixin;
+import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
+import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,6 +47,15 @@ public class EishayWriteStringNoneCache {
     @Benchmark
     public void fastjson2(Blackhole bh) {
         ObjectWriterProvider provider = new ObjectWriterProvider();
+        bh.consume(JSON.toJSONString(mc, JSONFactory.createWriteContext(provider)));
+    }
+
+    @Benchmark
+    public void fastjson2Mixin(Blackhole bh) {
+        ObjectWriterProvider provider = new ObjectWriterProvider();
+        provider.mixIn(MediaContent.class, MediaContentMixin.class);
+        provider.mixIn(Media.class, MediaMixin.class);
+        provider.mixIn(Image.class, ImageMixin.class);
         bh.consume(JSON.toJSONString(mc, JSONFactory.createWriteContext(provider)));
     }
 

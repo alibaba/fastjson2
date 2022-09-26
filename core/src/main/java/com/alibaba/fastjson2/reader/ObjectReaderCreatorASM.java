@@ -824,7 +824,12 @@ public class ObjectReaderCreatorASM
             genCreateObject(mw, classNameType, TYPE_OBJECT, FEATURES, fieldBased);
             mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
+            Label fieldEnd_ = new Label();
             for (int i = 0; i < fieldReaderArray.length; ++i) {
+                mw.visitVarInsn(Opcodes.ILOAD, ENTRY_CNT);
+                mw.visitLdcInsn(i + 1);
+                mw.visitJumpInsn(Opcodes.IF_ICMPLT, fieldEnd_);
+
                 FieldReader fieldReader = fieldReaderArray[i];
                 varIndex = genReadFieldValue(objectType,
                         fieldReader,
@@ -844,6 +849,9 @@ public class ObjectReaderCreatorASM
                         TYPE_OBJECT
                 );
             }
+
+            skipRest(mw, JSON_READER, fieldReaderArray.length, ENTRY_CNT, J, fieldEnd_);
+            mw.visitLabel(fieldEnd_);
 
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
             mw.visitInsn(Opcodes.ARETURN);
@@ -1118,6 +1126,33 @@ public class ObjectReaderCreatorASM
         mw.visitEnd();
     }
 
+    private static void skipRest(
+            MethodWriter mw,
+            int JSON_READER,
+            int start,
+            int ENTRY_CNT,
+            int J,
+            Label label
+    ) {
+        Label for_start_j_ = new Label(), for_inc_j_ = new Label();
+
+        mw.visitLdcInsn(start);
+        mw.visitVarInsn(Opcodes.ISTORE, J);
+
+        mw.visitLabel(for_start_j_);
+
+        mw.visitVarInsn(Opcodes.ILOAD, J);
+        mw.visitVarInsn(Opcodes.ILOAD, ENTRY_CNT);
+        mw.visitJumpInsn(Opcodes.IF_ICMPGE, label);
+
+        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "skipValue", "()V", false);
+
+        mw.visitLabel(for_inc_j_);
+        mw.visitIincInsn(J, 1);
+        mw.visitJumpInsn(Opcodes.GOTO, for_start_j_);
+    }
+
     private <T> void genMethodReadJSONBObjectArrayMapping(
             Class<T> objectType,
             long readerFeatures,
@@ -1166,7 +1201,12 @@ public class ObjectReaderCreatorASM
         genCreateObject(mw, classNameType, TYPE_OBJECT, FEATURES, fieldBased);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
+        Label fieldEnd_ = new Label();
         for (int i = 0; i < fieldReaderArray.length; ++i) {
+            mw.visitVarInsn(Opcodes.ILOAD, ENTRY_CNT);
+            mw.visitLdcInsn(i + 1);
+            mw.visitJumpInsn(Opcodes.IF_ICMPLT, fieldEnd_);
+
             FieldReader fieldReader = fieldReaderArray[i];
             varIndex = genReadFieldValue(objectType,
                     fieldReader,
@@ -1186,6 +1226,9 @@ public class ObjectReaderCreatorASM
                     TYPE_OBJECT
             );
         }
+
+        skipRest(mw, JSON_READER, fieldReaderArray.length, ENTRY_CNT, J, fieldEnd_);
+        mw.visitLabel(fieldEnd_);
 
         mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
         mw.visitInsn(Opcodes.ARETURN);

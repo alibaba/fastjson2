@@ -78,10 +78,15 @@ final class ObjectReader1<T>
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        jsonReader.startArray();
         Object object = defaultCreator.get();
 
-        fieldReader.readFieldValue(jsonReader, object);
+        int entryCnt = jsonReader.startArray();
+        if (entryCnt > 0) {
+            fieldReader.readFieldValue(jsonReader, object);
+            for (int i = 1; i < entryCnt; ++i) {
+                jsonReader.skipValue();
+            }
+        }
 
         if (buildFunction != null) {
             return (T) buildFunction.apply(object);
@@ -102,13 +107,14 @@ final class ObjectReader1<T>
         }
 
         if (jsonReader.isArray()) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt != 1) {
-                throw new JSONException(jsonReader.info("not support input entryCount " + entryCnt));
-            }
-
             Object object = defaultCreator.get();
-            fieldReader.readFieldValue(jsonReader, object);
+            int entryCnt = jsonReader.startArray();
+            if (entryCnt > 0) {
+                fieldReader.readFieldValue(jsonReader, object);
+                for (int i = 1; i < entryCnt; ++i) {
+                    jsonReader.skipValue();
+                }
+            }
 
             if (buildFunction != null) {
                 return (T) buildFunction.apply(object);

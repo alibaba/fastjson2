@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -538,7 +539,10 @@ public interface JSONB {
             } else {
                 boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
                 ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
-                if ((ctx.features & JSONReader.Feature.SupportArrayToBean.mask) != 0 && jsonReader.isArray()) {
+                if ((ctx.features & JSONReader.Feature.SupportArrayToBean.mask) != 0
+                        && jsonReader.isArray()
+                        && objectReader instanceof ObjectReaderBean
+                ) {
                     object = objectReader.readArrayMappingJSONBObject(jsonReader, null, null, 0);
                 } else {
                     object = objectReader.readJSONBObject(jsonReader, null, null, 0);

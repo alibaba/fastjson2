@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.SymbolTable;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -11,8 +12,11 @@ import java.util.Arrays;
 
 abstract class FieldWriterEnum
         extends FieldWriter {
-    volatile byte[][] valueNameCacheUTF8;
-    volatile char[][] valueNameCacheUTF16;
+    final byte[][] valueNameCacheUTF8;
+    final char[][] valueNameCacheUTF16;
+
+    final byte[][] utf8ValueCache;
+    final char[][] utf16ValueCache;
 
     final Class enumType;
     final Enum[] enumConstants;
@@ -36,6 +40,12 @@ abstract class FieldWriterEnum
         for (int i = 0; i < enumConstants.length; i++) {
             hashCodes[i] = Fnv.hashCode64(enumConstants[i].name());
         }
+
+        valueNameCacheUTF8 = new byte[enumConstants.length][];
+        valueNameCacheUTF16 = new char[enumConstants.length][];
+
+        utf8ValueCache = new byte[enumConstants.length][];
+        utf16ValueCache = new char[enumConstants.length][];
     }
 
     @Override
@@ -79,26 +89,52 @@ abstract class FieldWriterEnum
     @Override
     public final void writeEnum(JSONWriter jsonWriter, Enum e) {
         long features = this.features | jsonWriter.getFeatures();
-        boolean usingOrdinal = (features & (JSONWriter.Feature.WriteEnumUsingToString.mask | JSONWriter.Feature.WriteEnumsUsingName.mask)) == 0;
 
         if ((features & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0) {
             writeFieldName(jsonWriter);
             jsonWriter.writeString(e.toString());
             return;
-        } else if (usingOrdinal) {
+        }
+
+        final boolean usingOrdinal = (features & (JSONWriter.Feature.WriteEnumUsingToString.mask | JSONWriter.Feature.WriteEnumsUsingName.mask)) == 0;
+        final boolean utf8 = jsonWriter.isUTF8();
+        final boolean utf16 = utf8 ? false : jsonWriter.isUTF16();
+        final int ordinal = e.ordinal();
+
+        if (usingOrdinal) {
+            if (utf8) {
+                byte[] bytes = utf8ValueCache[ordinal];
+                if (bytes == null) {
+                    int size = IOUtils.stringSize(ordinal);
+                    byte[] original = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + size);
+                    bytes = Arrays.copyOf(original, original.length);
+                    IOUtils.getChars(ordinal, bytes.length, bytes);
+                    utf8ValueCache[ordinal] = bytes;
+                }
+                jsonWriter.writeNameRaw(bytes);
+                return;
+            }
+
+            if (utf16) {
+                char[] bytes = utf16ValueCache[ordinal];
+                if (bytes == null) {
+                    int size = IOUtils.stringSize(ordinal);
+                    char[] original = Arrays.copyOf(nameWithColonUTF16, nameWithColonUTF16.length + size);
+                    bytes = Arrays.copyOf(original, original.length);
+                    IOUtils.getChars(ordinal, bytes.length, bytes);
+                    utf16ValueCache[ordinal] = bytes;
+                }
+                jsonWriter.writeNameRaw(bytes);
+                return;
+            }
+
             writeFieldName(jsonWriter);
-            jsonWriter.writeInt32(e.ordinal());
+            jsonWriter.writeInt32(ordinal);
             return;
         }
 
-        if (jsonWriter.isUTF8()) {
-            int ordinal = e.ordinal();
-            byte[] bytes = null;
-            if (valueNameCacheUTF8 == null) {
-                valueNameCacheUTF8 = new byte[enumConstants.length][];
-            } else {
-                bytes = valueNameCacheUTF8[ordinal];
-            }
+        if (utf8) {
+            byte[] bytes = valueNameCacheUTF8[ordinal];
 
             if (bytes == null) {
                 String name = enumConstants[ordinal].name();
@@ -112,14 +148,8 @@ abstract class FieldWriterEnum
             return;
         }
 
-        if (jsonWriter.isUTF16()) {
-            int ordinal = e.ordinal();
-            char[] chars = null;
-            if (valueNameCacheUTF16 == null) {
-                valueNameCacheUTF16 = new char[enumConstants.length][];
-            } else {
-                chars = valueNameCacheUTF16[ordinal];
-            }
+        if (utf16) {
+            char[] chars = valueNameCacheUTF16[ordinal];
 
             if (chars == null) {
                 String name = enumConstants[ordinal].name();

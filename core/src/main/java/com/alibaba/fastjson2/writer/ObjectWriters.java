@@ -3,7 +3,10 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.function.ToByteFunction;
 import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.function.ToShortFunction;
+import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.function.*;
 
 public class ObjectWriters {
@@ -63,5 +66,13 @@ public class ObjectWriters {
 
     public static <T, V> FieldWriter fieldWriter(String fieldName, Class<V> fieldClass, Function<T, V> function) {
         return INSTANCE.createFieldWriter(fieldName, fieldClass, function);
+    }
+
+    public static <T, V> FieldWriter fieldWriter(String fieldName, Type fieldType, Class<V> fieldClass, Function<T, V> function) {
+        return INSTANCE.createFieldWriter(fieldName, fieldType, fieldClass, function);
+    }
+
+    public static <T, V> FieldWriter fieldWriterList(String fieldName, Class<V> itemType, Function<T, List<V>> function) {
+        return INSTANCE.createFieldWriter(fieldName, new ParameterizedTypeImpl(List.class, itemType), List.class, function);
     }
 }

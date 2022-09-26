@@ -52,15 +52,57 @@ public class ObjectWriterCreator {
     }
 
     public ObjectWriter createObjectWriter(
-            Class objectType,
+            Class objectClass,
             long features,
             FieldWriter... fieldWriters
     ) {
         if (fieldWriters.length == 0) {
-            return createObjectWriter(objectType, features, Collections.emptyList());
-        } else {
-            return new ObjectWriterAdapter(objectType, features, fieldWriters);
+            return createObjectWriter(objectClass, features, Collections.emptyList());
         }
+
+        boolean googleCollection = false;
+        if (objectClass != null) {
+            String typeName = objectClass.getName();
+            googleCollection =
+                    "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
+                            || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
+        }
+
+        if (!googleCollection) {
+            switch (fieldWriters.length) {
+                case 1:
+                    if ((fieldWriters[0].features & FieldInfo.VALUE_MASK) == 0) {
+                        return new ObjectWriterAdapter1(objectClass, features, fieldWriters);
+                    }
+                    return new ObjectWriterAdapter(objectClass, features, fieldWriters);
+                case 2:
+                    return new ObjectWriterAdapter2(objectClass, features, fieldWriters);
+                case 3:
+                    return new ObjectWriterAdapter3(objectClass, features, fieldWriters);
+                case 4:
+                    return new ObjectWriterAdapter4(objectClass, features, fieldWriters);
+                case 5:
+                    return new ObjectWriterAdapter5(objectClass, features, fieldWriters);
+                case 6:
+                    return new ObjectWriterAdapter6(objectClass, features, fieldWriters);
+                case 7:
+                    return new ObjectWriterAdapter7(objectClass, features, fieldWriters);
+                case 8:
+                    return new ObjectWriterAdapter8(objectClass, features, fieldWriters);
+                case 9:
+                    return new ObjectWriterAdapter9(objectClass, features, fieldWriters);
+                case 10:
+                    return new ObjectWriterAdapter10(objectClass, features, fieldWriters);
+                case 11:
+                    return new ObjectWriterAdapter11(objectClass, features, fieldWriters);
+                case 12:
+                    return new ObjectWriterAdapter12(objectClass, features, fieldWriters);
+                default:
+                    return new ObjectWriterAdapter(objectClass, features, fieldWriters);
+            }
+        }
+
+        return new ObjectWriterAdapter(objectClass, features, fieldWriters);
     }
 
     protected FieldWriter creteFieldWriter(
@@ -375,7 +417,62 @@ public class ObjectWriterCreator {
             Collections.sort(fieldWriters);
         }
 
-        ObjectWriterAdapter writerAdapter = new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+        ObjectWriterAdapter writerAdapter = null;
+
+        boolean googleCollection = false;
+        if (objectClass != null) {
+            String typeName = objectClass.getName();
+            googleCollection =
+                    "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
+                            || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
+        }
+        if (!googleCollection) {
+            switch (fieldWriters.size()) {
+                case 1:
+                    if ((fieldWriters.get(0).features & FieldInfo.VALUE_MASK) == 0) {
+                        writerAdapter = new ObjectWriterAdapter1(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    }
+                    break;
+                case 2:
+                    writerAdapter = new ObjectWriterAdapter2(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 3:
+                    writerAdapter = new ObjectWriterAdapter3(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 4:
+                    writerAdapter = new ObjectWriterAdapter4(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 5:
+                    writerAdapter = new ObjectWriterAdapter5(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 6:
+                    writerAdapter = new ObjectWriterAdapter6(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 7:
+                    writerAdapter = new ObjectWriterAdapter7(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 8:
+                    writerAdapter = new ObjectWriterAdapter8(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 9:
+                    writerAdapter = new ObjectWriterAdapter9(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 10:
+                    writerAdapter = new ObjectWriterAdapter10(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 11:
+                    writerAdapter = new ObjectWriterAdapter11(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 12:
+                    writerAdapter = new ObjectWriterAdapter12(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (writerAdapter == null) {
+            writerAdapter = new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+        }
 
         if (beanInfo.serializeFilters != null) {
             for (Class<? extends Filter> filterClass : beanInfo.serializeFilters) {
@@ -727,6 +824,15 @@ public class ObjectWriterCreator {
             Function<T, V> function
     ) {
         return createFieldWriter(null, null, fieldName, 0, 0, null, null, fieldClass, fieldClass, null, function);
+    }
+
+    public <T, V> FieldWriter createFieldWriter(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            Function<T, V> function
+    ) {
+        return createFieldWriter(null, null, fieldName, 0, 0, null, null, fieldType, fieldClass, null, function);
     }
 
     public <T, V> FieldWriter createFieldWriter(

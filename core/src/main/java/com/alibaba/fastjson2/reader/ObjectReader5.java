@@ -123,14 +123,27 @@ final class ObjectReader5<T>
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        jsonReader.startArray();
         Object object = defaultCreator.get();
 
-        fieldReader0.readFieldValue(jsonReader, object);
-        fieldReader1.readFieldValue(jsonReader, object);
-        fieldReader2.readFieldValue(jsonReader, object);
-        fieldReader3.readFieldValue(jsonReader, object);
-        fieldReader4.readFieldValue(jsonReader, object);
+        int entryCnt = jsonReader.startArray();
+        if (entryCnt > 0) {
+            fieldReader0.readFieldValue(jsonReader, object);
+            if (entryCnt > 1) {
+                fieldReader1.readFieldValue(jsonReader, object);
+                if (entryCnt > 2) {
+                    fieldReader2.readFieldValue(jsonReader, object);
+                    if (entryCnt > 3) {
+                        fieldReader3.readFieldValue(jsonReader, object);
+                        if (entryCnt > 4) {
+                            fieldReader4.readFieldValue(jsonReader, object);
+                            for (int i = 5; i < entryCnt; ++i) {
+                                jsonReader.skipValue();
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         if (buildFunction != null) {
             return (T) buildFunction.apply(object);
@@ -146,14 +159,27 @@ final class ObjectReader5<T>
         }
 
         if (jsonReader.isArray()) {
-            int entryCnt = jsonReader.startArray();
             Object object = defaultCreator.get();
 
-            fieldReader0.readFieldValue(jsonReader, object);
-            fieldReader1.readFieldValue(jsonReader, object);
-            fieldReader2.readFieldValue(jsonReader, object);
-            fieldReader3.readFieldValue(jsonReader, object);
-            fieldReader4.readFieldValue(jsonReader, object);
+            int entryCnt = jsonReader.startArray();
+            if (entryCnt > 0) {
+                fieldReader0.readFieldValue(jsonReader, object);
+                if (entryCnt > 1) {
+                    fieldReader1.readFieldValue(jsonReader, object);
+                    if (entryCnt > 2) {
+                        fieldReader2.readFieldValue(jsonReader, object);
+                        if (entryCnt > 3) {
+                            fieldReader3.readFieldValue(jsonReader, object);
+                            if (entryCnt > 4) {
+                                fieldReader4.readFieldValue(jsonReader, object);
+                                for (int i = 5; i < entryCnt; ++i) {
+                                    jsonReader.skipValue();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             if (buildFunction != null) {
                 return (T) buildFunction.apply(object);

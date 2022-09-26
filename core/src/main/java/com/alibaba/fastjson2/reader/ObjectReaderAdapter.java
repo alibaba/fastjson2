@@ -175,11 +175,19 @@ public class ObjectReaderAdapter<T>
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        jsonReader.startArray();
+        int entryCnt = jsonReader.startArray();
         Object object = createInstance(0);
 
-        for (FieldReader fieldReader : fieldReaders) {
+        for (int i = 0; i < fieldReaders.length; i++) {
+            if (i >= entryCnt) {
+                continue;
+            }
+            FieldReader fieldReader = fieldReaders[i];
             fieldReader.readFieldValue(jsonReader, object);
+        }
+
+        for (int i = fieldReaders.length; i < entryCnt; i++) {
+            jsonReader.skipValue();
         }
 
         if (buildFunction != null) {
