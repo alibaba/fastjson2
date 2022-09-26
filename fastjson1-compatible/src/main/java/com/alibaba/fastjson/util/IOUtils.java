@@ -17,6 +17,7 @@ package com.alibaba.fastjson.util;
 
 import com.alibaba.fastjson.JSONException;
 
+import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
@@ -219,5 +220,15 @@ public class IOUtils {
         }
 
         return dArr;
+    }
+
+    public static void close(Closeable x) {
+        if (x != null) {
+            try {
+                x.close();
+            } catch (Exception ignored) {
+                // ignored
+            }
+        }
     }
 }
