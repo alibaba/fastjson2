@@ -106,26 +106,26 @@ public class ObjectReaderCreator {
     }
 
     public <T> ObjectReader<T> createObjectReader(
-            Class<T> objectType,
+            Class<T> objectClass,
             FieldReader... fieldReaders
     ) {
         return createObjectReader(
-                objectType,
+                objectClass,
                 null,
                 0,
                 null,
-                createInstanceSupplier(objectType),
+                createInstanceSupplier(objectClass),
                 null,
                 fieldReaders
         );
     }
 
     public <T> ObjectReader<T> createObjectReader(
-            Class<T> objectType,
+            Class<T> objectClass,
             Supplier<T> defaultCreator,
             FieldReader... fieldReaders
     ) {
-        return createObjectReader(objectType, null, 0, null, defaultCreator, null, fieldReaders);
+        return createObjectReader(objectClass, null, 0, null, defaultCreator, null, fieldReaders);
     }
 
     public <T> ObjectReader<T> createObjectReaderSeeAlso(

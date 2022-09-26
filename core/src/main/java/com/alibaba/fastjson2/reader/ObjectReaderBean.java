@@ -10,12 +10,16 @@ import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
 public abstract class ObjectReaderBean<T>
         implements ObjectReader<T> {
     protected final Class objectClass;
+    protected final Supplier<T> creator;
+    protected final Function buildFunction;
+    protected final long features;
     protected final String typeName;
     protected final long typeNameHash;
 
@@ -26,7 +30,7 @@ public abstract class ObjectReaderBean<T>
 
     protected final JSONSchema schema;
 
-    protected ObjectReaderBean(Class objectClass, String typeName, JSONSchema schema) {
+    protected ObjectReaderBean(Class objectClass, Supplier<T> creator, String typeName, long features, JSONSchema schema, Function buildFunction) {
         if (typeName == null) {
             if (objectClass != null) {
                 typeName = TypeUtils.getTypeName(objectClass);
@@ -34,6 +38,9 @@ public abstract class ObjectReaderBean<T>
         }
 
         this.objectClass = objectClass;
+        this.creator = creator;
+        this.buildFunction = buildFunction;
+        this.features = features;
         this.typeName = typeName;
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
 

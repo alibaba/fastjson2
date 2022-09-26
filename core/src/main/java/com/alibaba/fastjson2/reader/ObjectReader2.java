@@ -15,31 +15,24 @@ import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 import static com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
-public class ObjectReader2<T>
+final class ObjectReader2<T>
         extends ObjectReaderBean<T> {
-    final long features;
-    final Supplier<T> defaultCreator;
-    final Function buildFunction;
-    private final FieldReader first;
-    private final FieldReader second;
-    private final long firstHashCode;
-    private final long secondHashCode;
-    private final long firstHashCodeLCase;
-    private final long secondHashCodeLCase;
+    protected final FieldReader first;
+    protected final FieldReader second;
+    protected final long firstHashCode;
+    protected final long secondHashCode;
+    protected final long firstHashCodeLCase;
+    protected final long secondHashCodeLCase;
 
     public ObjectReader2(
             Class objectClass,
             long features,
             JSONSchema schema,
-            Supplier<T> defaultCreator,
+            Supplier<T> creator,
             Function buildFunction,
             FieldReader first,
             FieldReader second) {
-        super(objectClass, null, schema);
-
-        this.features = features;
-        this.defaultCreator = defaultCreator;
-        this.buildFunction = buildFunction;
+        super(objectClass, creator, null, features, schema, buildFunction);
 
         this.first = first;
         this.second = second;
@@ -78,7 +71,7 @@ public class ObjectReader2<T>
 
     @Override
     public T createInstance(long features) {
-        return defaultCreator.get();
+        return creator.get();
     }
 
     @Override
@@ -92,7 +85,7 @@ public class ObjectReader2<T>
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        Object object = defaultCreator.get();
+        Object object = creator.get();
 
         int entryCnt = jsonReader.startArray();
         if (entryCnt > 0) {
@@ -124,7 +117,7 @@ public class ObjectReader2<T>
         }
 
         if (jsonReader.isArray()) {
-            T object = defaultCreator.get();
+            T object = creator.get();
             if (hasDefaultValue) {
                 initDefaultValue(object);
             }
@@ -151,8 +144,8 @@ public class ObjectReader2<T>
         }
 
         T object;
-        if (defaultCreator != null) {
-            object = defaultCreator.get();
+        if (creator != null) {
+            object = creator.get();
         } else if (UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
             try {
                 object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
@@ -233,7 +226,7 @@ public class ObjectReader2<T>
         if (jsonReader.isArray()) {
             if ((featuresAll & SupportArrayToBean.mask) != 0) {
                 jsonReader.next();
-                object = defaultCreator.get();
+                object = creator.get();
                 if (hasDefaultValue) {
                     initDefaultValue(object);
                 }
@@ -251,7 +244,7 @@ public class ObjectReader2<T>
         }
 
         jsonReader.nextIfMatch('{');
-        object = defaultCreator.get();
+        object = creator.get();
         if (hasDefaultValue) {
             initDefaultValue(object);
         }
