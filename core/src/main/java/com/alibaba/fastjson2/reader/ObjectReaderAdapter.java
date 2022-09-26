@@ -18,9 +18,7 @@ public class ObjectReaderAdapter<T>
         extends ObjectReaderBean<T> {
     protected final String typeKey;
     protected final long typeKeyHashCode;
-    final long features;
-    final Supplier<T> creator;
-    final Function buildFunction;
+
     final FieldReader[] fieldReaders;
     final long[] hashCodes;
     final short[] mapping;
@@ -30,6 +28,10 @@ public class ObjectReaderAdapter<T>
 
     final Constructor constructor;
     volatile boolean instantiationError;
+
+    public ObjectReaderAdapter(Class objectClass, Supplier<T> creator, FieldReader... fieldReaders) {
+        this(objectClass, null, null, 0, null, creator, null, fieldReaders);
+    }
 
     public ObjectReaderAdapter(
             Class objectClass,
@@ -41,7 +43,7 @@ public class ObjectReaderAdapter<T>
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
-        super(objectClass, typeName, schema);
+        super(objectClass, creator, typeName, features, schema, buildFunction);
 
         this.constructor = objectClass == null
                 ? null
@@ -59,9 +61,6 @@ public class ObjectReaderAdapter<T>
             typeKeyHashCode = Fnv.hashCode64(typeKey);
         }
 
-        this.features = features;
-        this.creator = creator;
-        this.buildFunction = buildFunction;
         this.fieldReaders = fieldReaders;
 
         long[] hashCodes = new long[fieldReaders.length];

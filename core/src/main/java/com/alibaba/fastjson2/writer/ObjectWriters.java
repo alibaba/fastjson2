@@ -24,6 +24,10 @@ public class ObjectWriters {
         return INSTANCE.createObjectWriter(objectType, fieldWriters);
     }
 
+    public static ObjectWriter of(Class objectType, FieldWriter... fieldWriters) {
+        return INSTANCE.createObjectWriter(objectType, fieldWriters);
+    }
+
     public static ObjectWriter objectWriter(Class objectType, long features, FieldWriter... fieldWriters) {
         return INSTANCE.createObjectWriter(objectType, features, fieldWriters);
     }

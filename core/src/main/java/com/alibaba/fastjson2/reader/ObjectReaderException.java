@@ -23,7 +23,7 @@ public class ObjectReaderException<T>
     private FieldReader fieldReaderStackTrace;
 
     protected ObjectReaderException(Class<T> objectClass) {
-        super(objectClass, objectClass.getName(), null);
+        super(objectClass, null, objectClass.getName(), 0, null, null);
         fieldReaderStackTrace = ObjectReaders.fieldReader("stackTrace", StackTraceElement[].class, Throwable::setStackTrace);
     }
 

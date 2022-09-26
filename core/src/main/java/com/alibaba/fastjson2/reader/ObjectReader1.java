@@ -16,26 +16,20 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 final class ObjectReader1<T>
         extends ObjectReaderBean<T> {
-    final long features;
-    final Supplier<T> defaultCreator;
-    final Function buildFunction;
     final FieldReader fieldReader;
 
     final long hashCode;
     final long hashCodeLCase;
 
-    ObjectReader1(
+    public ObjectReader1(
             Class objectClass,
             long features,
             JSONSchema schema,
-            Supplier<T> defaultCreator,
+            Supplier<T> creator,
             Function buildFunction,
             FieldReader fieldReader) {
-        super(objectClass, null, schema);
+        super(objectClass, creator, null, features, schema, buildFunction);
 
-        this.features = features;
-        this.defaultCreator = defaultCreator;
-        this.buildFunction = buildFunction;
         this.fieldReader = fieldReader;
         this.hashCode = fieldReader.fieldNameHash;
         this.hashCodeLCase = fieldReader.fieldNameHashLCase;
@@ -59,7 +53,7 @@ final class ObjectReader1<T>
 
     @Override
     public T createInstance(long features) {
-        return defaultCreator.get();
+        return creator.get();
     }
 
     @Override
@@ -78,7 +72,7 @@ final class ObjectReader1<T>
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        Object object = defaultCreator.get();
+        Object object = creator.get();
 
         int entryCnt = jsonReader.startArray();
         if (entryCnt > 0) {
@@ -107,7 +101,7 @@ final class ObjectReader1<T>
         }
 
         if (jsonReader.isArray()) {
-            Object object = defaultCreator.get();
+            Object object = creator.get();
             int entryCnt = jsonReader.startArray();
             if (entryCnt > 0) {
                 fieldReader.readFieldValue(jsonReader, object);
@@ -131,8 +125,8 @@ final class ObjectReader1<T>
         }
 
         T object;
-        if (defaultCreator != null) {
-            object = defaultCreator.get();
+        if (creator != null) {
+            object = creator.get();
         } else if (UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
             try {
                 object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
@@ -224,7 +218,7 @@ final class ObjectReader1<T>
         if (jsonReader.isArray()) {
             if ((featuresAll & JSONReader.Feature.SupportArrayToBean.mask) != 0) {
                 jsonReader.next();
-                Object object = defaultCreator.get();
+                Object object = creator.get();
 
                 fieldReader.readFieldValue(jsonReader, object);
                 if (!jsonReader.nextIfMatch(']')) {
@@ -243,8 +237,8 @@ final class ObjectReader1<T>
         }
 
         jsonReader.nextIfMatch('{');
-        T object = defaultCreator != null
-                ? defaultCreator.get()
+        T object = creator != null
+                ? creator.get()
                 : null;
 
         if (hasDefaultValue) {

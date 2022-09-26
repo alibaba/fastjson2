@@ -17,6 +17,22 @@ public class ObjectReaders {
         return ObjectReaderCreator.INSTANCE.createObjectReader(null, defaultCreator, fieldReaders);
     }
 
+    public static <T> ObjectReader<T> of(
+            Class<T> objectClass,
+            Supplier<T> defaultCreator,
+            FieldReader... fieldReaders
+    ) {
+        return ObjectReaderCreator.INSTANCE.createObjectReader(objectClass, defaultCreator, fieldReaders);
+    }
+
+    public static <T> ObjectReader<T> objectReader(
+            Class<T> objectClass,
+            Supplier<T> defaultCreator,
+            FieldReader... fieldReaders
+    ) {
+        return ObjectReaderCreator.INSTANCE.createObjectReader(objectClass, defaultCreator, fieldReaders);
+    }
+
     public static <T> ObjectReader<T> ofReflect(Class<T> objectType) {
         return ObjectReaderCreator.INSTANCE.createObjectReader(objectType);
     }

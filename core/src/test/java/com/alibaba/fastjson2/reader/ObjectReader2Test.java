@@ -24,6 +24,19 @@ public class ObjectReader2Test {
         assertNull(objectReader.getFieldReaderLCase(0));
     }
 
+    @Test
+    public void testBuilder0() {
+        ObjectReader<Bean> objectReader = new ObjectReaderAdapter(
+                Bean.class,
+                Bean::new,
+                ObjectReaders.fieldReaderInt("userId1", (Bean o, int v) -> o.userId1 = v),
+                ObjectReaders.fieldReaderInt("userId2", (Bean o, int v) -> o.userId2 = v)
+        );
+        Bean bean = objectReader.readObject(JSONReader.of("{\"userId1\":101,\"userId2\":102}"));
+        assertEquals(101, bean.userId1);
+        assertEquals(102, bean.userId2);
+    }
+
     private class Bean {
         public int userId1;
         public int userId2;
