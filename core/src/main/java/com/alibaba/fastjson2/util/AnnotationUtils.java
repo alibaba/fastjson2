@@ -61,25 +61,6 @@ public final class AnnotationUtils {
     }
 
     /**
-     * Find the existed annotation of {@code annotationType} that is either
-     * <em>directly present</em>, <em>meta-present</em>, or <em>indirectly
-     * present</em> on the supplied {@code element}.
-     *
-     * <p>If the element is a class and the annotation is neither <em>directly
-     * present</em> nor <em>meta-present</em> on the class, this method will additionally search on
-     * interfaces implemented by the class before finding an annotation that is <em>indirectly
-     * present</em> on the class.
-     *
-     * @param element the element on which to search for the annotation
-     * @param annotationType the annotation type of need to search
-     * @param <A> the annotation type
-     * @return the searched annotation
-     */
-    public static <A extends Annotation> boolean hasAnnotation(AnnotatedElement element, Class<A> annotationType) {
-        return Objects.nonNull(findAnnotation(element, annotationType));
-    }
-
-    /**
      * Find the first annotation of {@code annotationType} that is either
      * <em>directly present</em>, <em>meta-present</em>, or <em>indirectly
      * present</em> on the supplied {@code element}.
@@ -153,7 +134,8 @@ public final class AnnotationUtils {
             Annotation[] candidates, boolean inherited, Set<Annotation> visited) {
         for (Annotation candidateAnnotation : candidates) {
             Class<? extends Annotation> candidateAnnotationType = candidateAnnotation.annotationType();
-            if (!isInJavaLangAnnotationPackage(candidateAnnotationType) && visited.add(candidateAnnotation)) {
+            boolean isInJavaLangAnnotationPackage = candidateAnnotationType.getName().startsWith("java.lang.annotation");
+            if (!isInJavaLangAnnotationPackage && visited.add(candidateAnnotation)) {
                 A metaAnnotation = findAnnotation(candidateAnnotationType, annotationType, inherited, visited);
                 if (Objects.nonNull(metaAnnotation)) {
                     return metaAnnotation;
@@ -161,15 +143,5 @@ public final class AnnotationUtils {
             }
         }
         return null;
-    }
-
-    /**
-     * Determine whether {@code annotationType} is in Java lang annotation package.
-     *
-     * @param annotationType annotationType
-     * @return whether is in Java lang annotation package
-     */
-    private static boolean isInJavaLangAnnotationPackage(Class<? extends Annotation> annotationType) {
-        return Objects.nonNull(annotationType) && annotationType.getName().startsWith("java.lang.annotation");
     }
 }

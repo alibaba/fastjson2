@@ -683,7 +683,7 @@ public abstract class BeanUtils {
                 }
 
                 if (setterFound && unsetFound && getterFound
-                        && !AnnotationUtils.hasAnnotation(method, JSONField.class)) {
+                        && AnnotationUtils.findAnnotation(method, JSONField.class) == null) {
                     continue;
                 }
             }
