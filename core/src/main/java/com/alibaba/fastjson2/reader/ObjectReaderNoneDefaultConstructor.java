@@ -240,7 +240,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
                     if (autoTypeObjectReader == null) {
                         String typeName = jsonReader.getString();
-                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
+                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass, this.features);
                     }
                 } else {
                     String typeName = jsonReader.getString();
@@ -249,7 +249,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
                 if (autoTypeObjectReader == null) {
                     String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass, features);
+                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass, this.features);
                 }
 
                 if (autoTypeObjectReader != null) {
