@@ -2008,8 +2008,12 @@ public interface JSON {
                 writer.setRootObject(object);
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                if (valueClass == JSONObject.class) {
+                    writer.write((JSONObject) object);
+                } else {
+                    ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                    objectWriter.write(writer, object, null, null, 0);
+                }
             }
             return writer.toString();
         } catch (NullPointerException | NumberFormatException e) {

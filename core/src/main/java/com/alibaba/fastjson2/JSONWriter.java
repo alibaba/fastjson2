@@ -1048,13 +1048,12 @@ public abstract class JSONWriter
 
     public void write(List array) {
         write0('[');
-        boolean first = true;
-        for (Object item : array) {
-            if (!first) {
+        for (int i = 0; i < array.size(); i++) {
+            Object item = array.get(i);
+            if (i != 0) {
                 write0(',');
             }
             writeAny(item);
-            first = false;
         }
         write0(']');
     }
@@ -1077,6 +1076,14 @@ public abstract class JSONWriter
             first = false;
         }
         write0('}');
+    }
+
+    public void write(JSONArray array) {
+        write((List) array);
+    }
+
+    public void write(JSONObject map) {
+        write((Map) map);
     }
 
     public void writeAny(Object value) {

@@ -76,6 +76,8 @@ public abstract class JSONReader
 
     protected boolean typeRedirect; // redirect for {"@type":"xxx"",...
 
+    protected char[] doubleChars;
+
     public final char current() {
         return ch;
     }
@@ -2109,47 +2111,77 @@ public abstract class JSONReader
 
                             if (exponent == 0) {
                                 if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
-                                    switch (scale) {
-                                        case 1:
-                                        case 2:
-                                        case 3:
-                                        case 4:
-                                        case 5:
-                                        case 6:
-                                        case 7:
-                                        case 8:
-                                        case 9:
-                                        case 10:
-                                            return (float) (unscaledVal / SMALL_10_POW[scale]);
-                                        default: {
-                                            boolean isNegative = unscaledVal < 0;
-                                            int len = isNegative ? IOUtils.stringSize(-unscaledVal) + 1 : IOUtils.stringSize(unscaledVal);
-                                            char[] chars = new char[len];
-                                            IOUtils.getChars(unscaledVal, len, chars);
-                                            return FloatingDecimal.floatValue(isNegative, scale, chars, len);
+                                    boolean isNegative;
+                                    long unsignedUnscaledVal;
+                                    if (unscaledVal < 0) {
+                                        isNegative = true;
+                                        unsignedUnscaledVal = -unscaledVal;
+                                    } else {
+                                        isNegative = false;
+                                        unsignedUnscaledVal = unscaledVal;
+                                    }
+
+                                    /*
+                                     * If both unscaledVal and the scale can be exactly
+                                     * represented as float values, perform a single float
+                                     * multiply or divide to compute the (properly
+                                     * rounded) result.
+                                     */
+                                    if (unscaledVal != INFLATED && unsignedUnscaledVal < 1L << 22) {
+                                        // Don't have too guard against
+                                        // Math.abs(MIN_VALUE) because of outer check
+                                        // against INFLATED.
+                                        if (scale > 0 && scale < FLOAT_10_POW.length) {
+                                            return (float) unscaledVal / FLOAT_10_POW[scale];
+                                        } else if (scale < 0 && scale > -FLOAT_10_POW.length) {
+                                            return (float) unscaledVal * FLOAT_10_POW[-scale];
                                         }
                                     }
+
+                                    int len = IOUtils.stringSize(unsignedUnscaledVal);
+                                    if (doubleChars == null) {
+                                        doubleChars = new char[20];
+                                    }
+                                    IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
+                                    return FloatingDecimal.floatValue(isNegative, len - scale, doubleChars, len);
                                 } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
-                                    switch (scale) {
-                                        case 1:
-                                        case 2:
-                                        case 3:
-                                        case 4:
-                                        case 5:
-                                        case 6:
-                                        case 7:
-                                        case 8:
-                                        case 9:
-                                        case 10:
-                                            return unscaledVal / SMALL_10_POW[scale];
-                                        default: {
-                                            boolean isNegative = unscaledVal < 0;
-                                            int len = isNegative ? IOUtils.stringSize(-unscaledVal) + 1 : IOUtils.stringSize(unscaledVal);
-                                            char[] chars = new char[len];
-                                            IOUtils.getChars(unscaledVal, len, chars);
-                                            return FloatingDecimal.doubleValue(isNegative, scale, chars, len);
+                                    boolean isNegative;
+                                    long unsignedUnscaledVal;
+                                    if (unscaledVal < 0) {
+                                        isNegative = true;
+                                        unsignedUnscaledVal = -unscaledVal;
+                                    } else {
+                                        isNegative = false;
+                                        unsignedUnscaledVal = unscaledVal;
+                                    }
+
+                                    /*
+                                     * If both unscaledVal and the scale can be exactly
+                                     * represented as double values, perform a single
+                                     * double multiply or divide to compute the (properly
+                                     * rounded) result.
+                                     */
+                                    if (unscaledVal != INFLATED && unsignedUnscaledVal < 1L << 52) {
+                                        // Don't have too guard against
+                                        // Math.abs(MIN_VALUE) because of outer check
+                                        // against INFLATED.
+                                        if (scale > 0 && scale < DOUBLE_10_POW.length) {
+                                            return (double) unscaledVal / DOUBLE_10_POW[scale];
+                                        } else if (scale < 0 && scale > -DOUBLE_10_POW.length) {
+                                            return (double) unscaledVal * DOUBLE_10_POW[-scale];
                                         }
                                     }
+
+                                    int len = unsignedUnscaledVal < 10000000000000000L
+                                            ? 16
+                                            : unsignedUnscaledVal < 100000000000000000L
+                                            ? 17
+                                            : unsignedUnscaledVal < 1000000000000000000L ? 18 : 19;
+                                    if (doubleChars == null) {
+                                        doubleChars = new char[20];
+                                    }
+                                    IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
+                                    return FloatingDecimal.doubleValue(isNegative, len - scale, doubleChars, len);
                                 }
                             }
                             decimal = BigDecimal.valueOf(unscaledVal, scale);
@@ -2910,6 +2942,7 @@ public abstract class JSONReader
     public static AutoTypeBeforeHandler autoTypeFilter(String... names) {
         return new ContextAutoTypeBeforeHandler(names);
     }
+
     public static AutoTypeBeforeHandler autoTypeFilter(boolean includeBasic, String... names) {
         return new ContextAutoTypeBeforeHandler(includeBasic, names);
     }

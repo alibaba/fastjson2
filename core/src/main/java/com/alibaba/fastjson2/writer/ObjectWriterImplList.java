@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -251,6 +252,22 @@ final class ObjectWriterImplList
             }
 
             Class<?> itemClass = item.getClass();
+            if (itemClass == String.class) {
+                jsonWriter.writeString((String) item);
+                continue;
+            } else if (itemClass == Integer.class) {
+                jsonWriter.writeInt32((Integer) item);
+                continue;
+            } else if (itemClass == Long.class) {
+                jsonWriter.writeInt64((Long) item);
+                continue;
+            } else if (itemClass == Boolean.class) {
+                jsonWriter.writeBool((Boolean) item);
+                continue;
+            } else if (itemClass == BigDecimal.class) {
+                jsonWriter.writeDecimal((BigDecimal) item);
+                continue;
+            }
 
             boolean refDetect = (itemClass == this.itemClass)
                     ? this.itemClassRefDetect && jsonWriter.isRefDetect()

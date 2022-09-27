@@ -20,6 +20,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+
 public class JSONObject
         extends LinkedHashMap<String, Object>
         implements InvocationHandler {
@@ -27,6 +29,10 @@ public class JSONObject
 
     static ObjectReader<JSONArray> arrayReader;
     static ObjectWriter<JSONObject> objectWriter;
+    static final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+            | PrettyFormat.mask
+            | NotWriteEmptyArray.mask
+            | NotWriteDefaultValue.mask;
 
     /**
      * default
@@ -1050,10 +1056,16 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
+            if ((writer.context.features & NONE_DIRECT_FEATURES) == 0) {
+                writer.write(this);
+            } else {
+                writer.setRootObject(this);
+
+                if (objectWriter == null) {
+                    objectWriter = writer.getObjectWriter(JSONObject.class);
+                }
+                objectWriter.write(writer, this, null, null, 0);
             }
-            objectWriter.write(writer, this, null, null, 0);
             return writer.toString();
         }
     }
@@ -1067,10 +1079,17 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public String toString(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
+            if ((writer.context.features & NONE_DIRECT_FEATURES) == 0) {
+                writer.write(this);
+            } else {
+                writer.setRootObject(this);
+
+                if (objectWriter == null) {
+                    objectWriter = writer.getObjectWriter(JSONObject.class);
+                }
+                writer.setRootObject(this);
+                objectWriter.write(writer, this, null, null, 0);
             }
-            objectWriter.write(writer, this, null, null, 0);
             return writer.toString();
         }
     }
@@ -1864,6 +1883,7 @@ public class JSONObject
 
     /**
      * See {@link JSON#parse} for details
+     *
      * @since 2.0.13
      */
     public static JSONObject parse(String text, JSONReader.Feature... features) {

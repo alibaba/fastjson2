@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.RyuDouble;
 import com.alibaba.fastjson2.util.RyuFloat;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,6 +16,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -52,7 +55,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    protected void write0(char c) {
+    protected final void write0(char c) {
         if (off == chars.length) {
             int minCapacity = off + 1;
             int oldCapacity = chars.length;
@@ -1824,5 +1827,231 @@ class JSONWriterUTF16
     @Override
     public void writeRaw(byte[] bytes) {
         throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    public final void write(JSONObject map) {
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = '{';
+
+        boolean first = true;
+        for (Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator(); it.hasNext(); ) {
+            if (!first) {
+                if (off == chars.length) {
+                    int minCapacity = off + 1;
+                    int oldCapacity = chars.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                        throw new OutOfMemoryError();
+                    }
+
+                    // minCapacity is usually close to size, so this is a win:
+                    chars = Arrays.copyOf(chars, newCapacity);
+                }
+                chars[off++] = ',';
+            }
+
+            Map.Entry<String, Object> next = it.next();
+            Object value = next.getValue();
+            if (value == null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
+                continue;
+            }
+
+            first = false;
+            writeString(next.getKey());
+
+            if (off == chars.length) {
+                int minCapacity = off + 1;
+                int oldCapacity = chars.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
+                }
+                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    throw new OutOfMemoryError();
+                }
+
+                // minCapacity is usually close to size, so this is a win:
+                chars = Arrays.copyOf(chars, newCapacity);
+            }
+            chars[off++] = ':';
+
+            if (value == null) {
+                writeNull();
+                continue;
+            }
+
+            Class<?> valueClass = value.getClass();
+            if (valueClass == String.class) {
+                writeString((String) value);
+                continue;
+            }
+
+            if (valueClass == Integer.class) {
+                writeInt32((Integer) value);
+                continue;
+            }
+
+            if (valueClass == Long.class) {
+                writeInt64((Long) value);
+                continue;
+            }
+
+            if (valueClass == Boolean.class) {
+                writeBool((Boolean) value);
+                continue;
+            }
+
+            if (valueClass == BigDecimal.class) {
+                writeDecimal((BigDecimal) value);
+                continue;
+            }
+
+            if (valueClass == JSONArray.class) {
+                write((JSONArray) value);
+                continue;
+            }
+
+            if (valueClass == JSONObject.class) {
+                write((JSONObject) value);
+                continue;
+            }
+
+            ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+            objectWriter.write(this, value, null, null, 0);
+        }
+
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = '}';
+    }
+
+    @Override
+    public final void write(JSONArray array) {
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = '[';
+
+        boolean first = true;
+        for (int i = 0, size = array.size(); i < size; i++) {
+            if (!first) {
+                if (off == chars.length) {
+                    int minCapacity = off + 1;
+                    int oldCapacity = chars.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                        throw new OutOfMemoryError();
+                    }
+
+                    // minCapacity is usually close to size, so this is a win:
+                    chars = Arrays.copyOf(chars, newCapacity);
+                }
+                chars[off++] = ',';
+            }
+            first = false;
+            Object value = array.get(i);
+
+            if (value == null) {
+                writeNull();
+                continue;
+            }
+
+            Class<?> valueClass = value.getClass();
+            if (valueClass == String.class) {
+                writeString((String) value);
+                continue;
+            }
+
+            if (valueClass == Integer.class) {
+                writeInt32((Integer) value);
+                continue;
+            }
+
+            if (valueClass == Long.class) {
+                writeInt64((Long) value);
+                continue;
+            }
+
+            if (valueClass == Boolean.class) {
+                writeBool((Boolean) value);
+                continue;
+            }
+
+            if (valueClass == BigDecimal.class) {
+                writeDecimal((BigDecimal) value);
+                continue;
+            }
+
+            if (valueClass == JSONArray.class) {
+                write((JSONArray) value);
+                continue;
+            }
+
+            if (valueClass == JSONObject.class) {
+                write((JSONObject) value);
+                continue;
+            }
+
+            ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+            objectWriter.write(this, value, null, null, 0);
+        }
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = ']';
     }
 }
