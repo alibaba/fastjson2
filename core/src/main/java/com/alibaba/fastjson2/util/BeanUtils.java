@@ -185,6 +185,12 @@ public abstract class BeanUtils {
     }
 
     public static void fields(Class objectClass, Consumer<Field> fieldReaders) {
+        if (TypeUtils.isProxy(objectClass)) {
+            Class superclass = objectClass.getSuperclass();
+            fields(superclass, fieldReaders);
+            return;
+        }
+
         Field[] fields = fieldCache.get(objectClass);
         if (fields == null) {
             fields = objectClass.getFields();
