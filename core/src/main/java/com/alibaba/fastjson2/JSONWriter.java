@@ -1012,6 +1012,14 @@ public abstract class JSONWriter
         writeString(str);
     }
 
+    public abstract void writeDateTime14(
+            int year,
+            int month,
+            int dayOfMonth,
+            int hour,
+            int minute,
+            int second);
+
     public abstract void writeDateTime19(
             int year,
             int month,
@@ -1031,6 +1039,8 @@ public abstract class JSONWriter
             int offsetSeconds,
             boolean timeZone
     );
+
+    public abstract void writeDateYYYMMDD8(int year, int month, int dayOfMonth);
 
     public abstract void writeDateYYYMMDD10(int year, int month, int dayOfMonth);
 

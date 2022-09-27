@@ -1893,6 +1893,29 @@ final class JSONWriterJSONB
     }
 
     @Override
+    public void writeDateTime14(
+            int year,
+            int month,
+            int dayOfMonth,
+            int hour,
+            int minute,
+            int second) {
+        ensureCapacity(off + 8);
+
+        bytes[off++] = BC_LOCAL_DATETIME;
+        bytes[off++] = (byte) (year >>> 8);
+        bytes[off++] = (byte) year;
+        bytes[off++] = (byte) month;
+        bytes[off++] = (byte) dayOfMonth;
+        bytes[off++] = (byte) hour;
+        bytes[off++] = (byte) minute;
+        bytes[off++] = (byte) second;
+
+        int nano = 0;
+        writeInt32(nano);
+    }
+
+    @Override
     public void writeDateTime19(
             int year,
             int month,
@@ -1927,6 +1950,11 @@ final class JSONWriterJSONB
             int offsetSeconds,
             boolean timeZone
     ) {
+        throw new JSONException("unsupported operation");
+    }
+
+    @Override
+    public void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
         throw new JSONException("unsupported operation");
     }
 

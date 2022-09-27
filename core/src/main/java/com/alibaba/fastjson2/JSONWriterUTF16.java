@@ -1323,6 +1323,36 @@ class JSONWriterUTF16
     }
 
     @Override
+    public void writeDateTime14(
+            int year,
+            int month,
+            int dayOfMonth,
+            int hour,
+            int minute,
+            int second) {
+        ensureCapacity(off + 16);
+
+        chars[off++] = quote;
+
+        chars[off++] = (char) (year / 1000 + '0');
+        chars[off++] = (char) ((year / 100) % 10 + '0');
+        chars[off++] = (char) ((year / 10) % 10 + '0');
+        chars[off++] = (char) (year % 10 + '0');
+        chars[off++] = (char) (month / 10 + '0');
+        chars[off++] = (char) (month % 10 + '0');
+        chars[off++] = (char) (dayOfMonth / 10 + '0');
+        chars[off++] = (char) (dayOfMonth % 10 + '0');
+        chars[off++] = (char) (hour / 10 + '0');
+        chars[off++] = (char) (hour % 10 + '0');
+        chars[off++] = (char) (minute / 10 + '0');
+        chars[off++] = (char) (minute % 10 + '0');
+        chars[off++] = (char) (second / 10 + '0');
+        chars[off++] = (char) (second % 10 + '0');
+
+        chars[off++] = quote;
+    }
+
+    @Override
     public void writeDateTime19(
             int year,
             int month,
@@ -1538,6 +1568,23 @@ class JSONWriterUTF16
         }
         chars[off + len - 1] = quote;
         off += len;
+    }
+
+    @Override
+    public void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
+        ensureCapacity(off + 10);
+
+        chars[off] = quote;
+        chars[off + 1] = (char) (year / 1000 + '0');
+        chars[off + 2] = (char) ((year / 100) % 10 + '0');
+        chars[off + 3] = (char) ((year / 10) % 10 + '0');
+        chars[off + 4] = (char) (year % 10 + '0');
+        chars[off + 5] = (char) (month / 10 + '0');
+        chars[off + 6] = (char) (month % 10 + '0');
+        chars[off + 7] = (char) (dayOfMonth / 10 + '0');
+        chars[off + 8] = (char) (dayOfMonth % 10 + '0');
+        chars[off + 9] = quote;
+        off += 10;
     }
 
     @Override

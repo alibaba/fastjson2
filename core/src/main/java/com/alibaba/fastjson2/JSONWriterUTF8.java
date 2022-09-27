@@ -1368,6 +1368,36 @@ class JSONWriterUTF8
     }
 
     @Override
+    public void writeDateTime14(
+            int year,
+            int month,
+            int dayOfMonth,
+            int hour,
+            int minute,
+            int second) {
+        ensureCapacity(off + 16);
+
+        bytes[off++] = (byte) quote;
+
+        bytes[off++] = (byte) (year / 1000 + '0');
+        bytes[off++] = (byte) ((year / 100) % 10 + '0');
+        bytes[off++] = (byte) ((year / 10) % 10 + '0');
+        bytes[off++] = (byte) (year % 10 + '0');
+        bytes[off++] = (byte) (month / 10 + '0');
+        bytes[off++] = (byte) (month % 10 + '0');
+        bytes[off++] = (byte) (dayOfMonth / 10 + '0');
+        bytes[off++] = (byte) (dayOfMonth % 10 + '0');
+        bytes[off++] = (byte) (hour / 10 + '0');
+        bytes[off++] = (byte) (hour % 10 + '0');
+        bytes[off++] = (byte) (minute / 10 + '0');
+        bytes[off++] = (byte) (minute % 10 + '0');
+        bytes[off++] = (byte) (second / 10 + '0');
+        bytes[off++] = (byte) (second % 10 + '0');
+
+        bytes[off++] = (byte) quote;
+    }
+
+    @Override
     public void writeDateTime19(
             int year,
             int month,
@@ -1377,7 +1407,7 @@ class JSONWriterUTF8
             int second) {
         ensureCapacity(off + 21);
 
-        bytes[off++] = '"';
+        bytes[off++] = (byte) quote;
 
         bytes[off++] = (byte) (year / 1000 + '0');
         bytes[off++] = (byte) ((year / 100) % 10 + '0');
@@ -1399,7 +1429,7 @@ class JSONWriterUTF8
         bytes[off++] = (byte) (second / 10 + '0');
         bytes[off++] = (byte) (second % 10 + '0');
 
-        bytes[off++] = '"';
+        bytes[off++] = (byte) quote;
     }
 
     @Override
@@ -1488,6 +1518,23 @@ class JSONWriterUTF8
         bytes[off + len - 1] = (byte) quote;
 
         off += len;
+    }
+
+    @Override
+    public void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
+        ensureCapacity(off + 10);
+
+        bytes[off] = (byte) quote;
+        bytes[off + 1] = (byte) (year / 1000 + '0');
+        bytes[off + 2] = (byte) ((year / 100) % 10 + '0');
+        bytes[off + 3] = (byte) ((year / 10) % 10 + '0');
+        bytes[off + 4] = (byte) (year % 10 + '0');
+        bytes[off + 5] = (byte) (month / 10 + '0');
+        bytes[off + 6] = (byte) (month % 10 + '0');
+        bytes[off + 7] = (byte) (dayOfMonth / 10 + '0');
+        bytes[off + 8] = (byte) (dayOfMonth % 10 + '0');
+        bytes[off + 9] = (byte) quote;
+        off += 10;
     }
 
     @Override

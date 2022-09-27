@@ -15,11 +15,8 @@ final class ObjectWriterImplLocalDate
         implements ObjectWriter {
     static final ObjectWriterImplLocalDate INSTANCE = new ObjectWriterImplLocalDate(null, null);
 
-    final boolean yyyyMMdd10;
-
     public ObjectWriterImplLocalDate(String format, Locale locale) {
         super(format, locale);
-        yyyyMMdd10 = "yyyy-MM-dd".equals(format);
     }
 
     @Override
@@ -56,6 +53,14 @@ final class ObjectWriterImplLocalDate
             return;
         }
 
+        if (yyyyMMdd8) {
+            jsonWriter.writeDateYYYMMDD8(
+                    date.getYear(),
+                    date.getMonthValue(),
+                    date.getDayOfMonth());
+            return;
+        }
+
         if (yyyyMMdd10) {
             jsonWriter.writeDateYYYMMDD10(
                     date.getYear(),
@@ -81,7 +86,8 @@ final class ObjectWriterImplLocalDate
             jsonWriter.writeDateYYYMMDD10(
                     date.getYear(),
                     date.getMonthValue(),
-                    date.getDayOfMonth());
+                    date.getDayOfMonth()
+            );
             return;
         }
 

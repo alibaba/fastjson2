@@ -46,19 +46,46 @@ final class ObjectWriterImplZonedDateTime
             return;
         }
 
-        if (formatISO8601 || ctx.isDateFormatISO8601()) {
-            jsonWriter.writeDateTimeISO8601(
-                    zdt.getYear(),
-                    zdt.getMonthValue(),
-                    zdt.getDayOfMonth(),
-                    zdt.getHour(),
-                    zdt.getMinute(),
-                    zdt.getSecond(),
-                    zdt.getNano() / 1000_000,
-                    zdt.getOffset().getTotalSeconds(),
-                    true
-            );
-            return;
+        final int year = zdt.getYear();
+        if (year >= 0 && year <= 9999) {
+            if (formatISO8601 || ctx.isDateFormatISO8601()) {
+                jsonWriter.writeDateTimeISO8601(
+                        year,
+                        zdt.getMonthValue(),
+                        zdt.getDayOfMonth(),
+                        zdt.getHour(),
+                        zdt.getMinute(),
+                        zdt.getSecond(),
+                        zdt.getNano() / 1000_000,
+                        zdt.getOffset().getTotalSeconds(),
+                        true
+                );
+                return;
+            }
+
+            if (yyyyMMddhhmmss19) {
+                jsonWriter.writeDateTime19(
+                        year,
+                        zdt.getMonthValue(),
+                        zdt.getDayOfMonth(),
+                        zdt.getHour(),
+                        zdt.getMinute(),
+                        zdt.getSecond()
+                );
+                return;
+            }
+
+            if (yyyyMMddhhmmss14) {
+                jsonWriter.writeDateTime14(
+                        year,
+                        zdt.getMonthValue(),
+                        zdt.getDayOfMonth(),
+                        zdt.getHour(),
+                        zdt.getMinute(),
+                        zdt.getSecond()
+                );
+                return;
+            }
         }
 
         DateTimeFormatter formatter = this.getDateFormatter();
@@ -68,9 +95,10 @@ final class ObjectWriterImplZonedDateTime
 
         if (formatter == null) {
             jsonWriter.writeZonedDateTime(zdt);
-        } else {
-            String str = formatter.format(zdt);
-            jsonWriter.writeString(str);
+            return;
         }
+
+        String str = formatter.format(zdt);
+        jsonWriter.writeString(str);
     }
 }
