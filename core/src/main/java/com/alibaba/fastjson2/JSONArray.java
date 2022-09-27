@@ -19,6 +19,9 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONObject.NONE_DIRECT_FEATURES;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+
 public class JSONArray
         extends ArrayList<Object> {
     private static final long serialVersionUID = 1L;
@@ -880,10 +883,15 @@ public class JSONArray
     @SuppressWarnings("unchecked")
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
-            if (arrayWriter == null) {
-                arrayWriter = writer.getObjectWriter(JSONArray.class, JSONArray.class);
+            if ((writer.context.features & NONE_DIRECT_FEATURES) == 0) {
+                writer.write(this);
+            } else {
+                writer.setRootObject(this);
+                if (arrayWriter == null) {
+                    arrayWriter = writer.getObjectWriter(JSONArray.class, JSONArray.class);
+                }
+                arrayWriter.write(writer, this, null, null, 0);
             }
-            arrayWriter.write(writer, this, null, null, 0);
             return writer.toString();
         }
     }
@@ -897,10 +905,15 @@ public class JSONArray
     @SuppressWarnings("unchecked")
     public String toString(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
-            if (arrayWriter == null) {
-                arrayWriter = writer.getObjectWriter(JSONArray.class, JSONArray.class);
+            if ((writer.context.features & NONE_DIRECT_FEATURES) == 0) {
+                writer.write(this);
+            } else {
+                writer.setRootObject(this);
+                if (arrayWriter == null) {
+                    arrayWriter = writer.getObjectWriter(JSONArray.class, JSONArray.class);
+                }
+                arrayWriter.write(writer, this, null, null, 0);
             }
-            arrayWriter.write(writer, this, null, null, 0);
             return writer.toString();
         }
     }

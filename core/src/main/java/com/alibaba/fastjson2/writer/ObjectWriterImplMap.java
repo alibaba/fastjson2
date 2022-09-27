@@ -10,6 +10,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -430,6 +431,18 @@ final class ObjectWriterImplMap
             Class<?> valueType = value.getClass();
             if (valueType == String.class) {
                 jsonWriter.writeString((String) value);
+                continue;
+            } else if (valueType == Integer.class) {
+                jsonWriter.writeInt32((Integer) value);
+                continue;
+            } else if (valueType == Long.class) {
+                jsonWriter.writeInt64((Long) value);
+                continue;
+            } else if (valueType == Boolean.class) {
+                jsonWriter.writeBool((Boolean) value);
+                continue;
+            } else if (valueType == BigDecimal.class) {
+                jsonWriter.writeDecimal((BigDecimal) value);
                 continue;
             }
 

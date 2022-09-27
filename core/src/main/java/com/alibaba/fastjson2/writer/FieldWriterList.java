@@ -179,6 +179,11 @@ abstract class FieldWriterList<T>
             }
 
             Class<?> itemClass = item.getClass();
+            if (itemClass == String.class) {
+                jsonWriter.writeString((String) item);
+                continue;
+            }
+
             ObjectWriter itemObjectWriter;
             if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
