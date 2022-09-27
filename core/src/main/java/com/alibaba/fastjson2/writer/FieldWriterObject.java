@@ -92,7 +92,10 @@ abstract class FieldWriterObject<T>
                 return formattedWriter;
             } else {
                 if (initObjectWriter == null) {
-                    initObjectWriterUpdater.compareAndSet(this, null, initObjectWriter);
+                    boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
+                    if (success) {
+                        initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
+                    }
                 }
                 return formattedWriter;
             }

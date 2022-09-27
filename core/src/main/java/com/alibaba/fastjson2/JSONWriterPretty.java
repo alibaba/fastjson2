@@ -88,6 +88,11 @@ final class JSONWriterPretty
     }
 
     @Override
+    public void writeDateTime14(int year, int month, int dayOfMonth, int hour, int minute, int second) {
+        jsonWriter.writeDateTime14(year, month, dayOfMonth, hour, minute, second);
+    }
+
+    @Override
     public void writeDateTime19(int year, int month, int dayOfMonth, int hour, int minute, int second) {
         jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
     }
@@ -105,6 +110,11 @@ final class JSONWriterPretty
             boolean timeZone
     ) {
         jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, timeZone);
+    }
+
+    @Override
+    public void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
+        jsonWriter.writeDateYYYMMDD8(year, month, dayOfMonth);
     }
 
     @Override
