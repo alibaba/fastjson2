@@ -19,6 +19,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteDefaultValue;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class JSONWriter
@@ -1047,6 +1049,22 @@ public abstract class JSONWriter
     public abstract void writeTimeHHMMSS8(int hour, int minute, int second);
 
     public void write(List array) {
+        if (array == null) {
+            this.writeArrayNull();
+            return;
+        }
+
+        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+                | PrettyFormat.mask
+                | NotWriteEmptyArray.mask
+                | NotWriteDefaultValue.mask;
+
+        if ((context.features & NONE_DIRECT_FEATURES) != 0) {
+            ObjectWriter objectWriter = context.getObjectWriter(array.getClass());
+            objectWriter.write(this, array, null, null, 0);
+            return;
+        }
+
         write0('[');
         for (int i = 0; i < array.size(); i++) {
             Object item = array.get(i);
@@ -1059,6 +1077,22 @@ public abstract class JSONWriter
     }
 
     public void write(Map map) {
+        if (map == null) {
+            this.writeNull();
+            return;
+        }
+
+        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+                | PrettyFormat.mask
+                | NotWriteEmptyArray.mask
+                | NotWriteDefaultValue.mask;
+
+        if ((context.features & NONE_DIRECT_FEATURES) != 0) {
+            ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
+            objectWriter.write(this, map, null, null, 0);
+            return;
+        }
+
         write0('{');
         boolean first = true;
         for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
@@ -1076,10 +1110,6 @@ public abstract class JSONWriter
             first = false;
         }
         write0('}');
-    }
-
-    public void write(JSONArray array) {
-        write((List) array);
     }
 
     public void write(JSONObject map) {

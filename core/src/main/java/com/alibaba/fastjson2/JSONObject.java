@@ -1056,16 +1056,8 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
-            if ((writer.context.features & NONE_DIRECT_FEATURES) == 0) {
-                writer.write(this);
-            } else {
-                writer.setRootObject(this);
-
-                if (objectWriter == null) {
-                    objectWriter = writer.getObjectWriter(JSONObject.class);
-                }
-                objectWriter.write(writer, this, null, null, 0);
-            }
+            writer.setRootObject(this);
+            writer.write(this);
             return writer.toString();
         }
     }
@@ -1079,17 +1071,8 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public String toString(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
-            if ((writer.context.features & NONE_DIRECT_FEATURES) == 0) {
-                writer.write(this);
-            } else {
-                writer.setRootObject(this);
-
-                if (objectWriter == null) {
-                    objectWriter = writer.getObjectWriter(JSONObject.class);
-                }
-                writer.setRootObject(this);
-                objectWriter.write(writer, this, null, null, 0);
-            }
+            writer.setRootObject(this);
+            writer.write(this);
             return writer.toString();
         }
     }
@@ -1124,10 +1107,8 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public byte[] toJSONBBytes(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
-            }
-            objectWriter.write(writer, this, null, null, 0);
+            writer.setRootObject(this);
+            writer.write(this);
             return writer.getBytes();
         }
     }
