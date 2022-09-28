@@ -10,4 +10,6 @@ public interface JSONLexer {
     int VALUE = 3;
     int END = 4;
     int VALUE_NULL = 5;
+
+    com.alibaba.fastjson2.JSONReader getReader();
 }
