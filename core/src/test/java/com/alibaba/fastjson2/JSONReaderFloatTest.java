@@ -647,8 +647,14 @@ public class JSONReaderFloatTest {
             assertEquals(37.808631474146033D, array.getDouble(3));
             assertEquals(-122.420825939371D, array.getDouble(4));
         }
-//        String str = "-122.422003528252475";
-//        char[] chars = str.toCharArray();
-//        FloatingDecimal.parseDouble(chars, 0, chars.length);
+        {
+            String str = "[-122.422003528252475, 37.808480096967251,-122.42082593937107, 37.808631474146033,-122.420825939371]";
+            JSONArray array = JSON.parseArray(str, JSONReader.Feature.UseBigDecimalForFloats);
+            assertEquals(-122.422003528252475F, array.getDouble(0));
+            assertEquals(37.808480096967251F, array.getDouble(1));
+            assertEquals(-122.42082593937107F, array.getDouble(2));
+            assertEquals(37.808631474146033F, array.getDouble(3));
+            assertEquals(-122.420825939371F, array.getDouble(4));
+        }
     }
 }
