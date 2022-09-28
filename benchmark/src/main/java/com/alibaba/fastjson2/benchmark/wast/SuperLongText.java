@@ -21,9 +21,8 @@ import java.util.zip.ZipInputStream;
  * 超文本解析测试（180MB）
  * <p>文件下载地址： https://codeload.github.com/zemirco/sf-city-lots-json/zip/refs/heads/master
  *
- * @Author: wangy
- * @Date: 2022/6/3 8:56
- * @Description:
+ * author wangy
+ * 2022/6/3 8:56
  */
 public class SuperLongText {
     private static String result;

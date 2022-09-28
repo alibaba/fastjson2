@@ -14,9 +14,8 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Author: wangy
- * @Date: 2022/6/30 21:18
- * @Description:
+ * @author wangy
+ * 2022/6/30 21:18
  */
 public class EishayWriterCase {
     static String result = "{\"images\":[{\"height\":768,\"size\":\"LARGE\",\"title\":\"Javaone Keynote\",\"uri\":\"http://javaone.com/keynote_large.jpg\",\"width\":1024},{\"height\":240,\"size\":\"SMALL\",\"title\":\"Javaone Keynote\",\"uri\":\"http://javaone.com/keynote_small.jpg\",\"width\":320}],\"media\":{\"bitrate\":262144,\"duration\":18000000,\"format\":\"video/mpg4\",\"height\":480,\"persons\":[\"Bill Gates\",\"Steve Jobs\"],\"player\":\"JAVA\",\"size\":58982400,\"title\":\"Javaone Keynote\",\"uri\":\"http://javaone.com/keynote.mpg\",\"width\":640}}";

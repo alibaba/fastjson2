@@ -17,9 +17,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Author: wangy
- * @Date: 2022/1/15 23:17
- * @Description:
+ * @author wangy
+ * 2022/1/15 23:17
  */
 public class SimpleBeanWriteCase {
     private static String result;
