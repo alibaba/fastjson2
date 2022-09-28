@@ -14,8 +14,7 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
-import java.util.Arrays;
-import java.util.UUID;
+import java.util.*;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.CACHE_SIZE;
@@ -1996,6 +1995,53 @@ final class JSONWriterJSONB
     @Override
     public void writeColon() {
         throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    public void write(List array) {
+        if (array == null) {
+            writeArrayNull();
+            return;
+        }
+
+        final int size = array.size();
+        startArray(size);
+        for (int i = 0; i < size; i++) {
+            Object item = array.get(i);
+            writeAny(item);
+        }
+    }
+
+    @Override
+    public void write(Map map) {
+        if (map == null) {
+            writeNull();
+            return;
+        }
+
+        startObject();
+        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
+            Map.Entry entry = it.next();
+            writeAny(entry.getKey());
+            writeAny(entry.getValue());
+        }
+        endObject();
+    }
+
+    @Override
+    public void write(JSONObject object) {
+        if (object == null) {
+            writeNull();
+            return;
+        }
+
+        startObject();
+        for (Iterator<Map.Entry<String, Object>> it = object.entrySet().iterator(); it.hasNext();) {
+            Map.Entry entry = it.next();
+            writeAny(entry.getKey());
+            writeAny(entry.getValue());
+        }
+        endObject();
     }
 
     @Override

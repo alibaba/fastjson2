@@ -776,4 +776,123 @@ public class JSONWriterTest {
             }
         }
     }
+
+    @Test
+    public void writeList1() {
+        JSONArray array = JSONArray.of(1, 2, 3);
+        String result = "[1,2,3]";
+        String prettyResult = "[\n" +
+                "\t1,\n" +
+                "\t2,\n" +
+                "\t3\n" +
+                "]";
+
+        assertEquals(result, array.toString());
+        assertEquals(prettyResult, array.toString(PrettyFormat));
+        assertEquals(prettyResult, JSONB.toJSONString(array.toJSONBBytes()));
+
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.write(array);
+            assertEquals(result, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.write(array);
+            assertEquals(result, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16(PrettyFormat);
+            jsonWriter.write(array);
+            assertEquals(prettyResult, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
+            jsonWriter.write(array);
+            assertEquals(prettyResult, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofJSONB();
+            jsonWriter.write(array);
+            byte[] jsonbBytes = jsonWriter.getBytes();
+            assertEquals(prettyResult, JSONB.toJSONString(jsonbBytes));
+        }
+    }
+
+    @Test
+    public void writeObject1() {
+        JSONObject object = JSONObject.of("id", 123);
+        String result = "{\"id\":123}";
+        String prettyResult = "{\n" +
+                "\t\"id\":123\n" +
+                "}";
+        assertEquals(result, object.toString());
+        assertEquals(prettyResult, object.toString(PrettyFormat));
+
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.write(object);
+            assertEquals(result, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.write(object);
+            assertEquals(result, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16(PrettyFormat);
+            jsonWriter.write(object);
+            assertEquals(prettyResult, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
+            jsonWriter.write(object);
+            assertEquals(prettyResult, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofJSONB();
+            jsonWriter.write(object);
+            byte[] jsonbBytes = jsonWriter.getBytes();
+            assertEquals(prettyResult, JSONB.toJSONString(jsonbBytes));
+        }
+    }
+
+    @Test
+    public void writeObject2() {
+        JSONObject object = JSONObject.of("id", 123, "name", "DataWorks");
+        String result = "{\"id\":123,\"name\":\"DataWorks\"}";
+        String prettyResult = "{\n" +
+                "\t\"id\":123,\n" +
+                "\t\"name\":\"DataWorks\"\n" +
+                "}";
+        assertEquals(result, object.toString());
+        assertEquals(prettyResult, object.toString(PrettyFormat));
+
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.write(object);
+            assertEquals(result, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.write(object);
+            assertEquals(result, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16(PrettyFormat);
+            jsonWriter.write(object);
+            assertEquals(prettyResult, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8(PrettyFormat);
+            jsonWriter.write(object);
+            assertEquals(prettyResult, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofJSONB();
+            jsonWriter.write(object);
+            byte[] jsonbBytes = jsonWriter.getBytes();
+            assertEquals(prettyResult, JSONB.toJSONString(jsonbBytes));
+        }
+    }
 }

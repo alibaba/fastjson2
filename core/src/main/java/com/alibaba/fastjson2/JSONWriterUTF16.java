@@ -15,12 +15,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteDefaultValue;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 
 class JSONWriterUTF16
@@ -1831,6 +1830,22 @@ class JSONWriterUTF16
 
     @Override
     public final void write(JSONObject map) {
+        if (map == null) {
+            this.writeNull();
+            return;
+        }
+
+        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+                | PrettyFormat.mask
+                | NotWriteEmptyArray.mask
+                | NotWriteDefaultValue.mask;
+
+        if ((context.features & NONE_DIRECT_FEATURES) != 0) {
+            ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
+            objectWriter.write(this, map, null, null, 0);
+            return;
+        }
+
         if (off == chars.length) {
             int minCapacity = off + 1;
             int oldCapacity = chars.length;
@@ -1955,7 +1970,23 @@ class JSONWriterUTF16
     }
 
     @Override
-    public final void write(JSONArray array) {
+    public final void write(List array) {
+        if (array == null) {
+            this.writeArrayNull();
+            return;
+        }
+
+        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+                | PrettyFormat.mask
+                | NotWriteEmptyArray.mask
+                | NotWriteDefaultValue.mask;
+
+        if ((context.features & NONE_DIRECT_FEATURES) != 0) {
+            ObjectWriter objectWriter = context.getObjectWriter(array.getClass());
+            objectWriter.write(this, array, null, null, 0);
+            return;
+        }
+
         if (off == chars.length) {
             int minCapacity = off + 1;
             int oldCapacity = chars.length;
