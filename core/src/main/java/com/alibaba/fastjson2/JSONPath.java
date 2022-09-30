@@ -2979,6 +2979,52 @@ public abstract class JSONPath {
         }
     }
 
+    static final class EntrySetSegment
+            extends Segment
+            implements EvalSegment {
+        static final EntrySetSegment INSTANCE = new EntrySetSegment();
+
+        @Override
+        public void accept(JSONReader jsonReader, Context context) {
+            if (jsonReader.isObject()) {
+                jsonReader.next();
+                JSONArray array = new JSONArray();
+                while (!jsonReader.nextIfObjectEnd()) {
+                    String fieldName = jsonReader.readFieldName();
+                    Object value = jsonReader.readAny();
+                    array.add(
+                            JSONObject.of("key", fieldName, "value", value)
+                    );
+                }
+                context.value = array;
+                return;
+            }
+            throw new JSONException("TODO");
+        }
+
+        @Override
+        public void eval(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+            if (object instanceof Map) {
+                Map map = (Map) object;
+                JSONArray array = new JSONArray(map.size());
+                for (Iterator<Map.Entry> it = ((Map) object).entrySet().iterator(); it.hasNext();) {
+                    Map.Entry entry = it.next();
+                    array.add(
+                            JSONObject.of("key", entry.getKey(), "value", entry.getValue())
+                    );
+                }
+                context.value = array;
+                context.eval = true;
+                return;
+            }
+
+            throw new JSONException("TODO");
+        }
+    }
+
     static final class KeysSegment
             extends Segment
             implements EvalSegment {
@@ -6354,6 +6400,9 @@ public abstract class JSONPath {
                                 break;
                             case "values":
                                 segment = ValuesSegment.INSTANCE;
+                                break;
+                            case "entrySet":
+                                segment = EntrySetSegment.INSTANCE;
                                 break;
                             case "min":
                                 segment = MinSegment.INSTANCE;
