@@ -25,6 +25,18 @@ public class ObjectReaders {
         return ObjectReaderCreator.INSTANCE.createObjectReader(objectClass, defaultCreator, fieldReaders);
     }
 
+    public static <T> ObjectReader<T> ofString(Function<String, T> function) {
+        return new ObjectReaderImplFromString<>(null, function);
+    }
+
+    public static <T> ObjectReader<T> ofInt(IntFunction<T> function) {
+        return new ObjectReaderImplFromInt<>(null, function);
+    }
+
+    public static <T> ObjectReader<T> ofLong(LongFunction<T> function) {
+        return new ObjectReaderImplFromLong<>(null, function);
+    }
+
     public static <T> ObjectReader<T> objectReader(
             Class<T> objectClass,
             Supplier<T> defaultCreator,
