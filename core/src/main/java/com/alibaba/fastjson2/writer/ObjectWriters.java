@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.ToByteFunction;
 import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.function.ToShortFunction;
@@ -34,6 +35,52 @@ public class ObjectWriters {
 
     public static ObjectWriter objectWriter(FieldWriter... fieldWriters) {
         return INSTANCE.createObjectWriter(fieldWriters);
+    }
+
+    public static <T> ObjectWriter ofToString(Function<T, String> function) {
+        return INSTANCE.createObjectWriter(
+                INSTANCE.createFieldWriter(
+                        null,
+                        null,
+                        "toString",
+                        0,
+                        FieldInfo.VALUE_MASK,
+                        null,
+                        null,
+                        String.class,
+                        String.class,
+                        null,
+                        function
+                )
+        );
+    }
+
+    public static <T> ObjectWriter ofToInt(ToIntFunction function) {
+        return INSTANCE.createObjectWriter(
+                new FieldWriterInt32ValFunc(
+                        "toInt",
+                        0,
+                        FieldInfo.VALUE_MASK,
+                        null,
+                        null,
+                        null,
+                        function
+                )
+        );
+    }
+
+    public static <T> ObjectWriter ofToLong(ToLongFunction function) {
+        return INSTANCE.createObjectWriter(
+                new FieldWriterInt64ValFunc(
+                        "toLong",
+                        0,
+                        FieldInfo.VALUE_MASK,
+                        null,
+                        null,
+                        null,
+                        function
+                )
+        );
     }
 
     public static <T> FieldWriter fieldWriter(String fieldName, ToLongFunction<T> function) {
