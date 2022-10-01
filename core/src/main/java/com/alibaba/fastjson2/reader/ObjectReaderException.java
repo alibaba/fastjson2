@@ -29,7 +29,6 @@ public class ObjectReaderException<T>
     private Constructor constructor0;
     private Constructor constructor1;
     private Constructor constructor2;
-    static final Object PARENT_REFERENCE = new Object();
 
     protected ObjectReaderException(Class<T> objectClass) {
         this(

@@ -727,8 +727,9 @@ public class ObjectReaderCreator {
             Constructor constructor1 = null, constructor2 = null;
 
             for (int i = alternateConstructors.size() - 1; i >= 0; i--) {
-                Constructor item = alternateConstructors.get(0);
-                if (item.getParameterCount() == 1 && item.getParameterTypes()[0] == String.class) {
+                Constructor item = alternateConstructors.get(i);
+                if (item.getParameterCount() == 1
+                        && item.getParameterTypes()[0] == String.class) {
                     constructor1 = item;
                 } else if (item.getParameterCount() == 2
                         && item.getParameterTypes()[0] == String.class
@@ -738,8 +739,9 @@ public class ObjectReaderCreator {
                 }
             }
 
-            if (creatorConstructor != null) {
-                if (creatorConstructor.getParameterCount() == 1 && creatorConstructor.getParameterTypes()[0] == String.class) {
+            if (creatorConstructor != null && constructor2 == null) {
+                if (creatorConstructor.getParameterCount() == 1
+                        && creatorConstructor.getParameterTypes()[0] == String.class) {
                     constructor1 = creatorConstructor;
                 } else if (creatorConstructor.getParameterCount() == 2
                         && creatorConstructor.getParameterTypes()[0] == String.class
