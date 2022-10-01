@@ -15,7 +15,7 @@ public class NonDefaulConstructorTest {
     @Test
     public void testBuild() throws Exception {
         ObjectReaderCreator creator = TestUtils.READER_CREATOR;
-        ObjectReader<VO> objectReader = creator.createObjectReaderNoneDefaultConstrutor(
+        ObjectReader<VO> objectReader = creator.createObjectReaderNoneDefaultConstructor(
                 VO.class.getConstructor(int.class, String.class), "id", "name"
         );
         {

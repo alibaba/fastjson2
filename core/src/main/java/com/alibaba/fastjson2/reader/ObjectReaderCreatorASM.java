@@ -270,7 +270,7 @@ public class ObjectReaderCreatorASM
             if (JVM_VERSION >= 9 && objectClass == StackTraceElement.class) {
                 try {
                     Constructor<StackTraceElement> constructor = StackTraceElement.class.getConstructor(String.class, String.class, String.class, String.class, String.class, String.class, int.class);
-                    return createObjectReaderNoneDefaultConstrutor(constructor, "", "classLoaderName", "moduleName", "moduleVersion", "declaringClass", "methodName", "fileName", "lineNumber");
+                    return createObjectReaderNoneDefaultConstructor(constructor, "", "classLoaderName", "moduleName", "moduleVersion", "declaringClass", "methodName", "fileName", "lineNumber");
                 } catch (NoSuchMethodException | SecurityException ignored) {
                 }
             }

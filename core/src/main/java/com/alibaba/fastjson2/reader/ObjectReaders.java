@@ -56,7 +56,7 @@ public class ObjectReaders {
     public static <T> ObjectReader<T> createObjectReader(
             Function<Map<Long, Object>, T> creator,
             FieldReader... fieldReaders) {
-        return ObjectReaderCreator.INSTANCE.createObjectReaderNoneDefaultConstrutor(null, creator, fieldReaders);
+        return ObjectReaderCreator.INSTANCE.createObjectReaderNoneDefaultConstructor(null, creator, fieldReaders);
     }
 
     public static <T, U, R> ObjectReader<T> createObjectReader(BiFunction<T, U, R> function, FieldReader first, FieldReader second) {

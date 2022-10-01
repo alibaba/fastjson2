@@ -1661,7 +1661,7 @@ public class ObjectReaderBaseModule
                             int.class);
 
                     return creator
-                            .createObjectReaderNoneDefaultConstrutor(
+                            .createObjectReaderNoneDefaultConstructor(
                                     constructor,
                                     "className",
                                     "methodName",
