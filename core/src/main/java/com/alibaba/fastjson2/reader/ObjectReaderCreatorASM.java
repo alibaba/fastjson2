@@ -257,11 +257,7 @@ public class ObjectReaderCreatorASM
             return createObjectReaderWithBuilder(objectClass, modules, beanInfo);
         }
 
-        if ((!fieldBased) && Throwable.class.isAssignableFrom(objectClass)) {
-            return super.createObjectReader(objectClass, objectType, fieldBased, modules);
-        }
-
-        if (fieldBased && JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
+        if (Throwable.class.isAssignableFrom(objectClass)) {
             return super.createObjectReader(objectClass, objectType, fieldBased, modules);
         }
 
