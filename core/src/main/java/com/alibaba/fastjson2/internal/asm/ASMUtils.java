@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -135,6 +136,24 @@ public class ASMUtils {
     }
 
     public static String[] lookupParameterNames(AccessibleObject methodOrCtor) {
+        if (methodOrCtor instanceof Constructor) {
+            Constructor constructor = (Constructor) methodOrCtor;
+            Class[] parameterTypes = constructor.getParameterTypes();
+
+            Class declaringClass = constructor.getDeclaringClass();
+            if (declaringClass == DateTimeParseException.class) {
+                if (parameterTypes.length == 3) {
+                    if (parameterTypes[0] == String.class && parameterTypes[1] == CharSequence.class && parameterTypes[2] == int.class) {
+                        return new String[]{"message", "parsedString", "errorIndex"};
+                    }
+                } else if (parameterTypes.length == 4) {
+                    if (parameterTypes[0] == String.class && parameterTypes[1] == CharSequence.class && parameterTypes[2] == int.class && parameterTypes[3] == Throwable.class) {
+                        return new String[]{"message", "parsedString", "errorIndex", "cause"};
+                    }
+                }
+            }
+        }
+
         final Class<?>[] types;
         final Class<?> declaringClass;
         final String name;

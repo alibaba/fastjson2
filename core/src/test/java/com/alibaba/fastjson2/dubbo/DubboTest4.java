@@ -5,25 +5,34 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
+import java.time.format.DateTimeParseException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class DubboTest4 {
+    static final JSONWriter.Feature[] writerFeatures = {
+            JSONWriter.Feature.WriteClassName,
+            JSONWriter.Feature.FieldBased,
+            JSONWriter.Feature.ReferenceDetection,
+            JSONWriter.Feature.WriteNulls,
+            JSONWriter.Feature.NotWriteDefaultValue,
+            JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+            JSONWriter.Feature.WriteNameAsSymbol
+    };
+
+    static final JSONReader.Feature[] readerFeatures = {
+            JSONReader.Feature.SupportAutoType,
+            JSONReader.Feature.UseDefaultConstructorAsPossible,
+            JSONReader.Feature.UseNativeObject,
+            JSONReader.Feature.FieldBased
+    };
+
     @Test
     public void test0() {
         MyException ex = new MyException();
-        byte[] jsonbBytes = JSONB.toBytes(ex, JSONWriter.Feature.WriteClassName,
-                JSONWriter.Feature.FieldBased,
-                JSONWriter.Feature.ReferenceDetection,
-                JSONWriter.Feature.WriteNulls,
-                JSONWriter.Feature.NotWriteDefaultValue,
-                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                JSONWriter.Feature.WriteNameAsSymbol);
-        MyException obj = (MyException) JSONB.parseObject(jsonbBytes,
-                Object.class, JSONReader.Feature.SupportAutoType,
-                JSONReader.Feature.UseDefaultConstructorAsPossible,
-                JSONReader.Feature.UseNativeObject,
-                JSONReader.Feature.FieldBased);
+        byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
+        MyException obj = (MyException) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
         assertNull(obj.getMessage());
     }
 
@@ -31,18 +40,8 @@ public class DubboTest4 {
     public void test1() {
         String message = "hello world";
         MyException1 ex = new MyException1(message);
-        byte[] jsonbBytes = JSONB.toBytes(ex, JSONWriter.Feature.WriteClassName,
-                JSONWriter.Feature.FieldBased,
-                JSONWriter.Feature.ReferenceDetection,
-                JSONWriter.Feature.WriteNulls,
-                JSONWriter.Feature.NotWriteDefaultValue,
-                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                JSONWriter.Feature.WriteNameAsSymbol);
-        MyException1 obj = (MyException1) JSONB.parseObject(jsonbBytes,
-                Object.class, JSONReader.Feature.SupportAutoType,
-                JSONReader.Feature.UseDefaultConstructorAsPossible,
-                JSONReader.Feature.UseNativeObject,
-                JSONReader.Feature.FieldBased);
+        byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
+        MyException1 obj = (MyException1) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
         assertEquals(message, obj.getMessage());
     }
 
@@ -52,18 +51,8 @@ public class DubboTest4 {
         String message2 = "message2";
         MyException1 ex1 = new MyException1(message1);
         MyException2 ex = new MyException2(message2, ex1);
-        byte[] jsonbBytes = JSONB.toBytes(ex, JSONWriter.Feature.WriteClassName,
-                JSONWriter.Feature.FieldBased,
-                JSONWriter.Feature.ReferenceDetection,
-                JSONWriter.Feature.WriteNulls,
-                JSONWriter.Feature.NotWriteDefaultValue,
-                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                JSONWriter.Feature.WriteNameAsSymbol);
-        MyException2 obj = (MyException2) JSONB.parseObject(jsonbBytes,
-                Object.class, JSONReader.Feature.SupportAutoType,
-                JSONReader.Feature.UseDefaultConstructorAsPossible,
-                JSONReader.Feature.UseNativeObject,
-                JSONReader.Feature.FieldBased);
+        byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
+        MyException2 obj = (MyException2) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
         assertEquals(message2, obj.getMessage());
         assertEquals(message1, obj.getCause().getMessage());
     }
@@ -72,18 +61,9 @@ public class DubboTest4 {
     public void test3() {
         String message = "hello world";
         MyException3 ex = new MyException3(message, null);
-        byte[] jsonbBytes = JSONB.toBytes(ex, JSONWriter.Feature.WriteClassName,
-                JSONWriter.Feature.FieldBased,
-                JSONWriter.Feature.ReferenceDetection,
-                JSONWriter.Feature.WriteNulls,
-                JSONWriter.Feature.NotWriteDefaultValue,
-                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                JSONWriter.Feature.WriteNameAsSymbol);
+        byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
         MyException3 obj = (MyException3) JSONB.parseObject(jsonbBytes,
-                Object.class, JSONReader.Feature.SupportAutoType,
-                JSONReader.Feature.UseDefaultConstructorAsPossible,
-                JSONReader.Feature.UseNativeObject,
-                JSONReader.Feature.FieldBased);
+                Object.class, readerFeatures);
         assertEquals(message, obj.getMessage());
     }
 
@@ -133,19 +113,8 @@ public class DubboTest4 {
         MyException4 ex = new MyException4(message);
         ex.setCode(101);
 
-        byte[] jsonbBytes = JSONB.toBytes(ex, JSONWriter.Feature.WriteClassName,
-                JSONWriter.Feature.FieldBased,
-                JSONWriter.Feature.ReferenceDetection,
-                JSONWriter.Feature.WriteNulls,
-                JSONWriter.Feature.NotWriteDefaultValue,
-                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                JSONWriter.Feature.WriteNameAsSymbol);
-
-        MyException4 obj = (MyException4) JSONB.parseObject(jsonbBytes,
-                Object.class, JSONReader.Feature.SupportAutoType,
-                JSONReader.Feature.UseDefaultConstructorAsPossible,
-                JSONReader.Feature.UseNativeObject,
-                JSONReader.Feature.FieldBased);
+        byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
+        MyException4 obj = (MyException4) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
 
         assertEquals(message, obj.getMessage());
         assertEquals(ex.code, obj.code);
@@ -209,5 +178,36 @@ public class DubboTest4 {
                     "code=" + code +
                     '}';
         }
+    }
+
+    @Test
+    public void test5() {
+        MyException5 ex = new MyException5(101);
+
+        byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
+        MyException5 ex1 = (MyException5) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
+
+        assertEquals(ex.getMessage(), ex1.getMessage());
+        assertEquals(ex.code, ex1.code);
+    }
+
+    public static class MyException5
+            extends Exception {
+        private final long code;
+
+        public MyException5(long code) {
+            this.code = code;
+        }
+    }
+
+    @Test
+    public void testDateTimeParseException() {
+        DateTimeParseException ex = new DateTimeParseException("msg", "input", 0);
+
+        byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
+        DateTimeParseException ex1 = (DateTimeParseException) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
+
+        assertEquals(ex.getMessage(), ex1.getMessage());
+        assertEquals(ex.getErrorIndex(), ex1.getErrorIndex());
     }
 }

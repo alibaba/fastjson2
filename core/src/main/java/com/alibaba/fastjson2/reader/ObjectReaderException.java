@@ -4,16 +4,15 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.internal.asm.ASMUtils;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ObjectReaderException<T>
         extends ObjectReaderAdapter<T> {
@@ -26,28 +25,75 @@ public class ObjectReaderException<T>
     static final long HASH_SUPPRESSED_EXCEPTIONS = Fnv.hashCode64("suppressedExceptions");
 
     private FieldReader fieldReaderStackTrace;
-    private Constructor constructor0;
-    private Constructor constructor1;
-    private Constructor constructor2;
+    final List<Constructor> constructors;
+    final Constructor constructor0;
+    final Constructor constructor1;
+    final Constructor constructor2;
+    final List<String[]> constructorParameters;
 
     protected ObjectReaderException(Class<T> objectClass) {
         this(
                 objectClass,
-                null,
-                null,
-                null,
+                Arrays.asList(BeanUtils.getConstructor(objectClass)),
                 ObjectReaders.fieldReader("stackTrace", StackTraceElement[].class, Throwable::setStackTrace)
         );
     }
 
     protected ObjectReaderException(
             Class<T> objectClass,
-            Constructor constructor0,
-            Constructor constructor1,
-            Constructor constructor2,
+            List<Constructor> constructors,
             FieldReader... fieldReaders
     ) {
         super(objectClass, null, objectClass.getName(), 0, null, null, null, fieldReaders);
+        this.constructors = constructors;
+
+        Constructor constructor0 = null, constructor1 = null, constructor2 = null;
+
+        for (Constructor constructor : constructors) {
+            if (constructor != null && constructor2 == null) {
+                int paramCount = constructor.getParameterCount();
+
+                if (paramCount == 0) {
+                    constructor0 = constructor;
+                    continue;
+                }
+
+                if (paramCount == 1
+                        && constructor.getParameterTypes()[0] == String.class) {
+                    constructor1 = constructor;
+                }
+
+                if (paramCount == 2
+                        && constructor.getParameterTypes()[0] == String.class
+                        && constructor.getParameterTypes()[1] == Throwable.class
+                ) {
+                    constructor2 = constructor;
+                }
+            }
+        }
+
+        constructors.sort((Constructor left, Constructor right) -> {
+            int x = left.getParameterCount();
+            int y = right.getParameterCount();
+            if (x < y) {
+                return 1;
+            }
+            if (x > y) {
+                return -1;
+            }
+            return 0;
+        });
+
+        constructorParameters = new ArrayList<>(constructors.size());
+        for (Constructor constructor : constructors) {
+            int paramCount = constructor.getParameterCount();
+            String[] parameterNames = null;
+            if (paramCount > 0) {
+                parameterNames = ASMUtils.lookupParameterNames(constructor);
+            }
+            constructorParameters.add(parameterNames);
+        }
+
         this.constructor0 = constructor0;
         this.constructor1 = constructor1;
         this.constructor2 = constructor2;
@@ -162,6 +208,66 @@ public class ObjectReaderException<T>
         }
 
         Throwable object = createObject(message, cause);
+
+        if (object == null) {
+            for (int i = 0; i < constructors.size(); i++) {
+                String[] paramNames = constructorParameters.get(i);
+                if (paramNames == null || paramNames.length == 0) {
+                    continue;
+                }
+
+                boolean matchAll = true;
+                for (int j = 0; j < paramNames.length; j++) {
+                    String paramName = paramNames[j];
+
+                    if (paramName == null) {
+                        matchAll = false;
+                        break;
+                    }
+
+                    switch (paramName) {
+                        case "message":
+                        case "cause":
+                            break;
+                        default:
+                            if (!fieldValues.containsKey(paramName)) {
+                                matchAll = false;
+                            }
+                            break;
+                    }
+                }
+
+                if (!matchAll) {
+                    continue;
+                }
+
+                Object[] args = new Object[paramNames.length];
+                for (int j = 0; j < paramNames.length; j++) {
+                    String paramName = paramNames[j];
+                    Object fieldValue;
+                    switch (paramName) {
+                        case "message":
+                            fieldValue = message;
+                            break;
+                        case "cause":
+                            fieldValue = cause;
+                            break;
+                        default:
+                            fieldValue = fieldValues.get(paramName);
+                            break;
+                    }
+                    args[j] = fieldValue;
+                }
+
+                Constructor constructor = constructors.get(i);
+                try {
+                    object = (Throwable) constructor.newInstance(args);
+                    break;
+                } catch (Throwable e) {
+                    throw new JSONException("create error, objectClass " + constructor + ", " + e.getMessage(), e);
+                }
+            }
+        }
 
         if (object == null) {
             throw new JSONException(jsonReader.info(jsonReader.info("not support : " + objectClass.getName())));

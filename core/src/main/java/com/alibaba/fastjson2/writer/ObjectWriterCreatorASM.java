@@ -2714,8 +2714,10 @@ public class ObjectWriterCreatorASM
             ObjectWriter initObjectWriter
     ) {
         Class<?> declaringClass = field.getDeclaringClass();
-        if (!declaringClass.getName().startsWith("java.lang")) {
-            field.setAccessible(true);
+        if (Throwable.class.isAssignableFrom(declaringClass)
+                || declaringClass.getName().startsWith("java.lang")
+        ) {
+            return super.createFieldWriter(provider, fieldName, ordinal, features, format, label, field, initObjectWriter);
         }
 
         Class<?> fieldClass = field.getType();
