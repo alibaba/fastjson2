@@ -587,7 +587,7 @@ public class TypeUtils {
             return Long.parseLong(str);
         }
 
-        throw new JSONException("can not cast to long");
+        throw new JSONException("can not cast to long from " + value.getClass());
     }
 
     public static Integer toInteger(Object value) {

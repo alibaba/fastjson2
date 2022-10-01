@@ -8,30 +8,70 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class ObjectReaderException<T>
-        extends ObjectReaderBean<T> {
+        extends ObjectReaderAdapter<T> {
     static final long HASH_TYPE = Fnv.hashCode64("@type");
     static final long HASH_MESSAGE = Fnv.hashCode64("message");
     static final long HASH_DETAIL_MESSAGE = Fnv.hashCode64("detailMessage");
+    static final long HASH_LOCALIZED_MESSAGE = Fnv.hashCode64("localizedMessage");
     static final long HASH_CAUSE = Fnv.hashCode64("cause");
     static final long HASH_STACKTRACE = Fnv.hashCode64("stackTrace");
     static final long HASH_SUPPRESSED_EXCEPTIONS = Fnv.hashCode64("suppressedExceptions");
 
     private FieldReader fieldReaderStackTrace;
+    private Constructor constructor0;
+    private Constructor constructor1;
+    private Constructor constructor2;
+    static final Object PARENT_REFERENCE = new Object();
 
     protected ObjectReaderException(Class<T> objectClass) {
-        super(objectClass, null, objectClass.getName(), 0, null, null);
-        fieldReaderStackTrace = ObjectReaders.fieldReader("stackTrace", StackTraceElement[].class, Throwable::setStackTrace);
+        this(
+                objectClass,
+                null,
+                null,
+                null,
+                ObjectReaders.fieldReader("stackTrace", StackTraceElement[].class, Throwable::setStackTrace)
+        );
+    }
+
+    protected ObjectReaderException(
+            Class<T> objectClass,
+            Constructor constructor0,
+            Constructor constructor1,
+            Constructor constructor2,
+            FieldReader... fieldReaders
+    ) {
+        super(objectClass, null, objectClass.getName(), 0, null, null, null, fieldReaders);
+        this.constructor0 = constructor0;
+        this.constructor1 = constructor1;
+        this.constructor2 = constructor2;
+
+        FieldReader fieldReaderStackTrace = null;
+        for (FieldReader fieldReader : fieldReaders) {
+            if ("stackTrace".equals(fieldReader.fieldName) && fieldReader.fieldClass == StackTraceElement[].class) {
+                fieldReaderStackTrace = fieldReader;
+            }
+        }
+        this.fieldReaderStackTrace = fieldReaderStackTrace;
     }
 
     @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        jsonReader.nextIfObjectStart();
+        boolean objectStart = jsonReader.nextIfObjectStart();
+        if (!objectStart) {
+            if (jsonReader.nextIfEmptyString()) {
+                return null;
+            }
+        }
 
-        String message = null;
+        String message = null, localizedMessage = null;
         Throwable cause = null;
         StackTraceElement[] stackTrace = null;
         List<Throwable> suppressedExceptions = null;
@@ -39,6 +79,8 @@ public class ObjectReaderException<T>
         String stackTraceReference = null;
         String suppressedExceptionsReference = null;
         String causeReference = null;
+        Map<String, Object> fieldValues = null;
+        Map<String, String> references = null;
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfObjectEnd()) {
                 break;
@@ -66,6 +108,8 @@ public class ObjectReaderException<T>
                 return (T) reader.readObject(jsonReader);
             } else if (hash == HASH_MESSAGE || hash == HASH_DETAIL_MESSAGE) {
                 message = jsonReader.readString();
+            } else if (hash == HASH_LOCALIZED_MESSAGE) {
+                localizedMessage = jsonReader.readString();
             } else if (hash == HASH_CAUSE) {
                 if (jsonReader.isReference()) {
                     causeReference = jsonReader.readReference();
@@ -87,7 +131,34 @@ public class ObjectReaderException<T>
                     suppressedExceptions = jsonReader.readArray(Throwable.class);
                 }
             } else {
-                jsonReader.skipValue();
+                FieldReader fieldReader = getFieldReader(hash);
+                if (fieldValues == null) {
+                    fieldValues = new HashMap<>();
+                }
+
+                String name;
+                if (fieldReader != null) {
+                    name = fieldReader.fieldName;
+                } else {
+                    name = jsonReader.getFieldName();
+                }
+
+                Object fieldValue;
+                if (jsonReader.isReference()) {
+                    String reference = jsonReader.readReference();
+                    if (references == null) {
+                        references = new HashMap<>();
+                    }
+                    references.put(name, reference);
+                    continue;
+                }
+
+                if (fieldReader != null) {
+                    fieldValue = fieldReader.readFieldValue(jsonReader);
+                } else {
+                    fieldValue = jsonReader.readAny();
+                }
+                fieldValues.put(name, fieldValue);
             }
         }
 
@@ -103,6 +174,27 @@ public class ObjectReaderException<T>
 
         if (stackTraceReference != null) {
             jsonReader.addResolveTask(fieldReaderStackTrace, object, JSONPath.of(stackTraceReference));
+        }
+
+        if (fieldValues != null) {
+            for (Iterator<Map.Entry<String, Object>> it = fieldValues.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<String, Object> entry = it.next();
+                FieldReader fieldReader = getFieldReader(entry.getKey());
+                if (fieldReader != null) {
+                    fieldReader.accept(object, entry.getValue());
+                }
+            }
+        }
+
+        if (references != null) {
+            for (Iterator<Map.Entry<String, String>> it = references.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<String, String> entry = it.next();
+                FieldReader fieldReader = getFieldReader(entry.getKey());
+                if (fieldReader == null) {
+                    continue;
+                }
+                fieldReader.addResolveTask(jsonReader, object, entry.getValue());
+            }
         }
 
         return (T) object;
@@ -190,6 +282,27 @@ public class ObjectReaderException<T>
                 object = new IllegalStateException();
             }
         }
+
+        try {
+            if (constructor2 != null) {
+                if (cause != null || (message != null && constructor1 == null)) {
+                    return (Throwable) constructor2.newInstance(message, cause);
+                }
+            }
+
+            if (constructor1 != null) {
+                if (message != null || constructor0 == null) {
+                    return (Throwable) constructor1.newInstance(message);
+                }
+            }
+
+            if (constructor0 != null) {
+                return (Throwable) constructor0.newInstance();
+            }
+        } catch (Throwable e) {
+            throw new JSONException("create Exception error, class " + objectClass.getName() + ", " + e.getMessage(), e);
+        }
+
         return object;
     }
 }
