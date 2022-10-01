@@ -9,7 +9,6 @@ import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.*;
@@ -724,7 +723,7 @@ public class ObjectReaderCreator {
             alternateConstructors.remove(index);
         }
 
-        if ((JDKUtils.JVM_VERSION >= 11 || !fieldBased) && Throwable.class.isAssignableFrom(objectClass)) {
+        if (!fieldBased && Throwable.class.isAssignableFrom(objectClass)) {
             Constructor constructor0 = defaultConstructor;
             Constructor constructor1 = null, constructor2 = null;
 
