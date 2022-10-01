@@ -207,6 +207,22 @@ public abstract class BeanUtils {
         }
     }
 
+    public static Method getMethod(Class objectClass, String methodName) {
+        Method[] methods = methodCache.get(objectClass);
+        if (methods == null) {
+            methods = objectClass.getMethods();
+            methodCache.putIfAbsent(objectClass, methods);
+        }
+
+        for (Method method : methods) {
+            if (method.getName().equals(methodName)) {
+                return method;
+            }
+        }
+
+        return null;
+    }
+
     public static Field getDeclaredField(Class objectClass, String fieldName) {
         Map<String, Field> fieldMap = fieldMapCache.get(objectClass);
         if (fieldMap == null) {
@@ -318,6 +334,16 @@ public abstract class BeanUtils {
         for (Constructor constructor : constructors) {
             constructorConsumer.accept(constructor);
         }
+    }
+
+    public static Constructor[] getConstructor(Class objectClass) {
+        Constructor[] constructors = constructorCache.get(objectClass);
+        if (constructors == null) {
+            constructors = objectClass.getDeclaredConstructors();
+            constructorCache.putIfAbsent(objectClass, constructors);
+        }
+
+        return constructors;
     }
 
     public static Constructor getDefaultConstructor(Class objectClass) {

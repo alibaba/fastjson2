@@ -16,10 +16,12 @@ import com.alibaba.fastjson2.util.BeanUtils;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.*;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_WRITABLE_ANNOTATED;
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 public class ObjectWriterCreator {
     public static final ObjectWriterCreator INSTANCE = new ObjectWriterCreator();
@@ -270,10 +272,6 @@ public class ObjectWriterCreator {
         boolean fieldBased = (writerFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
 
         if (fieldBased && (objectClass.isInterface() || objectClass.isInterface())) {
-            fieldBased = false;
-        }
-
-        if (Throwable.class.isAssignableFrom(objectClass)) {
             fieldBased = false;
         }
 
@@ -553,6 +551,48 @@ public class ObjectWriterCreator {
             Field field,
             ObjectWriter initObjectWriter
     ) {
+        Class<?> declaringClass = field.getDeclaringClass();
+        Method method = null;
+
+        if (declaringClass == Throwable.class) {
+            switch (field.getName()) {
+                case "detailMessage":
+                    method = BeanUtils.getMethod(Throwable.class, "getMessage");
+                    fieldName = "message";
+                    break;
+                case "cause":
+                    method = BeanUtils.getMethod(Throwable.class, "getCause");
+                    break;
+                case "stackTrace": {
+                    if (JVM_VERSION > 11) {
+                        method = BeanUtils.getMethod(Throwable.class, "getStackTrace");
+                    }
+                    break;
+                }
+                case "suppressedExceptions": {
+                    method = BeanUtils.getMethod(Throwable.class, "getSuppressed");
+                    fieldName = "suppressed";
+                }
+                default:
+                    break;
+            }
+        } else if (declaringClass == DateTimeParseException.class) {
+            switch (field.getName()) {
+                case "errorIndex":
+                    method = BeanUtils.getMethod(DateTimeParseException.class, "getErrorIndex");
+                    break;
+                case "parsedString":
+                    method = BeanUtils.getMethod(DateTimeParseException.class, "getParsedString");
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (method != null) {
+            return createFieldWriter(provider, (Class<T>) Throwable.class, fieldName, ordinal, features, format, label, method, initObjectWriter);
+        }
+
         field.setAccessible(true);
 
         Class<?> fieldClass = field.getType();
@@ -668,15 +708,6 @@ public class ObjectWriterCreator {
 
         if (fieldClass.isArray() && !fieldClass.getComponentType().isPrimitive()) {
             Class<?> itemClass = fieldClass.getComponentType();
-
-            if (field.getDeclaringClass() == Throwable.class && "stackTrace".equals(fieldName)) {
-                try {
-                    Method method = Throwable.class.getMethod("getStackTrace");
-                    return new FieldWriterObjectArrayMethod(fieldName, itemClass, ordinal, features, format, label, field.getGenericType(), fieldClass, method);
-                } catch (NoSuchMethodException ignored) {
-                }
-            }
-
             return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, itemClass, fieldClass, field);
         }
 

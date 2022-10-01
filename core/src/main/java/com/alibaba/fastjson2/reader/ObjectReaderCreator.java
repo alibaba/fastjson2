@@ -688,6 +688,10 @@ public class ObjectReaderCreator {
             alternateConstructors.add(constructor);
         });
 
+        if (Throwable.class.isAssignableFrom(objectClass)) {
+            return new ObjectReaderException<>(objectClass, alternateConstructors, fieldReaderArray);
+        }
+
         Constructor defaultConstructor = null;
 
         Class<?> declaringClass = objectClass.getDeclaringClass();
@@ -720,38 +724,6 @@ public class ObjectReaderCreator {
 
         if (index != -1) {
             alternateConstructors.remove(index);
-        }
-
-        if (Throwable.class.isAssignableFrom(objectClass)) {
-            Constructor constructor0 = defaultConstructor;
-            Constructor constructor1 = null, constructor2 = null;
-
-            for (int i = alternateConstructors.size() - 1; i >= 0; i--) {
-                Constructor item = alternateConstructors.get(i);
-                if (item.getParameterCount() == 1
-                        && item.getParameterTypes()[0] == String.class) {
-                    constructor1 = item;
-                } else if (item.getParameterCount() == 2
-                        && item.getParameterTypes()[0] == String.class
-                        && item.getParameterTypes()[1] == Throwable.class
-                ) {
-                    constructor2 = item;
-                }
-            }
-
-            if (creatorConstructor != null && constructor2 == null) {
-                if (creatorConstructor.getParameterCount() == 1
-                        && creatorConstructor.getParameterTypes()[0] == String.class) {
-                    constructor1 = creatorConstructor;
-                } else if (creatorConstructor.getParameterCount() == 2
-                        && creatorConstructor.getParameterTypes()[0] == String.class
-                        && creatorConstructor.getParameterTypes()[1] == Throwable.class
-                ) {
-                    constructor2 = creatorConstructor;
-                }
-            }
-
-            return new ObjectReaderException<>(objectClass, constructor0, constructor1, constructor2, fieldReaderArray);
         }
 
         if (creatorConstructor != null && creatorConstructor.getParameterCount() != 0 && beanInfo.seeAlso == null) {
@@ -1563,7 +1535,8 @@ public class ObjectReaderCreator {
         }
 
         if (field != null) {
-            if (!objectClass.getName().startsWith("java.lang")) {
+            String objectClassName = objectClass.getName();
+            if (!objectClassName.startsWith("java.lang") && !objectClassName.startsWith("java.time")) {
                 field.setAccessible(true);
             }
         }
