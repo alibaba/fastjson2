@@ -140,11 +140,13 @@ public class DubboTest4 {
                 JSONWriter.Feature.NotWriteDefaultValue,
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName,
                 JSONWriter.Feature.WriteNameAsSymbol);
+
         MyException4 obj = (MyException4) JSONB.parseObject(jsonbBytes,
                 Object.class, JSONReader.Feature.SupportAutoType,
                 JSONReader.Feature.UseDefaultConstructorAsPossible,
                 JSONReader.Feature.UseNativeObject,
                 JSONReader.Feature.FieldBased);
+
         assertEquals(message, obj.getMessage());
         assertEquals(ex.code, obj.code);
     }

@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectWriterCreatorASM
@@ -160,7 +159,7 @@ public class ObjectWriterCreatorASM
         final boolean fieldBased = (writerFeatures & JSONWriter.Feature.FieldBased.mask) != 0
                 && !(objectClass.isInterface() || objectClass.isInterface());
 
-        if (fieldBased && JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
+        if (Throwable.class.isAssignableFrom(objectClass)) {
             return super.createObjectWriter(objectClass, features, modules);
         }
 
