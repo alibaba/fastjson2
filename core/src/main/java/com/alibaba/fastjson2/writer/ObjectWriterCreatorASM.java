@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.BeanInfo;
@@ -30,12 +29,9 @@ public class ObjectWriterCreatorASM
     protected static final AtomicLong seed = new AtomicLong();
     protected final DynamicClassLoader classLoader;
 
-    static final String TYPE_COLLECTION = ASMUtils.type(Collection.class);
     static final String TYPE_OBJECT_WRITER = ASMUtils.type(ObjectWriter.class);
     static final String TYPE_JSON_WRITER = ASMUtils.type(JSONWriter.class);
-    static final String TYPE_JSONB = ASMUtils.type(JSONB.class);
     static final String TYPE_FIELD_WRITER = ASMUtils.type(FieldWriter.class);
-    static final String TYPE_CONTEXT = ASMUtils.type(JSONWriter.Context.class);
     static final String TYPE_OBJECT_WRITER_ADAPTER = ASMUtils.type(ObjectWriterAdapter.class);
 
     static final String[] INTERFACES = {TYPE_OBJECT_WRITER};
@@ -44,7 +40,6 @@ public class ObjectWriterCreatorASM
     static final String DESC_JSON_WRITER = ASMUtils.desc(JSONWriter.class);
     static final String DESC_FIELD_WRITER = ASMUtils.desc(FieldWriter.class);
     static final String DESC_FIELD_WRITER_ARRAY = ASMUtils.desc(FieldWriter[].class);
-    static final String DESC_PATH = ASMUtils.desc(JSONWriter.Path.class);
 
     static final String METHOD_DESC_WRITE_VALUE = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;)V";
     static final String METHOD_DESC_WRITE = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V";
@@ -67,10 +62,7 @@ public class ObjectWriterCreatorASM
     static final String METHOD_DESC_GET_ITEM_WRITER = "(" + DESC_JSON_WRITER + "Ljava/lang/reflect/Type;)" + DESC_OBJECT_WRITER;
     static final String METHOD_DESC_WRITE_TYPE_INFO = "(" + DESC_JSON_WRITER + ")Z";
     static final String METHOD_DESC_HAS_FILTER = "(" + DESC_JSON_WRITER + ")Z";
-    static final String METHOD_DESC_GET_CONTEXT = "()" + ASMUtils.desc(JSONWriter.Context.class);
-    static final String METHOD_DESC_SET_PATH = "(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/String;";
     static final String METHOD_DESC_SET_PATH2 = "(" + DESC_FIELD_WRITER + "Ljava/lang/Object;)Ljava/lang/String;";
-    static final String METHOD_DESC_SET_PATH_I = "(ILjava/lang/Object;)Ljava/lang/String;";
     static final String METHOD_DESC_WRITE_REFERENCE = "(Ljava/lang/String;)V";
     static final String METHOD_DESC_WRITE_CLASS_INFO = "(" + DESC_JSON_WRITER + ")V";
 
