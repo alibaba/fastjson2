@@ -21,7 +21,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_READABLE_ANNOTATED;
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderCreator {
@@ -663,7 +662,7 @@ public class ObjectReaderCreator {
             return createEnumReader(objectClass, beanInfo.createMethod, modules);
         }
 
-        if (fieldBased && JVM_VERSION >= 11 && Throwable.class.isAssignableFrom(objectClass)) {
+        if (Throwable.class.isAssignableFrom(objectClass)) {
             fieldBased = false;
             beanInfo.readerFeatures |= JSONReader.Feature.IgnoreSetNullValue.mask;
         }
@@ -723,7 +722,7 @@ public class ObjectReaderCreator {
             alternateConstructors.remove(index);
         }
 
-        if (!fieldBased && Throwable.class.isAssignableFrom(objectClass)) {
+        if (Throwable.class.isAssignableFrom(objectClass)) {
             Constructor constructor0 = defaultConstructor;
             Constructor constructor1 = null, constructor2 = null;
 

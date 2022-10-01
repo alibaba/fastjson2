@@ -20,7 +20,6 @@ import java.util.*;
 import java.util.function.*;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_WRITABLE_ANNOTATED;
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 public class ObjectWriterCreator {
     public static final ObjectWriterCreator INSTANCE = new ObjectWriterCreator();
@@ -274,8 +273,7 @@ public class ObjectWriterCreator {
             fieldBased = false;
         }
 
-        if (fieldBased && JVM_VERSION >= 11
-                && Throwable.class.isAssignableFrom(objectClass)) {
+        if (Throwable.class.isAssignableFrom(objectClass)) {
             fieldBased = false;
         }
 
