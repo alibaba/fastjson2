@@ -87,6 +87,14 @@ class JSONReaderJSONB
             charset = StandardCharsets.UTF_16LE;
         } else if (strtype == BC_STR_UTF16BE) {
             charset = StandardCharsets.UTF_16BE;
+        } else if (strtype == BC_SYMBOL) {
+            int symbol = strlen;
+            if (symbol < 0) {
+                return symbolTable.getName(-symbol);
+            }
+            int index = symbol * 2;
+//            return symbols[index];
+            throw new JSONException("TODO : " + JSONB.typeName(strtype));
         } else {
             throw new JSONException("TODO : " + JSONB.typeName(strtype));
         }
@@ -1138,7 +1146,12 @@ class JSONReaderJSONB
                 if (symbol < 0) {
                     return symbolTable.getHashCode(-symbol);
                 }
+
                 int index = symbol * 2;
+                long strInfo = symbols[index + 1];
+                this.strtype = (byte) strInfo;
+                strlen = ((int) strInfo) >> 8;
+                strBegin = (int) (strInfo >> 32);
                 return symbols[index];
             }
             offset++;
@@ -2004,6 +2017,16 @@ class JSONReaderJSONB
                     offset += (type - BC_STR_ASCII_FIX_MIN);
                     return;
                 }
+
+                if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
+                    return;
+                }
+
+                if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
+                    offset++;
+                    return;
+                }
+
                 if (type >= BC_ARRAY_FIX_MIN && type <= BC_ARRAY) {
                     int itemCnt;
                     if (type == BC_ARRAY) {

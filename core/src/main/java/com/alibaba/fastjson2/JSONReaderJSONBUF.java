@@ -302,6 +302,7 @@ final class JSONReaderJSONBUF
     public long readFieldNameHashCode() {
         strtype = bytes[offset++];
         boolean typeSymbol = strtype == BC_SYMBOL;
+
         if (typeSymbol) {
             strtype = bytes[offset];
             if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
@@ -316,7 +317,12 @@ final class JSONReaderJSONBUF
                 if (symbol < 0) {
                     return symbolTable.getHashCode(-symbol);
                 }
+
                 int index = symbol * 2;
+                long strInfo = symbols[index + 1];
+                this.strtype = (byte) strInfo;
+                strlen = ((int) strInfo) >> 8;
+                strBegin = (int) (strInfo >> 32);
                 return symbols[index];
             }
             offset++;

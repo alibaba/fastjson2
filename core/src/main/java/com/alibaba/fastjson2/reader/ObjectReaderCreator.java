@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.*;
@@ -674,40 +675,6 @@ public class ObjectReaderCreator {
 
         FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType, beanInfo, fieldBased, modules);
 
-        if (!fieldBased && Throwable.class.isAssignableFrom(objectClass)) {
-            try {
-                Constructor constructor = null;
-                {
-                    Constructor<?>[] constructors = objectClass.getConstructors();
-                    for (Constructor<?> c : constructors) {
-                        if (c.getParameterCount() != 2) {
-                            continue;
-                        }
-                        Class<?>[] parameterTypes = c.getParameterTypes();
-                        if (parameterTypes[0] == String.class && Throwable.class.isAssignableFrom(parameterTypes[1])) {
-                            constructor = c;
-                            break;
-                        }
-                    }
-                }
-
-                if (constructor != null) {
-                    String[] paramNames = {"message", "cause"};
-                    FieldReader[] constructorParamReaders = createFieldReaders(constructor.getParameters(), paramNames);
-                    Arrays.sort(fieldReaderArray);
-                    return createObjectReaderNoneDefaultConstrutor(
-                            objectClass,
-                            constructor,
-                            paramNames,
-                            constructorParamReaders,
-                            fieldReaderArray
-                    );
-                }
-            } catch (Throwable ignored) {
-                //
-            }
-        }
-
         if (beanInfo.creatorConstructor != null || beanInfo.createMethod != null) {
             return createObjectReaderWithCreator(objectClass, modules, beanInfo);
         }
@@ -755,6 +722,36 @@ public class ObjectReaderCreator {
 
         if (index != -1) {
             alternateConstructors.remove(index);
+        }
+
+        if ((JDKUtils.JVM_VERSION >= 11 || !fieldBased) && Throwable.class.isAssignableFrom(objectClass)) {
+            Constructor constructor0 = defaultConstructor;
+            Constructor constructor1 = null, constructor2 = null;
+
+            for (int i = alternateConstructors.size() - 1; i >= 0; i--) {
+                Constructor item = alternateConstructors.get(0);
+                if (item.getParameterCount() == 1 && item.getParameterTypes()[0] == String.class) {
+                    constructor1 = item;
+                } else if (item.getParameterCount() == 2
+                        && item.getParameterTypes()[0] == String.class
+                        && item.getParameterTypes()[1] == Throwable.class
+                ) {
+                    constructor2 = item;
+                }
+            }
+
+            if (creatorConstructor != null) {
+                if (creatorConstructor.getParameterCount() == 1 && creatorConstructor.getParameterTypes()[0] == String.class) {
+                    constructor1 = creatorConstructor;
+                } else if (creatorConstructor.getParameterCount() == 2
+                        && creatorConstructor.getParameterTypes()[0] == String.class
+                        && creatorConstructor.getParameterTypes()[1] == Throwable.class
+                ) {
+                    constructor2 = creatorConstructor;
+                }
+            }
+
+            return new ObjectReaderException<>(objectClass, constructor0, constructor1, constructor2, fieldReaderArray);
         }
 
         if (creatorConstructor != null && creatorConstructor.getParameterCount() != 0 && beanInfo.seeAlso == null) {
