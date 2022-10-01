@@ -27,13 +27,13 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 public class ObjectReaderCreator {
     public static final ObjectReaderCreator INSTANCE = new ObjectReaderCreator();
 
-    public <T> ObjectReader<T> createObjectReaderNoneDefaultConstrutor(Constructor constructor, String... paramNames) {
+    public <T> ObjectReader<T> createObjectReaderNoneDefaultConstructor(Constructor constructor, String... paramNames) {
         Function<Map<Long, Object>, T> function = createFunction(constructor, paramNames);
         FieldReader[] fieldReaders = createFieldReaders(constructor.getParameters(), paramNames);
-        return createObjectReaderNoneDefaultConstrutor(constructor.getDeclaringClass(), function, fieldReaders);
+        return createObjectReaderNoneDefaultConstructor(constructor.getDeclaringClass(), function, fieldReaders);
     }
 
-    public <T> ObjectReader<T> createObjectReaderNoneDefaultConstrutor(
+    public <T> ObjectReader<T> createObjectReaderNoneDefaultConstructor(
             Class objectClass,
             Constructor constructor,
             String[] paramNames,
@@ -44,7 +44,7 @@ public class ObjectReaderCreator {
         return new ObjectReaderNoneDefaultConstructor(objectClass, null, null, 0, function, null, paramNames, paramFieldReaders, setterFieldReaders);
     }
 
-    public <T> ObjectReader<T> createObjectReaderNoneDefaultConstrutor(
+    public <T> ObjectReader<T> createObjectReaderNoneDefaultConstructor(
             Class objectClass,
             Function<Map<Long, Object>, T> creator,
             FieldReader... fieldReaders
