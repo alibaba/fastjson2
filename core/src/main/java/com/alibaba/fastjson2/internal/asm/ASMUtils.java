@@ -152,6 +152,27 @@ public class ASMUtils {
                     }
                 }
             }
+
+            if (Throwable.class.isAssignableFrom(declaringClass)) {
+                switch (parameterTypes.length) {
+                    case 1:
+                        if (parameterTypes[0] == String.class) {
+                            return new String[]{"message"};
+                        }
+
+                        if (Throwable.class.isAssignableFrom(parameterTypes[0])) {
+                            return new String[]{"cause"};
+                        }
+                        break;
+                    case 2:
+                        if (parameterTypes[0] == String.class && Throwable.class.isAssignableFrom(parameterTypes[1])) {
+                            return new String[]{"message", "cause"};
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         final Class<?>[] types;
