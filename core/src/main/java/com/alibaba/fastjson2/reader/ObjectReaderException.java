@@ -373,17 +373,11 @@ public class ObjectReaderException<T>
             }
 
             if (constructorMessage != null) {
-                if (message != null) {
-                    return (Throwable) constructorMessage.newInstance(message);
-                }
+                return (Throwable) constructorMessage.newInstance(message);
             }
 
             if (constructorCause != null) {
                 return (Throwable) constructorCause.newInstance(cause);
-            }
-
-            if (constructorMessageCause != null) {
-                return (Throwable) constructorMessageCause.newInstance(message, cause);
             }
         } catch (Throwable e) {
             throw new JSONException("create Exception error, class " + objectClass.getName() + ", " + e.getMessage(), e);
