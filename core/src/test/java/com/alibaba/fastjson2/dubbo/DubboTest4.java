@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.format.DateTimeParseException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -209,5 +211,79 @@ public class DubboTest4 {
 
         assertEquals(ex.getMessage(), ex1.getMessage());
         assertEquals(ex.getErrorIndex(), ex1.getErrorIndex());
+    }
+
+    @Test
+    public void test6() {
+        UncheckedIOException ex = new UncheckedIOException(null, new IOException("xxx"));
+
+        byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
+        UncheckedIOException ex1 = (UncheckedIOException) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
+
+        assertEquals(ex.getMessage(), ex1.getMessage());
+        assertEquals(ex.getCause().getMessage(), ex1.getCause().getMessage());
+    }
+
+    @Test
+    public void test7() {
+        Exception ex = new Exception(null, new IOException("xxx"));
+
+        byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
+        Exception ex1 = (Exception) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
+
+        assertEquals(ex.getCause().getMessage(), ex1.getCause().getMessage());
+    }
+
+    @Test
+    public void test8() {
+        MyException8 ex = new MyException8(null);
+
+        byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
+        MyException8 ex1 = (MyException8) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
+
+        assertEquals(ex.getMessage(), ex1.getMessage());
+    }
+
+    public static class MyException8
+            extends Exception {
+        public MyException8(String message) {
+            super(message);
+        }
+    }
+
+    @Test
+    public void test9() {
+        MyException9 ex = new MyException9(null);
+
+        byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
+        MyException9 ex1 = (MyException9) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
+
+        assertEquals(ex.getMessage(), ex1.getMessage());
+        assertEquals(ex.getCause(), ex1.getCause());
+    }
+
+    public static class MyException9
+            extends Exception {
+        public MyException9(Throwable cause) {
+            super(cause);
+        }
+    }
+
+    @Test
+    public void test10() {
+        MyException10 ex = new MyException10(null, null);
+
+        byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
+        MyException10 ex1 = (MyException10) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
+
+        assertEquals(ex.getMessage(), ex1.getMessage());
+        assertEquals(ex.getCause(), ex1.getCause());
+    }
+
+    public static class MyException10
+            extends Exception {
+        public MyException10(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }
