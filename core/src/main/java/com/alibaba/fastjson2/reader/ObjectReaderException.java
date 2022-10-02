@@ -8,8 +8,6 @@ import com.alibaba.fastjson2.internal.asm.ASMUtils;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -26,9 +24,12 @@ public class ObjectReaderException<T>
 
     private FieldReader fieldReaderStackTrace;
     final List<Constructor> constructors;
-    final Constructor constructor0;
-    final Constructor constructor1;
-    final Constructor constructor2;
+
+    final Constructor constructorDefault;
+    final Constructor constructorMessage;
+    final Constructor constructorMessageCause;
+    final Constructor constructorCause;
+
     final List<String[]> constructorParameters;
 
     protected ObjectReaderException(Class<T> objectClass) {
@@ -47,30 +48,42 @@ public class ObjectReaderException<T>
         super(objectClass, null, objectClass.getName(), 0, null, null, null, fieldReaders);
         this.constructors = constructors;
 
-        Constructor constructor0 = null, constructor1 = null, constructor2 = null;
+        Constructor constructorDefault = null;
+        Constructor constructorMessage = null;
+        Constructor constructorMessageCause = null;
+        Constructor constructorCause = null;
 
         for (Constructor constructor : constructors) {
-            if (constructor != null && constructor2 == null) {
+            if (constructor != null && constructorMessageCause == null) {
                 int paramCount = constructor.getParameterCount();
 
                 if (paramCount == 0) {
-                    constructor0 = constructor;
+                    constructorDefault = constructor;
                     continue;
                 }
 
-                if (paramCount == 1
-                        && constructor.getParameterTypes()[0] == String.class) {
-                    constructor1 = constructor;
+                Class[] paramTypes = constructor.getParameterTypes();
+                Class paramType0 = paramTypes[0];
+                if (paramCount == 1) {
+                    if (paramType0 == String.class) {
+                        constructorMessage = constructor;
+                    } else if (Throwable.class.isAssignableFrom(paramType0)) {
+                        constructorCause = constructor;
+                    }
                 }
 
                 if (paramCount == 2
-                        && constructor.getParameterTypes()[0] == String.class
-                        && constructor.getParameterTypes()[1] == Throwable.class
+                        && paramType0 == String.class
+                        && Throwable.class.isAssignableFrom(paramTypes[1])
                 ) {
-                    constructor2 = constructor;
+                    constructorMessageCause = constructor;
                 }
             }
         }
+        this.constructorDefault = constructorDefault;
+        this.constructorMessage = constructorMessage;
+        this.constructorMessageCause = constructorMessageCause;
+        this.constructorCause = constructorCause;
 
         constructors.sort((Constructor left, Constructor right) -> {
             int x = left.getParameterCount();
@@ -93,10 +106,6 @@ public class ObjectReaderException<T>
             }
             constructorParameters.add(parameterNames);
         }
-
-        this.constructor0 = constructor0;
-        this.constructor1 = constructor1;
-        this.constructor2 = constructor2;
 
         FieldReader fieldReaderStackTrace = null;
         for (FieldReader fieldReader : fieldReaders) {
@@ -330,79 +339,51 @@ public class ObjectReaderException<T>
 
     private Throwable createObject(String message, Throwable cause) {
         Throwable object = null;
-        if (objectClass == UncheckedIOException.class) {
-            if (message != null && cause != null) {
-                object = new UncheckedIOException(message, (IOException) cause);
-            } else if (cause != null) {
-                object = new UncheckedIOException((IOException) cause);
-            }
-        } else if (objectClass == RuntimeException.class) {
-            if (message != null && cause != null) {
-                object = new RuntimeException(message, cause);
-            } else if (cause != null) {
-                object = new RuntimeException(cause);
-            } else if (message != null) {
-                object = new RuntimeException(message);
-            } else {
-                object = new RuntimeException();
-            }
-        } else if (objectClass == IOException.class) {
-            if (message != null && cause != null) {
-                object = new IOException(message, cause);
-            } else if (cause != null) {
-                object = new IOException(cause);
-            } else if (message != null) {
-                object = new IOException(message);
-            } else {
-                object = new IOException();
-            }
-        } else if (objectClass == Exception.class) {
-            if (message != null && cause != null) {
-                object = new Exception(message, cause);
-            } else if (cause != null) {
-                object = new Exception(cause);
-            } else if (message != null) {
-                object = new Exception(message);
-            } else {
-                object = new Exception();
-            }
-        } else if (objectClass == Throwable.class) {
-            if (message != null && cause != null) {
-                object = new Throwable(message, cause);
-            } else if (cause != null) {
-                object = new Throwable(cause);
-            } else if (message != null) {
-                object = new Throwable(message);
-            } else {
-                object = new Throwable();
-            }
-        } else if (objectClass == IllegalStateException.class) {
-            if (message != null && cause != null) {
-                object = new IllegalStateException(message, cause);
-            } else if (cause != null) {
-                object = new IllegalStateException(cause);
-            } else if (message != null) {
-                object = new IllegalStateException(message);
-            } else {
-                object = new IllegalStateException();
-            }
-        }
-
         try {
-            if (constructor2 != null) {
-                if (cause != null || (message != null && constructor1 == null)) {
-                    return (Throwable) constructor2.newInstance(message, cause);
+            if (constructorMessageCause != null) {
+                if (cause != null && message != null) {
+                    return (Throwable) constructorMessageCause.newInstance(message, cause);
                 }
             }
 
-            if (constructor1 != null) {
-                if (message != null || constructor0 == null) {
-                    return (Throwable) constructor1.newInstance(message);
+            if (constructorMessage != null) {
+                if (message != null) {
+                    return (Throwable) constructorMessage.newInstance(message);
                 }
             }
 
-            if (constructor0 != null) {
-                return (Throwable) constructor0.newInstance();
+            if (constructorCause != null) {
+                if (cause != null) {
+                    return (Throwable) constructorCause.newInstance(cause);
+                }
+            }
+
+            if (constructorMessageCause != null) {
+                if (cause != null || message != null) {
+                    return (Throwable) constructorMessageCause.newInstance(message, cause);
+                }
+            }
+
+            if (constructorDefault != null) {
+                return (Throwable) constructorDefault.newInstance();
+            }
+
+            if (constructorMessageCause != null) {
+                return (Throwable) constructorMessageCause.newInstance(message, cause);
+            }
+
+            if (constructorMessage != null) {
+                if (message != null) {
+                    return (Throwable) constructorMessage.newInstance(message);
+                }
+            }
+
+            if (constructorCause != null) {
+                return (Throwable) constructorCause.newInstance(cause);
+            }
+
+            if (constructorMessageCause != null) {
+                return (Throwable) constructorMessageCause.newInstance(message, cause);
             }
         } catch (Throwable e) {
             throw new JSONException("create Exception error, class " + objectClass.getName() + ", " + e.getMessage(), e);
