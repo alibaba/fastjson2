@@ -12,8 +12,6 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK8;
-
 public class DecodeASCIIBenchmarkJDK8 {
     static byte[] utf8Bytes = new byte[128];
     static int utf8BytesLength;
@@ -30,15 +28,6 @@ public class DecodeASCIIBenchmarkJDK8 {
         byte[] bytes = "01234567890ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwzyz".getBytes(StandardCharsets.UTF_8);
         System.arraycopy(bytes, 0, utf8Bytes, 0, bytes.length);
         utf8BytesLength = bytes.length;
-    }
-
-    @Benchmark
-    public String unsafeEncodeUTF8() throws Exception {
-        char[] chars = new char[utf8BytesLength];
-        for (int i = 0; i < utf8BytesLength; i++) {
-            chars[i] = (char) utf8Bytes[i];
-        }
-        return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
     }
 
     @Benchmark
