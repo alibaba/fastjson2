@@ -1,10 +1,14 @@
 package com.alibaba.fastjson2.util;
 
+import java.lang.invoke.*;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.function.*;
 
 public class JDKUtils {
     public static final int JVM_VERSION;
+    public static final Byte LATIN1 = 0;
+    public static final Byte UTF16 = 1;
 
     static final Field FIELD_STRING_VALUE;
     static final long FIELD_STRING_VALUE_OFFSET;
@@ -75,5 +79,48 @@ public class JDKUtils {
     public static boolean isSQLDataSourceOrRowSet(Class<?> type) {
         return (CLASS_SQL_DATASOURCE != null && CLASS_SQL_DATASOURCE.isAssignableFrom(type))
                 || (CLASS_SQL_ROW_SET != null && CLASS_SQL_ROW_SET.isAssignableFrom(type));
+    }
+
+//
+//    public static BiFunction<byte[], java.nio.charset.Charset, String> getStringCreatorJDK17() throws Throwable {
+//        MethodHandles.Lookup lookup = getLookup();
+//
+//        MethodHandles.Lookup caller = lookup.in(String.class);
+//        MethodHandle handle = caller.findStatic(
+//                String.class, "newStringNoRepl1", MethodType.methodType(String.class, byte[].class, Charset.class)
+//        );
+//
+//        CallSite callSite = LambdaMetafactory.metafactory(
+//                caller,
+//                "apply",
+//                MethodType.methodType(BiFunction.class),
+//                handle.type().generic(),
+//                handle,
+//                handle.type()
+//        );
+//        return (BiFunction<byte[], java.nio.charset.Charset, String>) callSite.getTarget().invokeExact();
+//    }
+
+    static MethodHandles.Lookup getLookup() throws Exception {
+        // GraalVM not support
+        // Android not support
+        MethodHandles.Lookup lookup;
+        if (JVM_VERSION >= 15) {
+            Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, Class.class, int.class);
+            constructor.setAccessible(true);
+            lookup = constructor.newInstance(
+                    String.class,
+                    null,
+                    -1 // Lookup.TRUSTED
+            );
+        } else {
+            Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+            constructor.setAccessible(true);
+            lookup = constructor.newInstance(
+                    String.class,
+                    -1 // Lookup.TRUSTED
+            );
+        }
+        return lookup;
     }
 }
