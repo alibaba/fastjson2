@@ -237,6 +237,17 @@ public class FieldReaderObject<T>
             return;
         }
 
+        if (fieldClass == char.class) {
+            if (value instanceof String) {
+                String str = (String) value;
+                if (str.length() > 0) {
+                    value = str.charAt(0);
+                } else {
+                    value = '\0';
+                }
+            }
+        }
+
         if (function != null) {
             function.accept(object, value);
             return;
