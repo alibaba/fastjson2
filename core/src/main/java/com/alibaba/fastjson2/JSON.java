@@ -2212,7 +2212,7 @@ public interface JSON {
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+            jsonWriter = new JSONWriterUTF8(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF16(writeContext);
         }
@@ -2278,7 +2278,7 @@ public interface JSON {
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+            jsonWriter = new JSONWriterUTF8(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF16(writeContext);
         }
