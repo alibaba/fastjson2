@@ -43,20 +43,6 @@ public class EscapeNoneAsciiTest {
     }
 
     @Test
-    public void testJSONWriterUTF8JDK9() {
-        for (int i = 0; i < STRINGS.length; i++) {
-            String STR = STRINGS[i];
-            String JSON_STR = JSON_STRINGS[i];
-            JSONWriter.Context context = JSONFactory.createWriteContext(JSONWriter.Feature.EscapeNoneAscii);
-            JSONWriter jsonWriter = new JSONWriterUTF8JDK9(context);
-            jsonWriter.writeString(STR);
-            String str = jsonWriter.toString();
-            assertEquals(JSON_STR, str);
-            assertEquals(STR, JSON.parse(str));
-        }
-    }
-
-    @Test
     public void testJSONWriterUTF8() {
         for (int i = 0; i < STRINGS.length; i++) {
             String STR = STRINGS[i];
