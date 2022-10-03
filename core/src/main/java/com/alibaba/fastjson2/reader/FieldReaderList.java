@@ -74,7 +74,7 @@ public class FieldReaderList<T, V>
 
         if (jsonReader.isJSONB()) {
             Class fieldClass = this.fieldClass;
-            ObjectReader autoTypeReader = null;
+            ObjectReader autoTypeReader;
 
             if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
                 long typeHash = jsonReader.readTypeHashCode();
@@ -85,6 +85,7 @@ public class FieldReaderList<T, V>
                         autoTypeReader = context.getObjectReaderAutoType(typeName, fieldClass, fieldClassHash);
                     }
 
+                    objectReader = autoTypeReader;
                     builder = autoTypeReader.getBuildFunction();
                 }
             }
@@ -111,7 +112,10 @@ public class FieldReaderList<T, V>
                     array[i] = itemObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, 0);
                 }
             }
-            Collection list = Arrays.asList(array);
+            Collection list = (Collection) objectReader.createInstance(features);
+            for (Object item : array) {
+                list.add(item);
+            }
             if (builder != null) {
                 list = (Collection) builder.apply(list);
             }
