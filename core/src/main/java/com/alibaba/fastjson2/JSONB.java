@@ -886,7 +886,7 @@ public interface JSONB {
         }
 
         if (JVM_VERSION == 8) {
-            char[] chars = JDKUtils.getCharArray(str);
+            char[] chars = str.toCharArray();
             int strlen = chars.length;
             if (strlen <= STR_ASCII_FIX_LEN) {
                 boolean ascii = true;

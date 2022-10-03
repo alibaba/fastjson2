@@ -1,13 +1,10 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 class JSONReaderASCII
         extends JSONReaderUTF8 {
@@ -738,70 +735,6 @@ class JSONReaderASCII
             }
         }
 
-        if (JDKUtils.STRING_CREATOR_JDK11 != null) {
-            byte[] chars = new byte[nameLength];
-
-            int offset = nameBegin;
-            forStmt:
-            for (int i = 0; offset < nameEnd; ++i) {
-                byte b = bytes[offset];
-
-                if (b == '\\') {
-                    b = bytes[++offset];
-                    switch (b) {
-                        case 'u': {
-                            int c1 = bytes[++offset];
-                            int c2 = bytes[++offset];
-                            int c3 = bytes[++offset];
-                            int c4 = bytes[++offset];
-                            char c = char4(c1, c2, c3, c4);
-                            if (c > 0xFF) {
-                                chars = null;
-                                break forStmt;
-                            }
-                            b = (byte) c;
-                            break;
-                        }
-                        case 'x': {
-                            int c1 = bytes[++offset];
-                            int c2 = bytes[++offset];
-                            char c = char2(c1, c2);
-                            if (c > 0xFF) {
-                                chars = null;
-                                break forStmt;
-                            }
-                            b = (byte) c;
-                            break;
-                        }
-                        case '\\':
-                        case '"':
-                        case '.':
-                        case '-':
-                        case '+':
-                        case '*':
-                        case '/':
-                        case '>':
-                        case '<':
-                        case '=':
-                        case '@':
-                        case ':':
-                            break;
-                        default:
-                            b = (byte) char1(b);
-                            break;
-                    }
-                } else if (b == '"') {
-                    break;
-                }
-                chars[i] = b;
-                offset++;
-            }
-
-            if (chars != null) {
-                return STRING_CREATOR_JDK11.apply(chars, LATIN1);
-            }
-        }
-
         char[] chars = new char[nameLength];
 
         int offset = nameBegin;
@@ -1128,13 +1061,7 @@ class JSONReaderASCII
                             chars[i] = (char) (bytes[nameBegin + i] & 0xFF);
                         }
 
-                        String name;
-                        if (STRING_CREATOR_JDK8 != null) {
-                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                        } else {
-                            name = new String(chars);
-                        }
-
+                        String name = new String(chars);
                         NAME_CACHE2[indexMask] = new JSONFactory.NameCacheEntry2(name, nameValue0, nameValue1);
                         return name;
                     } else if (entry.value0 == nameValue0 && entry.value1 == nameValue1) {
@@ -1149,13 +1076,7 @@ class JSONReaderASCII
                             chars[i] = (char) (bytes[nameBegin + i] & 0xFF);
                         }
 
-                        String name;
-                        if (STRING_CREATOR_JDK8 != null) {
-                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                        } else {
-                            name = new String(chars);
-                        }
-
+                        String name = new String(chars);
                         NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(name, nameValue0);
                         return name;
                     } else if (entry.value == nameValue0) {
@@ -1243,12 +1164,7 @@ class JSONReaderASCII
 
             str = new String(chars);
         } else {
-            if (STRING_CREATOR_JDK11 != null) {
-                byte[] bytes = Arrays.copyOfRange(this.bytes, start, offset);
-                str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-            } else {
-                str = new String(bytes, start, this.offset - start, StandardCharsets.US_ASCII);
-            }
+            str = new String(bytes, start, this.offset - start, StandardCharsets.US_ASCII);
         }
 
         int b = bytes[++offset];
@@ -1393,9 +1309,6 @@ class JSONReaderASCII
             } else {
                 if (this.str != null) {
                     str = this.str.substring(this.offset, offset);
-                } else if (STRING_CREATOR_JDK11 != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                    str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
                 } else {
                     str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
                 }

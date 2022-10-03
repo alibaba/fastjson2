@@ -1309,19 +1309,6 @@ class JSONReaderUTF8
     public String getFieldName() {
         int length = nameEnd - nameBegin;
         if (!nameEscape) {
-            if (nameAscii) {
-                if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[length];
-                    for (int i = 0; i < length; ++i) {
-                        chars[i] = (char) bytes[nameBegin + i];
-                    }
-                    return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                } else if (STRING_CREATOR_JDK11 != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, nameBegin, nameEnd);
-                    return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-                }
-            }
-
             return new String(bytes, nameBegin, length,
                     nameAscii ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8
             );
@@ -1703,17 +1690,7 @@ class JSONReaderUTF8
                         int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
                         NameCacheEntry2 entry = NAME_CACHE2[indexMask];
                         if (entry == null) {
-                            String name;
-                            if (STRING_CREATOR_JDK8 != null) {
-                                char[] chars = new char[length];
-                                for (int i = 0; i < length; ++i) {
-                                    chars[i] = (char) bytes[nameBegin + i];
-                                }
-                                name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                            } else {
-                                name = new String(bytes, nameBegin, length, StandardCharsets.US_ASCII);
-                            }
-
+                            String name = new String(bytes, nameBegin, length, StandardCharsets.US_ASCII);
                             NAME_CACHE2[indexMask] = new NameCacheEntry2(name, nameValue0, nameValue1);
                             return name;
                         } else if (entry.value0 == nameValue0 && entry.value1 == nameValue1) {
@@ -1723,34 +1700,13 @@ class JSONReaderUTF8
                         int indexMask = ((int) nameValue0) & (NAME_CACHE.length - 1);
                         NameCacheEntry entry = NAME_CACHE[indexMask];
                         if (entry == null) {
-                            String name;
-                            if (STRING_CREATOR_JDK8 != null) {
-                                char[] chars = new char[length];
-                                for (int i = 0; i < length; ++i) {
-                                    chars[i] = (char) bytes[nameBegin + i];
-                                }
-                                name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                            } else {
-                                name = new String(bytes, nameBegin, length, StandardCharsets.US_ASCII);
-                            }
-
+                            String name = new String(bytes, nameBegin, length, StandardCharsets.US_ASCII);
                             NAME_CACHE[indexMask] = new NameCacheEntry(name, nameValue0);
                             return name;
                         } else if (entry.value == nameValue0) {
                             return entry.name;
                         }
                     }
-                }
-
-                if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[length];
-                    for (int i = 0; i < length; ++i) {
-                        chars[i] = (char) bytes[nameBegin + i];
-                    }
-                    return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                } else if (STRING_CREATOR_JDK11 != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, nameBegin, nameEnd);
-                    return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
                 }
             }
 
@@ -3727,23 +3683,8 @@ class JSONReaderUTF8
                 }
 
                 str = new String(chars);
-            } else if (ascii) {
-                if (STRING_CREATOR_JDK8 != null) {
-                    int strlen = offset - this.offset;
-                    char[] chars = new char[strlen];
-                    for (int i = 0; i < strlen; ++i) {
-                        chars[i] = (char) bytes[this.offset + i];
-                    }
-
-                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                } else if (STRING_CREATOR_JDK11 != null) {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                    str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-                } else {
-                    str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
-                }
             } else {
-                str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.UTF_8);
+                str = new String(bytes, this.offset, offset - this.offset, ascii ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8);
             }
 
             if ((context.features & Feature.TrimString.mask) != 0) {
