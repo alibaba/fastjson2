@@ -20,8 +20,16 @@ public class JdbcSupportTest {
 
     @Test
     public void isClob() {
+        JdbcSupport.CLASS_CLOB = null;
+        assertTrue(JdbcSupport.isClob(MyClob.class));
         assertTrue(JdbcSupport.isClob(MyClob.class));
         assertTrue(JdbcSupport.isClob(java.sql.Clob.class));
+
+        JdbcSupport.CLASS_CLOB = null;
+        assertTrue(JdbcSupport.isClob(java.sql.Clob.class));
+        assertFalse(JdbcSupport.isClob(Object.class));
+
+        JdbcSupport.CLASS_CLOB = null;
         assertFalse(JdbcSupport.isClob(Object.class));
     }
 
@@ -29,6 +37,9 @@ public class JdbcSupportTest {
     public void write() {
         MyClob clob = new MyClob("abc");
         assertEquals("\"abc\"", JSON.toJSONString(clob));
+
+        JdbcSupport.CLASS_CLOB = null;
+        JdbcSupport.createClobWriter(MyClob.class);
     }
 
     @Test

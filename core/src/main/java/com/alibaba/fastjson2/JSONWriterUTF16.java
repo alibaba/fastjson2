@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.RyuDouble;
-import com.alibaba.fastjson2.util.RyuFloat;
+import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
@@ -205,8 +203,48 @@ class JSONWriterUTF16
         }
 
         boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
-        final int strlen = str.length();
         boolean escape = false;
+
+        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+            byte coder = UnsafeUtils.getStringCoder(str);
+            if (coder == 0) {
+                byte[] value = UnsafeUtils.getStringValue(str);
+                int minCapacity = off + value.length + 2;
+                if (minCapacity - chars.length > 0) {
+                    int oldCapacity = chars.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                        throw new OutOfMemoryError();
+                    }
+
+                    // minCapacity is usually close to size, so this is a win:
+                    chars = Arrays.copyOf(chars, newCapacity);
+                }
+
+                final int mark = off;
+                chars[off++] = quote;
+
+                for (int i = 0; i < value.length; i++) {
+                    byte c = value[i];
+                    if (c == '\\' || c == quote || c < ' ') {
+                        escape = true;
+                        break;
+                    }
+                    chars[off++] = (char) c;
+                }
+
+                if (!escape) {
+                    chars[off++] = quote;
+                    return;
+                }
+                off = mark;
+            }
+        }
+
+        final int strlen = str.length();
         {
             int i = 0;
             // vector optimize 8

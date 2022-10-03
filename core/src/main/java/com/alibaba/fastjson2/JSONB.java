@@ -814,7 +814,9 @@ public interface JSONB {
                 writer.writeNull();
             } else {
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                JSONWriter.Context context = writer.context;
+                boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
+                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
                 objectWriter.writeJSONB(writer, object, null, null, 0);
             }
             return writer.getBytes();

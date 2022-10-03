@@ -2001,7 +2001,21 @@ public interface JSON {
      * @param object Java Object to be serialized into JSON {@link String}
      */
     static String toJSONString(Object object) {
-        try (JSONWriter writer = JSONWriter.of()) {
+        JSONWriter.Context writeContext = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider);
+
+        boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
+
+        JSONWriter jsonWriter;
+        if (JVM_VERSION == 8) {
+            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+        } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
+            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+        } else {
+            jsonWriter = new JSONWriterUTF16(writeContext);
+        }
+
+        try (JSONWriter writer = pretty ?
+                new JSONWriterPretty(jsonWriter) : jsonWriter) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -2011,7 +2025,9 @@ public interface JSON {
                 if (valueClass == JSONObject.class) {
                     writer.write((JSONObject) object);
                 } else {
-                    ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                    JSONWriter.Context context = writer.context;
+                    boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
+                    ObjectWriter<?> objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
                     objectWriter.write(writer, object, null, null, 0);
                 }
             }
