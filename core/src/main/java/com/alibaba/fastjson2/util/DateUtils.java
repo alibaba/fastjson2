@@ -2733,71 +2733,6 @@ public class DateUtils {
         }
 
         int len = 19 + millislen + zonelen;
-        if (STRING_CREATOR_JDK8 != null) {
-            char[] chars = new char[len];
-            chars[0] = (char) (year / 1000 + '0');
-            chars[1] = (char) ((year / 100) % 10 + '0');
-            chars[2] = (char) ((year / 10) % 10 + '0');
-            chars[3] = (char) (year % 10 + '0');
-            chars[4] = '-';
-            chars[5] = (char) (month / 10 + '0');
-            chars[6] = (char) (month % 10 + '0');
-            chars[7] = '-';
-            chars[8] = (char) (dayOfMonth / 10 + '0');
-            chars[9] = (char) (dayOfMonth % 10 + '0');
-            chars[10] = ' ';
-            chars[11] = (char) (hour / 10 + '0');
-            chars[12] = (char) (hour % 10 + '0');
-            chars[13] = ':';
-            chars[14] = (char) (minute / 10 + '0');
-            chars[15] = (char) (minute % 10 + '0');
-            chars[16] = ':';
-            chars[17] = (char) (second / 10 + '0');
-            chars[18] = (char) (second % 10 + '0');
-            if (millislen > 0) {
-                chars[19] = '.';
-                for (int i = 20; i < len; ++i) {
-                    chars[i] = '0';
-                }
-                if (millis < 10) {
-                    IOUtils.getChars(millis, 19 + millislen, chars);
-                } else {
-                    if (millis % 100 == 0) {
-                        IOUtils.getChars(millis / 100, 19 + millislen, chars);
-                    } else if (millis % 10 == 0) {
-                        IOUtils.getChars(millis / 10, 19 + millislen, chars);
-                    } else {
-                        IOUtils.getChars(millis, 19 + millislen, chars);
-                    }
-                }
-            }
-            if (timeZone) {
-                int timeZoneOffset = offsetTotalSeconds / 3600;
-                if (offsetTotalSeconds == 0) {
-                    chars[19 + millislen] = 'Z';
-                } else {
-                    int offsetAbs = Math.abs(timeZoneOffset);
-
-                    if (timeZoneOffset >= 0) {
-                        chars[19 + millislen] = '+';
-                    } else {
-                        chars[19 + millislen] = '-';
-                    }
-                    chars[19 + millislen + 1] = '0';
-                    IOUtils.getChars(offsetAbs, 19 + millislen + 3, chars);
-                    chars[19 + millislen + 3] = ':';
-                    chars[19 + millislen + 4] = '0';
-                    int offsetMinutes = (offsetTotalSeconds - timeZoneOffset * 3600) / 60;
-                    if (offsetMinutes < 0) {
-                        offsetMinutes = -offsetMinutes;
-                    }
-                    IOUtils.getChars(offsetMinutes, 19 + millislen + zonelen, chars);
-                }
-            }
-
-            return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-        }
-
         byte[] bytes = new byte[len];
         bytes[0] = (byte) (year / 1000 + '0');
         bytes[1] = (byte) ((year / 100) % 10 + '0');
@@ -2857,10 +2792,6 @@ public class DateUtils {
                 }
                 IOUtils.getChars(offsetMinutes, 19 + millislen + zonelen, bytes);
             }
-        }
-
-        if (STRING_CREATOR_JDK11 != null) {
-            return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
         }
 
         return new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);

@@ -26,8 +26,6 @@ import java.util.regex.Pattern;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 import static com.alibaba.fastjson2.JSONReader.EOI;
-import static com.alibaba.fastjson2.util.JDKUtils.LATIN1;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK11;
 
 public abstract class JSONPath {
     static final JSONReader.Context PARSE_CONTEXT = JSONFactory.createReadContext();
@@ -5365,14 +5363,7 @@ public abstract class JSONPath {
             bytes[0] = '[';
             IOUtils.getChars(index, bytes.length - 1, bytes);
             bytes[bytes.length - 1] = ']';
-
-            String str;
-            if (STRING_CREATOR_JDK11 != null) {
-                str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-            } else {
-                str = new String(bytes, StandardCharsets.US_ASCII);
-            }
-            return str;
+            return new String(bytes, StandardCharsets.ISO_8859_1);
         }
     }
 
