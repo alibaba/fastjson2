@@ -2,8 +2,8 @@ package com.alibaba.fastjson2.benchmark.eishay;
 
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
-public class EishayWriteStringTest {
-    static final EishayWriteString benchmark = new EishayWriteString();
+public class EishayWriteStringTreeTest {
+    static final EishayWriteStringTree benchmark = new EishayWriteStringTree();
     static final int LOOP = 1_000_000;
 
     public static void fastjson2() {
@@ -14,31 +14,9 @@ public class EishayWriteStringTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.58.0.13 : 325
-            // zulu11.52.13 : 347 369 344
-            // zulu17.32.13 : 335 342
-
-            // reflect-zulu8.58.0.13 : 498 465
-            // reflect-zulu11.52.13 : 532 504
-            // reflect-zulu17.32.13 : 508 486
-        }
-    }
-
-    public static void fastjson2Mixin() {
-        for (int j = 0; j < 10; j++) {
-            long start = System.currentTimeMillis();
-            for (int i = 0; i < LOOP; ++i) {
-                benchmark.fastjson2Mixin(BH);
-            }
-            long millis = System.currentTimeMillis() - start;
-            System.out.println("fastjson2Mixin millis : " + millis);
-            // zulu8.58.0.13 : 361
-            // zulu11.52.13 : 435 434
-            // zulu17.32.13 : 368 362
-
-            // reflect-zulu8.58.0.13 :
-            // reflect-zulu11.52.13 :
-            // reflect-zulu17.32.13 :
+            // zulu8.62.0.19 : 507
+            // zulu11.52.13 : 523
+            // zulu17.32.13 : 539
         }
     }
 
@@ -50,9 +28,9 @@ public class EishayWriteStringTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("jackson millis : " + millis);
-            // zulu8.58.0.13 :
-            // zulu11.52.13 :
-            // zulu17.32.13 :
+            // zulu8.62.0.19 : 604
+            // zulu11.52.13 : 654
+            // zulu17.32.13 : 706
         }
     }
 
@@ -64,9 +42,9 @@ public class EishayWriteStringTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("wastjson millis : " + millis);
-            // zulu8.58.0.13 : 467
-            // zulu17.32.13 : 542
-            // zulu11.52.13 :
+            // zulu8.62.0.19 : 452
+            // zulu11.52.13 : 475
+            // zulu17.32.13 : 528
         }
     }
 
@@ -78,16 +56,16 @@ public class EishayWriteStringTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("jackson millis : " + millis);
-            // zulu8.58.0.13 : 1455
-            // zulu11.52.13 :
+            // zulu8.62.0.19 :
+            // zulu11.52.13 : 1408
             // zulu17.32.13 :
         }
     }
 
     public static void main(String[] args) throws Exception {
         fastjson2();
-//        fastjson2Mixin();
 //        jackson();
 //        wastjson();
+//        gson();
     }
 }

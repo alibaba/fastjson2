@@ -190,7 +190,7 @@ public abstract class JSONWriter
         this.path = this.path.parent;
     }
 
-    public boolean hasFilter() {
+    public final boolean hasFilter() {
         return context.propertyPreFilter != null
                 || context.propertyFilter != null
                 || context.nameFilter != null
@@ -202,7 +202,7 @@ public abstract class JSONWriter
                 || context.contextNameFilter != null;
     }
 
-    public boolean hasFilter(long feature) {
+    public final boolean hasFilter(long feature) {
         return context.propertyPreFilter != null
                 || context.propertyFilter != null
                 || context.nameFilter != null
