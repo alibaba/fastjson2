@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
@@ -53,8 +54,12 @@ public class FieldReaderList<T, V>
         return itemClassHash;
     }
 
-    public List<V> createList() {
-        return new ArrayList<>();
+    public Collection<V> createList(JSONReader.Context context) {
+        if (fieldClass == List.class || fieldClass == Collection.class || fieldClass == ArrayList.class) {
+            return new ArrayList<>();
+        }
+
+        return (List<V>) getObjectReader(context).createInstance();
     }
 
     @Override
@@ -133,7 +138,7 @@ public class FieldReaderList<T, V>
             JSONReader.Context ctx = context;
             ObjectReader itemObjectReader = getItemObjectReader(ctx);
 
-            Collection list = createList();
+            Collection list = createList(ctx);
             jsonReader.next();
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
@@ -195,7 +200,7 @@ public class FieldReaderList<T, V>
             JSONReader.Context ctx = jsonReader.getContext();
             ObjectReader itemObjectReader = getItemObjectReader(ctx);
 
-            List list = createList();
+            Collection list = createList(ctx);
             jsonReader.next();
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
@@ -223,7 +228,7 @@ public class FieldReaderList<T, V>
             ) {
                 Function typeConvert = jsonReader.getContext().getProvider().getTypeConvert(String.class, itemType);
                 if (typeConvert != null) {
-                    List list = createList();
+                    Collection list = createList(jsonReader.getContext());
 
                     if (str.indexOf(',') != -1) {
                         String[] items = str.split(",");
