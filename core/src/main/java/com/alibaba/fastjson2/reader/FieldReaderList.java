@@ -128,7 +128,8 @@ public class FieldReaderList<T, V>
             return;
         }
 
-        if (jsonReader.current() == '[') {
+        char current = jsonReader.current();
+        if (current == '[') {
             JSONReader.Context ctx = context;
             ObjectReader itemObjectReader = getItemObjectReader(ctx);
 
@@ -147,6 +148,19 @@ public class FieldReaderList<T, V>
                     continue;
                 }
             }
+            if (builder != null) {
+                list = (Collection) builder.apply(list);
+            }
+            accept(object, list);
+
+            jsonReader.nextIfMatch(',');
+            return;
+        } else if (current == '{' && getItemObjectReader(context) instanceof ObjectReaderBean) {
+            Object itemValue = jsonReader.isJSONB()
+                    ? itemReader.readJSONBObject(jsonReader, null, null, features)
+                    : itemReader.readObject(jsonReader, null, null, features);
+            Collection list = (Collection) objectReader.createInstance(features);
+            list.add(itemValue);
             if (builder != null) {
                 list = (Collection) builder.apply(list);
             }
