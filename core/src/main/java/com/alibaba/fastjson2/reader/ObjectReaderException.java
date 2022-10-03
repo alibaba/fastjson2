@@ -12,7 +12,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.*;
 
-public class ObjectReaderException<T>
+final class ObjectReaderException<T>
         extends ObjectReaderAdapter<T> {
     static final long HASH_TYPE = Fnv.hashCode64("@type");
     static final long HASH_MESSAGE = Fnv.hashCode64("message");
